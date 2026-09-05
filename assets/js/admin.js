@@ -613,6 +613,7 @@ function updateQrPreviewFromUrl(url, previewImgId) {
 }
 
 function openCreateCampaignModal() {
+  clearCampaignFormError();
   const form = document.getElementById('createCampaignForm');
   if (form) form.reset();
   
@@ -641,10 +642,20 @@ function openCreateCampaignModal() {
   const btnDeleteInModal = document.getElementById('btnDeleteCampaignInModal');
   if (btnDeleteInModal) btnDeleteInModal.classList.add('hidden');
 
+  const btnSubmit = document.getElementById('btnSaveCampaignSubmit');
+  if (btnSubmit) {
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = `
+      <i data-lucide="save" class="w-4 h-4"></i>
+      <span>บันทึกและซิงค์ข้อมูล</span>
+    `;
+  }
+
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function openEditCampaignModal(campId) {
+  clearCampaignFormError();
   if (!window.ComedCampaignManager) return;
   const camp = window.ComedCampaignManager.getCampaignById(campId);
   if (!camp) return;
@@ -834,12 +845,81 @@ function closeCreateCampaignModal() {
   if (modal) modal.classList.add('hidden');
 }
 
+function showCampaignFormError(msg, targetInputId) {
+  const errBox = document.getElementById('campFormErrorBox');
+  const errText = document.getElementById('campFormErrorText');
+  if (errBox && errText) {
+    errText.textContent = msg;
+    errBox.classList.remove('hidden');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+  if (targetInputId) {
+    const input = document.getElementById(targetInputId);
+    if (input) {
+      input.focus();
+      input.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
+      setTimeout(() => {
+        input.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
+      }, 3500);
+    }
+  }
+  // Scroll form to top so error is immediately seen
+  const modalScroll = document.getElementById('modalCreateCampaign');
+  if (modalScroll) modalScroll.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function clearCampaignFormError() {
+  const errBox = document.getElementById('campFormErrorBox');
+  if (errBox) errBox.classList.add('hidden');
+}
+
 async function handleSaveCampaignSubmit(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
+  clearCampaignFormError();
+
   const editId = document.getElementById('campEditId')?.value.trim();
   const title = document.getElementById('campTitleInput')?.value.trim();
-  const code = (editId || document.getElementById('campCodeInput')?.value.trim() || '').toLowerCase();
-  const amount = parseFloat(document.getElementById('campAmountInput')?.value) || 0;
+  let code = (editId || document.getElementById('campCodeInput')?.value.trim() || '').toLowerCase();
+  const amountVal = document.getElementById('campAmountInput')?.value;
+  const amount = parseFloat(amountVal);
+
+  // 1. Validation Checks with specific Thai error messages
+  if (!title) {
+    showCampaignFormError("⚠️ กรุณากรอก \"ชื่อรายการเก็บเงิน\" (เช่น ค่าเสื้อสาขาวิชาเอก)", "campTitleInput");
+    return;
+  }
+
+  // Auto-generate code if empty when creating a new campaign
+  if (!code) {
+    code = 'camp_' + Date.now().toString(36);
+    const codeInput = document.getElementById('campCodeInput');
+    if (codeInput) codeInput.value = code;
+  } else {
+    // Sanitize code: allow only alphanumeric, dashes, underscores
+    code = code.replace(/[^a-z0-9_-]/g, '');
+    if (!code) {
+      code = 'camp_' + Date.now().toString(36);
+    }
+  }
+
+  if (isNaN(amount) || amount <= 0) {
+    showCampaignFormError("⚠️ กรุณากรอก \"ยอดเงินที่ต้องชำระ\" ให้ถูกต้องและมากกว่า 0 บาท", "campAmountInput");
+    return;
+  }
+
+  const btnSubmit = document.getElementById('btnSaveCampaignSubmit');
+  const originalBtnHtml = btnSubmit ? btnSubmit.innerHTML : '';
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>กำลังบันทึกและซิงค์ข้อมูล...</span>
+    `;
+  }
+
   const subtitle = document.getElementById('campSubtitleInput')?.value.trim() || '';
   const category = document.getElementById('campCategoryInput')?.value.trim() || 'กิจกรรมสาขา';
   const deadline = document.getElementById('campDeadlineInput')?.value || '';
@@ -859,11 +939,6 @@ async function handleSaveCampaignSubmit(e) {
   const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || 'qr_payment.png';
   const qrImage = qrInputVal || qrPreviewSrc;
   const isOpen = document.getElementById('campStatusOpenInput')?.checked;
-
-  if (!title || !code || amount <= 0) {
-    alert("⚠️ กรุณากรอกข้อมูลสำคัญให้ครบถ้วน (ชื่อรายการ, รหัส ID, และยอดเงิน)");
-    return;
-  }
 
   let existingCampaign = editId && window.ComedCampaignManager ? window.ComedCampaignManager.getCampaignById(editId) : null;
 
@@ -893,28 +968,38 @@ async function handleSaveCampaignSubmit(e) {
     campaignPayload.isDefault = false;
   }
 
-  // 1. Save in local & sync to Supabase
   try {
+    // 1. Save in local & sync to Supabase
     if (window.ComedCampaignManager) {
       window.ComedCampaignManager.updateCampaign(campaignPayload);
     }
-  } catch(err) {
-    console.warn("Local campaign save error:", err);
-  }
 
-  // 2. Log Admin Action
-  try {
+    // 2. Log Admin Action
     const actionName = editId ? "แก้ไขรายการเก็บเงิน" : "สร้างรายการเก็บเงินใหม่";
-    await logAdminAction(actionName, `${actionName} "${title}" (฿${amount}) รหัส ID: ${code}`);
+    try {
+      await logAdminAction(actionName, `${actionName} "${title}" (฿${amount}) รหัส ID: ${code}`);
+    } catch(err) {
+      console.warn("Admin log warning:", err);
+    }
+
+    // 3. Immediately re-render Admin Campaigns Hub navigation
+    if (typeof renderAdminCampaignsNav === 'function') {
+      renderAdminCampaignsNav();
+    }
+
+    closeCreateCampaignModal();
+    alert(`✨ บันทึกรายการ "${title}" เรียบร้อยแล้ว!`);
+
+    // Redirect / reload to the newly created / updated campaign
+    window.location.href = `payment-admin.html?camp=${encodeURIComponent(code)}`;
   } catch(err) {
-    console.warn("Admin log error:", err);
+    console.error("Save campaign error:", err);
+    showCampaignFormError("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + (err.message || String(err)));
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = originalBtnHtml;
+    }
   }
-
-  closeCreateCampaignModal();
-  alert(`✨ บันทึกรายการ "${title}" เรียบร้อยแล้ว!`);
-
-  // Reload or redirect to active campaign dashboard
-  window.location.href = `payment-admin.html?camp=${encodeURIComponent(code)}`;
 }
 
 function toggleCampaignStatus(campId) {
