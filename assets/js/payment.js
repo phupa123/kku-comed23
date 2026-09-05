@@ -1034,16 +1034,22 @@ async function executeSlipSubmission() {
   };
 
   let uploadedSlipUrl = tempSlipDataUrl;
+  let resolvedSlipProvider = 'local';
 
-  // Upload slip to Cloud Provider specified by Admin for this campaign
+  // Upload slip to Cloud Providers specified by Admin for this campaign (with Failover)
   if (window.MultiCloudUploader) {
     try {
-      const targetProvider = currentCampaign.slipProvider || 'cloudinary';
-      const providerName = window.MultiCloudUploader.getProviderName(targetProvider);
+      const allowedProviders = Array.isArray(currentCampaign.slipProviders) && currentCampaign.slipProviders.length > 0
+        ? currentCampaign.slipProviders
+        : [currentCampaign.slipProvider || 'cloudinary'];
+
+      const firstProvider = allowedProviders[0];
+      const providerName = window.MultiCloudUploader.getProviderName(firstProvider);
       if (title) title.textContent = `☁️ กำลังส่งสลิปไปยัง ${providerName}...`;
 
       const cloudRes = await window.MultiCloudUploader.upload(tempSlipDataUrl, {
-        preferredProvider: targetProvider,
+        preferredProvider: firstProvider,
+        priorityProviders: allowedProviders,
         customName: `Slip_${currentSelectedStudent.id}_${currentCampaign.id}.png`,
         category: `สลิป: ${currentCampaign.title || 'ชำระเงิน'}`,
         uploaderId: currentSelectedStudent.id,
@@ -1055,6 +1061,7 @@ async function executeSlipSubmission() {
       });
       if (cloudRes && cloudRes.url) {
         uploadedSlipUrl = cloudRes.url;
+        resolvedSlipProvider = cloudRes.provider || firstProvider;
       }
     } catch (cErr) {
       console.warn("MultiCloud slip upload fallback:", cErr);
@@ -1066,6 +1073,7 @@ async function executeSlipSubmission() {
     paid: true,
     timestamp: timestamp,
     slipUrl: uploadedSlipUrl,
+    slipProvider: resolvedSlipProvider,
     refCode: refCode,
     amount: currentCampaign.amount || 190
   };
@@ -1421,7 +1429,13 @@ function openStudentDetail(studentId) {
 
       ${(isPaid && rawSlipUrl) ? `
         <div class="space-y-3">
-          <span class="text-xs font-bold text-slate-700 block">ภาพสลิปหลักฐาน:</span>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700 block">ภาพสลิปหลักฐาน:</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-orange-400 border border-slate-700 flex items-center gap-1">
+              <i data-lucide="cloud" class="w-3 h-3 text-orange-400"></i>
+              <span>จัดเก็บบน: ${window.MultiCloudUploader ? window.MultiCloudUploader.getProviderName(record.slipProvider || 'cloudinary') : (record.slipProvider || 'Cloud')}</span>
+            </span>
+          </div>
           <div class="w-full h-80 sm:h-96 rounded-2xl border border-slate-200 overflow-hidden shadow-inner bg-slate-100">
             <iframe 
               src="${rawSlipUrl.includes('drive.google.com') ? rawSlipUrl.replace(/\/view.*|\/open\?id=/, '/file/d/').replace('/file/d/', 'https://drive.google.com/file/d/').split('&')[0].replace('?usp=sharing', '') + '/preview' : rawSlipUrl}" 

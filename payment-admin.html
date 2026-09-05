@@ -841,23 +841,65 @@
           </div>
         </div>
 
-        <!-- Dedicated Slip Storage Provider for this Campaign -->
-        <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <!-- Dedicated Slip Storage Provider for this Campaign (Multi-Select Supported) -->
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
             <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
               <i data-lucide="receipt" class="w-4 h-4 text-orange-400"></i>
-              <span>เลือกคลาวด์สำหรับจัดเก็บไฟล์สลิปของ นศ. (Slip Storage Provider):</span>
+              <span>เลือกคลาวด์สำหรับจัดเก็บไฟล์สลิป (เลือกได้มากกว่า 1 ตัว):</span>
             </label>
-            <select id="campSlipProviderSelect" class="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white font-bold text-xs outline-none focus:border-orange-500">
-              <option value="cloudinary" selected>⚡ Cloudinary CDN (แนะนำ - โหลดไว ตรวจสอบง่าย สั่งลบได้)</option>
-              <option value="catbox">🚀 Catbox.moe (ฟรีถาวร ไม่จำกัด ไม่ต้องใช้ API Key)</option>
-              <option value="imgbb">🖼️ ImgBB (ฟรี 32MB ลิงก์ตรงแสดงสลิปทันที)</option>
-              <option value="freeimage">📦 FreeImage.host (ฟรี ถาวร)</option>
-            </select>
+            <span class="text-[10px] text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">
+              Auto Failover ลำดับสำรอง
+            </span>
           </div>
-          <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400 leading-relaxed flex items-start gap-1.5">
-            <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5"></i>
-            <span><strong>คำแนะนำ:</strong> เมื่อ นศ. แนบสลิปในรายการนี้ ไฟล์จะถูกบีบอัดและส่งไปยังคลาวด์ที่คุณเลือกไว้โดยตรง และลิงก์สลิปจะซิงค์ลงฐานข้อมูล Supabase และหน้าตรวจสอบไฟล์ทันที</span>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1" id="campSlipProvidersGrid">
+            <!-- 1. Cloudinary -->
+            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+              <input type="checkbox" name="campSlipProviderOption" value="cloudinary" checked class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+              <div class="space-y-0.5">
+                <span class="font-bold text-white text-xs block flex items-center gap-1.5">
+                  <span>⚡ Cloudinary CDN</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] bg-cyan-950 text-cyan-300 border border-cyan-800">แนะนำ</span>
+                </span>
+                <span class="text-[11px] text-slate-400 block">สลิปโหลดเร็วสุดในไทย ตรวจสอบง่าย จัดการลบไฟล์ได้</span>
+              </div>
+            </label>
+
+            <!-- 2. Catbox.moe -->
+            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+              <input type="checkbox" name="campSlipProviderOption" value="catbox" checked class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+              <div class="space-y-0.5">
+                <span class="font-bold text-white text-xs block flex items-center gap-1.5">
+                  <span>🚀 Catbox.moe</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-800">ฟรีถาวร</span>
+                </span>
+                <span class="text-[11px] text-slate-400 block">ฟรีตลอดกาล ไม่มีวันหมดอายุ ไม่จำกัดจำนวนสลิป</span>
+              </div>
+            </label>
+
+            <!-- 3. ImgBB -->
+            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+              <input type="checkbox" name="campSlipProviderOption" value="imgbb" class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+              <div class="space-y-0.5">
+                <span class="font-bold text-white text-xs block">🖼️ ImgBB API</span>
+                <span class="text-[11px] text-slate-400 block">ฟรี 32MB/รูป ลิงก์ตรงโหลดเร็วแสดงสลิปทันที</span>
+              </div>
+            </label>
+
+            <!-- 4. FreeImage -->
+            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+              <input type="checkbox" name="campSlipProviderOption" value="freeimage" class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+              <div class="space-y-0.5">
+                <span class="font-bold text-white text-xs block">📦 FreeImage.host</span>
+                <span class="text-[11px] text-slate-400 block">พื้นที่สำรองฉุกเฉิน มั่นใจว่าสลิปไม่หลุดหาย</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-300 leading-relaxed flex items-start gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5"></i>
+            <span><strong>ระบบสลับตัวสำรอง (Smart Failover):</strong> หากเลือกมากกว่า 1 ตัว ระบบจะบันทึกสลิปไปยังตัวแรกที่เปิดไว้ หากคลาวด์ตัวแรกติดปัญหาขัดข้อง ระบบจะสลับไปบันทึกตัวถัดไปให้อัตโนมัติทันที พร้อมแสดงป้ายบอกว่าสลิปนี้ถูกเก็บไว้ที่คลาวด์ตัวใด</span>
           </div>
         </div>
 

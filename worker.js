@@ -8,6 +8,42 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.toLowerCase();
 
+    // 0. Dedicated Catbox Upload Proxy with complete CORS support
+    if (path === "/api/catbox-proxy") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*"
+          }
+        });
+      }
+
+      if (request.method === "POST") {
+        try {
+          const body = await request.formData();
+          const catboxRes = await fetch("https://catbox.moe/user/api.php", {
+            method: "POST",
+            body: body
+          });
+          const text = await catboxRes.text();
+          return new Response(text, {
+            status: catboxRes.status,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Content-Type": "text/plain; charset=utf-8"
+            }
+          });
+        } catch (catErr) {
+          return new Response("Catbox Worker Proxy Error: " + catErr.message, {
+            status: 500,
+            headers: { "Access-Control-Allow-Origin": "*" }
+          });
+        }
+      }
+    }
+
     // 1. Dynamic Campaign Routes (/payment/:id and /payment-admin/:id)
     let fetchUrl = request.url;
     let campaignParam = "";

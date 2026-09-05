@@ -689,8 +689,14 @@ function openEditCampaignModal(campId) {
   const qrPreview = document.getElementById('campQrPreviewImg');
   if (qrPreview) qrPreview.src = camp.qrImage || 'qr_payment.png';
 
-  const slipProviderSelect = document.getElementById('campSlipProviderSelect');
-  if (slipProviderSelect) slipProviderSelect.value = camp.slipProvider || 'cloudinary';
+  // Populate multiple selected slip providers
+  const selectedProviders = Array.isArray(camp.slipProviders) 
+    ? camp.slipProviders 
+    : (camp.slipProvider ? [camp.slipProvider] : ['cloudinary', 'catbox']);
+
+  document.querySelectorAll('input[name="campSlipProviderOption"]').forEach(cb => {
+    cb.checked = selectedProviders.includes(cb.value);
+  });
 
   const statusOpenInput = document.getElementById('campStatusOpenInput');
   if (statusOpenInput) statusOpenInput.checked = (camp.status === 'open');
@@ -725,7 +731,14 @@ async function handleSaveCampaignSubmit(e) {
   const bankName = document.getElementById('campBankNameInput')?.value.trim() || 'ธนาคารกสิกรไทย';
   const accountNumber = document.getElementById('campAccountNumInput')?.value.trim() || '236-2-47817-3';
   const accountName = document.getElementById('campAccountNameInput')?.value.trim() || 'น.ส. พิชามญธุ์ สามสี';
-  const slipProvider = document.getElementById('campSlipProviderSelect')?.value || 'cloudinary';
+  
+  // Read multiple checked slip providers
+  const checkedBoxes = Array.from(document.querySelectorAll('input[name="campSlipProviderOption"]:checked'));
+  let slipProviders = checkedBoxes.map(cb => cb.value);
+  if (slipProviders.length === 0) {
+    slipProviders = ['cloudinary']; // fallback
+  }
+  const slipProvider = slipProviders[0]; // primary
   
   const qrInputVal = document.getElementById('campQrImageInput')?.value.trim();
   const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || 'qr_payment.png';
@@ -755,6 +768,7 @@ async function handleSaveCampaignSubmit(e) {
     accountName: accountName,
     qrImage: qrImage,
     slipProvider: slipProvider,
+    slipProviders: slipProviders,
     status: isOpen ? 'open' : (existingCampaign && existingCampaign.status === 'completed' ? 'completed' : 'temp_closed'),
     updatedAt: new Date().toISOString()
   };
@@ -1161,9 +1175,14 @@ function renderAdminTable() {
         </td>
         <td class="p-4 text-center">
           ${isPaid && slipUrl
-        ? `<button onclick="inspectSlip('${st.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto border border-slate-700 cursor-pointer">
-                <i data-lucide="image" class="w-3.5 h-3.5"></i> ดูสลิป
-               </button>`
+        ? `<div class="space-y-1">
+             <button onclick="inspectSlip('${st.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto border border-slate-700 cursor-pointer">
+               <i data-lucide="image" class="w-3.5 h-3.5"></i> ดูสลิป
+             </button>
+             <span class="inline-block text-[9px] font-mono px-2 py-0.2 rounded-md bg-slate-900 text-slate-400 border border-slate-800">
+               ${window.MultiCloudUploader ? window.MultiCloudUploader.getProviderName(record.slipProvider || (slipUrl.includes('cloudinary') ? 'cloudinary' : (slipUrl.includes('catbox') ? 'catbox' : (slipUrl.includes('ibb.co') ? 'imgbb' : 'Cloud')))) : 'Cloud'}
+             </span>
+           </div>`
         : '<span class="text-xs text-slate-600">-</span>'
       }
         </td>

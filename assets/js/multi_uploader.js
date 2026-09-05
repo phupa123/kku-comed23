@@ -309,11 +309,11 @@
       }
       formData.append('fileToUpload', fileObj);
 
-      // Try multiple endpoints / proxies for Catbox
+      // Try multiple endpoints / proxies for Catbox (including our Cloudflare Worker Proxy)
       const proxies = [
-        'https://catbox.moe/user/api.php', // Direct (works in environments without strict preflight)
-        'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://catbox.moe/user/api.php'),
-        'https://thingproxy.freeboard.io/fetch/https://catbox.moe/user/api.php'
+        '/api/catbox-proxy', // Internal Cloudflare Worker proxy (Zero CORS issues)
+        'https://kku-comed23.edspace.workers.dev/api/catbox-proxy',
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://catbox.moe/user/api.php')
       ];
 
       let lastError = null;
