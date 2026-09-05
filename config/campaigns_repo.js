@@ -6,6 +6,7 @@
  */
 
 const COMED_CAMPAIGNS_STORAGE_KEY = 'COMED_PAYMENT_CAMPAIGNS_V2';
+const COMED_DELETED_CAMPAIGNS_KEY = 'COMED_DELETED_CAMPAIGNS_V2';
 
 // 1. Initial Default Campaigns Repository
 const DEFAULT_COMED_CAMPAIGNS = [
@@ -37,17 +38,27 @@ const DEFAULT_COMED_CAMPAIGNS = [
 
 // Helper Functions for Campaigns
 window.ComedCampaignManager = {
+  getDeletedIds: function() {
+    try {
+      const raw = localStorage.getItem(COMED_DELETED_CAMPAIGNS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e) {
+      return [];
+    }
+  },
+
   getAllCampaigns: function() {
+    const deletedIds = this.getDeletedIds();
     try {
       const stored = localStorage.getItem(COMED_CAMPAIGNS_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.filter(c => !String(c.id).startsWith("system_"));
+          return parsed.filter(c => !String(c.id).startsWith("system_") && !deletedIds.includes(c.id));
         }
       }
     } catch(e) {}
-    return DEFAULT_COMED_CAMPAIGNS;
+    return DEFAULT_COMED_CAMPAIGNS.filter(c => !deletedIds.includes(c.id));
   },
 
   getCampaignById: function(id) {
@@ -63,12 +74,20 @@ window.ComedCampaignManager = {
   },
 
   saveCampaigns: function(campaigns) {
-    const filtered = (Array.isArray(campaigns) ? campaigns : []).filter(c => !String(c.id).startsWith("system_"));
+    const deletedIds = this.getDeletedIds();
+    const filtered = (Array.isArray(campaigns) ? campaigns : []).filter(c => !String(c.id).startsWith("system_") && !deletedIds.includes(c.id));
     localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(filtered));
     this.syncToSupabase(filtered);
   },
 
   updateCampaign: function(updatedCampaign) {
+    // If updating a previously deleted campaign, remove from deleted list
+    let deletedIds = this.getDeletedIds();
+    if (deletedIds.includes(updatedCampaign.id)) {
+      deletedIds = deletedIds.filter(id => id !== updatedCampaign.id);
+      localStorage.setItem(COMED_DELETED_CAMPAIGNS_KEY, JSON.stringify(deletedIds));
+    }
+
     const list = this.getAllCampaigns();
     const idx = list.findIndex(c => c.id === updatedCampaign.id);
     if (idx !== -1) {
@@ -80,9 +99,20 @@ window.ComedCampaignManager = {
   },
 
   deleteCampaign: function(id) {
+    if (!id) return;
+    // 1. Add to permanent deleted list
+    const deletedIds = this.getDeletedIds();
+    if (!deletedIds.includes(id)) {
+      deletedIds.push(id);
+      localStorage.setItem(COMED_DELETED_CAMPAIGNS_KEY, JSON.stringify(deletedIds));
+    }
+
+    // 2. Remove from active stored list
     let list = this.getAllCampaigns();
     list = list.filter(c => c.id !== id);
-    this.saveCampaigns(list);
+    localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(list));
+
+    // 3. Delete from Supabase
     this.deleteFromSupabase(id);
   },
 
@@ -98,6 +128,7 @@ window.ComedCampaignManager = {
 
   // Fetch campaigns from Supabase if available
   fetchFromCloud: async function() {
+    const deletedIds = this.getDeletedIds();
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (sb) {
@@ -105,7 +136,7 @@ window.ComedCampaignManager = {
         if (!error && Array.isArray(data) && data.length > 0) {
           const localList = this.getAllCampaigns();
           const mapped = data
-            .filter(item => !String(item.id).startsWith("system_"))
+            .filter(item => !String(item.id).startsWith("system_") && !deletedIds.includes(item.id))
             .map(item => {
               const matchedLocal = localList.find(loc => loc.id === item.id) || {};
               return {
