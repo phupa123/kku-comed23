@@ -54,6 +54,7 @@ DROP POLICY IF EXISTS "Deny Public Delete Payments" ON payments;
 DROP POLICY IF EXISTS "Public Read Campaigns" ON campaigns;
 DROP POLICY IF EXISTS "Allow Insert Campaigns" ON campaigns;
 DROP POLICY IF EXISTS "Allow Update Campaigns" ON campaigns;
+DROP POLICY IF EXISTS "Allow Delete Campaigns" ON campaigns;
 DROP POLICY IF EXISTS "Allow Insert Admin Logs" ON admin_logs;
 DROP POLICY IF EXISTS "Deny Delete Admin Logs" ON admin_logs;
 
