@@ -15,12 +15,35 @@ window.SUPABASE_CONFIG = {
 window.getSupabaseClient = function() {
   if (window.supabase && typeof window.supabase.createClient === 'function') {
     if (!window._supabaseClientInstance) {
-      window._supabaseClientInstance = window.supabase.createClient(
-        window.SUPABASE_CONFIG.url,
-        window.SUPABASE_CONFIG.anonKey
-      );
+      try {
+        window._supabaseClientInstance = window.supabase.createClient(
+          window.SUPABASE_CONFIG.url,
+          window.SUPABASE_CONFIG.anonKey
+        );
+      } catch(e) {
+        console.warn("Supabase client init suppressed:", e);
+        return null;
+      }
     }
     return window._supabaseClientInstance;
   }
   return null;
 };
+
+// Global Handler: Prevent browser uncaught promise errors from noisy external network failures
+window.addEventListener('unhandledrejection', function(event) {
+  const reason = event.reason;
+  const reasonStr = String(reason || '');
+  if (
+    reasonStr.includes('Load failed') ||
+    reasonStr.includes('access control checks') ||
+    reasonStr.includes('Failed to fetch') ||
+    reasonStr.includes('NetworkError') ||
+    (reason && reason.name === 'TypeError' && reasonStr.includes('Load failed'))
+  ) {
+    // Suppress noisy network rejection popup/logs
+    event.preventDefault();
+    console.warn("[SafeNetworkGuard] Suppressed background fetch/network error:", reason);
+  }
+});
+
