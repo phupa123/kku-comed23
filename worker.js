@@ -8,7 +8,7 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.toLowerCase();
 
-    // 0. Dedicated Catbox Upload Proxy with complete CORS support
+    // 0. Dedicated Cloud Storage Upload Proxy with complete CORS support (Streams directly to upstream)
     if (path === "/api/catbox-proxy") {
       if (request.method === "OPTIONS") {
         return new Response(null, {
@@ -22,10 +22,14 @@ export default {
 
       if (request.method === "POST") {
         try {
-          const body = await request.formData();
+          const contentType = request.headers.get("content-type") || "";
           const catboxRes = await fetch("https://catbox.moe/user/api.php", {
             method: "POST",
-            body: body
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) KKU-Comed-Uploader/1.0",
+              "Content-Type": contentType
+            },
+            body: request.body
           });
           const text = await catboxRes.text();
           return new Response(text, {
@@ -39,6 +43,45 @@ export default {
           return new Response("Catbox Worker Proxy Error: " + catErr.message, {
             status: 500,
             headers: { "Access-Control-Allow-Origin": "*" }
+          });
+        }
+      }
+    }
+
+    if (path === "/api/freeimage-proxy") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*"
+          }
+        });
+      }
+
+      if (request.method === "POST") {
+        try {
+          const contentType = request.headers.get("content-type") || "";
+          const fiRes = await fetch("https://freeimage.host/api/1/upload", {
+            method: "POST",
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) KKU-Comed-Uploader/1.0",
+              "Content-Type": contentType
+            },
+            body: request.body
+          });
+          const json = await fiRes.text();
+          return new Response(json, {
+            status: fiRes.status,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Content-Type": "application/json; charset=utf-8"
+            }
+          });
+        } catch (fiErr) {
+          return new Response(JSON.stringify({ error: { message: fiErr.message } }), {
+            status: 500,
+            headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" }
           });
         }
       }

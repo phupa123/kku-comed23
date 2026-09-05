@@ -271,7 +271,7 @@
      * 2. FreeImage.host API
      */
     async uploadToFreeImage(fileObj, base64Clean) {
-      const apiKey = this.config.freeimageApiKey || '6d207e02198a847aa5ad8ac504ff3463';
+      const apiKey = this.config.freeimageApiKey || '6d207e02198a847aa98d0a2a901485a5';
       const formData = new FormData();
       formData.append('key', apiKey);
       formData.append('action', 'upload');
@@ -283,19 +283,33 @@
         formData.append('source', fileObj);
       }
 
-      const response = await fetch('https://freeimage.host/api/1/upload', {
-        method: 'POST',
-        body: formData
-      });
+      const endpoints = [
+        '/api/freeimage-proxy',
+        'https://kku-comed23.edspace.workers.dev/api/freeimage-proxy',
+        'https://freeimage.host/api/1/upload'
+      ];
 
-      const json = await response.json();
-      if (json && json.image && json.image.url) {
-        return {
-          url: json.image.display_url || json.image.url,
-          publicId: json.image.name || ''
-        };
+      let lastErr = null;
+      for (const ep of endpoints) {
+        try {
+          const response = await fetch(ep, {
+            method: 'POST',
+            body: formData
+          });
+
+          const json = await response.json();
+          if (json && json.image && json.image.url) {
+            return {
+              url: json.image.display_url || json.image.url,
+              publicId: json.image.name || ''
+            };
+          }
+        } catch(e) {
+          lastErr = e;
+        }
       }
-      throw new Error(json?.error?.message || "FreeImage upload rejected");
+
+      throw new Error("FreeImage upload rejected: " + (lastErr?.message || "Unknown error"));
     }
 
     /**
