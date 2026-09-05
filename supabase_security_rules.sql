@@ -99,6 +99,11 @@ TO anon, authenticated
 USING (true)
 WITH CHECK (true);
 
+CREATE POLICY "Allow Delete Campaigns" 
+ON campaigns FOR DELETE 
+TO anon, authenticated 
+USING (true);
+
 -- ================= 6. ตาราง ADMIN LOGS (ประวัติการกระทำ) =================
 CREATE POLICY "Allow Insert Admin Logs" 
 ON admin_logs FOR INSERT 

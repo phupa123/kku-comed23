@@ -523,6 +523,9 @@ function renderAdminCampaignsNav() {
             <button onclick="toggleCampaignStatus('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="เปิด/ปิดการชำระเงิน">
               ${camp.status === 'open' ? 'ปิดรับ' : 'เปิดรับ'}
             </button>
+            <button onclick="openDeleteCampaignModal('${camp.id}')" class="text-[9px] p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition" title="ลบรายการเก็บเงินนี้">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
             <a href="payment.html?camp=${encodeURIComponent(camp.id)}" target="_blank" class="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-orange-400" title="ดูหน้าชำระเงินของนศ.">
               <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             </a>
@@ -634,6 +637,10 @@ function openCreateCampaignModal() {
 
   const modal = document.getElementById('modalCreateCampaign');
   if (modal) modal.classList.remove('hidden');
+
+  const btnDeleteInModal = document.getElementById('btnDeleteCampaignInModal');
+  if (btnDeleteInModal) btnDeleteInModal.classList.add('hidden');
+
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
@@ -709,9 +716,117 @@ function openEditCampaignModal(campId) {
     `;
   }
 
+  // Show Delete button in modal if editing
+  const btnDeleteInModal = document.getElementById('btnDeleteCampaignInModal');
+  if (btnDeleteInModal) {
+    btnDeleteInModal.classList.remove('hidden');
+    btnDeleteInModal.setAttribute('data-camp-id', camp.id);
+  }
+
   const modal = document.getElementById('modalCreateCampaign');
   if (modal) modal.classList.remove('hidden');
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function confirmDeleteCurrentCampaign() {
+  const editId = document.getElementById('campEditId')?.value || 
+                 document.getElementById('btnDeleteCampaignInModal')?.getAttribute('data-camp-id');
+  if (editId) {
+    closeCreateCampaignModal();
+    openDeleteCampaignModal(editId);
+  }
+}
+
+// Campaign Delete Modal & Verification Workflow
+let expectedDeleteMatchText = '';
+
+function openDeleteCampaignModal(campId) {
+  if (!window.ComedCampaignManager) return;
+  const camp = window.ComedCampaignManager.getCampaignById(campId);
+  if (!camp) return;
+
+  const targetIdInput = document.getElementById('targetDeleteCampId');
+  if (targetIdInput) targetIdInput.value = camp.id;
+
+  const titleEl = document.getElementById('deleteCampTitleText');
+  if (titleEl) titleEl.textContent = camp.title;
+
+  const idEl = document.getElementById('deleteCampIdText');
+  if (idEl) idEl.textContent = camp.id;
+
+  expectedDeleteMatchText = (camp.title && camp.title.trim()) ? camp.title.trim() : camp.id;
+  const matchPhraseEl = document.getElementById('deleteCampMatchPhrase');
+  if (matchPhraseEl) {
+    matchPhraseEl.textContent = expectedDeleteMatchText;
+  }
+
+  const inputMatch = document.getElementById('deleteCampInputMatch');
+  if (inputMatch) {
+    inputMatch.value = '';
+    inputMatch.placeholder = `พิมพ์ "${expectedDeleteMatchText}" หรือ "ยืนยันลบ"`;
+  }
+
+  const btnConfirm = document.getElementById('btnConfirmDeleteCamp');
+  if (btnConfirm) btnConfirm.disabled = true;
+
+  const modal = document.getElementById('modalDeleteCampaign');
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  setTimeout(() => {
+    if (inputMatch) inputMatch.focus();
+  }, 100);
+}
+
+function closeDeleteCampaignModal() {
+  const modal = document.getElementById('modalDeleteCampaign');
+  if (modal) modal.classList.add('hidden');
+}
+
+function checkDeleteCampInputMatch() {
+  const inputMatch = document.getElementById('deleteCampInputMatch')?.value || '';
+  const btnConfirm = document.getElementById('btnConfirmDeleteCamp');
+  const normalizedInput = inputMatch.trim().toLowerCase();
+  const normalizedExpected = (expectedDeleteMatchText || '').trim().toLowerCase();
+
+  const isMatched = (
+    normalizedInput === normalizedExpected ||
+    normalizedInput === 'ยืนยันลบ' ||
+    normalizedInput === 'delete' ||
+    (document.getElementById('targetDeleteCampId')?.value || '').toLowerCase() === normalizedInput
+  );
+
+  if (btnConfirm) {
+    btnConfirm.disabled = !isMatched;
+  }
+}
+
+async function executeDeleteCampaign() {
+  const campId = document.getElementById('targetDeleteCampId')?.value;
+  if (!campId || !window.ComedCampaignManager) return;
+
+  const camp = window.ComedCampaignManager.getCampaignById(campId);
+  const campTitle = camp ? camp.title : campId;
+
+  // 1. Delete campaign from manager (localStorage + Supabase delete)
+  window.ComedCampaignManager.deleteCampaign(campId);
+
+  // 2. Remove payments key in localStorage for this campaign
+  try {
+    const key = (campId.toLowerCase() === 'paimai69') ? 'COMED_KKU69_PAYMENT_RECORDS_V2' : `COMED_PAYMENTS_${campId.toUpperCase()}`;
+    localStorage.removeItem(key);
+  } catch(e) {}
+
+  // 3. Log Admin Action
+  await logAdminAction("ลบรายการเก็บเงิน", `ลบรายการ "${campTitle}" (ID: ${campId}) ออกจากระบบอย่างถาวร`);
+
+  closeDeleteCampaignModal();
+  alert(`🗑️ ลบรายการ "${campTitle}" เรียบร้อยแล้ว`);
+
+  // 4. Redirect to remaining campaign
+  const remaining = window.ComedCampaignManager.getAllCampaigns();
+  const nextCampId = remaining[0]?.id || 'paimai69';
+  window.location.href = `payment-admin.html?camp=${encodeURIComponent(nextCampId)}`;
 }
 
 function closeCreateCampaignModal() {
@@ -779,13 +894,21 @@ async function handleSaveCampaignSubmit(e) {
   }
 
   // 1. Save in local & sync to Supabase
-  if (window.ComedCampaignManager) {
-    window.ComedCampaignManager.updateCampaign(campaignPayload);
+  try {
+    if (window.ComedCampaignManager) {
+      window.ComedCampaignManager.updateCampaign(campaignPayload);
+    }
+  } catch(err) {
+    console.warn("Local campaign save error:", err);
   }
 
   // 2. Log Admin Action
-  const actionName = editId ? "แก้ไขรายการเก็บเงิน" : "สร้างรายการเก็บเงินใหม่";
-  await logAdminAction(actionName, `${actionName} "${title}" (฿${amount}) รหัส ID: ${code}`);
+  try {
+    const actionName = editId ? "แก้ไขรายการเก็บเงิน" : "สร้างรายการเก็บเงินใหม่";
+    await logAdminAction(actionName, `${actionName} "${title}" (฿${amount}) รหัส ID: ${code}`);
+  } catch(err) {
+    console.warn("Admin log error:", err);
+  }
 
   closeCreateCampaignModal();
   alert(`✨ บันทึกรายการ "${title}" เรียบร้อยแล้ว!`);

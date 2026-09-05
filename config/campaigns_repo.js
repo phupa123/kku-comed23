@@ -83,6 +83,17 @@ window.ComedCampaignManager = {
     let list = this.getAllCampaigns();
     list = list.filter(c => c.id !== id);
     this.saveCampaigns(list);
+    this.deleteFromSupabase(id);
+  },
+
+  deleteFromSupabase: async function(id) {
+    try {
+      const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+      if (!sb || !id) return;
+      await sb.from('campaigns').delete().eq('id', id);
+    } catch(e) {
+      console.warn("Supabase Delete Campaign Error (will remain deleted locally):", e);
+    }
   },
 
   // Fetch campaigns from Supabase if available
@@ -92,27 +103,33 @@ window.ComedCampaignManager = {
       if (sb) {
         const { data, error } = await sb.from('campaigns').select('*').order('created_at', { ascending: false });
         if (!error && Array.isArray(data) && data.length > 0) {
+          const localList = this.getAllCampaigns();
           const mapped = data
             .filter(item => !String(item.id).startsWith("system_"))
-            .map(item => ({
-              id: item.id,
-              code: item.code,
-              title: item.title,
-              subtitle: item.subtitle || '',
-              category: item.category || 'กิจกรรมสาขา',
-              amount: parseFloat(item.amount) || 0,
-              currency: item.currency || 'THB',
-              deadline: item.deadline,
-              deadlineDisplay: item.deadline_display || '',
-              bankName: item.bank_name || '',
-              accountNumber: item.account_number || '',
-              accountName: item.account_name || '',
-              qrImage: item.qr_image || 'qr_payment.png',
-              status: item.status || 'open',
-              closedReason: item.closed_reason || '',
-              isDefault: item.is_default || false,
-              createdAt: item.created_at
-            }));
+            .map(item => {
+              const matchedLocal = localList.find(loc => loc.id === item.id) || {};
+              return {
+                id: item.id,
+                code: item.code,
+                title: item.title,
+                subtitle: item.subtitle || '',
+                category: item.category || 'กิจกรรมสาขา',
+                amount: parseFloat(item.amount) || 0,
+                currency: item.currency || 'THB',
+                deadline: item.deadline,
+                deadlineDisplay: item.deadline_display || '',
+                bankName: item.bank_name || '',
+                accountNumber: item.account_number || '',
+                accountName: item.account_name || '',
+                qrImage: item.qr_image || 'qr_payment.png',
+                status: item.status || 'open',
+                closedReason: item.closed_reason || '',
+                isDefault: item.is_default || false,
+                slipProvider: matchedLocal.slipProvider || 'cloudinary',
+                slipProviders: matchedLocal.slipProviders || ['cloudinary'],
+                createdAt: item.created_at
+              };
+            });
           localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(mapped));
           return mapped;
         }
@@ -130,25 +147,29 @@ window.ComedCampaignManager = {
       if (!sb) return;
       const list = Array.isArray(campaigns) ? campaigns : [campaigns];
       for (const c of list) {
-        await sb.from('campaigns').upsert({
-          id: c.id,
-          code: c.code || c.id.toUpperCase(),
-          title: c.title,
-          subtitle: c.subtitle || '',
-          category: c.category || 'กิจกรรม',
-          amount: c.amount,
-          currency: c.currency || 'THB',
-          deadline: c.deadline ? new Date(c.deadline).toISOString() : null,
-          deadline_display: c.deadlineDisplay || '',
-          bank_name: c.bankName || '',
-          account_number: c.accountNumber || '',
-          account_name: c.accountName || '',
-          qr_image: c.qrImage || 'qr_payment.png',
-          status: c.status || 'open',
-          closed_reason: c.closedReason || '',
-          is_default: !!c.isDefault,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+        try {
+          await sb.from('campaigns').upsert({
+            id: c.id,
+            code: c.code || c.id.toUpperCase(),
+            title: c.title,
+            subtitle: c.subtitle || '',
+            category: c.category || 'กิจกรรม',
+            amount: c.amount,
+            currency: c.currency || 'THB',
+            deadline: c.deadline ? new Date(c.deadline).toISOString() : null,
+            deadline_display: c.deadlineDisplay || '',
+            bank_name: c.bankName || '',
+            account_number: c.accountNumber || '',
+            account_name: c.accountName || '',
+            qr_image: c.qrImage || 'qr_payment.png',
+            status: c.status || 'open',
+            closed_reason: c.closedReason || '',
+            is_default: !!c.isDefault,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'id' });
+        } catch (innerErr) {
+          console.warn(`Supabase Upsert skipped for campaign ${c.id}:`, innerErr);
+        }
       }
     } catch(e) {
       console.warn("Supabase Upsert Campaign Error:", e);
