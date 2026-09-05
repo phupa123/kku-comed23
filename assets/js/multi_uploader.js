@@ -111,14 +111,15 @@
         fileObj = this.dataURLtoFile(fileInput, 'upload_' + Date.now() + '.png');
       }
 
-      // Auto Smart Image Compression (Resize & Compress if file is image and large)
-      if (this.config.autoCompress && fileObj && fileObj.type && fileObj.type.startsWith('image/')) {
+      // Auto Smart Image Compression (Always compress image if enabled or if size > 1MB)
+      const isImage = (fileObj && fileObj.type && fileObj.type.startsWith('image/')) || (typeof fileInput === 'string' && fileInput.startsWith('data:image/'));
+      if (isImage && (this.config.autoCompress || fileObj.size > 1024 * 1024)) {
         try {
           onProgress(10, 'กำลังปรับขนาดและบีบอัดภาพให้อยู่ในเกณฑ์เหมาะสม...');
           const compressed = await this.compressImage(fileObj, {
             maxWidth: this.config.maxImageDimension || 1600,
             maxHeight: this.config.maxImageDimension || 1600,
-            quality: this.config.compressionQuality || 0.82
+            quality: this.config.compressionQuality || 0.80
           });
           if (compressed) {
             fileObj = compressed;
@@ -128,9 +129,20 @@
         }
       }
 
-      // Prepare clean base64 if needed
-      if (typeof fileInput === 'string' && fileInput.startsWith('data:')) {
-        base64Clean = fileInput.split(',')[1] || fileInput;
+      // Convert compressed File back to Base64 DataURL / clean base64 if needed for providers
+      if (fileObj && (!base64Clean || fileObj !== fileInput)) {
+        try {
+          const reader = new FileReader();
+          const p = new Promise(resolve => {
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => resolve('');
+          });
+          reader.readAsDataURL(fileObj);
+          const dataUrl = await p;
+          if (dataUrl && dataUrl.includes(',')) {
+            base64Clean = dataUrl.split(',')[1];
+          }
+        } catch(e) {}
       }
 
       // Build Provider Sequence based on Admin Priority & Enabled settings
@@ -297,20 +309,34 @@
       }
       formData.append('fileToUpload', fileObj);
 
-      const targetUrl = 'https://corsproxy.io/?url=' + encodeURIComponent('https://catbox.moe/user/api.php');
-      const response = await fetch(targetUrl, {
-        method: 'POST',
-        body: formData
-      });
+      // Try multiple endpoints / proxies for Catbox
+      const proxies = [
+        'https://catbox.moe/user/api.php', // Direct (works in environments without strict preflight)
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://catbox.moe/user/api.php'),
+        'https://thingproxy.freeboard.io/fetch/https://catbox.moe/user/api.php'
+      ];
 
-      const text = (await response.text()).trim();
-      if (text.startsWith('http://') || text.startsWith('https://')) {
-        return {
-          url: text.replace('http://', 'https://'),
-          publicId: text.split('/').pop()
-        };
+      let lastError = null;
+      for (const targetUrl of proxies) {
+        try {
+          const response = await fetch(targetUrl, {
+            method: 'POST',
+            body: formData
+          });
+
+          const text = (await response.text()).trim();
+          if (text.startsWith('http://') || text.startsWith('https://')) {
+            return {
+              url: text.replace('http://', 'https://'),
+              publicId: text.split('/').pop()
+            };
+          }
+        } catch(e) {
+          lastError = e;
+        }
       }
-      throw new Error("Catbox response error: " + text);
+
+      throw new Error("Catbox upload failed: " + (lastError?.message || "CORS proxy unreachable"));
     }
 
     /**
@@ -400,11 +426,11 @@
     async compressImage(file, options = {}) {
       const maxWidth = options.maxWidth || 1600;
       const maxHeight = options.maxHeight || 1600;
-      const quality = options.quality || 0.82;
+      const quality = options.quality || 0.80;
 
       return new Promise((resolve) => {
-        // If file is not image or already very small (< 400KB), no need to compress
-        if (!file.type || !file.type.startsWith('image/') || file.size < 400 * 1024) {
+        // If file is not image or already very small (< 250KB), no need to compress
+        if (!file.type || !file.type.startsWith('image/') || file.size < 250 * 1024) {
           return resolve(file);
         }
 
@@ -415,14 +441,22 @@
             let width = img.width;
             let height = img.height;
 
+            // If image is over 5MB, aggressively scale down dimensions
+            let targetMaxW = maxWidth;
+            let targetMaxH = maxHeight;
+            if (file.size > 8 * 1024 * 1024) {
+              targetMaxW = Math.min(maxWidth, 1400);
+              targetMaxH = Math.min(maxHeight, 1400);
+            }
+
             // Calculate new dimensions respecting aspect ratio
-            if (width > maxWidth || height > maxHeight) {
+            if (width > targetMaxW || height > targetMaxH) {
               if (width > height) {
-                height = Math.round((height * maxWidth) / width);
-                width = maxWidth;
+                height = Math.round((height * targetMaxW) / width);
+                width = targetMaxW;
               } else {
-                width = Math.round((width * maxHeight) / height);
-                height = maxHeight;
+                width = Math.round((width * targetMaxH) / height);
+                height = targetMaxH;
               }
             }
 
@@ -436,21 +470,27 @@
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, width, height);
 
-            // Export to JPEG / Blob with target quality
-            const mimeType = file.type === 'image/png' && file.size > 1.5 * 1024 * 1024 ? 'image/jpeg' : file.type;
+            // Always use image/jpeg for large uploads (> 1MB) to ensure drastic size reduction
+            const mimeType = (file.type === 'image/png' && file.size > 1024 * 1024) ? 'image/jpeg' : (file.type || 'image/jpeg');
+            const targetQuality = file.size > 10 * 1024 * 1024 ? 0.75 : quality;
+
             canvas.toBlob((blob) => {
-              if (!blob || blob.size >= file.size) {
-                // If compression didn't save size, use original
-                resolve(file);
-              } else {
-                const compressedFile = new File([blob], file.name, {
-                  type: mimeType,
-                  lastModified: Date.now()
-                });
-                console.log(`[MultiUploader] Compressed: ${(file.size/1024).toFixed(1)}KB -> ${(compressedFile.size/1024).toFixed(1)}KB (${Math.round((1 - compressedFile.size/file.size)*100)}% saved)`);
-                resolve(compressedFile);
+              if (!blob) {
+                return resolve(file);
               }
-            }, mimeType, quality);
+
+              const newFileName = mimeType === 'image/jpeg' && !file.name.toLowerCase().endsWith('.jpg') && !file.name.toLowerCase().endsWith('.jpeg')
+                ? file.name.replace(/\.[^/.]+$/, "") + ".jpg"
+                : file.name;
+
+              const compressedFile = new File([blob], newFileName, {
+                type: mimeType,
+                lastModified: Date.now()
+              });
+
+              console.log(`[MultiUploader] Compressed: ${(file.size/1024/1024).toFixed(2)}MB -> ${(compressedFile.size/1024).toFixed(1)}KB (${Math.round((1 - compressedFile.size/file.size)*100)}% saved)`);
+              resolve(compressedFile);
+            }, mimeType, targetQuality);
           };
           img.onerror = () => resolve(file);
           img.src = e.target.result;
