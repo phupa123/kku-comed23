@@ -30,6 +30,8 @@ DROP POLICY IF EXISTS "Public Read Payments" ON payments;
 DROP POLICY IF EXISTS "Public Insert Payments" ON payments;
 DROP POLICY IF EXISTS "Deny Public Delete Payments" ON payments;
 DROP POLICY IF EXISTS "Public Read Campaigns" ON campaigns;
+DROP POLICY IF EXISTS "Allow Insert Campaigns" ON campaigns;
+DROP POLICY IF EXISTS "Allow Update Campaigns" ON campaigns;
 DROP POLICY IF EXISTS "Allow Insert Admin Logs" ON admin_logs;
 DROP POLICY IF EXISTS "Deny Delete Admin Logs" ON admin_logs;
 
@@ -57,10 +59,23 @@ TO anon
 USING (false);
 
 -- ================= 5. ตาราง CAMPAIGNS (รายการเก็บเงินและตั้งค่าเว็บ) =================
+-- อนุญาตให้อ่านข้อมูลแคมเปญได้ทุกคน (เพื่อให้หน้าเว็บแสดงยอดและ QR Code)
 CREATE POLICY "Public Read Campaigns" 
 ON campaigns FOR SELECT 
 TO anon, authenticated 
 USING (true);
+
+-- อนุญาตให้บันทึก / สร้าง / อัปเดตข้อมูลแคมเปญได้ (แก้ Error 403 / Access Control Checks ตอน Upsert)
+CREATE POLICY "Allow Insert Campaigns" 
+ON campaigns FOR INSERT 
+TO anon, authenticated 
+WITH CHECK (true);
+
+CREATE POLICY "Allow Update Campaigns" 
+ON campaigns FOR UPDATE 
+TO anon, authenticated 
+USING (true)
+WITH CHECK (true);
 
 -- ================= 6. ตาราง ADMIN LOGS (ประวัติการกระทำ) =================
 CREATE POLICY "Allow Insert Admin Logs" 
