@@ -841,6 +841,26 @@
           </div>
         </div>
 
+        <!-- Dedicated Slip Storage Provider for this Campaign -->
+        <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+              <i data-lucide="receipt" class="w-4 h-4 text-orange-400"></i>
+              <span>เลือกคลาวด์สำหรับจัดเก็บไฟล์สลิปของ นศ. (Slip Storage Provider):</span>
+            </label>
+            <select id="campSlipProviderSelect" class="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white font-bold text-xs outline-none focus:border-orange-500">
+              <option value="cloudinary" selected>⚡ Cloudinary CDN (แนะนำ - โหลดไว ตรวจสอบง่าย สั่งลบได้)</option>
+              <option value="catbox">🚀 Catbox.moe (ฟรีถาวร ไม่จำกัด ไม่ต้องใช้ API Key)</option>
+              <option value="imgbb">🖼️ ImgBB (ฟรี 32MB ลิงก์ตรงแสดงสลิปทันที)</option>
+              <option value="freeimage">📦 FreeImage.host (ฟรี ถาวร)</option>
+            </select>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400 leading-relaxed flex items-start gap-1.5">
+            <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5"></i>
+            <span><strong>คำแนะนำ:</strong> เมื่อ นศ. แนบสลิปในรายการนี้ ไฟล์จะถูกบีบอัดและส่งไปยังคลาวด์ที่คุณเลือกไว้โดยตรง และลิงก์สลิปจะซิงค์ลงฐานข้อมูล Supabase และหน้าตรวจสอบไฟล์ทันที</span>
+          </div>
+        </div>
+
         <div class="flex items-center justify-between pt-1">
           <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-slate-300 font-bold">
             <input type="checkbox" id="campStatusOpenInput" checked class="rounded accent-orange-500 w-4 h-4">

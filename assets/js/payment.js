@@ -1035,11 +1035,15 @@ async function executeSlipSubmission() {
 
   let uploadedSlipUrl = tempSlipDataUrl;
 
-  // Upload slip to Cloud Multi-Provider (ImgBB / FreeImage / Catbox / Cloudinary)
+  // Upload slip to Cloud Provider specified by Admin for this campaign
   if (window.MultiCloudUploader) {
     try {
-      if (title) title.textContent = '☁️ กำลังส่งสลิปไปยังระบบ Cloud ถาวร...';
+      const targetProvider = currentCampaign.slipProvider || 'cloudinary';
+      const providerName = window.MultiCloudUploader.getProviderName(targetProvider);
+      if (title) title.textContent = `☁️ กำลังส่งสลิปไปยัง ${providerName}...`;
+
       const cloudRes = await window.MultiCloudUploader.upload(tempSlipDataUrl, {
+        preferredProvider: targetProvider,
         customName: `Slip_${currentSelectedStudent.id}_${currentCampaign.id}.png`,
         category: `สลิป: ${currentCampaign.title || 'ชำระเงิน'}`,
         uploaderId: currentSelectedStudent.id,

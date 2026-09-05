@@ -689,6 +689,9 @@ function openEditCampaignModal(campId) {
   const qrPreview = document.getElementById('campQrPreviewImg');
   if (qrPreview) qrPreview.src = camp.qrImage || 'qr_payment.png';
 
+  const slipProviderSelect = document.getElementById('campSlipProviderSelect');
+  if (slipProviderSelect) slipProviderSelect.value = camp.slipProvider || 'cloudinary';
+
   const statusOpenInput = document.getElementById('campStatusOpenInput');
   if (statusOpenInput) statusOpenInput.checked = (camp.status === 'open');
 
@@ -722,6 +725,7 @@ async function handleSaveCampaignSubmit(e) {
   const bankName = document.getElementById('campBankNameInput')?.value.trim() || 'ธนาคารกสิกรไทย';
   const accountNumber = document.getElementById('campAccountNumInput')?.value.trim() || '236-2-47817-3';
   const accountName = document.getElementById('campAccountNameInput')?.value.trim() || 'น.ส. พิชามญธุ์ สามสี';
+  const slipProvider = document.getElementById('campSlipProviderSelect')?.value || 'cloudinary';
   
   const qrInputVal = document.getElementById('campQrImageInput')?.value.trim();
   const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || 'qr_payment.png';
@@ -750,6 +754,7 @@ async function handleSaveCampaignSubmit(e) {
     accountNumber: accountNumber,
     accountName: accountName,
     qrImage: qrImage,
+    slipProvider: slipProvider,
     status: isOpen ? 'open' : (existingCampaign && existingCampaign.status === 'completed' ? 'completed' : 'temp_closed'),
     updatedAt: new Date().toISOString()
   };
