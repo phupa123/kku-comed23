@@ -343,14 +343,15 @@
      * 4. Cloudinary Unsigned Upload
      */
     async uploadToCloudinary(fileObj) {
-      const cloudName = this.config.cloudinaryCloudName || 'demo';
-      const preset = this.config.cloudinaryUploadPreset || 'docs_upload_example_preset';
+      const cloudName = (this.config.cloudinaryCloudName || 'demo').trim();
+      const preset = (this.config.cloudinaryUploadPreset || 'docs_upload_example_preset').trim();
       
       const formData = new FormData();
       formData.append('file', fileObj);
       formData.append('upload_preset', preset);
 
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`, {
+      const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`;
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: formData
       });
@@ -362,7 +363,10 @@
           publicId: json.public_id || ''
         };
       }
-      throw new Error(json?.error?.message || "Cloudinary upload rejected");
+      
+      const errMsg = json?.error?.message || `Cloudinary rejected with status ${response.status}`;
+      console.warn(`[MultiUploader] Cloudinary (${cloudName}/${preset}) failed:`, errMsg);
+      throw new Error(errMsg);
     }
 
     /**
