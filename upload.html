@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>บริการอัปโหลดและจัดเก็บไฟล์สาธารณะ (Cloud File Storage) | COMED KKU</title>
-  <meta name="description" content="บริการอัปโหลดรูปภาพ สลิป และไฟล์ขึ้นคลาวด์ถาวรฟรี รองรับ ImgBB, FreeImage, Catbox และ Cloudinary">
+  <title>บริการอัปโหลดและจัดเก็บไฟล์คลาวด์ส่วนตัว (Personal Cloud Storage 5GB) | COMED KKU</title>
+  <meta name="description" content="ระบบอัปโหลดและจัดเก็บไฟล์ขึ้นคลาวด์ถาวร พร้อมระบบตรวจสอบสิทธิ์และจำกัดพื้นที่ 5 GB ต่อคน">
 
   <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,6 +31,13 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Google Sign-In Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Student Database (60 Students) -->
+  <script src="students_data.js"></script>
 
   <!-- Multi-Cloud File Uploader Core -->
   <script src="assets/js/multi_uploader.js"></script>
@@ -44,7 +51,7 @@
 
   <!-- Header -->
   <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <a href="index.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition">
           <i data-lucide="arrow-left" class="w-5 h-5"></i>
@@ -52,17 +59,40 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
-              FREE PERMANENT CLOUD
+              CLOUD STORAGE • 5 GB PER USER
             </span>
           </div>
-          <h1 class="text-sm sm:text-base font-black text-white">ศูนย์อัปโหลดและจัดเก็บไฟล์สาธารณะ</h1>
+          <h1 class="text-sm sm:text-base font-black text-white">ศูนย์อัปโหลดและจัดเก็บไฟล์คลาวด์</h1>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <a href="upload-admin.html" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5">
-          <i data-lucide="sliders" class="w-3.5 h-3.5 text-orange-400"></i>
-          <span class="hidden sm:inline">ตั้งค่า API คลาวด์</span>
+      <!-- User Session Actions / Profile Header -->
+      <div class="flex items-center gap-2.5">
+        <!-- Guest State (Not Logged In) -->
+        <div id="headerGuestArea" class="flex items-center gap-2">
+          <button onclick="openAuthModal()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/20 transition flex items-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>เข้าสู่ระบบเพื่ออัปโหลด</span>
+          </button>
+        </div>
+
+        <!-- Logged-in State -->
+        <div id="headerUserArea" class="hidden items-center gap-2.5">
+          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+            <img id="userHeaderAvatar" src="" alt="Avatar" class="w-7 h-7 rounded-full bg-slate-800 object-cover border border-orange-500/40">
+            <div class="text-left hidden sm:block">
+              <span id="userHeaderName" class="text-xs font-bold text-white block leading-tight truncate max-w-[130px]">-</span>
+              <span id="userHeaderQuotaBadge" class="text-[10px] font-mono text-emerald-400 leading-tight block">0 MB / 5.0 GB</span>
+            </div>
+          </div>
+          <button onclick="logoutUser()" title="ออกจากระบบ" class="w-9 h-9 rounded-2xl bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 flex items-center justify-center transition cursor-pointer">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <a href="upload-admin.html" title="ตั้งค่า API คลาวด์" class="px-3 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="sliders" class="w-4 h-4 text-orange-400"></i>
+          <span class="hidden md:inline">จัดการคลาวด์</span>
         </a>
       </div>
     </div>
@@ -72,37 +102,87 @@
   <main class="max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 flex-grow space-y-8">
     
     <!-- Hero Box -->
-    <div class="text-center space-y-3 pt-4">
+    <div class="text-center space-y-3 pt-2">
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-slate-800 text-xs text-slate-300">
         <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-        <span>อัปโหลดฟรีตลอดชีพ • ไม่ลบไฟล์ • สลับ 4 คลาวด์อัตโนมัติ</span>
+        <span>ระบบฝากไฟล์ปลอดภัย • แยกบัญชีรายบุคคล • โควตาฟรี 5 GB ต่อคน</span>
       </div>
       <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
         อัปโหลดไฟล์และรูปภาพขึ้นคลาวด์ถาวร
       </h2>
       <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
-        ระบบเชื่อมต่อกับ <strong>ImgBB, FreeImage, Catbox.moe และ Cloudinary</strong> ให้อัตโนมัติ<br>
-        ใช้งานได้ทันทีโดยไม่ต้องสมัครสมาชิกใดๆ ทั้งสิ้น
+        เข้าสู่ระบบด้วยบัญชีอีเมลนักศึกษา KKU เพื่ออัปโหลด ตรวจสอบรายการไฟล์ทั้งหมดของคุณ และจัดการลบไฟล์ได้ตลอดเวลา
       </p>
+    </div>
+
+    <!-- User Quota Card (Visible when logged in) -->
+    <div id="userQuotaCard" class="hidden p-6 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-950/90 border border-slate-800/90 space-y-4 shadow-xl backdrop-blur-xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <img id="quotaAvatar" src="" alt="Avatar" class="w-12 h-12 rounded-2xl bg-slate-800 object-cover border border-orange-500/40">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="quotaUserName" class="text-sm sm:text-base font-black text-white">-</span>
+              <span id="quotaUserBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20">COMED 69</span>
+            </div>
+            <span id="quotaUserEmail" class="text-xs text-slate-400 font-mono">-</span>
+          </div>
+        </div>
+
+        <div class="text-left sm:text-right">
+          <span class="text-xs text-slate-400 block font-bold">พื้นที่จัดเก็บของคุณ (Storage Quota):</span>
+          <div class="flex items-baseline sm:justify-end gap-1.5">
+            <span id="quotaUsedText" class="text-lg sm:text-xl font-black text-white">0.00 MB</span>
+            <span class="text-xs text-slate-500">/ 5.00 GB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quota Progress Bar -->
+      <div class="space-y-1.5">
+        <div class="w-full h-3 rounded-full bg-slate-950 border border-slate-800 overflow-hidden p-0.5">
+          <div id="quotaProgressBar" class="h-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-500 to-orange-500 transition-all duration-500" style="width: 0%;"></div>
+        </div>
+        <div class="flex justify-between items-center text-[11px] text-slate-400">
+          <span id="quotaPercentText">ใช้ไป 0% ของพื้นที่ทั้งหมด</span>
+          <span id="quotaRemainText" class="text-emerald-400 font-bold">คงเหลือ 5.00 GB</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Prompt Alert (Visible when NOT logged in) -->
+    <div id="loginRequiredBanner" class="p-5 rounded-3xl bg-orange-500/10 border border-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="lock" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-white">กรุณาเข้าสู่ระบบก่อนทำการอัปโหลดไฟล์</h4>
+          <p class="text-xs text-slate-400 mt-0.5">เพื่อบันทึกประวัติการฝากไฟล์ของคุณ ตรวจสอบสิทธิ์การใช้งาน และลบไฟล์ของคุณได้</p>
+        </div>
+      </div>
+      <button onclick="openAuthModal()" class="px-5 py-2.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition flex-shrink-0 cursor-pointer active:scale-95">
+        เข้าสู่ระบบด้วยอีเมล KKU
+      </button>
     </div>
 
     <!-- Provider Badges -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
       <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-        <span class="text-xs font-bold text-white block">ImgBB API</span>
-        <span class="text-[10px] text-emerald-400">ฟรี 32MB / ถาวร</span>
-      </div>
-      <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-        <span class="text-xs font-bold text-white block">FreeImage API</span>
-        <span class="text-[10px] text-emerald-400">ภาพคมชัด / ถาวร</span>
+        <span class="text-xs font-bold text-white block">Cloudinary CDN</span>
+        <span class="text-[10px] text-emerald-400">⚡ ความเร็วสูง / เสถียร</span>
       </div>
       <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80">
         <span class="text-xs font-bold text-white block">Catbox.moe</span>
-        <span class="text-[10px] text-emerald-400">ทุกไฟล์ / ไม่หมดอายุ</span>
+        <span class="text-[10px] text-emerald-400">🚀 ทุกประเภทไฟล์ / ถาวร</span>
       </div>
       <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-        <span class="text-xs font-bold text-white block">Cloudinary CDN</span>
-        <span class="text-[10px] text-emerald-400">ความเร็วสูงระดับโลก</span>
+        <span class="text-xs font-bold text-white block">ImgBB API</span>
+        <span class="text-[10px] text-emerald-400">🖼️ รูปภาพคมชัด 32MB</span>
+      </div>
+      <div class="p-3 rounded-2xl bg-slate-900/40 border border-slate-800/50 opacity-60">
+        <span class="text-xs font-bold text-slate-300 block">FreeImage API</span>
+        <span class="text-[10px] text-amber-400">⚠️ ปิดปรับปรุงจากโฮสต์</span>
       </div>
     </div>
 
@@ -114,10 +194,10 @@
           <span>เลือกผู้ให้บริการจัดเก็บข้อมูลที่คุณต้องการ (Select Storage Provider):</span>
         </label>
         <select id="userPreferredProvider" class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold text-xs outline-none focus:border-orange-500 transition">
-          <option value="cloudinary" selected>⚡ Cloudinary CDN (แนะนำ - โหลดเร็วที่สุด จัดการลบไฟล์ได้)</option>
-          <option value="catbox">🚀 Catbox.moe (แนะนำ - ฟรีถาวรตลอดกาล ไม่จำกัดพื้นที่)</option>
+          <option value="cloudinary" selected>⚡ Cloudinary CDN (แนะนำ - โหลดเร็วที่สุด เสถียรสูง)</option>
+          <option value="catbox">🚀 Catbox.moe (แนะนำ - ฟรีถาวรตลอดกาล ไม่จำกัดประเภท)</option>
           <option value="imgbb">🖼️ ImgBB API (ภาพเดี่ยว คมชัด ลิงก์ตรงง่าย)</option>
-          <option value="freeimage">📦 FreeImage.host (ฟรี ถาวร เก็บสำรองยาวนาน)</option>
+          <option value="freeimage" disabled>📦 FreeImage.host (⚠️ ปิดรับบริการชั่วคราวจากผู้ให้บริการ)</option>
         </select>
       </div>
 
@@ -125,10 +205,10 @@
       <div class="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex items-start gap-2.5 text-xs">
         <i data-lucide="info" class="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5"></i>
         <div class="text-[11px] text-slate-300 space-y-0.5">
-          <span class="font-bold text-white">คำแนะนำเพื่อช่วยตัดสินใจ:</span>
+          <span class="font-bold text-white">คำแนะนำการใช้งาน:</span>
           <p class="text-slate-400">
-            • <strong>Cloudinary:</strong> เร็วระดับโลก รูปภาพจะถูกส่งผ่าน CDN ใกล้ผู้ใช้ที่สุด เหมาะกับสลิปและไฟล์ที่เปิดบ่อย<br>
-            • <strong>Catbox.moe:</strong> อิสระ 100% ฟรีถาวร ไม่ต้องกลัวโควต้าเต็ม เหมาะสำหรับเก็บถาวรระยะยาว
+            • <strong>Cloudinary / ImgBB:</strong> แนะนำสำหรับการอัปโหลดรูปภาพและสลิปหลักฐาน โหลดได้รวดเร็วมากผ่านโครงข่าย CDN<br>
+            • <strong>Catbox.moe:</strong> เหมาะสำหรับเอกสาร ไฟล์บีบอัด หรือไฟล์ทั่วไปที่ไม่หมดอายุ
           </p>
         </div>
       </div>
@@ -140,7 +220,7 @@
       <!-- Drop Area -->
       <div id="dropArea" 
         class="border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-3xl p-8 sm:p-12 text-center transition-all cursor-pointer bg-slate-950/40 group relative overflow-hidden"
-        onclick="document.getElementById('fileInput').click()">
+        onclick="triggerFileSelect()">
         
         <input type="file" id="fileInput" class="hidden" onchange="handleFileSelect(event)">
 
@@ -151,7 +231,7 @@
 
           <div class="space-y-1.5">
             <h3 class="text-base sm:text-lg font-bold text-white">ลากและวางไฟล์ที่นี่ หรือ <span class="text-orange-400 underline">คลิกเพื่อเลือกไฟล์</span></h3>
-            <p class="text-xs text-slate-400">รองรับรูปภาพ JPG, PNG, GIF, WebP และไฟล์ทั่วไป (สูงสุด 32 MB)</p>
+            <p class="text-xs text-slate-400">จำกัดขนาดไฟล์ไม่เกิน 32 MB ต่อครั้ง • จำกัดพื้นที่รวม 5.0 GB ต่อบัญชีผู้ใช้</p>
           </div>
         </div>
       </div>
@@ -177,7 +257,7 @@
             <i data-lucide="check-circle-2" class="w-4 h-4"></i>
             <span>อัปโหลดขึ้นคลาวด์ถาวรสำเร็จแล้ว!</span>
           </div>
-          <span id="resultProviderBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Catbox.moe</span>
+          <span id="resultProviderBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Cloudinary</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
@@ -199,6 +279,30 @@
 
     </div>
 
+    <!-- ================= MY UPLOADED FILES SECTION ================= -->
+    <div class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+            <i data-lucide="folder-clock" class="w-5 h-5 text-orange-400"></i>
+            <span>ไฟล์ที่ฉันอัปโหลดไว้ (My Uploaded Files)</span>
+          </h3>
+          <p class="text-xs text-slate-400">ตรวจสอบไฟล์ของคุณ ลิงก์ดาวน์โหลด และสามารถลบไฟล์เพื่อคืนพื้นที่ได้</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span id="myFilesCountBadge" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
+            0 รายการ
+          </span>
+        </div>
+      </div>
+
+      <!-- File List Container -->
+      <div id="myFilesContainer" class="space-y-3">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
   </main>
 
   <!-- Footer -->
@@ -206,10 +310,314 @@
     สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU)
   </footer>
 
-  <script>
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+  <!-- ================= AUTHENTICATION MODAL ================= -->
+  <div id="modalUserAuth" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+    <div id="authCard" class="bg-slate-950 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-6 sm:p-8 space-y-5 text-left shadow-2xl relative overflow-hidden">
+      
+      <!-- Top Decorative Gradient Line -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-amber-400 to-cyan-500"></div>
 
-    // Drag & Drop
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold">
+            <i data-lucide="user-check" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-base font-black text-white">เข้าสู่ระบบยืนยันตัวตน</h3>
+        </div>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400 leading-relaxed">
+        กรุณาเข้าสู่ระบบด้วยอีเมล KKU หรือเลือกรหัสนักศึกษาของคุณ เพื่อเริ่มใช้งานคลาวด์และรับโควตา 5 GB
+      </p>
+
+      <!-- Google Sign-In Button Container -->
+      <div class="space-y-2 text-center pt-1">
+        <div id="googleButtonWrapper" class="flex justify-center"></div>
+        <span class="text-[11px] text-slate-400 block">รองรับบัญชี @kkumail.com และผู้ดูแลระบบ</span>
+      </div>
+
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-slate-800"></div>
+        <span class="flex-shrink mx-3 text-[10px] text-slate-500 uppercase font-bold tracking-wider">หรือ เลือกรหัสจากสารบบ 60 คน</span>
+        <div class="flex-grow border-t border-slate-800"></div>
+      </div>
+
+      <!-- Student Picker Dropdown -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-300">เลือกรหัสนักศึกษา / ชื่อของคุณ:</label>
+        <select id="authStudentSelect" class="w-full px-3.5 py-3 rounded-2xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
+          <option value="">-- กรุณาเลือกรายชื่อของคุณ --</option>
+        </select>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="closeAuthModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
+          ยกเลิก
+        </button>
+        <button onclick="confirmStudentPickerAuth()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition active:scale-95">
+          เข้าใช้งานด้วยรหัสนักศึกษา
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Logic -->
+  <script>
+    // Max quota: 5 GB in bytes
+    const MAX_QUOTA_BYTES = 5 * 1024 * 1024 * 1024; // 5,368,709,120 bytes
+    const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
+
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      initUserSession();
+      populateStudentDropdown();
+      initGoogleAuth();
+    });
+
+    // 1. Session & Auth Management
+    function initUserSession() {
+      try {
+        const stored = localStorage.getItem('COMED_USER_SESSION');
+        if (stored) {
+          currentUser = JSON.parse(stored);
+        }
+      } catch(e) {
+        currentUser = null;
+      }
+      updateUserUI();
+      renderMyFiles();
+    }
+
+    function updateUserUI() {
+      const guestArea = document.getElementById('headerGuestArea');
+      const userArea = document.getElementById('headerUserArea');
+      const banner = document.getElementById('loginRequiredBanner');
+      const quotaCard = document.getElementById('userQuotaCard');
+
+      if (currentUser && currentUser.email) {
+        guestArea.classList.add('hidden');
+        userArea.classList.remove('hidden');
+        userArea.classList.add('flex');
+        banner.classList.add('hidden');
+        quotaCard.classList.remove('hidden');
+
+        // Populate details
+        document.getElementById('userHeaderAvatar').src = currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.email}`;
+        document.getElementById('userHeaderName').textContent = currentUser.name;
+
+        document.getElementById('quotaAvatar').src = currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.email}`;
+        document.getElementById('quotaUserName').textContent = currentUser.nickname ? `${currentUser.name} (${currentUser.nickname})` : currentUser.name;
+        document.getElementById('quotaUserEmail').textContent = currentUser.email;
+
+        // Calculate & display storage quota
+        updateQuotaDisplay();
+      } else {
+        guestArea.classList.remove('hidden');
+        userArea.classList.add('hidden');
+        userArea.classList.remove('flex');
+        banner.classList.remove('hidden');
+        quotaCard.classList.add('hidden');
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function getUserUsedBytes() {
+      if (!currentUser || !currentUser.email) return 0;
+      const allFiles = window.MultiCloudUploader.getAllFiles();
+      const userEmailLower = currentUser.email.toLowerCase().trim();
+
+      const userFiles = allFiles.filter(f => {
+        const fEmail = (f.uploaderEmail || '').toLowerCase().trim();
+        const fId = (f.uploaderId || '').trim();
+        return (fEmail && fEmail === userEmailLower) || (currentUser.studentId && fId === currentUser.studentId);
+      });
+
+      return userFiles.reduce((acc, f) => acc + (Number(f.size) || 0), 0);
+    }
+
+    function updateQuotaDisplay() {
+      const usedBytes = getUserUsedBytes();
+      const pct = Math.min(100, ((usedBytes / MAX_QUOTA_BYTES) * 100)).toFixed(2);
+
+      const usedFormatted = formatBytes(usedBytes);
+      const remainFormatted = formatBytes(Math.max(0, MAX_QUOTA_BYTES - usedBytes));
+
+      const bar = document.getElementById('quotaProgressBar');
+      if (bar) bar.style.width = pct + '%';
+
+      const usedText = document.getElementById('quotaUsedText');
+      if (usedText) usedText.textContent = usedFormatted;
+
+      const pctText = document.getElementById('quotaPercentText');
+      if (pctText) pctText.textContent = `ใช้ไป ${pct}% ของพื้นที่ทั้งหมด`;
+
+      const remainText = document.getElementById('quotaRemainText');
+      if (remainText) remainText.textContent = `คงเหลือ ${remainFormatted}`;
+
+      const headerBadge = document.getElementById('userHeaderQuotaBadge');
+      if (headerBadge) headerBadge.textContent = `${usedFormatted} / 5.0 GB`;
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes <= 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function triggerFileSelect() {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+      document.getElementById('fileInput').click();
+    }
+
+    function logoutUser() {
+      if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+        localStorage.removeItem('COMED_USER_SESSION');
+        currentUser = null;
+        updateUserUI();
+        renderMyFiles();
+      }
+    }
+
+    // 2. Google Authentication
+    function initGoogleAuth() {
+      try {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: false
+          });
+
+          const btnWrapper = document.getElementById('googleButtonWrapper');
+          if (btnWrapper) {
+            btnWrapper.innerHTML = '';
+            google.accounts.id.renderButton(
+              btnWrapper,
+              { theme: "filled_blue", size: "large", width: 280, text: "signin_with", shape: "pill" }
+            );
+          }
+        }
+      } catch (e) {
+        console.warn("Google Auth Init:", e);
+      }
+    }
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) {
+        return null;
+      }
+    }
+
+    function handleGoogleCredentialResponse(response) {
+      const data = parseJwt(response.credential);
+      if (!data || !data.email) {
+        alert("ไม่สามารถดึงข้อมูลบัญชีจาก Google ได้");
+        return;
+      }
+
+      const emailLower = data.email.toLowerCase().trim();
+      const isSpecialTester = (emailLower === 'phupa5874@gmail.com');
+
+      if (!emailLower.endsWith('@kkumail.com') && !isSpecialTester) {
+        alert(`ขออภัย บัญชี "${data.email}" ไม่สามารถเข้าใช้งานได้ ระบบอนุญาตเฉพาะบัญชี @kkumail.com ของมหาวิทยาลัยขอนแก่นเท่านั้น`);
+        return;
+      }
+
+      const student = (window.STUDENTS_DATA || []).find(st => st.email.toLowerCase() === emailLower);
+
+      currentUser = {
+        email: emailLower,
+        name: student ? student.name : (isSpecialTester ? 'ภูผา (ผู้ดูแลระบบ & ทดสอบระบบ)' : data.name),
+        nickname: student ? student.nickname : (isSpecialTester ? 'ภูผา' : ''),
+        studentId: student ? student.id : (isSpecialTester ? 'ADMIN-TESTER' : ''),
+        avatar: data.picture || `https://api.dicebear.com/7.x/bottts/svg?seed=${emailLower}`,
+        isSpecialTester: isSpecialTester,
+        loggedInAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentUser));
+      closeAuthModal();
+      updateUserUI();
+      renderMyFiles();
+      if (typeof confetti === 'function') confetti({ particleCount: 60, spread: 60 });
+    }
+
+    function populateStudentDropdown() {
+      const sel = document.getElementById('authStudentSelect');
+      if (!sel) return;
+      sel.innerHTML = '<option value="">-- กรุณาเลือกรายชื่อของคุณ (60 คน) --</option>';
+
+      (window.STUDENTS_DATA || []).forEach(st => {
+        const opt = document.createElement('option');
+        opt.value = st.id;
+        opt.textContent = `${st.id} - ${st.name} (${st.nickname || ''})`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function confirmStudentPickerAuth() {
+      const sel = document.getElementById('authStudentSelect');
+      const stId = sel.value;
+      if (!stId) {
+        alert('กรุณาเลือกรหัสนักศึกษาของคุณก่อน');
+        return;
+      }
+
+      const st = (window.STUDENTS_DATA || []).find(s => s.id === stId);
+      if (!st) return;
+
+      currentUser = {
+        email: st.email || `${st.id}@kkumail.com`,
+        name: st.name,
+        nickname: st.nickname || '',
+        studentId: st.id,
+        avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${st.id}`,
+        isSpecialTester: false,
+        loggedInAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentUser));
+      closeAuthModal();
+      updateUserUI();
+      renderMyFiles();
+    }
+
+    function openAuthModal() {
+      const modal = document.getElementById('modalUserAuth');
+      if (modal) {
+        modal.classList.remove('hidden');
+        if (typeof gsap !== 'undefined') {
+          gsap.fromTo('#authCard', { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'back.out(1.5)' });
+        }
+        initGoogleAuth();
+      }
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('modalUserAuth');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // 3. Drag & Drop & Upload Flow
     const dropArea = document.getElementById('dropArea');
     ['dragenter', 'dragover'].forEach(name => {
       dropArea.addEventListener(name, (e) => {
@@ -234,6 +642,19 @@
     }
 
     async function startUpload(file) {
+      // 1. Must be logged in
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      // 2. Check 5 GB Storage Quota
+      const currentUsed = getUserUsedBytes();
+      if (currentUsed + file.size > MAX_QUOTA_BYTES) {
+        alert(`⚠️ พื้นที่จัดเก็บของคุณเต็มโควตา 5 GB แล้ว!\n\nขนาดไฟล์: ${formatBytes(file.size)}\nพื้นที่คงเหลือ: ${formatBytes(Math.max(0, MAX_QUOTA_BYTES - currentUsed))}\n\nกรุณาลบไฟล์เก่าที่คุณไม่ได้ใช้ออกก่อนเพื่อคืนพื้นที่`);
+        return;
+      }
+
       const progressBox = document.getElementById('uploadProgressBox');
       const progressBar = document.getElementById('uploadProgressBar');
       const percentText = document.getElementById('uploadPercentText');
@@ -245,12 +666,20 @@
       progressBar.style.width = '20%';
       percentText.textContent = '20%';
 
-      const chosenProvider = document.getElementById('userPreferredProvider')?.value || 'cloudinary';
+      let chosenProvider = document.getElementById('userPreferredProvider')?.value || 'cloudinary';
+      if (chosenProvider === 'freeimage') {
+        chosenProvider = 'cloudinary'; // FreeImage host is blocked by upstream
+      }
 
       try {
         const res = await window.MultiCloudUploader.upload(file, {
           preferredProvider: chosenProvider,
           category: 'อัปโหลดทั่วไป',
+          uploader: {
+            id: currentUser.studentId || currentUser.email,
+            name: currentUser.name,
+            email: currentUser.email
+          },
           onProgress: (pct, msg) => {
             progressBar.style.width = pct + '%';
             percentText.textContent = pct + '%';
@@ -277,10 +706,12 @@
               previewImg.classList.add('hidden');
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
+            updateQuotaDisplay();
+            renderMyFiles();
           }, 500);
         }
       } catch (err) {
-        statusText.innerHTML = `<span class="text-rose-400">⚠️ เกิดข้อผิดพลาด: ${err.message}</span>`;
+        statusText.innerHTML = `<span class="text-rose-400 font-bold">⚠️ เกิดข้อผิดพลาด: ${err.message}</span>`;
       }
     }
 
@@ -293,6 +724,117 @@
       setTimeout(() => {
         btnText.textContent = 'คัดลอก';
       }, 2000);
+    }
+
+    // 4. My Uploaded Files Management
+    function renderMyFiles() {
+      const container = document.getElementById('myFilesContainer');
+      const countBadge = document.getElementById('myFilesCountBadge');
+      if (!container) return;
+
+      if (!currentUser || !currentUser.email) {
+        container.innerHTML = `
+          <div class="p-8 rounded-3xl bg-slate-900/40 border border-slate-800 text-center space-y-3">
+            <i data-lucide="shield-alert" class="w-10 h-10 text-slate-500 mx-auto"></i>
+            <h4 class="text-sm font-bold text-slate-300">กรุณาเข้าสู่ระบบเพื่อดูประวัติไฟล์ที่คุณอัปโหลด</h4>
+            <button onclick="openAuthModal()" class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition">
+              เข้าสู่ระบบตอนนี้
+            </button>
+          </div>
+        `;
+        if (countBadge) countBadge.textContent = '0 รายการ';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      const allFiles = window.MultiCloudUploader.getAllFiles();
+      const userEmailLower = currentUser.email.toLowerCase().trim();
+
+      const userFiles = allFiles.filter(f => {
+        const fEmail = (f.uploaderEmail || '').toLowerCase().trim();
+        const fId = (f.uploaderId || '').trim();
+        return (fEmail && fEmail === userEmailLower) || (currentUser.studentId && fId === currentUser.studentId);
+      });
+
+      if (countBadge) countBadge.textContent = `${userFiles.length} รายการ`;
+
+      if (userFiles.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 rounded-3xl bg-slate-900/30 border border-slate-800/80 text-center space-y-2">
+            <i data-lucide="inbox" class="w-8 h-8 text-slate-500 mx-auto"></i>
+            <p class="text-xs text-slate-400">ยังไม่มีไฟล์ที่คุณอัปโหลดไว้ คุณสามารถลากไฟล์มาวางด้านบนเพื่อเริ่มอัปโหลดได้เลย</p>
+          </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      let html = '';
+      userFiles.forEach(file => {
+        const isImg = file.type && file.type.startsWith('image/');
+        const formattedSize = formatBytes(file.size);
+
+        html += `
+          <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            
+            <div class="flex items-center gap-3.5 min-w-0 flex-grow">
+              <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                ${isImg 
+                  ? `<img src="${file.url}" alt="Thumbnail" class="w-full h-full object-cover">` 
+                  : `<i data-lucide="file-text" class="w-6 h-6 text-orange-400"></i>`}
+              </div>
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-white block truncate max-w-xs sm:max-w-md" title="${file.name}">${file.name}</span>
+                <div class="flex items-center gap-2 text-[10px] text-slate-400 flex-wrap mt-0.5">
+                  <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">${file.provider}</span>
+                  <span>•</span>
+                  <span class="font-mono text-emerald-400 font-bold">${formattedSize}</span>
+                  <span>•</span>
+                  <span>${file.uploadedAt || '-'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+              <a href="${file.url}" target="_blank" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition flex items-center gap-1">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                <span>เปิดดู</span>
+              </a>
+              <button onclick="copyDirectUrl('${file.url}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span>ก๊อปปี้</span>
+              </button>
+              <button onclick="deleteMyFile('${file.id}')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>ลบ</span>
+              </button>
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function copyDirectUrl(url) {
+      navigator.clipboard.writeText(url);
+      alert('คัดลอกลิงก์ไฟล์เรียบร้อยแล้ว!');
+    }
+
+    async function deleteMyFile(fileId) {
+      const allFiles = window.MultiCloudUploader.getAllFiles();
+      const target = allFiles.find(f => f.id === fileId);
+      if (!target) return;
+
+      if (!confirm(`คุณต้องการลบไฟล์ "${target.name}" เพื่อคืนพื้นที่ใช่หรือไม่?`)) {
+        return;
+      }
+
+      await window.MultiCloudUploader.deleteFile(target);
+      updateQuotaDisplay();
+      renderMyFiles();
     }
   </script>
 </body>

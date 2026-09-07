@@ -186,10 +186,15 @@
             onProgress(100, `อัปโหลดสำเร็จผ่าน ${this.getProviderName(provider)}!`);
 
             // Save to File Catalog for Full Management
+            let storedUser = null;
+            try {
+              storedUser = JSON.parse(localStorage.getItem('COMED_USER_SESSION') || 'null');
+            } catch(e) {}
+
             const uploaderInfo = options.uploader || {
-              id: options.uploaderId || (sessionStorage.getItem('COMED_KKU69_USER_ID') || 'Anonymous'),
-              name: options.uploaderName || (sessionStorage.getItem('COMED_KKU69_USER_NAME') || 'บุคคลทั่วไป'),
-              email: options.uploaderEmail || (sessionStorage.getItem('COMED_KKU69_USER_EMAIL') || '-')
+              id: options.uploaderId || (storedUser?.studentId || sessionStorage.getItem('COMED_KKU69_USER_ID') || 'Anonymous'),
+              name: options.uploaderName || (storedUser?.name || sessionStorage.getItem('COMED_KKU69_USER_NAME') || 'บุคคลทั่วไป'),
+              email: options.uploaderEmail || (storedUser?.email || sessionStorage.getItem('COMED_KKU69_USER_EMAIL') || '-')
             };
 
             const fileItem = {
@@ -201,7 +206,7 @@
               deleteToken: uploadResult.deleteToken || '',
               size: fileObj.size || 0,
               type: fileObj.type || 'image/png',
-              category: options.category || 'สลิปการชำระเงิน',
+              category: options.category || 'อัปโหลดทั่วไป',
               uploaderId: uploaderInfo.id,
               uploaderName: uploaderInfo.name,
               uploaderEmail: uploaderInfo.email,
@@ -285,8 +290,7 @@
 
       const endpoints = [
         '/api/freeimage-proxy',
-        'https://kku-comed23.edspace.workers.dev/api/freeimage-proxy',
-        'https://freeimage.host/api/1/upload'
+        'https://kku-comed23.edspace.workers.dev/api/freeimage-proxy'
       ];
 
       let lastErr = null;
@@ -297,7 +301,14 @@
             body: formData
           });
 
-          const json = await response.json();
+          if (response.status === 400 || response.status === 403) {
+            const errData = await response.json().catch(() => null);
+            if (errData?.error?.code === 103 || errData?.error?.message?.includes('forbidden')) {
+              throw new Error("FreeImage.host บล็อกการเชื่อมต่อจาก Cloudflare Worker Proxy (Error 103 Forbidden)");
+            }
+          }
+
+          const json = await response.json().catch(() => null);
           if (json && json.image && json.image.url) {
             return {
               url: json.image.display_url || json.image.url,
@@ -309,7 +320,7 @@
         }
       }
 
-      throw new Error("FreeImage upload rejected: " + (lastErr?.message || "Unknown error"));
+      throw new Error("FreeImage upload rejected: " + (lastErr?.message || "เซิร์ฟเวอร์ FreeImage ปิดกั้นการเข้าถึง"));
     }
 
     /**
