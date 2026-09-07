@@ -1872,7 +1872,8 @@ function handleGoogleCredentialResponse(response) {
   }
 
   const emailLower = data.email.toLowerCase().trim();
-  if (!emailLower.endsWith('@kkumail.com')) {
+  const isSpecialTester = (emailLower === 'phupa5874@gmail.com');
+  if (!emailLower.endsWith('@kkumail.com') && !isSpecialTester) {
     if (errBox && errText) {
       errText.textContent = `บัญชี "${data.email}" ไม่ใช่ @kkumail.com จึงไม่สามารถเข้าสู่ระบบได้`;
       errBox.classList.remove('hidden');
@@ -1883,10 +1884,11 @@ function handleGoogleCredentialResponse(response) {
   const student = (studentDatabase || []).find(st => st.email.toLowerCase() === emailLower);
   const userSession = {
     email: emailLower,
-    name: student ? student.name : (data.name || emailLower),
-    nickname: student ? student.nickname : "",
-    studentId: student ? student.id : "",
+    name: student ? student.name : (isSpecialTester ? 'ภูผา (ผู้ดูแลระบบ & ทดสอบระบบ)' : (data.name || emailLower)),
+    nickname: student ? student.nickname : (isSpecialTester ? 'ภูผา' : ''),
+    studentId: student ? student.id : (isSpecialTester ? 'ADMIN-TESTER' : ''),
     avatar: data.picture || `https://api.dicebear.com/7.x/bottts/svg?seed=${emailLower}`,
+    isSpecialTester: isSpecialTester,
     loggedInAt: new Date().toISOString()
   };
 

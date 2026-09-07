@@ -43,6 +43,7 @@ function generateSecurePassword(length = 10) {
 // Initial default admin accounts
 const DEFAULT_ADMINS = [
   { email: 'thitiwut.a@kkumail.com', name: 'ธิติวุฒิ อารีเอื้อ (ภูผา)', password: 'Phupa#69ComEd', hash: '59de3e916100d7316a353db05617c31de97697ec474e47be6af4168e5ae55e47', role: 'Super Admin' },
+  { email: 'phupa5874@gmail.com', name: 'ภูผา (System Tester & Admin Special)', password: 'Phupa#69ComEd', hash: '59de3e916100d7316a353db05617c31de97697ec474e47be6af4168e5ae55e47', role: 'Super Admin' },
   { email: 'pichamon.sam@kkumail.com', name: 'พิชามญธุ์ สามสี (หมูหวาน)', password: 'MooWan#69ComEd', hash: '41d0b334f78c302fb30d6b73041fec5aeaf78982ce6d90ef30113cde7974399a', role: 'Admin' },
   { email: 'nattachai.p@kkumail.com', name: 'ณัฏฐชัย โพธิ์ทับไทย (โอ้)', password: 'OhNatta#69ComEd', hash: 'd6dbff479a49739cc1d20ad7704993174f5f9f7fb34f1bc756f4d7afb9017e45', role: 'Admin' }
 ];
@@ -51,6 +52,13 @@ let adminAccounts = [];
 try {
   const storedAdmins = localStorage.getItem(ADMIN_ACCOUNTS_KEY);
   adminAccounts = storedAdmins ? JSON.parse(storedAdmins) : DEFAULT_ADMINS;
+  // Ensure default whitelist admins are always present in adminAccounts
+  DEFAULT_ADMINS.forEach(def => {
+    if (!adminAccounts.some(a => (a.email || '').toLowerCase() === def.email.toLowerCase())) {
+      adminAccounts.push(def);
+    }
+  });
+  localStorage.setItem(ADMIN_ACCOUNTS_KEY, JSON.stringify(adminAccounts));
 } catch (e) {
   adminAccounts = DEFAULT_ADMINS;
 }

@@ -16,6 +16,7 @@
   // สามารถเพิ่ม/แก้ไข อีเมลที่ต้องการให้เข้าหลังบ้านได้ที่นี่
   const AUTHORIZED_ADMIN_WHITELIST = [
     'thitiwut.a@kkumail.com',     // ภูผา (Super Admin)
+    'phupa5874@gmail.com',        // ภูผา (ผู้ดูแลระบบ & ผู้ทดสอบระบบ - กรณีพิเศษ ไม่รวม 60 คน)
     'pichamon.sam@kkumail.com',    // หมูหวาน (Admin)
     'nattachai.p@kkumail.com'      // โอ้ (Admin)
   ];

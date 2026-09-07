@@ -476,16 +476,18 @@ function handleGoogleAuthResponse(response) {
   try {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
     const email = (payload.email || '').toLowerCase().trim();
-    if (!email.endsWith('@kkumail.com')) {
+    const isSpecialTester = (email === 'phupa5874@gmail.com');
+    if (!email.endsWith('@kkumail.com') && !isSpecialTester) {
       alert("กรุณาใช้อีเมล @kkumail.com เท่านั้น");
       return;
     }
     const student = (window.STUDENTS_DATA || []).find(s => s.email.toLowerCase() === email);
     currentStudent = {
-      studentId: student ? student.id : (email.split('@')[0]),
-      studentName: student ? student.name : payload.name,
-      nickname: student ? student.nickname : '',
-      email: email
+      studentId: student ? student.id : (isSpecialTester ? 'ADMIN-TESTER' : email.split('@')[0]),
+      studentName: student ? student.name : (isSpecialTester ? 'ภูผา (ผู้ดูแลระบบ & ทดสอบระบบ)' : payload.name),
+      nickname: student ? student.nickname : (isSpecialTester ? 'ภูผา' : ''),
+      email: email,
+      isSpecialTester: isSpecialTester
     };
 
     localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentStudent));

@@ -133,8 +133,9 @@ function handleGoogleCredentialResponse(response) {
 function validateAndSetUser(email, name, avatarUrl) {
   const emailLower = email.toLowerCase().trim();
 
-  // CRITICAL CHECK: MUST BE @kkumail.com
-  if (!emailLower.endsWith('@kkumail.com')) {
+  // CRITICAL CHECK: MUST BE @kkumail.com (ยกเว้น phupa5874@gmail.com กรณีพิเศษสำหรับทดสอบระบบ/แอดมิน)
+  const isSpecialTester = (emailLower === 'phupa5874@gmail.com');
+  if (!emailLower.endsWith('@kkumail.com') && !isSpecialTester) {
     closeGoogleLoginModal();
     showAuthErrorPopup(emailLower);
     return;
@@ -145,10 +146,11 @@ function validateAndSetUser(email, name, avatarUrl) {
 
   const userSession = {
     email: emailLower,
-    name: student ? student.name : name,
-    nickname: student ? student.nickname : "",
-    studentId: student ? student.id : "",
+    name: student ? student.name : (isSpecialTester ? 'ภูผา (ผู้ดูแลระบบ & ทดสอบระบบ)' : name),
+    nickname: student ? student.nickname : (isSpecialTester ? 'ภูผา' : ''),
+    studentId: student ? student.id : (isSpecialTester ? 'ADMIN-TESTER' : ''),
     avatar: avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${emailLower}`,
+    isSpecialTester: isSpecialTester,
     loggedInAt: new Date().toISOString()
   };
 
