@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการกิจกรรม & ทำเนียบเลือกฝ่าย (Event Admin Hub) | COMED KKU 69</title>
+  <meta name="description" content="ระบบจัดการหลังบ้าน ควบคุมเปิด-ปิดกิจกรรม ปรับโครงสร้างฝ่าย และส่งออกรายชื่อนักศึกษา">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP Animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- SheetJS with Full Cell Styling Support (xlsx-js-style) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <!-- Instant Strict Admin Security Guard -->
+  <script src="config/admin_guard.js"></script>
+  <script src="students_data.js"></script>
+  <script src="config/events_repo.js"></script>
+  <link rel="stylesheet" href="assets/css/master-admin.css">
+
+  <style>
+    .hub-glass {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden bg-mesh-dark">
+
+  <!-- ================= TOP NAVIGATION HEADER ================= -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <div class="flex items-center gap-3.5">
+        <a href="admin.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition shadow-sm" title="กลับสู่ Central Admin Hub">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-black uppercase tracking-wider text-orange-400">EVENT & COMMITTEE CMS</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">
+              ระบบเลือกฝ่าย
+            </span>
+          </div>
+          <h1 class="text-base sm:text-lg font-black text-white leading-tight">จัดการกิจกรรมและคณะกรรมการห้อง 69</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="event.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">ดูหน้าเว็บจริง</span>
+        </a>
+        <button onclick="exportRosterExcel()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+          <span>ส่งออก Excel (.xlsx)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
+
+    <!-- Active Event Control Banner -->
+    <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-orange-500/30 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold flex-shrink-0">
+            <i data-lucide="sliders" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="adminEventTitle" class="text-lg sm:text-xl font-black text-white">กำลังโหลดข้อมูลกิจกรรม...</h2>
+              <span id="adminEventStatusPill" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                ONLINE
+              </span>
+            </div>
+            <p id="adminEventSubtitle" class="text-xs text-slate-400 mt-0.5">ระบบควบคุมสถานะการเปิดรับสมัคร และแก้ไขรายละเอียดกิจกรรม</p>
+          </div>
+        </div>
+
+        <!-- Quick Event Action Controls -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btnToggleEventStatus" onclick="toggleEventStatus()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="power" class="w-4 h-4 text-emerald-400"></i>
+            <span id="btnToggleEventStatusText">เปิดรับสมัครอยู่</span>
+          </button>
+          <button onclick="openEditEventModal()" class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+            <span>แก้ไขกิจกรรม & โควตา</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Real-time Stats Counter Matrix -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1">
+          <span class="text-[11px] text-slate-400 font-bold block">ลงชื่อเลือกฝ่ายแล้ว</span>
+          <div class="flex items-baseline gap-1.5">
+            <span id="adminStatRegistered" class="text-2xl font-black text-emerald-400">0</span>
+            <span class="text-xs text-slate-500">/ 60 คน</span>
+          </div>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1">
+          <span class="text-[11px] text-slate-400 font-bold block">ยังไม่ได้ลงชื่อ</span>
+          <div class="flex items-baseline gap-1.5">
+            <span id="adminStatPending" class="text-2xl font-black text-amber-400">60</span>
+            <span class="text-xs text-slate-500">คน</span>
+          </div>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1">
+          <span class="text-[11px] text-slate-400 font-bold block">ตำแหน่งที่เปิดรับ</span>
+          <div class="flex items-baseline gap-1.5">
+            <span id="adminStatRolesCount" class="text-2xl font-black text-sky-400">10</span>
+            <span class="text-xs text-slate-500">ตำแหน่ง</span>
+          </div>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1">
+          <span class="text-[11px] text-slate-400 font-bold block">ความคืบหน้ารวม</span>
+          <div class="flex items-baseline gap-1.5">
+            <span id="adminStatProgress" class="text-2xl font-black text-orange-400">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SECTION: DEPARTMENTS BREAKDOWN MATRIX ================= -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-black text-white flex items-center gap-2">
+          <i data-lucide="grid" class="w-5 h-5 text-orange-400"></i>
+          <span>สัดส่วนและยอดสมาชิกในแต่ละฝ่าย</span>
+        </h3>
+      </div>
+      <div id="adminDeptsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- ================= SECTION: REGISTRATIONS MANAGEMENT TABLE ================= -->
+    <div class="hub-glass rounded-3xl p-6 sm:p-8 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h3 class="text-lg font-black text-white flex items-center gap-2">
+            <i data-lucide="users" class="w-5 h-5 text-orange-400"></i>
+            <span>ตารางบริหารจัดการรายชื่อนักศึกษา 60 คน</span>
+          </h3>
+          <p class="text-xs text-slate-400">แอดมินสามารถช่วยเลือกฝ่ายให้นักศึกษา, เปลี่ยนแปลงตำแหน่ง หรือรีเซ็ตข้อมูลได้</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="filterAdminTable('all')" class="admin-tab active px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white">ทั้งหมด</button>
+          <button onclick="filterAdminTable('registered')" class="admin-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white">เลือกแล้ว</button>
+          <button onclick="filterAdminTable('pending')" class="admin-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white">ยังไม่เลือก</button>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="relative w-full sm:max-w-xs">
+          <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3"></i>
+          <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="ค้นหาชื่อ, รหัส, หรือฝ่าย..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-xs text-white outline-none focus:border-orange-500 transition">
+        </div>
+        <span id="adminTableSummaryCount" class="text-xs text-slate-400">กำลังแสดง 60 รายการ</span>
+      </div>
+
+      <!-- Main Table -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-800">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800">
+            <tr>
+              <th class="p-3.5">#</th>
+              <th class="p-3.5">รหัสนักศึกษา</th>
+              <th class="p-3.5">ชื่อ - นามสกุล</th>
+              <th class="p-3.5">ชื่อเล่น</th>
+              <th class="p-3.5">ฝ่ายที่เลือก</th>
+              <th class="p-3.5">ตำแหน่ง</th>
+              <th class="p-3.5">เวลาลงทะเบียน</th>
+              <th class="p-3.5 text-center">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody" class="divide-y divide-slate-800/60 font-medium text-slate-300">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= MODAL: EDIT EVENT & QUOTAS ================= -->
+  <div id="modalEditEvent" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="hub-glass rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 border border-orange-500/40 text-left max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="settings" class="w-5 h-5 text-orange-400"></i>
+          <h3 class="text-base font-black text-white">แก้ไขข้อมูลกิจกรรม & กำหนดการ</h3>
+        </div>
+        <button onclick="closeEditEventModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="editEventForm" onsubmit="handleSaveEventConfig(event)" class="space-y-4 text-xs">
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300">ชื่อกิจกรรม <span class="text-rose-400">*</span></label>
+          <input type="text" id="editEventTitleInput" required
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300">คำอธิบายเพิ่มเติม</label>
+          <input type="text" id="editEventSubtitleInput"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300">สถานะกิจกรรม</label>
+            <select id="editEventStatusSelect" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+              <option value="open">เปิดรับลงทะเบียน (Open)</option>
+              <option value="temp_closed">ปิดรับชั่วคราว (Paused)</option>
+              <option value="completed">เสร็จสิ้นกิจกรรม (Closed)</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300">กำหนดปิดรับสมัคร (วัน-เวลา)</label>
+            <input type="datetime-local" id="editEventDeadlineInput"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeEditEventModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white font-bold text-xs transition">
+            ยกเลิก
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition">
+            บันทึกการตั้งค่า
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: MANUAL ASSIGN ROLE TO STUDENT ================= -->
+  <div id="modalManualAssign" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="hub-glass rounded-3xl max-w-md w-full p-6 space-y-4 border border-orange-500/40 text-left">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-orange-400"></i>
+          <span>กำหนดฝ่ายให้นักศึกษา</span>
+        </h3>
+        <button onclick="closeManualAssignModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs space-y-1">
+        <span class="text-slate-400">นักศึกษา:</span>
+        <span id="assignStudentName" class="font-bold text-white block">-</span>
+        <span id="assignStudentId" class="font-mono text-orange-400 block text-[11px]">-</span>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <label class="font-bold text-slate-300">เลือกฝ่ายและตำแหน่ง:</label>
+        <select id="assignDeptRoleSelect" class="w-full px-3.5 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+          <!-- Populated dynamically -->
+        </select>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="closeManualAssignModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
+          ยกเลิก
+        </button>
+        <button onclick="submitManualAssign()" class="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition">
+          บันทึก
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/event-admin.js"></script>
+</body>
+</html>

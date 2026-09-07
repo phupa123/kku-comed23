@@ -24,6 +24,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       currentPath.includes('admin.html') ||
       currentPath.includes('payment-admin.html') ||
       currentPath.includes('index-admin.html') ||
+      currentPath.includes('event-admin.html') ||
       currentPath.includes('maintenance.html') ||
       currentPath.includes('404.html')
     ) {
@@ -33,6 +34,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     let pageKey = 'index';
     if (currentPath.includes('payment') || currentPath.includes('payment.html')) {
       pageKey = 'payment';
+    } else if (currentPath.includes('event') || currentPath.includes('event.html')) {
+      pageKey = 'event';
     }
 
     const globalLock = config['all'] && config['all'].active;

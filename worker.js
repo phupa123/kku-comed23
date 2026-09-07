@@ -136,6 +136,8 @@ export default {
     else if (path === "/admin" || path === "/admin.html") target = "/admin.html";
     else if (path === "/index-admin" || path === "/index-admin.html") target = "/index-admin.html";
     else if (path === "/payment-admin" || path === "/payment-admin.html" || path.startsWith("/payment-admin/")) target = "/payment-admin.html";
+    else if (path === "/event" || path === "/event.html") target = "/event.html";
+    else if (path === "/event-admin" || path === "/event-admin.html") target = "/event-admin.html";
     else if (path === "/maintenance" || path === "/maintenance.html") target = "/maintenance.html";
     else if (path === "/404" || path === "/404.html") target = "/404.html";
     else if (path.startsWith("/assets/") || path.startsWith("/config/") || path.endsWith(".png") || path.endsWith(".js") || path.endsWith(".css")) {

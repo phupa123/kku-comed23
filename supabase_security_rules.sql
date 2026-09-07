@@ -115,3 +115,47 @@ CREATE POLICY "Deny Delete Admin Logs"
 ON admin_logs FOR DELETE 
 TO anon 
 USING (false);
+
+-- ================= 7. ตาราง EVENTS & EVENT_REGISTRATIONS (กิจกรรมและการเลือกฝ่าย) =================
+CREATE TABLE IF NOT EXISTS events (
+  id TEXT PRIMARY KEY,
+  code TEXT,
+  title TEXT NOT NULL,
+  subtitle TEXT,
+  category TEXT,
+  status TEXT DEFAULT 'open',
+  deadline TIMESTAMPTZ,
+  departments JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS event_registrations (
+  id TEXT PRIMARY KEY,
+  event_id TEXT REFERENCES events(id) ON DELETE CASCADE,
+  student_id TEXT NOT NULL,
+  student_name TEXT NOT NULL,
+  nickname TEXT,
+  email TEXT,
+  department_id TEXT NOT NULL,
+  department_name TEXT NOT NULL,
+  role_id TEXT NOT NULL,
+  role_title TEXT NOT NULL,
+  note TEXT,
+  registered_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE IF EXISTS events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS event_registrations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public Read Events" ON events;
+DROP POLICY IF EXISTS "Allow Modify Events" ON events;
+DROP POLICY IF EXISTS "Public Read Registrations" ON event_registrations;
+DROP POLICY IF EXISTS "Allow Modify Registrations" ON event_registrations;
+
+CREATE POLICY "Public Read Events" ON events FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Allow Modify Events" ON events FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Public Read Registrations" ON event_registrations FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Allow Modify Registrations" ON event_registrations FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+

@@ -417,7 +417,24 @@ function updateLivePageBadges() {
     btnPayment.textContent = isPaymentOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุงหน้านี้";
   }
 
-  // 3. Global All
+  // 3. Event Page
+  const isEventOff = (cfg.all && cfg.all.active) || (cfg.event && cfg.event.active);
+  const badgeEvent = document.getElementById("pageBadgeEvent");
+  const btnEvent = document.getElementById("btnToggleEvent");
+  if (badgeEvent) {
+    badgeEvent.className = isEventOff
+      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
+      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+    badgeEvent.innerHTML = isEventOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+  }
+  if (btnEvent) {
+    btnEvent.className = isEventOff
+      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
+    btnEvent.textContent = isEventOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุง";
+  }
+
+  // 4. Global All
   const isAllOff = !!(cfg.all && cfg.all.active);
   const badgeAll = document.getElementById("pageBadgeAll");
   const btnAll = document.getElementById("btnToggleAll");
@@ -453,10 +470,12 @@ function toggleAllPagesQuick(shouldLock) {
   if (!cfg.all) cfg.all = {};
   if (!cfg.index) cfg.index = {};
   if (!cfg.payment) cfg.payment = {};
+  if (!cfg.event) cfg.event = {};
 
   cfg.all.active = shouldLock;
   cfg.index.active = shouldLock;
   cfg.payment.active = shouldLock;
+  cfg.event.active = shouldLock;
 
   localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
   updateMaintenanceStatusBadge();
