@@ -21,11 +21,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Sync latest from Supabase
   try {
     await window.ComedEventManager.fetchCloudData(activeEvent.id);
-    renderHeaderAndStats();
-    renderDeptsGrid();
-    renderAdminTable();
+    refreshAdminUI();
   } catch(e) {}
+
+  // Subscribe to Real-Time Live updates for Admin
+  if (window.ComedEventManager && typeof window.ComedEventManager.subscribeRealtime === 'function') {
+    window.ComedEventManager.subscribeRealtime(activeEvent.id, () => {
+      refreshAdminUI();
+    });
+  }
 });
+
+function refreshAdminUI() {
+  renderHeaderAndStats();
+  renderDeptsGrid();
+  renderAdminTable();
+}
 
 function renderHeaderAndStats() {
   if (!activeEvent) return;

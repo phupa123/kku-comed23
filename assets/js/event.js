@@ -20,22 +20,53 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Check Session / Local Login
   initUserSession();
 
-  // 4. Render UI
+  // 4. Render Initial UI
   renderEventHeader();
   renderDepartmentsGrid();
   renderStats();
   renderRosterTable();
   populateStudentSelect();
 
-  // 5. Background Cloud Sync from Supabase
+  // 5. Background Initial Cloud Fetch
   try {
     await window.ComedEventManager.fetchCloudData(currentEvent.id);
-    renderDepartmentsGrid();
-    renderStats();
-    renderRosterTable();
-    checkCurrentUserStatus();
+    refreshEventUI();
   } catch(e) {}
+
+  // 6. Connect Real-Time Live Sync (No refresh needed!)
+  startRealtimeLiveSync();
 });
+
+function refreshEventUI() {
+  renderDepartmentsGrid();
+  renderStats();
+  renderRosterTable();
+  checkCurrentUserStatus();
+}
+
+function startRealtimeLiveSync() {
+  const badgeText = document.getElementById('eventRealtimeStatusText');
+  const badgeEl = document.getElementById('eventRealtimeBadge');
+
+  if (window.ComedEventManager && typeof window.ComedEventManager.subscribeRealtime === 'function') {
+    window.ComedEventManager.subscribeRealtime(currentEvent.id, (eventNotice) => {
+      console.log("[Event Client] 🔄 Realtime Update received:", eventNotice);
+      
+      // Update UI instantaneously
+      refreshEventUI();
+
+      // Pulse highlight effect on live badge
+      if (badgeEl) {
+        badgeEl.classList.add('ring-2', 'ring-cyan-400', 'bg-cyan-500/30');
+        if (badgeText) badgeText.textContent = "⚡ มีการอัปเดตสด!";
+        setTimeout(() => {
+          badgeEl.classList.remove('ring-2', 'ring-cyan-400', 'bg-cyan-500/30');
+          if (badgeText) badgeText.textContent = "⚡ Real-Time ซิงค์สด";
+        }, 1800);
+      }
+    });
+  }
+}
 
 function initUserSession() {
   try {

@@ -240,20 +240,33 @@ window.ComedEventManager = {
     return target;
   },
 
-  // Supabase Sync Methods (Safe & non-blocking)
+  // Supabase Sync Methods (Safe & non-blocking with Dual Sync Architecture)
   syncEventToSupabase: async function(eventData) {
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
-      await sb.from('events').upsert({
+
+      // 1. Try dedicated events table if exists
+      sb.from('events').upsert({
         id: eventData.id,
-        code: eventData.code,
+        code: eventData.code || eventData.id.toUpperCase(),
         title: eventData.title,
         subtitle: eventData.subtitle || '',
         category: eventData.category || 'กิจกรรม',
         status: eventData.status || 'open',
         deadline: eventData.deadline ? new Date(eventData.deadline).toISOString() : null,
         departments: eventData.departments,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' }).catch(() => {});
+
+      // 2. Reliable Cloud Sync via 'campaigns' table (confirmed public access)
+      await sb.from('campaigns').upsert({
+        id: `event_cfg_${eventData.id}`,
+        code: `CFG_${eventData.id.toUpperCase()}`.substring(0, 30),
+        title: `EVENT_CONFIG_${eventData.id}`,
+        subtitle: eventData.title || '',
+        status: eventData.status || 'open',
+        closed_reason: JSON.stringify(eventData),
         updated_at: new Date().toISOString()
       }, { onConflict: 'id' });
     } catch(e) {
@@ -265,9 +278,31 @@ window.ComedEventManager = {
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
-      await sb.from('events').delete().eq('id', eventId);
+      sb.from('events').delete().eq('id', eventId).catch(() => {});
+      await sb.from('campaigns').delete().eq('id', `event_cfg_${eventId}`);
+      await sb.from('campaigns').delete().eq('id', `event_regs_${eventId}`);
     } catch(e) {
       console.warn("Supabase Event Delete Suppressed:", e);
+    }
+  },
+
+  syncAllRegistrationsToCloud: async function(eventId) {
+    const targetEventId = eventId || 'room_roles_69';
+    try {
+      const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+      if (!sb) return;
+
+      const regs = this.getRegistrations(targetEventId);
+      await sb.from('campaigns').upsert({
+        id: `event_regs_${targetEventId}`,
+        code: `REGS_${targetEventId.toUpperCase()}`.substring(0, 30),
+        title: `EVENT_REGISTRATIONS_${targetEventId}`,
+        subtitle: `${regs.length} คนลงทะเบียนแล้ว`,
+        closed_reason: JSON.stringify(regs),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+    } catch(e) {
+      console.warn("Supabase Batch Regs Sync Suppressed:", e);
     }
   },
 
@@ -275,7 +310,9 @@ window.ComedEventManager = {
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
-      await sb.from('event_registrations').upsert({
+
+      // 1. Try dedicated table if exists
+      sb.from('event_registrations').upsert({
         id: `${regRecord.eventId}_${regRecord.studentId}`,
         event_id: regRecord.eventId,
         student_id: regRecord.studentId,
@@ -288,7 +325,10 @@ window.ComedEventManager = {
         role_title: regRecord.roleTitle,
         note: regRecord.note || '',
         registered_at: regRecord.registeredAt || new Date().toISOString()
-      }, { onConflict: 'id' });
+      }, { onConflict: 'id' }).catch(() => {});
+
+      // 2. Real-time Cloud Sync to 'campaigns' record for global broadcast
+      await this.syncAllRegistrationsToCloud(regRecord.eventId);
     } catch(e) {
       console.warn("Supabase Registration Sync Suppressed:", e);
     }
@@ -299,60 +339,129 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
       const compositeId = `${eventId}_${studentId}`;
-      await sb.from('event_registrations').delete().eq('id', compositeId);
+      sb.from('event_registrations').delete().eq('id', compositeId).catch(() => {});
+      await this.syncAllRegistrationsToCloud(eventId);
     } catch(e) {
       console.warn("Supabase Registration Delete Suppressed:", e);
     }
   },
 
-  // ดึงข้อมูล Real-time จาก Supabase เมื่อเปิดหน้าเว็บ
+  // ดึงข้อมูล Real-time จาก Supabase เมื่อเปิดหน้าเว็บ หรือเมื่อมีการเปลี่ยนแปลง
   fetchCloudData: async function(eventId) {
     const targetEventId = eventId || 'room_roles_69';
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
-      if (!sb) return;
+      if (!sb) return false;
 
-      // 1. Fetch Event Config
-      const { data: eventData, error: evErr } = await sb.from('events').select('*').eq('id', targetEventId).maybeSingle();
-      if (!evErr && eventData && eventData.departments) {
-        const events = this.getAllEvents();
-        const idx = events.findIndex(e => e.id === targetEventId);
-        const mapped = {
-          id: eventData.id,
-          code: eventData.code,
-          title: eventData.title,
-          subtitle: eventData.subtitle,
-          category: eventData.category,
-          status: eventData.status,
-          deadline: eventData.deadline,
-          departments: eventData.departments
-        };
-        if (idx !== -1) events[idx] = { ...events[idx], ...mapped };
-        else events.unshift(mapped);
-        localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(events));
-      }
+      let hasUpdate = false;
 
-      // 2. Fetch Registrations
-      const { data: regsData, error: regErr } = await sb.from('event_registrations').select('*').eq('event_id', targetEventId);
-      if (!regErr && Array.isArray(regsData)) {
-        const mappedRegs = regsData.map(r => ({
-          eventId: r.event_id,
-          studentId: r.student_id,
-          studentName: r.student_name,
-          nickname: r.nickname,
-          email: r.email,
-          departmentId: r.department_id,
-          departmentName: r.department_name,
-          roleId: r.role_id,
-          roleTitle: r.role_title,
-          note: r.note || '',
-          registeredAt: r.registered_at
-        }));
-        const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
-        localStorage.setItem(key, JSON.stringify(mappedRegs));
-      }
+      // 1. Fetch Event Config (from campaigns cloud store)
+      try {
+        const { data: cfgRow } = await sb.from('campaigns')
+          .select('closed_reason')
+          .eq('id', `event_cfg_${targetEventId}`)
+          .maybeSingle();
+
+        if (cfgRow && cfgRow.closed_reason) {
+          const parsedCfg = JSON.parse(cfgRow.closed_reason);
+          if (parsedCfg && parsedCfg.departments) {
+            const events = this.getAllEvents();
+            const idx = events.findIndex(e => e.id === targetEventId);
+            if (idx !== -1) {
+              events[idx] = { ...events[idx], ...parsedCfg };
+            } else {
+              events.unshift(parsedCfg);
+            }
+            localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(events));
+            hasUpdate = true;
+          }
+        }
+      } catch(e) {}
+
+      // 2. Fetch Registrations (from campaigns cloud store)
+      try {
+        const { data: regsRow } = await sb.from('campaigns')
+          .select('closed_reason')
+          .eq('id', `event_regs_${targetEventId}`)
+          .maybeSingle();
+
+        if (regsRow && regsRow.closed_reason) {
+          const cloudRegs = JSON.parse(regsRow.closed_reason);
+          if (Array.isArray(cloudRegs)) {
+            const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
+            const localStr = localStorage.getItem(key);
+            const cloudStr = JSON.stringify(cloudRegs);
+            if (localStr !== cloudStr) {
+              localStorage.setItem(key, cloudStr);
+              hasUpdate = true;
+            }
+          }
+        } else {
+          // If not in cloud yet, push local initial registrations to cloud
+          const localRegs = this.getRegistrations(targetEventId);
+          if (localRegs.length > 0) {
+            this.syncAllRegistrationsToCloud(targetEventId);
+          }
+        }
+      } catch(e) {}
+
+      return hasUpdate;
     } catch(e) {
       console.warn("Supabase Fetch Cloud Data Suppressed:", e);
+      return false;
     }
+  },
+
+  // สมัครรับการแจ้งเตือน Real-Time แบบทันที (Supabase Realtime Channel + Live Polling Fallback)
+  subscribeRealtime: function(eventId, onUpdateCallback) {
+    const targetEventId = eventId || 'room_roles_69';
+    let isSubscribed = false;
+
+    try {
+      const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+      if (sb && typeof sb.channel === 'function') {
+        const channelName = `realtime_event_${targetEventId}_${Date.now()}`;
+        const channel = sb.channel(channelName);
+
+        // Listen for changes in 'campaigns' table (which houses event_cfg and event_regs)
+        channel
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'campaigns'
+          }, async (payload) => {
+            const rowId = payload?.new?.id || payload?.old?.id;
+            if (rowId === `event_regs_${targetEventId}` || rowId === `event_cfg_${targetEventId}`) {
+              await this.fetchCloudData(targetEventId);
+              if (typeof onUpdateCallback === 'function') {
+                onUpdateCallback({ type: 'cloud_change', payload });
+              }
+            }
+          })
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              isSubscribed = true;
+              console.log(`[EventRealtime] ⚡ Connected to live channel: ${targetEventId}`);
+            }
+          });
+      }
+    } catch(e) {
+      console.warn("[EventRealtime] Channel subscription warning:", e);
+    }
+
+    // High-frequency, lightweight polling backup (Every 4 seconds)
+    // Ensures updates are 100% visible even if WebSocket disconnects
+    const pollInterval = setInterval(async () => {
+      try {
+        const updated = await this.fetchCloudData(targetEventId);
+        if (updated && typeof onUpdateCallback === 'function') {
+          onUpdateCallback({ type: 'poll_update' });
+        }
+      } catch(e) {}
+    }, 4000);
+
+    return () => {
+      clearInterval(pollInterval);
+    };
   }
 };
