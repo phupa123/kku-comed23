@@ -682,10 +682,10 @@ function saveCampaignSubmit(e) {
   showToastNotification(`✅ บันทึกรายการชำระเงิน "${title}" สำเร็จเรียบร้อย!`);
 }
 
-function deleteCampaign(id) {
+async function deleteCampaign(id) {
   if (!window.ComedCampaignManager) return;
   if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการชำระเงินนี้?")) {
-    window.ComedCampaignManager.deleteCampaign(id);
+    await window.ComedCampaignManager.deleteCampaign(id);
     renderCampaignsList();
     showToastNotification("ลบรายการชำระเงินเรียบร้อยแล้ว");
   }

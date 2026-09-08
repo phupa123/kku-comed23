@@ -828,7 +828,7 @@ async function executeDeleteCampaign() {
   const campTitle = camp ? camp.title : campId;
 
   // 1. Delete campaign from manager (localStorage + Supabase delete)
-  window.ComedCampaignManager.deleteCampaign(campId);
+  await window.ComedCampaignManager.deleteCampaign(campId);
 
   // 2. Remove payments key in localStorage for this campaign
   try {

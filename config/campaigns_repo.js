@@ -98,7 +98,7 @@ window.ComedCampaignManager = {
     this.saveCampaigns(list);
   },
 
-  deleteCampaign: function(id) {
+  deleteCampaign: async function(id) {
     if (!id) return;
     // 1. Add to permanent deleted list
     const deletedIds = this.getDeletedIds();
@@ -112,15 +112,18 @@ window.ComedCampaignManager = {
     list = list.filter(c => c.id !== id);
     localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(list));
 
-    // 3. Delete from Supabase
-    this.deleteFromSupabase(id);
+    // 3. Delete from Supabase and await completion
+    await this.deleteFromSupabase(id);
   },
 
   deleteFromSupabase: async function(id) {
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb || !id) return;
-      await sb.from('campaigns').delete().eq('id', id);
+      const { error } = await sb.from('campaigns').delete().eq('id', id);
+      if (error) {
+        console.warn("Supabase Delete Campaign Notice:", error);
+      }
     } catch(e) {
       console.warn("Supabase Delete Campaign Error (will remain deleted locally):", e);
     }
