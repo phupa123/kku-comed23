@@ -1505,6 +1505,29 @@ async function submitAdminManualPayment() {
     amount: 190
   };
 
+  // 1. Send to Supabase Database
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (sb) {
+    try {
+      await sb.from('payments').upsert({
+        campaign_id: currentAdminCampaign.id,
+        student_id: studentId,
+        student_name: currentAdminTargetStudent.name,
+        student_nickname: currentAdminTargetStudent.nickname,
+        student_email: currentAdminTargetStudent.email,
+        amount: currentAdminCampaign.amount || 190,
+        paid: true,
+        timestamp: timestamp,
+        slip_url: adminTempSlipBase64,
+        ref_code: refCode,
+        verified: true
+      }, { onConflict: 'campaign_id,student_id' });
+    } catch (sbErr) {
+      console.warn("Supabase admin payment save warning:", sbErr);
+    }
+  }
+
+  // 2. Send to Google Apps Script
   if (googleAppsScriptUrl) {
     try {
       await fetch(googleAppsScriptUrl, {
@@ -1839,20 +1862,21 @@ function inspectSlip(studentId) {
         </div>
       </div>
 
-      <div class="w-full h-96 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner flex flex-col relative">
-        <iframe 
-          src="${drivePreviewUrl}" 
-          class="w-full h-full border-0 rounded-2xl" 
-          allow="autoplay"
-          loading="lazy"
-        ></iframe>
+      <div class="w-full h-96 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner flex items-center justify-center relative">
+        ${rawSlipUrl.startsWith('data:image') || rawSlipUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || rawSlipUrl.includes('cloudinary') || rawSlipUrl.includes('catbox') || rawSlipUrl.includes('ibb.co')
+          ? `<img src="${rawSlipUrl}" alt="หลักฐานสลิป" class="max-h-full max-w-full object-contain mx-auto rounded-xl">`
+          : `<iframe src="${drivePreviewUrl}" class="w-full h-full border-0 rounded-2xl" allow="autoplay" loading="lazy"></iframe>`
+        }
       </div>
 
       <div class="flex items-center justify-between gap-2 pt-1">
-        <a href="${driveViewUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md shadow-sky-600/25">
-          <i data-lucide="external-link" class="w-4 h-4"></i>
-          <span>เปิดดูรูปเต็มบน Google Drive</span>
-        </a>
+        ${driveViewUrl
+          ? `<a href="${driveViewUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md shadow-sky-600/25">
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+              <span>เปิดดูไฟล์ภาพต้นฉบับ</span>
+            </a>`
+          : `<div></div>`
+        }
         <button onclick="closeInspectorModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">
           ปิดหน้าต่าง
         </button>

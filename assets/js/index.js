@@ -361,6 +361,51 @@ async function checkUserPaymentStatus(user) {
     applyPaidUI(user, cachedSlip, box, icon, title, sub, btn, payBtn);
   }
 
+  // Priority 1: Supabase Realtime Database check
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (sb) {
+    try {
+      let query = sb.from('payments').select('*').eq('campaign_id', 'paimai69');
+      const { data, error } = await query;
+      if (!error && Array.isArray(data) && data.length > 0) {
+        const found = data.find(p => {
+          const pId = (p.student_id || '').replace(/-/g, '').trim();
+          const pEmail = (p.student_email || '').toLowerCase().trim();
+          const pName = (p.student_name || '').trim();
+          return (myId && pId === myId) || 
+                 (myEmail && pEmail === myEmail) || 
+                 (myName && pName && (pName.includes(myName) || myName.includes(pName)));
+        });
+
+        if (found && found.paid) {
+          const matchedRecord = {
+            studentId: found.student_id,
+            studentName: found.student_name,
+            name: found.student_name,
+            nickname: found.student_nickname,
+            email: found.student_email,
+            paid: true,
+            amount: found.amount || 190,
+            timestamp: found.timestamp || '',
+            slipUrl: found.slip_url || '',
+            refCode: found.ref_code || ''
+          };
+          // Update local cache to match verified cloud truth
+          if (myId) {
+            localCache[myId] = matchedRecord;
+            localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localCache));
+          }
+          applyPaidUI(user, matchedRecord, box, icon, title, sub, btn, payBtn);
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+          return;
+        }
+      }
+    } catch (sbErr) {
+      console.warn("Supabase user payment check warning:", sbErr);
+    }
+  }
+
+  // Priority 2: Google Apps Script Web App
   const cloudUrl = localStorage.getItem('COMED_GOOGLE_SHEETS_URL') || "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
 
   try {
@@ -393,9 +438,20 @@ async function checkUserPaymentStatus(user) {
       });
 
       if (userSlip) {
+        // Also ensure it's saved in localCache
+        if (myId) {
+          localCache[myId] = userSlip;
+          localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localCache));
+        }
         applyPaidUI(user, userSlip, box, icon, title, sub, btn, payBtn);
       } else {
-        // Not paid yet -> Animate in the "Pending Payment" state
+        // Not found in verified cloud databases -> mark as unpaid
+        if (cachedSlip) {
+          // Clear invalid local cache so user is not misled
+          delete localCache[myId];
+          if (user.studentId) delete localCache[user.studentId];
+          localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localCache));
+        }
         applyUnpaidUI(user, box, icon, title, sub, btn, payBtn);
       }
     } else {

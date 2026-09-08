@@ -1069,7 +1069,12 @@ async function executeSlipSubmission() {
   }
 
   // บันทึกลงหน่วยความจำและ LocalStorage ทันที
-  paymentRecords[studentId] = {
+  const recordData = {
+    studentId: studentId,
+    studentName: currentSelectedStudent.name,
+    name: currentSelectedStudent.name,
+    nickname: currentSelectedStudent.nickname,
+    email: currentSelectedStudent.email,
     paid: true,
     timestamp: timestamp,
     slipUrl: uploadedSlipUrl,
@@ -1077,7 +1082,18 @@ async function executeSlipSubmission() {
     refCode: refCode,
     amount: currentCampaign.amount || 190
   };
+
+  paymentRecords[studentId] = recordData;
   saveLocalBackup();
+
+  // Sync to index.html personal cache (COMED_LOCAL_PAYMENTS) so both student and index are in sync
+  try {
+    const localPay = JSON.parse(localStorage.getItem('COMED_LOCAL_PAYMENTS') || '{}');
+    const cleanId = studentId.replace(/-/g, '').trim();
+    localPay[studentId] = recordData;
+    if (cleanId) localPay[cleanId] = recordData;
+    localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localPay));
+  } catch (cErr) {}
 
   if (bar) bar.style.width = '60%';
 
@@ -1085,7 +1101,7 @@ async function executeSlipSubmission() {
   const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
   if (sb) {
     try {
-      await sb.from('payments').upsert({
+      const { error: sbErr } = await sb.from('payments').upsert({
         campaign_id: currentCampaign.id,
         student_id: studentId,
         student_name: currentSelectedStudent.name,
@@ -1098,6 +1114,9 @@ async function executeSlipSubmission() {
         ref_code: refCode,
         verified: true
       }, { onConflict: 'campaign_id,student_id' });
+      if (sbErr) {
+        console.warn("Supabase upsert payment notice:", sbErr);
+      }
     } catch(err) {
       console.warn("Supabase insert payment warning:", err);
     }
