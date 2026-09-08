@@ -269,7 +269,7 @@
       </a>
 
       <!-- 2. Navigation Links in the Center (with Smooth Hover Underline Animation) -->
-      <nav class="hidden lg:flex items-center gap-1">
+      <nav class="hidden lg:flex items-center gap-1.5">
         <a href="#payments-list" class="nav-link-modern active">
           <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse mr-1.5"></span>
           <span>รายการต้องชำระ</span>
@@ -278,13 +278,13 @@
         <a href="#curriculum" class="nav-link-modern">หลักสูตร</a>
         <a href="#careers" class="nav-link-modern">อาชีพในอนาคต</a>
         <a href="#students" class="nav-link-modern">ทำเนียบรุ่น 69</a>
-        <a href="event.html" class="nav-link-modern text-orange-600 font-bold flex items-center gap-1">
-          <i data-lucide="award" class="w-3.5 h-3.5"></i>
+        <a href="event.html" class="nav-link-modern text-orange-600 font-extrabold flex items-center gap-1.5 bg-orange-500/10 rounded-xl px-3 py-1.5 border border-orange-500/20 shadow-xs hover:bg-orange-500/20 transition">
+          <i data-lucide="award" class="w-4 h-4 text-orange-600"></i>
           <span>เลือกฝ่ายกิจกรรม</span>
         </a>
-        <a href="upload.html" target="_blank" class="nav-link-modern text-slate-600 hover:text-orange-600 font-medium flex items-center gap-1">
-          <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i>
-          <span>ฝากไฟล์ฟรี</span>
+        <a href="upload.html" target="_blank" class="nav-link-modern text-slate-700 hover:text-orange-600 font-bold flex items-center gap-1.5">
+          <i data-lucide="cloud-upload" class="w-4 h-4 text-sky-500"></i>
+          <span>ฝากไฟล์ 5GB</span>
         </a>
       </nav>
 
@@ -396,27 +396,33 @@
   </div>
 
   <!-- ================= SECTION 0: ACTIVE PAYMENTS (หมวดหมู่รายการที่ต้องชำระตอนนี้) ================= -->
-  <section id="payments-list" class="bg-gradient-to-b from-orange-500/10 via-amber-500/5 to-transparent pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-b border-orange-200/50">
-    <div class="max-w-7xl mx-auto space-y-6">
+  <section id="payments-list" class="relative bg-gradient-to-b from-orange-500/10 via-amber-500/5 to-slate-50 pt-12 pb-20 px-4 sm:px-6 lg:px-8 border-b border-orange-200/60 overflow-hidden">
+    <!-- Subtle Ambient Glow -->
+    <div class="absolute top-0 right-10 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-0 left-10 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative max-w-7xl mx-auto space-y-8">
       
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-orange-200/40 pb-6">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500 text-white text-xs font-black uppercase tracking-wider shadow-sm">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 text-white text-xs font-black uppercase tracking-wider shadow-md shadow-orange-500/20">
             <i data-lucide="bell-ring" class="w-3.5 h-3.5 animate-bounce"></i>
             <span>รายการที่ต้องชำระเงินในขณะนี้ (Active Dues)</span>
           </div>
-          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+          <h2 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight mt-3">
             ติดตามและชำระเงินค่ากิจกรรมสาขาวิชา
           </h2>
-          <p class="text-xs sm:text-sm text-slate-600 mt-1">
-            โปรดตรวจสอบกำหนดการและแนบสลิปผ่านระบบออนไลน์ เพื่อความถูกต้องและรวดเร็ว
+          <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
+            โปรดตรวจสอบกำหนดการ ยอดชำระ และแนบสลิปผ่านระบบออนไลน์ เพื่อความสะดวกรวดเร็วและตรวจสอบได้ตลอด 24 ชม.
           </p>
         </div>
 
-        <a href="payment.html" class="inline-flex items-center gap-1.5 text-xs font-black text-orange-600 hover:text-orange-700 bg-white px-4 py-2.5 rounded-2xl border border-orange-200 shadow-sm transition">
-          <span>ตรวจสอบประวัติและรายชื่อผู้ชำระแล้ว</span>
-          <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </a>
+        <div class="flex items-center gap-2.5 flex-shrink-0">
+          <a href="payment.html" class="inline-flex items-center gap-2 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 px-5 py-3 rounded-2xl shadow-md transition transform active:scale-95 cursor-pointer">
+            <i data-lucide="clipboard-list" class="w-4 h-4 text-orange-400"></i>
+            <span>ตรวจสอบสถานะ 60 คน</span>
+          </a>
+        </div>
       </div>
 
       <!-- Dynamic Payment Campaigns Grid -->
@@ -432,56 +438,59 @@
   </section>
 
   <!-- ================= HERO SECTION (CYBER & MODERN TECH) ================= -->
-  <section class="relative overflow-hidden bg-slate-950 text-white pt-12 sm:pt-20 pb-20 sm:pb-32 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+  <section class="relative overflow-hidden bg-slate-950 text-white pt-14 sm:pt-24 pb-24 sm:pb-36 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80">
     
-    <!-- Dynamic Mesh Background -->
-    <div class="absolute inset-0 bg-mesh-dark opacity-90 pointer-events-none"></div>
-    <div class="absolute inset-0 grid-pattern opacity-10 pointer-events-none"></div>
+    <!-- Dynamic Glowing Mesh Background -->
+    <div class="absolute inset-0 bg-mesh-dark opacity-95 pointer-events-none"></div>
+    <div class="absolute inset-0 grid-pattern opacity-20 pointer-events-none"></div>
+    <div class="absolute top-1/4 -left-20 w-96 h-96 bg-orange-500/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-10 right-0 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       
       <!-- Left Hero Content -->
-      <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+      <div class="lg:col-span-7 space-y-7 text-center lg:text-left">
         
-        <!-- Pill Badge -->
-        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs sm:text-sm font-bold shadow-lg">
-          <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
-          <span>หลักสูตรศึกษาศาสตรบัณฑิต (ศศ.บ.) 4 ปี</span>
+        <!-- Pill Badge with Live Indicator -->
+        <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-900/90 border border-orange-500/40 text-orange-300 text-xs sm:text-sm font-bold shadow-xl shadow-orange-500/10 backdrop-blur-xl">
+          <span class="w-2.5 h-2.5 rounded-full bg-orange-400 animate-ping"></span>
+          <span>หลักสูตรศึกษาศาสตรบัณฑิต (ศศ.บ.) 4 ปี • คณะศึกษาศาสตร์ มข.</span>
         </div>
 
-        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15]">
-          สร้าง <span class="gradient-text-orange">ครูคอมพิวเตอร์ยุคใหม่</span> และนักพัฒนานวัตกรรมการศึกษาดิจิทัล
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.12]">
+          สร้าง <span class="gradient-text-orange">ครูคอมพิวเตอร์ยุคใหม่</span><br>
+          และนักพัฒนานวัตกรรม <span class="gradient-text-cyan">EdTech</span> ดิจิทัล
         </h1>
 
         <p class="text-sm sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto lg:mx-0">
-          สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น มุ่งเน้นการบูรณาการองค์ความรู้ด้านวิทยาการคอมพิวเตอร์ เทคโนโลยีดิจิทัล และศาสตร์การสอน เพื่อสร้างผู้นำการเปลี่ยนแปลงทางการศึกษาแห่งอนาคต
+          สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น บูรณาการองค์ความรู้วิทยาการคอมพิวเตอร์ ปัญญาประดิษฐ์ (AI) และศาสตร์การสอน เพื่อสร้างผู้นำการเปลี่ยนแปลงทางการศึกษาแห่งอนาคต
         </p>
 
-        <!-- Stats Counter -->
-        <div class="grid grid-cols-3 gap-3 sm:gap-6 pt-4 max-w-lg mx-auto lg:mx-0">
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-            <div class="text-2xl sm:text-4xl font-black text-orange-400 font-mono">69</div>
-            <div class="text-xs text-slate-400 font-medium mt-1">รุ่นนักศึกษาปัจจุบัน</div>
+        <!-- Stats Counter with Luxury Glass Cards -->
+        <div class="grid grid-cols-3 gap-3 sm:gap-5 pt-2 max-w-lg mx-auto lg:mx-0">
+          <div class="p-4 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl hover:border-orange-500/40 transition">
+            <div class="text-2xl sm:text-4xl font-black text-orange-400 font-mono tracking-tight">69</div>
+            <div class="text-[11px] sm:text-xs text-slate-400 font-bold mt-1">รุ่นนักศึกษาปัจจุบัน</div>
           </div>
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-            <div class="text-2xl sm:text-4xl font-black text-cyan-400 font-mono">60</div>
-            <div class="text-xs text-slate-400 font-medium mt-1">เพื่อนร่วมรุ่นปี 1</div>
+          <div class="p-4 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl hover:border-cyan-500/40 transition">
+            <div class="text-2xl sm:text-4xl font-black text-cyan-400 font-mono tracking-tight">60</div>
+            <div class="text-[11px] sm:text-xs text-slate-400 font-bold mt-1">เพื่อนร่วมรุ่นปี 1</div>
           </div>
-          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-            <div class="text-2xl sm:text-4xl font-black text-emerald-400 font-mono">100%</div>
-            <div class="text-xs text-slate-400 font-medium mt-1">ความพร้อมสู่อาชีพ</div>
+          <div class="p-4 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl hover:border-emerald-500/40 transition">
+            <div class="text-2xl sm:text-4xl font-black text-emerald-400 font-mono tracking-tight">100%</div>
+            <div class="text-[11px] sm:text-xs text-slate-400 font-bold mt-1">พร้อมสู่วิชาชีพ</div>
           </div>
         </div>
 
         <!-- Hero CTA Links -->
-        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
-          <a href="payment.html" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-base shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2.5 transition transform active:scale-95">
+        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+          <a href="payment.html" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-sm sm:text-base shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2.5 transition transform active:scale-95 cursor-pointer">
             <i data-lucide="sparkles" class="w-5 h-5"></i>
             <span>เข้าสู่ระบบชำระเงินค่าป้ายเอก ฿190</span>
           </a>
-          <a href="#curriculum" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-base border border-slate-700 flex items-center justify-center gap-2 transition">
-            <i data-lucide="book-open" class="w-5 h-5 text-orange-400"></i>
-            <span>ดูโครงสร้างหลักสูตร</span>
+          <a href="event.html" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-white font-bold text-sm sm:text-base border border-slate-700 flex items-center justify-center gap-2 transition backdrop-blur-xl">
+            <i data-lucide="award" class="w-5 h-5 text-orange-400"></i>
+            <span>เลือกฝ่ายกิจกรรม</span>
           </a>
         </div>
 
@@ -551,54 +560,63 @@
   </section>
 
   <!-- ================= SECTION 1: ABOUT & PHILOSOPHY ================= -->
-  <section id="about" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
+  <section id="about" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-16">
     
     <div class="text-center max-w-3xl mx-auto space-y-4">
-      <span class="px-3.5 py-1 rounded-full text-xs font-black bg-orange-100 text-orange-800 tracking-wider uppercase border border-orange-200">
+      <span class="px-4 py-1.5 rounded-full text-xs font-black bg-orange-100/80 text-orange-700 tracking-wider uppercase border border-orange-200 shadow-xs">
         ABOUT DEPARTMENT
       </span>
-      <h2 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
-        มุ่งมั่นผลิตครูมืออาชีพ <span class="text-orange-600">พร้อมทักษะเทคโนโลยีระดับสากล</span>
+      <h2 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+        มุ่งมั่นผลิตครูมืออาชีพ <span class="gradient-text-orange">พร้อมทักษะเทคโนโลยีระดับสากล</span>
       </h2>
-      <p class="text-sm sm:text-base text-slate-600">
-        สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น บ่มเพาะบัณฑิตให้มีความเชี่ยวชาญทั้งด้านเทคโนโลยีคอมพิวเตอร์และวิทยาการการสอนที่ทันสมัย
+      <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+        สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น บ่มเพาะบัณฑิตให้มีความเชี่ยวชาญทั้งด้านวิทยาการคอมพิวเตอร์และเทคนิคการสอนที่ทันสมัย
       </p>
     </div>
 
-    <!-- 3 Core Pillars -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- 3 Core Pillars with Ultra-Modern Hover Effects -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       
       <!-- Card 1 -->
-      <div class="glass-card rounded-3xl p-8 space-y-4 border border-slate-200/80 shadow-card-premium hover:shadow-card-hover transition-all duration-300 group">
-        <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 shadow-md">
-          <i data-lucide="cpu" class="w-7 h-7"></i>
+      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-orange-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-orange-500/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all"></div>
+        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center shadow-lg shadow-orange-500/25 group-hover:scale-110 transition-transform">
+          <i data-lucide="cpu" class="w-8 h-8"></i>
         </div>
-        <h3 class="text-xl font-black text-slate-900">วิทยาการคอมพิวเตอร์เข้มข้น</h3>
-        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-          เรียนรู้การเขียนโปรแกรม (Coding), การพัฒนาซอฟต์แวร์, เว็บแอปพลิเคชัน, ปัญญาประดิษฐ์ (AI), อินเทอร์เน็ตของสรรพสิ่ง (IoT) และระบบความปลอดภัยไซเบอร์
-        </p>
+        <div class="space-y-2">
+          <h3 class="text-xl font-black text-slate-900 group-hover:text-orange-600 transition-colors">วิทยาการคอมพิวเตอร์เข้มข้น</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            เรียนรู้การเขียนโปรแกรม (Coding), ซอฟต์แวร์, เว็บแอปพลิเคชัน, ปัญญาประดิษฐ์ (AI), IoT และระบบความปลอดภัยไซเบอร์
+          </p>
+        </div>
       </div>
 
       <!-- Card 2 -->
-      <div class="glass-card rounded-3xl p-8 space-y-4 border border-slate-200/80 shadow-card-premium hover:shadow-card-hover transition-all duration-300 group">
-        <div class="w-14 h-14 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300 shadow-md">
-          <i data-lucide="sparkles" class="w-7 h-7"></i>
+      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-cyan-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-cyan-500/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all"></div>
+        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-cyan-500 to-blue-500 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 group-hover:scale-110 transition-transform">
+          <i data-lucide="sparkles" class="w-8 h-8"></i>
         </div>
-        <h3 class="text-xl font-black text-slate-900">นวัตกรรมสื่อการเรียนรู้</h3>
-        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-          การออกแบบสื่อดิจิทัลเพื่อการเรียนรู้, สื่อมัลติมีเดียแบบโต้ตอบ (Interactive Media), ระบบการจัดการเรียนการสอน (LMS) และเทคโนโลยีความจริงเสมือน (AR/VR)
-        </p>
+        <div class="space-y-2">
+          <h3 class="text-xl font-black text-slate-900 group-hover:text-cyan-600 transition-colors">นวัตกรรมสื่อการเรียนรู้</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            การออกแบบสื่อดิจิทัลเพื่อการศึกษา, Interactive Media, ระบบการจัดการเรียนรู้ (LMS) และเทคโนโลยีเสมือนจริง (AR/VR)
+          </p>
+        </div>
       </div>
 
       <!-- Card 3 -->
-      <div class="glass-card rounded-3xl p-8 space-y-4 border border-slate-200/80 shadow-card-premium hover:shadow-card-hover transition-all duration-300 group">
-        <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-md">
-          <i data-lucide="award" class="w-7 h-7"></i>
+      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-emerald-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-emerald-500/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all"></div>
+        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:scale-110 transition-transform">
+          <i data-lucide="award" class="w-8 h-8"></i>
         </div>
-        <h3 class="text-xl font-black text-slate-900">ศาสตร์การสอนยุคดิจิทัล</h3>
-        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-          จิตวิทยาการศึกษา, การวัดและประเมินผลการเรียนรู้, การจัดการชั้นเรียนแบบ Active Learning และเทคนิคการสอนเพื่อกระตุ้นความคิดเชิงคำนวณ (Computational Thinking)
-        </p>
+        <div class="space-y-2">
+          <h3 class="text-xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors">ศาสตร์การสอนยุคดิจิทัล</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            จิตวิทยาการศึกษา, การวัดผลประเมินผล, การจัดการเรียนรู้แบบ Active Learning และเทคนิคกระตุ้นความคิดเชิงคำนวณ
+          </p>
+        </div>
       </div>
 
     </div>
@@ -624,62 +642,70 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         <!-- Year 1 -->
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-md space-y-4 relative overflow-hidden">
-          <div class="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-orange-500/30">
+        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-orange-100 hover:border-orange-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-orange-500/30">
             01
           </div>
-          <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 1: ปูพื้นฐาน</h3>
-          <p class="text-xs text-orange-600 font-bold">Foundation & Principles</p>
-          <ul class="space-y-2 text-xs text-slate-600">
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> พื้นฐานวิทยาการคอมพิวเตอร์</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> การเขียนโปรแกรมเชิงโครงสร้าง</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> คณิตศาสตร์สำหรับวิทยาการคอมพิวเตอร์</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> ความเป็นครูและจิตวิทยาการศึกษา</li>
+          <div>
+            <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 1: ปูพื้นฐาน</h3>
+            <p class="text-[11px] text-orange-600 font-extrabold uppercase tracking-wider">Foundation & Principles</p>
+          </div>
+          <ul class="space-y-2.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> พื้นฐานวิทยาการคอมพิวเตอร์</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การเขียนโปรแกรมเชิงโครงสร้าง</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> คณิตศาสตร์สำหรับวิทยาการคอมฯ</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> ความเป็นครูและจิตวิทยาการศึกษา</li>
           </ul>
         </div>
 
         <!-- Year 2 -->
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-md space-y-4 relative overflow-hidden">
-          <div class="w-12 h-12 rounded-2xl bg-cyan-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-cyan-500/30">
+        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-cyan-100 hover:border-cyan-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-cyan-500/30">
             02
           </div>
-          <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 2: พัฒนาระบบ</h3>
-          <p class="text-xs text-cyan-600 font-bold">Software & Web Tech</p>
-          <ul class="space-y-2 text-xs text-slate-600">
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> การเขียนโปรแกรมเชิงวัตถุ (OOP)</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> ระบบฐานข้อมูลและเว็บเทคโนโลยี</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> โครงสร้างข้อมูลและอัลกอริทึม</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> การออกแบบสื่อนวัตกรรมการศึกษา</li>
+          <div>
+            <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 2: พัฒนาระบบ</h3>
+            <p class="text-[11px] text-cyan-600 font-extrabold uppercase tracking-wider">Software & Web Tech</p>
+          </div>
+          <ul class="space-y-2.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การเขียนโปรแกรมเชิงวัตถุ (OOP)</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> ระบบฐานข้อมูลและเว็บเทคโนโลยี</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> โครงสร้างข้อมูลและอัลกอริทึม</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การออกแบบสื่อนวัตกรรมการศึกษา</li>
           </ul>
         </div>
 
         <!-- Year 3 -->
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-md space-y-4 relative overflow-hidden">
-          <div class="w-12 h-12 rounded-2xl bg-purple-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-purple-500/30">
+        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-purple-100 hover:border-purple-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-purple-500/30">
             03
           </div>
-          <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 3: นวัตกรรม & AI</h3>
-          <p class="text-xs text-purple-600 font-bold">Innovation & Pedagogy</p>
-          <ul class="space-y-2 text-xs text-slate-600">
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> ปัญญาประดิษฐ์และวิทยาการข้อมูล</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> เครือข่ายคอมพิวเตอร์และความปลอดภัย</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> วิธีวิทยาการจัดการเรียนรู้คอมพิวเตอร์</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> โครงงานนวัตกรรมการศึกษา</li>
+          <div>
+            <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 3: นวัตกรรม & AI</h3>
+            <p class="text-[11px] text-purple-600 font-extrabold uppercase tracking-wider">Innovation & Pedagogy</p>
+          </div>
+          <ul class="space-y-2.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> ปัญญาประดิษฐ์ (AI) & Data Science</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> เครือข่ายคอมฯ & Cyber Security</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> วิธีวิทยาการจัดการเรียนรู้คอมฯ</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> โครงงานนวัตกรรมการศึกษา</li>
           </ul>
         </div>
 
         <!-- Year 4 -->
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-md space-y-4 relative overflow-hidden">
-          <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-emerald-500/30">
+        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-emerald-100 hover:border-emerald-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-emerald-500/30">
             04
           </div>
-          <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 4: ประสบการณ์จริง</h3>
-          <p class="text-xs text-emerald-600 font-bold">Teaching Internship</p>
-          <ul class="space-y-2 text-xs text-slate-600">
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> การปฏิบัติการสอนในสถานศึกษา 1 ปี</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> การวิจัยปฏิบัติการในชั้นเรียน (CAR)</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> สัมมนาวิชาชีพครูคอมพิวเตอร์</li>
-            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i> พร้อมก้าวสู่การเป็นครูมืออาชีพ</li>
+          <div>
+            <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 4: ประสบการณ์จริง</h3>
+            <p class="text-[11px] text-emerald-600 font-extrabold uppercase tracking-wider">Teaching Internship</p>
+          </div>
+          <ul class="space-y-2.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การปฏิบัติการสอนในสถานศึกษา 1 ปี</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การวิจัยปฏิบัติการในชั้นเรียน (CAR)</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> สัมมนาวิชาชีพครูคอมพิวเตอร์</li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> พร้อมก้าวสู่การเป็นครูมืออาชีพ</li>
           </ul>
         </div>
 
@@ -689,60 +715,68 @@
   </section>
 
   <!-- ================= SECTION 3: CAREER PATHS ================= -->
-  <section id="careers" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
+  <section id="careers" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-16">
     
     <div class="text-center max-w-3xl mx-auto space-y-4">
-      <span class="px-3.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 tracking-wider uppercase border border-amber-200">
+      <span class="px-4 py-1.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 tracking-wider uppercase border border-amber-200 shadow-xs">
         FUTURE CAREERS
       </span>
-      <h2 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+      <h2 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
         จบไปทำอาชีพอะไรได้บ้าง?
       </h2>
-      <p class="text-xs sm:text-sm text-slate-600">
-        สายอาชีพเปิดกว้าง ทั้งในสายวิชาชีพครู สายเทคโนโลยี และอุตสาหกรรมดิจิทัล
+      <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+        เส้นทางสายอาชีพเปิดกว้าง ทั้งในสายวิชาชีพครู สายเทคโนโลยี และอุตสาหกรรมดิจิทัลระดับสากล
       </p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       
-      <div class="glass-card rounded-3xl p-6 border border-slate-200 space-y-3 shadow-md hover:-translate-y-1 transition-all">
-        <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center">
-          <i data-lucide="school" class="w-6 h-6"></i>
+      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-orange-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden">
+        <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors shadow-md shadow-orange-500/10">
+          <i data-lucide="school" class="w-7 h-7"></i>
         </div>
-        <h4 class="text-base font-black text-slate-900">ครูคอมพิวเตอร์ / วิทยาการคำนวณ</h4>
-        <p class="text-xs text-slate-500 leading-relaxed">
-          ครูผู้สอนระดับประถมศึกษา มัธยมศึกษา และอาชีวศึกษา ทั้งในโรงเรียนรัฐบาลและเอกชน
-        </p>
+        <div>
+          <h4 class="text-base font-black text-slate-900 group-hover:text-orange-600 transition-colors">ครูคอมพิวเตอร์ / วิทยาการคำนวณ</h4>
+          <p class="text-xs text-slate-500 leading-relaxed mt-2">
+            ครูผู้สอนระดับประถมฯ มัธยมฯ และอาชีวศึกษา ทั้งในโรงเรียนรัฐบาลและเอกชน
+          </p>
+        </div>
       </div>
 
-      <div class="glass-card rounded-3xl p-6 border border-slate-200 space-y-3 shadow-md hover:-translate-y-1 transition-all">
-        <div class="w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center">
-          <i data-lucide="code" class="w-6 h-6"></i>
+      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-cyan-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden">
+        <div class="w-14 h-14 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:bg-cyan-600 group-hover:text-white transition-colors shadow-md shadow-cyan-500/10">
+          <i data-lucide="code" class="w-7 h-7"></i>
         </div>
-        <h4 class="text-base font-black text-slate-900">นักพัฒนาซอฟต์แวร์ & เว็บแอป</h4>
-        <p class="text-xs text-slate-500 leading-relaxed">
-          Frontend, Backend, Fullstack Developer และนักพัฒนาระบบการเรียนรู้ออนไลน์ (LMS)
-        </p>
+        <div>
+          <h4 class="text-base font-black text-slate-900 group-hover:text-cyan-600 transition-colors">นักพัฒนาซอฟต์แวร์ & เว็บแอป</h4>
+          <p class="text-xs text-slate-500 leading-relaxed mt-2">
+            Frontend, Backend, Fullstack Developer และผู้พัฒนาระบบการเรียนรู้ออนไลน์ (LMS)
+          </p>
+        </div>
       </div>
 
-      <div class="glass-card rounded-3xl p-6 border border-slate-200 space-y-3 shadow-md hover:-translate-y-1 transition-all">
-        <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center">
-          <i data-lucide="palette" class="w-6 h-6"></i>
+      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-purple-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden">
+        <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors shadow-md shadow-purple-500/10">
+          <i data-lucide="palette" class="w-7 h-7"></i>
         </div>
-        <h4 class="text-base font-black text-slate-900">นักออกแบบสื่อ & Instructional Designer</h4>
-        <p class="text-xs text-slate-500 leading-relaxed">
-          ผู้ออกแบบหลักสูตรดิจิทัล นวัตกรรมการเรียนรู้ สื่อปฏิสัมพันธ์ และคอนเทนต์ครีเอเตอร์
-        </p>
+        <div>
+          <h4 class="text-base font-black text-slate-900 group-hover:text-purple-600 transition-colors">นักออกแบบสื่อนวัตกรรม (ID)</h4>
+          <p class="text-xs text-slate-500 leading-relaxed mt-2">
+            ผู้ออกแบบหลักสูตรดิจิทัล นวัตกรรมการเรียนรู้ Interactive Media และคอนเทนต์ครีเอเตอร์
+          </p>
+        </div>
       </div>
 
-      <div class="glass-card rounded-3xl p-6 border border-slate-200 space-y-3 shadow-md hover:-translate-y-1 transition-all">
-        <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
-          <i data-lucide="server" class="w-6 h-6"></i>
+      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-emerald-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors shadow-md shadow-emerald-500/10">
+          <i data-lucide="server" class="w-7 h-7"></i>
         </div>
-        <h4 class="text-base font-black text-slate-900">นักวิชาการคอมพิวเตอร์ & IT Support</h4>
-        <p class="text-xs text-slate-500 leading-relaxed">
-          ผู้เชี่ยวชาญด้านระบบสารสนเทศและการสื่อสาร ในหน่วยงานภาครัฐ สถาบันการศึกษา และเอกชน
-        </p>
+        <div>
+          <h4 class="text-base font-black text-slate-900 group-hover:text-emerald-600 transition-colors">นักวิชาการคอมฯ & IT Support</h4>
+          <p class="text-xs text-slate-500 leading-relaxed mt-2">
+            ผู้เชี่ยวชาญด้านระบบสารสนเทศและการสื่อสาร ในหน่วยงานภาครัฐ มหาวิทยาลัย และเอกชน
+          </p>
+        </div>
       </div>
 
     </div>
@@ -750,31 +784,37 @@
   </section>
 
   <!-- ================= SECTION 4: STUDENT ROSTER (COMED KKU 69) ================= -->
-  <section id="students" class="py-20 bg-slate-950 text-white border-t border-slate-800 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+  <section id="students" class="py-24 bg-slate-950 text-white border-t border-slate-800/90 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
     
-    <div class="absolute inset-0 bg-mesh-dark opacity-60 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-mesh-dark opacity-75 pointer-events-none"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="relative max-w-7xl mx-auto space-y-10">
       
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-800 pb-6">
         <div>
-          <span class="px-3.5 py-1 rounded-full text-xs font-black bg-orange-500/20 text-orange-400 uppercase tracking-wider border border-orange-500/30">
-            CLASS OF 2026 (COMED 69)
-          </span>
-          <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight mt-2">
+          <div class="flex items-center gap-2 flex-wrap mb-2">
+            <span class="px-3.5 py-1 rounded-full text-xs font-black bg-orange-500/20 text-orange-400 uppercase tracking-wider border border-orange-500/30">
+              CLASS OF 2026 (COMED 69)
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800/90 text-slate-300 border border-slate-700">
+              60 คนครบทั้งสาขา
+            </span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
             ทำเนียบเพื่อนร่วมรุ่น คอมพิวเตอร์ศึกษา รุ่น 69
           </h2>
-          <p class="text-xs sm:text-sm text-slate-400 mt-1">
-            นักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มข.
+          <p class="text-xs sm:text-sm text-slate-400 mt-1.5">
+            นักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
           </p>
         </div>
 
         <!-- Quick Search -->
         <div class="w-full md:w-80">
           <div class="relative">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+            <i data-lucide="search" class="w-4 h-4 text-orange-400 absolute left-4 top-3.5"></i>
             <input type="text" id="rosterSearchInput" oninput="filterRoster()" placeholder="ค้นหาชื่อ, รหัส หรือชื่อเล่น..."
-              class="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 focus:border-orange-500 outline-none">
+              class="w-full pl-11 pr-4 py-3 bg-slate-900/90 border border-slate-700/80 rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition shadow-inner">
           </div>
         </div>
       </div>
@@ -784,10 +824,14 @@
         <!-- Rendered via JS -->
       </div>
 
-      <div class="pt-4 text-center">
-        <a href="payment.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-600/30 transition">
+      <div class="pt-6 text-center border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="payment.html" class="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs sm:text-sm shadow-xl shadow-orange-600/25 transition transform active:scale-95 cursor-pointer">
           <i data-lucide="credit-card" class="w-4 h-4"></i>
           <span>ไปที่หน้าระบบชำระเงินค่าป้ายเอก ฿190</span>
+        </a>
+        <a href="event.html" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs sm:text-sm border border-slate-800 transition">
+          <i data-lucide="award" class="w-4 h-4 text-orange-400"></i>
+          <span>เลือกลงฝ่ายกิจกรรมห้อง</span>
         </a>
       </div>
 

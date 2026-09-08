@@ -14,22 +14,46 @@ html, body {
   box-sizing: border-box;
 }
 
+/* Custom Sleek Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.4);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, 0.7);
+}
+
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05), 0 0 1px 1px rgba(0, 0, 0, 0.03);
 }
 
 .glass-dark {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .gradient-text-orange {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #f59e0b 100%);
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 45%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-cyan {
+  background: linear-gradient(135deg, #06b6d4 0%, #38bdf8 50%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -38,15 +62,20 @@ html, body {
   animation: floatSlow 6s ease-in-out infinite;
 }
 
+.float-delayed {
+  animation: floatSlow 7s ease-in-out 1.5s infinite;
+}
+
 /* Modern Navbar Slide Underline Effect */
 .nav-link-modern {
   position: relative;
   color: #334155;
   font-weight: 700;
   padding: 0.5rem 0.85rem;
-  transition: color 0.25s ease;
+  transition: all 0.25s ease;
   display: inline-flex;
   align-items: center;
+  border-radius: 0.75rem;
 }
 
 .nav-link-modern::after {
@@ -63,6 +92,7 @@ html, body {
 
 .nav-link-modern:hover {
   color: #ea580c;
+  background-color: rgba(249, 115, 22, 0.06);
 }
 
 .nav-link-modern:hover::after,
@@ -77,29 +107,51 @@ html, body {
 }
 
 #mainNavbar.scrolled {
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
 }
 
 #mainNavbar.transparent-top {
-  background-color: transparent;
-  border-bottom: 1px solid transparent;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(241, 245, 249, 0.8);
   box-shadow: none;
 }
 
 @keyframes floatSlow {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(2deg); }
+  50% { transform: translateY(-10px) rotate(1.5deg); }
 }
 
 .grid-pattern {
-  background-size: 30px 30px;
+  background-size: 32px 32px;
   background-image: 
-    linear-gradient(to right, rgba(249, 115, 22, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(249, 115, 22, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgba(249, 115, 22, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(249, 115, 22, 0.06) 1px, transparent 1px);
+}
+
+/* Card Glow Effect */
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+.card-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-25deg);
+  pointer-events: none;
+  transition: left 0.75s ease;
+}
+.card-shine:hover::before {
+  left: 150%;
 }

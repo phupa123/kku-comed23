@@ -616,17 +616,20 @@ function renderRoster(students) {
 
   grid.innerHTML = students.map((st, idx) => {
     return `
-      <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-orange-500/50 transition-all group">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500/20 to-amber-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center font-black text-sm flex-shrink-0 group-hover:scale-105 transition">
+      <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-orange-500/50 hover:bg-slate-900 transition-all duration-300 group hover:-translate-y-0.5 shadow-md">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-500/20 to-amber-500/15 text-orange-400 border border-orange-500/30 flex items-center justify-center font-black text-sm flex-shrink-0 group-hover:scale-105 group-hover:border-orange-500 transition shadow-inner">
             ${st.nickname.slice(0, 1) || st.name.slice(0, 1)}
           </div>
           <div class="min-w-0 flex-grow">
-            <div class="flex items-center justify-between gap-1">
-              <span class="font-bold text-white text-xs truncate">${st.name}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-amber-300 font-bold flex-shrink-0">น้อง${st.nickname}</span>
+            <div class="flex items-center justify-between gap-1.5">
+              <span class="font-bold text-white text-xs truncate group-hover:text-orange-300 transition-colors">${st.name}</span>
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800/90 text-amber-300 font-black flex-shrink-0 border border-amber-400/20">น้อง${st.nickname}</span>
             </div>
-            <div class="text-[11px] text-slate-500 font-mono mt-0.5 truncate">${st.id}</div>
+            <div class="text-[11px] text-slate-400 font-mono mt-0.5 truncate flex items-center gap-1">
+              <i data-lucide="hash" class="w-3 h-3 text-slate-500"></i>
+              <span>${st.id}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -816,66 +819,66 @@ async function renderIndexCampaigns() {
     }
 
     return `
-      <div class="bg-white rounded-3xl p-6 sm:p-7 border-2 ${isOpen ? 'border-orange-300 shadow-xl shadow-orange-500/10 hover:border-orange-500' : 'border-slate-200 opacity-95'} space-y-4 relative overflow-hidden group transition-all">
+      <div class="bg-white/95 backdrop-blur-xl rounded-[2.5rem] p-7 sm:p-8 border-2 ${isOpen ? 'border-orange-300 shadow-xl shadow-orange-500/10 hover:shadow-2xl hover:border-orange-500' : 'border-slate-200 shadow-lg'} space-y-5 relative overflow-hidden group transition-all duration-300">
         ${topBadge}
 
-        <div class="flex items-start gap-3">
-          <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 p-1.5 flex items-center justify-center flex-shrink-0 border border-orange-200 shadow-sm">
+        <div class="flex items-start gap-3.5 pt-1">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-500/10 to-amber-500/10 text-orange-600 p-2 flex items-center justify-center flex-shrink-0 border border-orange-200/80 shadow-md">
             <img src="${camp.qrImage && !camp.qrImage.includes('data:') ? camp.qrImage : 'logo.png'}" alt="Logo" class="w-full h-full object-contain">
           </div>
           <div class="pr-12">
-            <span class="text-[10px] font-bold text-orange-600 uppercase tracking-wider block">${camp.category || 'กิจกรรมสาขาวิชา'}</span>
-            <h3 class="text-base font-black text-slate-900 leading-tight">${camp.title}</h3>
-            <p class="text-xs text-slate-500 mt-0.5">${camp.subtitle || 'คณะศึกษาศาสตร์ มข.'}</p>
+            <span class="text-[10px] font-black text-orange-600 tracking-wider uppercase block bg-orange-100/60 border border-orange-200/60 px-2.5 py-0.5 rounded-full w-fit mb-1">${camp.category || 'กิจกรรมสาขาวิชา'}</span>
+            <h3 class="text-base sm:text-lg font-black text-slate-900 leading-snug">${camp.title}</h3>
+            <p class="text-xs text-slate-500 mt-0.5 line-clamp-1">${camp.subtitle || 'คณะศึกษาศาสตร์ มข.'}</p>
           </div>
         </div>
 
         <!-- Basic Info Box -->
-        <div class="bg-slate-50/90 p-3.5 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
+        <div class="bg-slate-50/90 p-4 rounded-2xl border border-slate-200/80 space-y-2.5 text-xs">
           <div class="flex justify-between items-center">
-            <span class="text-slate-500 flex items-center gap-1.5"><i data-lucide="tag" class="w-3.5 h-3.5 text-orange-500"></i> ยอดที่ต้องชำระ:</span>
-            <span class="font-black text-slate-900 text-base text-orange-600">฿${amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+            <span class="text-slate-500 flex items-center gap-1.5 font-bold"><i data-lucide="tag" class="w-4 h-4 text-orange-500"></i> ยอดที่ต้องชำระ:</span>
+            <span class="font-black text-slate-900 text-base sm:text-lg text-orange-600 font-mono">฿${amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-slate-500 flex items-center gap-1.5"><i data-lucide="calendar" class="w-3.5 h-3.5 text-rose-500"></i> กำหนดชำระ:</span>
+            <span class="text-slate-500 flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4 text-rose-500"></i> กำหนดชำระ:</span>
             <span class="font-bold text-rose-600">${camp.deadlineDisplay || camp.deadline || 'ตามที่สาขากำหนด'}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-slate-500 flex items-center gap-1.5"><i data-lucide="credit-card" class="w-3.5 h-3.5 text-slate-400"></i> บัญชีปลายทาง:</span>
+            <span class="text-slate-500 flex items-center gap-1.5"><i data-lucide="credit-card" class="w-4 h-4 text-slate-400"></i> บัญชีปลายทาง:</span>
             <span class="font-semibold text-slate-700 truncate max-w-[180px]">${camp.bankName || ''} ${camp.accountNumber || ''}</span>
           </div>
         </div>
 
         <!-- Progress Stats -->
-        <div class="p-3.5 rounded-2xl bg-gradient-to-br from-orange-50/70 via-amber-50/40 to-slate-50 border border-orange-200/90 space-y-2.5">
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-orange-50/80 via-amber-50/50 to-slate-50 border border-orange-200/80 space-y-3">
           <div class="flex items-center justify-between text-xs">
-            <span class="font-bold text-slate-700 flex items-center gap-1">
-              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-orange-500"></i>
+            <span class="font-bold text-slate-700 flex items-center gap-1.5">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-orange-500"></i>
               <span>ความคืบหน้าการชำระเงิน</span>
             </span>
-            <span class="text-[10px] font-extrabold text-orange-600">${percent}%</span>
+            <span class="text-xs font-black text-orange-600 font-mono">${percent}%</span>
           </div>
 
           <div class="grid grid-cols-2 gap-2 pt-1">
-            <div class="bg-white/80 p-2 rounded-xl border border-orange-100">
-              <span class="text-[10px] font-semibold text-slate-500 block">ยอดชำระแล้ว</span>
+            <div class="bg-white/90 p-2.5 rounded-xl border border-orange-100 shadow-2xs">
+              <span class="text-[10px] font-bold text-slate-500 block">ยอดรวมที่เข้า</span>
               <div class="flex items-baseline gap-1 mt-0.5">
-                <span class="text-sm font-black text-orange-600">฿${paidAmount.toLocaleString()}</span>
-                <span class="text-[9px] text-slate-400">/ ฿${targetTotalAmount.toLocaleString()}</span>
+                <span class="text-sm font-black text-orange-600 font-mono">฿${paidAmount.toLocaleString()}</span>
+                <span class="text-[9px] text-slate-400 font-mono">/ ฿${targetTotalAmount.toLocaleString()}</span>
               </div>
             </div>
 
-            <div class="bg-white/80 p-2 rounded-xl border border-emerald-100">
-              <span class="text-[10px] font-semibold text-slate-500 block">จำนวนผู้ชำระ</span>
+            <div class="bg-white/90 p-2.5 rounded-xl border border-emerald-100 shadow-2xs">
+              <span class="text-[10px] font-bold text-slate-500 block">จำนวนผู้ชำระแล้ว</span>
               <div class="flex items-baseline gap-1 mt-0.5">
-                <span class="text-sm font-black text-emerald-600">${paidCount} คน</span>
-                <span class="text-[9px] text-slate-400">/ 60</span>
+                <span class="text-sm font-black text-emerald-600 font-mono">${paidCount} คน</span>
+                <span class="text-[9px] text-slate-400 font-mono">/ 60</span>
               </div>
             </div>
           </div>
 
-          <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden p-0.5 border border-slate-200">
-            <div class="h-full bg-gradient-to-r from-orange-500 to-emerald-500 rounded-full transition-all duration-700" style="width: ${percent}%;"></div>
+          <div class="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden p-0.5 border border-slate-200">
+            <div class="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500 rounded-full transition-all duration-700" style="width: ${percent}%;"></div>
           </div>
         </div>
 
