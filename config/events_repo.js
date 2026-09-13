@@ -385,7 +385,16 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
 
-      // 1. Primary: บันทึกลงตารางเฉพาะ event_registrations (Atomic Row Level) - Trigger Supabase Realtime Broadcast ทันที!
+      // 0. ⚡ Instant WebSocket Broadcast (< 50ms): ยิงตรงเข้าเครื่องทุกคนที่กำลังเปิดหน้าเว็บอยู่ ณ เสี้ยววินาทีนี้
+      if (this._activeRealtimeChannel) {
+        this._activeRealtimeChannel.send({
+          type: 'broadcast',
+          event: 'REGISTRATION_UPDATE',
+          payload: { action: 'upsert', record: regRecord }
+        }).catch(() => {});
+      }
+
+      // 1. Primary: บันทึกลงตารางเฉพาะ event_registrations (Atomic Row Level)
       const upsertPromise = sb.from('event_registrations').upsert({
         id: `${regRecord.eventId}_${regRecord.studentId}`,
         event_id: regRecord.eventId,
@@ -414,6 +423,16 @@ window.ComedEventManager = {
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
+
+      // 0. ⚡ Instant WebSocket Broadcast (< 50ms): ยิงลบออกจากเครื่องเพื่อนทุกคนทันที
+      if (this._activeRealtimeChannel) {
+        this._activeRealtimeChannel.send({
+          type: 'broadcast',
+          event: 'REGISTRATION_UPDATE',
+          payload: { action: 'delete', studentId: studentId }
+        }).catch(() => {});
+      }
+
       const compositeId = `${eventId}_${studentId}`;
       await sb.from('event_registrations').delete().eq('id', compositeId);
       await this.syncAllRegistrationsToCloud(eventId);
@@ -527,19 +546,47 @@ window.ComedEventManager = {
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (sb && typeof sb.channel === 'function') {
-        const channelName = `realtime_events_all_${Date.now()}`;
-        const channel = sb.channel(channelName);
+        const channelName = `comed_live_room_${targetEventId}`;
+        const channel = sb.channel(channelName, {
+          config: { broadcast: { self: false } }
+        });
 
-        // ฟังการเปลี่ยนแปลงในตาราง event_registrations
+        // 1. ⚡ Broadcast WebSocket Channel: ได้รับข้อความตรงจากเพื่อน (< 80ms ทันทีทั่วโลก)
         channel
+          .on('broadcast', { event: 'REGISTRATION_UPDATE' }, (msg) => {
+            console.log("[Supabase Broadcast] ⚡⚡ Peer update received (<80ms):", msg.payload);
+            try {
+              const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
+              let currentRegs = this.getRegistrations(targetEventId);
+              const data = msg.payload;
+
+              if (data.action === 'upsert' && data.record) {
+                const idx = currentRegs.findIndex(r => r.studentId === data.record.studentId);
+                if (idx !== -1) {
+                  currentRegs[idx] = data.record;
+                } else {
+                  currentRegs.push(data.record);
+                }
+                localStorage.setItem(key, JSON.stringify(currentRegs));
+              } else if (data.action === 'delete' && data.studentId) {
+                currentRegs = currentRegs.filter(r => r.studentId !== data.studentId);
+                localStorage.setItem(key, JSON.stringify(currentRegs));
+              }
+
+              if (typeof onUpdateCallback === 'function') {
+                onUpdateCallback({ type: 'broadcast_instant', payload: data });
+              }
+            } catch(bErr) {
+              console.warn("Broadcast parse error:", bErr);
+            }
+          })
+          // 2. Postgres Changes Database Event (Backup Verification)
           .on('postgres_changes', { 
             event: '*', 
             schema: 'public', 
             table: 'event_registrations'
           }, async (payload) => {
-            console.log("[Supabase Realtime] ⚡ Event received:", payload.eventType, payload);
-
-            // ⚡ Instant In-Memory Patch (< 50ms): อัปเดตข้อมูลลง LocalStorage ทันทีจาก Payload โดยไม่ต้องรอยิง Request ไปดึงใหม่ทั้งตาราง
+            console.log("[Supabase DB Change] ⚡ Event received:", payload.eventType);
             try {
               const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
               let currentRegs = this.getRegistrations(targetEventId);
@@ -579,22 +626,11 @@ window.ComedEventManager = {
                   localStorage.setItem(key, JSON.stringify(currentRegs));
                 }
               }
-            } catch(patchErr) {
-              console.warn("Instant patch error:", patchErr);
-            }
+            } catch(patchErr) {}
 
-            // แจ้ง UI ให้อัปเดตทันทีเสี้ยววินาที!
             if (typeof onUpdateCallback === 'function') {
               onUpdateCallback({ type: 'table_change', payload });
             }
-
-            // ซิงค์เต็มรอบฉากหลัง (Background Reconciliation) เพื่อความสมบูรณ์แบบ
-            setTimeout(async () => {
-              await this.fetchCloudData(targetEventId, true);
-              if (typeof onUpdateCallback === 'function') {
-                onUpdateCallback({ type: 'reconcile_done' });
-              }
-            }, 500);
           })
           .on('postgres_changes', { 
             event: '*', 
@@ -611,9 +647,11 @@ window.ComedEventManager = {
           })
           .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-              console.log(`[EventRealtime] ⚡ Connected to live channel: ${targetEventId}`);
+              console.log(`[EventRealtime] ⚡ Connected to live broadcast channel: ${targetEventId}`);
             }
           });
+
+        this._activeRealtimeChannel = channel;
       }
     } catch(e) {
       console.warn("[EventRealtime] Channel subscription warning:", e);

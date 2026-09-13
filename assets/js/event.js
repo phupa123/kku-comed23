@@ -36,6 +36,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 6. Connect Real-Time Live Sync (No refresh needed!)
   startRealtimeLiveSync();
+
+  // 7. Initial Mobile Tab Setup & Window Resize Handler
+  if (window.innerWidth < 1024) {
+    switchMobileTab('departments');
+  }
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024) {
+      document.getElementById('bentoLeftPanel')?.classList.remove('hidden');
+      document.getElementById('sectionDepartmentsView')?.classList.remove('hidden');
+      document.getElementById('sectionRosterView')?.classList.remove('hidden');
+    } else {
+      switchMobileTab(currentMobileTab);
+    }
+  });
 });
 
 function refreshEventUI() {
@@ -131,20 +145,127 @@ function handleUserLogout() {
 
 function checkCurrentUserStatus() {
   const card = document.getElementById('userCurrentStatusCard');
-  if (!card) return;
+  const actions = document.getElementById('userCurrentStatusActions');
+  const roleTitleEl = document.getElementById('userRegisteredRoleTitle');
+  const deptNameEl = document.getElementById('userRegisteredDeptName');
+
+  // Floating Bar Elements
+  const floatingPrompt = document.getElementById('floatingUserPrompt');
+  const floatingRole = document.getElementById('floatingUserRoleTitle');
+  const btnFloating = document.getElementById('btnFloatingAction');
+  const tabStatusBadge = document.getElementById('tabMyStatusText');
 
   if (!currentStudent) {
-    card.classList.add('hidden');
+    if (roleTitleEl) roleTitleEl.textContent = "ยังไม่ได้ระบุตัวตน";
+    if (deptNameEl) deptNameEl.textContent = "กดปุ่มระบุตัวตนเพื่อเริ่มเลือกฝ่าย";
+    if (actions) actions.classList.add('hidden');
+
+    if (floatingPrompt) floatingPrompt.textContent = "ผู้ใช้: ยังไม่ระบุตัวตน";
+    if (floatingRole) floatingRole.textContent = "กดปุ่มเพื่อเข้าสู่ระบบ";
+    if (btnFloating) {
+      btnFloating.innerHTML = `<span>ระบุตัวตน</span>`;
+      btnFloating.className = "px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white text-xs font-black shadow-md transition active:scale-95 flex items-center gap-1 cursor-pointer";
+    }
+    if (tabStatusBadge) tabStatusBadge.textContent = "สถานะฉัน";
     return;
   }
 
   const reg = window.ComedEventManager.getStudentRegistration(currentEvent.id, currentStudent.studentId);
+  const displayName = currentStudent.nickname ? `${currentStudent.nickname} (${currentStudent.studentName})` : currentStudent.studentName;
+
   if (reg) {
-    document.getElementById('userRegisteredRoleTitle').textContent = reg.roleTitle;
-    document.getElementById('userRegisteredDeptName').textContent = `สังกัด: ${reg.departmentName}`;
-    card.classList.remove('hidden');
+    if (roleTitleEl) roleTitleEl.textContent = reg.roleTitle;
+    if (deptNameEl) deptNameEl.textContent = `สังกัดฝ่าย: ${reg.departmentName}`;
+    if (actions) actions.classList.remove('hidden');
+
+    if (floatingPrompt) floatingPrompt.textContent = `คุณ: ${currentStudent.nickname || currentStudent.studentName.split(' ')[0]}`;
+    if (floatingRole) floatingRole.textContent = `${reg.roleTitle} (${reg.departmentName})`;
+    if (btnFloating) {
+      btnFloating.innerHTML = `<i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i><span>เปลี่ยน</span>`;
+      btnFloating.className = "px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-bold transition active:scale-95 flex items-center gap-1 cursor-pointer";
+    }
+    if (tabStatusBadge) tabStatusBadge.textContent = "เลือกแล้ว ✓";
   } else {
-    card.classList.add('hidden');
+    if (roleTitleEl) roleTitleEl.textContent = "ยังไม่ได้เลือกฝ่าย";
+    if (deptNameEl) deptNameEl.textContent = `${displayName} สามารถกดเลือกฝ่ายได้ทันที`;
+    if (actions) actions.classList.add('hidden');
+
+    if (floatingPrompt) floatingPrompt.textContent = `คุณ: ${currentStudent.nickname || currentStudent.studentName.split(' ')[0]}`;
+    if (floatingRole) floatingRole.textContent = `ยังไม่ได้เลือกตำแหน่ง`;
+    if (btnFloating) {
+      btnFloating.innerHTML = `<span>เลือกฝ่าย</span>`;
+      btnFloating.className = "px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white text-xs font-black shadow-md transition active:scale-95 flex items-center gap-1 cursor-pointer";
+    }
+    if (tabStatusBadge) tabStatusBadge.textContent = "ยังไม่เลือก";
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ================= MOBILE TAB & FLOATING BAR CONTROLS =================
+let currentMobileTab = 'departments';
+
+function switchMobileTab(tabName) {
+  currentMobileTab = tabName;
+
+  const btnDepts = document.getElementById('tabBtnDepartments');
+  const btnRoster = document.getElementById('tabBtnRoster');
+  const btnMyStatus = document.getElementById('tabBtnMyStatus');
+
+  const leftPanel = document.getElementById('bentoLeftPanel');
+  const viewDepts = document.getElementById('sectionDepartmentsView');
+  const viewRoster = document.getElementById('sectionRosterView');
+
+  // Reset Button States
+  [btnDepts, btnRoster, btnMyStatus].forEach(b => {
+    if (b) {
+      b.className = "mobile-segment-btn py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition cursor-pointer";
+    }
+  });
+
+  const activeClass = "mobile-segment-btn active py-2 rounded-xl text-xs font-black bg-orange-500 text-white shadow-sm flex items-center justify-center gap-1.5 transition cursor-pointer";
+
+  // Desktop view always shows leftPanel and both views appropriately
+  if (window.innerWidth >= 1024) {
+    if (leftPanel) leftPanel.classList.remove('hidden');
+    if (viewDepts) viewDepts.classList.remove('hidden');
+    if (viewRoster) viewRoster.classList.remove('hidden');
+    return;
+  }
+
+  // Mobile Tab Logic
+  if (tabName === 'departments') {
+    if (btnDepts) btnDepts.className = activeClass;
+    if (leftPanel) leftPanel.classList.add('hidden');
+    if (viewDepts) viewDepts.classList.remove('hidden');
+    if (viewRoster) viewRoster.classList.add('hidden');
+  } else if (tabName === 'roster') {
+    if (btnRoster) btnRoster.className = activeClass;
+    if (leftPanel) leftPanel.classList.add('hidden');
+    if (viewDepts) viewDepts.classList.add('hidden');
+    if (viewRoster) viewRoster.classList.remove('hidden');
+    renderRosterTable();
+  } else if (tabName === 'mystatus') {
+    if (btnMyStatus) btnMyStatus.className = activeClass;
+    if (leftPanel) leftPanel.classList.remove('hidden');
+    if (viewDepts) viewDepts.classList.add('hidden');
+    if (viewRoster) viewRoster.classList.add('hidden');
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function handleFloatingActionClick() {
+  if (!currentStudent) {
+    openStudentAuthModal();
+  } else {
+    const reg = window.ComedEventManager.getStudentRegistration(currentEvent.id, currentStudent.studentId);
+    if (reg) {
+      handleCancelMyRole();
+    } else {
+      switchMobileTab('departments');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }
 
