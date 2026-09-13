@@ -225,6 +225,7 @@ window.ComedEventManager = {
 
     // 4. บันทึกขึ้น Cloud แบบ Non-blocking ทันทีเพื่อความเร็วสูงสุด
     // ยิง upsert ตรงไปยัง event_registrations ทันทีเพื่อให้เพื่อนๆ ใน Realtime Channel ได้รับ Payload ในเสี้ยววินาที
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
     if (sb) {
       this.syncRegistrationToSupabase(newRecord).catch(err => {
         console.warn("Background Supabase registration sync failed:", err);

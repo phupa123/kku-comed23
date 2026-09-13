@@ -10,6 +10,83 @@ let currentStudent = null; // { studentId, studentName, nickname, email }
 let pendingSelection = null; // { deptId, roleId }
 let currentRosterFilter = 'all';
 
+// Bookmark & Search States
+let deptSearchQuery = '';
+let showOnlyBookmarked = false;
+let countdownInterval = null;
+
+const BOOKMARKS_STORAGE_KEY = 'COMED_BOOKMARKED_ROLES_V1';
+
+function getBookmarkedRoles() {
+  try {
+    const raw = localStorage.getItem(BOOKMARKS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) {
+    return [];
+  }
+}
+
+function isRoleBookmarked(deptId, roleId) {
+  const list = getBookmarkedRoles();
+  return list.some(item => item.deptId === deptId && item.roleId === roleId);
+}
+
+function toggleBookmarkRole(deptId, roleId, deptName, roleTitle, e) {
+  if (e) e.stopPropagation();
+  let list = getBookmarkedRoles();
+  const existsIdx = list.findIndex(item => item.deptId === deptId && item.roleId === roleId);
+  if (existsIdx !== -1) {
+    list.splice(existsIdx, 1);
+  } else {
+    list.push({ deptId, roleId, deptName, roleTitle, markedAt: new Date().toISOString() });
+  }
+  localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(list));
+  updateBookmarkBadge();
+  renderDepartmentsGrid();
+}
+
+function updateBookmarkBadge() {
+  const badge = document.getElementById('bookmarkedCountBadge');
+  const list = getBookmarkedRoles();
+  if (badge) {
+    if (list.length > 0) {
+      badge.textContent = list.length;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+}
+
+function toggleBookmarkFilter() {
+  showOnlyBookmarked = !showOnlyBookmarked;
+  const btn = document.getElementById('btnFilterBookmarked');
+  if (btn) {
+    if (showOnlyBookmarked) {
+      btn.className = "flex-shrink-0 px-3.5 py-2.5 rounded-2xl bg-amber-500 text-slate-950 font-black text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-amber-500/20";
+    } else {
+      btn.className = "flex-shrink-0 px-3.5 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-400 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm";
+    }
+  }
+  renderDepartmentsGrid();
+}
+
+function handleDeptSearch(query) {
+  deptSearchQuery = String(query || '').trim().toLowerCase();
+  const clearBtn = document.getElementById('btnClearDeptSearch');
+  if (clearBtn) {
+    if (deptSearchQuery.length > 0) clearBtn.classList.remove('hidden');
+    else clearBtn.classList.add('hidden');
+  }
+  renderDepartmentsGrid();
+}
+
+function clearDeptSearch() {
+  const input = document.getElementById('deptSearchInput');
+  if (input) input.value = '';
+  handleDeptSearch('');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   // 1. Initial Lucide
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -22,6 +99,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. Render Initial UI
   renderEventHeader();
+  initCountdownTimer();
+  updateBookmarkBadge();
   renderDeptFilterChips();
   renderDepartmentsGrid();
   renderStats();
@@ -31,6 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 5. Background Initial Cloud Fetch
   try {
     await window.ComedEventManager.fetchCloudData(currentEvent.id);
+    currentEvent = window.ComedEventManager.getActiveEvent('room_roles_69');
     refreshEventUI();
   } catch(e) {}
 
@@ -53,6 +133,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function refreshEventUI() {
+  currentEvent = window.ComedEventManager.getActiveEvent('room_roles_69');
+  renderEventHeader();
+  initCountdownTimer();
+  updateBookmarkBadge();
   renderDeptFilterChips();
   renderDepartmentsGrid();
   renderStats();
@@ -269,6 +353,99 @@ function handleFloatingActionClick() {
   }
 }
 
+function initCountdownTimer() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+
+  const card = document.getElementById('eventCountdownCard');
+  if (!card || !currentEvent) return;
+
+  const now = Date.now();
+  const startTime = currentEvent.startTime ? new Date(currentEvent.startTime).getTime() : null;
+  const deadline = currentEvent.deadline ? new Date(currentEvent.deadline).getTime() : null;
+
+  let targetTime = null;
+  let mode = null; // 'opening' | 'closing'
+
+  if (startTime && now < startTime) {
+    targetTime = startTime;
+    mode = 'opening';
+  } else if (deadline && now < deadline && currentEvent.status === 'open') {
+    targetTime = deadline;
+    mode = 'closing';
+  }
+
+  if (!targetTime) {
+    card.classList.add('hidden');
+    return;
+  }
+
+  card.classList.remove('hidden');
+
+  const titleLabel = document.getElementById('countdownTitleLabel');
+  const targetLabel = document.getElementById('countdownTargetTimeDisplay');
+  const subtext = document.getElementById('countdownSubtext');
+
+  const d = new Date(targetTime);
+  const timeStr = `${d.toLocaleDateString('th-TH', { month: 'short', day: 'numeric' })} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} น.`;
+
+  if (targetLabel) targetLabel.textContent = `เป้าหมาย: ${timeStr}`;
+
+  if (mode === 'opening') {
+    if (titleLabel) {
+      titleLabel.textContent = "นับถอยหลังเปิดระบบ";
+      titleLabel.className = "text-xs font-black uppercase tracking-wider text-amber-400";
+    }
+    if (subtext) {
+      subtext.innerHTML = `ระบบจะเปิดให้แย่งฝ่ายในเวลา <strong class="text-white">${timeStr}</strong> ระหว่างนี้กด <span class="text-amber-400 font-bold">★ มาร์กฝ่ายที่ชอบ</span> ไว้ก่อนได้เลย`;
+    }
+  } else {
+    if (titleLabel) {
+      titleLabel.textContent = "นับถอยหลังปิดรับสมัคร";
+      titleLabel.className = "text-xs font-black uppercase tracking-wider text-rose-400";
+    }
+    if (subtext) {
+      subtext.innerHTML = `กำหนดปิดรับสมัครในวันที่ <strong class="text-white">${timeStr}</strong> กรุณาเลือกให้เรียบร้อย`;
+    }
+  }
+
+  const updateTick = () => {
+    const diff = targetTime - Date.now();
+    if (diff <= 0) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      if (mode === 'opening') {
+        if (currentEvent.status !== 'open') {
+          currentEvent.status = 'open';
+        }
+        alert("🎉 ระบบเปิดให้ลงทะเบียนเลือกฝ่ายแล้ว!");
+      }
+      refreshEventUI();
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    const elDays = document.getElementById('cdDays');
+    const elHours = document.getElementById('cdHours');
+    const elMinutes = document.getElementById('cdMinutes');
+    const elSeconds = document.getElementById('cdSeconds');
+
+    if (elDays) elDays.textContent = String(days).padStart(2, '0');
+    if (elHours) elHours.textContent = String(hours).padStart(2, '0');
+    if (elMinutes) elMinutes.textContent = String(minutes).padStart(2, '0');
+    if (elSeconds) elSeconds.textContent = String(seconds).padStart(2, '0');
+  };
+
+  updateTick();
+  countdownInterval = setInterval(updateTick, 1000);
+}
+
 function renderEventHeader() {
   if (!currentEvent) return;
   document.getElementById('eventMainTitle').textContent = currentEvent.title;
@@ -282,7 +459,14 @@ function renderEventHeader() {
 
   const badge = document.getElementById('eventStatusBadge');
   if (badge) {
-    if (currentEvent.status === 'open') {
+    const now = Date.now();
+    const startTime = currentEvent.startTime ? new Date(currentEvent.startTime).getTime() : null;
+    const isWaitingToOpen = startTime && now < startTime;
+
+    if (isWaitingToOpen) {
+      badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span><span>รอเปิดระบบ (นับถอยหลัง)</span>`;
+      badge.className = "px-3 py-1 rounded-full text-xs font-black tracking-wide uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
+    } else if (currentEvent.status === 'open') {
       badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span><span>เปิดรับลงทะเบียน</span>`;
       badge.className = "px-3 py-1 rounded-full text-xs font-black tracking-wide uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
     } else {
@@ -290,6 +474,7 @@ function renderEventHeader() {
       badge.className = "px-3 py-1 rounded-full text-xs font-black tracking-wide uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1.5";
     }
   }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 let activeDeptCategory = 'all';
@@ -362,34 +547,81 @@ function renderDepartmentsGrid() {
   const regs = window.ComedEventManager.getRegistrations(currentEvent.id);
   const myReg = currentStudent ? window.ComedEventManager.getStudentRegistration(currentEvent.id, currentStudent.studentId) : null;
 
-  const filteredDepts = activeDeptCategory === 'all' 
+  // 1. ตรวจสอบสถานะการเปิดรับสมัคร (ถ้ากำลังนับถอยหลังรอเปิด)
+  const now = Date.now();
+  const startTime = currentEvent.startTime ? new Date(currentEvent.startTime).getTime() : null;
+  const isWaitingToOpen = (startTime && now < startTime) || currentEvent.status !== 'open';
+
+  // 2. กรองตาม Category Chip
+  let filteredDepts = activeDeptCategory === 'all' 
     ? currentEvent.departments 
     : currentEvent.departments.filter(d => d.id === activeDeptCategory);
 
-  if (filteredDepts.length === 0) {
+  // 3. กรองตามการค้นหา (deptSearchQuery) และการมาร์กชอบ (showOnlyBookmarked)
+  const query = deptSearchQuery;
+  const onlyBookmarks = showOnlyBookmarked;
+
+  const renderedDepts = [];
+
+  filteredDepts.forEach(dept => {
+    // กรอง Roles ภายในฝ่าย
+    const matchedRoles = dept.roles.filter(role => {
+      // ตรวจ Bookmark
+      if (onlyBookmarks && !isRoleBookmarked(dept.id, role.id)) {
+        return false;
+      }
+      // ตรวจ Query ค้นหา
+      if (query) {
+        const dName = (dept.name || '').toLowerCase();
+        const rTitle = (role.title || '').toLowerCase();
+        const dDesc = (dept.description || '').toLowerCase();
+        return dName.includes(query) || rTitle.includes(query) || dDesc.includes(query);
+      }
+      return true;
+    });
+
+    if (matchedRoles.length > 0) {
+      renderedDepts.push({
+        ...dept,
+        displayRoles: matchedRoles
+      });
+    }
+  });
+
+  if (renderedDepts.length === 0) {
     container.innerHTML = `
-      <div class="col-span-full py-12 text-center text-slate-500 text-sm">
-        ไม่พบฝ่ายที่ตรงกับตัวกรอง
+      <div class="col-span-full py-16 text-center space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 text-slate-500 flex items-center justify-center mx-auto">
+          <i data-lucide="${onlyBookmarks ? 'star-off' : 'search-x'}" class="w-6 h-6"></i>
+        </div>
+        <p class="text-sm font-bold text-slate-400">
+          ${onlyBookmarks ? 'ยังไม่มีฝ่ายหรือตำแหน่งที่กดมาร์กไว้' : `ไม่พบฝ่ายหรือตำแหน่งที่ตรงกับคำค้นหา "${query}"`}
+        </p>
+        <p class="text-xs text-slate-500">
+          ${onlyBookmarks ? 'กดไอคอนรูปดาว ★ บนการ์ดตำแหน่งเพื่อมาร์กตำแหน่งที่สนใจเตรียมไว้ได้เลย' : 'ลองเปลี่ยนคำค้นหา หรือเลือกแท็บ "ทุกฝ่าย"'}
+        </p>
       </div>
     `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     return;
   }
 
-  container.innerHTML = filteredDepts.map(dept => {
+  container.innerHTML = renderedDepts.map(dept => {
     // คำนวณยอดรวมของฝ่าย
     const deptRegs = regs.filter(r => r.departmentId === dept.id);
     const totalDeptSeats = dept.roles.reduce((sum, r) => sum + r.maxSeats, 0);
     const isDeptFull = deptRegs.length >= totalDeptSeats;
 
-    const rolesHtml = dept.roles.map(role => {
+    const rolesHtml = dept.displayRoles.map(role => {
       const roleRegs = deptRegs.filter(r => r.roleId === role.id);
       const isFull = roleRegs.length >= role.maxSeats;
       const isMyRole = myReg && myReg.departmentId === dept.id && myReg.roleId === role.id;
       const availableSeats = Math.max(0, role.maxSeats - roleRegs.length);
+      const isMarked = isRoleBookmarked(dept.id, role.id);
 
       // รายชื่อคนที่ลงตำแหน่งนี้
       const membersPills = roleRegs.map(m => `
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/90 border border-slate-700/80 text-[11px] text-slate-200">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-800/90 border border-slate-700/80 text-[11px] text-slate-200">
           <i data-lucide="user" class="w-3 h-3 text-orange-400"></i>
           <span class="font-bold">${m.nickname ? m.nickname : m.studentName.split(' ')[0]}</span>
           <span class="text-[10px] text-slate-400">(${m.studentName})</span>
@@ -397,12 +629,13 @@ function renderDepartmentsGrid() {
       `).join('');
 
       return `
-        <div class="p-3 sm:p-4 rounded-2xl bg-slate-900/95 border ${isMyRole ? 'border-orange-500 ring-1 ring-orange-500/50 bg-gradient-to-r from-orange-500/10 to-transparent' : 'border-slate-800/90 hover:border-slate-700/80'} space-y-2.5 transition">
+        <div class="p-3 sm:p-4 rounded-2xl bg-slate-900/95 border ${isMyRole ? 'border-orange-500 ring-1 ring-orange-500/50 bg-gradient-to-r from-orange-500/10 to-transparent' : (isMarked ? 'border-amber-500/50 bg-amber-500/5' : 'border-slate-800/90 hover:border-slate-700/80')} space-y-2.5 transition">
           <div class="flex items-start justify-between gap-2.5">
-            <div class="space-y-0.5">
+            <div class="space-y-0.5 min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-black text-white text-xs sm:text-sm tracking-tight">${role.title}</span>
                 ${isMyRole ? '<span class="px-2 py-0.5 rounded-full text-[10px] bg-orange-500 text-white font-black animate-pulse">คุณอยู่ตำแหน่งนี้</span>' : ''}
+                ${isMarked && !isMyRole ? '<span class="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">★ ที่ชอบ</span>' : ''}
               </div>
               <div class="flex items-center gap-2 pt-0.5">
                 <span class="text-[11px] font-bold ${isFull ? 'text-rose-400' : 'text-emerald-400'} flex items-center gap-1">
@@ -412,12 +645,25 @@ function renderDepartmentsGrid() {
               </div>
             </div>
 
-            <!-- Action Button (Mobile-optimized thumb touch target) -->
-            <div class="flex-shrink-0">
+            <!-- Action Controls (Bookmark Star + Select Button) -->
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <!-- Bookmark Star Button -->
+              <button onclick="toggleBookmarkRole('${dept.id}', '${role.id}', '${dept.name}', '${role.title}', event)"
+                title="${isMarked ? 'ยกเลิกมาร์กตำแหน่งนี้' : 'มาร์กตำแหน่งที่ชอบไว้เตรียมเลือก'}"
+                class="w-8 h-8 rounded-xl ${isMarked ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/30' : 'bg-slate-800 hover:bg-slate-750 text-slate-400 hover:text-amber-400 border border-slate-700/60'} flex items-center justify-center transition active:scale-95 cursor-pointer">
+                <i data-lucide="star" class="w-4 h-4 ${isMarked ? 'fill-current' : ''}"></i>
+              </button>
+
+              <!-- Main Select / Cancel / Waiting Button -->
               ${isMyRole ? `
                 <button onclick="handleCancelMyRole()" class="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/35 text-xs font-black transition cursor-pointer active:scale-95 flex items-center gap-1">
                   <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                   <span>ยกเลิก</span>
+                </button>
+              ` : (isWaitingToOpen ? `
+                <button onclick="handlePreSelectNotice('${dept.name}', '${role.title}')" class="px-3 sm:px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-bold transition cursor-pointer flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>รอนับถอยหลัง</span>
                 </button>
               ` : (isFull ? `
                 <button disabled class="px-3.5 py-2 rounded-xl bg-slate-800/80 text-slate-500 text-xs font-bold cursor-not-allowed border border-slate-700/50">
@@ -429,7 +675,7 @@ function renderDepartmentsGrid() {
                   <i data-lucide="check" class="w-3.5 h-3.5"></i>
                   <span>${myReg ? 'ย้ายมาที่นี่' : 'เลือก'}</span>
                 </button>
-              `)}
+              `))}
             </div>
           </div>
 
@@ -479,7 +725,25 @@ function renderDepartmentsGrid() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
+function handlePreSelectNotice(deptName, roleTitle) {
+  const isWaiting = currentEvent && currentEvent.startTime && Date.now() < new Date(currentEvent.startTime).getTime();
+  if (isWaiting) {
+    const d = new Date(currentEvent.startTime);
+    const timeStr = `${d.toLocaleDateString('th-TH', { month: 'short', day: 'numeric' })} เวลา ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} น.`;
+    alert(`⏳ ระบบยังไม่เปิดรับสมัครตำแหน่ง "${roleTitle}" (${deptName})\n\nระบบจะเปิดพร้อมกันในวันที่ ${timeStr}\n\n💡 แนะนำ: กดปุ่มไอคอนรูปดาว ★ ด้านข้างเพื่อมาร์กตำแหน่งนี้ไว้ เมื่อถึงเวลาระบบเปิดจะช่วยให้เลือกได้ทันที!`);
+  } else {
+    alert(`⚠️ กิจกรรมนี้ปิดรับสมัครชั่วคราว ไม่สามารถเลือกตำแหน่ง "${roleTitle}" (${deptName}) ได้ในขณะนี้`);
+  }
+}
+
 function handleSelectRoleClick(deptId, roleId, deptName, roleTitle) {
+  // Check if event is open
+  const isWaiting = currentEvent && currentEvent.startTime && Date.now() < new Date(currentEvent.startTime).getTime();
+  if (isWaiting || (currentEvent && currentEvent.status !== 'open')) {
+    handlePreSelectNotice(deptName, roleTitle);
+    return;
+  }
+
   // Check if user is identified
   if (!currentStudent) {
     pendingSelection = { deptId, roleId, deptName, roleTitle };

@@ -223,14 +223,27 @@ function openEditEventModal() {
   document.getElementById('editEventSubtitleInput').value = activeEvent.subtitle || '';
   document.getElementById('editEventStatusSelect').value = activeEvent.status || 'open';
   
+  if (activeEvent.startTime) {
+    const d = new Date(activeEvent.startTime);
+    const localIso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('editEventStartTimeInput').value = localIso;
+  } else {
+    document.getElementById('editEventStartTimeInput').value = '';
+  }
+
   if (activeEvent.deadline) {
     const d = new Date(activeEvent.deadline);
     const localIso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     document.getElementById('editEventDeadlineInput').value = localIso;
+  } else {
+    document.getElementById('editEventDeadlineInput').value = '';
   }
 
   const modal = document.getElementById('modalEditEvent');
-  if (modal) modal.classList.remove('hidden');
+  if (modal) {
+    modal.classList.remove('hidden');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
 }
 
 function closeEditEventModal() {
@@ -246,13 +259,16 @@ function handleSaveEventConfig(e) {
   activeEvent.subtitle = document.getElementById('editEventSubtitleInput').value.trim();
   activeEvent.status = document.getElementById('editEventStatusSelect').value;
   
+  const startVal = document.getElementById('editEventStartTimeInput').value;
+  activeEvent.startTime = startVal ? new Date(startVal).toISOString() : null;
+
   const dlVal = document.getElementById('editEventDeadlineInput').value;
-  if (dlVal) activeEvent.deadline = new Date(dlVal).toISOString();
+  activeEvent.deadline = dlVal ? new Date(dlVal).toISOString() : null;
 
   window.ComedEventManager.saveEvent(activeEvent);
   closeEditEventModal();
   renderHeaderAndStats();
-  alert("✨ บันทึกการตั้งค่ากิจกรรมเรียบร้อยแล้ว!");
+  alert("✨ บันทึกการตั้งค่ากิจกรรมและเวลานับถอยหลังเรียบร้อยแล้ว!");
 }
 
 // Manual Assign Modal

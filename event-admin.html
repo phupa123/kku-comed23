@@ -41,7 +41,7 @@
   <!-- Instant Strict Admin Security Guard -->
   <script src="config/admin_guard.js"></script>
   <script src="students_data.js"></script>
-  <script src="config/events_repo.js?v=2.0.1"></script>
+  <script src="config/events_repo.js?v=2.3.0"></script>
   <link rel="stylesheet" href="assets/css/master-admin.css">
 
   <style>
@@ -244,7 +244,7 @@
             class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="space-y-1">
             <label class="font-bold text-slate-300">สถานะกิจกรรม</label>
             <select id="editEventStatusSelect" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
@@ -254,9 +254,22 @@
             </select>
           </div>
           <div class="space-y-1">
-            <label class="font-bold text-slate-300">กำหนดปิดรับสมัคร (วัน-เวลา)</label>
+            <label class="font-bold text-slate-300 flex items-center gap-1">
+              <i data-lucide="play-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>เวลาเปิดระบบ (Countdown)</span>
+            </label>
+            <input type="datetime-local" id="editEventStartTimeInput"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+            <span class="text-[10px] text-slate-500 block">หากระบุไว้ หน้าเว็บจะนับถอยหลังรอเปิด</span>
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 flex items-center gap-1">
+              <i data-lucide="stop-circle" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span>กำหนดปิดรับสมัคร</span>
+            </label>
             <input type="datetime-local" id="editEventDeadlineInput"
               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+            <span class="text-[10px] text-slate-500 block">เวลาสิ้นสุดการรับสมัคร</span>
           </div>
         </div>
 
@@ -309,6 +322,6 @@
     </div>
   </div>
 
-  <script src="assets/js/event-admin.js"></script>
+  <script src="assets/js/event-admin.js?v=2.3.0"></script>
 </body>
 </html>

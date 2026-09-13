@@ -60,7 +60,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
   <script src="students_data.js"></script>
-  <script src="config/events_repo.js?v=2.2.1"></script>
+  <script src="config/events_repo.js?v=2.3.0"></script>
 
   <style>
     .glass-card {
@@ -189,6 +189,39 @@
           </div>
         </div>
 
+        <!-- 1.5 Countdown Timer Card (แสดงเมื่อมีเวลานับถอยหลังเปิดหรือปิด) -->
+        <div id="eventCountdownCard" class="hidden glass-card rounded-3xl p-5 border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-slate-900/80 to-slate-950 relative overflow-hidden space-y-3 shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+              <span id="countdownTitleLabel" class="text-xs font-black uppercase tracking-wider text-amber-400">นับถอยหลังเปิดระบบ</span>
+            </div>
+            <span id="countdownTargetTimeDisplay" class="text-[10px] font-mono text-slate-400"></span>
+          </div>
+
+          <div class="grid grid-cols-4 gap-1.5 text-center">
+            <div class="p-2 rounded-2xl bg-slate-950/80 border border-slate-800/80">
+              <span id="cdDays" class="text-lg sm:text-xl font-black text-white font-mono block">00</span>
+              <span class="text-[9px] text-slate-400 font-bold">วัน</span>
+            </div>
+            <div class="p-2 rounded-2xl bg-slate-950/80 border border-slate-800/80">
+              <span id="cdHours" class="text-lg sm:text-xl font-black text-white font-mono block">00</span>
+              <span class="text-[9px] text-slate-400 font-bold">ชม.</span>
+            </div>
+            <div class="p-2 rounded-2xl bg-slate-950/80 border border-slate-800/80">
+              <span id="cdMinutes" class="text-lg sm:text-xl font-black text-amber-400 font-mono block">00</span>
+              <span class="text-[9px] text-slate-400 font-bold">นาที</span>
+            </div>
+            <div class="p-2 rounded-2xl bg-slate-950/80 border border-slate-800/80">
+              <span id="cdSeconds" class="text-lg sm:text-xl font-black text-orange-400 font-mono block">00</span>
+              <span class="text-[9px] text-slate-400 font-bold">วินาที</span>
+            </div>
+          </div>
+          <p id="countdownSubtext" class="text-[11px] text-slate-300 text-center leading-relaxed">
+            สามารถกดปุ่ม <span class="text-amber-400 font-bold">★ มาร์กฝ่ายที่ชอบ</span> ไว้ล่วงหน้าได้เลย เมื่อระบบเปิดจะช่วยให้เลือกได้รวดเร็วขึ้น
+          </p>
+        </div>
+
         <!-- 2. Quick Stat Counters -->
         <div class="grid grid-cols-3 gap-2 sm:gap-3">
           <div class="glass-card p-3 rounded-2xl text-center space-y-0.5">
@@ -236,6 +269,29 @@
 
         <!-- DEPARTMENTS VIEW CONTAINER -->
         <div id="sectionDepartmentsView" class="space-y-4">
+          
+          <!-- Search & Bookmarked Controls Bar -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 justify-between">
+            <!-- Department / Role Search Bar -->
+            <div class="relative flex-grow">
+              <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3"></i>
+              <input type="text" id="deptSearchInput" oninput="handleDeptSearch(this.value)"
+                placeholder="ค้นหาชื่อฝ่าย, ตำแหน่งงาน (เช่น หัวหน้า, สวัสดิการ, พิธีกร)..."
+                class="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 outline-none focus:border-orange-500 transition shadow-inner">
+              <button id="btnClearDeptSearch" onclick="clearDeptSearch()" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-white p-0.5">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <!-- Bookmark Quick Filter Button -->
+            <button onclick="toggleBookmarkFilter()" id="btnFilterBookmarked"
+              class="flex-shrink-0 px-3.5 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-400 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm">
+              <i data-lucide="star" class="w-4 h-4 text-amber-400"></i>
+              <span>ที่บันทึกไว้</span>
+              <span id="bookmarkedCountBadge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-slate-950 font-black">0</span>
+            </button>
+          </div>
+
           <!-- Sticky Category Filter Chips -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1" id="deptFilterChips">
             <button onclick="filterDeptCategory('all')" class="dept-chip active flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-sm transition">
@@ -500,6 +556,6 @@
   </div>
 
   <!-- Page Logic Script -->
-  <script src="assets/js/event.js?v=2.2.0"></script>
+  <script src="assets/js/event.js?v=2.3.0"></script>
 </body>
 </html>
