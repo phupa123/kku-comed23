@@ -417,14 +417,14 @@ window.ComedEventManager = {
   },
 
   // ดึงข้อมูล Real-time จาก Supabase เมื่อเปิดหน้าเว็บ หรือเมื่อมีการเปลี่ยนแปลง
-  fetchCloudData: async function(eventId) {
+  fetchCloudData: async function(eventId, forceBypassEcho = false) {
     const targetEventId = eventId || 'room_roles_69';
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return false;
 
-      // Anti-Echo: หากเครื่องนี้เพิ่งกดยืนยัน/ยกเลิกไปไม่เกิน 5 วินาที ให้ข้ามการเขียนทับด้วยข้อมูลเก่า
-      if (Date.now() - (this._lastLocalWriteTime || 0) < 5000) {
+      // Anti-Echo: หากเครื่องนี้เพิ่งกดยืนยัน/ยกเลิกไปไม่เกิน 5 วินาที ให้ข้ามการเขียนทับด้วยข้อมูลเก่า (เว้นแต่ถูกบังคับ forceBypassEcho)
+      if (!forceBypassEcho && (Date.now() - (this._lastLocalWriteTime || 0) < 5000)) {
         return false;
       }
 
@@ -514,7 +514,7 @@ window.ComedEventManager = {
     }
   },
 
-  // สมัครรับการแจ้งเตือน Real-Time แบบทันที (Supabase Realtime Channel + Smart Polling Fallback)
+  // สมัครรับการแจ้งเตือน Real-Time แบบทันที (Supabase Realtime Channel + Instant In-Memory Patch)
   subscribeRealtime: function(eventId, onUpdateCallback) {
     const targetEventId = eventId || 'room_roles_69';
 
@@ -524,17 +524,71 @@ window.ComedEventManager = {
         const channelName = `realtime_events_all_${Date.now()}`;
         const channel = sb.channel(channelName);
 
-        // ฟังทั้งตาราง event_registrations (แถวเดี่ยว) และ campaigns
+        // ฟังการเปลี่ยนแปลงในตาราง event_registrations
         channel
           .on('postgres_changes', { 
             event: '*', 
             schema: 'public', 
             table: 'event_registrations'
           }, async (payload) => {
-            await this.fetchCloudData(targetEventId);
+            console.log("[Supabase Realtime] ⚡ Event received:", payload.eventType, payload);
+
+            // ⚡ Instant In-Memory Patch (< 50ms): อัปเดตข้อมูลลง LocalStorage ทันทีจาก Payload โดยไม่ต้องรอยิง Request ไปดึงใหม่ทั้งตาราง
+            try {
+              const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
+              let currentRegs = this.getRegistrations(targetEventId);
+
+              if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+                const newRow = payload.new;
+                if (newRow && newRow.student_id) {
+                  const mappedRecord = {
+                    eventId: newRow.event_id || targetEventId,
+                    studentId: newRow.student_id,
+                    studentName: newRow.student_name,
+                    nickname: newRow.nickname || '',
+                    email: newRow.email || '',
+                    departmentId: newRow.department_id,
+                    departmentName: newRow.department_name,
+                    roleId: newRow.role_id,
+                    roleTitle: newRow.role_title,
+                    note: newRow.note || '',
+                    registeredAt: newRow.registered_at || new Date().toISOString()
+                  };
+
+                  const idx = currentRegs.findIndex(r => r.studentId === mappedRecord.studentId);
+                  if (idx !== -1) {
+                    currentRegs[idx] = mappedRecord;
+                  } else {
+                    currentRegs.push(mappedRecord);
+                  }
+                  localStorage.setItem(key, JSON.stringify(currentRegs));
+                }
+              } else if (payload.eventType === 'DELETE') {
+                const oldRow = payload.old;
+                if (oldRow) {
+                  currentRegs = currentRegs.filter(r => 
+                    (oldRow.id && `${targetEventId}_${r.studentId}` !== oldRow.id) &&
+                    (oldRow.student_id ? r.studentId !== oldRow.student_id : true)
+                  );
+                  localStorage.setItem(key, JSON.stringify(currentRegs));
+                }
+              }
+            } catch(patchErr) {
+              console.warn("Instant patch error:", patchErr);
+            }
+
+            // แจ้ง UI ให้อัปเดตทันทีเสี้ยววินาที!
             if (typeof onUpdateCallback === 'function') {
               onUpdateCallback({ type: 'table_change', payload });
             }
+
+            // ซิงค์เต็มรอบฉากหลัง (Background Reconciliation) เพื่อความสมบูรณ์แบบ
+            setTimeout(async () => {
+              await this.fetchCloudData(targetEventId, true);
+              if (typeof onUpdateCallback === 'function') {
+                onUpdateCallback({ type: 'reconcile_done' });
+              }
+            }, 500);
           })
           .on('postgres_changes', { 
             event: '*', 
@@ -543,7 +597,7 @@ window.ComedEventManager = {
           }, async (payload) => {
             const rowId = payload?.new?.id || payload?.old?.id;
             if (rowId === `event_regs_${targetEventId}` || rowId === `event_cfg_${targetEventId}`) {
-              await this.fetchCloudData(targetEventId);
+              await this.fetchCloudData(targetEventId, true);
               if (typeof onUpdateCallback === 'function') {
                 onUpdateCallback({ type: 'cloud_change', payload });
               }
