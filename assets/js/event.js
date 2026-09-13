@@ -73,12 +73,21 @@ function initUserSession() {
     const stored = localStorage.getItem('COMED_USER_SESSION');
     if (stored) {
       const user = JSON.parse(stored);
-      if (user && user.studentId) {
+      if (user && (user.studentId || user.email)) {
+        // ค้นหาข้อมูลจาก STUDENTS_DATA เผื่อชื่อไม่ตรง
+        let st = null;
+        if (window.STUDENTS_DATA) {
+          st = window.STUDENTS_DATA.find(s => 
+            (user.studentId && s.id === user.studentId) ||
+            (user.email && s.email.toLowerCase() === user.email.toLowerCase())
+          );
+        }
+
         currentStudent = {
-          studentId: user.studentId,
-          studentName: user.name,
-          nickname: user.nickname || '',
-          email: user.email
+          studentId: user.studentId || (st ? st.id : ''),
+          studentName: user.studentName || user.name || (st ? st.name : 'นักศึกษา'),
+          nickname: user.nickname || (st ? st.nickname : ''),
+          email: user.email || (st ? st.email : '')
         };
         updateAuthWidget();
         checkCurrentUserStatus();
@@ -214,17 +223,17 @@ function renderDepartmentsGrid() {
             <!-- Action Button -->
             <div>
               ${isMyRole ? `
-                <button onclick="handleCancelMyRole()" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition cursor-pointer">
+                <button onclick="handleCancelMyRole()" class="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition cursor-pointer">
                   ยกเลิก
                 </button>
               ` : (isFull ? `
-                <button disabled class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold cursor-not-allowed">
+                <button disabled class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold cursor-not-allowed">
                   เต็มแล้ว
                 </button>
               ` : `
                 <button onclick="handleSelectRoleClick('${dept.id}', '${role.id}', '${dept.name}', '${role.title}')"
-                  class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-black shadow-md shadow-orange-600/30 transition cursor-pointer active:scale-95">
-                  เลือกตำแหน่งนี้
+                  class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r ${myReg ? 'from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500' : 'from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500'} text-white text-xs font-black shadow-md transition cursor-pointer active:scale-95">
+                  ${myReg ? 'เปลี่ยนมาตำแหน่งนี้' : 'เลือกตำแหน่งนี้'}
                 </button>
               `)}
             </div>
