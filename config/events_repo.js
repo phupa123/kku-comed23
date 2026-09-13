@@ -183,78 +183,21 @@ window.ComedEventManager = {
     const role = dept.roles.find(r => r.id === roleId);
     if (!role) throw new Error("ไม่พบตำแหน่งที่เลือก");
 
-    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
-
-    // 1. ลองเรียก PostgreSQL RPC Function ก่อน (ถ้าแอดมินรันไว้แล้วใน Supabase)
-    if (sb) {
-      try {
-        const { data: rpcRes, error: rpcErr } = await sb.rpc('register_event_role', {
-          p_event_id: event.id,
-          p_student_id: studentInfo.studentId,
-          p_student_name: studentInfo.studentName,
-          p_nickname: studentInfo.nickname || '',
-          p_email: studentInfo.email || '',
-          p_dept_id: dept.id,
-          p_dept_name: dept.name,
-          p_role_id: role.id,
-          p_role_title: role.title,
-          p_max_seats: role.maxSeats,
-          p_note: studentInfo.note || ''
-        });
-
-        if (!rpcErr && rpcRes) {
-          if (rpcRes.success === false) {
-            throw new Error(rpcRes.error || "ไม่สามารถลงทะเบียนได้");
-          }
-          // บันทึกลง Client Cache และตั้งเวลาป้องกัน Echo
-          this._lastLocalWriteTime = Date.now();
-          await this.fetchCloudData(event.id);
-          return rpcRes;
-        }
-      } catch(rpcException) {
-        if (rpcException.message && (rpcException.message.includes("เต็มจำนวนแล้ว") || rpcException.message.includes("ปิดรับ"))) {
-          throw rpcException;
-        }
-        // หากยังไม่มี RPC ใน Supabase ให้ทำงานต่อด้วย Strict Direct Lock Fallback ด้านล่าง
-      }
-    }
-
-    // 2. Direct Supabase Query Check (Concurrency Lock Check)
-    if (sb) {
-      try {
-        // เช็คจำนวนคนแบบสดๆ จาก Cloud ตาราง event_registrations ทันที ณ เสี้ยววินาทีที่กด
-        const { data: currentDbRegs, error: fetchErr } = await sb
-          .from('event_registrations')
-          .select('student_id')
-          .eq('event_id', event.id)
-          .eq('department_id', deptId)
-          .eq('role_id', roleId);
-
-        if (!fetchErr && Array.isArray(currentDbRegs)) {
-          const isSelfAlready = currentDbRegs.some(r => r.student_id === studentInfo.studentId);
-          if (!isSelfAlready && currentDbRegs.length >= role.maxSeats) {
-            throw new Error(`ขออภัย ตำแหน่ง "${role.title}" (${dept.name}) มีผู้ลงทะเบียนเต็มจำนวนแล้ว (${role.maxSeats}/${role.maxSeats} คน)`);
-          }
-        }
-      } catch(chkErr) {
-        if (chkErr.message && chkErr.message.includes("เต็มจำนวนแล้ว")) throw chkErr;
-      }
-    }
-
-    // 3. บันทึกลง Local Cache ทันที (Optimistic Write < 5ms)
+    // 1. ตรวจสอบกับ Local Cache ทันที (Instant Pre-check < 1ms)
     const regs = this.getRegistrations(event.id);
     const existingIdx = regs.findIndex(r => 
       (r.studentId && r.studentId === studentInfo.studentId) ||
       (r.email && studentInfo.email && r.email.toLowerCase() === studentInfo.email.toLowerCase())
     );
 
-    // ตรวจสอบกับ Local cache ซ้ำอีกครั้ง
     const occupiedSeats = regs.filter(r => r.departmentId === deptId && r.roleId === roleId).length;
     const isSelfCurrentRole = existingIdx !== -1 && regs[existingIdx].departmentId === deptId && regs[existingIdx].roleId === roleId;
 
     if (!isSelfCurrentRole && occupiedSeats >= role.maxSeats) {
       throw new Error(`ขออภัย ตำแหน่ง "${role.title}" (${dept.name}) เต็มจำนวนแล้ว (${role.maxSeats}/${role.maxSeats})`);
     }
+
+    // 2. บันทึกลง Local Cache ทันที (Optimistic Write < 5ms) ดั่งเช่น cancelRegistration
 
     const newRecord = {
       eventId: event.id,
