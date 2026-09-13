@@ -321,19 +321,24 @@ async function submitRoleRegistration() {
     // Await server / atomic registration
     await window.ComedEventManager.registerRole(currentEvent.id, studentPayload, pendingSelection.deptId, pendingSelection.roleId);
 
-    // Trigger Confetti
+    // ปรับลดเอฟเฟกต์พลุเบาๆ (Confetti) ให้เหลือเพียง 20 ชิ้น ไม่กระตุกแม้เครื่องไม่แรง
     if (typeof confetti !== 'undefined') {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+      try {
+        confetti({
+          particleCount: 20,
+          spread: 45,
+          ticks: 120,
+          origin: { y: 0.65 }
+        });
+      } catch(e) {}
     }
 
+    const savedSelection = { ...pendingSelection };
     closeConfirmRoleModal();
     refreshEventUI();
 
-    alert(`🎉 ลงทะเบียนตำแหน่ง "${pendingSelection.roleTitle}" ใน${pendingSelection.deptName} สำเร็จเรียบร้อย!`);
+    // แสดง Custom Popup ลงทะเบียนสำเร็จแทน alert ธรรมดา
+    openRoleSuccessPopup(savedSelection);
   } catch(err) {
     alert("⚠️ " + (err.message || "ไม่สามารถลงทะเบียนได้"));
     // Refresh to get latest seats count
@@ -344,6 +349,46 @@ async function submitRoleRegistration() {
       btn.textContent = "ยืนยันการเลือกตำแหน่งนี้";
     }
   }
+}
+
+// ================= POPUP CONTROLLERS =================
+function openAuthSuccessPopup(student) {
+  const popup = document.getElementById('popupAuthSuccess');
+  const nameEl = document.getElementById('popupAuthName');
+  const idEl = document.getElementById('popupAuthId');
+  if (nameEl) nameEl.textContent = `${student.studentName} (${student.nickname || '-'})`;
+  if (idEl) idEl.textContent = `รหัสนักศึกษา: ${student.studentId}`;
+  if (popup) {
+    popup.classList.remove('hidden');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+
+function closeAuthSuccessPopup() {
+  const popup = document.getElementById('popupAuthSuccess');
+  if (popup) popup.classList.add('hidden');
+}
+
+function openRoleSuccessPopup(selection) {
+  const popup = document.getElementById('popupRoleSuccess');
+  const nameEl = document.getElementById('popupSuccessStudentName');
+  const deptEl = document.getElementById('popupSuccessDept');
+  const roleEl = document.getElementById('popupSuccessRole');
+
+  if (nameEl && currentStudent) nameEl.textContent = `${currentStudent.studentName} (${currentStudent.nickname || '-'})`;
+  if (deptEl) deptEl.textContent = selection.deptName || '-';
+  if (roleEl) roleEl.textContent = selection.roleTitle || '-';
+
+  if (popup) {
+    popup.classList.remove('hidden');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+
+function closeRoleSuccessPopup() {
+  const popup = document.getElementById('popupRoleSuccess');
+  if (popup) popup.classList.add('hidden');
+  scrollToLiveRoster();
 }
 
 async function handleCancelMyRole() {
@@ -521,6 +566,9 @@ function confirmStudentPickerAuth() {
 
   if (pendingSelection) {
     handleSelectRoleClick(pendingSelection.deptId, pendingSelection.roleId, pendingSelection.deptName, pendingSelection.roleTitle);
+  } else {
+    // แสดง Popup ต้อนรับเข้าสู่ระบบ
+    openAuthSuccessPopup(currentStudent);
   }
 }
 
@@ -550,6 +598,8 @@ function handleGoogleAuthResponse(response) {
 
     if (pendingSelection) {
       handleSelectRoleClick(pendingSelection.deptId, pendingSelection.roleId, pendingSelection.deptName, pendingSelection.roleTitle);
+    } else {
+      openAuthSuccessPopup(currentStudent);
     }
   } catch(e) {
     console.warn("Google Auth Parse Error:", e);
