@@ -85,37 +85,37 @@
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white bg-mesh-dark">
 
   <!-- ================= TOP NAVIGATION BAR ================= -->
-  <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-2xl border-b border-slate-800/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-2xl border-b border-slate-800/80 w-full">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
       
       <!-- Brand Logo -->
-      <a href="index.html" class="flex items-center gap-3 group">
-        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-orange-500/20 to-amber-500/20 p-1.5 border border-orange-500/30 flex items-center justify-center shadow-lg group-hover:scale-105 transition">
+      <a href="index.html" class="flex items-center gap-2 sm:gap-3 group min-w-0">
+        <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-orange-500/20 to-amber-500/20 p-1 border border-orange-500/30 flex items-center justify-center shadow-lg group-hover:scale-105 transition flex-shrink-0">
           <img src="logo.png" alt="โลโก้สาขาคอมพิวเตอร์ศึกษา" class="w-full h-full object-contain">
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-[11px] font-black uppercase tracking-wider text-orange-400">COMED KKU 69</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">
-              ระบบกิจกรรม & ฝ่าย
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-orange-400">COMED KKU 69</span>
+            <span class="hidden xs:inline-block px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">
+              ระบบกิจกรรม
             </span>
           </div>
-          <h1 class="text-sm sm:text-base font-black text-white leading-tight">ระบบเลือกฝ่ายภายในห้อง</h1>
+          <h1 class="text-xs sm:text-base font-black text-white leading-tight truncate">ระบบเลือกฝ่ายห้อง</h1>
         </div>
       </a>
 
       <!-- Right Navigation & Auth State -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
         <!-- Auth Guest / Logged In Widget -->
-        <div id="authWidgetArea" class="flex items-center gap-2">
+        <div id="authWidgetArea" class="flex items-center gap-1.5">
           <button onclick="openStudentAuthModal()" id="btnAuthTrigger"
-            class="px-3.5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 text-xs font-bold transition flex items-center gap-2 shadow-sm cursor-pointer active:scale-95">
-            <i data-lucide="user-check" class="w-4 h-4 text-orange-400"></i>
-            <span id="authTriggerText">ระบุตัวตน / เข้าสู่ระบบ</span>
+            class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 text-[11px] sm:text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer active:scale-95 max-w-[140px] sm:max-w-none truncate">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-orange-400 flex-shrink-0"></i>
+            <span id="authTriggerText" class="truncate">ระบุตัวตน</span>
           </button>
           <button onclick="handleUserLogout()" id="btnSwitchUser" title="สลับบัญชี / เปลี่ยนชื่อ"
-            class="hidden px-2.5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 text-xs font-bold transition cursor-pointer">
-            <i data-lucide="log-out" class="w-4 h-4"></i>
+            class="hidden px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 text-xs font-bold transition cursor-pointer">
+            <i data-lucide="log-out" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
           </button>
         </div>
 
@@ -128,7 +128,7 @@
   </header>
 
   <!-- ================= MAIN CONTENT ================= -->
-  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 flex-grow space-y-6 sm:space-y-8">
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 flex-grow space-y-5 sm:space-y-8 w-full overflow-x-hidden">
 
     <!-- Hero Event Header Banner (Responsive Compact Design) -->
     <div class="glass-card rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 border border-orange-500/25 relative overflow-hidden">
@@ -241,7 +241,7 @@
       </div>
 
       <!-- Quick Department Category Filter Chips (Sticky scrollable on mobile) -->
-      <div class="sticky top-20 z-30 -mx-3 px-3 sm:mx-0 sm:px-0 py-2 bg-slate-950/90 backdrop-blur-md flex items-center gap-1.5 overflow-x-auto no-scrollbar border-b border-slate-800/60" id="deptFilterChips">
+      <div class="sticky top-16 sm:top-20 z-30 -mx-3 px-3 sm:mx-0 sm:px-0 py-2 bg-slate-950/90 backdrop-blur-md flex items-center gap-1.5 overflow-x-auto no-scrollbar border-b border-slate-800/60" id="deptFilterChips">
         <button onclick="filterDeptCategory('all')" class="dept-chip active flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-sm transition">
           ทุกฝ่าย (ทั้งหมด)
         </button>
@@ -255,34 +255,34 @@
     </div>
 
     <!-- ================= LIVE ROSTER: SUMMARY TABLE ================= -->
-    <div id="rosterSection" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+    <div id="rosterSection" class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8 space-y-4 sm:space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3 sm:pb-4">
         <div>
-          <h3 class="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-            <i data-lucide="clipboard-list" class="w-5 h-5 text-orange-400"></i>
-            <span>สรุปทำเนียบสมาชิกแยกตามฝ่าย (Live Roster)</span>
+          <h3 class="text-base sm:text-xl font-black text-white flex items-center gap-2">
+            <i data-lucide="clipboard-list" class="w-4 h-4 sm:w-5 sm:h-5 text-orange-400"></i>
+            <span>สรุปทำเนียบสมาชิก (Live Roster)</span>
           </h3>
-          <p class="text-xs text-slate-400">ตรวจสอบรายชื่อนักศึกษาทั้งหมด 60 คน และตำแหน่งประจำแต่ละฝ่าย</p>
+          <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">ตรวจสอบรายชื่อนักศึกษาทั้งหมด 60 คน และตำแหน่งประจำแต่ละฝ่าย</p>
         </div>
 
         <!-- Filter Tab Buttons -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1" id="rosterFilterTabs">
-          <button onclick="filterRoster('all')" class="roster-tab active px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white">ทั้งหมด (60)</button>
-          <button onclick="filterRoster('registered')" class="roster-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white">เลือกแล้ว</button>
-          <button onclick="filterRoster('pending')" class="roster-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white">ยังไม่เลือก</button>
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1" id="rosterFilterTabs">
+          <button onclick="filterRoster('all')" class="roster-tab active flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white">ทั้งหมด (60)</button>
+          <button onclick="filterRoster('registered')" class="roster-tab flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white">เลือกแล้ว</button>
+          <button onclick="filterRoster('pending')" class="roster-tab flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white">ยังไม่เลือก</button>
         </div>
       </div>
 
       <!-- Search Input -->
-      <div class="relative max-w-md">
+      <div class="relative max-w-md w-full">
         <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3"></i>
-        <input type="text" id="rosterSearchInput" oninput="renderRosterTable()" placeholder="ค้นหาชื่อ, ชื่อเล่น หรือรหัสนักศึกษา..."
-          class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-white placeholder-slate-500 outline-none focus:border-orange-500 transition">
+        <input type="text" id="rosterSearchInput" oninput="renderRosterTable()" placeholder="ค้นหาชื่อ, ชื่อเล่น หรือรหัส..."
+          class="w-full pl-10 pr-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-white placeholder-slate-500 outline-none focus:border-orange-500 transition">
       </div>
 
       <!-- Table Container -->
-      <div class="overflow-x-auto rounded-2xl border border-slate-800">
-        <table class="w-full text-left text-xs">
+      <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-800 -mx-1 sm:mx-0">
+        <table class="w-full text-left text-xs min-w-[560px]">
           <thead class="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800">
             <tr>
               <th class="p-3.5">ลำดับ</th>
@@ -321,14 +321,14 @@
   </footer>
 
   <!-- ================= MODAL: STUDENT IDENTIFICATION / LOGIN ================= -->
-  <div id="modalAuth" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
-    <div class="glass-card rounded-[2.5rem] max-w-md w-full p-6 sm:p-8 space-y-5 border border-orange-500/30 text-left">
+  <div id="modalAuth" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-2xl sm:rounded-[2.5rem] max-w-md w-full p-5 sm:p-8 space-y-4 sm:space-y-5 border border-orange-500/30 text-left max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <div class="flex items-center gap-2">
-          <div class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold">
-            <i data-lucide="user-check" class="w-5 h-5"></i>
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold">
+            <i data-lucide="user-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <h3 class="text-base font-black text-white">ยืนยันตัวตนนศ. COMED 69</h3>
+          <h3 class="text-sm sm:text-base font-black text-white">ยืนยันตัวตนนศ. COMED 69</h3>
         </div>
         <button onclick="closeStudentAuthModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -342,7 +342,7 @@
       <!-- Student Picker Dropdown -->
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-slate-300">เลือกรหัสนักศึกษา / ชื่อของคุณ (60 คน):</label>
-        <select id="authStudentSelect" class="w-full px-3.5 py-3 rounded-2xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
+        <select id="authStudentSelect" class="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
           <option value="">-- กรุณาเลือกรายชื่อของคุณ --</option>
           <!-- Populated from window.STUDENTS_DATA -->
         </select>
@@ -356,15 +356,15 @@
 
       <!-- Google Login Wrapper -->
       <div class="text-center space-y-2">
-        <div id="googleAuthWrapper" class="flex justify-center"></div>
+        <div id="googleAuthWrapper" class="flex justify-center overflow-hidden"></div>
         <span class="text-[10px] text-slate-500 block">รองรับเฉพาะบัญชี @kkumail.com ของนักศึกษาเท่านั้น</span>
       </div>
 
       <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
-        <button onclick="closeStudentAuthModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
+        <button onclick="closeStudentAuthModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
           ยกเลิก
         </button>
-        <button onclick="confirmStudentPickerAuth()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition">
+        <button onclick="confirmStudentPickerAuth()" class="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition active:scale-95">
           ยืนยันตัวตน
         </button>
       </div>
@@ -372,24 +372,24 @@
   </div>
 
   <!-- ================= MODAL: ROLE REGISTRATION CONFIRMATION ================= -->
-  <div id="modalConfirmRole" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
-    <div class="glass-card rounded-[2.5rem] max-w-md w-full p-6 sm:p-8 space-y-5 border border-orange-500/40 text-left">
+  <div id="modalConfirmRole" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-2xl sm:rounded-[2.5rem] max-w-md w-full p-5 sm:p-8 space-y-4 sm:space-y-5 border border-orange-500/40 text-left max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <div class="flex items-center gap-2">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-bold">
-            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-bold">
+            <i data-lucide="check-circle-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <h3 class="text-base font-black text-white">ยืนยันการเลือกฝ่าย</h3>
+          <h3 class="text-sm sm:text-base font-black text-white">ยืนยันการเลือกฝ่าย</h3>
         </div>
         <button onclick="closeConfirmRoleModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2 text-xs">
+      <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-900 border border-slate-800 space-y-2 text-xs">
         <div class="flex justify-between">
           <span class="text-slate-400">ผู้สมัคร:</span>
-          <span id="confirmStudentName" class="font-bold text-white">-</span>
+          <span id="confirmStudentName" class="font-bold text-white truncate max-w-[200px] text-right">-</span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-400">รหัสนักศึกษา:</span>
@@ -407,17 +407,17 @@
 
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-slate-300">ความถนัด หรือ ข้อความเพิ่มเติม (ถ้ามี):</label>
-        <textarea id="confirmRoleNote" rows="2" placeholder="เช่น เคยมีประสบการณ์จัดกิจกรรม, ถนัดงานออกแบบสื่อ..."
-          class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition"></textarea>
+        <textarea id="confirmRoleNote" rows="2" placeholder="เช่น เคยมีประสบการณ์จัดกิจกรรม, ถนัดงานออกแบบ..."
+          class="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition"></textarea>
       </div>
 
       <!-- Action Buttons -->
       <div class="pt-2 flex items-center justify-end gap-2">
-        <button onclick="closeConfirmRoleModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
+        <button onclick="closeConfirmRoleModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
           ยกเลิก
         </button>
         <button id="btnSubmitRoleRegistration" onclick="submitRoleRegistration()"
-          class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition active:scale-95">
+          class="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition active:scale-95">
           ยืนยันการเลือกตำแหน่งนี้
         </button>
       </div>
@@ -425,44 +425,44 @@
   </div>
 
   <!-- ================= POPUP 1: เข้าสู่ระบบ / ยืนยันตัวตนสำเร็จ ================= -->
-  <div id="popupAuthSuccess" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="glass-card rounded-[2.5rem] max-w-sm w-full p-6 sm:p-7 text-center space-y-4 border border-emerald-500/40 shadow-2xl animate-in fade-in duration-200">
-      <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
-        <i data-lucide="check-circle" class="w-8 h-8 text-white"></i>
+  <div id="popupAuthSuccess" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-2xl sm:rounded-[2.5rem] max-w-sm w-full p-5 sm:p-7 text-center space-y-3.5 sm:space-y-4 border border-emerald-500/40 shadow-2xl animate-in fade-in duration-200">
+      <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
+        <i data-lucide="check-circle" class="w-6 h-6 sm:w-8 sm:h-8 text-white"></i>
       </div>
       <div>
-        <h3 class="text-lg font-black text-white">เข้าสู่ระบบสำเร็จ!</h3>
-        <p class="text-xs text-slate-400 mt-1">ยินดีต้อนรับนักศึกษา COMED KKU 69</p>
+        <h3 class="text-base sm:text-lg font-black text-white">เข้าสู่ระบบสำเร็จ!</h3>
+        <p class="text-xs text-slate-400 mt-0.5">ยินดีต้อนรับนักศึกษา COMED KKU 69</p>
       </div>
-      <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 text-left space-y-1 text-xs">
+      <div class="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-900 border border-slate-800 text-left space-y-1 text-xs">
         <div class="text-emerald-400 font-bold text-sm" id="popupAuthName">-</div>
         <div class="text-slate-400 font-mono" id="popupAuthId">-</div>
       </div>
       <button onclick="closeAuthSuccessPopup()"
-        class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg shadow-emerald-600/30 transition active:scale-95 cursor-pointer">
+        class="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg shadow-emerald-600/30 transition active:scale-95 cursor-pointer">
         เข้าสู่ระบบเลือกฝ่าย
       </button>
     </div>
   </div>
 
   <!-- ================= POPUP 2: ลงทะเบียนเลือกฝ่ายสำเร็จ ================= -->
-  <div id="popupRoleSuccess" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="glass-card rounded-[2.5rem] max-w-md w-full p-6 sm:p-8 text-center space-y-5 border border-orange-500/40 shadow-2xl animate-in fade-in duration-200">
-      <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center mx-auto shadow-lg shadow-orange-500/30">
-        <i data-lucide="award" class="w-8 h-8 text-white"></i>
+  <div id="popupRoleSuccess" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-2xl sm:rounded-[2.5rem] max-w-md w-full p-5 sm:p-8 text-center space-y-4 sm:space-y-5 border border-orange-500/40 shadow-2xl animate-in fade-in duration-200">
+      <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center mx-auto shadow-lg shadow-orange-500/30">
+        <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 text-white"></i>
       </div>
       <div>
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-[11px] font-bold text-orange-400 mb-2">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-[10px] sm:text-[11px] font-bold text-orange-400 mb-1.5">
           <span>🎉 บันทึกข้อมูลสำเร็จเรียบร้อย</span>
         </div>
-        <h3 class="text-xl font-black text-white">ลงทะเบียนเลือกฝ่ายสำเร็จ!</h3>
-        <p class="text-xs text-slate-400 mt-1">ระบบได้จองตำแหน่งและบันทึกข้อมูลเข้าสู่ฐานข้อมูลกลางแล้ว</p>
+        <h3 class="text-lg sm:text-xl font-black text-white">ลงทะเบียนเลือกฝ่ายสำเร็จ!</h3>
+        <p class="text-xs text-slate-400 mt-0.5">ระบบได้จองตำแหน่งและบันทึกข้อมูลเข้าสู่ฐานข้อมูลกลางแล้ว</p>
       </div>
 
-      <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-left space-y-2 text-xs">
-        <div class="flex justify-between border-b border-slate-800/80 pb-2">
+      <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-900/90 border border-slate-800 text-left space-y-1.5 sm:space-y-2 text-xs">
+        <div class="flex justify-between border-b border-slate-800/80 pb-1.5">
           <span class="text-slate-400">ผู้สมัคร:</span>
-          <span id="popupSuccessStudentName" class="font-bold text-white">-</span>
+          <span id="popupSuccessStudentName" class="font-bold text-white truncate max-w-[200px] text-right">-</span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-400">ฝ่ายที่สังกัด:</span>
@@ -475,7 +475,7 @@
       </div>
 
       <button onclick="closeRoleSuccessPopup()"
-        class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition active:scale-95 cursor-pointer">
+        class="w-full py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition active:scale-95 cursor-pointer">
         ตกลง / ดูรายชื่อเพื่อนในฝ่าย
       </button>
     </div>
