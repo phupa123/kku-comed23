@@ -60,7 +60,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
   <script src="students_data.js"></script>
-  <script src="config/events_repo.js"></script>
+  <script src="config/events_repo.js?v=2.0.1"></script>
 
   <style>
     .glass-card {
@@ -108,6 +108,10 @@
             class="px-3.5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 text-xs font-bold transition flex items-center gap-2 shadow-sm cursor-pointer active:scale-95">
             <i data-lucide="user-check" class="w-4 h-4 text-orange-400"></i>
             <span id="authTriggerText">ระบุตัวตน / เข้าสู่ระบบ</span>
+          </button>
+          <button onclick="handleUserLogout()" id="btnSwitchUser" title="สลับบัญชี / เปลี่ยนชื่อ"
+            class="hidden px-2.5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 text-xs font-bold transition cursor-pointer">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
           </button>
         </div>
 
@@ -402,6 +406,6 @@
   </div>
 
   <!-- Page Logic Script -->
-  <script src="assets/js/event.js"></script>
+  <script src="assets/js/event.js?v=2.0.1"></script>
 </body>
 </html>

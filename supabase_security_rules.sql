@@ -159,3 +159,98 @@ CREATE POLICY "Allow Modify Events" ON events FOR ALL TO anon, authenticated USI
 CREATE POLICY "Public Read Registrations" ON event_registrations FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY "Allow Modify Registrations" ON event_registrations FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
+-- เพิ่ม Unique Index เพื่อป้องกันไม่ให้นักศึกษา 1 คน ลงซ้ำได้เกิน 1 ตำแหน่งต่อ 1 กิจกรรม
+CREATE UNIQUE INDEX IF NOT EXISTS idx_event_student_unique 
+ON event_registrations (event_id, student_id);
+
+CREATE INDEX IF NOT EXISTS idx_event_dept_role 
+ON event_registrations (event_id, department_id, role_id);
+
+-- ฟังก์ชัน Atomic RPC: register_event_role
+-- ป้องกัน Race Condition เมื่อ 60 คนแย่งกดตำแหน่งเดียวกันพร้อมกัน
+CREATE OR REPLACE FUNCTION register_event_role(
+  p_event_id TEXT,
+  p_student_id TEXT,
+  p_student_name TEXT,
+  p_nickname TEXT,
+  p_email TEXT,
+  p_dept_id TEXT,
+  p_dept_name TEXT,
+  p_role_id TEXT,
+  p_role_title TEXT,
+  p_max_seats INT,
+  p_note TEXT DEFAULT ''
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_event_status TEXT;
+  v_occupied INT;
+  v_existing_dept TEXT;
+  v_existing_role TEXT;
+  v_reg_id TEXT;
+  v_result JSONB;
+BEGIN
+  -- 1. ตรวจสอบสถานะกิจกรรม
+  SELECT status INTO v_event_status FROM events WHERE id = p_event_id;
+  IF v_event_status IS NOT NULL AND v_event_status <> 'open' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'กิจกรรมนี้ปิดรับลงทะเบียนชั่วคราว');
+  END IF;
+
+  -- 2. ตรวจสอบตำแหน่งเดิมของนักศึกษา (ถ้ามี)
+  SELECT department_id, role_id INTO v_existing_dept, v_existing_role
+  FROM event_registrations
+  WHERE event_id = p_event_id AND student_id = p_student_id;
+
+  -- 3. ตรวจสอบจำนวนคนที่ลงในตำแหน่งนี้ (Lock แถวเพื่อนับโควตาแบบแม่นยำ)
+  -- ถ้านักศึกษาลงตำแหน่งนี้อยู่แล้ว ไม่ต้องนับตัวเองเพิ่ม
+  IF v_existing_dept IS NOT NULL AND v_existing_dept = p_dept_id AND v_existing_role = p_role_id THEN
+    v_occupied := 0; -- ตัวเองอยู่ตำแหน่งนี้แล้ว ให้ผ่านได้เลย
+  ELSE
+    SELECT COUNT(*) INTO v_occupied
+    FROM event_registrations
+    WHERE event_id = p_event_id AND department_id = p_dept_id AND role_id = p_role_id;
+
+    IF v_occupied >= p_max_seats THEN
+      RETURN jsonb_build_object(
+        'success', false, 
+        'error', 'ขออภัย ตำแหน่งนี้มีผู้ลงทะเบียนเต็มจำนวนแล้ว (' || p_max_seats || '/' || p_max_seats || ' คน)'
+      );
+    END IF;
+  END IF;
+
+  -- 4. บันทึกข้อมูลลงทะเบียน (Upsert)
+  v_reg_id := p_event_id || '_' || p_student_id;
+
+  INSERT INTO event_registrations (
+    id, event_id, student_id, student_name, nickname, email,
+    department_id, department_name, role_id, role_title, note, registered_at
+  ) VALUES (
+    v_reg_id, p_event_id, p_student_id, p_student_name, p_nickname, p_email,
+    p_dept_id, p_dept_name, p_role_id, p_role_title, p_note, NOW()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    department_id = EXCLUDED.department_id,
+    department_name = EXCLUDED.department_name,
+    role_id = EXCLUDED.role_id,
+    role_title = EXCLUDED.role_title,
+    note = EXCLUDED.note,
+    registered_at = NOW();
+
+  v_result := jsonb_build_object(
+    'success', true,
+    'eventId', p_event_id,
+    'studentId', p_student_id,
+    'studentName', p_student_name,
+    'departmentId', p_dept_id,
+    'departmentName', p_dept_name,
+    'roleId', p_role_id,
+    'roleTitle', p_role_title
+  );
+
+  RETURN v_result;
+END;
+$$;
+

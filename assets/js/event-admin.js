@@ -290,7 +290,7 @@ function closeManualAssignModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-function submitManualAssign() {
+async function submitManualAssign() {
   if (!targetAssignStudent || !activeEvent) return;
   const val = document.getElementById('assignDeptRoleSelect').value;
   if (!val) return;
@@ -298,7 +298,7 @@ function submitManualAssign() {
   const [deptId, roleId] = val.split(':::');
 
   try {
-    window.ComedEventManager.registerRole(activeEvent.id, {
+    await window.ComedEventManager.registerRole(activeEvent.id, {
       studentId: targetAssignStudent.id,
       studentName: targetAssignStudent.name,
       nickname: targetAssignStudent.nickname || '',
@@ -307,22 +307,22 @@ function submitManualAssign() {
     }, deptId, roleId);
 
     closeManualAssignModal();
-    renderHeaderAndStats();
-    renderDeptsGrid();
-    renderAdminTable();
+    refreshAdminUI();
     alert(`✅ บันทึกฝ่ายและตำแหน่งให้ ${targetAssignStudent.name} เรียบร้อยแล้ว`);
   } catch(err) {
-    alert("⚠️ " + err.message);
+    alert("⚠️ " + (err.message || "เกิดข้อผิดพลาด"));
   }
 }
 
-function resetStudentRole(studentId, name) {
+async function resetStudentRole(studentId, name) {
   if (confirm(`คุณต้องการลบ/รีเซ็ตการเลือกตำแหน่งของ "${name}" ใช่หรือไม่?`)) {
-    window.ComedEventManager.cancelRegistration(activeEvent.id, studentId);
-    renderHeaderAndStats();
-    renderDeptsGrid();
-    renderAdminTable();
-    alert("🗑️ ล้างข้อมูลเรียบร้อยแล้ว");
+    try {
+      await window.ComedEventManager.cancelRegistration(activeEvent.id, studentId);
+      refreshAdminUI();
+      alert("🗑️ ล้างข้อมูลเรียบร้อยแล้ว");
+    } catch(err) {
+      alert("⚠️ เกิดข้อผิดพลาด: " + (err.message || ""));
+    }
   }
 }
 

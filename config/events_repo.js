@@ -169,8 +169,11 @@ window.ComedEventManager = {
     return regs.filter(r => r.departmentId === deptId && r.roleId === roleId).length;
   },
 
-  // ลงทะเบียนเลือกฝ่าย
-  registerRole: function(eventId, studentInfo, deptId, roleId) {
+  // ตัวแปรกัน Echo / Pause Polling หลังเพิ่งมี local write
+  _lastLocalWriteTime: 0,
+
+  // ลงทะเบียนเลือกฝ่าย (Async & Concurrency-Safe)
+  registerRole: async function(eventId, studentInfo, deptId, roleId) {
     const event = this.getActiveEvent(eventId);
     if (!event) throw new Error("ไม่พบกิจกรรมนี้ในระบบ");
     if (event.status !== 'open') throw new Error("กิจกรรมนี้ไม่ได้เปิดรับลงทะเบียนในขณะนี้");
@@ -180,13 +183,72 @@ window.ComedEventManager = {
     const role = dept.roles.find(r => r.id === roleId);
     if (!role) throw new Error("ไม่พบตำแหน่งที่เลือก");
 
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+
+    // 1. ลองเรียก PostgreSQL RPC Function ก่อน (ถ้าแอดมินรันไว้แล้วใน Supabase)
+    if (sb) {
+      try {
+        const { data: rpcRes, error: rpcErr } = await sb.rpc('register_event_role', {
+          p_event_id: event.id,
+          p_student_id: studentInfo.studentId,
+          p_student_name: studentInfo.studentName,
+          p_nickname: studentInfo.nickname || '',
+          p_email: studentInfo.email || '',
+          p_dept_id: dept.id,
+          p_dept_name: dept.name,
+          p_role_id: role.id,
+          p_role_title: role.title,
+          p_max_seats: role.maxSeats,
+          p_note: studentInfo.note || ''
+        });
+
+        if (!rpcErr && rpcRes) {
+          if (rpcRes.success === false) {
+            throw new Error(rpcRes.error || "ไม่สามารถลงทะเบียนได้");
+          }
+          // บันทึกลง Client Cache และตั้งเวลาป้องกัน Echo
+          this._lastLocalWriteTime = Date.now();
+          await this.fetchCloudData(event.id);
+          return rpcRes;
+        }
+      } catch(rpcException) {
+        if (rpcException.message && (rpcException.message.includes("เต็มจำนวนแล้ว") || rpcException.message.includes("ปิดรับ"))) {
+          throw rpcException;
+        }
+        // หากยังไม่มี RPC ใน Supabase ให้ทำงานต่อด้วย Strict Direct Lock Fallback ด้านล่าง
+      }
+    }
+
+    // 2. Direct Supabase Query Check (Concurrency Lock Check)
+    if (sb) {
+      try {
+        // เช็คจำนวนคนแบบสดๆ จาก Cloud ตาราง event_registrations ทันที ณ เสี้ยววินาทีที่กด
+        const { data: currentDbRegs, error: fetchErr } = await sb
+          .from('event_registrations')
+          .select('student_id')
+          .eq('event_id', event.id)
+          .eq('department_id', deptId)
+          .eq('role_id', roleId);
+
+        if (!fetchErr && Array.isArray(currentDbRegs)) {
+          const isSelfAlready = currentDbRegs.some(r => r.student_id === studentInfo.studentId);
+          if (!isSelfAlready && currentDbRegs.length >= role.maxSeats) {
+            throw new Error(`ขออภัย ตำแหน่ง "${role.title}" (${dept.name}) มีผู้ลงทะเบียนเต็มจำนวนแล้ว (${role.maxSeats}/${role.maxSeats} คน)`);
+          }
+        }
+      } catch(chkErr) {
+        if (chkErr.message && chkErr.message.includes("เต็มจำนวนแล้ว")) throw chkErr;
+      }
+    }
+
+    // 3. บันทึกลง Local Cache
     const regs = this.getRegistrations(event.id);
     const existingIdx = regs.findIndex(r => 
       (r.studentId && r.studentId === studentInfo.studentId) ||
-      (r.email && r.email.toLowerCase() === studentInfo.email.toLowerCase())
+      (r.email && studentInfo.email && r.email.toLowerCase() === studentInfo.email.toLowerCase())
     );
 
-    // เช็คว่าที่นั่งเต็มหรือไม่ (ถ้าไม่ได้สลับตำแหน่งเดิมของตัวเอง)
+    // ตรวจสอบกับ Local cache ซ้ำอีกครั้ง
     const occupiedSeats = regs.filter(r => r.departmentId === deptId && r.roleId === roleId).length;
     const isSelfCurrentRole = existingIdx !== -1 && regs[existingIdx].departmentId === deptId && regs[existingIdx].roleId === roleId;
 
@@ -199,7 +261,7 @@ window.ComedEventManager = {
       studentId: studentInfo.studentId,
       studentName: studentInfo.studentName,
       nickname: studentInfo.nickname || '',
-      email: studentInfo.email,
+      email: studentInfo.email || '',
       departmentId: dept.id,
       departmentName: dept.name,
       roleId: role.id,
@@ -216,13 +278,16 @@ window.ComedEventManager = {
 
     const key = `${COMED_EVENT_REGS_KEY}_${event.id}`;
     localStorage.setItem(key, JSON.stringify(regs));
-    this.syncRegistrationToSupabase(newRecord);
+    this._lastLocalWriteTime = Date.now();
+
+    // 4. บันทึกขึ้น Cloud พร้อมกันทั้ง 2 ระบบ (Dedicated Table + Campaigns Backup)
+    await this.syncRegistrationToSupabase(newRecord);
 
     return newRecord;
   },
 
   // ยกเลิกการเลือกฝ่าย
-  cancelRegistration: function(eventId, studentIdOrEmail) {
+  cancelRegistration: async function(eventId, studentIdOrEmail) {
     const key = `${COMED_EVENT_REGS_KEY}_${eventId}`;
     let regs = this.getRegistrations(eventId);
     const cleanQuery = String(studentIdOrEmail).trim().toLowerCase();
@@ -235,7 +300,8 @@ window.ComedEventManager = {
     if (target) {
       regs = regs.filter(r => r !== target);
       localStorage.setItem(key, JSON.stringify(regs));
-      this.deleteRegistrationFromSupabase(eventId, target.studentId);
+      this._lastLocalWriteTime = Date.now();
+      await this.deleteRegistrationFromSupabase(eventId, target.studentId);
     }
     return target;
   },
@@ -259,7 +325,7 @@ window.ComedEventManager = {
         updated_at: new Date().toISOString()
       }, { onConflict: 'id' }).catch(() => {});
 
-      // 2. Reliable Cloud Sync via 'campaigns' table (confirmed public access)
+      // 2. Reliable Cloud Sync via 'campaigns' table
       await sb.from('campaigns').upsert({
         id: `event_cfg_${eventData.id}`,
         code: `CFG_${eventData.id.toUpperCase()}`.substring(0, 30),
@@ -311,23 +377,27 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
 
-      // 1. Try dedicated table if exists
-      sb.from('event_registrations').upsert({
-        id: `${regRecord.eventId}_${regRecord.studentId}`,
-        event_id: regRecord.eventId,
-        student_id: regRecord.studentId,
-        student_name: regRecord.studentName,
-        nickname: regRecord.nickname || '',
-        email: regRecord.email,
-        department_id: regRecord.departmentId,
-        department_name: regRecord.departmentName,
-        role_id: regRecord.roleId,
-        role_title: regRecord.roleTitle,
-        note: regRecord.note || '',
-        registered_at: regRecord.registeredAt || new Date().toISOString()
-      }, { onConflict: 'id' }).catch(() => {});
+      // 1. Primary: บันทึกลงตารางเฉพาะ event_registrations (Atomic Row Level)
+      try {
+        await sb.from('event_registrations').upsert({
+          id: `${regRecord.eventId}_${regRecord.studentId}`,
+          event_id: regRecord.eventId,
+          student_id: regRecord.studentId,
+          student_name: regRecord.studentName,
+          nickname: regRecord.nickname || '',
+          email: regRecord.email,
+          department_id: regRecord.departmentId,
+          department_name: regRecord.departmentName,
+          role_id: regRecord.roleId,
+          role_title: regRecord.roleTitle,
+          note: regRecord.note || '',
+          registered_at: regRecord.registeredAt || new Date().toISOString()
+        }, { onConflict: 'id' });
+      } catch(err1) {
+        console.warn("Direct event_registrations upsert error:", err1);
+      }
 
-      // 2. Real-time Cloud Sync to 'campaigns' record for global broadcast
+      // 2. Secondary Broadcast: อัปเดตไปยัง 'campaigns' ก้อนรวมสำหรับ Real-time / Fallback
       await this.syncAllRegistrationsToCloud(regRecord.eventId);
     } catch(e) {
       console.warn("Supabase Registration Sync Suppressed:", e);
@@ -339,7 +409,7 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
       const compositeId = `${eventId}_${studentId}`;
-      sb.from('event_registrations').delete().eq('id', compositeId).catch(() => {});
+      await sb.from('event_registrations').delete().eq('id', compositeId);
       await this.syncAllRegistrationsToCloud(eventId);
     } catch(e) {
       console.warn("Supabase Registration Delete Suppressed:", e);
@@ -353,9 +423,14 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return false;
 
+      // Anti-Echo: หากเครื่องนี้เพิ่งกดยืนยัน/ยกเลิกไปไม่เกิน 5 วินาที ให้ข้ามการเขียนทับด้วยข้อมูลเก่า
+      if (Date.now() - (this._lastLocalWriteTime || 0) < 5000) {
+        return false;
+      }
+
       let hasUpdate = false;
 
-      // 1. Fetch Event Config (from campaigns cloud store)
+      // 1. Fetch Event Config
       try {
         const { data: cfgRow } = await sb.from('campaigns')
           .select('closed_reason')
@@ -378,29 +453,56 @@ window.ComedEventManager = {
         }
       } catch(e) {}
 
-      // 2. Fetch Registrations (from campaigns cloud store)
+      // 2. Fetch Registrations (ดึงจากตาราง event_registrations เป็นหลัก เพื่อความแม่นยำรายคน)
       try {
-        const { data: regsRow } = await sb.from('campaigns')
-          .select('closed_reason')
-          .eq('id', `event_regs_${targetEventId}`)
-          .maybeSingle();
+        let loadedRegs = null;
 
-        if (regsRow && regsRow.closed_reason) {
-          const cloudRegs = JSON.parse(regsRow.closed_reason);
-          if (Array.isArray(cloudRegs)) {
-            const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
-            const localStr = localStorage.getItem(key);
-            const cloudStr = JSON.stringify(cloudRegs);
-            if (localStr !== cloudStr) {
-              localStorage.setItem(key, cloudStr);
-              hasUpdate = true;
+        const { data: directRows, error: directErr } = await sb
+          .from('event_registrations')
+          .select('*')
+          .eq('event_id', targetEventId);
+
+        if (!directErr && Array.isArray(directRows) && directRows.length > 0) {
+          loadedRegs = directRows.map(r => ({
+            eventId: r.event_id,
+            studentId: r.student_id,
+            studentName: r.student_name,
+            nickname: r.nickname || '',
+            email: r.email || '',
+            departmentId: r.department_id,
+            departmentName: r.department_name,
+            roleId: r.role_id,
+            roleTitle: r.role_title,
+            note: r.note || '',
+            registeredAt: r.registered_at
+          }));
+        } else {
+          // ถ้าตารางตรงยังว่าง ให้ fallback ดึงจาก campaigns store
+          const { data: regsRow } = await sb.from('campaigns')
+            .select('closed_reason')
+            .eq('id', `event_regs_${targetEventId}`)
+            .maybeSingle();
+
+          if (regsRow && regsRow.closed_reason) {
+            const cloudRegs = JSON.parse(regsRow.closed_reason);
+            if (Array.isArray(cloudRegs)) {
+              loadedRegs = cloudRegs;
             }
           }
+        }
+
+        if (loadedRegs && Array.isArray(loadedRegs)) {
+          const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
+          const localStr = localStorage.getItem(key);
+          const cloudStr = JSON.stringify(loadedRegs);
+          if (localStr !== cloudStr) {
+            localStorage.setItem(key, cloudStr);
+            hasUpdate = true;
+          }
         } else {
-          // If not in cloud yet, push local initial registrations to cloud
           const localRegs = this.getRegistrations(targetEventId);
           if (localRegs.length > 0) {
-            this.syncAllRegistrationsToCloud(targetEventId);
+            await this.syncAllRegistrationsToCloud(targetEventId);
           }
         }
       } catch(e) {}
@@ -412,19 +514,28 @@ window.ComedEventManager = {
     }
   },
 
-  // สมัครรับการแจ้งเตือน Real-Time แบบทันที (Supabase Realtime Channel + Live Polling Fallback)
+  // สมัครรับการแจ้งเตือน Real-Time แบบทันที (Supabase Realtime Channel + Smart Polling Fallback)
   subscribeRealtime: function(eventId, onUpdateCallback) {
     const targetEventId = eventId || 'room_roles_69';
-    let isSubscribed = false;
 
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (sb && typeof sb.channel === 'function') {
-        const channelName = `realtime_event_${targetEventId}_${Date.now()}`;
+        const channelName = `realtime_events_all_${Date.now()}`;
         const channel = sb.channel(channelName);
 
-        // Listen for changes in 'campaigns' table (which houses event_cfg and event_regs)
+        // ฟังทั้งตาราง event_registrations (แถวเดี่ยว) และ campaigns
         channel
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'event_registrations'
+          }, async (payload) => {
+            await this.fetchCloudData(targetEventId);
+            if (typeof onUpdateCallback === 'function') {
+              onUpdateCallback({ type: 'table_change', payload });
+            }
+          })
           .on('postgres_changes', { 
             event: '*', 
             schema: 'public', 
@@ -440,7 +551,6 @@ window.ComedEventManager = {
           })
           .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-              isSubscribed = true;
               console.log(`[EventRealtime] ⚡ Connected to live channel: ${targetEventId}`);
             }
           });
@@ -449,8 +559,8 @@ window.ComedEventManager = {
       console.warn("[EventRealtime] Channel subscription warning:", e);
     }
 
-    // High-frequency, lightweight polling backup (Every 4 seconds)
-    // Ensures updates are 100% visible even if WebSocket disconnects
+    // Adaptive Polling Backup: ปรับเป็นทุก 10 วินาที เพื่อไม่ให้โหลดเซิร์ฟเวอร์หนัก
+    // และระบบจะไม่ fetch ทับถ้าผู้ใช้เพิ่งมีการบันทึกข้อมูลไป
     const pollInterval = setInterval(async () => {
       try {
         const updated = await this.fetchCloudData(targetEventId);
@@ -458,7 +568,7 @@ window.ComedEventManager = {
           onUpdateCallback({ type: 'poll_update' });
         }
       } catch(e) {}
-    }, 4000);
+    }, 10000);
 
     return () => {
       clearInterval(pollInterval);

@@ -90,11 +90,31 @@ function initUserSession() {
 function updateAuthWidget() {
   const btnText = document.getElementById('authTriggerText');
   const btn = document.getElementById('btnAuthTrigger');
+  const switchBtn = document.getElementById('btnSwitchUser');
   if (currentStudent && btnText) {
     btnText.textContent = `${currentStudent.nickname ? currentStudent.nickname + ' - ' : ''}${currentStudent.studentName}`;
     if (btn) {
       btn.classList.add('border-orange-500/50', 'bg-orange-500/10', 'text-orange-300');
     }
+    if (switchBtn) switchBtn.classList.remove('hidden');
+  } else {
+    if (btnText) btnText.textContent = "ระบุตัวตน / เข้าสู่ระบบ";
+    if (btn) {
+      btn.classList.remove('border-orange-500/50', 'bg-orange-500/10', 'text-orange-300');
+    }
+    if (switchBtn) switchBtn.classList.add('hidden');
+  }
+}
+
+function handleUserLogout() {
+  if (confirm("คุณต้องการเปลี่ยนชื่อผู้ใช้ / ออกจากระบบ หรือไม่?")) {
+    currentStudent = null;
+    localStorage.removeItem('COMED_USER_SESSION');
+    updateAuthWidget();
+    checkCurrentUserStatus();
+    renderDepartmentsGrid();
+    renderRosterTable();
+    alert("ออกจากระบบเรียบร้อยแล้ว คุณสามารถเลือกระบุตัวตนใหม่ได้");
   }
 }
 
@@ -289,7 +309,7 @@ async function submitRoleRegistration() {
 
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline-block mr-1"></i> กำลังบันทึก...`;
+    btn.innerHTML = `<span class="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5"></span> กำลังบันทึกและแย่งที่นั่ง...`;
   }
 
   try {
@@ -298,7 +318,8 @@ async function submitRoleRegistration() {
       note: note
     };
 
-    window.ComedEventManager.registerRole(currentEvent.id, studentPayload, pendingSelection.deptId, pendingSelection.roleId);
+    // Await server / atomic registration
+    await window.ComedEventManager.registerRole(currentEvent.id, studentPayload, pendingSelection.deptId, pendingSelection.roleId);
 
     // Trigger Confetti
     if (typeof confetti !== 'undefined') {
@@ -310,14 +331,13 @@ async function submitRoleRegistration() {
     }
 
     closeConfirmRoleModal();
-    renderDepartmentsGrid();
-    renderStats();
-    renderRosterTable();
-    checkCurrentUserStatus();
+    refreshEventUI();
 
-    alert(`🎉 ลงทะเบียนตำแหน่ง "${pendingSelection.roleTitle}" ใน${pendingSelection.deptName} เรียบร้อยแล้ว!`);
+    alert(`🎉 ลงทะเบียนตำแหน่ง "${pendingSelection.roleTitle}" ใน${pendingSelection.deptName} สำเร็จเรียบร้อย!`);
   } catch(err) {
-    alert("⚠️ " + err.message);
+    alert("⚠️ " + (err.message || "ไม่สามารถลงทะเบียนได้"));
+    // Refresh to get latest seats count
+    refreshEventUI();
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -326,18 +346,19 @@ async function submitRoleRegistration() {
   }
 }
 
-function handleCancelMyRole() {
+async function handleCancelMyRole() {
   if (!currentStudent) return;
   const reg = window.ComedEventManager.getStudentRegistration(currentEvent.id, currentStudent.studentId);
   if (!reg) return;
 
   if (confirm(`คุณต้องการยกเลิกการเลือกตำแหน่ง "${reg.roleTitle}" (${reg.departmentName}) ใช่หรือไม่?`)) {
-    window.ComedEventManager.cancelRegistration(currentEvent.id, currentStudent.studentId);
-    renderDepartmentsGrid();
-    renderStats();
-    renderRosterTable();
-    checkCurrentUserStatus();
-    alert("✅ ยกเลิกการเลือกตำแหน่งเรียบร้อยแล้ว คุณสามารถเลือกตำแหน่งใหม่ได้ทันที");
+    try {
+      await window.ComedEventManager.cancelRegistration(currentEvent.id, currentStudent.studentId);
+      refreshEventUI();
+      alert("✅ ยกเลิกการเลือกตำแหน่งเรียบร้อยแล้ว คุณสามารถเลือกตำแหน่งใหม่ได้ทันที");
+    } catch(err) {
+      alert("⚠️ เกิดข้อผิดพลาดในการยกเลิก: " + (err.message || ""));
+    }
   }
 }
 
