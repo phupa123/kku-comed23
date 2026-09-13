@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. Render Initial UI
   renderEventHeader();
+  renderDeptFilterChips();
   renderDepartmentsGrid();
   renderStats();
   renderRosterTable();
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function refreshEventUI() {
+  renderDeptFilterChips();
   renderDepartmentsGrid();
   renderStats();
   renderRosterTable();
@@ -169,6 +171,8 @@ function renderEventHeader() {
   }
 }
 
+let activeDeptCategory = 'all';
+
 function renderStats() {
   const regs = window.ComedEventManager.getRegistrations(currentEvent.id);
   const totalStudents = (window.STUDENTS_DATA || []).length || 60;
@@ -176,10 +180,58 @@ function renderStats() {
   const unregisteredCount = Math.max(0, totalStudents - registeredCount);
   const pct = Math.round((registeredCount / totalStudents) * 100);
 
-  document.getElementById('statRegisteredCount').textContent = registeredCount;
-  document.getElementById('statUnregisteredCount').textContent = unregisteredCount;
-  document.getElementById('statTotalDepts').textContent = (currentEvent.departments || []).length;
-  document.getElementById('statProgressPercent').textContent = `${pct}%`;
+  const regEl = document.getElementById('statRegisteredCount');
+  const unregEl = document.getElementById('statUnregisteredCount');
+  const deptsEl = document.getElementById('statTotalDepts');
+  const pctEl = document.getElementById('statProgressPercent');
+  const barEl = document.getElementById('statProgressBar');
+
+  if (regEl) regEl.textContent = registeredCount;
+  if (unregEl) unregEl.textContent = unregisteredCount;
+  if (deptsEl) deptsEl.textContent = (currentEvent.departments || []).length;
+  if (pctEl) pctEl.textContent = `${pct}%`;
+  if (barEl) barEl.style.width = `${pct}%`;
+}
+
+function renderDeptFilterChips() {
+  const container = document.getElementById('deptFilterChips');
+  if (!container || !currentEvent || !currentEvent.departments) return;
+
+  const regs = window.ComedEventManager.getRegistrations(currentEvent.id);
+
+  let chipsHtml = `
+    <button onclick="filterDeptCategory('all')" 
+      class="dept-chip ${activeDeptCategory === 'all' ? 'active bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'} flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+      <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+      <span>ทุกฝ่าย (${currentEvent.departments.length})</span>
+    </button>
+  `;
+
+  chipsHtml += currentEvent.departments.map(dept => {
+    const deptRegs = regs.filter(r => r.departmentId === dept.id);
+    const totalDeptSeats = dept.roles.reduce((sum, r) => sum + r.maxSeats, 0);
+    const isSelected = activeDeptCategory === dept.id;
+
+    return `
+      <button onclick="filterDeptCategory('${dept.id}')"
+        class="dept-chip ${isSelected ? 'active bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'} flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+        <i data-lucide="${dept.icon || 'circle'}" class="w-3.5 h-3.5"></i>
+        <span>${dept.name}</span>
+        <span class="px-1.5 py-0.2 rounded-md text-[10px] ${isSelected ? 'bg-black/20 text-white' : 'bg-slate-800 text-slate-400'}">
+          ${deptRegs.length}/${totalDeptSeats}
+        </span>
+      </button>
+    `;
+  }).join('');
+
+  container.innerHTML = chipsHtml;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function filterDeptCategory(deptId) {
+  activeDeptCategory = deptId;
+  renderDeptFilterChips();
+  renderDepartmentsGrid();
 }
 
 function renderDepartmentsGrid() {
@@ -189,51 +241,72 @@ function renderDepartmentsGrid() {
   const regs = window.ComedEventManager.getRegistrations(currentEvent.id);
   const myReg = currentStudent ? window.ComedEventManager.getStudentRegistration(currentEvent.id, currentStudent.studentId) : null;
 
-  container.innerHTML = currentEvent.departments.map(dept => {
+  const filteredDepts = activeDeptCategory === 'all' 
+    ? currentEvent.departments 
+    : currentEvent.departments.filter(d => d.id === activeDeptCategory);
+
+  if (filteredDepts.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-slate-500 text-sm">
+        ไม่พบฝ่ายที่ตรงกับตัวกรอง
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filteredDepts.map(dept => {
     // คำนวณยอดรวมของฝ่าย
     const deptRegs = regs.filter(r => r.departmentId === dept.id);
     const totalDeptSeats = dept.roles.reduce((sum, r) => sum + r.maxSeats, 0);
+    const isDeptFull = deptRegs.length >= totalDeptSeats;
 
     const rolesHtml = dept.roles.map(role => {
       const roleRegs = deptRegs.filter(r => r.roleId === role.id);
       const isFull = roleRegs.length >= role.maxSeats;
       const isMyRole = myReg && myReg.departmentId === dept.id && myReg.roleId === role.id;
+      const availableSeats = Math.max(0, role.maxSeats - roleRegs.length);
 
       // รายชื่อคนที่ลงตำแหน่งนี้
       const membersPills = roleRegs.map(m => `
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700 text-[11px] text-slate-200">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/90 border border-slate-700/80 text-[11px] text-slate-200">
           <i data-lucide="user" class="w-3 h-3 text-orange-400"></i>
-          <span>${m.nickname ? m.nickname + ' ' : ''}${m.studentName}</span>
+          <span class="font-bold">${m.nickname ? m.nickname : m.studentName.split(' ')[0]}</span>
+          <span class="text-[10px] text-slate-400">(${m.studentName})</span>
         </span>
       `).join('');
 
       return `
-        <div class="p-3.5 rounded-2xl bg-slate-900/90 border ${isMyRole ? 'border-orange-500 bg-orange-500/5' : 'border-slate-800'} space-y-2.5 transition">
-          <div class="flex items-start justify-between gap-2">
-            <div>
-              <div class="flex items-center gap-1.5">
-                <span class="font-bold text-white text-xs sm:text-sm">${role.title}</span>
-                ${isMyRole ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-orange-500 text-white font-black">คุณเลือกตำแหน่งนี้</span>' : ''}
+        <div class="p-3 sm:p-4 rounded-2xl bg-slate-900/95 border ${isMyRole ? 'border-orange-500 ring-1 ring-orange-500/50 bg-gradient-to-r from-orange-500/10 to-transparent' : 'border-slate-800/90 hover:border-slate-700/80'} space-y-2.5 transition">
+          <div class="flex items-start justify-between gap-2.5">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-black text-white text-xs sm:text-sm tracking-tight">${role.title}</span>
+                ${isMyRole ? '<span class="px-2 py-0.5 rounded-full text-[10px] bg-orange-500 text-white font-black animate-pulse">คุณอยู่ตำแหน่งนี้</span>' : ''}
               </div>
-              <span class="text-[11px] text-slate-400 block mt-0.5">
-                ที่นั่ง: <strong class="${isFull ? 'text-rose-400' : 'text-emerald-400'}">${roleRegs.length}/${role.maxSeats}</strong>
-              </span>
+              <div class="flex items-center gap-2 pt-0.5">
+                <span class="text-[11px] font-bold ${isFull ? 'text-rose-400' : 'text-emerald-400'} flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full ${isFull ? 'bg-rose-500' : 'bg-emerald-400'}"></span>
+                  ${isFull ? 'เต็มแล้ว' : `ว่าง ${availableSeats} ที่`} (${roleRegs.length}/${role.maxSeats})
+                </span>
+              </div>
             </div>
 
-            <!-- Action Button -->
-            <div>
+            <!-- Action Button (Mobile-optimized thumb touch target) -->
+            <div class="flex-shrink-0">
               ${isMyRole ? `
-                <button onclick="handleCancelMyRole()" class="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition cursor-pointer">
-                  ยกเลิก
+                <button onclick="handleCancelMyRole()" class="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/35 text-xs font-black transition cursor-pointer active:scale-95 flex items-center gap-1">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>ยกเลิก</span>
                 </button>
               ` : (isFull ? `
-                <button disabled class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold cursor-not-allowed">
-                  เต็มแล้ว
+                <button disabled class="px-3.5 py-2 rounded-xl bg-slate-800/80 text-slate-500 text-xs font-bold cursor-not-allowed border border-slate-700/50">
+                  เต็ม
                 </button>
               ` : `
                 <button onclick="handleSelectRoleClick('${dept.id}', '${role.id}', '${dept.name}', '${role.title}')"
-                  class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r ${myReg ? 'from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500' : 'from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500'} text-white text-xs font-black shadow-md transition cursor-pointer active:scale-95">
-                  ${myReg ? 'เปลี่ยนมาตำแหน่งนี้' : 'เลือกตำแหน่งนี้'}
+                  class="px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r ${myReg ? 'from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500' : 'from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500'} text-white text-xs font-black shadow-md shadow-orange-600/20 transition cursor-pointer active:scale-95 flex items-center gap-1">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  <span>${myReg ? 'ย้ายมาที่นี่' : 'เลือก'}</span>
                 </button>
               `)}
             </div>
@@ -241,13 +314,13 @@ function renderDepartmentsGrid() {
 
           <!-- Members List Preview -->
           ${roleRegs.length > 0 ? `
-            <div class="pt-2 border-t border-slate-800/80 flex flex-wrap gap-1.5 items-center">
-              <span class="text-[10px] text-slate-500 font-bold mr-1">สมาชิก:</span>
+            <div class="pt-2 border-t border-slate-800/70 flex flex-wrap gap-1.5 items-center">
+              <span class="text-[10px] text-slate-400 font-bold mr-0.5">เพื่อนในตำแหน่ง:</span>
               ${membersPills}
             </div>
           ` : `
-            <div class="pt-1.5 text-[10px] text-slate-500 italic">
-              ยังไม่มีผู้สมัครในตำแหน่งนี้ (ว่าง ${role.maxSeats} ที่นั่ง)
+            <div class="pt-1 text-[10px] text-slate-500 italic">
+              ✨ ยังไม่มีผู้เลือกตำแหน่งนี้ สามารถกดเลือกได้ทันที
             </div>
           `}
         </div>
@@ -255,26 +328,27 @@ function renderDepartmentsGrid() {
     }).join('');
 
     return `
-      <div class="glass-card rounded-[2rem] p-5 sm:p-6 space-y-4 border border-slate-800 hover:border-slate-700 transition">
+      <div class="glass-card rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 space-y-3.5 sm:space-y-4 border border-slate-800 hover:border-slate-700 transition">
+        <!-- Dept Header -->
         <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
           <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr ${dept.color || 'from-orange-500 to-amber-500'} text-white flex items-center justify-center font-bold shadow-lg">
-              <i data-lucide="${dept.icon || 'star'}" class="w-5 h-5"></i>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr ${dept.color || 'from-orange-500 to-amber-500'} text-white flex items-center justify-center font-bold shadow-lg flex-shrink-0">
+              <i data-lucide="${dept.icon || 'star'}" class="w-5 h-5 sm:w-6 sm:h-6"></i>
             </div>
             <div>
-              <div class="flex items-center gap-2">
-                <h4 class="text-base font-black text-white">${dept.name}</h4>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${dept.badgeColor || 'bg-orange-500/10 text-orange-400 border border-orange-500/30'}">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="text-sm sm:text-base font-black text-white tracking-tight">${dept.name}</h4>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${isDeptFull ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30' : (dept.badgeColor || 'bg-orange-500/10 text-orange-400 border border-orange-500/30')}">
                   ${deptRegs.length}/${totalDeptSeats} คน
                 </span>
               </div>
-              <p class="text-xs text-slate-400 mt-0.5 line-clamp-1">${dept.description || ''}</p>
+              <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-2">${dept.description || ''}</p>
             </div>
           </div>
         </div>
 
         <!-- Roles List -->
-        <div class="space-y-2.5">
+        <div class="space-y-2 sm:space-y-2.5">
           ${rolesHtml}
         </div>
       </div>

@@ -60,7 +60,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
   <script src="students_data.js"></script>
-  <script src="config/events_repo.js?v=2.0.1"></script>
+  <script src="config/events_repo.js?v=2.1.0"></script>
 
   <style>
     .glass-card {
@@ -72,8 +72,12 @@
     .glass-card:hover {
       border-color: rgba(249, 115, 22, 0.3);
     }
-    .glow-badge {
-      box-shadow: 0 0 20px -3px rgba(249, 115, 22, 0.4);
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 </head>
@@ -124,113 +128,128 @@
   </header>
 
   <!-- ================= MAIN CONTENT ================= -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 flex-grow space-y-6 sm:space-y-8">
 
-    <!-- Hero Event Header Banner -->
-    <div class="glass-card rounded-[2.5rem] p-6 sm:p-10 border border-orange-500/20 relative overflow-hidden">
+    <!-- Hero Event Header Banner (Responsive Compact Design) -->
+    <div class="glass-card rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 border border-orange-500/25 relative overflow-hidden">
       <div class="absolute -right-16 -top-16 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute -left-16 -bottom-16 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div class="relative z-10 space-y-4 max-w-3xl">
-        <div class="flex flex-wrap items-center gap-2">
-          <span id="eventStatusBadge" class="px-3 py-1 rounded-full text-xs font-black tracking-wide uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+      <div class="relative z-10 space-y-3 sm:space-y-4 max-w-4xl">
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <span id="eventStatusBadge" class="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-black tracking-wide uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
             <span>เปิดรับลงทะเบียน</span>
           </span>
-          <span id="eventRealtimeBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5 shadow-sm">
+          <span id="eventRealtimeBadge" class="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5 shadow-sm">
             <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
             <span id="eventRealtimeStatusText">⚡ Real-Time ซิงค์สด</span>
           </span>
-          <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
+          <span class="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
             นักศึกษา 60 คน
           </span>
-          <span id="eventDeadlineBadge" class="text-xs text-slate-400 flex items-center gap-1.5">
+          <span id="eventDeadlineBadge" class="text-[11px] sm:text-xs text-slate-400 flex items-center gap-1">
             <i data-lucide="clock" class="w-3.5 h-3.5 text-orange-400"></i>
             <span id="eventDeadlineText">กำลังโหลดกำหนดการ...</span>
           </span>
         </div>
 
-        <h2 id="eventMainTitle" class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+        <h2 id="eventMainTitle" class="text-xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-snug">
           เลือกฝ่ายและคณะกรรมการดำเนินงานห้อง/รุ่น COMED KKU 69
         </h2>
-        <p id="eventSubtitle" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-          ขอให้นักศึกษาชั้นปีที่ 1 ทุกท่าน (รหัส 69) ร่วมเลือกฝ่ายและตำแหน่งที่ตนเองสนใจเพื่อร่วมกันขับเคลื่อนกิจกรรมสาขาตลอดปีการศึกษา
+        <p id="eventSubtitle" class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
+          ขอให้นักศึกษาชั้นปีที่ 1 ทุกท่าน (รหัส 69) ร่วมเลือกฝ่ายและตำแหน่งที่สนใจเพื่อร่วมกันขับเคลื่อนกิจกรรมสาขาตลอดปีการศึกษา
         </p>
 
-        <!-- Current User Registration Status Card (Appears if user already registered) -->
-        <div id="userCurrentStatusCard" class="hidden p-4 sm:p-5 rounded-3xl bg-orange-500/10 border border-orange-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- Current User Registration Status Card (Pinned banner when user selected) -->
+        <div id="userCurrentStatusCard" class="hidden p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-transparent border border-orange-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-black shadow-lg">
-              <i data-lucide="award" class="w-6 h-6"></i>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-black shadow-md flex-shrink-0">
+              <i data-lucide="award" class="w-5 h-5 sm:w-6 sm:h-6"></i>
             </div>
-            <div>
-              <span class="text-[11px] font-bold text-orange-300 uppercase tracking-wider block">ตำแหน่งที่คุณได้ลงทะเบียนไว้แล้ว:</span>
-              <span id="userRegisteredRoleTitle" class="text-base sm:text-lg font-black text-white block">-</span>
-              <span id="userRegisteredDeptName" class="text-xs text-slate-400 block">-</span>
+            <div class="min-w-0">
+              <span class="text-[10px] sm:text-[11px] font-bold text-orange-400 uppercase tracking-wider block">ฝ่ายที่คุณสังกัดปัจจุบัน:</span>
+              <span id="userRegisteredRoleTitle" class="text-sm sm:text-base font-black text-white truncate block">-</span>
+              <span id="userRegisteredDeptName" class="text-xs text-slate-300 truncate block">-</span>
             </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="handleCancelMyRole()" class="px-4 py-2.5 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-              <span>ยกเลิก / เปลี่ยนฝ่าย</span>
+          <div class="flex items-center gap-2 flex-shrink-0 pt-1 sm:pt-0">
+            <button onclick="handleCancelMyRole()" class="w-full sm:w-auto px-3.5 py-2 rounded-xl sm:rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>ยกเลิก / เปลี่ยนตำแหน่ง</span>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Stats Grid -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div class="glass-card p-4 sm:p-5 rounded-3xl space-y-1">
-        <span class="text-[11px] text-slate-400 font-bold block">ลงทะเบียนแล้ว</span>
-        <div class="flex items-baseline gap-1.5">
-          <span id="statRegisteredCount" class="text-2xl sm:text-3xl font-black text-emerald-400">0</span>
-          <span class="text-xs text-slate-500">/ 60 คน</span>
+    <!-- Quick Stats Grid + Overall Visual Progress -->
+    <div class="space-y-3">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div class="glass-card p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl space-y-1">
+          <span class="text-[11px] text-slate-400 font-bold block">ลงทะเบียนแล้ว</span>
+          <div class="flex items-baseline gap-1.5">
+            <span id="statRegisteredCount" class="text-xl sm:text-3xl font-black text-emerald-400">0</span>
+            <span class="text-[11px] sm:text-xs text-slate-500">/ 60 คน</span>
+          </div>
+        </div>
+        <div class="glass-card p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl space-y-1">
+          <span class="text-[11px] text-slate-400 font-bold block">ยังไม่ได้เลือก</span>
+          <div class="flex items-baseline gap-1.5">
+            <span id="statUnregisteredCount" class="text-xl sm:text-3xl font-black text-amber-400">60</span>
+            <span class="text-[11px] sm:text-xs text-slate-500">คน</span>
+          </div>
+        </div>
+        <div class="glass-card p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl space-y-1">
+          <span class="text-[11px] text-slate-400 font-bold block">จำนวนฝ่ายทั้งหมด</span>
+          <div class="flex items-baseline gap-1.5">
+            <span id="statTotalDepts" class="text-xl sm:text-3xl font-black text-sky-400">6</span>
+            <span class="text-[11px] sm:text-xs text-slate-500">ฝ่าย</span>
+          </div>
+        </div>
+        <div class="glass-card p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl space-y-1">
+          <span class="text-[11px] text-slate-400 font-bold block">ความคืบหน้ารวม</span>
+          <div class="flex items-baseline gap-1.5">
+            <span id="statProgressPercent" class="text-xl sm:text-3xl font-black text-orange-400">0%</span>
+          </div>
         </div>
       </div>
-      <div class="glass-card p-4 sm:p-5 rounded-3xl space-y-1">
-        <span class="text-[11px] text-slate-400 font-bold block">ยังไม่ได้เลือก</span>
-        <div class="flex items-baseline gap-1.5">
-          <span id="statUnregisteredCount" class="text-2xl sm:text-3xl font-black text-amber-400">60</span>
-          <span class="text-xs text-slate-500">คน</span>
-        </div>
-      </div>
-      <div class="glass-card p-4 sm:p-5 rounded-3xl space-y-1">
-        <span class="text-[11px] text-slate-400 font-bold block">จำนวนฝ่ายทั้งหมด</span>
-        <div class="flex items-baseline gap-1.5">
-          <span id="statTotalDepts" class="text-2xl sm:text-3xl font-black text-sky-400">6</span>
-          <span class="text-xs text-slate-500">ฝ่าย</span>
-        </div>
-      </div>
-      <div class="glass-card p-4 sm:p-5 rounded-3xl space-y-1">
-        <span class="text-[11px] text-slate-400 font-bold block">ความคืบหน้ารวม</span>
-        <div class="flex items-baseline gap-1.5">
-          <span id="statProgressPercent" class="text-2xl sm:text-3xl font-black text-orange-400">0%</span>
-        </div>
+
+      <!-- Linear Progress Bar -->
+      <div class="w-full bg-slate-900/80 rounded-full h-2.5 sm:h-3 overflow-hidden border border-slate-800/80 p-0.5">
+        <div id="statProgressBar" class="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 rounded-full transition-all duration-500" style="width: 0%"></div>
       </div>
     </div>
 
-    <!-- ================= DEPARTMENTS GRID ================= -->
-    <div class="space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+    <!-- ================= DEPARTMENTS GRID & QUICK FILTER TABS ================= -->
+    <div class="space-y-4 sm:space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3 sm:pb-4">
         <div>
-          <h3 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-            <i data-lucide="layers" class="w-6 h-6 text-orange-400"></i>
+          <h3 class="text-lg sm:text-2xl font-black text-white flex items-center gap-2">
+            <i data-lucide="layers" class="w-5 h-5 sm:w-6 sm:h-6 text-orange-400"></i>
             <span>รายชื่อฝ่ายและตำแหน่งที่เปิดรับ</span>
           </h3>
-          <p class="text-xs text-slate-400 mt-1">คลิกเลือกตำแหน่งที่คุณต้องการสมัคร หรือดูรายชื่อเพื่อนที่อยู่ในแต่ละฝ่าย</p>
+          <p class="text-xs text-slate-400 mt-0.5">กดเลือกตำแหน่งที่คุณต้องการสมัคร หรือดูเพื่อนร่วมฝ่ายได้ทันที</p>
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="scrollToLiveRoster()" class="px-3.5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-800 transition flex items-center gap-1.5 cursor-pointer">
+          <button onclick="scrollToLiveRoster()" class="w-full sm:w-auto px-3.5 py-2 rounded-xl sm:rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-800 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-95">
             <i data-lucide="users" class="w-4 h-4 text-orange-400"></i>
             <span>ดูทำเนียบรวม 60 คน</span>
           </button>
         </div>
       </div>
 
+      <!-- Quick Department Category Filter Chips (Sticky scrollable on mobile) -->
+      <div class="sticky top-20 z-30 -mx-3 px-3 sm:mx-0 sm:px-0 py-2 bg-slate-950/90 backdrop-blur-md flex items-center gap-1.5 overflow-x-auto no-scrollbar border-b border-slate-800/60" id="deptFilterChips">
+        <button onclick="filterDeptCategory('all')" class="dept-chip active flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-sm transition">
+          ทุกฝ่าย (ทั้งหมด)
+        </button>
+        <!-- Populated dynamically via JS -->
+      </div>
+
       <!-- Department Cards Container (Rendered dynamically) -->
-      <div id="departmentsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div id="departmentsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <!-- Rendered via JS -->
       </div>
     </div>
@@ -463,6 +482,6 @@
   </div>
 
   <!-- Page Logic Script -->
-  <script src="assets/js/event.js?v=2.0.2"></script>
+  <script src="assets/js/event.js?v=2.1.0"></script>
 </body>
 </html>

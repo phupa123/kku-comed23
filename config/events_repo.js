@@ -241,7 +241,7 @@ window.ComedEventManager = {
       }
     }
 
-    // 3. บันทึกลง Local Cache
+    // 3. บันทึกลง Local Cache ทันที (Optimistic Write < 5ms)
     const regs = this.getRegistrations(event.id);
     const existingIdx = regs.findIndex(r => 
       (r.studentId && r.studentId === studentInfo.studentId) ||
@@ -280,8 +280,13 @@ window.ComedEventManager = {
     localStorage.setItem(key, JSON.stringify(regs));
     this._lastLocalWriteTime = Date.now();
 
-    // 4. บันทึกขึ้น Cloud พร้อมกันทั้ง 2 ระบบ (Dedicated Table + Campaigns Backup)
-    await this.syncRegistrationToSupabase(newRecord);
+    // 4. บันทึกขึ้น Cloud แบบ Non-blocking ทันทีเพื่อความเร็วสูงสุด
+    // ยิง upsert ตรงไปยัง event_registrations ทันทีเพื่อให้เพื่อนๆ ใน Realtime Channel ได้รับ Payload ในเสี้ยววินาที
+    if (sb) {
+      this.syncRegistrationToSupabase(newRecord).catch(err => {
+        console.warn("Background Supabase registration sync failed:", err);
+      });
+    }
 
     return newRecord;
   },
@@ -301,7 +306,10 @@ window.ComedEventManager = {
       regs = regs.filter(r => r !== target);
       localStorage.setItem(key, JSON.stringify(regs));
       this._lastLocalWriteTime = Date.now();
-      await this.deleteRegistrationFromSupabase(eventId, target.studentId);
+      // Non-blocking Cloud Deletion
+      this.deleteRegistrationFromSupabase(eventId, target.studentId).catch(err => {
+        console.warn("Background deletion failed:", err);
+      });
     }
     return target;
   },
@@ -345,8 +353,8 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
       sb.from('events').delete().eq('id', eventId).catch(() => {});
-      await sb.from('campaigns').delete().eq('id', `event_cfg_${eventId}`);
-      await sb.from('campaigns').delete().eq('id', `event_regs_${eventId}`);
+      sb.from('campaigns').delete().eq('id', `event_cfg_${eventId}`).catch(() => {});
+      sb.from('campaigns').delete().eq('id', `event_regs_${eventId}`).catch(() => {});
     } catch(e) {
       console.warn("Supabase Event Delete Suppressed:", e);
     }
@@ -377,28 +385,26 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
 
-      // 1. Primary: บันทึกลงตารางเฉพาะ event_registrations (Atomic Row Level)
-      try {
-        await sb.from('event_registrations').upsert({
-          id: `${regRecord.eventId}_${regRecord.studentId}`,
-          event_id: regRecord.eventId,
-          student_id: regRecord.studentId,
-          student_name: regRecord.studentName,
-          nickname: regRecord.nickname || '',
-          email: regRecord.email,
-          department_id: regRecord.departmentId,
-          department_name: regRecord.departmentName,
-          role_id: regRecord.roleId,
-          role_title: regRecord.roleTitle,
-          note: regRecord.note || '',
-          registered_at: regRecord.registeredAt || new Date().toISOString()
-        }, { onConflict: 'id' });
-      } catch(err1) {
-        console.warn("Direct event_registrations upsert error:", err1);
-      }
+      // 1. Primary: บันทึกลงตารางเฉพาะ event_registrations (Atomic Row Level) - Trigger Supabase Realtime Broadcast ทันที!
+      const upsertPromise = sb.from('event_registrations').upsert({
+        id: `${regRecord.eventId}_${regRecord.studentId}`,
+        event_id: regRecord.eventId,
+        student_id: regRecord.studentId,
+        student_name: regRecord.studentName,
+        nickname: regRecord.nickname || '',
+        email: regRecord.email,
+        department_id: regRecord.departmentId,
+        department_name: regRecord.departmentName,
+        role_id: regRecord.roleId,
+        role_title: regRecord.roleTitle,
+        note: regRecord.note || '',
+        registered_at: regRecord.registeredAt || new Date().toISOString()
+      }, { onConflict: 'id' });
 
-      // 2. Secondary Broadcast: อัปเดตไปยัง 'campaigns' ก้อนรวมสำหรับ Real-time / Fallback
-      await this.syncAllRegistrationsToCloud(regRecord.eventId);
+      // 2. Secondary Broadcast: อัปเดตไปยัง 'campaigns' ขนานกันโดยไม่ต้องรอกัน
+      const backupPromise = this.syncAllRegistrationsToCloud(regRecord.eventId);
+
+      await Promise.allSettled([upsertPromise, backupPromise]);
     } catch(e) {
       console.warn("Supabase Registration Sync Suppressed:", e);
     }
