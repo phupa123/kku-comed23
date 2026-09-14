@@ -227,7 +227,7 @@
           <div id="quotaProgressBar" class="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500 rounded-full transition-all duration-500 w-0"></div>
         </div>
         <div class="flex items-center justify-between text-[11px] text-slate-400">
-          <span>โควตามาตรฐานฟรี: 5.0 GB ต่อบัญชี</span>
+          <span id="quotaStandardText">โควตาพื้นที่ของคุณ: 5.0 GB</span>
           <span id="quotaRemainText" class="font-mono text-emerald-400">คงเหลือ 5.0 GB</span>
         </div>
       </div>
@@ -1018,16 +1018,12 @@
     }
 
     function getUserMaxQuotaBytes() {
-      if (!currentUser || !currentUser.email) return 5 * 1024 * 1024 * 1024;
-      const emailLower = currentUser.email.toLowerCase().trim();
-      const customQuotas = JSON.parse(localStorage.getItem('COMED_CUSTOM_QUOTAS_V1') || '{}');
-      if (customQuotas[emailLower]) {
-        return Number(customQuotas[emailLower]) * 1024 * 1024 * 1024;
+      if (window.MultiCloudUploader && typeof window.MultiCloudUploader.getUserSettings === 'function') {
+        const userCfg = window.MultiCloudUploader.getUserSettings(currentUser);
+        const quotaGB = userCfg && userCfg.quotaGB ? Number(userCfg.quotaGB) : 5;
+        return quotaGB * 1024 * 1024 * 1024;
       }
-      if (currentUser.isSpecialTester || emailLower === 'phupa5874@gmail.com') {
-        return 100 * 1024 * 1024 * 1024; // 100 GB for Super Admin
-      }
-      return 5 * 1024 * 1024 * 1024; // 5 GB default
+      return 5 * 1024 * 1024 * 1024; // 5 GB fallback
     }
 
     function getUserUsedBytes() {
@@ -1062,6 +1058,9 @@
 
       const pctText = document.getElementById('quotaPercentText');
       if (pctText) pctText.textContent = `ใช้ไป ${pct}% ของพื้นที่ ${totalGBFormatted} GB`;
+
+      const standardText = document.getElementById('quotaStandardText');
+      if (standardText) standardText.textContent = `โควตาพื้นที่ของคุณ: ${totalGBFormatted} GB`;
 
       const remainText = document.getElementById('quotaRemainText');
       if (remainText) remainText.textContent = `คงเหลือ ${remainFormatted}`;

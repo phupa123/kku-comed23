@@ -135,7 +135,7 @@
           <span class="text-xs text-slate-400 block font-bold">พื้นที่จัดเก็บของคุณ (Storage Quota):</span>
           <div class="flex items-baseline sm:justify-end gap-1.5">
             <span id="quotaUsedText" class="text-lg sm:text-xl font-black text-white">0.00 MB</span>
-            <span class="text-xs text-slate-500">/ 5.00 GB</span>
+            <span id="quotaTotalText" class="text-xs text-slate-500">/ 5.00 GB</span>
           </div>
         </div>
       </div>
@@ -586,6 +586,9 @@
 
       const usedText = document.getElementById('quotaUsedText');
       if (usedText) usedText.textContent = usedFormatted;
+
+      const totalText = document.getElementById('quotaTotalText');
+      if (totalText) totalText.textContent = `/ ${totalGBFormatted} GB`;
 
       const pctText = document.getElementById('quotaPercentText');
       if (pctText) pctText.textContent = `ใช้ไป ${pct}% ของพื้นที่ ${totalGBFormatted} GB`;

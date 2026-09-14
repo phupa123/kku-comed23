@@ -1369,11 +1369,9 @@
         const totalBytes = userFiles.reduce((acc, f) => acc + (Number(f.size) || 0), 0);
         const fileCount = userFiles.length;
 
-        // Check custom override
+        // Resolve settings using unified MultiCloudUploader.getUserSettings
+        const userSettings = window.MultiCloudUploader.getUserSettings(st);
         const override = overrides[st.id] || overrides[emailLower] || null;
-        const currentQuotaGB = override && override.quotaGB !== undefined ? override.quotaGB : (st.isSuperAdmin ? 20 : globalCfg.quotaGB);
-        const currentMaxDim = override && override.maxDimension !== undefined ? override.maxDimension : globalCfg.maxDimension;
-        const currentQuality = override && override.quality !== undefined ? override.quality : (st.isSuperAdmin ? 1.0 : globalCfg.quality);
 
         return {
           id: st.id,
@@ -1383,11 +1381,11 @@
           isSuperAdmin: st.isSuperAdmin,
           fileCount,
           totalBytes,
-          hasOverride: !!override || st.isSuperAdmin,
-          overrideNote: override?.note || (st.isSuperAdmin ? 'Super Admin / Tester' : ''),
-          quotaGB: currentQuotaGB,
-          maxDimension: currentMaxDim,
-          quality: currentQuality,
+          hasOverride: userSettings.isOverride || !!override || st.isSuperAdmin,
+          overrideNote: override?.note || userSettings.overrideNote || (st.isSuperAdmin ? 'Super Admin / Tester' : ''),
+          quotaGB: userSettings.quotaGB,
+          maxDimension: userSettings.maxDimension,
+          quality: userSettings.quality,
           avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${st.email || st.id}`
         };
       });

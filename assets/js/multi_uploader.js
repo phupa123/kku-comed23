@@ -152,6 +152,35 @@
         };
       }
 
+      // Check backward compatibility with COMED_CUSTOM_QUOTAS_V1
+      try {
+        const legacyQuotas = JSON.parse(localStorage.getItem('COMED_CUSTOM_QUOTAS_V1') || '{}');
+        const legacyVal = (email && legacyQuotas[email]) || (id && legacyQuotas[id]);
+        if (legacyVal) {
+          return {
+            quotaGB: Number(legacyVal),
+            maxDimension: globalCfg.maxDimension,
+            quality: globalCfg.quality,
+            autoCompress: globalCfg.autoCompress,
+            isOverride: true,
+            overrideNote: 'Legacy Quota'
+          };
+        }
+      } catch (e) {}
+
+      // Default for Super Admin / Special Tester (phupa5874@gmail.com)
+      const isSuper = (email === 'phupa5874@gmail.com') || (typeof userIdentifier === 'object' && userIdentifier.isSpecialTester);
+      if (isSuper) {
+        return {
+          quotaGB: 100, // 100 GB default for Super Admin
+          maxDimension: 4000,
+          quality: 1.0,
+          autoCompress: false,
+          isOverride: true,
+          overrideNote: 'Super Admin / Tester'
+        };
+      }
+
       return { ...globalCfg, isOverride: false };
     }
 
