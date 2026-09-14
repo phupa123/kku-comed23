@@ -451,5 +451,5 @@ function exportClassRosterExcel() {
   XLSX.utils.book_append_sheet(wb, wsChild, "งานวันเด็ก");
 
   const today = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(wb, `รายชื่อกิจกรรมรุ่น69_ซุ้มบัณฑิต_วันเด็ก_${today}.xlsx`);
+  XLSX.writeFile(wb, `รายชื่อกิจกรรม_COMED23_KKU63_ซุ้มบัณฑิต_วันเด็ก_${today}.xlsx`);
 }

@@ -87,7 +87,7 @@
             <span>HOST ADMIN PORTAL</span>
           </div>
           <h2 class="text-2xl font-black text-white tracking-tight">เข้าสู่ระบบผู้ดูแล</h2>
-          <p class="text-xs text-slate-400 mt-1">สาขาคอมพิวเตอร์ศึกษา มข. (รหัส 69)</p>
+          <p class="text-xs text-slate-400 mt-1">สาขาคอมพิวเตอร์ศึกษา มข. (COMED23 KKU63)</p>
         </div>
       </div>
 
@@ -103,90 +103,73 @@
           </svg>
           <span>Login with Google</span>
         </button>
-
         <button type="button" id="tabModePassword" onclick="switchLoginMode('password')"
           class="py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-          <i data-lucide="key" class="w-4 h-4"></i>
-          <span>กรอกรหัสผ่าน</span>
+          <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+          <span>รหัสผ่านแอดมิน</span>
         </button>
       </div>
 
-      <!-- Mode 1: Login with Google View -->
+      <!-- VIEW 1: GOOGLE ONE-TAP LOGIN -->
       <div id="viewModeGoogle" class="space-y-4 pt-1">
-        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-center space-y-3">
-          <div class="w-12 h-12 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner">
-            <svg class="w-6 h-6" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-            </svg>
-          </div>
-          <div>
-            <h4 class="text-sm font-black text-white">เข้าสู่ระบบด้วย Google (KKU Mail)</h4>
-            <p class="text-[11px] text-slate-400 mt-0.5">เลือกบัญชี Google มข. ของคุณที่มุมขวาบน หรือกดปุ่มด้านล่างนี้</p>
-          </div>
-          <div id="googleAdminButtonWrapper" class="flex justify-center min-h-[44px] pt-1"></div>
-        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          เข้าสู่ระบบด่วนด้วยบัญชี Google มหาวิทยาลัยขอนแก่น (<strong class="text-amber-300">@kkumail.com</strong>) ที่ได้รับอนุญาต
+        </p>
 
-        <button type="button" onclick="triggerGoogleOneTapPrompt()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 text-orange-400 hover:text-orange-300 font-bold text-xs rounded-xl border border-orange-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-          <span>แสดงหน้าต่างเลือกบัญชี Google มุมขวาบน</span>
-        </button>
+        <!-- Container สำหรับปุ่ม Google อย่างเป็นทางการ (GSI) -->
+        <div id="googleAdminButtonWrapper" class="flex justify-center min-h-[44px]"></div>
+
+        <div class="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 text-[11px] text-slate-400 text-left space-y-1">
+          <div class="font-bold text-amber-400 flex items-center gap-1">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            <span>หมายเหตุความปลอดภัย:</span>
+          </div>
+          <p>ระบบจะตรวจสอบสิทธิ์อัตโนมัติเฉพาะอีเมลที่อยู่ในรายชื่อผู้ดูแลระบบเท่านั้น</p>
+        </div>
       </div>
 
-      <!-- Mode 2: Password Login View (Initially Hidden or Toggled) -->
-      <div id="viewModePassword" class="hidden space-y-4 pt-1">
-        <form id="adminLoginForm" onsubmit="event.preventDefault(); handleAdminLogin(event);" class="space-y-4 text-left">
+      <!-- VIEW 2: PASSWORD LOGIN -->
+      <div id="viewModePassword" class="hidden space-y-4 pt-1 text-left">
+        <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-3.5">
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
-              <span>อีเมลผู้ดูแลระบบ (KKU Mail)</span>
-              <span class="text-[10px] text-orange-400 font-normal">เฉพาะแอดมิน</span>
-            </label>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">อีเมลบัญชีผู้ดูแล (@kkumail.com)</label>
             <div class="relative">
-              <input type="email" id="adminEmailInput" placeholder="เช่น thitiwut.a@kkumail.com"
-                class="w-full pl-11 pr-4 py-3.5 bg-slate-950/90 border border-slate-700/80 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition font-sans">
-              <i data-lucide="mail" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none"></i>
+              <i data-lucide="mail" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"></i>
+              <input type="email" id="adminEmailInput" required placeholder="เช่น thitiwut.a@kkumail.com"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-mono">
             </div>
           </div>
-
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่าน (Password)</label>
-            <div class="relative flex items-center">
-              <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่านของคุณ"
-                class="w-full pl-11 pr-14 py-3.5 bg-slate-950/90 border border-slate-700/80 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition font-sans">
-              <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none"></i>
-              <button type="button" id="pwdToggleBtn" onclick="togglePasswordVisibility('adminPasswordInput', 'pwdToggleIconWrap')"
-                class="absolute right-0 top-0 bottom-0 px-4 text-slate-400 hover:text-white transition cursor-pointer flex items-center justify-center rounded-r-2xl z-10"
-                title="แสดง/ซ่อนรหัสผ่าน">
-                <span id="pwdToggleIconWrap" class="pointer-events-none flex items-center justify-center">
-                  <i data-lucide="eye" class="w-5 h-5"></i>
-                </span>
-              </button>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่านระบบ (Password)</label>
+            <div class="relative">
+              <i data-lucide="lock" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"></i>
+              <input type="password" id="adminPasswordInput" required placeholder="••••••••••••"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-mono">
             </div>
           </div>
 
-          <button type="button" id="btnLoginSubmit" onclick="handleAdminLogin(event)"
-            class="w-full py-3.5 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
+          <button type="submit"
+            class="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-orange-500/30 transition transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer mt-2">
             <i data-lucide="log-in" class="w-4 h-4"></i>
-            <span>เข้าสู่ระบบ Dashboard ด้วยรหัสผ่าน</span>
+            <span>เข้าสู่ระบบด้วยรหัสผ่าน</span>
           </button>
         </form>
       </div>
 
+      <!-- Login Error Alert (Shared) -->
       <div id="loginErrorMsg"
-        class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 p-3.5 rounded-2xl flex items-center gap-2">
-        <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
-        <span id="loginErrorText">อีเมลหรือรหัสผ่านไม่ถูกต้อง</span>
+        class="hidden p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-2 text-left">
+        <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0 text-rose-400"></i>
+        <span id="loginErrorText">ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง</span>
       </div>
 
-      <div class="pt-2">
-        <a href="index.html"
-          class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-orange-400 transition font-bold py-1">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-          <span>กลับสู่หน้าเว็บไซต์หลัก</span>
+      <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-500">
+        <a href="payment.html" class="hover:text-slate-300 flex items-center gap-1">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> กลับหน้าระบบชำระเงิน
         </a>
+        <span class="font-mono text-[10px]">Cloud Security V2.3</span>
       </div>
+
     </div>
   </div>
 
@@ -205,11 +188,11 @@
             </div>
             <div>
               <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[11px] font-black text-orange-400 uppercase tracking-wider">COMED KKU 69</span>
+                <span class="text-[11px] font-black text-orange-400 uppercase tracking-wider">COMED23</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-950/60 text-orange-300 border border-orange-500/30">KKU63</span>
                 <span
                   class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-orange-500/20 text-orange-300 border border-orange-500/30">Host
                   Admin</span>
-                <span class="text-[9px] text-slate-500 font-mono hidden md:inline">v2.3.0 (30 ส.ค. 69)</span>
               </div>
               <h1 class="text-sm sm:text-lg font-black text-white">ระบบจัดการหลังบ้าน: ค่าทำป้ายสาขาวิชาเอก</h1>
             </div>

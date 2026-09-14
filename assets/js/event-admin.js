@@ -675,8 +675,8 @@ function exportRosterExcel() {
 
   const ws = XLSX.utils.json_to_sheet(excelRows);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "รายชื่อเลือกฝ่าย_COMED69");
+  XLSX.utils.book_append_sheet(wb, ws, "รายชื่อเลือกฝ่าย_COMED23");
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(wb, `COMED69_Room_Roles_${todayStr}.xlsx`);
+  XLSX.writeFile(wb, `COMED23_KKU63_Room_Roles_${todayStr}.xlsx`);
 }

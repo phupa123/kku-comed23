@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบควบคุมศูนย์กลาง (Central Admin Hub) | สาขาวิชาคอมพิวเตอร์ศึกษา มข. รุ่น 69</title>
-  <meta name="description" content="ศูนย์ควบคุมและจัดการระบบหลัก COMED KKU 69 Master Admin Command Center">
+  <title>ระบบควบคุมศูนย์กลาง (Central Admin Hub) | สาขาวิชาคอมพิวเตอร์ศึกษา มข. (COMED23 KKU63)</title>
+  <meta name="description" content="ศูนย์ควบคุมและจัดการระบบหลัก COMED23 KKU63 Master Admin Command Center">
 
   <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -71,7 +71,7 @@
           Master Command Center
         </span>
         <h2 class="text-2xl font-black text-white">ระบบควบคุมแอดมินศูนย์กลาง</h2>
-        <p class="text-xs text-slate-400">สาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น (รุ่น 69)</p>
+        <p class="text-xs text-slate-400">สาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น (COMED23 KKU63)</p>
       </div>
 
       <!-- Login Mode Switcher Tabs -->
@@ -88,49 +88,66 @@
         </button>
       </div>
 
-      <!-- Mode 1: Google One-Tap Login View -->
-      <div id="viewModeGoogle" class="space-y-4 pt-2">
-        <p class="text-xs text-slate-400 leading-relaxed">
-          เข้าสู่ระบบด่วนด้วยบัญชี <strong class="text-amber-300">@kkumail.com</strong> ที่ได้รับสิทธิ์แอดมิน
-        </p>
-        <div id="googleAdminButtonWrapper" class="flex justify-center min-h-[44px]"></div>
-      </div>
-
-      <!-- Mode 2: Standard Email & Password View -->
-      <div id="viewModePassword" class="hidden space-y-4 pt-2 text-left">
-        <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-300">อีเมลแอดมิน</label>
-            <input type="email" id="adminEmailInput" placeholder="name@kkumail.com"
-              class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-mono">
+      <!-- GOOGLE AUTH MODE -->
+      <div id="authModeGoogle" class="space-y-4">
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-400 text-left space-y-2">
+          <div class="flex items-center gap-1.5 font-bold text-slate-300">
+            <i data-lucide="info" class="w-4 h-4 text-orange-400"></i>
+            <span>สิทธิ์การเข้าถึงสำหรับผู้ดูแลระบบ</span>
           </div>
+          <p class="text-[11px] leading-relaxed">
+            ระบบตรวจสอบสิทธิ์จากอีเมล <span class="font-mono text-orange-400 font-bold">@kkumail.com</span> ที่ได้รับอนุญาตเท่านั้น บุคคลทั่วไปไม่สามารถเข้าใช้งานได้
+          </p>
+        </div>
 
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-300">รหัสผ่านแอดมิน</label>
-            <input type="password" id="adminPasswordInput" placeholder="••••••••••"
-              class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-mono">
+        <div class="pt-2 flex justify-center min-h-[48px] items-center">
+          <div id="googleAdminBtnWrapper" class="scale-105"></div>
+        </div>
+
+        <div id="googleAuthAdminError" class="hidden p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs text-center font-bold">
+          อีเมลนี้ไม่มีสิทธิ์เข้าถึงระบบแอดมิน
+        </div>
+      </div>
+
+      <!-- PASSWORD AUTH MODE -->
+      <div id="authModePassword" class="hidden space-y-4 text-left">
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-300 block">อีเมลหรือบัญชีแอดมิน</label>
+          <div class="relative">
+            <i data-lucide="mail" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"></i>
+            <input type="email" id="adminInputEmail" placeholder="admin@kkumail.com"
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500 font-mono transition">
           </div>
+        </div>
 
-          <button type="submit"
-            class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-            <i data-lucide="log-in" class="w-4 h-4"></i>
-            <span>เข้าสู่ระบบศูนย์กลาง</span>
-          </button>
-        </form>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-300 block">รหัสผ่านลับแอดมิน</label>
+          <div class="relative">
+            <i data-lucide="lock" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"></i>
+            <input type="password" id="adminInputPassword" placeholder="••••••••••••"
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500 font-mono transition">
+          </div>
+        </div>
+
+        <button onclick="handlePasswordLogin()"
+          class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs shadow-lg shadow-orange-500/25 transition cursor-pointer flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>เข้าสู่ระบบด้วยรหัสผ่าน</span>
+        </button>
+
+        <div id="passwordAuthError" class="hidden p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs text-center font-bold">
+          อีเมลหรือรหัสผ่านไม่ถูกต้อง
+        </div>
       </div>
 
-      <!-- Login Error Alert -->
-      <div id="loginErrorMsg" class="hidden p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-2 text-left">
-        <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0 text-rose-400"></i>
-        <span id="loginErrorText">อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง</span>
-      </div>
-
-      <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-500">
-        <a href="index.html" class="hover:text-slate-300 flex items-center gap-1">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> กลับหน้าหลัก
+      <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+        <a href="index.html" class="hover:text-slate-300 transition flex items-center gap-1">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>กลับหน้าแรก</span>
         </a>
-        <span>Security Layer V2.5</span>
+        <span class="font-mono text-[10px]">v2.5.0 • KKU Security</span>
       </div>
+
     </div>
   </div>
 
@@ -148,7 +165,8 @@
           </a>
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-[11px] font-black uppercase tracking-wider text-orange-500">COMED KKU 69</span>
+              <span class="text-[11px] font-black uppercase tracking-wider text-orange-500">COMED23</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-950/50 text-orange-300 border border-orange-500/30">KKU63</span>
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-live"></span> Master Control
               </span>
@@ -778,7 +796,7 @@
     <!-- Footer -->
     <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
       <div class="max-w-7xl mx-auto px-4">
-        <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU 69)</p>
+        <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED23 • KKU63)</p>
       </div>
     </footer>
 
