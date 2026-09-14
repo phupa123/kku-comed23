@@ -189,6 +189,25 @@
     <!-- Provider Selector Bar with Advice -->
     <!-- Provider Selector Bar with Advice & Uncompressed Toggle -->
     <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
+      
+      <!-- Mode Switcher: Single File vs Multi File -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3.5">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4 text-orange-400"></i>
+          <span class="text-xs font-bold text-white">รูปแบบการอัปโหลด (Upload Mode):</span>
+        </div>
+        <div class="flex items-center bg-slate-950 p-1 rounded-2xl border border-slate-800">
+          <button id="btnModeSingle" type="button" onclick="setUploadMode('single')" class="px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-orange-600 text-white shadow-md">
+            <i data-lucide="file" class="w-3.5 h-3.5"></i>
+            <span>ไฟล์เดี่ยว (Single File)</span>
+          </button>
+          <button id="btnModeMulti" type="button" onclick="setUploadMode('multi')" class="px-4 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+            <i data-lucide="files" class="w-3.5 h-3.5"></i>
+            <span>หลายไฟล์พร้อมกัน (Multi Files)</span>
+          </button>
+        </div>
+      </div>
+
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <label class="text-xs font-bold text-white flex items-center gap-1.5">
           <i data-lucide="server" class="w-4 h-4 text-orange-400"></i>
@@ -250,70 +269,80 @@
         class="border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-3xl p-8 sm:p-12 text-center transition-all cursor-pointer bg-slate-950/40 group relative overflow-hidden"
         onclick="triggerFileSelect()">
         
-        <input type="file" id="fileInput" class="hidden" onchange="handleFileSelect(event)">
+        <!-- File Input (dynamic multiple attribute controlled by JS) -->
+        <input type="file" id="fileInput" class="hidden" onchange="handleFileInputChange(event)">
+        <!-- Hidden input specifically for adding more files in multi-file mode -->
+        <input type="file" id="addMoreFileInput" multiple class="hidden" onchange="handleAddMoreFiles(event)">
 
         <div class="space-y-4 relative z-10">
           <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl bg-gradient-to-tr from-orange-500/20 to-amber-500/10 text-orange-400 border border-orange-500/30 flex items-center justify-center group-hover:scale-110 transition duration-300 shadow-xl">
-            <i data-lucide="cloud-upload" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+            <i data-lucide="cloud-upload" id="dropAreaIcon" class="w-8 h-8 sm:w-10 sm:h-10"></i>
           </div>
 
           <div class="space-y-1.5">
-            <h3 class="text-base sm:text-lg font-bold text-white">ลากและวางไฟล์ที่นี่ หรือ <span class="text-orange-400 underline">คลิกเพื่อเลือกไฟล์</span></h3>
-            <p class="text-xs text-slate-400">เลือกไฟล์ก่อนเพื่อตรวจสอบความเข้ากันได้ของโฮสต์ ขนาดไฟล์ และพรีวิว</p>
+            <h3 class="text-base sm:text-lg font-bold text-white" id="dropAreaTitle">
+              ลากและวางไฟล์ที่นี่ หรือ <span class="text-orange-400 underline">คลิกเพื่อเลือกไฟล์</span>
+            </h3>
+            <p class="text-xs text-slate-400" id="dropAreaSubtitle">
+              เลือกไฟล์เพื่อตรวจสอบความเข้ากันได้ของโฮสต์ ขนาดไฟล์ และพรีวิวก่อนอัปโหลด
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- SELECTED FILE STAGING CARD (พรีวิวไฟล์ + ตรวจสอบความเข้ากันได้ + ขนาดไฟล์) -->
-      <div id="fileStagingCard" class="hidden p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 transition-all">
-        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+      <!-- FILE STAGING & QUEUE CARD (รองรับทั้ง Single File และ Multi-Files + เพิ่มไฟล์ได้) -->
+      <div id="fileStagingCard" class="hidden p-5 sm:p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 transition-all shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
           <div class="flex items-center gap-2">
-            <i data-lucide="file-check-2" class="w-4 h-4 text-orange-400"></i>
-            <span class="text-xs font-bold text-white">ไฟล์ที่เลือกพร้อมดำเนินการ</span>
-          </div>
-          <button onclick="cancelSelectedFile()" class="text-xs text-slate-400 hover:text-rose-400 transition flex items-center gap-1">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            <span>ยกเลิกไฟล์นี้</span>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-          <!-- Thumbnail / Icon -->
-          <div class="sm:col-span-3 flex items-center justify-center bg-slate-900 rounded-xl border border-slate-800 p-2 min-h-[90px]">
-            <img id="stagingPreviewImg" src="" alt="Thumbnail" class="max-h-20 max-w-full object-contain rounded-lg hidden">
-            <div id="stagingFileIconBox" class="flex flex-col items-center justify-center text-slate-400">
-              <i data-lucide="file-text" id="stagingFileIcon" class="w-10 h-10 text-orange-400"></i>
-              <span id="stagingFileExtBadge" class="text-[10px] font-mono uppercase font-bold text-slate-400 mt-1">FILE</span>
+            <div class="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">
+              <i data-lucide="list-checks" class="w-4 h-4"></i>
             </div>
-          </div>
-
-          <!-- File Info & Checks -->
-          <div class="sm:col-span-9 space-y-2">
             <div>
-              <h4 id="stagingFileName" class="text-sm font-bold text-white truncate">-</h4>
-              <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-0.5">
-                <span>ขนาดไฟล์: <strong id="stagingFileSizeText" class="text-amber-400 font-mono">-</strong></span>
-                <span>•</span>
-                <span>ประเภท: <span id="stagingFileMimeText" class="font-mono text-slate-300">-</span></span>
-              </div>
+              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                <span>รายการไฟล์ที่เลือกเตรียมอัปโหลด</span>
+                <span id="stagingTotalCountBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">1 ไฟล์</span>
+              </h4>
+              <span id="stagingTotalSizeText" class="text-[11px] text-slate-400">ขนาดรวม: 0 MB</span>
             </div>
+          </div>
 
-            <!-- Provider Compatibility Warning/Success Alert -->
-            <div id="stagingCompatibilityAlert" class="p-3 rounded-xl text-xs flex items-start gap-2.5 transition">
-              <!-- Rendered via JS -->
-            </div>
+          <div class="flex items-center gap-2">
+            <!-- Add More Files Button (Active in Multi Mode) -->
+            <button id="btnAddMoreFiles" onclick="triggerAddMoreFiles()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 hover:text-amber-300 text-xs font-bold border border-slate-800 transition flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>เพิ่มไฟล์อีก</span>
+            </button>
+            <button onclick="cancelAllStagedFiles()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-300 text-xs font-bold border border-slate-800 transition flex items-center gap-1">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>ยกเลิกทั้งหมด</span>
+            </button>
           </div>
         </div>
 
-        <!-- Action Button -->
-        <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-800/80">
-          <button onclick="triggerFileSelect()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs border border-slate-800 transition">
-            เลือกไฟล์อื่น
-          </button>
-          <button id="btnConfirmUpload" onclick="executeUpload()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-            <i data-lucide="upload" class="w-4 h-4"></i>
-            <span>เริ่มอัปโหลดไฟล์ทันที</span>
-          </button>
+        <!-- Overall Batch Compatibility Banner -->
+        <div id="batchCompatibilityAlert" class="hidden"></div>
+
+        <!-- Staged Files List (Cards or Rows) -->
+        <div id="stagedFilesList" class="space-y-2.5 max-h-80 overflow-y-auto custom-scrollbar pr-1">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- Staging Action Footer -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
+          <div class="text-xs text-slate-400">
+            ปลายทาง: <span id="stagingTargetProviderText" class="font-bold text-white">Cloudinary CDN</span> | 
+            โหมด: <span id="stagingModeLabel" class="font-bold text-amber-400">ไฟล์เดี่ยว</span>
+          </div>
+
+          <div class="flex items-center gap-2 justify-end">
+            <button onclick="triggerFileSelect()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs border border-slate-800 transition">
+              เลือกใหม่
+            </button>
+            <button id="btnConfirmUpload" onclick="executeUpload()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+              <span id="btnUploadText">เริ่มอัปโหลดทันที (1 ไฟล์)</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -347,30 +376,25 @@
         </div>
       </div>
 
-      <!-- Result Card (Hidden until uploaded) -->
-      <div id="uploadResultCard" class="hidden space-y-4 p-5 rounded-2xl bg-slate-950/90 border border-emerald-500/30">
+      <!-- Result Card for Completed Upload (Single & Multi Batch) -->
+      <div id="uploadResultCard" class="hidden space-y-4 p-5 rounded-2xl bg-slate-950/90 border border-emerald-500/30 shadow-2xl">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2 text-emerald-400 text-xs font-bold">
             <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-            <span>อัปโหลดขึ้นคลาวด์ถาวรสำเร็จแล้ว!</span>
+            <span id="resultSummaryTitle">อัปโหลดขึ้นคลาวด์ถาวรสำเร็จแล้ว!</span>
           </div>
-          <span id="resultProviderBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Cloudinary</span>
+          <span id="resultProviderBadge" class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Cloudinary</span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-          <div class="sm:col-span-3">
-            <img id="resultPreviewImg" src="" alt="Preview" class="w-full h-24 object-contain rounded-xl bg-slate-900 border border-slate-800 p-1">
-          </div>
-          <div class="sm:col-span-9 space-y-2">
-            <label class="text-[11px] font-bold text-slate-400 block">ลิงก์ไฟล์ถาวร (Permanent Direct URL):</label>
-            <div class="flex items-center gap-2">
-              <input type="text" id="resultUrlInput" readonly class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs outline-none focus:border-orange-500">
-              <button onclick="copyResultUrl()" class="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer active:scale-95">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                <span id="copyBtnText">คัดลอก</span>
-              </button>
-            </div>
-          </div>
+        <!-- Multi-Result Container (renders 1 or multiple completed files) -->
+        <div id="resultItemsContainer" class="space-y-3">
+          <!-- Rendered via JS -->
+        </div>
+
+        <div class="pt-2 border-t border-slate-800/80 flex justify-end">
+          <button onclick="dismissResultCard()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition">
+            เสร็จสิ้น / อัปโหลดชุดใหม่
+          </button>
         </div>
       </div>
 
@@ -724,9 +748,43 @@
       if (modal) modal.classList.add('hidden');
     }
 
-    // Uncompressed Mode State
+    // Upload Mode State ('single' | 'multi')
+    let uploadMode = 'single';
     let isUncompressedMode = false;
-    let currentSelectedFile = null;
+    let selectedFilesQueue = []; // Array of File objects
+
+    function setUploadMode(mode) {
+      uploadMode = mode;
+      const btnSingle = document.getElementById('btnModeSingle');
+      const btnMulti = document.getElementById('btnModeMulti');
+      const fileInput = document.getElementById('fileInput');
+      const dropTitle = document.getElementById('dropAreaTitle');
+      const dropSub = document.getElementById('dropAreaSubtitle');
+      const addMoreBtn = document.getElementById('btnAddMoreFiles');
+
+      if (mode === 'single') {
+        btnSingle.className = 'px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-orange-600 text-white shadow-md';
+        btnMulti.className = 'px-4 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+        if (fileInput) fileInput.removeAttribute('multiple');
+        if (dropTitle) dropTitle.innerHTML = 'ลากและวางไฟล์ที่นี่ หรือ <span class="text-orange-400 underline">คลิกเพื่อเลือกไฟล์เดี่ยว</span>';
+        if (dropSub) dropSub.textContent = 'เลือก 1 ไฟล์เพื่อตรวจสอบความเข้ากันได้ของโฮสต์ ขนาดไฟล์ และพรีวิวก่อนอัปโหลด';
+        if (addMoreBtn) addMoreBtn.classList.add('hidden');
+
+        // If we currently have more than 1 file queued, keep only the first one
+        if (selectedFilesQueue.length > 1) {
+          selectedFilesQueue = [selectedFilesQueue[0]];
+        }
+      } else {
+        btnMulti.className = 'px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md';
+        btnSingle.className = 'px-4 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+        if (fileInput) fileInput.setAttribute('multiple', 'multiple');
+        if (dropTitle) dropTitle.innerHTML = 'ลากและวางหลายไฟล์พร้อมกัน หรือ <span class="text-orange-400 underline">คลิกเพื่อเลือกหลายไฟล์</span>';
+        if (dropSub) dropSub.textContent = 'สามารถเลือกได้หลายไฟล์พร้อมกัน และสามารถกดปุ่ม "เพิ่มไฟล์อีก" ได้ตลอดเวลา';
+        if (addMoreBtn) addMoreBtn.classList.remove('hidden');
+      }
+
+      renderStagedQueue();
+    }
 
     function handleUncompressedToggle(checked) {
       isUncompressedMode = checked;
@@ -745,18 +803,53 @@
           badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
         }
       }
-      if (currentSelectedFile) {
-        validateAndRenderSelectedFile(currentSelectedFile);
-      }
+      renderStagedQueue();
     }
 
     function onProviderOrSettingChange() {
-      if (currentSelectedFile) {
-        validateAndRenderSelectedFile(currentSelectedFile);
-      }
+      renderStagedQueue();
     }
 
-    // 3. Drag & Drop & File Selection with Staging & Compatibility Validation
+    // Trigger File Picker for primary dropzone
+    function triggerFileSelect() {
+      const fileInput = document.getElementById('fileInput');
+      if (fileInput) fileInput.click();
+    }
+
+    // Trigger File Picker specifically for adding more files
+    function triggerAddMoreFiles() {
+      const addInput = document.getElementById('addMoreFileInput');
+      if (addInput) addInput.click();
+    }
+
+    function handleFileInputChange(e) {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+
+      if (uploadMode === 'single') {
+        selectedFilesQueue = [files[0]];
+      } else {
+        selectedFilesQueue = [...files];
+      }
+      renderStagedQueue();
+    }
+
+    function handleAddMoreFiles(e) {
+      const newFiles = Array.from(e.target.files || []);
+      if (newFiles.length === 0) return;
+
+      // Deduplicate by name and size
+      for (const nf of newFiles) {
+        if (!selectedFilesQueue.some(f => f.name === nf.name && f.size === nf.size)) {
+          selectedFilesQueue.push(nf);
+        }
+      }
+      // Reset input value so same files can be re-selected if needed
+      e.target.value = '';
+      renderStagedQueue();
+    }
+
+    // Drag & Drop event bindings
     const dropArea = document.getElementById('dropArea');
     ['dragenter', 'dragover'].forEach(name => {
       dropArea.addEventListener(name, (e) => {
@@ -771,183 +864,252 @@
       });
     });
     dropArea.addEventListener('drop', (e) => {
-      const file = e.dataTransfer.files && e.dataTransfer.files[0];
-      if (file) handleFileSelectedForStaging(file);
+      const droppedFiles = Array.from(e.dataTransfer.files || []);
+      if (droppedFiles.length === 0) return;
+
+      if (uploadMode === 'single') {
+        selectedFilesQueue = [droppedFiles[0]];
+      } else {
+        // In multi mode, append and deduplicate
+        for (const nf of droppedFiles) {
+          if (!selectedFilesQueue.some(f => f.name === nf.name && f.size === nf.size)) {
+            selectedFilesQueue.push(nf);
+          }
+        }
+      }
+      renderStagedQueue();
     });
 
-    function handleFileSelect(e) {
-      const file = e.target.files && e.target.files[0];
-      if (file) handleFileSelectedForStaging(file);
+    function removeStagedFile(index) {
+      selectedFilesQueue.splice(index, 1);
+      renderStagedQueue();
     }
 
-    function handleFileSelectedForStaging(file) {
-      currentSelectedFile = file;
-      validateAndRenderSelectedFile(file);
-    }
-
-    function cancelSelectedFile() {
-      currentSelectedFile = null;
+    function cancelAllStagedFiles() {
+      selectedFilesQueue = [];
       const fileInput = document.getElementById('fileInput');
       if (fileInput) fileInput.value = '';
-      const stagingCard = document.getElementById('fileStagingCard');
-      if (stagingCard) stagingCard.classList.add('hidden');
-      const dropArea = document.getElementById('dropArea');
-      if (dropArea) dropArea.classList.remove('hidden');
+      const addInput = document.getElementById('addMoreFileInput');
+      if (addInput) addInput.value = '';
+      renderStagedQueue();
     }
 
-    function validateAndRenderSelectedFile(file) {
-      if (!file) return;
-
-      const stagingCard = document.getElementById('fileStagingCard');
-      const dropArea = document.getElementById('dropArea');
-      const nameEl = document.getElementById('stagingFileName');
-      const sizeEl = document.getElementById('stagingFileSizeText');
-      const mimeEl = document.getElementById('stagingFileMimeText');
-      const previewImg = document.getElementById('stagingPreviewImg');
-      const iconBox = document.getElementById('stagingFileIconBox');
-      const extBadge = document.getElementById('stagingFileExtBadge');
-      const alertBox = document.getElementById('stagingCompatibilityAlert');
-      const btnUpload = document.getElementById('btnConfirmUpload');
-
-      dropArea.classList.add('hidden');
-      stagingCard.classList.remove('hidden');
-
-      nameEl.textContent = file.name;
-      sizeEl.textContent = formatBytes(file.size);
-      mimeEl.textContent = file.type || 'ไม่ระบุประเภท (Binary)';
-
-      const ext = (file.name.split('.').pop() || '').toUpperCase();
-      if (extBadge) extBadge.textContent = ext || 'FILE';
-
-      // Thumbnail handling
+    // Helper: validate a single file against provider limits
+    function validateFileForProvider(file, provider) {
       const isImg = file.type && file.type.startsWith('image/');
-      if (isImg) {
-        previewImg.src = URL.createObjectURL(file);
-        previewImg.classList.remove('hidden');
-        iconBox.classList.add('hidden');
-      } else {
-        previewImg.classList.add('hidden');
-        iconBox.classList.remove('hidden');
-      }
-
-      // Check Provider Compatibility
-      const provider = document.getElementById('userPreferredProvider')?.value || 'cloudinary';
-      let isCompatible = true;
-      let alertHtml = '';
+      const ext = (file.name.split('.').pop() || '').toUpperCase();
 
       if (provider === 'imgbb') {
         if (!isImg) {
-          isCompatible = false;
-          alertHtml = `
-            <div class="flex items-start gap-2.5 text-rose-300 bg-rose-950/50 border border-rose-500/30 p-3 rounded-xl w-full">
-              <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5"></i>
-              <div>
-                <strong class="text-white block font-bold">ImgBB ไม่รองรับไฟล์ประเภทนี้!</strong>
-                <span>ImgBB ให้บริการเฉพาะไฟล์รูปภาพ (JPG, PNG, GIF, WebP) เท่านั้น ไม่สามารถอัปโหลดไฟล์ <strong>.${ext}</strong> ได้ แนะนำให้สลับไปใช้ <strong>Catbox.moe</strong> แทน</span>
-              </div>
-            </div>
-          `;
-        } else if (file.size > 32 * 1024 * 1024) {
-          isCompatible = false;
-          alertHtml = `
-            <div class="flex items-start gap-2.5 text-rose-300 bg-rose-950/50 border border-rose-500/30 p-3 rounded-xl w-full">
-              <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5"></i>
-              <div>
-                <strong class="text-white block font-bold">ขนาดไฟล์เกินขีดจำกัด ImgBB!</strong>
-                <span>ขนาดไฟล์ของคุณ (${formatBytes(file.size)}) เกินขีดจำกัดสูงสุด 32 MB ของ ImgBB แนะนำให้สลับไปใช้ Catbox.moe</span>
-              </div>
-            </div>
-          `;
-        } else {
-          alertHtml = `
-            <div class="flex items-center gap-2 text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 p-2.5 rounded-xl w-full">
-              <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
-              <span>ไฟล์รูปภาพเข้ากันได้ดีกับ <strong>ImgBB API</strong> (ขนาด ${formatBytes(file.size)})</span>
-            </div>
-          `;
+          return {
+            valid: false,
+            badge: '❌ ไม่รองรับ',
+            badgeClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+            msg: `ImgBB รับเฉพาะไฟล์รูปภาพ (ไม่รองรับ .${ext}) แนะนำเลือก Catbox.moe`
+          };
         }
-      } else if (provider === 'cloudinary') {
-        if (file.size > 30 * 1024 * 1024) {
-          isCompatible = false;
-          alertHtml = `
-            <div class="flex items-start gap-2.5 text-rose-300 bg-rose-950/50 border border-rose-500/30 p-3 rounded-xl w-full">
-              <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5"></i>
-              <div>
-                <strong class="text-white block font-bold">ขนาดไฟล์เกิน 30 MB!</strong>
-                <span>Cloudinary บัญชีฟรีจำกัดขนาดไฟล์ไม่เกิน 30 MB ต่อไฟล์ แนะนำให้เลือก Catbox.moe ซึ่งรองรับได้ถึง 200 MB</span>
-              </div>
-            </div>
-          `;
-        } else {
-          alertHtml = `
-            <div class="flex items-center gap-2 text-cyan-300 bg-cyan-950/40 border border-cyan-500/30 p-2.5 rounded-xl w-full">
-              <i data-lucide="zap" class="w-4 h-4 text-cyan-400 flex-shrink-0"></i>
-              <span>ไฟล์พร้อมอัปโหลดผ่าน <strong>Cloudinary CDN</strong> (โหลดรวดเร็ว ความเร็วสูงพิเศษ)</span>
-            </div>
-          `;
+        if (file.size > 32 * 1024 * 1024) {
+          return {
+            valid: false,
+            badge: '⚠️ ขนาดเกิน',
+            badgeClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+            msg: `ขนาดเกินขีดจำกัด 32 MB ของ ImgBB (${formatBytes(file.size)})`
+          };
         }
-      } else if (provider === 'catbox') {
-        if (file.size > 200 * 1024 * 1024) {
-          isCompatible = false;
-          alertHtml = `
-            <div class="flex items-start gap-2.5 text-rose-300 bg-rose-950/50 border border-rose-500/30 p-3 rounded-xl w-full">
-              <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5"></i>
-              <div>
-                <strong class="text-white block font-bold">ขนาดไฟล์เกิน 200 MB!</strong>
-                <span>Catbox.moe จำกัดขนาดไม่เกิน 200 MB ต่อไฟล์</span>
-              </div>
-            </div>
-          `;
-        } else {
-          alertHtml = `
-            <div class="flex items-center gap-2 text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 p-2.5 rounded-xl w-full">
-              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
-              <span>ไฟล์ทุกประเภทเข้ากันได้กับ <strong>Catbox.moe</strong> อย่างสมบูรณ์แบบ (ถาวร ไม่หมดอายุ)</span>
-            </div>
-          `;
-        }
+        return {
+          valid: true,
+          badge: '✅ รองรับ',
+          badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+          msg: `รูปภาพเข้ากันได้ดีกับ ImgBB API`
+        };
       }
 
-      // Check Quota Overflow
-      const currentUsed = getUserUsedBytes();
-      const maxQuotaBytes = getUserMaxQuotaBytes();
-      if (currentUsed + file.size > maxQuotaBytes) {
-        isCompatible = false;
-        alertHtml = `
-          <div class="flex items-start gap-2.5 text-rose-300 bg-rose-950/50 border border-rose-500/30 p-3 rounded-xl w-full">
-            <i data-lucide="hard-drive" class="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5"></i>
-            <div>
-              <strong class="text-white block font-bold">พื้นที่จัดเก็บของคุณไม่เพียงพอ!</strong>
-              <span>ไฟล์นี้ขนาด ${formatBytes(file.size)} แต่โควตาของคุณเหลือเพียง ${formatBytes(Math.max(0, maxQuotaBytes - currentUsed))}</span>
+      if (provider === 'cloudinary') {
+        if (file.size > 30 * 1024 * 1024) {
+          return {
+            valid: false,
+            badge: '⚠️ ขนาดเกิน 30MB',
+            badgeClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+            msg: `ขนาดเกิน 30 MB สำหรับ Cloudinary ฟรี แนะนำเลือก Catbox.moe`
+          };
+        }
+        return {
+          valid: true,
+          badge: '⚡ โหลดเร็วพิเศษ',
+          badgeClass: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+          msg: `รองรับ Cloudinary CDN ความเร็วสูง`
+        };
+      }
+
+      if (provider === 'catbox') {
+        if (file.size > 200 * 1024 * 1024) {
+          return {
+            valid: false,
+            badge: '⚠️ ขนาดเกิน 200MB',
+            badgeClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+            msg: `Catbox จำกัดขนาดไม่เกิน 200 MB ต่อไฟล์`
+          };
+        }
+        return {
+          valid: true,
+          badge: '🚀 ถาวร ไม่จำกัด',
+          badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+          msg: `รองรับไฟล์ทุกประเภท ถาวรตลอดกาล`
+        };
+      }
+
+      return { valid: true, badge: 'ปกติ', badgeClass: 'bg-slate-800 text-slate-300', msg: '' };
+    }
+
+    // Render Staging Queue Table & Validation
+    function renderStagedQueue() {
+      const stagingCard = document.getElementById('fileStagingCard');
+      const dropArea = document.getElementById('dropArea');
+      const countBadge = document.getElementById('stagingTotalCountBadge');
+      const sizeText = document.getElementById('stagingTotalSizeText');
+      const modeLabel = document.getElementById('stagingModeLabel');
+      const providerText = document.getElementById('stagingTargetProviderText');
+      const listContainer = document.getElementById('stagedFilesList');
+      const batchAlert = document.getElementById('batchCompatibilityAlert');
+      const btnUpload = document.getElementById('btnConfirmUpload');
+      const btnUploadText = document.getElementById('btnUploadText');
+      const addMoreBtn = document.getElementById('btnAddMoreFiles');
+
+      if (selectedFilesQueue.length === 0) {
+        if (stagingCard) stagingCard.classList.add('hidden');
+        if (dropArea) dropArea.classList.remove('hidden');
+        return;
+      }
+
+      // Show staging card, hide dropArea
+      if (stagingCard) stagingCard.classList.remove('hidden');
+      if (dropArea) dropArea.classList.add('hidden');
+
+      const provider = document.getElementById('userPreferredProvider')?.value || 'cloudinary';
+      const providerName = window.MultiCloudUploader.getProviderName(provider);
+      if (providerText) providerText.textContent = providerName;
+      if (modeLabel) modeLabel.textContent = uploadMode === 'multi' ? `หลายไฟล์ (${selectedFilesQueue.length} ไฟล์)` : 'ไฟล์เดี่ยว (Single File)';
+
+      // Show/hide addMore button
+      if (addMoreBtn) {
+        if (uploadMode === 'multi') addMoreBtn.classList.remove('hidden');
+        else addMoreBtn.classList.add('hidden');
+      }
+
+      // Calculate Total Size
+      const totalBytes = selectedFilesQueue.reduce((acc, f) => acc + f.size, 0);
+      if (countBadge) countBadge.textContent = `${selectedFilesQueue.length} ไฟล์`;
+      if (sizeText) sizeText.textContent = `ขนาดรวมทั้งหมด: ${formatBytes(totalBytes)}`;
+
+      // Validate all files
+      let anyInvalid = false;
+      let invalidCount = 0;
+
+      listContainer.innerHTML = selectedFilesQueue.map((file, idx) => {
+        const check = validateFileForProvider(file, provider);
+        if (!check.valid) {
+          anyInvalid = true;
+          invalidCount++;
+        }
+
+        const isImg = file.type && file.type.startsWith('image/');
+        const ext = (file.name.split('.').pop() || '').toUpperCase();
+        const thumbSrc = isImg ? URL.createObjectURL(file) : '';
+
+        return `
+          <div class="p-3.5 rounded-xl bg-slate-900/80 border ${check.valid ? 'border-slate-800' : 'border-rose-500/40 bg-rose-950/20'} flex items-center justify-between gap-3 transition">
+            <div class="flex items-center gap-3 overflow-hidden">
+              <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                ${isImg 
+                  ? `<img src="${thumbSrc}" class="w-full h-full object-cover rounded-lg">`
+                  : `<div class="text-center font-mono font-bold text-[10px] text-orange-400"><i data-lucide="file-text" class="w-5 h-5 mx-auto"></i><span>${ext}</span></div>`
+                }
+              </div>
+
+              <div class="space-y-0.5 overflow-hidden">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-xs text-white truncate max-w-xs sm:max-w-md block" title="${file.name}">${file.name}</span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-md border font-bold ${check.badgeClass}">
+                    ${check.badge}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 text-[11px] text-slate-400">
+                  <span class="font-mono text-amber-400 font-bold">${formatBytes(file.size)}</span>
+                  <span>•</span>
+                  <span>${file.type || 'Binary'}</span>
+                  ${!check.valid ? `<span class="text-rose-400 font-bold ml-1">• ${check.msg}</span>` : ''}
+                </div>
+              </div>
             </div>
+
+            <button onclick="removeStagedFile(${idx})" class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition flex-shrink-0 cursor-pointer" title="ลบไฟล์นี้ออกจากคิว">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
           </div>
         `;
+      }).join('');
+
+      // Check User Quota against total batch size
+      const currentUsed = getUserUsedBytes();
+      const maxQuotaBytes = getUserMaxQuotaBytes();
+      let quotaExceeded = false;
+      if (currentUsed + totalBytes > maxQuotaBytes) {
+        quotaExceeded = true;
+        anyInvalid = true;
       }
 
-      alertBox.innerHTML = alertHtml;
-      btnUpload.disabled = !isCompatible;
+      // Render Batch Alert if needed
+      if (quotaExceeded) {
+        batchAlert.className = 'p-3 rounded-xl bg-rose-950/40 border border-rose-500/40 text-xs text-rose-300 flex items-start gap-2.5';
+        batchAlert.innerHTML = `
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <strong class="text-white block font-bold">ขนาดไฟล์รวมเกินโควตาคงเหลือของคุณ!</strong>
+            <span>ขนาดชุดไฟล์นี้รวม ${formatBytes(totalBytes)} แต่โควตาของคุณเหลือเพียง ${formatBytes(Math.max(0, maxQuotaBytes - currentUsed))}</span>
+          </div>
+        `;
+        batchAlert.classList.remove('hidden');
+      } else if (invalidCount > 0) {
+        batchAlert.className = 'p-3 rounded-xl bg-rose-950/30 border border-rose-500/30 text-xs text-rose-300 flex items-start gap-2.5';
+        batchAlert.innerHTML = `
+          <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <strong class="text-white block font-bold">มี ${invalidCount} ไฟล์ที่ไม่รองรับกับ ${providerName}!</strong>
+            <span>กรุณาลบไฟล์ที่มีปัญหาออก หรือสลับไปใช้บริการอื่นที่รองรับ เช่น Catbox.moe</span>
+          </div>
+        `;
+        batchAlert.classList.remove('hidden');
+      } else {
+        batchAlert.classList.add('hidden');
+      }
+
+      // Update upload button state
+      btnUpload.disabled = anyInvalid;
+      if (btnUploadText) {
+        btnUploadText.textContent = `เริ่มอัปโหลดทันที (${selectedFilesQueue.length} ไฟล์)`;
+      }
 
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    function executeUpload() {
-      if (!currentSelectedFile) return;
-      startUpload(currentSelectedFile);
-    }
+    // Execute Batch Upload (Sequentially or with progress tracking per file and total)
+    async function executeUpload() {
+      if (selectedFilesQueue.length === 0) return;
 
-    async function startUpload(file) {
       // 1. Must be logged in
       if (!currentUser) {
         openAuthModal();
         return;
       }
 
-      // 2. Check Storage Quota (Custom per user or Global)
+      // 2. Validate Quota
+      const totalBytes = selectedFilesQueue.reduce((acc, f) => acc + f.size, 0);
       const currentUsed = getUserUsedBytes();
       const maxQuotaBytes = getUserMaxQuotaBytes();
       const quotaGBFormatted = (maxQuotaBytes / (1024 * 1024 * 1024)).toFixed(1);
-      if (currentUsed + file.size > maxQuotaBytes) {
-        alert(`⚠️ พื้นที่จัดเก็บของคุณเต็มโควตา ${quotaGBFormatted} GB แล้ว!\n\nขนาดไฟล์: ${formatBytes(file.size)}\nพื้นที่คงเหลือ: ${formatBytes(Math.max(0, maxQuotaBytes - currentUsed))}\n\nกรุณาลบไฟล์เก่าที่คุณไม่ได้ใช้ออกก่อนเพื่อคืนพื้นที่ หรือแจ้งผู้ดูแลระบบเพื่อขอขยายโควตา`);
+
+      if (currentUsed + totalBytes > maxQuotaBytes) {
+        alert(`⚠️ พื้นที่จัดเก็บของคุณเต็มโควตา ${quotaGBFormatted} GB แล้ว!\n\nขนาดรวม: ${formatBytes(totalBytes)}\nพื้นที่คงเหลือ: ${formatBytes(Math.max(0, maxQuotaBytes - currentUsed))}\n\nกรุณาลบไฟล์เก่าออกก่อนเพื่อคืนพื้นที่ หรือแจ้งผู้ดูแลระบบเพื่อขอขยายโควตา`);
         return;
       }
 
@@ -965,14 +1127,9 @@
       if (resultCard) resultCard.classList.add('hidden');
       if (progressBox) progressBox.classList.remove('hidden');
 
-      progressBar.style.width = '5%';
-      percentText.textContent = '5%';
-      bytesText.textContent = `0 / ${formatBytes(file.size)}`;
-      statusText.innerHTML = `<span>กำลังเตรียมไฟล์...</span>`;
-
       let chosenProvider = document.getElementById('userPreferredProvider')?.value || 'cloudinary';
       if (chosenProvider === 'freeimage') {
-        chosenProvider = 'cloudinary'; // FreeImage host is blocked by upstream
+        chosenProvider = 'cloudinary';
       }
 
       const providerDisplayName = window.MultiCloudUploader.getProviderName(chosenProvider);
@@ -981,79 +1138,136 @@
         compressModeLabel.innerHTML = isUncompressedMode ? '💎 ต้นฉบับแท้ 100%' : '⚡ บีบอัดอัตโนมัติ';
       }
 
-      try {
-        const res = await window.MultiCloudUploader.upload(file, {
-          preferredProvider: chosenProvider,
-          skipCompression: isUncompressedMode,
-          category: 'อัปโหลดทั่วไป',
-          uploader: {
-            id: currentUser.studentId || currentUser.email,
-            name: currentUser.name,
-            email: currentUser.email
-          },
-          onProgress: (pct, msg, details = {}) => {
-            progressBar.style.width = pct + '%';
-            percentText.textContent = pct + '%';
-            statusText.innerHTML = `<span>${msg}</span>`;
+      const totalFiles = selectedFilesQueue.length;
+      let completedFiles = [];
+      let currentFileIndex = 0;
 
-            if (details.loadedBytes && details.totalBytes) {
-              bytesText.textContent = `${formatBytes(details.loadedBytes)} / ${formatBytes(details.totalBytes)}`;
-            } else if (file.size) {
-              const estLoaded = Math.round((pct / 100) * file.size);
-              bytesText.textContent = `${formatBytes(estLoaded)} / ${formatBytes(file.size)}`;
+      for (let i = 0; i < totalFiles; i++) {
+        const file = selectedFilesQueue[i];
+        currentFileIndex = i + 1;
+
+        // Base progress for completed files in batch
+        const baseBatchPct = Math.round((i / totalFiles) * 100);
+        const perFileWeight = 100 / totalFiles;
+
+        statusText.innerHTML = `<span>กำลังอัปโหลดไฟล์ที่ ${currentFileIndex}/${totalFiles}: <strong>${file.name}</strong></span>`;
+        bytesText.textContent = `ไฟล์ ${currentFileIndex}/${totalFiles} (${formatBytes(file.size)})`;
+
+        try {
+          const res = await window.MultiCloudUploader.upload(file, {
+            preferredProvider: chosenProvider,
+            skipCompression: isUncompressedMode,
+            category: 'อัปโหลดทั่วไป',
+            uploader: {
+              id: currentUser.studentId || currentUser.email,
+              name: currentUser.name,
+              email: currentUser.email
+            },
+            onProgress: (pct, msg, details = {}) => {
+              const currentBatchPct = Math.min(99, Math.round(baseBatchPct + (pct * (perFileWeight / 100))));
+              progressBar.style.width = currentBatchPct + '%';
+              percentText.textContent = currentBatchPct + '%';
+              statusText.innerHTML = `<span>[${currentFileIndex}/${totalFiles}] ${msg}</span>`;
+
+              if (details.loadedBytes && details.totalBytes) {
+                bytesText.textContent = `${formatBytes(details.loadedBytes)} / ${formatBytes(details.totalBytes)} (ไฟล์ที่ ${currentFileIndex}/${totalFiles})`;
+              }
             }
+          });
+
+          if (res && res.url) {
+            completedFiles.push({
+              file: file,
+              result: res
+            });
           }
-        });
-
-        if (res && res.url) {
-          progressBar.style.width = '100%';
-          percentText.textContent = '100%';
-          bytesText.textContent = `${formatBytes(file.size)} / ${formatBytes(file.size)}`;
-          statusText.innerHTML = `<span>✨ อัปโหลดสำเร็จสมบูรณ์!</span>`;
-
-          setTimeout(() => {
-            progressBox.classList.add('hidden');
-            resultCard.classList.remove('hidden');
-            document.getElementById('resultUrlInput').value = res.url;
-            document.getElementById('resultProviderBadge').textContent = window.MultiCloudUploader.getProviderName(res.provider);
-            const previewImg = document.getElementById('resultPreviewImg');
-            if (file.type.startsWith('image/')) {
-              previewImg.src = res.url;
-              previewImg.classList.remove('hidden');
-            } else {
-              previewImg.classList.add('hidden');
-            }
-
-            currentSelectedFile = null;
-            const dropArea = document.getElementById('dropArea');
-            if (dropArea) dropArea.classList.remove('hidden');
-
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-            updateQuotaDisplay();
-            renderMyFiles();
-          }, 600);
+        } catch (err) {
+          console.error(`Upload failed for ${file.name}:`, err);
+          statusText.innerHTML = `<span class="text-rose-400 font-bold">⚠️ ไฟล์ "${file.name}" ขัดข้อง: ${err.message}</span>`;
+          // Continue with next file or stop
         }
-      } catch (err) {
-        statusText.innerHTML = `<span class="text-rose-400 font-bold">⚠️ เกิดข้อผิดพลาด: ${err.message}</span>`;
-        // Allow user to go back to staging to re-try or choose another host
-        setTimeout(() => {
-          if (confirm(`การอัปโหลดขัดข้อง: "${err.message}"\n\nต้องการกลับไปเลือกผู้ให้บริการอื่นหรือไม่?`)) {
-            progressBox.classList.add('hidden');
-            if (stagingCard) stagingCard.classList.remove('hidden');
-          }
-        }, 1200);
       }
+
+      // Finish Batch
+      progressBar.style.width = '100%';
+      percentText.textContent = '100%';
+      statusText.innerHTML = `<span>✨ อัปโหลดสำเร็จครบทั้ง ${completedFiles.length}/${totalFiles} ไฟล์แล้ว!</span>`;
+
+      setTimeout(() => {
+        progressBox.classList.add('hidden');
+        renderUploadResults(completedFiles);
+        selectedFilesQueue = [];
+        updateQuotaDisplay();
+        renderMyFiles();
+      }, 700);
     }
 
-    function copyResultUrl() {
-      const input = document.getElementById('resultUrlInput');
+    function renderUploadResults(completedFiles) {
+      const resultCard = document.getElementById('uploadResultCard');
+      const title = document.getElementById('resultSummaryTitle');
+      const badge = document.getElementById('resultProviderBadge');
+      const container = document.getElementById('resultItemsContainer');
+      if (!resultCard || !container) return;
+
+      if (completedFiles.length === 0) {
+        alert("ไม่สามารถอัปโหลดไฟล์ใดๆ สำเร็จได้ กรุณาตรวจสอบการเชื่อมต่อ");
+        cancelAllStagedFiles();
+        return;
+      }
+
+      title.textContent = completedFiles.length > 1 
+        ? `อัปโหลดสำเร็จครบทั้ง ${completedFiles.length} ไฟล์!`
+        : `อัปโหลดขึ้นคลาวด์ถาวรสำเร็จแล้ว!`;
+
+      badge.textContent = window.MultiCloudUploader.getProviderName(completedFiles[0]?.result?.provider || 'cloudinary');
+
+      container.innerHTML = completedFiles.map((item, idx) => {
+        const f = item.file;
+        const res = item.result;
+        const isImg = f.type && f.type.startsWith('image/');
+        const urlId = `resultUrlInput_${idx}`;
+
+        return `
+          <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2 truncate max-w-sm">
+                <i data-lucide="${isImg ? 'image' : 'file-text'}" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+                <span class="font-bold text-white truncate">${f.name}</span>
+                <span class="text-slate-400 font-mono text-[11px]">(${formatBytes(f.size)})</span>
+              </div>
+              <a href="${res.url}" target="_blank" class="text-sky-400 hover:underline text-xs flex items-center gap-1 font-bold flex-shrink-0">
+                <span>เปิดดูไฟล์</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input type="text" id="${urlId}" value="${res.url}" readonly class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-orange-500">
+              <button onclick="copySingleResultUrl('${urlId}')" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer active:scale-95">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span>คัดลอก</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      resultCard.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function dismissResultCard() {
+      const resultCard = document.getElementById('uploadResultCard');
+      if (resultCard) resultCard.classList.add('hidden');
+      cancelAllStagedFiles();
+    }
+
+    function copySingleResultUrl(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
       input.select();
       navigator.clipboard.writeText(input.value);
-      const btnText = document.getElementById('copyBtnText');
-      btnText.textContent = 'คัดลอกแล้ว!';
-      setTimeout(() => {
-        btnText.textContent = 'คัดลอก';
-      }, 2000);
+      alert("📋 คัดลอกลิงก์เรียบร้อยแล้ว!");
     }
 
     // 4. My Uploaded Files Management
