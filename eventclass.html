@@ -6,8 +6,8 @@
   <script src="assets/js/maintenance-guard.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ลงชื่อ 2 กิจกรรมห้อง COMED KKU 69 | ซุ้มบัณฑิต & วันเด็ก</title>
-  <meta name="description" content="ระบบลงทะเบียน 2 กิจกรรมใหญ่ ซุ้มพี่บัณฑิต และ งานวันเด็ก สาขาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น">
+  <title>ลงชื่อ 2 กิจกรรมห้อง COMED23 KKU63 | ซุ้มบัณฑิต & วันเด็ก</title>
+  <meta name="description" content="ระบบลงทะเบียน 2 กิจกรรมใหญ่ ซุ้มพี่บัณฑิต และ งานวันเด็ก สาขาคอมพิวเตอร์ศึกษา (COMED23 KKU63) มหาวิทยาลัยขอนแก่น">
   <link rel="icon" type="image/png" href="logo.png">
 
   <!-- Google Fonts -->
@@ -54,7 +54,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
   <script src="students_data.js"></script>
-  <script src="config/events_repo.js?v=2.4.0"></script>
+  <script src="config/events_repo.js?v=2.6.0"></script>
 
   <style>
     .clean-card {
@@ -74,6 +74,10 @@
       color: #ffffff !important;
       border-color: #059669 !important;
     }
+    .step-disabled {
+      opacity: 0.5;
+      cursor: not-allowed !important;
+    }
   </style>
 </head>
 
@@ -87,7 +91,10 @@
           <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
         </div>
         <div>
-          <span class="text-[10px] font-bold text-orange-400 block leading-none">COMED KKU 69</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] font-bold text-orange-400 leading-none">COMED23</span>
+            <span class="text-[10px] font-mono text-slate-400 leading-none">• KKU63</span>
+          </div>
           <h1 class="text-sm sm:text-base font-bold text-white leading-tight">ลงชื่อ 2 กิจกรรมห้อง</h1>
         </div>
       </a>
@@ -106,42 +113,64 @@
     </div>
   </header>
 
+  <!-- ================= SYSTEM CLOSED BANNER ================= -->
+  <div id="systemClosedBanner" class="hidden max-w-4xl mx-auto w-full px-3 sm:px-6 pt-5">
+    <div class="p-4 rounded-2xl bg-rose-950/40 border border-rose-500/50 text-rose-300 text-xs flex items-center gap-3">
+      <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="lock" class="w-4 h-4"></i>
+      </div>
+      <div class="flex-grow">
+        <strong class="text-white text-sm block">ระบบปิดรับสมัครชั่วคราว</strong>
+        <span>ขณะนี้ระบบยังไม่เปิดให้เลือกลงทะเบียนหรือเปลี่ยนตำแหน่ง คุณสามารถดูข้อมูลและทำเนียบเพื่อนได้ใน Step-4</span>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= MAIN CONTAINER ================= -->
   <main class="max-w-4xl mx-auto w-full px-3 sm:px-6 py-5 sm:py-8 flex-grow space-y-6">
 
-    <!-- ================= 3-STEP PROGRESS STEPPER ================= -->
+    <!-- ================= 4-STEP PROGRESS STEPPER ================= -->
     <div class="p-3 sm:p-4 rounded-2xl bg-slate-900 border border-slate-800">
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-4 gap-1.5 sm:gap-2">
         <!-- Step 1 Button -->
-        <button onclick="goToStep(1)" id="stepBtn1" class="step-nav-btn py-2 px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 step-active">
-          <span class="step-num w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[11px]">1</span>
-          <span class="truncate">1. ระบุตัวตน</span>
+        <button onclick="goToStep(1)" id="stepBtn1" class="step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 step-active cursor-pointer">
+          <span class="step-num w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] sm:text-[11px]">1</span>
+          <span class="truncate text-[11px] sm:text-xs">ระบุตัวตน</span>
         </button>
 
         <!-- Step 2 Button -->
-        <button onclick="goToStep(2)" id="stepBtn2" class="step-nav-btn py-2 px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 bg-slate-800/80 text-slate-400">
-          <span class="step-num w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[11px]">2</span>
-          <span class="truncate">2. เลือกฝ่าย/งาน</span>
+        <button onclick="goToStep(2)" id="stepBtn2" class="step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-slate-800/80 text-slate-400 cursor-pointer">
+          <span class="step-num w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] sm:text-[11px]">2</span>
+          <span class="truncate text-[11px] sm:text-xs">เลือกกิจกรรม</span>
         </button>
 
         <!-- Step 3 Button -->
-        <button onclick="goToStep(3)" id="stepBtn3" class="step-nav-btn py-2 px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 bg-slate-800/80 text-slate-400">
-          <span class="step-num w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[11px]">3</span>
-          <span class="truncate">3. ทำเนียบเพื่อน</span>
+        <button onclick="goToStep(3)" id="stepBtn3" class="step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-slate-800/80 text-slate-400 cursor-pointer">
+          <span class="step-num w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] sm:text-[11px]">3</span>
+          <span class="truncate text-[11px] sm:text-xs">เลือกฝ่าย</span>
+        </button>
+
+        <!-- Step 4 Button -->
+        <button onclick="goToStep(4)" id="stepBtn4" class="step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-slate-800/80 text-slate-400 cursor-pointer">
+          <span class="step-num w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] sm:text-[11px]">4</span>
+          <span class="truncate text-[11px] sm:text-xs">ทำเนียบเพื่อน</span>
         </button>
       </div>
     </div>
 
     <!-- ========================================================= -->
-    <!-- STEP 1: ระบุตัวตน (เลือกชื่อจาก 60 คน หรือ Google Login) -->
+    <!-- STEP 1: ระบุตัวตน + ตรวจสอบข้อมูลที่ยังไม่ได้บันทึก (เบอร์โทร) -->
     <!-- ========================================================= -->
     <section id="stepSection1" class="space-y-4">
       <div class="clean-card rounded-2xl p-5 sm:p-7 space-y-5">
         <div>
-          <span class="text-xs font-bold text-orange-400 uppercase">ขั้นตอนที่ 1 จาก 3</span>
-          <h2 class="text-lg sm:text-xl font-black text-white mt-0.5">ระบุว่าคุณคือใครในรุ่น 69</h2>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-orange-400 uppercase">Step-1: ระบุตัวตน</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">COMED23 KKU63</span>
+          </div>
+          <h2 class="text-lg sm:text-xl font-black text-white mt-0.5">ยืนยันตัวตนและตรวจสอบข้อมูลการติดต่อ</h2>
           <p class="text-xs text-slate-400 mt-1">
-            เพียงเลือกรหัสนักศึกษาและชื่อของคุณจากรายชื่อด้านล่าง เพื่อเข้าสู่หน้าเลือกหน้าที่
+            เลือกรหัสนักศึกษาของคุณจากรายชื่อ 60 คน ระบบจะตรวจสอบข้อมูลติดต่อ เช่น เบอร์โทรศัพท์ เพื่อให้ติดต่อประสานงานได้ราบรื่น
           </p>
         </div>
 
@@ -153,7 +182,7 @@
           <div class="relative">
             <select id="step1StudentSelect" onchange="handleStep1StudentChange(this.value)"
               class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm outline-none focus:border-orange-500 transition cursor-pointer">
-              <option value="">-- แตะเพื่อเลือกชื่อของคุณ --</option>
+              <option value="">-- แตะเพื่อเลือกรหัส/ชื่อของคุณ --</option>
             </select>
           </div>
         </div>
@@ -161,42 +190,56 @@
         <!-- Or Google Sign In -->
         <div class="relative flex items-center py-1">
           <div class="flex-grow border-t border-slate-800"></div>
-          <span class="px-3 text-[11px] text-slate-500 font-bold">หรือ</span>
+          <span class="px-3 text-[11px] text-slate-500 font-bold">หรือยืนยันด้วยบัญชีมหาวิทยาลัย</span>
           <div class="flex-grow border-t border-slate-800"></div>
         </div>
 
         <div class="text-center space-y-2">
           <div id="googleAuthWrapperStep1" class="flex justify-center overflow-hidden"></div>
-          <span class="text-[10px] text-slate-500 block">สามารถล็อกอินด้วยอีเมล @kkumail.com เพื่อจำตัวตนได้อัตโนมัติ</span>
+          <span class="text-[10px] text-slate-500 block">รองรับอีเมล @kkumail.com ของสาขาวิชาคอมพิวเตอร์ศึกษา</span>
         </div>
 
-        <!-- Current Identified Profile Box (If already set) -->
-        <div id="step1ProfileCard" class="hidden p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                <i data-lucide="check" class="w-5 h-5"></i>
+        <!-- Missing Info Verification Card (เบอร์โทรศัพท์ & ข้อมูลส่วนตัว) -->
+        <div id="step1ProfileCard" class="hidden p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4">
+          <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold flex-shrink-0">
+                <i data-lucide="user-check" class="w-5 h-5"></i>
               </div>
               <div>
-                <div class="text-xs text-emerald-400 font-bold">ยืนยันตัวตนสำเร็จแล้ว</div>
-                <div id="step1ConfirmedName" class="text-sm sm:text-base font-black text-white">-</div>
+                <div class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                  <span>ยืนยันตัวตนแล้ว</span>
+                  <span class="text-[10px] text-slate-400">(COMED23 KKU63)</span>
+                </div>
+                <div id="step1ConfirmedName" class="text-base font-black text-white">-</div>
                 <div id="step1ConfirmedId" class="text-xs font-mono text-slate-400">-</div>
               </div>
             </div>
             <button onclick="handleUserLogout()" class="text-xs text-rose-400 hover:text-rose-300 font-bold underline cursor-pointer">
-              เปลี่ยนชื่อ
+              เปลี่ยนคน
             </button>
           </div>
 
-          <!-- Quick status of this user -->
-          <div class="pt-2 border-t border-emerald-900/40 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-              <span class="text-slate-400 block text-[11px]">🎓 ซุ้มพี่บัณฑิต (20 ธ.ค.)</span>
-              <span id="step1GradStatusText" class="font-bold text-amber-400">ยังไม่เลือกลง</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-              <span class="text-slate-400 block text-[11px]">🎪 งานวันเด็ก (9 ม.ค. 70)</span>
-              <span id="step1ChildStatusText" class="font-bold text-sky-400">ยังไม่เลือกลง</span>
+          <!-- MISSING INFO ALERT BOX: เบอร์โทรศัพท์ -->
+          <div id="phoneCheckAlertBox" class="p-3.5 rounded-xl border space-y-2">
+            <!-- Dynamic Alert status filled by JS -->
+          </div>
+
+          <!-- Phone Number Input for instant update -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300 flex items-center justify-between">
+              <span>เบอร์โทรศัพท์สำหรับติดต่อประสานงานกิจกรรม:</span>
+              <span id="phoneStatusBadge" class="text-[10px] font-bold text-amber-400">กรุณากรอกเบอร์โทร</span>
+            </label>
+            <div class="flex gap-2">
+              <div class="relative flex-grow">
+                <i data-lucide="phone" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                <input type="tel" id="step1PhoneInput" maxlength="12" placeholder="เช่น 0812345678"
+                  class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition font-mono">
+              </div>
+              <button onclick="saveUserPhone()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex-shrink-0">
+                บันทึกเบอร์
+              </button>
             </div>
           </div>
         </div>
@@ -204,8 +247,8 @@
         <!-- Action Next Button -->
         <div class="pt-2">
           <button onclick="submitStep1AndContinue()" id="btnStep1Continue"
-            class="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-sm shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
-            <span>ไปขั้นตอนที่ 2: เลือกฝ่าย/งาน</span>
+            class="w-full py-3.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-sm shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>ไปขั้นตอน Step-2: เลือกกิจกรรม</span>
             <i data-lucide="arrow-right" class="w-4 h-4"></i>
           </button>
         </div>
@@ -213,156 +256,267 @@
     </section>
 
     <!-- ========================================================= -->
-    <!-- STEP 2: เลือกกิจกรรมและฝ่ายที่ต้องการ (ซุ้มบัณฑิต / วันเด็ก) -->
+    <!-- STEP 2: เลือกกิจกรรม (สามารถเลือกได้ทั้ง 2 กิจกรรม) -->
     <!-- ========================================================= -->
     <section id="stepSection2" class="hidden space-y-4">
+      <div class="clean-card rounded-2xl p-5 sm:p-7 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-orange-400 uppercase">Step-2: เลือกกิจกรรม</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
+                เลือกได้ 2 กิจกรรม
+              </span>
+            </div>
+            <h2 class="text-lg sm:text-xl font-black text-white mt-0.5">คุณต้องการเข้าร่วมกิจกรรมใดบ้าง?</h2>
+            <p class="text-xs text-slate-400 mt-1">
+              แตะเลือกกิจกรรมที่สนใจ สามารถเข้าร่วมทั้ง 2 กิจกรรม หรือเลือกอย่างใดอย่างหนึ่ง จากนั้นไปเลือกฝ่ายใน Step-3
+            </p>
+          </div>
+          <div class="text-xs font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/80 px-3 py-1.5 rounded-xl self-start sm:self-auto">
+            ผู้ลงชื่อ: <span id="step2UserName" class="text-white">-</span>
+          </div>
+        </div>
+
+        <!-- 2 Big Activity Selection Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Track 1: ซุ้มพี่บัณฑิต -->
+          <div id="cardTrackSelectGrad" onclick="selectTrackAndGoToStep3('track_grad')"
+            class="p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-amber-500/50 transition cursor-pointer relative space-y-3 shadow-lg group">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
+                  <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 block">กิจกรรมที่ 1</span>
+                  <h3 class="text-base font-black text-white group-hover:text-amber-300 transition">ทำซุ้มพี่บัณฑิต</h3>
+                </div>
+              </div>
+              <span id="step2GradEnrolledCount" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                0 / 30+ คน
+              </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs text-slate-300">
+              <div class="flex items-center gap-2 text-amber-300/90">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                <span>ช่วงประมาณ 20 ธันวาคม (เสาร์-อาทิตย์ 2 วัน)</span>
+              </div>
+              <div class="flex items-center gap-2 text-slate-400">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-orange-400"></i>
+                <span>คณะศึกษาศาสตร์ (โรงรถ 1 ล็อคที่จอดรถ เน้นถ่ายรูป)</span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+              <span id="step2GradMyStatusPill" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">
+                ยังไม่ได้ลงชื่อ
+              </span>
+              <span class="text-amber-400 font-bold flex items-center gap-1 group-hover:translate-x-1 transition">
+                <span>เลือกฝ่ายในงานนี้</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Track 2: งานวันเด็กแห่งชาติ -->
+          <div id="cardTrackSelectChild" onclick="selectTrackAndGoToStep3('track_children')"
+            class="p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-sky-500/50 transition cursor-pointer relative space-y-3 shadow-lg group">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-sky-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
+                  <i data-lucide="sparkles" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider text-sky-400 block">กิจกรรมที่ 2</span>
+                  <h3 class="text-base font-black text-white group-hover:text-sky-300 transition">งานวันเด็กแห่งชาติ</h3>
+                </div>
+              </div>
+              <span id="step2ChildEnrolledCount" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-300 border border-sky-500/20">
+                0 / 30+ คน
+              </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs text-slate-300">
+              <div class="flex items-center gap-2 text-sky-300/90">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                <span>ช่วง 9 มกราคม 2570</span>
+              </div>
+              <div class="flex items-center gap-2 text-slate-400">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-indigo-400"></i>
+                <span>ลงทะเบียนซุ้มสาขา ออกแบบกิจกรรม (Bingo, Robot, AR)</span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+              <span id="step2ChildMyStatusPill" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">
+                ยังไม่ได้ลงชื่อ
+              </span>
+              <span class="text-sky-400 font-bold flex items-center gap-1 group-hover:translate-x-1 transition">
+                <span>เลือกฝ่ายในงานนี้</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="flex items-center justify-between gap-3 pt-2">
+          <button onclick="goToStep(1)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>ย้อนกลับไป Step-1</span>
+          </button>
+          <button onclick="goToStep(4)" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1">
+            <span>ข้ามไปดูทำเนียบเพื่อน (Step-4)</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- STEP 3: เลือกฝ่าย & ตำแหน่งในกิจกรรมนั้นๆ -->
+    <!-- ========================================================= -->
+    <section id="stepSection3" class="hidden space-y-4">
       
-      <!-- Top Guidance & Switcher -->
+      <!-- Track Switcher Header -->
       <div class="clean-card rounded-2xl p-4 sm:p-5 space-y-3">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <span class="text-xs font-bold text-orange-400 uppercase">ขั้นตอนที่ 2 จาก 3</span>
-            <h2 class="text-lg sm:text-xl font-black text-white">เลือกกิจกรรมและฝ่ายที่คุณต้องการ</h2>
+            <span class="text-xs font-bold text-orange-400 uppercase">Step-3: เลือกฝ่าย</span>
+            <h2 class="text-lg sm:text-xl font-black text-white">เลือกฝ่ายและหน้าที่ความถนัดของคุณ</h2>
             <p class="text-xs text-slate-400 mt-0.5">
-              💡 สามารถเลือกลงได้ทั้ง 2 กิจกรรม หรือเลือกอย่างใดอย่างหนึ่งตามสะดวก
+              สามารถกดสลับกิจกรรมเพื่อเลือกลงทั้ง 2 งานได้ตามสะดวก
             </p>
           </div>
-          <div id="step2UserPill" class="text-xs font-bold text-emerald-400 bg-emerald-950/30 border border-emerald-800 px-3 py-1 rounded-lg self-start sm:self-auto">
-            กำลังลงชื่อให้: <span id="step2UserName" class="text-white">-</span>
+
+          <!-- Activity Switcher Buttons -->
+          <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 self-start sm:self-auto">
+            <button onclick="switchStep3Track('track_grad')" id="step3BtnGrad"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 font-black cursor-pointer">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+              <span>ซุ้มพี่บัณฑิต</span>
+            </button>
+            <button onclick="switchStep3Track('track_children')" id="step3BtnChild"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white cursor-pointer">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>งานวันเด็ก</span>
+            </button>
           </div>
         </div>
 
-        <!-- 2 Big Activity Switcher Buttons -->
-        <div class="grid grid-cols-2 gap-2 pt-1">
-          <button onclick="switchStep2Track('track_grad')" id="step2BtnGrad"
-            class="p-3 rounded-xl border text-left transition relative cursor-pointer border-amber-500 bg-amber-500/15 text-white">
-            <div class="flex items-center gap-2">
-              <span class="w-7 h-7 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0">
-                <i data-lucide="graduation-cap" class="w-4 h-4"></i>
-              </span>
-              <div class="min-w-0">
-                <div class="text-[10px] uppercase font-bold text-amber-400 leading-none">ตัวเลือกที่ 1</div>
-                <div class="text-xs sm:text-sm font-bold truncate">ซุ้มพี่บัณฑิต</div>
-              </div>
+        <!-- Banner of Current Track -->
+        <div id="step3TrackBanner" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div id="step3BannerIcon" class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold flex-shrink-0">
+              <i data-lucide="info" class="w-4 h-4"></i>
             </div>
-            <div class="mt-2 text-[11px] text-slate-400 flex items-center justify-between">
-              <span>20 ธ.ค. (2 วัน)</span>
-              <span id="step2BadgeGradCount" class="font-bold text-amber-400">0 / 30+ คน</span>
+            <div>
+              <span id="step3BannerTitle" class="font-bold text-white block">กำลังดูฝ่าย: ทำซุ้มพี่บัณฑิต (20 ธ.ค.)</span>
+              <span id="step3BannerDesc" class="text-[11px] text-slate-400">โรงรถ 1 ล็อค คณะศึกษาศาสตร์</span>
             </div>
-            <div id="step2MyGradSelectedBadge" class="hidden mt-1 text-[10px] font-bold text-emerald-400">
-              ✓ คุณเลือกลงแล้ว
-            </div>
-          </button>
-
-          <button onclick="switchStep2Track('track_children')" id="step2BtnChild"
-            class="p-3 rounded-xl border text-left transition relative cursor-pointer border-slate-800 bg-slate-900 text-slate-400 hover:text-white">
-            <div class="flex items-center gap-2">
-              <span class="w-7 h-7 rounded-lg bg-sky-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0">
-                <i data-lucide="sparkles" class="w-4 h-4"></i>
-              </span>
-              <div class="min-w-0">
-                <div class="text-[10px] uppercase font-bold text-sky-400 leading-none">ตัวเลือกที่ 2</div>
-                <div class="text-xs sm:text-sm font-bold truncate">งานวันเด็กแห่งชาติ</div>
-              </div>
-            </div>
-            <div class="mt-2 text-[11px] text-slate-400 flex items-center justify-between">
-              <span>9 ม.ค. 2570</span>
-              <span id="step2BadgeChildCount" class="font-bold text-sky-400">0 / 30+ คน</span>
-            </div>
-            <div id="step2MyChildSelectedBadge" class="hidden mt-1 text-[10px] font-bold text-emerald-400">
-              ✓ คุณเลือกลงแล้ว
-            </div>
-          </button>
+          </div>
+          <span id="step3CurrentTrackStatusBadge" class="text-[10px] px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-slate-400">
+            ยังไม่ลงชื่อ
+          </span>
         </div>
       </div>
 
-      <!-- Active Track Info Banner -->
-      <div id="activeTrackBanner" class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-1">
-        <div class="font-bold text-white flex items-center gap-2" id="activeTrackBannerTitle">
-          <i data-lucide="info" class="w-4 h-4 text-orange-400"></i>
-          <span>กำลังดูรายการฝ่ายของ: ซุ้มพี่บัณฑิต</span>
-        </div>
-        <p id="activeTrackBannerDesc" class="text-slate-400 text-[11px] leading-relaxed">
-          สถานที่: โรงรถ 1 ล็อค คณะศึกษาศาสตร์ เน้นจัดฉากถ่ายรูปสวยงาม อบอุ่น
-        </p>
+      <!-- Department and Roles List -->
+      <div id="step3DepartmentsContainer" class="space-y-3">
+        <!-- Rendered via JS -->
       </div>
 
-      <!-- Department & Roles List -->
-      <div id="step2DepartmentsContainer" class="space-y-3">
-        <!-- Rendered via JavaScript -->
-      </div>
-
-      <!-- Navigation buttons -->
+      <!-- Navigation Buttons -->
       <div class="flex items-center justify-between gap-3 pt-2">
-        <button onclick="goToStep(1)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1">
+        <button onclick="goToStep(2)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-          <span>ย้อนกลับไปขั้นตอนที่ 1</span>
+          <span>ย้อนกลับไป Step-2 (เลือกกิจกรรม)</span>
         </button>
-        <button onclick="goToStep(3)" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition flex items-center gap-1">
-          <span>ไปขั้นตอนที่ 3: ทำเนียบเพื่อน</span>
+        <button onclick="goToStep(4)" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition flex items-center gap-1 shadow-md">
+          <span>ไป Step-4: สรุปและดูทำเนียบเพื่อน</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </button>
       </div>
     </section>
 
     <!-- ========================================================= -->
-    <!-- STEP 3: สรุปสถานะฉัน & ทำเนียบรายชื่อเพื่อน 60 คน -->
+    <!-- STEP 4: ทำเนียบเพื่อน (แก้ไข/เปลี่ยนได้จนกว่าระบบจะปิด) -->
     <!-- ========================================================= -->
-    <section id="stepSection3" class="hidden space-y-4">
+    <section id="stepSection4" class="hidden space-y-4">
       
-      <!-- User Summary Card -->
+      <!-- Current User Self-Management Card -->
       <div class="clean-card rounded-2xl p-5 space-y-3">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
-            <span class="text-xs font-bold text-emerald-400 uppercase">สถานะของคุณ</span>
-            <h3 id="step3UserName" class="text-base sm:text-lg font-black text-white">-</h3>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-emerald-400 uppercase">สถานะของคุณ</span>
+              <span id="step4LockNoticeBadge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                ✓ ระบบเปิดให้แก้ไขได้
+              </span>
+            </div>
+            <h3 id="step4UserName" class="text-base sm:text-lg font-black text-white">-</h3>
           </div>
-          <button onclick="goToStep(2)" class="px-3 py-1.5 rounded-lg bg-orange-600/20 text-orange-400 border border-orange-500/30 text-xs font-bold hover:bg-orange-600/30 transition">
-            + แก้ไข/เลือกลงเพิ่ม
+          <button onclick="goToStep(3)" id="btnStep4EditMore"
+            class="px-3.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            <span>เลือกฝ่ายเพิ่ม / เปลี่ยนตำแหน่ง</span>
           </button>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <!-- Grad summary -->
-          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="font-bold text-amber-400">🎓 ซุ้มพี่บัณฑิต (20 ธ.ค.)</span>
-              <span id="step3BadgeGrad" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">ยังไม่ลง</span>
+              <span id="step4BadgeGrad" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">ยังไม่ลง</span>
             </div>
-            <div id="step3DetailGrad" class="text-slate-300 font-semibold text-xs">-</div>
-            <div id="step3ActionGrad" class="hidden pt-1">
-              <button onclick="handleCancelTrackRole('track_grad')" class="text-[11px] text-rose-400 hover:underline">
-                ยกเลิกการลงชื่อในกิจกรรมนี้
+            <div id="step4DetailGrad" class="text-slate-300 font-semibold text-xs">-</div>
+            <div id="step4ActionGrad" class="hidden pt-1">
+              <button onclick="handleCancelTrackRole('track_grad')" class="text-[11px] text-rose-400 hover:underline flex items-center gap-1">
+                <i data-lucide="x" class="w-3 h-3"></i>
+                <span>ยกเลิกการลงชื่อในซุ้มบัณฑิต</span>
               </button>
             </div>
           </div>
 
           <!-- Child summary -->
-          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="font-bold text-sky-400">🎪 งานวันเด็ก (9 ม.ค. 70)</span>
-              <span id="step3BadgeChild" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">ยังไม่ลง</span>
+              <span id="step4BadgeChild" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">ยังไม่ลง</span>
             </div>
-            <div id="step3DetailChild" class="text-slate-300 font-semibold text-xs">-</div>
-            <div id="step3ActionChild" class="hidden pt-1">
-              <button onclick="handleCancelTrackRole('track_children')" class="text-[11px] text-rose-400 hover:underline">
-                ยกเลิกการลงชื่อในกิจกรรมนี้
+            <div id="step4DetailChild" class="text-slate-300 font-semibold text-xs">-</div>
+            <div id="step4ActionChild" class="hidden pt-1">
+              <button onclick="handleCancelTrackRole('track_children')" class="text-[11px] text-rose-400 hover:underline flex items-center gap-1">
+                <i data-lucide="x" class="w-3 h-3"></i>
+                <span>ยกเลิกการลงชื่อในงานวันเด็ก</span>
               </button>
             </div>
           </div>
         </div>
+
+        <p class="text-[11px] text-slate-400 pt-1">
+          💡 สามารถแก้ไขหรือเปลี่ยนตำแหน่งของตนเองได้ตลอดเวลาจนกว่าระบบจะปิดรับสมัคร
+        </p>
       </div>
 
-      <!-- 60 Students Roster Table -->
+      <!-- 60 Students Master Roster Table -->
       <div class="clean-card rounded-2xl p-5 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
           <div>
-            <h3 class="text-base font-black text-white">ทำเนียบรายชื่อเพื่อนรุ่น 69 (ทั้งหมด 60 คน)</h3>
-            <p class="text-xs text-slate-400">ดูว่าเพื่อนๆ คนไหนลงชื่อในกิจกรรมอะไรบ้าง</p>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-black text-white">ทำเนียบเพื่อนร่วมรุ่น COMED23 (ทั้งหมด 60 คน)</h3>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">KKU63</span>
+            </div>
+            <p class="text-xs text-slate-400">ตรวจสอบรายชื่อเพื่อนและฝ่ายที่แต่ละคนสังกัด</p>
           </div>
-          <button onclick="exportClassRosterExcel()" class="px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
+          <button onclick="exportClassRosterExcel()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
             <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-            <span>ดาวน์โหลด Excel</span>
+            <span>ส่งออก Excel</span>
           </button>
         </div>
 
@@ -421,7 +575,8 @@
       </div>
 
       <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-xs">
-        <div><span class="text-slate-400">ชื่อผู้ลง:</span> <strong id="confirmStudentName" class="text-white">-</strong></div>
+        <div><span class="text-slate-400">ผู้สมัคร:</span> <strong id="confirmStudentName" class="text-white">-</strong></div>
+        <div><span class="text-slate-400">เบอร์โทรศัพท์:</span> <span id="confirmStudentPhone" class="text-emerald-400 font-mono">-</span></div>
         <div><span class="text-slate-400">กิจกรรม:</span> <span id="confirmTrackTitle" class="text-amber-400 font-bold">-</span></div>
         <div><span class="text-slate-400">ฝ่าย:</span> <span id="confirmDeptName" class="text-sky-400 font-semibold">-</span></div>
         <div class="pt-1 border-t border-slate-800 text-sm"><span class="text-slate-400 text-xs">ตำแหน่ง:</span> <strong id="confirmRoleTitle" class="text-emerald-400">-</strong></div>
@@ -446,6 +601,6 @@
   </div>
 
   <!-- Page Logic Script -->
-  <script src="assets/js/eventclass.js?v=2.5.0"></script>
+  <script src="assets/js/eventclass.js?v=2.6.0"></script>
 </body>
 </html>

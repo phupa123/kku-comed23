@@ -450,13 +450,14 @@ window.ComedEventManager = {
       studentName: studentInfo.studentName,
       nickname: studentInfo.nickname || '',
       email: studentInfo.email || '',
+      phone: studentInfo.phone || '',
       trackId: trackId,
       trackTitle: targetTrack ? targetTrack.title : '',
       departmentId: targetDept.id,
       departmentName: targetDept.name,
       roleId: targetRole.id,
       roleTitle: targetRole.title,
-      note: studentInfo.note || '',
+      note: studentInfo.phone ? (studentInfo.note ? `[TEL:${studentInfo.phone}] ${studentInfo.note}` : `[TEL:${studentInfo.phone}]`) : (studentInfo.note || ''),
       registeredAt: new Date().toISOString()
     };
 

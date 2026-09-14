@@ -1,10 +1,11 @@
 /**
  * =========================================================================
- * EVENT CLASS CONTROLLER (3-Step Wizard Flow) - assets/js/eventclass.js
- * ปรับปรุงใหม่: เรียบง่าย ตรงไปตรงมา ใช้งานง่ายที่สุดสำหรับคอมและมือถือ
- * Step 1: ระบุตัวตน (เลือกชื่อ 60 คน หรือ Google Login)
- * Step 2: เลือกฝ่ายและตำแหน่งใน 2 กิจกรรมใหญ่ (ซุ้มบัณฑิต / วันเด็ก)
- * Step 3: สรุปสถานะตนเอง และดูทำเนียบเพื่อนร่วมรุ่น (60 คน)
+ * EVENT CLASS CONTROLLER (4-Step Wizard Flow) - assets/js/eventclass.js
+ * สาขาวิชาคอมพิวเตอร์ศึกษา COMED23 | รุ่นในมหาวิทยาลัย KKU63
+ * Step-1: ระบุตัวตน + ตรวจสอบข้อมูลติดต่อ (เช่น เบอร์โทรศัพท์)
+ * Step-2: เลือกกิจกรรม (สามารถเลือกได้ 2 กิจกรรม) *หากระบบเปิดจึงจะเลือก Step 2-3 ได้
+ * Step-3: เลือกฝ่ายในกิจกรรมนั้นๆ
+ * Step-4: ทำเนียบเพื่อน (สามารถแก้ไข/เปลี่ยนของตัวเองได้จนกว่าระบบจะปิด)
  * =========================================================================
  */
 
@@ -12,34 +13,36 @@ const EVENT_CLASS_ID = 'eventclass_69';
 
 let currentClassEvent = null;
 let activeTrackId = 'track_grad'; // 'track_grad' | 'track_children'
-let currentStudent = null; // { studentId, studentName, nickname, email }
+let currentStudent = null; // { studentId, studentName, nickname, email, phone }
 let pendingTrackSelection = null; // { trackId, deptId, roleId, trackTitle, deptName, roleTitle }
 let currentRosterFilter = 'all'; // 'all' | 'grad' | 'children' | 'both' | 'pending'
 let currentStepNumber = 1;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Icons
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
-  // 2. Load Event from repository
+  // 1. Load Event
   currentClassEvent = window.ComedEventManager.getActiveEvent(EVENT_CLASS_ID);
 
-  // 3. Populate student dropdown list
+  // 2. Populate Dropdown list
   populateStudentPickerStep1();
 
-  // 4. Check existing session
+  // 3. Check Session
   initUserSession();
 
-  // 5. Initial render of departments & roster
-  renderStep2Departments();
-  updateStep2TrackSwitcher();
-  updateUserSummaryStep3();
+  // 4. Check system open status & update banners
+  updateSystemStatusBanner();
+
+  // 5. Initial Renderings
+  renderStep2TrackCards();
+  renderStep3Departments();
+  updateUserSummaryStep4();
   renderClassRosterTable();
 
   // 6. Setup Google Login
   initGoogleAuthStep1();
 
-  // 7. Cloud Fetch & Realtime sync
+  // 7. Background Cloud Sync
   try {
     await window.ComedEventManager.fetchCloudData(EVENT_CLASS_ID);
     currentClassEvent = window.ComedEventManager.getActiveEvent(EVENT_CLASS_ID);
@@ -48,73 +51,126 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   startRealtimeLiveSync();
 
-  // 8. Auto proceed to Step 2 if user is already logged in
+  // 8. Auto step placement
   if (currentStudent && currentStudent.studentId) {
-    goToStep(2);
+    if (isSystemOpen()) {
+      goToStep(2);
+    } else {
+      goToStep(4);
+    }
   } else {
     goToStep(1);
   }
 });
 
-// ================= STEP WIZARD NAVIGATION =================
+function isSystemOpen() {
+  return currentClassEvent && currentClassEvent.status === 'open';
+}
+
+function updateSystemStatusBanner() {
+  const banner = document.getElementById('systemClosedBanner');
+  const lockBadge = document.getElementById('step4LockNoticeBadge');
+  const btnEdit = document.getElementById('btnStep4EditMore');
+
+  if (!isSystemOpen()) {
+    if (banner) banner.classList.remove('hidden');
+    if (lockBadge) {
+      lockBadge.textContent = "🔒 ระบบปิดรับสมัครชั่วคราว (ไม่อนุญาตให้แก้ไข)";
+      lockBadge.className = "text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold";
+    }
+    if (btnEdit) {
+      btnEdit.classList.add('hidden');
+    }
+  } else {
+    if (banner) banner.classList.add('hidden');
+    if (lockBadge) {
+      lockBadge.textContent = "✓ ระบบเปิดให้แก้ไขได้";
+      lockBadge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold";
+    }
+    if (btnEdit) {
+      btnEdit.classList.remove('hidden');
+    }
+  }
+}
+
+// ================= 4-STEP WIZARD NAVIGATION =================
 function goToStep(step) {
+  // Guard for Step 2 & 3: Cannot enter if system is closed
+  if ((step === 2 || step === 3) && !isSystemOpen()) {
+    alert("⚠️ ระบบปิดรับสมัครชั่วคราวในขณะนี้ คุณสามารถดูสรุปสถานะและทำเนียบเพื่อนได้ที่ Step-4 ครับ");
+    goToStep(4);
+    return;
+  }
+
+  // Guard: Must identify in Step 1 first
+  if (step > 1 && !currentStudent) {
+    alert("กรุณาเลือกรหัส/ชื่อของคุณใน Step-1 ก่อนครับ");
+    goToStep(1);
+    return;
+  }
+
   currentStepNumber = step;
 
   const sec1 = document.getElementById('stepSection1');
   const sec2 = document.getElementById('stepSection2');
   const sec3 = document.getElementById('stepSection3');
+  const sec4 = document.getElementById('stepSection4');
 
   const btn1 = document.getElementById('stepBtn1');
   const btn2 = document.getElementById('stepBtn2');
   const btn3 = document.getElementById('stepBtn3');
+  const btn4 = document.getElementById('stepBtn4');
 
-  // Reset display
-  sec1.classList.add('hidden');
-  sec2.classList.add('hidden');
-  sec3.classList.add('hidden');
+  // Hide all sections
+  [sec1, sec2, sec3, sec4].forEach(s => s?.classList.add('hidden'));
 
-  const inactiveBtnClass = "step-nav-btn py-2 px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 bg-slate-800/80 text-slate-400";
-  const activeBtnClass = "step-nav-btn py-2 px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 step-active";
-  const completedBtnClass = "step-nav-btn py-2 px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 step-completed";
+  const baseInactive = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-slate-800/80 text-slate-400 cursor-pointer";
+  const baseActive = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 step-active cursor-pointer";
+  const baseCompleted = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 step-completed cursor-pointer";
 
-  [btn1, btn2, btn3].forEach(b => {
-    if (b) b.className = inactiveBtnClass;
+  [btn1, btn2, btn3, btn4].forEach(b => {
+    if (b) b.className = baseInactive;
   });
 
+  if (!isSystemOpen()) {
+    if (btn2) { btn2.classList.add('step-disabled'); btn2.title = "ระบบปิดรับสมัคร"; }
+    if (btn3) { btn3.classList.add('step-disabled'); btn3.title = "ระบบปิดรับสมัคร"; }
+  }
+
   if (step === 1) {
-    sec1.classList.remove('hidden');
-    if (btn1) btn1.className = activeBtnClass;
+    sec1?.classList.remove('hidden');
+    if (btn1) btn1.className = baseActive;
   } else if (step === 2) {
-    if (!currentStudent) {
-      alert("กรุณาเลือกรหัสนักศึกษา/ชื่อของคุณในขั้นตอนที่ 1 ก่อนครับ");
-      goToStep(1);
-      return;
-    }
-    sec2.classList.remove('hidden');
-    if (btn1) btn1.className = completedBtnClass;
-    if (btn2) btn2.className = activeBtnClass;
-    renderStep2Departments();
-    updateStep2TrackSwitcher();
+    sec2?.classList.remove('hidden');
+    if (btn1) btn1.className = baseCompleted;
+    if (btn2) btn2.className = baseActive;
+    renderStep2TrackCards();
   } else if (step === 3) {
-    sec3.classList.remove('hidden');
-    if (btn1 && currentStudent) btn1.className = completedBtnClass;
-    if (btn2) btn2.className = completedBtnClass;
-    if (btn3) btn3.className = activeBtnClass;
-    updateUserSummaryStep3();
+    sec3?.classList.remove('hidden');
+    if (btn1) btn1.className = baseCompleted;
+    if (btn2) btn2.className = baseCompleted;
+    if (btn3) btn3.className = baseActive;
+    renderStep3Departments();
+  } else if (step === 4) {
+    sec4?.classList.remove('hidden');
+    if (btn1 && currentStudent) btn1.className = baseCompleted;
+    if (btn2 && currentStudent) btn2.className = baseCompleted;
+    if (btn3 && currentStudent) btn3.className = baseCompleted;
+    if (btn4) btn4.className = baseActive;
+    updateUserSummaryStep4();
     renderClassRosterTable();
   }
 
-  // Scroll to top of step nicely
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-// ================= USER SESSION & STEP 1 =================
+// ================= STEP 1: ระบุตัวตน + ตรวจสอบเบอร์โทร =================
 function populateStudentPickerStep1() {
   const sel = document.getElementById('step1StudentSelect');
   if (!sel) return;
   const list = window.STUDENTS_DATA || [];
-  sel.innerHTML = '<option value="">-- แตะเพื่อเลือกรหัส/ชื่อของคุณ --</option>' + list.map(st => `
+  sel.innerHTML = '<option value="">-- แตะเพื่อเลือกรหัส/ชื่อของคุณ (COMED23) --</option>' + list.map(st => `
     <option value="${st.id}">${st.id} - ${st.name} (${st.nickname || 'ไม่มีชื่อเล่น'})</option>
   `).join('');
 }
@@ -133,13 +189,24 @@ function initUserSession() {
           );
         }
 
+        // Check if phone was previously registered in any track
+        let detectedPhone = user.phone || '';
+        if (!detectedPhone && st) {
+          const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
+          const found = regs.find(r => r.studentId === st.id && (r.phone || (r.note && r.note.includes('TEL:'))));
+          if (found) {
+            detectedPhone = found.phone || (found.note ? (found.note.match(/\[TEL:(.*?)\]/) || [])[1] : '');
+          }
+        }
+
         currentStudent = {
           studentId: user.studentId || (st ? st.id : ''),
           studentName: user.studentName || user.name || (st ? st.name : 'นักศึกษา'),
           nickname: user.nickname || (st ? st.nickname : ''),
-          email: user.email || (st ? st.email : '')
+          email: user.email || (st ? st.email : ''),
+          phone: detectedPhone
         };
-        updateProfileCards();
+        updateProfileCardsStep1();
       }
     }
   } catch(e) {}
@@ -150,15 +217,109 @@ function handleStep1StudentChange(studentId) {
   const student = (window.STUDENTS_DATA || []).find(s => s.id === studentId);
   if (!student) return;
 
+  // Retrieve phone if already saved in registration
+  let detectedPhone = '';
+  const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
+  const found = regs.find(r => r.studentId === student.id && (r.phone || (r.note && r.note.includes('TEL:'))));
+  if (found) {
+    detectedPhone = found.phone || (found.note ? (found.note.match(/\[TEL:(.*?)\]/) || [])[1] : '');
+  }
+
   currentStudent = {
     studentId: student.id,
     studentName: student.name,
     nickname: student.nickname || '',
-    email: student.email
+    email: student.email,
+    phone: detectedPhone || ''
   };
 
   localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentStudent));
-  updateProfileCards();
+  updateProfileCardsStep1();
+}
+
+function saveUserPhone() {
+  if (!currentStudent) {
+    alert("กรุณาเลือกรายชื่อนักศึกษาก่อนบันทึกเบอร์");
+    return;
+  }
+  const input = document.getElementById('step1PhoneInput');
+  const val = (input?.value || '').trim();
+
+  if (val && !/^[0-9\-+ ]{9,12}$/.test(val)) {
+    alert("กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (เช่น 0812345678)");
+    return;
+  }
+
+  currentStudent.phone = val;
+  localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentStudent));
+  updateProfileCardsStep1();
+  alert(val ? "✅ บันทึกเบอร์โทรศัพท์เรียบร้อยแล้ว" : "บันทึกข้อมูลเรียบร้อย");
+}
+
+function updateProfileCardsStep1() {
+  const card = document.getElementById('step1ProfileCard');
+  const confirmedName = document.getElementById('step1ConfirmedName');
+  const confirmedId = document.getElementById('step1ConfirmedId');
+  const headerName = document.getElementById('headerUserName');
+  const headerBadge = document.getElementById('headerUserBadge');
+  const step2UserName = document.getElementById('step2UserName');
+  const step4UserName = document.getElementById('step4UserName');
+  const sel = document.getElementById('step1StudentSelect');
+  const phoneInput = document.getElementById('step1PhoneInput');
+  const alertBox = document.getElementById('phoneCheckAlertBox');
+  const phoneBadge = document.getElementById('phoneStatusBadge');
+
+  if (currentStudent) {
+    if (card) card.classList.remove('hidden');
+    if (confirmedName) confirmedName.textContent = `${currentStudent.studentName} (${currentStudent.nickname || '-'})`;
+    if (confirmedId) confirmedId.textContent = `รหัส: ${currentStudent.studentId}`;
+    if (headerName) headerName.textContent = `${currentStudent.nickname || currentStudent.studentName.split(' ')[0]} (COMED23)`;
+    if (headerBadge) headerBadge.classList.remove('hidden');
+    if (step2UserName) step2UserName.textContent = `${currentStudent.studentName} (${currentStudent.nickname || '-'}) | ${currentStudent.studentId}`;
+    if (step4UserName) step4UserName.textContent = `${currentStudent.studentName} (${currentStudent.nickname || '-'}) | รหัส ${currentStudent.studentId}`;
+    if (sel && currentStudent.studentId) sel.value = currentStudent.studentId;
+    if (phoneInput) phoneInput.value = currentStudent.phone || '';
+
+    // Verify if phone is missing
+    if (!currentStudent.phone) {
+      if (alertBox) {
+        alertBox.className = "p-3.5 rounded-xl border border-amber-500/40 bg-amber-950/20 text-xs space-y-1";
+        alertBox.innerHTML = `
+          <div class="flex items-center gap-2 text-amber-400 font-bold">
+            <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0"></i>
+            <span>ยังไม่ได้บันทึก: เบอร์โทรศัพท์</span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            ระบบตรวจพบว่าคุณยังไม่มีเบอร์โทรในฐานข้อมูล กรุณากรอกเบอร์โทรศัพท์ในช่องด้านล่างเพื่อความสะดวกในการประสานงานซุ้ม
+          </p>
+        `;
+      }
+      if (phoneBadge) {
+        phoneBadge.textContent = "ยังไม่ได้ระบุ (แนะนำให้กรอก)";
+        phoneBadge.className = "text-[10px] font-bold text-amber-400";
+      }
+    } else {
+      if (alertBox) {
+        alertBox.className = "p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-950/20 text-xs space-y-1";
+        alertBox.innerHTML = `
+          <div class="flex items-center gap-2 text-emerald-400 font-bold">
+            <i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i>
+            <span>ข้อมูลครบถ้วน: มีเบอร์ติดต่อแล้ว (${currentStudent.phone})</span>
+          </div>
+        `;
+      }
+      if (phoneBadge) {
+        phoneBadge.textContent = "✓ บันทึกเรียบร้อย";
+        phoneBadge.className = "text-[10px] font-bold text-emerald-400";
+      }
+    }
+  } else {
+    if (card) card.classList.add('hidden');
+    if (headerBadge) headerBadge.classList.add('hidden');
+    if (sel) sel.value = '';
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function submitStep1AndContinue() {
@@ -172,55 +333,25 @@ function submitStep1AndContinue() {
     return;
   }
 
-  goToStep(2);
-}
+  // Check phone input
+  const phoneVal = (document.getElementById('step1PhoneInput')?.value || '').trim();
+  if (phoneVal) {
+    currentStudent.phone = phoneVal;
+    localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentStudent));
+  }
 
-function updateProfileCards() {
-  const card = document.getElementById('step1ProfileCard');
-  const confirmedName = document.getElementById('step1ConfirmedName');
-  const confirmedId = document.getElementById('step1ConfirmedId');
-  const headerName = document.getElementById('headerUserName');
-  const headerBadge = document.getElementById('headerUserBadge');
-  const step2UserName = document.getElementById('step2UserName');
-  const step3UserName = document.getElementById('step3UserName');
-  const sel = document.getElementById('step1StudentSelect');
-
-  if (currentStudent) {
-    if (card) card.classList.remove('hidden');
-    if (confirmedName) confirmedName.textContent = `${currentStudent.studentName} (${currentStudent.nickname || '-'})`;
-    if (confirmedId) confirmedId.textContent = `รหัส: ${currentStudent.studentId}`;
-    if (headerName) headerName.textContent = currentStudent.nickname || currentStudent.studentName.split(' ')[0];
-    if (headerBadge) headerBadge.classList.remove('hidden');
-    if (step2UserName) step2UserName.textContent = `${currentStudent.studentName} (${currentStudent.nickname || '-'})`;
-    if (step3UserName) step3UserName.textContent = `${currentStudent.studentName} (${currentStudent.nickname || '-'}) | รหัส ${currentStudent.studentId}`;
-    if (sel && currentStudent.studentId) sel.value = currentStudent.studentId;
-
-    // Check my current registrations
-    const myGrad = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_grad');
-    const myChild = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_children');
-
-    const gradText = document.getElementById('step1GradStatusText');
-    const childText = document.getElementById('step1ChildStatusText');
-    if (gradText) {
-      gradText.textContent = myGrad ? `✓ ${myGrad.roleTitle}` : 'ยังไม่เลือกลง';
-      gradText.className = myGrad ? 'font-bold text-emerald-400' : 'font-bold text-slate-500';
-    }
-    if (childText) {
-      childText.textContent = myChild ? `✓ ${myChild.roleTitle}` : 'ยังไม่เลือกลง';
-      childText.className = myChild ? 'font-bold text-emerald-400' : 'font-bold text-slate-500';
-    }
+  if (!isSystemOpen()) {
+    goToStep(4);
   } else {
-    if (card) card.classList.add('hidden');
-    if (headerBadge) headerBadge.classList.add('hidden');
-    if (sel) sel.value = '';
+    goToStep(2);
   }
 }
 
 function handleUserLogout() {
-  if (confirm("ต้องการเปลี่ยนชื่อหรือเลือกใหม่อีกครั้งหรือไม่?")) {
+  if (confirm("ต้องการเปลี่ยนชื่อนักศึกษาหรือไม่?")) {
     currentStudent = null;
     localStorage.removeItem('COMED_USER_SESSION');
-    updateProfileCards();
+    updateProfileCardsStep1();
     goToStep(1);
   }
 }
@@ -247,7 +378,7 @@ function handleGoogleAuthResponse(response) {
     const isSpecialTester = (email === 'phupa5874@gmail.com' || email === 'thitiwut.a@kkumail.com');
 
     if (!email.endsWith('@kkumail.com') && !isSpecialTester) {
-      alert("กรุณาใช้อีเมล @kkumail.com เพื่อยืนยันตัวตน");
+      alert("กรุณาใช้อีเมล @kkumail.com");
       return;
     }
 
@@ -256,74 +387,108 @@ function handleGoogleAuthResponse(response) {
       studentId: student ? student.id : (isSpecialTester ? 'ADMIN-TESTER' : email.split('@')[0]),
       studentName: student ? student.name : (isSpecialTester ? 'ภูผา (ทดสอบระบบ)' : payload.name),
       nickname: student ? student.nickname : (isSpecialTester ? 'ภูผา' : ''),
-      email: email
+      email: email,
+      phone: ''
     };
 
     localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentStudent));
-    updateProfileCards();
-    goToStep(2);
-  } catch(e) {
-    console.warn("Google Auth Error:", e);
-  }
+    updateProfileCardsStep1();
+
+    if (isSystemOpen()) {
+      goToStep(2);
+    } else {
+      goToStep(4);
+    }
+  } catch(e) {}
 }
 
-// ================= STEP 2: TRACK & DEPARTMENTS =================
-function switchStep2Track(trackId) {
-  activeTrackId = trackId;
-  updateStep2TrackSwitcher();
-  renderStep2Departments();
-}
-
-function updateStep2TrackSwitcher() {
-  const btnGrad = document.getElementById('step2BtnGrad');
-  const btnChild = document.getElementById('step2BtnChild');
-  const bannerTitle = document.getElementById('activeTrackBannerTitle');
-  const bannerDesc = document.getElementById('activeTrackBannerDesc');
-
+// ================= STEP 2: เลือกกิจกรรม (2 กิจกรรมใหญ่) =================
+function renderStep2TrackCards() {
   const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
   const gradRegs = regs.filter(r => r.trackId === 'track_grad' || (r.departmentId && r.departmentId.startsWith('dept_grad_')));
   const childRegs = regs.filter(r => r.trackId === 'track_children' || (r.departmentId && r.departmentId.startsWith('dept_child_')));
 
-  document.getElementById('step2BadgeGradCount').textContent = `${gradRegs.length} / 30+ คน`;
-  document.getElementById('step2BadgeChildCount').textContent = `${childRegs.length} / 30+ คน`;
+  document.getElementById('step2GradEnrolledCount').textContent = `${gradRegs.length} / 30+ คน`;
+  document.getElementById('step2ChildEnrolledCount').textContent = `${childRegs.length} / 30+ คน`;
 
-  // Highlight active button
-  if (activeTrackId === 'track_grad') {
-    btnGrad.className = "p-3 rounded-xl border text-left transition relative cursor-pointer border-amber-500 bg-amber-500/15 text-white";
-    btnChild.className = "p-3 rounded-xl border text-left transition relative cursor-pointer border-slate-800 bg-slate-900 text-slate-400 hover:text-white";
-    if (bannerTitle) bannerTitle.innerHTML = `<i data-lucide="graduation-cap" class="w-4 h-4 text-amber-400"></i><span>ฝ่ายงาน: ทำซุ้มพี่บัณฑิต (ช่วง 20 ธ.ค. 2 วัน)</span>`;
-    if (bannerDesc) bannerDesc.textContent = "สถานที่: โรงรถ 1 ล็อค คณะศึกษาศาสตร์ เน้นจัดฉากถ่ายรูปสวยงาม อบอุ่น และต้อนรับพี่บัณฑิต";
-  } else {
-    btnChild.className = "p-3 rounded-xl border text-left transition relative cursor-pointer border-sky-500 bg-sky-500/15 text-white";
-    btnGrad.className = "p-3 rounded-xl border text-left transition relative cursor-pointer border-slate-800 bg-slate-900 text-slate-400 hover:text-white";
-    if (bannerTitle) bannerTitle.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 text-sky-400"></i><span>ฝ่ายงาน: งานวันเด็กแห่งชาติ (ช่วง 9 ม.ค. 2570)</span>`;
-    if (bannerDesc) bannerDesc.textContent = "ลงทะเบียนซุ้มสาขา ออกแบบกิจกรรมให้เด็กๆ เช่น Bingo, ระบายสี AR 3D, หุ่นยนต์ และแจกของขวัญ";
-  }
-
-  // Show "selected" badge on track if user enrolled
   if (currentStudent) {
     const myGrad = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_grad');
     const myChild = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_children');
 
-    const gradBadge = document.getElementById('step2MyGradSelectedBadge');
-    const childBadge = document.getElementById('step2MyChildSelectedBadge');
-    if (gradBadge) {
-      gradBadge.classList.toggle('hidden', !myGrad);
-      if (myGrad) gradBadge.textContent = `✓ ลงแล้ว: ${myGrad.roleTitle}`;
+    const gradPill = document.getElementById('step2GradMyStatusPill');
+    const childPill = document.getElementById('step2ChildMyStatusPill');
+
+    if (gradPill) {
+      if (myGrad) {
+        gradPill.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        gradPill.textContent = `✓ ลงแล้ว: ${myGrad.roleTitle}`;
+      } else {
+        gradPill.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
+        gradPill.textContent = "ยังไม่ได้ลงชื่อ";
+      }
     }
-    if (childBadge) {
-      childBadge.classList.toggle('hidden', !myChild);
-      if (myChild) childBadge.textContent = `✓ ลงแล้ว: ${myChild.roleTitle}`;
+
+    if (childPill) {
+      if (myChild) {
+        childPill.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        childPill.textContent = `✓ ลงแล้ว: ${myChild.roleTitle}`;
+      } else {
+        childPill.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
+        childPill.textContent = "ยังไม่ได้ลงชื่อ";
+      }
+    }
+  }
+}
+
+function selectTrackAndGoToStep3(trackId) {
+  if (!isSystemOpen()) {
+    alert("ระบบปิดรับสมัครชั่วคราว");
+    goToStep(4);
+    return;
+  }
+  activeTrackId = trackId;
+  goToStep(3);
+}
+
+// ================= STEP 3: เลือกฝ่าย & ตำแหน่ง =================
+function switchStep3Track(trackId) {
+  activeTrackId = trackId;
+  renderStep3Departments();
+}
+
+function renderStep3Departments() {
+  const btnGrad = document.getElementById('step3BtnGrad');
+  const btnChild = document.getElementById('step3BtnChild');
+  const bannerTitle = document.getElementById('step3BannerTitle');
+  const bannerDesc = document.getElementById('step3BannerDesc');
+  const bannerStatusBadge = document.getElementById('step3CurrentTrackStatusBadge');
+  const container = document.getElementById('step3DepartmentsContainer');
+
+  if (activeTrackId === 'track_grad') {
+    btnGrad.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-amber-500 text-slate-950 font-black cursor-pointer shadow-sm";
+    btnChild.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 text-slate-400 hover:text-white font-bold cursor-pointer";
+    if (bannerTitle) bannerTitle.textContent = "กำลังดูฝ่าย: ทำซุ้มพี่บัณฑิต (ช่วง 20 ธ.ค. 2 วัน)";
+    if (bannerDesc) bannerDesc.textContent = "โรงรถ 1 ล็อค คณะศึกษาศาสตร์ เน้นจัดฉากถ่ายรูปสวยงามและต้อนรับพี่บัณฑิต";
+  } else {
+    btnChild.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-sky-500 text-slate-950 font-black cursor-pointer shadow-sm";
+    btnGrad.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 text-slate-400 hover:text-white font-bold cursor-pointer";
+    if (bannerTitle) bannerTitle.textContent = "กำลังดูฝ่าย: งานวันเด็กแห่งชาติ (ช่วง 9 ม.ค. 2570)";
+    if (bannerDesc) bannerDesc.textContent = "ลงทะเบียนซุ้ม ออกแบบกิจกรรม Bingo, หุ่นยนต์, ระบายสี AR 3D และแจกของขวัญ";
+  }
+
+  // Track status badge
+  if (currentStudent && bannerStatusBadge) {
+    const myCurrent = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, activeTrackId);
+    if (myCurrent) {
+      bannerStatusBadge.textContent = `✓ ลงตำแหน่ง: ${myCurrent.roleTitle}`;
+      bannerStatusBadge.className = "text-[10px] px-2.5 py-1 rounded-lg font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+    } else {
+      bannerStatusBadge.textContent = "ยังไม่ได้เลือกฝ่ายในงานนี้";
+      bannerStatusBadge.className = "text-[10px] px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-slate-400";
     }
   }
 
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
-function renderStep2Departments() {
-  const container = document.getElementById('step2DepartmentsContainer');
   if (!container || !currentClassEvent) return;
-
   const track = currentClassEvent.tracks?.find(t => t.id === activeTrackId);
   if (!track || !track.departments) {
     container.innerHTML = `<div class="p-6 text-center text-slate-500">ไม่พบข้อมูลฝ่าย</div>`;
@@ -363,8 +528,7 @@ function renderStep2Departments() {
         `;
       }
 
-      // Member names
-      const memberNames = roleRegs.map(r => `
+      const memberPills = roleRegs.map(r => `
         <span class="inline-flex items-center px-2 py-0.5 rounded bg-slate-900 text-slate-300 text-[11px] font-medium border border-slate-800">
           ${r.nickname || r.studentName.split(' ')[0]}
         </span>
@@ -384,10 +548,9 @@ function renderStep2Departments() {
             ${actionBtn}
           </div>
 
-          <!-- Members list -->
           <div class="pt-1 text-[11px] text-slate-400 flex items-center gap-1.5 flex-wrap">
             <span class="text-slate-500 text-[10px]">เพื่อนที่ลง (${roleRegs.length}):</span>
-            ${roleRegs.length > 0 ? memberNames : '<span class="text-slate-600 italic text-[10px]">ยังไม่มี</span>'}
+            ${roleRegs.length > 0 ? memberPills : '<span class="text-slate-600 italic text-[10px]">ยังไม่มี</span>'}
           </div>
         </div>
       `;
@@ -420,8 +583,13 @@ function renderStep2Departments() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-// ================= MODAL & CONFIRMATION =================
+// ================= MODAL & CONFIRM ROLE REGISTRATION =================
 function openSelectRoleModal(trackId, trackTitle, deptId, deptName, roleId, roleTitle) {
+  if (!isSystemOpen()) {
+    alert("ระบบปิดรับสมัครชั่วคราว");
+    goToStep(4);
+    return;
+  }
   if (!currentStudent) {
     alert("กรุณาระบุตัวตนก่อนครับ");
     goToStep(1);
@@ -431,6 +599,7 @@ function openSelectRoleModal(trackId, trackTitle, deptId, deptName, roleId, role
   pendingTrackSelection = { trackId, trackTitle, deptId, deptName, roleId, roleTitle };
 
   document.getElementById('confirmStudentName').textContent = `${currentStudent.studentName} (${currentStudent.nickname || '-'})`;
+  document.getElementById('confirmStudentPhone').textContent = currentStudent.phone || '(ยังไม่ระบุเบอร์)';
   document.getElementById('confirmTrackTitle').textContent = trackTitle;
   document.getElementById('confirmDeptName').textContent = deptName;
   document.getElementById('confirmRoleTitle').textContent = roleTitle;
@@ -447,6 +616,13 @@ function closeConfirmRoleModal() {
 
 async function submitTrackRoleRegistration() {
   if (!currentStudent || !pendingTrackSelection) return;
+
+  if (!isSystemOpen()) {
+    alert("ขออภัย ระบบได้ปิดรับสมัครชั่วคราวแล้ว");
+    closeConfirmRoleModal();
+    goToStep(4);
+    return;
+  }
 
   const btn = document.getElementById('btnSubmitRoleRegistration');
   const note = document.getElementById('confirmRoleNote')?.value.trim() || '';
@@ -472,6 +648,7 @@ async function submitTrackRoleRegistration() {
     closeConfirmRoleModal();
     refreshUI();
     alert(`✅ บันทึกตำแหน่ง "${pendingTrackSelection.roleTitle}" เรียบร้อยแล้ว!`);
+    goToStep(4); // Advance to Step 4 to review
   } catch(err) {
     alert("⚠️ " + (err.message || "ไม่สามารถลงทะเบียนได้"));
   } finally {
@@ -483,6 +660,10 @@ async function submitTrackRoleRegistration() {
 }
 
 async function handleCancelTrackRole(trackId) {
+  if (!isSystemOpen()) {
+    alert("⚠️ ไม่สามารถยกเลิกหรือเปลี่ยนแปลงได้เนื่องจากระบบปิดรับสมัครแล้ว");
+    return;
+  }
   if (!currentStudent) return;
   const reg = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, trackId);
   if (!reg) return;
@@ -499,16 +680,16 @@ async function handleCancelTrackRole(trackId) {
   }
 }
 
-// ================= STEP 3: SUMMARY & ROSTER =================
-function updateUserSummaryStep3() {
-  const nameEl = document.getElementById('step3UserName');
-  const badgeGrad = document.getElementById('step3BadgeGrad');
-  const detailGrad = document.getElementById('step3DetailGrad');
-  const actionGrad = document.getElementById('step3ActionGrad');
+// ================= STEP 4: ทำเนียบเพื่อน (แก้ไขได้จนกว่าระบบจะปิด) =================
+function updateUserSummaryStep4() {
+  const nameEl = document.getElementById('step4UserName');
+  const badgeGrad = document.getElementById('step4BadgeGrad');
+  const detailGrad = document.getElementById('step4DetailGrad');
+  const actionGrad = document.getElementById('step4ActionGrad');
 
-  const badgeChild = document.getElementById('step3BadgeChild');
-  const detailChild = document.getElementById('step3DetailChild');
-  const actionChild = document.getElementById('step3ActionChild');
+  const badgeChild = document.getElementById('step4BadgeChild');
+  const detailChild = document.getElementById('step4DetailChild');
+  const actionChild = document.getElementById('step4ActionChild');
 
   if (!currentStudent) {
     if (nameEl) nameEl.textContent = "ยังไม่ได้ระบุตัวตน";
@@ -522,24 +703,26 @@ function updateUserSummaryStep3() {
     badgeGrad.textContent = "ลงแล้ว ✓";
     badgeGrad.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
     detailGrad.textContent = `${myGrad.roleTitle} (${myGrad.departmentName.replace(/\[.*?\]\s*/, '')})`;
-    actionGrad.classList.remove('hidden');
+    if (isSystemOpen()) actionGrad?.classList.remove('hidden');
+    else actionGrad?.classList.add('hidden');
   } else {
     badgeGrad.textContent = "ยังไม่ลง";
     badgeGrad.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
     detailGrad.textContent = "ยังไม่ได้เลือกฝ่ายในกิจกรรมนี้";
-    actionGrad.classList.add('hidden');
+    actionGrad?.classList.add('hidden');
   }
 
   if (myChild) {
     badgeChild.textContent = "ลงแล้ว ✓";
     badgeChild.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
     detailChild.textContent = `${myChild.roleTitle} (${myChild.departmentName.replace(/\[.*?\]\s*/, '')})`;
-    actionChild.classList.remove('hidden');
+    if (isSystemOpen()) actionChild?.classList.remove('hidden');
+    else actionChild?.classList.add('hidden');
   } else {
     badgeChild.textContent = "ยังไม่ลง";
     badgeChild.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
     detailChild.textContent = "ยังไม่ได้เลือกฝ่ายในกิจกรรมนี้";
-    actionChild.classList.add('hidden');
+    actionChild?.classList.add('hidden');
   }
 }
 
@@ -663,14 +846,15 @@ function startRealtimeLiveSync() {
 
 function refreshUI() {
   currentClassEvent = window.ComedEventManager.getActiveEvent(EVENT_CLASS_ID);
-  updateProfileCards();
-  updateStep2TrackSwitcher();
-  renderStep2Departments();
-  updateUserSummaryStep3();
+  updateSystemStatusBanner();
+  updateProfileCardsStep1();
+  renderStep2TrackCards();
+  renderStep3Departments();
+  updateUserSummaryStep4();
   renderClassRosterTable();
 }
 
-// ================= EXCEL EXPORT =================
+// ================= EXPORT EXCEL (.XLSX) =================
 function exportClassRosterExcel() {
   if (typeof XLSX === 'undefined') {
     alert("ไม่พบโมดูลดาวน์โหลด Excel");
@@ -681,12 +865,14 @@ function exportClassRosterExcel() {
   const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
 
   const overallData = [
-    ["ลำดับ", "รหัสนักศึกษา", "ชื่อ-สกุล", "ชื่อเล่น", "อีเมล", "ซุ้มพี่บัณฑิต (20 ธ.ค.)", "งานวันเด็ก (9 ม.ค. 70)", "สถานะ"]
+    ["ลำดับ", "รหัสนักศึกษา", "ชื่อ-สกุล", "ชื่อเล่น", "อีเมล", "เบอร์โทร", "ซุ้มพี่บัณฑิต (20 ธ.ค.)", "งานวันเด็ก (9 ม.ค. 70)", "สถานะ (COMED23 KKU63)"]
   ];
 
   students.forEach((st, idx) => {
     const grad = regs.find(r => r.studentId === st.id && (r.trackId === 'track_grad' || (r.departmentId && r.departmentId.startsWith('dept_grad_'))));
     const child = regs.find(r => r.studentId === st.id && (r.trackId === 'track_children' || (r.departmentId && r.departmentId.startsWith('dept_child_'))));
+
+    const phone = (grad && grad.phone) || (child && child.phone) || (grad && grad.note && (grad.note.match(/\[TEL:(.*?)\]/) || [])[1]) || (child && child.note && (child.note.match(/\[TEL:(.*?)\]/) || [])[1]) || "-";
 
     let status = "ยังไม่เลือกลง";
     if (grad && child) status = "ร่วมทั้ง 2 กิจกรรม";
@@ -699,6 +885,7 @@ function exportClassRosterExcel() {
       st.name,
       st.nickname || '',
       st.email,
+      phone,
       grad ? `${grad.roleTitle} (${grad.departmentName})` : "-",
       child ? `${child.roleTitle} (${child.departmentName})` : "-",
       status
@@ -707,8 +894,8 @@ function exportClassRosterExcel() {
 
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(overallData);
-  XLSX.utils.book_append_sheet(wb, ws, "ทำเนียบ 60 คน");
+  XLSX.utils.book_append_sheet(wb, ws, "ทำเนียบ 60 คน COMED23");
 
   const today = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(wb, `รายชื่อกิจกรรมรุ่น69_ซุ้มบัณฑิต_วันเด็ก_${today}.xlsx`);
+  XLSX.writeFile(wb, `รายชื่อกิจกรรมCOMED23_KKU63_ซุ้มบัณฑิต_วันเด็ก_${today}.xlsx`);
 }
