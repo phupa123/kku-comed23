@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบแอดมินจัดการกิจกรรมห้อง (ซุ้มบัณฑิต & วันเด็ก) | COMED KKU 69</title>
+  <meta name="description" content="ระบบจัดการหลังบ้านสำหรับกิจกรรมซุ้มพี่บัณฑิต และ งานวันเด็กแห่งชาติ สาขาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- SheetJS with Full Cell Styling Support (xlsx-js-style) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <!-- Instant Strict Admin Security Guard -->
+  <script src="config/admin_guard.js"></script>
+  <script src="students_data.js"></script>
+  <script src="config/events_repo.js?v=2.5.0"></script>
+  <link rel="stylesheet" href="assets/css/master-admin.css">
+
+  <style>
+    .hub-glass {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden bg-mesh-dark font-sans">
+
+  <!-- ================= TOP NAVIGATION HEADER ================= -->
+  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-2xl border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <div class="flex items-center gap-3.5">
+        <a href="admin.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition shadow-sm" title="กลับสู่ Central Admin Hub">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-black uppercase tracking-wider text-purple-400">EVENT CLASS ADMIN HUB</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              ซุ้มบัณฑิต & วันเด็ก
+            </span>
+          </div>
+          <h1 class="text-base sm:text-lg font-black text-white leading-tight">จัดการ 2 กิจกรรมห้อง COMED 69</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <a href="eventclass.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">ดูหน้าเว็บจริง</span>
+        </a>
+        <button onclick="exportClassRosterExcel()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+          <span>ส่งออก Excel</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
+
+    <!-- Active Event Control Banner -->
+    <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-purple-500/30 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold flex-shrink-0">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="classAdminStatusPill" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                ONLINE
+              </span>
+              <span class="text-xs text-slate-400">ID: <code class="font-mono text-purple-300">eventclass_69</code></span>
+            </div>
+            <h2 id="classAdminTitle" class="text-lg sm:text-xl font-black text-white mt-1">กิจกรรมซุ้มพี่บัณฑิต & งานวันเด็กแห่งชาติ</h2>
+            <p id="classAdminSubtitle" class="text-xs text-slate-400 mt-0.5">ระบบเลือกลงทะเบียน 2 ตัวเลือกใหญ่ โควตาแนะนำ 30+ คนต่อกิจกรรม</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btnToggleClassStatus" onclick="toggleClassEventStatus()"
+            class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-xs font-bold border border-slate-700 transition flex items-center gap-2 text-slate-200 cursor-pointer">
+            <i data-lucide="power" class="w-4 h-4 text-emerald-400"></i>
+            <span id="btnToggleClassStatusText">เปิดรับสมัครอยู่ (คลิกเพื่อปิด)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Quick Stats Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Stat 1: ซุ้มบัณฑิต -->
+        <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-1">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-bold">
+            <span>🎓 ซุ้มพี่บัณฑิต</span>
+            <span class="text-amber-400">20 ธ.ค.</span>
+          </div>
+          <div class="flex items-baseline gap-2 pt-1">
+            <span id="statGradCount" class="text-2xl sm:text-3xl font-black text-amber-400 font-mono">0</span>
+            <span class="text-xs text-slate-500">/ 30+ คน</span>
+          </div>
+        </div>
+
+        <!-- Stat 2: วันเด็ก -->
+        <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-1">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-bold">
+            <span>🎪 งานวันเด็ก</span>
+            <span class="text-sky-400">9 ม.ค. 70</span>
+          </div>
+          <div class="flex items-baseline gap-2 pt-1">
+            <span id="statChildCount" class="text-2xl sm:text-3xl font-black text-sky-400 font-mono">0</span>
+            <span class="text-xs text-slate-500">/ 30+ คน</span>
+          </div>
+        </div>
+
+        <!-- Stat 3: ทั้ง 2 งาน -->
+        <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-1">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-bold">
+            <span>🌟 ร่วมครบ 2 งาน</span>
+            <span class="text-purple-400">Multi-track</span>
+          </div>
+          <div class="flex items-baseline gap-2 pt-1">
+            <span id="statBothCount" class="text-2xl sm:text-3xl font-black text-purple-400 font-mono">0</span>
+            <span class="text-xs text-slate-500">คน</span>
+          </div>
+        </div>
+
+        <!-- Stat 4: ยังไม่ลง -->
+        <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-1">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-bold">
+            <span>⏳ ยังไม่ได้ลงชื่อ</span>
+            <span class="text-rose-400">รอดำเนินการ</span>
+          </div>
+          <div class="flex items-baseline gap-2 pt-1">
+            <span id="statPendingCount" class="text-2xl sm:text-3xl font-black text-rose-400 font-mono">60</span>
+            <span class="text-xs text-slate-500">/ 60 คน</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 2 TRACKS OVERVIEW TABS ================= -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+          <i data-lucide="layers" class="w-5 h-5 text-purple-400"></i>
+          <span>โครงสร้างฝ่ายและจำนวนสมาชิกแยกตามกิจกรรม</span>
+        </h3>
+        
+        <!-- Track Switcher -->
+        <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-900 border border-slate-800">
+          <button onclick="switchAdminTrack('track_grad')" id="adminBtnGradTrack"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-black transition bg-amber-500 text-slate-950 shadow-sm cursor-pointer flex items-center gap-1.5">
+            <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+            <span>ซุ้มพี่บัณฑิต</span>
+          </button>
+          <button onclick="switchAdminTrack('track_children')" id="adminBtnChildTrack"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>งานวันเด็กแห่งชาติ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Departments Grid for Active Track -->
+      <div id="adminDeptsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- ================= 60-STUDENT MASTER ROSTER TABLE ================= -->
+    <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-lg font-black text-white">ทำเนียบรายชื่อนักศึกษา 60 คน (Master Roster)</h3>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30">
+              สถานะ 2 กิจกรรม
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">แอดมินสามารถกำหนดตำแหน่งให้เพื่อนโดยตรง หรือกดยกเลิกการลงชื่อได้ทันที</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openAssignModal()" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>+ กำหนดตำแหน่งให้นักศึกษา</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Controls & Search -->
+      <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <!-- Filter Tabs -->
+        <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-900 border border-slate-800 text-xs overflow-x-auto">
+          <button onclick="setRosterFilter('all')" class="admin-tab-btn active px-3 py-1.5 rounded-xl font-bold bg-purple-600 text-white flex-shrink-0">ทั้งหมด (60)</button>
+          <button onclick="setRosterFilter('grad')" class="admin-tab-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white font-bold flex-shrink-0">ซุ้มบัณฑิต</button>
+          <button onclick="setRosterFilter('children')" class="admin-tab-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white font-bold flex-shrink-0">งานวันเด็ก</button>
+          <button onclick="setRosterFilter('both')" class="admin-tab-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white font-bold flex-shrink-0">ร่วม 2 งาน</button>
+          <button onclick="setRosterFilter('pending')" class="admin-tab-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white font-bold flex-shrink-0">ยังไม่ลงชื่อ</button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative min-w-[240px]">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+          <input type="text" id="adminRosterSearch" oninput="renderAdminRosterTable()"
+            placeholder="พิมพ์ค้นหารหัส หรือ ชื่อเพื่อน..."
+            class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-purple-500 transition">
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-800">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px] font-black border-b border-slate-800">
+            <tr>
+              <th class="p-3.5">#</th>
+              <th class="p-3.5">รหัสนักศึกษา</th>
+              <th class="p-3.5">ชื่อ - สกุล</th>
+              <th class="p-3.5">ชื่อเล่น</th>
+              <th class="p-3.5 text-amber-400">ซุ้มพี่บัณฑิต (20 ธ.ค.)</th>
+              <th class="p-3.5 text-sky-400">งานวันเด็ก (9 ม.ค. 70)</th>
+              <th class="p-3.5 text-center">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="adminRosterTbody" class="divide-y divide-slate-800/60 bg-slate-950/40 font-medium">
+            <!-- Dynamic Rows via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= MODAL: ASSIGN ROLE TO STUDENT ================= -->
+  <div id="modalAssignRole" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="hub-glass rounded-3xl max-w-md w-full p-6 space-y-4 border border-purple-500/40 text-left">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-purple-400"></i>
+          <span>กำหนดตำแหน่งให้นักศึกษา</span>
+        </h3>
+        <button onclick="closeAssignModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Student Picker -->
+      <div class="space-y-1">
+        <label class="text-xs font-bold text-slate-300">1. เลือกรหัสนักศึกษา / ชื่อ (60 คน):</label>
+        <select id="assignStudentSelect" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-purple-500">
+          <option value="">-- เลือกนักศึกษา --</option>
+        </select>
+      </div>
+
+      <!-- Track Picker -->
+      <div class="space-y-1">
+        <label class="text-xs font-bold text-slate-300">2. เลือกกิจกรรม:</label>
+        <select id="assignTrackSelect" onchange="updateAssignDeptOptions()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-purple-500">
+          <option value="track_grad">🎓 ทำซุ้มพี่บัณฑิต (20 ธ.ค.)</option>
+          <option value="track_children">🎪 งานวันเด็กแห่งชาติ (9 ม.ค. 70)</option>
+        </select>
+      </div>
+
+      <!-- Department Picker -->
+      <div class="space-y-1">
+        <label class="text-xs font-bold text-slate-300">3. เลือกฝ่าย:</label>
+        <select id="assignDeptSelect" onchange="updateAssignRoleOptions()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-purple-500">
+          <option value="">-- เลือกฝ่าย --</option>
+        </select>
+      </div>
+
+      <!-- Role Picker -->
+      <div class="space-y-1">
+        <label class="text-xs font-bold text-slate-300">4. เลือกตำแหน่ง:</label>
+        <select id="assignRoleSelect" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-purple-500">
+          <option value="">-- เลือกตำแหน่ง --</option>
+        </select>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="closeAssignModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">
+          ยกเลิก
+        </button>
+        <button onclick="submitAssignRole()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md">
+          บันทึกการจัดสรร
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Logic Script -->
+  <script src="assets/js/eventclass-admin.js?v=2.5.0"></script>
+</body>
+</html>
