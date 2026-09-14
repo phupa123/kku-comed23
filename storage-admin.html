@@ -39,6 +39,9 @@
   <!-- Strict Admin Security Guard -->
   <script src="config/admin_guard.js"></script>
 
+  <!-- Students Roster Data (60 Students) -->
+  <script src="students_data.js"></script>
+
   <!-- Multi-Cloud Engine -->
   <script src="assets/js/multi_uploader.js"></script>
 </head>
@@ -129,76 +132,162 @@
 
     </div>
 
-    <!-- Filter & Search Toolbar -->
-    <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        
-        <!-- Search -->
-        <div class="relative flex-grow max-w-md">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-500"></i>
-          <input type="text" id="searchInput" oninput="renderStorageTable()" placeholder="ค้นหาชื่อไฟล์, รหัสนักศึกษา, ชื่อผู้ใช้, หรืออีเมล..."
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-sans">
-        </div>
-
-        <!-- Provider Filters Tabs -->
-        <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 sm:pb-0">
-          <button onclick="setProviderFilter('all')" id="btnFilterAll" class="px-3 py-2 rounded-xl text-xs font-black transition cursor-pointer bg-orange-500 text-white shadow-md">
-            ทั้งหมด (<span id="countAll">0</span>)
-          </button>
-          <button onclick="setProviderFilter('cloudinary')" id="btnFilterCloudinary" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
-            Cloudinary (<span id="countCloudinary">0</span>)
-          </button>
-          <button onclick="setProviderFilter('catbox')" id="btnFilterCatbox" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
-            Catbox (<span id="countCatbox">0</span>)
-          </button>
-          <button onclick="setProviderFilter('imgbb')" id="btnFilterImgbb" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
-            ImgBB (<span id="countImgbb">0</span>)
-          </button>
-          <button onclick="setProviderFilter('freeimage')" id="btnFilterFreeimage" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
-            FreeImage (<span id="countFreeimage">0</span>)
-          </button>
-        </div>
-
-        <!-- Refresh Button -->
-        <button onclick="refreshAllStorageData()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer flex-shrink-0">
-          <i data-lucide="rotate-cw" id="refreshIcon" class="w-3.5 h-3.5"></i>
-          <span>ดึงข้อมูลล่าสุด</span>
-        </button>
-
-      </div>
+    <!-- Main Section Switcher (Tabs) -->
+    <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+      <button onclick="switchAdminTab('files')" id="tabBtnFiles" class="px-4 py-2.5 rounded-2xl text-xs font-black transition flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20">
+        <i data-lucide="folder-check" class="w-4 h-4"></i>
+        <span>รายการไฟล์ทั้งหมด (File Audit)</span>
+      </button>
+      <button onclick="switchAdminTab('members')" id="tabBtnMembers" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition flex items-center gap-2">
+        <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i>
+        <span>โควตา & ความคมชัดของสมาชิก (Members & Quota)</span>
+        <span id="memberCountBadge" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300">60 คน</span>
+      </button>
+      <button onclick="openGlobalSettingsModal()" class="ml-auto px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-700 transition flex items-center gap-2">
+        <i data-lucide="sliders" class="w-4 h-4 text-amber-400"></i>
+        <span>ปรับส่วนรวม (Global Settings)</span>
+      </button>
     </div>
 
-    <!-- Main Files Audit Table -->
-    <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-        <div class="flex items-center gap-2">
-          <h2 class="text-base sm:text-lg font-black text-white">ตารางตรวจสอบไฟล์และผู้รับผิดชอบการอัปโหลด</h2>
-          <span id="showingCountBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">กำลังแสดง 0 รายการ</span>
+    <!-- VIEW 1: FILES LIST VIEW -->
+    <div id="viewFilesAudit" class="space-y-6">
+      
+      <!-- Filter & Search Toolbar -->
+      <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          
+          <!-- Search -->
+          <div class="relative flex-grow max-w-md">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-500"></i>
+            <input type="text" id="searchInput" oninput="renderStorageTable()" placeholder="ค้นหาชื่อไฟล์, รหัสนักศึกษา, ชื่อผู้ใช้, หรืออีเมล..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-sans">
+          </div>
+
+          <!-- Active Member Filter Indicator -->
+          <div id="filterMemberBanner" class="hidden items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs">
+            <span class="text-emerald-400 font-bold flex items-center gap-1">
+              <i data-lucide="user" class="w-3.5 h-3.5"></i>
+              <span id="filterMemberNameText">-</span>
+            </span>
+            <button onclick="clearMemberFileFilter()" class="text-slate-400 hover:text-white p-0.5 rounded-full hover:bg-slate-800" title="ล้างการกรองเฉพาะคนนี้">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- Provider Filters Tabs -->
+          <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 sm:pb-0">
+            <button onclick="setProviderFilter('all')" id="btnFilterAll" class="px-3 py-2 rounded-xl text-xs font-black transition cursor-pointer bg-orange-500 text-white shadow-md">
+              ทั้งหมด (<span id="countAll">0</span>)
+            </button>
+            <button onclick="setProviderFilter('cloudinary')" id="btnFilterCloudinary" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
+              Cloudinary (<span id="countCloudinary">0</span>)
+            </button>
+            <button onclick="setProviderFilter('catbox')" id="btnFilterCatbox" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
+              Catbox (<span id="countCatbox">0</span>)
+            </button>
+            <button onclick="setProviderFilter('imgbb')" id="btnFilterImgbb" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
+              ImgBB (<span id="countImgbb">0</span>)
+            </button>
+            <button onclick="setProviderFilter('freeimage')" id="btnFilterFreeimage" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
+              FreeImage (<span id="countFreeimage">0</span>)
+            </button>
+          </div>
+
+          <!-- Refresh Button -->
+          <button onclick="refreshAllStorageData()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer flex-shrink-0">
+            <i data-lucide="rotate-cw" id="refreshIcon" class="w-3.5 h-3.5"></i>
+            <span>ดึงข้อมูลล่าสุด</span>
+          </button>
+
         </div>
       </div>
 
-      <div class="overflow-x-auto custom-scrollbar">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
-              <th class="p-3 text-center w-12">ภาพตัวอย่าง</th>
-              <th class="p-3">ชื่อไฟล์ / หมวดหมู่</th>
-              <th class="p-3">ผู้ใช้ที่เป็นคนอัปโหลด (Uploader)</th>
-              <th class="p-3 text-center">ผู้ให้บริการคลาวด์</th>
-              <th class="p-3">วันและเวลาที่ส่ง</th>
-              <th class="p-3 text-center w-36">การจัดการไฟล์</th>
-            </tr>
-          </thead>
-          <tbody id="storageTableBody">
-            <tr>
-              <td colspan="6" class="text-center py-12 text-slate-500 text-xs font-bold flex-col items-center justify-center">
-                <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-orange-500 mx-auto mb-2"></i>
-                <span>กำลังโหลดข้อมูลคลังไฟล์จากทุกช่องทาง...</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Main Files Audit Table -->
+      <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base sm:text-lg font-black text-white">ตารางตรวจสอบไฟล์และผู้รับผิดชอบการอัปโหลด</h2>
+            <span id="showingCountBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">กำลังแสดง 0 รายการ</span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+                <th class="p-3 text-center w-12">ภาพตัวอย่าง</th>
+                <th class="p-3">ชื่อไฟล์ / หมวดหมู่</th>
+                <th class="p-3">ผู้ใช้ที่เป็นคนอัปโหลด (Uploader)</th>
+                <th class="p-3 text-center">ผู้ให้บริการคลาวด์</th>
+                <th class="p-3">วันและเวลาที่ส่ง</th>
+                <th class="p-3 text-center w-36">การจัดการไฟล์</th>
+              </tr>
+            </thead>
+            <tbody id="storageTableBody">
+              <tr>
+                <td colspan="6" class="text-center py-12 text-slate-500 text-xs font-bold flex-col items-center justify-center">
+                  <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-orange-500 mx-auto mb-2"></i>
+                  <span>กำลังโหลดข้อมูลคลังไฟล์จากทุกช่องทาง...</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+
+    </div>
+
+    <!-- VIEW 2: MEMBERS AUDIT & STORAGE/RESOLUTION CONTROLS -->
+    <div id="viewMembersAudit" class="hidden space-y-6">
+
+      <!-- Member Search & Quick Stats -->
+      <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="relative flex-grow max-w-md">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-500"></i>
+          <input type="text" id="memberSearchInput" oninput="renderMembersAuditTable()" placeholder="ค้นหารหัสนักศึกษา, ชื่อ, หรืออีเมลสมาชิก..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white text-xs outline-none transition font-sans">
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="text-xs text-slate-400">
+            ค่าเริ่มต้นส่วนรวม: <span class="text-white font-bold" id="currentGlobalQuotaLabel">5 GB</span> | 
+            ความคมชัด: <span class="text-white font-bold" id="currentGlobalResolutionLabel">1600px (82%)</span>
+          </div>
+          <button onclick="openGlobalSettingsModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold transition flex items-center gap-1.5">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            <span>แก้ไขส่วนรวม</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Members Audit Table -->
+      <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base sm:text-lg font-black text-white">ตรวจสอบการอัปโหลดและปรับโควตา / ความคมชัดรายบุคคล</h2>
+            <span id="membersShowingCountBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">สมาชิกทั้งหมด 60 คน</span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+                <th class="p-3">สมาชิก (COMED23 / KKU63)</th>
+                <th class="p-3 text-center">จำนวนไฟล์ที่อัป</th>
+                <th class="p-3 text-center">พื้นที่ใช้ไป</th>
+                <th class="p-3 text-center">โควตาความจุ (Storage Quota)</th>
+                <th class="p-3 text-center">ความคมชัดภาพ (Resolution)</th>
+                <th class="p-3 text-center w-48">การจัดการ & ดูประวัติ</th>
+              </tr>
+            </thead>
+            <tbody id="membersTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
   </main>
@@ -266,14 +355,243 @@
     </div>
   </div>
 
+  <!-- ================= MODAL: GLOBAL SETTINGS (ตั้งค่าส่วนรวม) ================= -->
+  <div id="modalGlobalSettings" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="globe" class="w-5 h-5 text-amber-400"></i>
+          <span>ตั้งค่าความจุ & ความคมชัดส่วนรวม (Default for All)</span>
+        </h3>
+        <button onclick="closeGlobalSettingsModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400 leading-relaxed">
+        การตั้งค่านี้จะมีผลกับสมาชิกทุกคนในระบบที่ไม่ได้ถูกกำหนดโควตาหรือความคมชัดเฉพาะบุคคล
+      </p>
+
+      <div class="space-y-4 text-xs">
+        <!-- Default Quota GB -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-slate-300 flex items-center justify-between">
+            <span>ความจุเริ่มต้นต่อคน (Storage Quota):</span>
+            <span id="globalQuotaDisplay" class="text-amber-400 font-mono font-bold">5 GB</span>
+          </label>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" onclick="setGlobalQuotaInput(2)" class="py-2 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-amber-500 focus:border-amber-500 text-center">2 GB</button>
+            <button type="button" onclick="setGlobalQuotaInput(5)" class="py-2 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-amber-500 focus:border-amber-500 text-center">5 GB (ปกติ)</button>
+            <button type="button" onclick="setGlobalQuotaInput(10)" class="py-2 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-amber-500 focus:border-amber-500 text-center">10 GB</button>
+            <button type="button" onclick="setGlobalQuotaInput(20)" class="py-2 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-amber-500 focus:border-amber-500 text-center">20 GB</button>
+          </div>
+          <div class="flex items-center gap-2 mt-1">
+            <input type="number" id="globalQuotaInput" min="1" max="100" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white font-mono text-xs outline-none" placeholder="ระบุขนาดเป็น GB (เช่น 5)">
+            <span class="text-slate-400 font-bold">GB</span>
+          </div>
+        </div>
+
+        <!-- Resolution & Quality -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-800">
+          <label class="font-bold text-slate-300 block">
+            ความคมชัดของภาพและการบีบอัดเริ่มต้น (Default Image Resolution):
+          </label>
+          <select id="globalResolutionPreset" onchange="handleGlobalPresetChange(this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white text-xs outline-none">
+            <option value="1280_0.75">⚡ บีบอัดประหยัดพื้นที่ (Max 1280px, คุณภาพ 75% - เบาที่สุด)</option>
+            <option value="1600_0.82" selected>✨ มาตรฐานสวยคมชัด (Max 1600px, คุณภาพ 82% - แนะนำ)</option>
+            <option value="2048_0.90">🔥 ความละเอียดสูง HD (Max 2048px, คุณภาพ 90%)</option>
+            <option value="4000_1.0">💎 ต้นฉบับไม่ลดคุณภาพ (Original Max 4000px, 100%)</option>
+          </select>
+        </div>
+
+        <!-- Auto Compress Toggle -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+          <div>
+            <span class="font-bold text-white block">เปิดใช้งาน Smart Compression</span>
+            <span class="text-slate-400 text-[11px] block">ช่วยประหยัดพื้นที่คลาวด์สูงสุด 75% โดยภาพยังคมชัด</span>
+          </div>
+          <input type="checkbox" id="globalAutoCompressCheck" checked class="w-4 h-4 accent-amber-500 rounded">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+        <button onclick="closeGlobalSettingsModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white font-bold text-xs transition">
+          ยกเลิก
+        </button>
+        <button onclick="saveGlobalSettingsAction()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-xs shadow-lg shadow-orange-500/20 transition flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>บันทึกการตั้งค่าส่วนรวม</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: MEMBER QUOTA & RESOLUTION EDIT (ปรับรายบุคคล) ================= -->
+  <div id="modalMemberQuota" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-black text-white flex items-center gap-2">
+            <i data-lucide="user-cog" class="w-5 h-5 text-emerald-400"></i>
+            <span>ปรับพื้นที่ & ความคมชัดรายบุคคล</span>
+          </h3>
+          <span id="memberEditSubTitle" class="text-[11px] text-slate-400">รหัสนักศึกษา / ผู้ใช้</span>
+        </div>
+        <button onclick="closeMemberQuotaModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Hidden Key -->
+      <input type="hidden" id="editMemberKey" value="">
+
+      <!-- User Card Info -->
+      <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center gap-3">
+        <img id="editMemberAvatar" src="logo.png" class="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 object-cover">
+        <div>
+          <h4 id="editMemberName" class="text-sm font-bold text-white">-</h4>
+          <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+            <span id="editMemberId">-</span>
+            <span>•</span>
+            <span id="editMemberEmail" class="text-orange-400">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        
+        <!-- Custom Quota Input -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-slate-300">กำหนดโควตาความจุ (GB):</label>
+            <span id="editMemberQuotaNote" class="text-emerald-400 font-bold font-mono">5 GB</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" onclick="setMemberQuotaInput(5)" class="py-2 px-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-emerald-500 text-center">5 GB</button>
+            <button type="button" onclick="setMemberQuotaInput(10)" class="py-2 px-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-emerald-500 text-center">10 GB</button>
+            <button type="button" onclick="setMemberQuotaInput(25)" class="py-2 px-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-emerald-500 text-center">25 GB</button>
+            <button type="button" onclick="setMemberQuotaInput(50)" class="py-2 px-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-emerald-500 text-center">50 GB (VIP)</button>
+          </div>
+          <div class="flex items-center gap-2 mt-1">
+            <input type="number" id="editMemberQuotaInput" min="1" max="500" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white font-mono text-xs outline-none" placeholder="ระบุจำนวน GB (เช่น 15)">
+            <span class="text-slate-400 font-bold">GB</span>
+          </div>
+        </div>
+
+        <!-- Custom Image Quality Input -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-800">
+          <label class="font-bold text-slate-300 block">
+            ปรับความคมชัดภาพเฉพาะของสมาชิกคนนี้:
+          </label>
+          <select id="editMemberResolutionPreset" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white text-xs outline-none">
+            <option value="global">🌐 ใช้ตามค่าเริ่มต้นส่วนรวม</option>
+            <option value="1280_0.75">⚡ บีบอัดประหยัดพื้นที่ (Max 1280px, คุณภาพ 75%)</option>
+            <option value="1600_0.82">✨ มาตรฐานสวยคมชัด (Max 1600px, คุณภาพ 82%)</option>
+            <option value="2048_0.90">🔥 ความละเอียดสูง HD (Max 2048px, คุณภาพ 90%)</option>
+            <option value="4000_1.0">💎 ต้นฉบับไม่ลดคุณภาพ (Original Max 4000px, 100%)</option>
+          </select>
+        </div>
+
+        <!-- Admin Note -->
+        <div class="space-y-1 pt-1">
+          <label class="font-bold text-slate-300 block">หมายเหตุ / เหตุผลการปรับ (Optional):</label>
+          <input type="text" id="editMemberNote" placeholder="เช่น ช่างภาพประจำรุ่น, ฝ่ายตัดต่อสื่อ, VIP..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white text-xs outline-none">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button onclick="resetMemberOverrideToDefault()" type="button" class="text-rose-400 hover:text-rose-300 text-xs font-bold transition flex items-center gap-1">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>รีเซ็ตใช้ค่าส่วนรวม</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button onclick="closeMemberQuotaModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white font-bold text-xs transition">
+            ยกเลิก
+          </button>
+          <button onclick="saveMemberQuotaAction()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>บันทึกการตั้งค่าคนนี้</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: AUDIT USER FILES (ดูประวัติทั้งหมดของคนนี้) ================= -->
+  <div id="modalUserAudit" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3 flex-shrink-0">
+        <div>
+          <h3 class="text-base font-black text-white flex items-center gap-2">
+            <i data-lucide="history" class="w-5 h-5 text-indigo-400"></i>
+            <span>ประวัติไฟล์ทั้งหมดที่สมาชิกคนนี้อัปโหลด</span>
+          </h3>
+          <span id="auditModalUserSubtitle" class="text-xs text-slate-400">-</span>
+        </div>
+        <button onclick="closeUserAuditModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- User Stats Summary inside Audit Modal -->
+      <div class="grid grid-cols-3 gap-3 flex-shrink-0">
+        <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+          <span class="text-[10px] text-slate-400 font-bold block">จำนวนไฟล์ที่พบ</span>
+          <span id="auditStatFileCount" class="text-lg font-black text-white font-mono">0</span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+          <span class="text-[10px] text-slate-400 font-bold block">พื้นที่ใช้จริง</span>
+          <span id="auditStatUsedBytes" class="text-lg font-black text-emerald-400 font-mono">0 MB</span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+          <span class="text-[10px] text-slate-400 font-bold block">โควตาที่ได้รับ</span>
+          <span id="auditStatQuota" class="text-lg font-black text-amber-400 font-mono">5 GB</span>
+        </div>
+      </div>
+
+      <!-- User Files List Table Container -->
+      <div class="overflow-y-auto custom-scrollbar flex-grow border border-slate-800 rounded-2xl">
+        <table class="w-full text-left border-collapse">
+          <thead class="sticky top-0 bg-slate-950 border-b border-slate-800">
+            <tr class="text-slate-400 text-[11px] uppercase font-bold">
+              <th class="p-3 w-12 text-center">ภาพ</th>
+              <th class="p-3">ชื่อไฟล์ / หมวดหมู่</th>
+              <th class="p-3 text-center">คลาวด์</th>
+              <th class="p-3 text-right">ขนาด</th>
+              <th class="p-3">วัน-เวลาที่ส่ง</th>
+              <th class="p-3 text-center w-24">ลิงก์</th>
+            </tr>
+          </thead>
+          <tbody id="userAuditTableBody">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800 flex-shrink-0">
+        <button id="btnFilterUserInMainTable" onclick="" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs transition flex items-center gap-1.5">
+          <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+          <span>ไปกรองในตารางหลัก</span>
+        </button>
+        <button onclick="closeUserAuditModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let allStorageFiles = [];
     let currentProviderFilter = 'all';
+    let currentAdminTab = 'files'; // 'files' | 'members'
+    let activeMemberFilter = null; // Filter files by specific student or uploader
 
+    // 1. Load All Storage Data & Slips
     async function loadAllStorageData() {
       allStorageFiles = [];
 
-      // 1. Load from MultiCloudUploader Local Catalog
+      // 1.1 Load from MultiCloudUploader Local Catalog
       if (window.MultiCloudUploader) {
         const localCatalog = window.MultiCloudUploader.getAllFiles();
         if (Array.isArray(localCatalog)) {
@@ -281,7 +599,7 @@
         }
       }
 
-      // 2. Load Real-time Slips from Supabase `payments` table
+      // 1.2 Load Real-time Slips from Supabase `payments` table
       if (window.getSupabaseClient) {
         const sb = window.getSupabaseClient();
         if (sb) {
@@ -290,8 +608,7 @@
             if (data && Array.isArray(data)) {
               data.forEach(p => {
                 if (p.slip_url && (p.slip_url.startsWith('http://') || p.slip_url.startsWith('https://'))) {
-                  
-                  // Check if already in catalog by URL
+                  // Avoid duplicate entry if already in catalog
                   if (!allStorageFiles.some(f => f.url === p.slip_url)) {
                     let inferredProvider = 'catbox';
                     if (p.slip_url.includes('cloudinary.com')) inferredProvider = 'cloudinary';
@@ -305,6 +622,7 @@
                       url: p.slip_url,
                       provider: inferredProvider,
                       category: `สลิปชำระเงิน (฿${p.amount})`,
+                      size: p.slip_size || (250 * 1024), // Approx size fallback
                       uploaderId: p.student_id,
                       uploaderName: p.student_name + (p.student_nickname ? ` (น้อง${p.student_nickname})` : ''),
                       uploaderEmail: p.student_email || '-',
@@ -321,7 +639,9 @@
       }
 
       updateSummaryCounts();
+      updateGlobalSettingsLabels();
       renderStorageTable();
+      renderMembersAuditTable();
     }
 
     function updateSummaryCounts() {
@@ -343,6 +663,32 @@
       document.getElementById('countFreeimage').textContent = cFreeimage;
     }
 
+    // 2. Tab Navigation
+    function switchAdminTab(tab) {
+      currentAdminTab = tab;
+      const btnFiles = document.getElementById('tabBtnFiles');
+      const btnMembers = document.getElementById('tabBtnMembers');
+      const viewFiles = document.getElementById('viewFilesAudit');
+      const viewMembers = document.getElementById('viewMembersAudit');
+
+      if (tab === 'files') {
+        btnFiles.className = 'px-4 py-2.5 rounded-2xl text-xs font-black transition flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20';
+        btnMembers.className = 'px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition flex items-center gap-2';
+        viewFiles.classList.remove('hidden');
+        viewMembers.classList.add('hidden');
+        renderStorageTable();
+      } else {
+        btnMembers.className = 'px-4 py-2.5 rounded-2xl text-xs font-black transition flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/20';
+        btnFiles.className = 'px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition flex items-center gap-2';
+        viewMembers.classList.remove('hidden');
+        viewFiles.classList.add('hidden');
+        renderMembersAuditTable();
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // 3. Provider Filters
     function setProviderFilter(p) {
       currentProviderFilter = p;
       const buttons = ['All', 'Cloudinary', 'Catbox', 'Imgbb', 'Freeimage'];
@@ -359,6 +705,34 @@
       renderStorageTable();
     }
 
+    // 4. File Audit Table Rendering & Member Filtering
+    function filterFilesByMember(memberIdOrEmail, memberName) {
+      activeMemberFilter = {
+        key: memberIdOrEmail.toLowerCase().trim(),
+        name: memberName
+      };
+
+      const banner = document.getElementById('filterMemberBanner');
+      const nameText = document.getElementById('filterMemberNameText');
+      if (banner && nameText) {
+        banner.classList.remove('hidden');
+        banner.classList.add('flex');
+        nameText.textContent = `กรองเฉพาะ: ${memberName} (${memberIdOrEmail})`;
+      }
+
+      switchAdminTab('files');
+    }
+
+    function clearMemberFileFilter() {
+      activeMemberFilter = null;
+      const banner = document.getElementById('filterMemberBanner');
+      if (banner) {
+        banner.classList.add('hidden');
+        banner.classList.remove('flex');
+      }
+      renderStorageTable();
+    }
+
     function renderStorageTable() {
       const tbody = document.getElementById('storageTableBody');
       const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
@@ -366,6 +740,16 @@
       if (!tbody) return;
 
       let list = allStorageFiles;
+
+      // Filter by active member if selected
+      if (activeMemberFilter) {
+        const k = activeMemberFilter.key;
+        list = list.filter(f => {
+          const fid = (f.uploaderId || '').toLowerCase().trim();
+          const femail = (f.uploaderEmail || '').toLowerCase().trim();
+          return fid === k || femail === k;
+        });
+      }
 
       // Filter by provider
       if (currentProviderFilter !== 'all') {
@@ -391,7 +775,7 @@
         return;
       }
 
-      tbody.innerHTML = list.map((f, idx) => {
+      tbody.innerHTML = list.map((f) => {
         let providerBadge = '';
         if (f.provider === 'cloudinary') {
           providerBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">Cloudinary CDN</span>';
@@ -403,6 +787,8 @@
           providerBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">FreeImage</span>';
         }
 
+        const sizeFormatted = f.size ? formatBytes(f.size) : '-';
+
         return `
           <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 transition">
             <td class="p-3 text-center">
@@ -410,11 +796,15 @@
             </td>
             <td class="p-3">
               <span class="font-bold text-white text-xs block truncate max-w-xs cursor-pointer hover:text-orange-400 transition" onclick="openFileDetailModal('${f.id}')">${f.name || 'ไฟล์ไม่มีชื่อ'}</span>
-              <span class="text-[10px] text-slate-400 block">${f.category || 'ทั่วไป'}</span>
+              <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                <span>${f.category || 'ทั่วไป'}</span>
+                <span>•</span>
+                <span class="font-mono text-slate-500">${sizeFormatted}</span>
+              </div>
             </td>
             <td class="p-3">
               <div class="space-y-0.5">
-                <span class="font-bold text-amber-300 text-xs block">${f.uploaderName || 'บุคคลทั่วไป'}</span>
+                <span class="font-bold text-amber-300 text-xs block hover:underline cursor-pointer" onclick="openMemberAuditModal('${f.uploaderId || f.uploaderEmail}')">${f.uploaderName || 'บุคคลทั่วไป'}</span>
                 <div class="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
                   <span>${f.uploaderId || '-'}</span>
                   <span>•</span>
@@ -448,6 +838,419 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
+    // 5. Members Audit Table (60 Students + Adhoc Users)
+    function renderMembersAuditTable() {
+      const tbody = document.getElementById('membersTableBody');
+      const q = (document.getElementById('memberSearchInput')?.value || '').toLowerCase().trim();
+      const badge = document.getElementById('membersShowingCountBadge');
+      if (!tbody) return;
+
+      const students = window.STUDENTS_DATA || [];
+      const globalCfg = window.MultiCloudUploader?.memberSettings?.global || { quotaGB: 5, maxDimension: 1600, quality: 0.82 };
+      const overrides = window.MultiCloudUploader?.memberSettings?.userOverrides || {};
+
+      // Aggregate upload stats per student
+      let memberRows = students.map(st => {
+        const idLower = st.id.toLowerCase().trim();
+        const emailLower = (st.email || '').toLowerCase().trim();
+
+        // Count files uploaded by this student
+        const userFiles = allStorageFiles.filter(f => {
+          const fid = (f.uploaderId || '').toLowerCase().trim();
+          const femail = (f.uploaderEmail || '').toLowerCase().trim();
+          return fid === idLower || (emailLower && femail === emailLower);
+        });
+
+        const totalBytes = userFiles.reduce((acc, f) => acc + (Number(f.size) || 0), 0);
+        const fileCount = userFiles.length;
+
+        // Check custom override
+        const override = overrides[st.id] || overrides[emailLower] || null;
+        const currentQuotaGB = override && override.quotaGB !== undefined ? override.quotaGB : globalCfg.quotaGB;
+        const currentMaxDim = override && override.maxDimension !== undefined ? override.maxDimension : globalCfg.maxDimension;
+        const currentQuality = override && override.quality !== undefined ? override.quality : globalCfg.quality;
+
+        return {
+          id: st.id,
+          name: st.name,
+          nickname: st.nickname,
+          email: st.email,
+          fileCount,
+          totalBytes,
+          hasOverride: !!override,
+          overrideNote: override?.note || '',
+          quotaGB: currentQuotaGB,
+          maxDimension: currentMaxDim,
+          quality: currentQuality,
+          avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${st.email || st.id}`
+        };
+      });
+
+      // Filter by search query
+      if (q) {
+        memberRows = memberRows.filter(m => 
+          m.id.toLowerCase().includes(q) ||
+          m.name.toLowerCase().includes(q) ||
+          (m.nickname && m.nickname.toLowerCase().includes(q)) ||
+          (m.email && m.email.toLowerCase().includes(q))
+        );
+      }
+
+      if (badge) badge.textContent = `แสดง ${memberRows.length} จาก 60 สมาชิก`;
+
+      if (memberRows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-500 text-xs font-bold">ไม่พบรายชื่อสมาชิกที่ค้นหา</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = memberRows.map(m => {
+        const usedFormatted = formatBytes(m.totalBytes);
+        const maxQuotaBytes = m.quotaGB * 1024 * 1024 * 1024;
+        const pct = Math.min(100, (m.totalBytes / maxQuotaBytes) * 100).toFixed(1);
+
+        let quotaBadge = '';
+        if (m.hasOverride) {
+          quotaBadge = `
+            <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+              <i data-lucide="shield-check" class="w-3 h-3"></i>
+              <span>${m.quotaGB} GB (เฉพาะคนนี้)</span>
+            </div>
+            ${m.overrideNote ? `<span class="block text-[10px] text-slate-400 truncate max-w-[140px]">${m.overrideNote}</span>` : ''}
+          `;
+        } else {
+          quotaBadge = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700">
+              <span>${m.quotaGB} GB (ส่วนรวม)</span>
+            </span>
+          `;
+        }
+
+        let resolutionLabel = '';
+        if (m.quality >= 1.0) {
+          resolutionLabel = '💎 ต้นฉบับ (100%)';
+        } else {
+          resolutionLabel = `${m.maxDimension}px (${Math.round(m.quality * 100)}%)`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 transition">
+            <td class="p-3">
+              <div class="flex items-center gap-3">
+                <img src="${m.avatar}" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 object-cover flex-shrink-0">
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-white text-xs">${m.name}</span>
+                    ${m.nickname ? `<span class="text-[11px] text-amber-400 font-bold">(${m.nickname})</span>` : ''}
+                  </div>
+                  <div class="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                    <span class="text-emerald-400 font-bold">${m.id}</span>
+                    <span>•</span>
+                    <span class="truncate max-w-[150px]">${m.email}</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <td class="p-3 text-center font-mono text-xs">
+              <span class="font-bold ${m.fileCount > 0 ? 'text-white' : 'text-slate-500'}">${m.fileCount} ไฟล์</span>
+            </td>
+
+            <td class="p-3 text-center">
+              <div class="space-y-1">
+                <span class="font-bold font-mono text-xs text-white block">${usedFormatted}</span>
+                <div class="w-24 bg-slate-800 rounded-full h-1.5 mx-auto overflow-hidden">
+                  <div class="bg-gradient-to-r from-emerald-500 to-amber-500 h-1.5 rounded-full" style="width: ${pct}%"></div>
+                </div>
+                <span class="text-[9px] text-slate-400 block">${pct}%</span>
+              </div>
+            </td>
+
+            <td class="p-3 text-center">
+              ${quotaBadge}
+            </td>
+
+            <td class="p-3 text-center">
+              <span class="text-xs font-mono font-bold text-slate-300 block">${resolutionLabel}</span>
+              ${m.hasOverride ? '<span class="text-[10px] text-amber-400">กำหนดเฉพาะคน</span>' : '<span class="text-[10px] text-slate-500">ตามส่วนรวม</span>'}
+            </td>
+
+            <td class="p-3 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <button onclick="openMemberAuditModal('${m.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold transition flex items-center gap-1" title="ดูว่าคนนี้อัปอะไรไปบ้าง">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                  <span>ดูไฟล์ (${m.fileCount})</span>
+                </button>
+                <button onclick="openMemberQuotaEditModal('${m.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1" title="ปรับโควตาและความคมชัด">
+                  <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+                  <span>ปรับโควตา</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // 6. Global Settings Logic
+    function updateGlobalSettingsLabels() {
+      const globalCfg = window.MultiCloudUploader?.memberSettings?.global || { quotaGB: 5, maxDimension: 1600, quality: 0.82 };
+      const qLabel = document.getElementById('currentGlobalQuotaLabel');
+      const rLabel = document.getElementById('currentGlobalResolutionLabel');
+      if (qLabel) qLabel.textContent = `${globalCfg.quotaGB} GB`;
+      if (rLabel) {
+        const qPct = Math.round((globalCfg.quality || 0.82) * 100);
+        rLabel.textContent = `${globalCfg.maxDimension || 1600}px (${qPct}%)`;
+      }
+    }
+
+    function openGlobalSettingsModal() {
+      const globalCfg = window.MultiCloudUploader?.memberSettings?.global || { quotaGB: 5, maxDimension: 1600, quality: 0.82, autoCompress: true };
+      document.getElementById('globalQuotaInput').value = globalCfg.quotaGB || 5;
+      document.getElementById('globalQuotaDisplay').textContent = `${globalCfg.quotaGB || 5} GB`;
+      document.getElementById('globalAutoCompressCheck').checked = globalCfg.autoCompress !== false;
+
+      // Select preset matching dimension and quality
+      const sel = document.getElementById('globalResolutionPreset');
+      if (globalCfg.quality >= 1.0) {
+        sel.value = '4000_1.0';
+      } else if (globalCfg.maxDimension <= 1280) {
+        sel.value = '1280_0.75';
+      } else if (globalCfg.maxDimension >= 2048) {
+        sel.value = '2048_0.90';
+      } else {
+        sel.value = '1600_0.82';
+      }
+
+      const modal = document.getElementById('modalGlobalSettings');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeGlobalSettingsModal() {
+      const modal = document.getElementById('modalGlobalSettings');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function setGlobalQuotaInput(gb) {
+      document.getElementById('globalQuotaInput').value = gb;
+      document.getElementById('globalQuotaDisplay').textContent = `${gb} GB`;
+    }
+
+    function handleGlobalPresetChange(val) {
+      // Handled upon save
+    }
+
+    function saveGlobalSettingsAction() {
+      const quotaVal = parseFloat(document.getElementById('globalQuotaInput').value) || 5;
+      const preset = document.getElementById('globalResolutionPreset').value;
+      const autoCompress = document.getElementById('globalAutoCompressCheck').checked;
+
+      let maxDim = 1600;
+      let quality = 0.82;
+
+      if (preset === '1280_0.75') { maxDim = 1280; quality = 0.75; }
+      else if (preset === '1600_0.82') { maxDim = 1600; quality = 0.82; }
+      else if (preset === '2048_0.90') { maxDim = 2048; quality = 0.90; }
+      else if (preset === '4000_1.0') { maxDim = 4000; quality = 1.0; }
+
+      if (window.MultiCloudUploader) {
+        window.MultiCloudUploader.setGlobalSettings({
+          quotaGB: quotaVal,
+          maxDimension: maxDim,
+          quality: quality,
+          autoCompress: autoCompress
+        });
+      }
+
+      updateGlobalSettingsLabels();
+      renderMembersAuditTable();
+      closeGlobalSettingsModal();
+      alert(`✅ บันทึกการตั้งค่าส่วนรวมเรียบร้อยแล้ว!\n- โควตาเริ่มต้น: ${quotaVal} GB ต่อคน\n- ความละเอียดสูงสุด: ${maxDim}px (${Math.round(quality*100)}%)`);
+    }
+
+    // 7. Member Specific Override Logic
+    function openMemberQuotaEditModal(studentId) {
+      const student = (window.STUDENTS_DATA || []).find(st => st.id === studentId);
+      if (!student) return;
+
+      const userSettings = window.MultiCloudUploader.getUserSettings(student.id);
+      const overrides = window.MultiCloudUploader?.memberSettings?.userOverrides || {};
+      const override = overrides[student.id] || overrides[student.email.toLowerCase()] || null;
+
+      document.getElementById('editMemberKey').value = student.id;
+      document.getElementById('editMemberName').textContent = `${student.name} ${student.nickname ? `(${student.nickname})` : ''}`;
+      document.getElementById('editMemberId').textContent = student.id;
+      document.getElementById('editMemberEmail').textContent = student.email;
+      document.getElementById('editMemberAvatar').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${student.email || student.id}`;
+
+      document.getElementById('editMemberQuotaInput').value = userSettings.quotaGB;
+      document.getElementById('editMemberQuotaNote').textContent = `${userSettings.quotaGB} GB`;
+      document.getElementById('editMemberNote').value = override?.note || '';
+
+      const resSelect = document.getElementById('editMemberResolutionPreset');
+      if (!override || override.maxDimension === undefined) {
+        resSelect.value = 'global';
+      } else if (override.quality >= 1.0) {
+        resSelect.value = '4000_1.0';
+      } else if (override.maxDimension <= 1280) {
+        resSelect.value = '1280_0.75';
+      } else if (override.maxDimension >= 2048) {
+        resSelect.value = '2048_0.90';
+      } else {
+        resSelect.value = '1600_0.82';
+      }
+
+      const modal = document.getElementById('modalMemberQuota');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeMemberQuotaModal() {
+      const modal = document.getElementById('modalMemberQuota');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function setMemberQuotaInput(gb) {
+      document.getElementById('editMemberQuotaInput').value = gb;
+      document.getElementById('editMemberQuotaNote').textContent = `${gb} GB`;
+    }
+
+    function saveMemberQuotaAction() {
+      const studentId = document.getElementById('editMemberKey').value;
+      if (!studentId) return;
+
+      const student = (window.STUDENTS_DATA || []).find(st => st.id === studentId);
+      const quotaVal = parseFloat(document.getElementById('editMemberQuotaInput').value) || 5;
+      const resPreset = document.getElementById('editMemberResolutionPreset').value;
+      const note = document.getElementById('editMemberNote').value.trim();
+
+      const overrideData = {
+        studentId: studentId,
+        email: student?.email || '',
+        name: student?.name || '',
+        quotaGB: quotaVal,
+        note: note
+      };
+
+      if (resPreset !== 'global') {
+        let maxDim = 1600;
+        let quality = 0.82;
+        if (resPreset === '1280_0.75') { maxDim = 1280; quality = 0.75; }
+        else if (resPreset === '1600_0.82') { maxDim = 1600; quality = 0.82; }
+        else if (resPreset === '2048_0.90') { maxDim = 2048; quality = 0.90; }
+        else if (resPreset === '4000_1.0') { maxDim = 4000; quality = 1.0; }
+
+        overrideData.maxDimension = maxDim;
+        overrideData.quality = quality;
+      }
+
+      if (window.MultiCloudUploader) {
+        window.MultiCloudUploader.setUserOverride(studentId, overrideData);
+      }
+
+      renderMembersAuditTable();
+      closeMemberQuotaModal();
+      alert(`✅ บันทึกโควตาพิเศษเฉพาะคุณ "${student?.name || studentId}" เรียบร้อยแล้ว!\n- โควตาใหม่: ${quotaVal} GB`);
+    }
+
+    function resetMemberOverrideToDefault() {
+      const studentId = document.getElementById('editMemberKey').value;
+      if (!studentId) return;
+
+      if (confirm("คุณต้องการล้างการตั้งค่าเฉพาะบุคคล และให้สมาชิกคนนี้กลับไปใช้ค่ามาตรฐานส่วนรวมใช่หรือไม่?")) {
+        if (window.MultiCloudUploader) {
+          window.MultiCloudUploader.setUserOverride(studentId, { remove: true });
+        }
+        renderMembersAuditTable();
+        closeMemberQuotaModal();
+        alert("🔄 รีเซ็ตเป็นค่าเริ่มต้นส่วนรวมเรียบร้อยแล้ว");
+      }
+    }
+
+    // 8. Member File Audit Modal (ดูประวัติทั้งหมดว่าคนนี้อัปอะไรไปบ้าง)
+    function openMemberAuditModal(studentIdOrEmail) {
+      const student = (window.STUDENTS_DATA || []).find(st => 
+        st.id.toLowerCase() === (studentIdOrEmail||'').toLowerCase() || 
+        (st.email && st.email.toLowerCase() === (studentIdOrEmail||'').toLowerCase())
+      );
+
+      const targetKey = student ? student.id.toLowerCase() : studentIdOrEmail.toLowerCase();
+      const targetEmail = student ? (student.email || '').toLowerCase() : '';
+      const displayName = student ? `${student.name} ${student.nickname ? `(${student.nickname})` : ''}` : studentIdOrEmail;
+
+      document.getElementById('auditModalUserSubtitle').textContent = `${displayName} • รหัส: ${student ? student.id : studentIdOrEmail}`;
+
+      // Filter files
+      const userFiles = allStorageFiles.filter(f => {
+        const fid = (f.uploaderId || '').toLowerCase().trim();
+        const femail = (f.uploaderEmail || '').toLowerCase().trim();
+        return fid === targetKey || (targetEmail && femail === targetEmail);
+      });
+
+      const totalBytes = userFiles.reduce((acc, f) => acc + (Number(f.size) || 0), 0);
+      const userSettings = window.MultiCloudUploader.getUserSettings(student ? student.id : studentIdOrEmail);
+
+      document.getElementById('auditStatFileCount').textContent = userFiles.length;
+      document.getElementById('auditStatUsedBytes').textContent = formatBytes(totalBytes);
+      document.getElementById('auditStatQuota').textContent = `${userSettings.quotaGB} GB`;
+
+      // Set filter in main table button action
+      const filterBtn = document.getElementById('btnFilterUserInMainTable');
+      if (filterBtn) {
+        filterBtn.onclick = () => {
+          closeUserAuditModal();
+          filterFilesByMember(student ? student.id : studentIdOrEmail, displayName);
+        };
+      }
+
+      // Populate file list inside modal
+      const tbody = document.getElementById('userAuditTableBody');
+      if (userFiles.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-500 text-xs font-bold">สมาชิกท่านนี้ยังไม่มีประวัติการอัปโหลดไฟล์หรือสลิปในระบบ</td></tr>`;
+      } else {
+        tbody.innerHTML = userFiles.map(f => {
+          const sz = f.size ? formatBytes(f.size) : '-';
+          return `
+            <tr class="hover:bg-slate-900 border-b border-slate-800/80 transition">
+              <td class="p-2.5 text-center">
+                <img src="${f.url}" class="w-8 h-8 rounded-lg object-cover bg-slate-950 border border-slate-800 mx-auto" onerror="this.src='logo.png'">
+              </td>
+              <td class="p-2.5">
+                <a href="${f.url}" target="_blank" class="font-bold text-white text-xs hover:text-amber-400 truncate block max-w-xs transition">${f.name || 'ไฟล์ไม่มีชื่อ'}</a>
+                <span class="text-[10px] text-slate-400 block">${f.category || 'ทั่วไป'}</span>
+              </td>
+              <td class="p-2.5 text-center font-mono text-[11px] text-slate-300 uppercase">
+                ${f.provider}
+              </td>
+              <td class="p-2.5 text-right font-mono text-xs text-slate-300">
+                ${sz}
+              </td>
+              <td class="p-2.5 text-slate-400 text-[11px] font-mono">
+                ${f.uploadedAt || '-'}
+              </td>
+              <td class="p-2.5 text-center">
+                <a href="${f.url}" target="_blank" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 inline-flex items-center" title="เปิดดูภาพ">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                </a>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const modal = document.getElementById('modalUserAudit');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeUserAuditModal() {
+      const modal = document.getElementById('modalUserAudit');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // 9. File Preview & Management Helpers
     function openFileDetailModal(id) {
       const target = allStorageFiles.find(f => f.id === id);
       if (!target) return;
@@ -494,6 +1297,7 @@
       allStorageFiles = allStorageFiles.filter(f => f.id !== id);
       updateSummaryCounts();
       renderStorageTable();
+      renderMembersAuditTable();
       alert("🗑️ ลบไฟล์เรียบร้อยแล้ว!");
     }
 
@@ -502,6 +1306,14 @@
       if (icon) icon.classList.add('animate-spin');
       await loadAllStorageData();
       if (icon) icon.classList.remove('animate-spin');
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes <= 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     document.addEventListener('DOMContentLoaded', () => {

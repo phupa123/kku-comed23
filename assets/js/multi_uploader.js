@@ -16,6 +16,7 @@
 
   const STORAGE_KEY = 'COMED_MULTI_STORAGE_CONFIG_V1';
   const FILES_LOG_KEY = 'COMED_UPLOADED_FILES_CATALOG_V1';
+  const MEMBER_SETTINGS_KEY = 'COMED_MEMBER_STORAGE_SETTINGS_V1';
 
   // Default keys and fallbacks
   const DEFAULT_CONFIG = {
@@ -45,24 +46,128 @@
     catboxUserHash: localStorage.getItem('COMED_CATBOX_HASH') || '4f0c883945e2fe8d067b3dd12'
   };
 
+  const DEFAULT_MEMBER_SETTINGS = {
+    global: {
+      quotaGB: 5,               // 5 GB default
+      maxDimension: 1600,       // 1600px default
+      quality: 0.82,            // 82% quality
+      autoCompress: true        // enable smart compression
+    },
+    userOverrides: {} // Keyed by studentId or lowercase email
+  };
+
   class MultiCloudUploader {
     constructor() {
       this.config = this.loadConfig();
       this.fileCatalog = this.loadFileCatalog();
+      this.memberSettings = this.loadMemberSettings();
     }
 
-    loadConfig() {
+    loadMemberSettings() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : { ...DEFAULT_CONFIG };
+        const saved = localStorage.getItem(MEMBER_SETTINGS_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return {
+            global: { ...DEFAULT_MEMBER_SETTINGS.global, ...(parsed.global || {}) },
+            userOverrides: parsed.userOverrides || {}
+          };
+        }
       } catch (e) {
-        return { ...DEFAULT_CONFIG };
+        console.warn("[MultiUploader] Failed to parse member settings:", e);
       }
+      return JSON.parse(JSON.stringify(DEFAULT_MEMBER_SETTINGS));
     }
 
-    saveConfig(newCfg) {
-      this.config = { ...this.config, ...newCfg };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+    saveMemberSettings(newSettings) {
+      if (newSettings) {
+        this.memberSettings = {
+          global: { ...this.memberSettings.global, ...(newSettings.global || {}) },
+          userOverrides: newSettings.userOverrides || this.memberSettings.userOverrides
+        };
+      }
+      localStorage.setItem(MEMBER_SETTINGS_KEY, JSON.stringify(this.memberSettings));
+    }
+
+    /**
+     * Get storage quota and image resolution setting for a specific user.
+     * Fallbacks to global settings if no individual override exists.
+     * @param {string|Object} userIdentifier - studentId, email, or user object
+     */
+    getUserSettings(userIdentifier) {
+      const globalCfg = this.memberSettings?.global || DEFAULT_MEMBER_SETTINGS.global;
+      if (!userIdentifier) return { ...globalCfg, isOverride: false };
+
+      let id = '';
+      let email = '';
+      if (typeof userIdentifier === 'object') {
+        id = (userIdentifier.studentId || userIdentifier.id || '').trim();
+        email = (userIdentifier.email || '').trim().toLowerCase();
+      } else if (typeof userIdentifier === 'string') {
+        const str = userIdentifier.trim();
+        if (str.includes('@')) email = str.toLowerCase();
+        else id = str;
+      }
+
+      const overrides = this.memberSettings?.userOverrides || {};
+      let override = null;
+
+      if (id && overrides[id]) {
+        override = overrides[id];
+      } else if (email && overrides[email]) {
+        override = overrides[email];
+      } else {
+        // Also check if any override matches studentId / email within stored objects
+        for (const k in overrides) {
+          const item = overrides[k];
+          if ((id && item.studentId === id) || (email && (item.email || '').toLowerCase() === email)) {
+            override = item;
+            break;
+          }
+        }
+      }
+
+      if (override) {
+        return {
+          quotaGB: Number(override.quotaGB !== undefined ? override.quotaGB : globalCfg.quotaGB),
+          maxDimension: Number(override.maxDimension !== undefined ? override.maxDimension : globalCfg.maxDimension),
+          quality: Number(override.quality !== undefined ? override.quality : globalCfg.quality),
+          autoCompress: override.autoCompress !== undefined ? Boolean(override.autoCompress) : globalCfg.autoCompress,
+          isOverride: true,
+          overrideNote: override.note || ''
+        };
+      }
+
+      return { ...globalCfg, isOverride: false };
+    }
+
+    /**
+     * Set individual override for a user
+     */
+    setUserOverride(identifierKey, customData) {
+      if (!this.memberSettings.userOverrides) this.memberSettings.userOverrides = {};
+      if (!customData || customData.remove) {
+        delete this.memberSettings.userOverrides[identifierKey];
+      } else {
+        this.memberSettings.userOverrides[identifierKey] = {
+          ...this.memberSettings.userOverrides[identifierKey],
+          ...customData,
+          updatedAt: new Date().toISOString()
+        };
+      }
+      this.saveMemberSettings();
+    }
+
+    /**
+     * Set global default settings for all members
+     */
+    setGlobalSettings(globalData) {
+      if (!this.memberSettings.global) this.memberSettings.global = { ...DEFAULT_MEMBER_SETTINGS.global };
+      this.memberSettings.global = {
+        ...this.memberSettings.global,
+        ...globalData
+      };
+      this.saveMemberSettings();
     }
 
     loadFileCatalog() {
@@ -111,15 +216,27 @@
         fileObj = this.dataURLtoFile(fileInput, 'upload_' + Date.now() + '.png');
       }
 
-      // Auto Smart Image Compression (Always compress image if enabled or if size > 1MB)
+      // Resolve user settings (Quota & Image resolution)
+      let storedUser = null;
+      try {
+        storedUser = JSON.parse(localStorage.getItem('COMED_USER_SESSION') || 'null');
+      } catch(e) {}
+      const userKey = options.uploaderId || (storedUser?.studentId || options.uploaderEmail || storedUser?.email || '');
+      const userSettings = this.getUserSettings(userKey);
+
+      // Auto Smart Image Compression (Custom resolution / quality per member or global setting)
       const isImage = (fileObj && fileObj.type && fileObj.type.startsWith('image/')) || (typeof fileInput === 'string' && fileInput.startsWith('data:image/'));
-      if (isImage && (this.config.autoCompress || fileObj.size > 1024 * 1024)) {
+      const shouldCompress = userSettings.quality < 1.0 && (userSettings.autoCompress || fileObj.size > 1024 * 1024);
+
+      if (isImage && shouldCompress) {
         try {
-          onProgress(10, 'กำลังปรับขนาดและบีบอัดภาพให้อยู่ในเกณฑ์เหมาะสม...');
+          const dim = userSettings.maxDimension || this.config.maxImageDimension || 1600;
+          const qual = userSettings.quality !== undefined ? userSettings.quality : (this.config.compressionQuality || 0.82);
+          onProgress(10, `กำลังปรับความคมชัดภาพ (สูงสุด ${dim}px, คุณภาพ ${Math.round(qual * 100)}%)...`);
           const compressed = await this.compressImage(fileObj, {
-            maxWidth: this.config.maxImageDimension || 1600,
-            maxHeight: this.config.maxImageDimension || 1600,
-            quality: this.config.compressionQuality || 0.80
+            maxWidth: dim,
+            maxHeight: dim,
+            quality: qual
           });
           if (compressed) {
             fileObj = compressed;

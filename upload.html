@@ -366,8 +366,16 @@
 
   <!-- Script Logic -->
   <script>
-    // Max quota: 5 GB in bytes
-    const MAX_QUOTA_BYTES = 5 * 1024 * 1024 * 1024; // 5,368,709,120 bytes
+    // Dynamic quota lookup per user or global default
+    function getUserMaxQuotaBytes() {
+      if (window.MultiCloudUploader && typeof window.MultiCloudUploader.getUserSettings === 'function') {
+        const userCfg = window.MultiCloudUploader.getUserSettings(currentUser);
+        const quotaGB = userCfg && userCfg.quotaGB ? Number(userCfg.quotaGB) : 5;
+        return quotaGB * 1024 * 1024 * 1024;
+      }
+      return 5 * 1024 * 1024 * 1024; // 5 GB fallback
+    }
+
     const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
 
     let currentUser = null;
@@ -442,11 +450,13 @@
     }
 
     function updateQuotaDisplay() {
+      const maxQuota = getUserMaxQuotaBytes();
       const usedBytes = getUserUsedBytes();
-      const pct = Math.min(100, ((usedBytes / MAX_QUOTA_BYTES) * 100)).toFixed(2);
+      const pct = Math.min(100, ((usedBytes / maxQuota) * 100)).toFixed(2);
+      const totalGBFormatted = (maxQuota / (1024 * 1024 * 1024)).toFixed(1);
 
       const usedFormatted = formatBytes(usedBytes);
-      const remainFormatted = formatBytes(Math.max(0, MAX_QUOTA_BYTES - usedBytes));
+      const remainFormatted = formatBytes(Math.max(0, maxQuota - usedBytes));
 
       const bar = document.getElementById('quotaProgressBar');
       if (bar) bar.style.width = pct + '%';
@@ -455,13 +465,13 @@
       if (usedText) usedText.textContent = usedFormatted;
 
       const pctText = document.getElementById('quotaPercentText');
-      if (pctText) pctText.textContent = `ใช้ไป ${pct}% ของพื้นที่ทั้งหมด`;
+      if (pctText) pctText.textContent = `ใช้ไป ${pct}% ของพื้นที่ ${totalGBFormatted} GB`;
 
       const remainText = document.getElementById('quotaRemainText');
       if (remainText) remainText.textContent = `คงเหลือ ${remainFormatted}`;
 
       const headerBadge = document.getElementById('userHeaderQuotaBadge');
-      if (headerBadge) headerBadge.textContent = `${usedFormatted} / 5.0 GB`;
+      if (headerBadge) headerBadge.textContent = `${usedFormatted} / ${totalGBFormatted} GB`;
     }
 
     function formatBytes(bytes) {
@@ -648,10 +658,12 @@
         return;
       }
 
-      // 2. Check 5 GB Storage Quota
+      // 2. Check Storage Quota (Custom per user or Global)
       const currentUsed = getUserUsedBytes();
-      if (currentUsed + file.size > MAX_QUOTA_BYTES) {
-        alert(`⚠️ พื้นที่จัดเก็บของคุณเต็มโควตา 5 GB แล้ว!\n\nขนาดไฟล์: ${formatBytes(file.size)}\nพื้นที่คงเหลือ: ${formatBytes(Math.max(0, MAX_QUOTA_BYTES - currentUsed))}\n\nกรุณาลบไฟล์เก่าที่คุณไม่ได้ใช้ออกก่อนเพื่อคืนพื้นที่`);
+      const maxQuotaBytes = getUserMaxQuotaBytes();
+      const quotaGBFormatted = (maxQuotaBytes / (1024 * 1024 * 1024)).toFixed(1);
+      if (currentUsed + file.size > maxQuotaBytes) {
+        alert(`⚠️ พื้นที่จัดเก็บของคุณเต็มโควตา ${quotaGBFormatted} GB แล้ว!\n\nขนาดไฟล์: ${formatBytes(file.size)}\nพื้นที่คงเหลือ: ${formatBytes(Math.max(0, maxQuotaBytes - currentUsed))}\n\nกรุณาลบไฟล์เก่าที่คุณไม่ได้ใช้ออกก่อนเพื่อคืนพื้นที่ หรือแจ้งผู้ดูแลระบบเพื่อขอขยายโควตา`);
         return;
       }
 
