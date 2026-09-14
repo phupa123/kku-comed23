@@ -176,11 +176,16 @@
     const MAINT_CONFIG_KEY = 'COMED_MAINTENANCE_CONFIG_V1';
 
     function returnToTargetPage() {
-      if (targetPage === 'payment') {
-        window.location.replace('payment.html');
-      } else {
-        window.location.replace('index.html');
-      }
+      const pageMap = {
+        payment: 'payment.html',
+        event: 'event.html',
+        eventclass: 'eventclass.html',
+        shortlink: 'shortlink.html',
+        upload: 'upload.html',
+        index: 'index.html'
+      };
+      const dest = pageMap[targetPage] || 'index.html';
+      window.location.replace(dest);
     }
 
     function checkSiteOpened(config) {

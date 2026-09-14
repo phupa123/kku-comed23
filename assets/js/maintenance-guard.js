@@ -21,10 +21,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     
     // Safety check: Never block admin or status pages
     if (
-      currentPath.includes('admin.html') ||
-      currentPath.includes('payment-admin.html') ||
-      currentPath.includes('index-admin.html') ||
-      currentPath.includes('event-admin.html') ||
+      currentPath.includes('admin') ||
       currentPath.includes('maintenance.html') ||
       currentPath.includes('404.html')
     ) {
@@ -34,8 +31,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     let pageKey = 'index';
     if (currentPath.includes('payment') || currentPath.includes('payment.html')) {
       pageKey = 'payment';
+    } else if (currentPath.includes('eventclass') || currentPath.includes('eventclass.html')) {
+      pageKey = 'eventclass';
     } else if (currentPath.includes('event') || currentPath.includes('event.html')) {
       pageKey = 'event';
+    } else if (currentPath.includes('upload') || currentPath.includes('upload.html')) {
+      pageKey = 'upload';
+    } else if (currentPath.includes('shortlink') || currentPath.includes('shortlink.html') || currentPath.includes('/s/')) {
+      pageKey = 'shortlink';
     }
 
     const globalLock = config['all'] && config['all'].active;
@@ -63,9 +66,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   try {
     const currentPath = window.location.pathname.toLowerCase();
     if (
-      currentPath.includes('admin.html') ||
-      currentPath.includes('payment-admin.html') ||
-      currentPath.includes('index-admin.html') ||
+      currentPath.includes('admin') ||
       currentPath.includes('maintenance.html') ||
       currentPath.includes('404.html')
     ) {
