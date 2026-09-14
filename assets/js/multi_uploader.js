@@ -225,14 +225,15 @@
       const userSettings = this.getUserSettings(userKey);
 
       // Auto Smart Image Compression (Custom resolution / quality per member or global setting)
+      // Can be explicitly bypassed if user turns off compression (skipCompression = true)
       const isImage = (fileObj && fileObj.type && fileObj.type.startsWith('image/')) || (typeof fileInput === 'string' && fileInput.startsWith('data:image/'));
-      const shouldCompress = userSettings.quality < 1.0 && (userSettings.autoCompress || fileObj.size > 1024 * 1024);
+      const shouldCompress = !options.skipCompression && userSettings.quality < 1.0 && (userSettings.autoCompress || fileObj.size > 1024 * 1024);
 
       if (isImage && shouldCompress) {
         try {
           const dim = userSettings.maxDimension || this.config.maxImageDimension || 1600;
           const qual = userSettings.quality !== undefined ? userSettings.quality : (this.config.compressionQuality || 0.82);
-          onProgress(10, `กำลังปรับความคมชัดภาพ (สูงสุด ${dim}px, คุณภาพ ${Math.round(qual * 100)}%)...`);
+          onProgress(5, `กำลังปรับความคมชัดภาพ (สูงสุด ${dim}px, คุณภาพ ${Math.round(qual * 100)}%)...`, { phase: 'compress' });
           const compressed = await this.compressImage(fileObj, {
             maxWidth: dim,
             maxHeight: dim,
@@ -244,6 +245,8 @@
         } catch (compErr) {
           console.warn("[MultiUploader] Image compression skipped:", compErr);
         }
+      } else if (isImage && options.skipCompression) {
+        onProgress(5, `⚡ โหมดไม่บีบอัดภาพ: กำลังเตรียมไฟล์ต้นฉบับความละเอียด 100%...`, { phase: 'prepare' });
       }
 
       // Convert compressed File back to Base64 DataURL / clean base64 if needed for providers
@@ -286,17 +289,36 @@
 
       for (const provider of providers) {
         try {
-          onProgress(25, `กำลังเชื่อมต่อ ${this.getProviderName(provider)}...`);
+          const providerName = this.getProviderName(provider);
+          onProgress(10, `กำลังเชื่อมต่อไปยัง ${providerName}...`, { phase: 'connecting', provider });
           let uploadResult = null;
 
+          // Wire real-time network progress callback (10% - 95%)
+          const onNetProgress = (pct, loadedBytes, totalBytes) => {
+            const mappedPct = Math.min(95, Math.max(10, Math.round(10 + (pct * 0.85))));
+            let sizeMsg = '';
+            if (loadedBytes && totalBytes) {
+              const loadedMb = (loadedBytes / (1024 * 1024)).toFixed(1);
+              const totalMb = (totalBytes / (1024 * 1024)).toFixed(1);
+              sizeMsg = ` (${loadedMb}/${totalMb} MB)`;
+            }
+            onProgress(mappedPct, `กำลังส่งข้อมูลไปยัง ${providerName}${sizeMsg}... ${pct}%`, {
+              phase: 'uploading',
+              provider,
+              percent: pct,
+              loadedBytes,
+              totalBytes
+            });
+          };
+
           if (provider === 'imgbb') {
-            uploadResult = await this.uploadToImgBB(fileObj, base64Clean);
+            uploadResult = await this.uploadToImgBB(fileObj, base64Clean, onNetProgress);
           } else if (provider === 'freeimage') {
-            uploadResult = await this.uploadToFreeImage(fileObj, base64Clean);
+            uploadResult = await this.uploadToFreeImage(fileObj, base64Clean, onNetProgress);
           } else if (provider === 'catbox') {
-            uploadResult = await this.uploadToCatbox(fileObj);
+            uploadResult = await this.uploadToCatbox(fileObj, onNetProgress);
           } else if (provider === 'cloudinary') {
-            uploadResult = await this.uploadToCloudinary(fileObj);
+            uploadResult = await this.uploadToCloudinary(fileObj, onNetProgress);
           }
 
           if (uploadResult && uploadResult.url) {
@@ -362,9 +384,9 @@
     }
 
     /**
-     * 1. ImgBB Upload
+     * 1. ImgBB Upload with Real-time Progress
      */
-    async uploadToImgBB(fileObj, base64Clean) {
+    async uploadToImgBB(fileObj, base64Clean, onProgress) {
       const apiKey = this.config.imgbbApiKey || '6d207e02198a847aa5ad8ac504ff3463';
       const formData = new FormData();
       if (base64Clean) {
@@ -373,26 +395,45 @@
         formData.append('image', fileObj);
       }
 
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(apiKey)}`, {
-        method: 'POST',
-        body: formData
-      });
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.imgbb.com/1/upload?key=${encodeURIComponent(apiKey)}`);
 
-      const json = await response.json();
-      if (json && json.data && json.data.url) {
-        return {
-          url: json.data.display_url || json.data.url,
-          publicId: json.data.id || '',
-          deleteToken: json.data.delete_url || ''
+        if (xhr.upload && typeof onProgress === 'function') {
+          xhr.upload.onprogress = (evt) => {
+            if (evt.lengthComputable) {
+              const pct = Math.round((evt.loaded / evt.total) * 100);
+              onProgress(pct, evt.loaded, evt.total);
+            }
+          };
+        }
+
+        xhr.onload = () => {
+          try {
+            const json = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300 && json && json.data && json.data.url) {
+              resolve({
+                url: json.data.display_url || json.data.url,
+                publicId: json.data.id || '',
+                deleteToken: json.data.delete_url || ''
+              });
+            } else {
+              reject(new Error(json?.error?.message || `ImgBB upload failed (HTTP ${xhr.status})`));
+            }
+          } catch(err) {
+            reject(new Error("ImgBB response parse error: " + err.message));
+          }
         };
-      }
-      throw new Error(json?.error?.message || "ImgBB upload rejected");
+
+        xhr.onerror = () => reject(new Error("ImgBB network error"));
+        xhr.send(formData);
+      });
     }
 
     /**
      * 2. FreeImage.host API
      */
-    async uploadToFreeImage(fileObj, base64Clean) {
+    async uploadToFreeImage(fileObj, base64Clean, onProgress) {
       const apiKey = this.config.freeimageApiKey || '6d207e02198a847aa98d0a2a901485a5';
       const formData = new FormData();
       formData.append('key', apiKey);
@@ -441,9 +482,9 @@
     }
 
     /**
-     * 3. Catbox.moe API
+     * 3. Catbox.moe API with Real-time Progress
      */
-    async uploadToCatbox(fileObj) {
+    async uploadToCatbox(fileObj, onProgress) {
       const formData = new FormData();
       formData.append('reqtype', 'fileupload');
       if (this.config.catboxUserHash) {
@@ -451,7 +492,6 @@
       }
       formData.append('fileToUpload', fileObj);
 
-      // Try multiple endpoints / proxies for Catbox (including our Cloudflare Worker Proxy)
       const proxies = [
         '/api/catbox-proxy', // Internal Cloudflare Worker proxy (Zero CORS issues)
         'https://kku-comed23.edspace.workers.dev/api/catbox-proxy',
@@ -461,18 +501,36 @@
       let lastError = null;
       for (const targetUrl of proxies) {
         try {
-          const response = await fetch(targetUrl, {
-            method: 'POST',
-            body: formData
+          const res = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', targetUrl);
+
+            if (xhr.upload && typeof onProgress === 'function') {
+              xhr.upload.onprogress = (evt) => {
+                if (evt.lengthComputable) {
+                  const pct = Math.round((evt.loaded / evt.total) * 100);
+                  onProgress(pct, evt.loaded, evt.total);
+                }
+              };
+            }
+
+            xhr.onload = () => {
+              const text = (xhr.responseText || '').trim();
+              if (xhr.status >= 200 && xhr.status < 300 && (text.startsWith('http://') || text.startsWith('https://'))) {
+                resolve({
+                  url: text.replace('http://', 'https://'),
+                  publicId: text.split('/').pop()
+                });
+              } else {
+                reject(new Error(text || `HTTP ${xhr.status}`));
+              }
+            };
+
+            xhr.onerror = () => reject(new Error("Catbox connection error"));
+            xhr.send(formData);
           });
 
-          const text = (await response.text()).trim();
-          if (text.startsWith('http://') || text.startsWith('https://')) {
-            return {
-              url: text.replace('http://', 'https://'),
-              publicId: text.split('/').pop()
-            };
-          }
+          if (res && res.url) return res;
         } catch(e) {
           lastError = e;
         }
@@ -482,9 +540,9 @@
     }
 
     /**
-     * 4. Cloudinary Unsigned Upload
+     * 4. Cloudinary Unsigned Upload with Real-time Progress
      */
-    async uploadToCloudinary(fileObj) {
+    async uploadToCloudinary(fileObj, onProgress) {
       const cloudName = (this.config.cloudinaryCloudName || 'demo').trim();
       const preset = (this.config.cloudinaryUploadPreset || 'docs_upload_example_preset').trim();
       
@@ -492,23 +550,41 @@
       formData.append('file', fileObj);
       formData.append('upload_preset', preset);
 
-      const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        body: formData
-      });
+      const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/auto/upload`;
 
-      const json = await response.json();
-      if (json && json.secure_url) {
-        return {
-          url: json.secure_url,
-          publicId: json.public_id || ''
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', endpoint);
+
+        if (xhr.upload && typeof onProgress === 'function') {
+          xhr.upload.onprogress = (evt) => {
+            if (evt.lengthComputable) {
+              const pct = Math.round((evt.loaded / evt.total) * 100);
+              onProgress(pct, evt.loaded, evt.total);
+            }
+          };
+        }
+
+        xhr.onload = () => {
+          try {
+            const json = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300 && json && json.secure_url) {
+              resolve({
+                url: json.secure_url,
+                publicId: json.public_id || ''
+              });
+            } else {
+              const errMsg = json?.error?.message || `Cloudinary rejected with HTTP ${xhr.status}`;
+              reject(new Error(errMsg));
+            }
+          } catch(err) {
+            reject(new Error("Cloudinary response parse error: " + err.message));
+          }
         };
-      }
-      
-      const errMsg = json?.error?.message || `Cloudinary rejected with status ${response.status}`;
-      console.warn(`[MultiUploader] Cloudinary (${cloudName}/${preset}) failed:`, errMsg);
-      throw new Error(errMsg);
+
+        xhr.onerror = () => reject(new Error("Cloudinary network error"));
+        xhr.send(formData);
+      });
     }
 
     /**
