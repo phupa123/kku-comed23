@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+
+<head>
+  <!-- Site Maintenance & Access Guard -->
+  <script src="assets/js/maintenance-guard.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>กิจกรรมพิเศษห้อง COMED KKU 69 | ซุ้มพี่บัณฑิต & งานวันเด็กแห่งชาติ</title>
+  <meta name="description" content="ระบบเลือกร่วมกิจกรรมใหญ่ของรุ่น COMED KKU 69 ซุ้มพี่บัณฑิต (20 ธ.ค.) และ งานวันเด็ก (9 ม.ค. 2570) เลือกได้ทั้ง 2 กิจกรรม">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+            mono: ['Plus Jakarta Sans', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              kku: '#A73B24'
+            }
+          },
+          backgroundImage: {
+            'mesh-dark': 'radial-gradient(at 10% 20%, rgba(249, 115, 22, 0.15) 0px, transparent 50%), radial-gradient(at 90% 10%, rgba(59, 130, 246, 0.15) 0px, transparent 50%), radial-gradient(at 50% 90%, rgba(234, 88, 12, 0.1) 0px, transparent 50%)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP Animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- SheetJS with full style -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <!-- Supabase JS Client & Configs -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <script src="students_data.js"></script>
+  <script src="config/events_repo.js?v=2.4.0"></script>
+
+  <style>
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .glass-card:hover {
+      border-color: rgba(249, 115, 22, 0.3);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .track-active {
+      border-color: rgba(249, 115, 22, 0.8) !important;
+      background: rgba(30, 41, 59, 0.85) !important;
+      box-shadow: 0 0 25px rgba(249, 115, 22, 0.25);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white bg-mesh-dark">
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-2xl border-b border-slate-800/80 w-full">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="flex items-center gap-2 sm:gap-3 group min-w-0">
+        <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-orange-500/20 to-amber-500/20 p-1 border border-orange-500/30 flex items-center justify-center shadow-lg group-hover:scale-105 transition flex-shrink-0">
+          <img src="logo.png" alt="โลโก้สาขาคอมพิวเตอร์ศึกษา" class="w-full h-full object-contain">
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-orange-400">COMED KKU 69</span>
+            <span class="hidden xs:inline-block px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              กิจกรรมรุ่น 2 กิจกรรม
+            </span>
+          </div>
+          <h1 class="text-xs sm:text-base font-black text-white leading-tight truncate">กิจกรรมซุ้มบัณฑิต & วันเด็ก</h1>
+        </div>
+      </a>
+
+      <!-- Right Navigation & Auth State -->
+      <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+        <!-- Auth Guest / Logged In Widget -->
+        <div id="authWidgetArea" class="flex items-center gap-1.5">
+          <button onclick="openStudentAuthModal()" id="btnAuthTrigger"
+            class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 text-[11px] sm:text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer active:scale-95 max-w-[140px] sm:max-w-none truncate">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-orange-400 flex-shrink-0"></i>
+            <span id="authTriggerText" class="truncate">ระบุตัวตน</span>
+          </button>
+          <button onclick="handleUserLogout()" id="btnSwitchUser" title="สลับบัญชี / เปลี่ยนชื่อ"
+            class="hidden px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 text-xs font-bold transition cursor-pointer">
+            <i data-lucide="log-out" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+          </button>
+        </div>
+
+        <a href="event.html" class="hidden md:flex px-3 py-2 rounded-2xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold border border-slate-800 transition items-center gap-1.5">
+          <i data-lucide="award" class="w-4 h-4 text-orange-400"></i>
+          <span>เลือกฝ่ายห้อง (60 คน)</span>
+        </a>
+
+        <a href="index.html" class="hidden sm:flex px-3.5 py-2 rounded-2xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold border border-slate-800 transition items-center gap-1.5">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>หน้าหลัก</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 flex-grow space-y-5 sm:space-y-6 w-full overflow-x-hidden pb-24 lg:pb-12">
+
+    <!-- Mobile Segmented View Tabs -->
+    <div class="lg:hidden grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-slate-900 border border-slate-800">
+      <button onclick="switchMobileTab('tracks')" id="tabBtnTracks"
+        class="mobile-segment-btn active py-2 rounded-xl text-xs font-black bg-orange-500 text-white shadow-sm flex items-center justify-center gap-1.5 transition">
+        <i data-lucide="grid" class="w-3.5 h-3.5"></i>
+        <span>2 กิจกรรม</span>
+      </button>
+      <button onclick="switchMobileTab('roster')" id="tabBtnRoster"
+        class="mobile-segment-btn py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition">
+        <i data-lucide="users" class="w-3.5 h-3.5"></i>
+        <span>ทำเนียบ (60)</span>
+      </button>
+      <button onclick="switchMobileTab('mystatus')" id="tabBtnMyStatus"
+        class="mobile-segment-btn py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition">
+        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+        <span id="tabMyStatusText">สถานะฉัน</span>
+      </button>
+    </div>
+
+    <!-- ================= DUAL MASTER TRACK SELECTOR HERO ================= -->
+    <section class="space-y-3 sm:space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-wider bg-orange-500/10 text-orange-400 border border-orange-500/30">
+              ⚡ Multi-Track Selection
+            </span>
+            <span id="classRealtimeBadge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900 border border-slate-800 text-emerald-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="classRealtimeStatusText">⚡ Real-Time ซิงค์สด</span>
+            </span>
+          </div>
+          <h2 class="text-lg sm:text-2xl font-black text-white mt-1">เลือกตัวเลือกกิจกรรมใหญ่ (สามารถเลือกได้ทั้ง 2 อย่าง)</h2>
+          <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">
+            โควตาแนะนำ 30 คนต่อกิจกรรม หากเลือกเกิน 30 คนระบบสามารถขยายรับเพิ่มได้ทันที จากนั้นเลือกฝ่ายที่ต้องการสังกัด
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="exportClassRosterExcel()" class="px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span>ส่งออก Excel</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2 Master Track Bento Cards (Interactive Selection) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        
+        <!-- Track 1: ซุ้มพี่บัณฑิต -->
+        <div id="cardTrackGrad" onclick="selectActiveTrack('track_grad')"
+          class="glass-card rounded-3xl p-5 sm:p-6 border border-slate-800 hover:border-amber-500/50 transition-all duration-300 cursor-pointer relative overflow-hidden group space-y-4 shadow-xl">
+          <div class="absolute -right-10 -top-10 w-36 h-36 bg-amber-500/15 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition"></div>
+          
+          <div class="flex items-start justify-between gap-3 relative z-10">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center font-black shadow-lg shadow-amber-500/20 flex-shrink-0">
+                <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <span class="text-[10px] font-black uppercase tracking-wider text-amber-400">ตัวเลือกที่ 1</span>
+                <h3 class="text-base sm:text-lg font-black text-white group-hover:text-amber-300 transition">ทำซุ้มพี่บัณฑิต</h3>
+              </div>
+            </div>
+
+            <!-- Enrollment Counter Badge -->
+            <div class="text-right flex-shrink-0">
+              <span class="text-[10px] text-slate-400 font-bold block">ลงชื่อแล้ว</span>
+              <div class="inline-flex items-baseline gap-1 px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300">
+                <span id="gradEnrolledCount" class="text-base sm:text-lg font-black text-amber-400">0</span>
+                <span class="text-[11px] text-slate-400">/ 30+ คน</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 text-xs text-slate-300 relative z-10">
+            <div class="flex items-center gap-2 text-amber-300/90 font-medium">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0"></i>
+              <span>ช่วงประมาณ 20 ธันวาคม (เสาร์ - อาทิตย์ 2 วัน)</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-400">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-orange-400"></i>
+              <span>คณะศึกษาศาสตร์ (โรงรถ 1 ล็อคที่จอดรถ เน้นถ่ายรูป)</span>
+            </div>
+            <p class="text-slate-400 text-[11px] leading-relaxed line-clamp-2 pt-1 border-t border-slate-800/80">
+              เนรมิตฉากถ่ายรูปซุ้มพี่บัณฑิต 1 ล็อคโรงรถ สไตล์สวยงาม อบอุ่น พร้อมทีมตากล้อง สื่อมีเดีย และของที่ระลึก
+            </p>
+          </div>
+
+          <div class="pt-2 flex items-center justify-between border-t border-slate-800/80 relative z-10">
+            <span id="gradUserRegStatusPill" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-800 text-slate-400">
+              ยังไม่ได้ลงชื่อในงานนี้
+            </span>
+            <span class="text-xs font-black text-amber-400 flex items-center gap-1 group-hover:translate-x-1 transition">
+              <span>ดูฝ่าย & ลงชื่อ</span>
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Track 2: งานวันเด็ก -->
+        <div id="cardTrackChildren" onclick="selectActiveTrack('track_children')"
+          class="glass-card rounded-3xl p-5 sm:p-6 border border-slate-800 hover:border-sky-500/50 transition-all duration-300 cursor-pointer relative overflow-hidden group space-y-4 shadow-xl">
+          <div class="absolute -right-10 -top-10 w-36 h-36 bg-sky-500/15 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition"></div>
+          
+          <div class="flex items-start justify-between gap-3 relative z-10">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center font-black shadow-lg shadow-sky-500/20 flex-shrink-0">
+                <i data-lucide="sparkles" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <span class="text-[10px] font-black uppercase tracking-wider text-sky-400">ตัวเลือกที่ 2</span>
+                <h3 class="text-base sm:text-lg font-black text-white group-hover:text-sky-300 transition">งานวันเด็กแห่งชาติ</h3>
+              </div>
+            </div>
+
+            <!-- Enrollment Counter Badge -->
+            <div class="text-right flex-shrink-0">
+              <span class="text-[10px] text-slate-400 font-bold block">ลงชื่อแล้ว</span>
+              <div class="inline-flex items-baseline gap-1 px-3 py-1 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300">
+                <span id="childrenEnrolledCount" class="text-base sm:text-lg font-black text-sky-400">0</span>
+                <span class="text-[11px] text-slate-400">/ 30+ คน</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 text-xs text-slate-300 relative z-10">
+            <div class="flex items-center gap-2 text-sky-300/90 font-medium">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0"></i>
+              <span>ช่วง 9 มกราคม 2570</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-400">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-indigo-400"></i>
+              <span>ลงทะเบียนซุ้ม ออกแบบกิจกรรมภายในซุ้มสาขาคอมพิวเตอร์ศึกษา</span>
+            </div>
+            <p class="text-slate-400 text-[11px] leading-relaxed line-clamp-2 pt-1 border-t border-slate-800/80">
+              ออกแบบกิจกรรมยอดฮิตสำหรับเด็กๆ: ระบายสี AR 3D, นิทรรศการหุ่นยนต์, บิงโกชิงรางวัล และแจกขนมของขวัญ
+            </p>
+          </div>
+
+          <div class="pt-2 flex items-center justify-between border-t border-slate-800/80 relative z-10">
+            <span id="childrenUserRegStatusPill" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-800 text-slate-400">
+              ยังไม่ได้ลงชื่อในงานนี้
+            </span>
+            <span class="text-xs font-black text-sky-400 flex items-center gap-1 group-hover:translate-x-1 transition">
+              <span>ดูฝ่าย & ลงชื่อ</span>
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= BENTO GRID CONTAINER ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
+
+      <!-- ================= LEFT BENTO COLUMN (Sticky Summary & My Status) ================= -->
+      <div id="bentoLeftPanel" class="lg:col-span-4 space-y-4 sm:space-y-5 lg:sticky lg:top-24">
+        
+        <!-- 1. Current User Participation Card -->
+        <div class="glass-card rounded-3xl p-5 sm:p-6 border border-purple-500/25 relative overflow-hidden space-y-4 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+                <i data-lucide="user-check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="text-[10px] uppercase font-bold text-slate-500 block">สถานะของคุณ</span>
+                <h4 id="userDisplayName" class="text-xs sm:text-sm font-black text-white truncate">ยังไม่ได้ระบุตัวตน</h4>
+              </div>
+            </div>
+            <button onclick="openStudentAuthModal()" class="text-[11px] text-orange-400 hover:text-orange-300 font-bold">
+              เปลี่ยนตัวตน
+            </button>
+          </div>
+
+          <!-- Status Box 1: ซุ้มพี่บัณฑิต -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-1.5 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-amber-400 flex items-center gap-1">
+                <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+                <span>ซุ้มพี่บัณฑิต (20 ธ.ค.)</span>
+              </span>
+              <span id="badgeMyGradRole" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400">ยังไม่ลง</span>
+            </div>
+            <div id="detailMyGradRole" class="text-slate-300 font-semibold text-[11px]">
+              ยังไม่ได้เลือกฝ่ายในกิจกรรมนี้
+            </div>
+            <div id="actionMyGradRole" class="hidden pt-1 flex justify-end">
+              <button onclick="handleCancelTrackRole('track_grad')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1">
+                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                <span>ยกเลิกการลงชื่อ</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Box 2: งานวันเด็ก -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-1.5 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sky-400 flex items-center gap-1">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>งานวันเด็ก (9 ม.ค. 70)</span>
+              </span>
+              <span id="badgeMyChildRole" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400">ยังไม่ลง</span>
+            </div>
+            <div id="detailMyChildRole" class="text-slate-300 font-semibold text-[11px]">
+              ยังไม่ได้เลือกฝ่ายในกิจกรรมนี้
+            </div>
+            <div id="actionMyChildRole" class="hidden pt-1 flex justify-end">
+              <button onclick="handleCancelTrackRole('track_children')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1">
+                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                <span>ยกเลิกการลงชื่อ</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-400 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 leading-relaxed">
+            💡 <strong class="text-white">คำแนะนำ:</strong> สามารถเลือกลงชื่อทั้ง 2 กิจกรรมได้เลย โดยแต่ละกิจกรรมจะมีฝ่ายย่อยให้เลือกหน้าที่ความถนัด
+          </div>
+        </div>
+
+        <!-- 2. Overall Stats Summary Widget -->
+        <div class="glass-card rounded-3xl p-5 sm:p-6 border border-slate-800 space-y-3 shadow-xl">
+          <h4 class="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-orange-400"></i>
+            <span>สรุปภาพรวมความพร้อมรุ่น 69</span>
+          </h4>
+
+          <div class="grid grid-cols-2 gap-2 text-center">
+            <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800">
+              <span class="text-[10px] text-slate-400 block font-bold">ร่วมซุ้มบัณฑิต</span>
+              <span id="statGradTotal" class="text-lg font-black text-amber-400">0</span>
+              <span class="text-[10px] text-slate-500 block">เป้าหมาย 30+</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800">
+              <span class="text-[10px] text-slate-400 block font-bold">ร่วมงานวันเด็ก</span>
+              <span id="statChildrenTotal" class="text-lg font-black text-sky-400">0</span>
+              <span class="text-[10px] text-slate-500 block">เป้าหมาย 30+</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800">
+              <span class="text-[10px] text-slate-400 block font-bold">ร่วมทั้ง 2 กิจกรรม</span>
+              <span id="statBothTotal" class="text-lg font-black text-purple-400">0</span>
+              <span class="text-[10px] text-slate-500 block">คน</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800">
+              <span class="text-[10px] text-slate-400 block font-bold">ยังไม่ลงทะเบียน</span>
+              <span id="statPendingTotal" class="text-lg font-black text-rose-400">60</span>
+              <span class="text-[10px] text-slate-500 block">/ 60 คน</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= RIGHT BENTO COLUMN (Active Track Departments & Roles) ================= -->
+      <div id="sectionDepartmentsView" class="lg:col-span-8 space-y-4 sm:space-y-6">
+        
+        <!-- Active Track Header Bar -->
+        <div class="glass-card rounded-3xl p-5 sm:p-6 border border-orange-500/30 space-y-4 shadow-xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-3">
+              <div id="activeTrackIconContainer" class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold shadow-lg flex-shrink-0">
+                <i id="activeTrackIcon" data-lucide="graduation-cap" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span id="activeTrackTag" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                    ตัวเลือกที่ 1
+                  </span>
+                  <span id="activeTrackDate" class="text-xs text-slate-400">20 ธันวาคม</span>
+                </div>
+                <h3 id="activeTrackTitle" class="text-base sm:text-xl font-black text-white">ทำซุ้มพี่บัณฑิต (คณะศึกษาศาสตร์)</h3>
+              </div>
+            </div>
+
+            <!-- Track Switcher Toggle Buttons -->
+            <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-900 border border-slate-800 flex-shrink-0">
+              <button onclick="selectActiveTrack('track_grad')" id="btnSwitchGrad"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer bg-amber-500 text-slate-950 font-black shadow-sm">
+                <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+                <span>ซุ้มบัณฑิต</span>
+              </button>
+              <button onclick="selectActiveTrack('track_children')" id="btnSwitchChildren"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer text-slate-400 hover:text-white">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>งานวันเด็ก</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Track Description & Note -->
+          <p id="activeTrackDescription" class="text-xs text-slate-300 leading-relaxed">
+            จัดทำซุ้มแสดงความยินดีกับพี่บัณฑิต ณ โรงรถ 1 ล็อคที่จอดรถ คณะศึกษาศาสตร์ เน้นฉากถ่ายรูปสวยงาม อบอุ่น และน่าประทับใจ
+          </p>
+
+          <!-- Search & Department Quick Chips -->
+          <div class="flex flex-col sm:flex-row gap-2 pt-1">
+            <div class="relative flex-grow">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              <input type="text" id="trackDeptSearchInput" oninput="handleTrackDeptSearch(this.value)"
+                placeholder="ค้นหาฝ่าย หรือ ตำแหน่งงาน..."
+                class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-orange-500 transition">
+            </div>
+          </div>
+        </div>
+
+        <!-- Departments & Roles Container for Active Track -->
+        <div id="trackDepartmentsContainer" class="space-y-4">
+          <!-- Populated by JavaScript -->
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================= 60-STUDENT LIVE ROSTER SECTION ================= -->
+    <section id="sectionRosterView" class="glass-card rounded-3xl p-5 sm:p-8 border border-slate-800 space-y-5 shadow-2xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-base sm:text-xl font-black text-white">ทำเนียบรายชื่อนศ. COMED KKU 69 (ทั้งหมด 60 คน)</h3>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-orange-500/10 text-orange-400 border border-orange-500/30">
+              สถานะ 2 กิจกรรม
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">ตรวจสอบรายชื่อเพื่อนๆ ที่เข้าร่วมซุ้มบัณฑิต และ งานวันเด็ก</p>
+        </div>
+
+        <!-- Roster Filter Tabs -->
+        <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-900 border border-slate-800 flex-wrap">
+          <button onclick="filterRosterTab('all')" class="roster-filter-btn active px-3 py-1.5 rounded-xl text-xs font-black bg-orange-500 text-white transition">
+            ทั้งหมด (60)
+          </button>
+          <button onclick="filterRosterTab('grad')" class="roster-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
+            ซุ้มบัณฑิต (<span id="countFilterGrad">0</span>)
+          </button>
+          <button onclick="filterRosterTab('children')" class="roster-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
+            งานวันเด็ก (<span id="countFilterChildren">0</span>)
+          </button>
+          <button onclick="filterRosterTab('both')" class="roster-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
+            ร่วม 2 งาน (<span id="countFilterBoth">0</span>)
+          </button>
+          <button onclick="filterRosterTab('pending')" class="roster-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
+            ยังไม่ลงชื่อ (<span id="countFilterPending">60</span>)
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Box for Roster -->
+      <div class="relative max-w-md">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+        <input type="text" id="rosterSearchInput" oninput="renderClassRosterTable()"
+          placeholder="พิมพ์ค้นหารหัสนักศึกษา หรือ ชื่อ-สกุล..."
+          class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-orange-500 transition">
+      </div>
+
+      <!-- Roster Table -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-800">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px] font-black border-b border-slate-800">
+            <tr>
+              <th class="p-3.5">#</th>
+              <th class="p-3.5">รหัสนักศึกษา</th>
+              <th class="p-3.5">ชื่อ - สกุล</th>
+              <th class="p-3.5">ชื่อเล่น</th>
+              <th class="p-3.5 text-amber-400">ซุ้มพี่บัณฑิต (20 ธ.ค.)</th>
+              <th class="p-3.5 text-sky-400">งานวันเด็ก (9 ม.ค. 70)</th>
+              <th class="p-3.5 text-center">สถานะ</th>
+            </tr>
+          </thead>
+          <tbody id="classRosterTableBody" class="divide-y divide-slate-800/60 bg-slate-950/40 font-medium">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MOBILE FLOATING BOTTOM BAR ================= -->
+  <div id="mobileFloatingBar" class="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-2xl border-t border-slate-800 px-4 py-3 flex items-center justify-between shadow-2xl">
+    <div class="min-w-0 pr-2">
+      <div id="floatingUserPrompt" class="text-[10px] font-bold text-slate-400 truncate">สถานะการเลือกกิจกรรม</div>
+      <div id="floatingUserRoleTitle" class="text-xs font-black text-white truncate">เลือกซุ้มบัณฑิต / วันเด็ก</div>
+    </div>
+    <div class="flex items-center gap-1.5 flex-shrink-0">
+      <button onclick="openStudentAuthModal()" id="btnFloatingAuth" class="px-3 py-1.5 rounded-xl bg-slate-900 text-slate-300 border border-slate-700 text-xs font-bold transition">
+        ระบุตัวตน
+      </button>
+      <button onclick="switchMobileTab('tracks')" class="px-3.5 py-1.5 rounded-xl bg-orange-600 text-white text-xs font-black shadow-md transition">
+        เลือกกิจกรรม
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: STUDENT AUTHENTICATION ================= -->
+  <div id="modalAuth" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-2xl sm:rounded-[2.5rem] max-w-md w-full p-5 sm:p-7 space-y-4 border border-orange-500/30 text-left max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold">
+            <i data-lucide="user-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+          </div>
+          <h3 class="text-sm sm:text-base font-black text-white">ยืนยันตัวตนนศ. COMED 69</h3>
+        </div>
+        <button onclick="closeStudentAuthModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400 leading-relaxed">
+        กรุณาเลือกรหัสนักศึกษาของคุณ หรือล็อกอินด้วยอีเมล KKU (@kkumail.com) เพื่อลงชื่อเข้าร่วมกิจกรรม
+      </p>
+
+      <!-- Student Picker Dropdown -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-300">เลือกรหัสนักศึกษา / ชื่อของคุณ (60 คน):</label>
+        <select id="authStudentSelect" class="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
+          <option value="">-- กรุณาเลือกรายชื่อของคุณ --</option>
+        </select>
+      </div>
+
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-slate-800"></div>
+        <span class="flex-shrink mx-3 text-[11px] text-slate-500 uppercase">หรือ</span>
+        <div class="flex-grow border-t border-slate-800"></div>
+      </div>
+
+      <!-- Google Login Wrapper -->
+      <div class="text-center space-y-2">
+        <div id="googleAuthWrapper" class="flex justify-center overflow-hidden"></div>
+        <span class="text-[10px] text-slate-500 block">รองรับบัญชี @kkumail.com ของนักศึกษาคอมพิวเตอร์ศึกษา</span>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="closeStudentAuthModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
+          ยกเลิก
+        </button>
+        <button onclick="confirmStudentPickerAuth()" class="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition active:scale-95">
+          ยืนยันตัวตน
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ROLE REGISTRATION CONFIRMATION ================= -->
+  <div id="modalConfirmRole" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-2xl sm:rounded-[2.5rem] max-w-md w-full p-5 sm:p-8 space-y-4 sm:space-y-5 border border-orange-500/40 text-left max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-bold">
+            <i data-lucide="check-circle-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+          </div>
+          <h3 class="text-sm sm:text-base font-black text-white">ยืนยันการลงชื่อเข้าร่วมกิจกรรม</h3>
+        </div>
+        <button onclick="closeConfirmRoleModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-900 border border-slate-800 space-y-2 text-xs">
+        <div class="flex justify-between">
+          <span class="text-slate-400">ผู้สมัคร:</span>
+          <span id="confirmStudentName" class="font-bold text-white truncate max-w-[200px] text-right">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">รหัสนักศึกษา:</span>
+          <span id="confirmStudentId" class="font-mono text-orange-400">-</span>
+        </div>
+        <div class="border-t border-slate-800 pt-2 flex justify-between">
+          <span class="text-slate-400">กิจกรรมหลัก:</span>
+          <span id="confirmTrackTitle" class="font-bold text-amber-400">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">ฝ่ายที่สังกัด:</span>
+          <span id="confirmDeptName" class="font-bold text-sky-400">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">ตำแหน่งงาน:</span>
+          <span id="confirmRoleTitle" class="font-black text-emerald-400 text-sm">-</span>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-300">ความถนัด หรือ ข้อความเพิ่มเติม (ถ้ามี):</label>
+        <textarea id="confirmRoleNote" rows="2" placeholder="เช่น ถนัดจัดฉาก, มีกล้องถ่ายรูป, ถนัดงานเกมบิงโก..."
+          class="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition"></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-2 flex items-center justify-end gap-2">
+        <button onclick="closeConfirmRoleModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
+          ยกเลิก
+        </button>
+        <button id="btnSubmitRoleRegistration" onclick="submitTrackRoleRegistration()"
+          class="px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition active:scale-95">
+          ยืนยันการเลือกตำแหน่งนี้
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= POPUP: ยืนยันตัวตนสำเร็จ ================= -->
+  <div id="popupAuthSuccess" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-2xl sm:rounded-[2.5rem] max-w-sm w-full p-5 sm:p-7 text-center space-y-3.5 sm:space-y-4 border border-emerald-500/40 shadow-2xl animate-in fade-in duration-200">
+      <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
+        <i data-lucide="check-circle" class="w-6 h-6 sm:w-8 sm:h-8 text-white"></i>
+      </div>
+      <div>
+        <h3 class="text-base sm:text-lg font-black text-white">เข้าสู่ระบบสำเร็จ!</h3>
+        <p class="text-xs text-slate-400 mt-0.5">ยินดีต้อนรับนักศึกษา COMED KKU 69</p>
+      </div>
+      <div class="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-900 border border-slate-800 text-left space-y-1 text-xs">
+        <div class="text-emerald-400 font-bold text-sm" id="popupAuthName">-</div>
+        <div class="text-slate-400 font-mono" id="popupAuthId">-</div>
+      </div>
+      <button onclick="closeAuthSuccessPopup()"
+        class="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg shadow-emerald-600/30 transition active:scale-95 cursor-pointer">
+        เริ่มเลือกกิจกรรม & ฝ่าย
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= POPUP: ลงทะเบียนสำเร็จ ================= -->
+  <div id="popupRoleSuccess" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card rounded-2xl sm:rounded-[2.5rem] max-w-md w-full p-5 sm:p-8 text-center space-y-4 sm:space-y-5 border border-orange-500/40 shadow-2xl animate-in fade-in duration-200">
+      <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center mx-auto shadow-lg shadow-orange-500/30">
+        <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 text-white"></i>
+      </div>
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-[10px] sm:text-[11px] font-bold text-orange-400 mb-1.5">
+          <span>🎉 บันทึกข้อมูลสำเร็จเรียบร้อย</span>
+        </div>
+        <h3 class="text-lg sm:text-xl font-black text-white">ลงทะเบียนเข้าร่วมกิจกรรมสำเร็จ!</h3>
+        <p class="text-xs text-slate-400 mt-0.5">ระบบได้บันทึกตำแหน่งของคุณและอัปเดตเข้าสู่ฐานข้อมูลกลางแล้ว</p>
+      </div>
+
+      <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-900/90 border border-slate-800 text-left space-y-1.5 sm:space-y-2 text-xs">
+        <div class="flex justify-between border-b border-slate-800/80 pb-1.5">
+          <span class="text-slate-400">ผู้สมัคร:</span>
+          <span id="popupSuccessStudentName" class="font-bold text-white truncate max-w-[200px] text-right">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">กิจกรรมที่เข้าร่วม:</span>
+          <span id="popupSuccessTrack" class="font-bold text-amber-400">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">ฝ่ายที่สังกัด:</span>
+          <span id="popupSuccessDept" class="font-bold text-sky-400">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">ตำแหน่งงาน:</span>
+          <span id="popupSuccessRole" class="font-black text-emerald-400 text-sm">-</span>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-purple-300 bg-purple-500/10 p-2.5 rounded-xl border border-purple-500/20">
+        ✨ คุณยังสามารถเลือกลงทะเบียนในอีกกิจกรรมหนึ่งเพิ่มเติมได้ตลอดเวลา!
+      </div>
+
+      <button onclick="closeRoleSuccessPopup()"
+        class="w-full py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition active:scale-95 cursor-pointer">
+        ตกลง / ดูทำเนียบรายชื่อเพื่อน
+      </button>
+    </div>
+  </div>
+
+  <!-- Page Logic Script -->
+  <script src="assets/js/eventclass.js?v=2.4.0"></script>
+</body>
+</html>

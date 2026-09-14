@@ -91,6 +91,143 @@ const DEFAULT_COMED_EVENTS = [
         ]
       }
     ]
+  },
+  {
+    id: 'eventclass_69',
+    code: 'EVENTCLASS_69',
+    title: 'กิจกรรมพิเศษรุ่น COMED KKU 69: ซุ้มพี่บัณฑิต & งานวันเด็กแห่งชาติ',
+    subtitle: 'เลือกเข้าร่วมได้ 2 กิจกรรมใหญ่ สามารถเลือกได้ทั้ง 2 อย่าง หรือเลือกอย่างใดอย่างหนึ่ง (ขยายโควตาได้เกิน 30 คน)',
+    category: 'กิจกรรมรุ่น/ห้อง',
+    status: 'open',
+    deadline: new Date(Date.now() + 90 * 24 * 3600 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+    tracks: [
+      {
+        id: 'track_grad',
+        code: 'GRAD_BOOTH',
+        title: 'ทำซุ้มพี่บัณฑิต',
+        dateDisplay: 'ประมาณ 20 ธันวาคม (เสาร์ - อาทิตย์ 2 วัน)',
+        location: 'คณะศึกษาศาสตร์ (โรงรถ 1 ล็อคที่จอดรถ แล้วแต่จะจัด เน้นให้เขาถ่ายรูป)',
+        targetCount: 30,
+        color: 'from-amber-500 via-orange-500 to-rose-600',
+        badge: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+        icon: 'graduation-cap',
+        description: 'จัดทำซุ้มแสดงความยินดีกับพี่บัณฑิต ณ โรงรถ 1 ล็อคที่จอดรถ คณะศึกษาศาสตร์ เน้นฉากถ่ายรูปสวยงาม อบอุ่น และน่าประทับใจ',
+        departments: [
+          {
+            id: 'dept_grad_design',
+            name: 'ฝ่ายออกแบบและจัดซุ้มถ่ายรูป',
+            icon: 'palette',
+            color: 'from-amber-500 to-orange-600',
+            badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+            description: 'เนรมิตฉากถ่ายรูป 1 ล็อคโรงรถ เลือกธีม ออกแบบ Backdrop พร็อพถ่ายรูป ป้ายแสดงความยินดี',
+            roles: [
+              { id: 'role_grad_design_lead', title: 'หัวหน้าทีมออกแบบและจัดฉาก', maxSeats: 4 },
+              { id: 'role_grad_craft', title: 'ทีมประดิษฐ์และประกอบฉาก', maxSeats: 8 },
+              { id: 'role_grad_painter', title: 'ทีมวาดภาพ ระบายสี และตกแต่ง', maxSeats: 6 }
+            ]
+          },
+          {
+            id: 'dept_grad_media',
+            name: 'ฝ่ายช่างภาพและสื่อมีเดีย',
+            icon: 'camera',
+            color: 'from-cyan-500 to-blue-600',
+            badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+            description: 'ถ่ายภาพนิ่ง วิดีโอเก็บบรรยากาศพี่บัณฑิต ทำคลิปสั้น และสื่อโซเชียลมีเดียของรุ่น',
+            roles: [
+              { id: 'role_grad_photographer', title: 'ช่างภาพนิ่ง (Photo)', maxSeats: 4 },
+              { id: 'role_grad_videographer', title: 'ช่างวิดีโอ & ครีเอทีฟคลิป (Video)', maxSeats: 4 }
+            ]
+          },
+          {
+            id: 'dept_grad_welcome',
+            name: 'ฝ่ายต้อนรับและของที่ระลึก',
+            icon: 'gift',
+            color: 'from-pink-500 to-rose-600',
+            badgeColor: 'bg-pink-500/10 text-pink-400 border-pink-500/30',
+            description: 'ดูแลของที่ระลึก สายสะพาย มงกุฎ ต้อนรับพี่บัณฑิตและญาติๆ ให้ประทับใจ',
+            roles: [
+              { id: 'role_grad_welcome_team', title: 'ทีมต้อนรับและประสานงานพี่บัณฑิต', maxSeats: 6 },
+              { id: 'role_grad_souvenir', title: 'ทีมจัดเตรียมและมอบของขวัญที่ระลึก', maxSeats: 4 }
+            ]
+          },
+          {
+            id: 'dept_grad_welfare',
+            name: 'ฝ่ายสถานที่และสวัสดิการ',
+            icon: 'heart-handshake',
+            color: 'from-emerald-500 to-teal-600',
+            badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+            description: 'จัดเตรียมโต๊ะ เก้าอี้ พัดลม ลากปลั๊กไฟ อาหาร น้ำดื่ม และดูแลความสะอาดพื้นที่โรงรถ',
+            roles: [
+              { id: 'role_grad_venue', title: 'ทีมจัดการสถานที่และระบบไฟ', maxSeats: 4 },
+              { id: 'role_grad_catering', title: 'ทีมสวัสดิการ น้ำดื่ม และอาหาร', maxSeats: 4 }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'track_children',
+        code: 'CHILDREN_DAY',
+        title: 'งานวันเด็กแห่งชาติ',
+        dateDisplay: 'ช่วง 9 มกราคม 2570',
+        location: 'ลงทะเบียนซุ้ม ออกแบบกิจกรรมภายในซุ้มสาขาคอมพิวเตอร์ศึกษา',
+        targetCount: 30,
+        color: 'from-sky-500 via-indigo-500 to-purple-600',
+        badge: 'bg-sky-500/10 text-sky-300 border-sky-500/30',
+        icon: 'sparkles',
+        description: 'ลงทะเบียนซุ้มสาขา ออกแบบกิจกรรมสนุกสนานและให้ความรู้แก่น้องๆ เช่น Bingo, หุ่นยนต์ตั้งโชว์, AR ระบายสี ฯลฯ',
+        departments: [
+          {
+            id: 'dept_child_ar',
+            name: 'ฝ่ายกิจกรรม AR ระบายสี (ยอดฮิตเด็กชอบ)',
+            icon: 'smartphone',
+            color: 'from-purple-500 to-indigo-600',
+            badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+            description: 'เตรียมภาพระบายสี AR เซ็ตแท็บเล็ต/มือถือ แนะนำเด็กๆ สแกนดูผลงาน 3D มีชีวิต',
+            roles: [
+              { id: 'role_child_ar_lead', title: 'ผู้ดูแลระบบ AR และอุปกรณ์ไอที', maxSeats: 4 },
+              { id: 'role_child_ar_staff', title: 'พี่เลี้ยงแนะนำน้องๆ ระบายสี AR', maxSeats: 8 }
+            ]
+          },
+          {
+            id: 'dept_child_robot',
+            name: 'ฝ่ายนิทรรศการหุ่นยนต์และเทคโนโลยี',
+            icon: 'bot',
+            color: 'from-cyan-500 to-teal-600',
+            badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+            description: 'นำหุ่นยนต์ อุปกรณ์ Microcontroller มาจัดแสดง สาธิต และให้น้องๆ ได้ทดลองกดเล่น',
+            roles: [
+              { id: 'role_child_robot_demo', title: 'ทีมสาธิตหุ่นยนต์ & ให้ความรู้เด็กๆ', maxSeats: 6 },
+              { id: 'role_child_tech_display', title: 'ทีมจัดแสดงบอร์ดนวัตกรรมและเทค', maxSeats: 4 }
+            ]
+          },
+          {
+            id: 'dept_child_bingo',
+            name: 'ฝ่ายเกมบิงโกและสันทนาการหน้าซุ้ม',
+            icon: 'dices',
+            color: 'from-amber-500 to-pink-600',
+            badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+            description: 'จัดกิจกรรม Bingo สุดมันส์ เกมตอบคำถามชิงรางวัล ดึงดูดเด็กๆ และผู้ปกครองเข้าซุ้ม',
+            roles: [
+              { id: 'role_child_bingo_mc', title: 'พิธีกรดำเนินเกม Bingo & สันทนาการ', maxSeats: 4 },
+              { id: 'role_child_bingo_staff', title: 'ทีมแจกการ์ดบิงโกและตรวจผลรางวัล', maxSeats: 6 }
+            ]
+          },
+          {
+            id: 'dept_child_reward',
+            name: 'ฝ่ายของรางวัล ขนม และสวัสดิการ',
+            icon: 'candy',
+            color: 'from-emerald-500 to-lime-600',
+            badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+            description: 'จัดสรรของรางวัล ตุ๊กตา สมุด ดินสอ ขนม นมกล่อง และต้อนรับลงทะเบียนน้องๆ',
+            roles: [
+              { id: 'role_child_reward_manager', title: 'ทีมคุมสต็อกของรางวัลและแจกของขวัญ', maxSeats: 6 },
+              { id: 'role_child_hospitality', title: 'ทีมต้อนรับ ลงทะเบียนเด็ก และสวัสดิการ', maxSeats: 6 }
+            ]
+          }
+        ]
+      }
+    ]
   }
 ];
 
@@ -100,8 +237,22 @@ window.ComedEventManager = {
     try {
       const stored = localStorage.getItem(COMED_EVENTS_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        let parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // ตรวจสอบว่ามี default events ทุกตัวหรือไม่ ถ้าไม่มีให้รวมเข้ามา
+          let hasChange = false;
+          DEFAULT_COMED_EVENTS.forEach(defEvt => {
+            const exists = parsed.some(e => e.id === defEvt.id);
+            if (!exists) {
+              parsed.push(defEvt);
+              hasChange = true;
+            }
+          });
+          if (hasChange) {
+            localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(parsed));
+          }
+          return parsed;
+        }
       }
     } catch(e) {}
     localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(DEFAULT_COMED_EVENTS));
@@ -235,6 +386,132 @@ window.ComedEventManager = {
     return newRecord;
   },
 
+  // ดึงข้อมูลการลงทะเบียนเฉพาะ Track ใน Event ที่มีหลาย Track (เช่น eventclass_69)
+  getStudentTrackRegistration: function(eventId, studentIdOrEmail, trackId) {
+    if (!studentIdOrEmail) return null;
+    const regs = this.getRegistrations(eventId);
+    const cleanQuery = String(studentIdOrEmail).trim().toLowerCase();
+    return regs.find(r => 
+      ((r.studentId && r.studentId.trim().toLowerCase() === cleanQuery) ||
+       (r.email && r.email.trim().toLowerCase() === cleanQuery)) &&
+      (!trackId || r.trackId === trackId)
+    ) || null;
+  },
+
+  // ดึงรายการลงทะเบียนทั้งหมดของนักศึกษาคนหนึ่งใน Event นั้น (อาจมีหลาย Track)
+  getAllStudentRegistrations: function(eventId, studentIdOrEmail) {
+    if (!studentIdOrEmail) return [];
+    const regs = this.getRegistrations(eventId);
+    const cleanQuery = String(studentIdOrEmail).trim().toLowerCase();
+    return regs.filter(r => 
+      (r.studentId && r.studentId.trim().toLowerCase() === cleanQuery) ||
+      (r.email && r.email.trim().toLowerCase() === cleanQuery)
+    );
+  },
+
+  // ลงทะเบียนตาม Track (สำหรับ eventclass_69 ที่เลือกได้ทั้ง 2 ตัวเลือกใหญ่)
+  registerTrackRole: async function(eventId, studentInfo, trackId, deptId, roleId) {
+    const event = this.getActiveEvent(eventId);
+    if (!event) throw new Error("ไม่พบกิจกรรมนี้ในระบบ");
+    if (event.status !== 'open') throw new Error("กิจกรรมนี้ไม่ได้เปิดรับลงทะเบียนในขณะนี้");
+
+    // หา Track
+    let targetTrack = null;
+    let targetDept = null;
+    let targetRole = null;
+
+    if (event.tracks && Array.isArray(event.tracks)) {
+      targetTrack = event.tracks.find(t => t.id === trackId);
+      if (!targetTrack) throw new Error("ไม่พบตัวเลือกกิจกรรมที่เลือก");
+      targetDept = targetTrack.departments.find(d => d.id === deptId);
+      if (!targetDept) throw new Error("ไม่พบฝ่ายที่เลือกในกิจกรรมนี้");
+      targetRole = targetDept.roles.find(r => r.id === roleId);
+      if (!targetRole) throw new Error("ไม่พบตำแหน่งที่เลือก");
+    } else {
+      // Fallback
+      targetDept = event.departments?.find(d => d.id === deptId);
+      if (!targetDept) throw new Error("ไม่พบฝ่ายที่เลือก");
+      targetRole = targetDept.roles?.find(r => r.id === roleId);
+      if (!targetRole) throw new Error("ไม่พบตำแหน่งที่เลือก");
+    }
+
+    const regs = this.getRegistrations(event.id);
+    // ค้นหาว่าใน Track นี้ นักศึกษาเคยลงตำแหน่งเดิมไว้หรือไม่
+    const existingTrackIdx = regs.findIndex(r => 
+      ((r.studentId && r.studentId === studentInfo.studentId) ||
+       (r.email && studentInfo.email && r.email.toLowerCase() === studentInfo.email.toLowerCase())) &&
+      (r.trackId === trackId)
+    );
+
+    const newRecord = {
+      id: `${event.id}_${studentInfo.studentId}_${trackId}`,
+      eventId: event.id,
+      studentId: studentInfo.studentId,
+      studentName: studentInfo.studentName,
+      nickname: studentInfo.nickname || '',
+      email: studentInfo.email || '',
+      trackId: trackId,
+      trackTitle: targetTrack ? targetTrack.title : '',
+      departmentId: targetDept.id,
+      departmentName: targetDept.name,
+      roleId: targetRole.id,
+      roleTitle: targetRole.title,
+      note: studentInfo.note || '',
+      registeredAt: new Date().toISOString()
+    };
+
+    if (existingTrackIdx !== -1) {
+      regs[existingTrackIdx] = { ...regs[existingTrackIdx], ...newRecord, updatedAt: new Date().toISOString() };
+    } else {
+      regs.push(newRecord);
+    }
+
+    const key = `${COMED_EVENT_REGS_KEY}_${event.id}`;
+    localStorage.setItem(key, JSON.stringify(regs));
+    this._lastLocalWriteTime = Date.now();
+
+    // บันทึกขึ้น Supabase
+    this.syncRegistrationToSupabase(newRecord).catch(err => {
+      console.warn("Track role sync failed:", err);
+    });
+
+    return newRecord;
+  },
+
+  // ยกเลิกการเลือกเฉพาะ Track
+  cancelTrackRegistration: async function(eventId, studentIdOrEmail, trackId) {
+    const key = `${COMED_EVENT_REGS_KEY}_${eventId}`;
+    let regs = this.getRegistrations(eventId);
+    const cleanQuery = String(studentIdOrEmail).trim().toLowerCase();
+
+    const target = regs.find(r => 
+      ((r.studentId && r.studentId.trim().toLowerCase() === cleanQuery) ||
+       (r.email && r.email.trim().toLowerCase() === cleanQuery)) &&
+      (r.trackId === trackId)
+    );
+
+    if (target) {
+      regs = regs.filter(r => r !== target);
+      localStorage.setItem(key, JSON.stringify(regs));
+      this._lastLocalWriteTime = Date.now();
+
+      const compositeId = target.id || `${eventId}_${target.studentId}_${trackId}`;
+      const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+      if (sb) {
+        if (this._activeRealtimeChannel) {
+          this._activeRealtimeChannel.send({
+            type: 'broadcast',
+            event: 'REGISTRATION_UPDATE',
+            payload: { action: 'delete', studentId: target.studentId, trackId: trackId, id: compositeId }
+          }).catch(() => {});
+        }
+        sb.from('event_registrations').delete().eq('id', compositeId).catch(() => {});
+        this.syncAllRegistrationsToCloud(eventId);
+      }
+    }
+    return target;
+  },
+
   // ยกเลิกการเลือกฝ่าย
   cancelRegistration: async function(eventId, studentIdOrEmail) {
     const key = `${COMED_EVENT_REGS_KEY}_${eventId}`;
@@ -339,18 +616,19 @@ window.ComedEventManager = {
       }
 
       // 1. Primary: บันทึกลงตารางเฉพาะ event_registrations (Atomic Row Level)
+      const targetRowId = regRecord.id || `${regRecord.eventId}_${regRecord.studentId}`;
       const upsertPromise = sb.from('event_registrations').upsert({
-        id: `${regRecord.eventId}_${regRecord.studentId}`,
+        id: targetRowId,
         event_id: regRecord.eventId,
         student_id: regRecord.studentId,
         student_name: regRecord.studentName,
         nickname: regRecord.nickname || '',
         email: regRecord.email,
         department_id: regRecord.departmentId,
-        department_name: regRecord.departmentName,
+        department_name: regRecord.trackTitle ? `[${regRecord.trackTitle}] ${regRecord.departmentName}` : regRecord.departmentName,
         role_id: regRecord.roleId,
         role_title: regRecord.roleTitle,
-        note: regRecord.note || '',
+        note: regRecord.note ? (regRecord.trackId ? `[TRACK:${regRecord.trackId}] ` + regRecord.note : regRecord.note) : (regRecord.trackId ? `[TRACK:${regRecord.trackId}]` : ''),
         registered_at: regRecord.registeredAt || new Date().toISOString()
       }, { onConflict: 'id' });
 
@@ -432,19 +710,30 @@ window.ComedEventManager = {
           .eq('event_id', targetEventId);
 
         if (!directErr && Array.isArray(directRows) && directRows.length > 0) {
-          loadedRegs = directRows.map(r => ({
-            eventId: r.event_id,
-            studentId: r.student_id,
-            studentName: r.student_name,
-            nickname: r.nickname || '',
-            email: r.email || '',
-            departmentId: r.department_id,
-            departmentName: r.department_name,
-            roleId: r.role_id,
-            roleTitle: r.role_title,
-            note: r.note || '',
-            registeredAt: r.registered_at
-          }));
+          loadedRegs = directRows.map(r => {
+            let parsedTrackId = null;
+            if (r.id && r.id.includes('_track_')) {
+              parsedTrackId = 'track_' + r.id.split('_track_')[1];
+            } else if (r.note && r.note.includes('[TRACK:')) {
+              const match = r.note.match(/\[TRACK:(.*?)\]/);
+              if (match) parsedTrackId = match[1];
+            }
+            return {
+              id: r.id,
+              eventId: r.event_id,
+              studentId: r.student_id,
+              studentName: r.student_name,
+              nickname: r.nickname || '',
+              email: r.email || '',
+              trackId: parsedTrackId,
+              departmentId: r.department_id,
+              departmentName: r.department_name,
+              roleId: r.role_id,
+              roleTitle: r.role_title,
+              note: r.note || '',
+              registeredAt: r.registered_at
+            };
+          });
         } else {
           // ถ้าตารางตรงยังว่าง ให้ fallback ดึงจาก campaigns store
           const { data: regsRow } = await sb.from('campaigns')
@@ -505,15 +794,25 @@ window.ComedEventManager = {
               const data = msg.payload;
 
               if (data.action === 'upsert' && data.record) {
-                const idx = currentRegs.findIndex(r => r.studentId === data.record.studentId);
+                const rec = data.record;
+                const idx = currentRegs.findIndex(r => 
+                  (rec.id && r.id === rec.id) ||
+                  (rec.trackId ? (r.studentId === rec.studentId && r.trackId === rec.trackId) : (r.studentId === rec.studentId))
+                );
                 if (idx !== -1) {
-                  currentRegs[idx] = data.record;
+                  currentRegs[idx] = rec;
                 } else {
-                  currentRegs.push(data.record);
+                  currentRegs.push(rec);
                 }
                 localStorage.setItem(key, JSON.stringify(currentRegs));
-              } else if (data.action === 'delete' && data.studentId) {
-                currentRegs = currentRegs.filter(r => r.studentId !== data.studentId);
+              } else if (data.action === 'delete') {
+                if (data.id) {
+                  currentRegs = currentRegs.filter(r => r.id !== data.id);
+                } else if (data.trackId) {
+                  currentRegs = currentRegs.filter(r => !(r.studentId === data.studentId && r.trackId === data.trackId));
+                } else if (data.studentId) {
+                  currentRegs = currentRegs.filter(r => r.studentId !== data.studentId);
+                }
                 localStorage.setItem(key, JSON.stringify(currentRegs));
               }
 
@@ -538,12 +837,21 @@ window.ComedEventManager = {
               if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
                 const newRow = payload.new;
                 if (newRow && newRow.student_id) {
+                  let parsedTrackId = null;
+                  if (newRow.id && newRow.id.includes('_track_')) {
+                    parsedTrackId = 'track_' + newRow.id.split('_track_')[1];
+                  } else if (newRow.note && newRow.note.includes('[TRACK:')) {
+                    const match = newRow.note.match(/\[TRACK:(.*?)\]/);
+                    if (match) parsedTrackId = match[1];
+                  }
                   const mappedRecord = {
+                    id: newRow.id,
                     eventId: newRow.event_id || targetEventId,
                     studentId: newRow.student_id,
                     studentName: newRow.student_name,
                     nickname: newRow.nickname || '',
                     email: newRow.email || '',
+                    trackId: parsedTrackId,
                     departmentId: newRow.department_id,
                     departmentName: newRow.department_name,
                     roleId: newRow.role_id,
@@ -552,7 +860,10 @@ window.ComedEventManager = {
                     registeredAt: newRow.registered_at || new Date().toISOString()
                   };
 
-                  const idx = currentRegs.findIndex(r => r.studentId === mappedRecord.studentId);
+                  const idx = currentRegs.findIndex(r => 
+                    (mappedRecord.id && r.id === mappedRecord.id) ||
+                    (mappedRecord.trackId ? (r.studentId === mappedRecord.studentId && r.trackId === mappedRecord.trackId) : (r.studentId === mappedRecord.studentId))
+                  );
                   if (idx !== -1) {
                     currentRegs[idx] = mappedRecord;
                   } else {
@@ -564,7 +875,7 @@ window.ComedEventManager = {
                 const oldRow = payload.old;
                 if (oldRow) {
                   currentRegs = currentRegs.filter(r => 
-                    (oldRow.id && `${targetEventId}_${r.studentId}` !== oldRow.id) &&
+                    (oldRow.id ? r.id !== oldRow.id : true) &&
                     (oldRow.student_id ? r.studentId !== oldRow.student_id : true)
                   );
                   localStorage.setItem(key, JSON.stringify(currentRegs));
