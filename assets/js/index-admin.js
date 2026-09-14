@@ -32,7 +32,8 @@ const DEFAULT_MAINT_CONFIG = {
   event: { active: false, title: "ระบบเลือกฝ่ายห้องปิดปรับปรุงชั่วคราว", reason: "กำลังเตรียมความพร้อมของข้อมูลรายชื่อฝ่าย", endTime: "" },
   eventclass: { active: false, title: "ระบบ 2 กิจกรรมห้องปิดปรับปรุงชั่วคราว", reason: "กำลังอัปเดตข้อมูลกิจกรรมซุ้มพี่บัณฑิตและวันเด็ก", endTime: "" },
   shortlink: { active: false, title: "ระบบย่อลิงก์ปิดปรับปรุงชั่วคราว", reason: "ระบบย่อลิงก์กำลังอยู่ระหว่างการบำรุงรักษา", endTime: "" },
-  upload: { active: false, title: "ระบบอัปโหลดไฟล์ปิดปรับปรุงชั่วคราว", reason: "ระบบจัดเก็บไฟล์กำลังปรับปรุงเซิร์ฟเวอร์", endTime: "" }
+  upload: { active: false, title: "ระบบอัปโหลดไฟล์ปิดปรับปรุงชั่วคราว", reason: "ระบบจัดเก็บไฟล์กำลังปรับปรุงเซิร์ฟเวอร์", endTime: "" },
+  storage: { active: false, title: "ระบบคลาวด์ไดรฟ์ปิดปรับปรุงชั่วคราว", reason: "ระบบคลาวด์ไดรฟ์และโฟลเดอร์กำลังปรับปรุงเพื่อเพิ่มความเร็ว", endTime: "" }
 };
 
 let indexConfig = DEFAULT_INDEX_CONFIG;
@@ -219,6 +220,23 @@ function updateLivePageBadges() {
     btnUpload.textContent = isUploadOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุง";
   }
 
+  // 7. Storage Drive (storage.html)
+  const isStorageOff = (cfg.all && cfg.all.active) || (cfg.storage && cfg.storage.active);
+  const badgeStorage = document.getElementById("pageBadgeStorage");
+  const btnStorage = document.getElementById("btnToggleStorage");
+  if (badgeStorage) {
+    badgeStorage.className = isStorageOff
+      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
+      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+    badgeStorage.innerHTML = isStorageOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+  }
+  if (btnStorage) {
+    btnStorage.className = isStorageOff
+      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
+    btnStorage.textContent = isStorageOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุง";
+  }
+
   // 7. Global All
   const isAllOff = !!(cfg.all && cfg.all.active);
   const badgeAll = document.getElementById("pageBadgeAll");
@@ -350,6 +368,7 @@ function toggleAllPagesQuick(shouldLock) {
   if (!cfg.eventclass) cfg.eventclass = {};
   if (!cfg.shortlink) cfg.shortlink = {};
   if (!cfg.upload) cfg.upload = {};
+  if (!cfg.storage) cfg.storage = {};
 
   cfg.all.active = shouldLock;
   cfg.index.active = shouldLock;
@@ -358,6 +377,7 @@ function toggleAllPagesQuick(shouldLock) {
   cfg.eventclass.active = shouldLock;
   cfg.shortlink.active = shouldLock;
   cfg.upload.active = shouldLock;
+  cfg.storage.active = shouldLock;
 
   localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
   updateLivePageBadges();

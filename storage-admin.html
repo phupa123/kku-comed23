@@ -71,10 +71,19 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Keyboard Shortcut Button -->
+        <button onclick="openShortcutsModal()" class="w-9 h-9 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 flex items-center justify-center transition cursor-pointer" title="คีย์ลัดช่วยเหลือ (?)">
+          <i data-lucide="keyboard" class="w-4 h-4"></i>
+        </button>
+
         <a href="upload-admin.html" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
           <i data-lucide="sliders" class="w-3.5 h-3.5 text-orange-400"></i>
           <span class="hidden sm:inline">ตั้งค่า API</span>
+        </a>
+        <a href="storage.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center gap-1.5">
+          <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>หน้าไดรฟ์ (Storage)</span>
         </a>
         <a href="upload.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
           <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -1950,10 +1959,167 @@
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
+    // ================= KEYBOARD SHORTCUTS ENGINE =================
+    function setupAdminKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        const tag = (e.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+          if (e.key === 'Escape') {
+            e.target.blur();
+          }
+          return;
+        }
+
+        const isCtrl = e.ctrlKey || e.metaKey;
+
+        // / : Focus Search Input
+        if (e.key === '/') {
+          e.preventDefault();
+          const searchInput = document.getElementById('searchInput');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+          return;
+        }
+
+        // ? : Open Shortcuts Modal
+        if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+          e.preventDefault();
+          openShortcutsModal();
+          return;
+        }
+
+        // Esc : Close Modals / Clear Selection
+        if (e.key === 'Escape') {
+          closeShortcutsModal();
+          closeCustomQuotaModal();
+          if (selectedFileIds.size > 0) {
+            selectedFileIds.clear();
+            const chkAll = document.getElementById('selectAllCheckbox');
+            if (chkAll) chkAll.checked = false;
+            updateSelectionBar();
+            renderStorageTable();
+          }
+          return;
+        }
+
+        // Ctrl + A : Select All Files
+        if (isCtrl && (e.key === 'a' || e.key === 'A')) {
+          e.preventDefault();
+          toggleSelectAll(true);
+          const chkAll = document.getElementById('selectAllCheckbox');
+          if (chkAll) chkAll.checked = true;
+          return;
+        }
+
+        // Del / Backspace : Delete Selected
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          if (selectedFileIds.size > 0) {
+            e.preventDefault();
+            deleteSelectedFiles();
+            return;
+          }
+        }
+
+        // 1 : List View
+        if (e.key === '1') {
+          e.preventDefault();
+          switchViewMode('list');
+          return;
+        }
+
+        // 2 : Grid View
+        if (e.key === '2') {
+          e.preventDefault();
+          switchViewMode('grid');
+          return;
+        }
+
+        // R : Refresh
+        if (e.key === 'r' && !isCtrl) {
+          e.preventDefault();
+          refreshAllStorageData();
+          return;
+        }
+      });
+    }
+
+    function openShortcutsModal() {
+      const m = document.getElementById('modalAdminShortcuts');
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      }
+    }
+
+    function closeShortcutsModal() {
+      const m = document.getElementById('modalAdminShortcuts');
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       loadAllStorageData();
+      setupAdminKeyboardShortcuts();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     });
   </script>
+
+  <!-- Modal: Keyboard Shortcuts Cheat Sheet -->
+  <div id="modalAdminShortcuts" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-2xl relative">
+      <button onclick="closeShortcutsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+          <i data-lucide="command" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white">คีย์ลัดสำหรับแอดมิน (Admin Shortcuts)</h3>
+          <p class="text-xs text-slate-400">ควบคุมระบบตรวจสอบไฟล์คลาวด์ได้อย่างรวดเร็ว</p>
+        </div>
+      </div>
+
+      <div class="space-y-2 text-xs divide-y divide-slate-800/80">
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ค้นหาไฟล์หรือชื่อผู้ใช้</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] font-bold text-slate-400">/</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">สลับมุมมอง List View (ตาราง)</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] font-bold text-slate-400">1</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">สลับมุมมอง Grid View (การ์ด)</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] font-bold text-slate-400">2</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">เลือกไฟล์ทั้งหมดในหน้านี้</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] font-bold text-slate-400">Ctrl + A</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ลบไฟล์ที่เลือกทั้งหมด (Bulk Delete)</span>
+          <span class="px-2 py-0.5 rounded bg-rose-950 border border-rose-800 font-mono text-[11px] font-bold text-rose-400">Del / Backspace</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">รีเฟรชข้อมูลคลาวด์ทั้งหมด</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] font-bold text-slate-400">R</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ปิดหน้าต่าง / ยกเลิกการเลือก</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] font-bold text-slate-400">Esc</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">เปิดดูคีย์ลัดนี้</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] font-bold text-slate-400">?</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

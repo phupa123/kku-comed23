@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <!-- Site Maintenance & Access Guard -->
+  <script src="assets/js/maintenance-guard.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบคลาวด์ไดรฟ์ส่วนตัวและสาขาวิชา (COMED Cloud Drive & Storage) | COMED KKU</title>
+  <meta name="description" content="ระบบจัดการโฟลเดอร์ คลาวด์ไดรฟ์ อัปโหลดไฟล์ แชร์ลิงก์ภายนอก/ภายใน และตั้งรหัสผ่านล็อคไฟล์ โควตา 5GB ต่อคน">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Google Sign-In Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Student Database (60 Students) -->
+  <script src="students_data.js"></script>
+
+  <!-- Multi-Cloud File Uploader Core -->
+  <script src="assets/js/multi_uploader.js"></script>
+
+  <!-- Storage Drive Repository -->
+  <script src="assets/js/storage_drive_repo.js"></script>
+
+  <style>
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .kbd-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.15rem 0.4rem;
+      font-size: 0.7rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 700;
+      color: #94a3b8;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.4);
+      border-radius: 0.375rem;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(249, 115, 22, 0.6);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
+
+  <!-- Background Glowing Orbs -->
+  <div class="fixed top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-10 right-10 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Page Title -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-orange-500/40 transition flex-shrink-0" title="กลับหน้าแรก">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+              COMED CLOUD DRIVE • 5 GB
+            </span>
+            <span class="hidden sm:inline-flex items-center gap-1 text-[10px] text-slate-400 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Ready
+            </span>
+          </div>
+          <h1 class="text-sm sm:text-base font-black text-white flex items-center gap-2">
+            <span>คลังไดรฟ์ส่วนตัวและโฟลเดอร์</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Action Center & User Profile -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        
+        <!-- Keyboard Shortcut Button -->
+        <button onclick="openShortcutsModal()" class="w-9 h-9 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 flex items-center justify-center transition cursor-pointer" title="คีย์ลัดช่วยเหลือ (?)">
+          <i data-lucide="keyboard" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Link to Storage Admin -->
+        <a href="storage-admin.html" class="hidden md:flex px-3 py-2 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition items-center gap-1.5">
+          <i data-lucide="shield-check" class="w-4 h-4 text-orange-400"></i>
+          <span>แผงควบคุมแอดมิน</span>
+        </a>
+
+        <!-- Guest State (Not Logged In) -->
+        <div id="headerGuestArea" class="flex items-center gap-2">
+          <button onclick="openAuthModal()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/20 transition flex items-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>เข้าสู่ระบบไดรฟ์</span>
+          </button>
+        </div>
+
+        <!-- Logged-in State -->
+        <div id="headerUserArea" class="hidden items-center gap-2 sm:gap-2.5">
+          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+            <img id="userHeaderAvatar" src="" alt="Avatar" class="w-7 h-7 rounded-full bg-slate-800 object-cover border border-orange-500/40">
+            <div class="text-left hidden sm:block">
+              <span id="userHeaderName" class="text-xs font-bold text-white block leading-tight truncate max-w-[130px]">-</span>
+              <span id="userHeaderQuotaBadge" class="text-[10px] font-mono text-emerald-400 leading-tight block">0 MB / 5.0 GB</span>
+            </div>
+          </div>
+          <button onclick="logoutUser()" title="ออกจากระบบ" class="w-9 h-9 rounded-2xl bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 flex items-center justify-center transition cursor-pointer">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow space-y-6">
+
+    <!-- Guest / Login Prompt Banner -->
+    <div id="loginRequiredBanner" class="p-6 rounded-3xl bg-gradient-to-r from-orange-950/40 via-amber-950/20 to-slate-900/90 border border-orange-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center flex-shrink-0 border border-orange-500/20">
+          <i data-lucide="folder-lock" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white">เข้าสู่ระบบเพื่อใช้งานคลาวด์ไดรฟ์และพื้นที่ส่วนตัว 5 GB</h3>
+          <p class="text-xs text-slate-400 mt-0.5">เข้าสู่ระบบด้วย Google Account หรือเลือกชื่อนักศึกษา COMED KKU เพื่อเปิดใช้งานโฟลเดอร์ การอัปโหลด และการแชร์</p>
+        </div>
+      </div>
+      <button onclick="openAuthModal()" class="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs shadow-lg shadow-orange-500/20 transition flex items-center justify-center gap-2 cursor-pointer flex-shrink-0">
+        <i data-lucide="log-in" class="w-4 h-4"></i>
+        <span>เข้าสู่ระบบทันที</span>
+      </button>
+    </div>
+
+    <!-- Storage Quota & User Profile Overview (Shown when logged in) -->
+    <div id="userQuotaCard" class="hidden glass-card p-5 sm:p-6 rounded-3xl border border-slate-800 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <img id="quotaAvatar" src="" class="w-12 h-12 rounded-2xl bg-slate-800 object-cover border-2 border-orange-500/40 shadow-md">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="quotaUserName" class="text-sm font-black text-white">-</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                ACTIVE MEMBER
+              </span>
+            </div>
+            <p id="quotaUserEmail" class="text-xs text-slate-400 font-mono mt-0.5">-</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <button onclick="openCreateFolderModal()" class="px-3.5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs border border-slate-700 transition flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm">
+            <i data-lucide="folder-plus" class="w-4 h-4 text-amber-400"></i>
+            <span>สร้างโฟลเดอร์ใหม่</span>
+            <span class="kbd-badge ml-1 hidden lg:inline">N</span>
+          </button>
+          <button onclick="triggerUploadModalOrZone()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs shadow-lg shadow-orange-500/20 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+            <span>อัปโหลดไฟล์ขึ้นไดรฟ์</span>
+            <span class="kbd-badge ml-1 hidden lg:inline bg-orange-700 text-white border-orange-500">U</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quota Progress Bar -->
+      <div class="space-y-2 pt-2 border-t border-slate-800/80">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-400 font-medium flex items-center gap-1.5">
+            <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>การใช้งานพื้นที่จัดเก็บ: <strong id="quotaUsedText" class="text-white font-mono">0 MB</strong></span>
+          </span>
+          <span id="quotaPercentText" class="text-xs font-mono font-bold text-orange-400">ใช้ไป 0% ของพื้นที่ 5.0 GB</span>
+        </div>
+        <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+          <div id="quotaProgressBar" class="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500 rounded-full transition-all duration-500 w-0"></div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-slate-400">
+          <span>โควตามาตรฐานฟรี: 5.0 GB ต่อบัญชี</span>
+          <span id="quotaRemainText" class="font-mono text-emerald-400">คงเหลือ 5.0 GB</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Staging & Dropzone Section (Collapsible / Toggleable) -->
+    <div id="driveUploadSection" class="glass-card p-5 sm:p-6 rounded-3xl border border-slate-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+            <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-white">พื้นที่อัปโหลดไฟล์ (Upload Dropzone)</h3>
+            <p class="text-[11px] text-slate-400">รองรับทั้งไฟล์เดี่ยว หลายไฟล์ ไม่จำกัดประเภทไฟล์ (ภาพ, วิดีโอ, เสียง, เอกสาร, ZIP)</p>
+          </div>
+        </div>
+
+        <button onclick="toggleUploadAreaVisibility()" id="btnToggleUploadCollapse" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-bold cursor-pointer">
+          <span id="toggleUploadText">ซ่อนกล่องอัปโหลด</span>
+          <i data-lucide="chevron-up" id="toggleUploadIcon" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div id="driveUploadCollapsibleBody" class="space-y-4 pt-1">
+        
+        <!-- Controls: Provider & Compress Switch -->
+        <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
+          <div class="flex items-center gap-2 flex-wrap">
+            <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="server" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>ผู้ให้บริการคลาวด์:</span>
+            </label>
+            <select id="userPreferredProvider" class="bg-slate-950 border border-slate-700 text-white text-xs font-medium rounded-xl px-3 py-1.5 focus:outline-none focus:border-orange-500">
+              <option value="cloudinary" selected>☁️ Cloudinary (แนะนำ - เร็ว เสถียร CDN สูงสุด 100MB)</option>
+              <option value="catbox">📦 Catbox.moe (ไฟล์ทั่วไป เอกสาร ZIP วิดีโอ สูงสุด 200MB)</option>
+              <option value="imgbb">🖼️ ImgBB (เฉพาะรูปภาพ สูงสุด 32MB)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <!-- Target Folder Selection for Uploaded Files -->
+            <div class="flex items-center gap-1.5">
+              <label class="text-xs text-slate-400 font-bold">บันทึกลงโฟลเดอร์:</label>
+              <select id="uploadTargetFolderSelect" class="bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-orange-500">
+                <option value="">📁 หน้าแรก (Root)</option>
+              </select>
+            </div>
+
+            <!-- Compress Toggle -->
+            <button onclick="toggleCompressionMode()" id="btnCompressMode" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 hover:border-slate-600 text-xs font-bold text-slate-300 flex items-center gap-1.5 transition cursor-pointer">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span id="compressModeText">⚡ บีบอัดอัตโนมัติ</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Area -->
+        <div id="dropArea" class="border-2 border-dashed border-slate-700 hover:border-orange-500/70 rounded-3xl p-8 sm:p-12 text-center transition-all duration-200 cursor-pointer bg-slate-900/40 hover:bg-orange-500/5 group relative overflow-hidden" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" class="hidden" multiple onchange="handleFilesSelected(event)">
+          <input type="file" id="addMoreFileInput" class="hidden" multiple onchange="handleAddMoreFiles(event)">
+
+          <div class="space-y-3">
+            <div class="w-16 h-16 rounded-3xl bg-slate-900 group-hover:scale-110 group-hover:bg-orange-500/10 border border-slate-800 group-hover:border-orange-500/30 flex items-center justify-center mx-auto text-slate-400 group-hover:text-orange-400 transition-all duration-300 shadow-xl">
+              <i data-lucide="cloud-upload" class="w-8 h-8"></i>
+            </div>
+            <div>
+              <h4 class="text-base sm:text-lg font-black text-white">ลากและวางไฟล์ลงที่นี่ หรือคลิกเพื่อเลือกไฟล์</h4>
+              <p class="text-xs text-slate-400 mt-1">เลือกได้ทีละไฟล์ หรือเลือกหลายไฟล์พร้อมกัน (Multi-File Queue)</p>
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-1 flex-wrap">
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">รูปภาพ JPG/PNG/WebP</span>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">วิดีโอ MP4/MOV</span>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">เอกสาร PDF/DOCX</span>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">ไฟล์บีบอัด ZIP/RAR</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Staging Card (Selected Files Preview Before Upload) -->
+        <div id="fileStagingCard" class="hidden rounded-3xl bg-slate-900/90 border border-slate-800 p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2.5">
+              <span class="text-xs font-black text-white">คิวไฟล์ที่เตรียมอัปโหลด</span>
+              <span id="stagingTotalCountBadge" class="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">0 ไฟล์</span>
+              <span id="stagingTotalSizeText" class="text-xs font-mono text-slate-400">ขนาดรวม: 0 B</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="document.getElementById('addMoreFileInput').click()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-white font-bold transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="plus" class="w-3.5 h-3.5 text-orange-400"></i>
+                <span>เพิ่มไฟล์อีก</span>
+              </button>
+              <button onclick="cancelAllStagedFiles()" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-xs text-rose-400 font-bold transition cursor-pointer">
+                ยกเลิกทั้งหมด
+              </button>
+            </div>
+          </div>
+
+          <!-- Staged Files List Container -->
+          <div id="stagedFilesList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+
+          <!-- Quota / Provider Warning Alert -->
+          <div id="batchCompatibilityAlert" class="hidden p-3 rounded-xl bg-rose-950/30 border border-rose-500/30 text-xs text-rose-300 flex items-start gap-2.5"></div>
+
+          <!-- Upload Action Button -->
+          <div class="pt-2 flex items-center justify-end gap-3">
+            <button id="btnConfirmUpload" onclick="executeUpload()" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:pointer-events-none text-white font-black text-sm shadow-xl shadow-orange-500/25 transition flex items-center justify-center gap-2 cursor-pointer">
+              <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+              <span id="btnUploadText">เริ่มอัปโหลดไฟล์เข้าไดรฟ์</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Upload Progress Indicator Box -->
+        <div id="uploadProgressBox" class="hidden rounded-3xl bg-slate-900/90 border border-slate-800 p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+                <i data-lucide="loader" class="w-5 h-5 animate-spin"></i>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-white flex items-center gap-2">
+                  <span id="uploadStatusText">กำลังเริ่มต้นการอัปโหลดไฟล์...</span>
+                </div>
+                <div class="text-xs text-slate-400 font-mono" id="uploadBytesText">0 B / 0 B</div>
+              </div>
+            </div>
+            <div class="text-xl font-black font-mono text-orange-400" id="uploadPercentText">0%</div>
+          </div>
+
+          <div class="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div id="uploadProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-300 w-0"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Drive Explorer Toolbar & Breadcrumb -->
+    <div class="space-y-4">
+      
+      <!-- Top Drive Controls Bar -->
+      <div class="glass-card p-4 rounded-3xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <!-- Left: Breadcrumb Navigation -->
+        <div class="flex items-center gap-2 flex-wrap text-sm font-bold" id="driveBreadcrumbs">
+          <button onclick="navigateToFolder(null)" class="text-slate-400 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded-xl hover:bg-slate-800/80 cursor-pointer">
+            <i data-lucide="hard-drive" class="w-4 h-4 text-orange-400"></i>
+            <span>คลาวด์ไดรฟ์ของฉัน</span>
+          </button>
+          <!-- Dynamic Breadcrumb items inserted here -->
+        </div>
+
+        <!-- Right: Search, Filter, View Switcher & Selection Tools -->
+        <div class="flex items-center gap-2 flex-wrap">
+          
+          <!-- Search Input -->
+          <div class="relative flex-grow sm:flex-grow-0 sm:w-56">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="driveSearchInput" placeholder="ค้นหาไฟล์หรือโฟลเดอร์..." oninput="handleDriveSearch(this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+            <span class="kbd-badge absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] hidden sm:inline">/</span>
+          </div>
+
+          <!-- Category Filter Dropdown -->
+          <select id="driveCategoryFilter" onchange="handleCategoryFilter(this.value)" class="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 font-bold focus:outline-none focus:border-orange-500">
+            <option value="all">📁 ทั้งหมด</option>
+            <option value="image">🖼️ รูปภาพ</option>
+            <option value="video">🎥 วิดีโอ</option>
+            <option value="audio">🎵 เสียง</option>
+            <option value="document">📄 เอกสาร</option>
+            <option value="other">📦 อื่นๆ / ZIP</option>
+          </select>
+
+          <!-- View Switcher (Grid / List) -->
+          <div class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800">
+            <button onclick="setDriveView('grid')" id="btnViewGrid" class="p-1.5 rounded-lg text-white bg-slate-800 transition cursor-pointer" title="มุมมอง Grid (2)">
+              <i data-lucide="grid" class="w-4 h-4"></i>
+            </button>
+            <button onclick="setDriveView('list')" id="btnViewList" class="p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer" title="มุมมอง List (1)">
+              <i data-lucide="list" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Refresh Button -->
+          <button onclick="refreshDriveContents()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition cursor-pointer" title="รีเฟรชไดรฟ์">
+            <i data-lucide="rotate-cw" id="driveRefreshIcon" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Batch Selection Bar (Appears when files are selected) -->
+      <div id="batchActionBar" class="hidden p-3 rounded-2xl bg-orange-950/40 border border-orange-500/40 flex items-center justify-between gap-3 animate-fadeIn">
+        <div class="flex items-center gap-2.5 text-xs">
+          <input type="checkbox" id="batchSelectAllCheckbox" onchange="toggleSelectAllFiles(this.checked)" class="w-4 h-4 rounded text-orange-500 focus:ring-0 cursor-pointer">
+          <span class="font-bold text-white">เลือกอยู่ <span id="selectedFilesCountText" class="text-orange-400 font-mono font-bold">0</span> ไฟล์</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openBatchMoveModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="folder-symlink" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>ย้ายไปที่โฟลเดอร์</span>
+          </button>
+          <button onclick="deleteBatchSelectedFiles()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/30 transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+            <span>ลบที่เลือก</span>
+            <span class="kbd-badge text-rose-400 border-rose-500/30">Del</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Section: Folders (Folder Cards) -->
+      <div id="foldersSection" class="space-y-3">
+        <div class="flex items-center justify-between text-xs text-slate-400 font-bold px-1">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
+            <span>โฟลเดอร์ (<span id="foldersCountText">0</span>)</span>
+          </span>
+          <button onclick="openCreateFolderModal()" class="text-orange-400 hover:text-orange-300 flex items-center gap-1 cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>สร้างโฟลเดอร์</span>
+          </button>
+        </div>
+
+        <!-- Folders Grid List -->
+        <div id="foldersListContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"></div>
+      </div>
+
+      <!-- Section: Files Container -->
+      <div id="filesSection" class="space-y-3 pt-2">
+        <div class="flex items-center justify-between text-xs text-slate-400 font-bold px-1">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="file-text" class="w-4 h-4 text-sky-400"></i>
+            <span>ไฟล์ในหน้านี้ (<span id="filesCountText">0</span> ไฟล์)</span>
+          </span>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleSelectAllFiles(true)" class="text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer">
+              <span>เลือกทั้งหมด</span>
+              <span class="kbd-badge">Ctrl+A</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Files Display Container (Grid / List dynamically toggled) -->
+        <div id="filesDisplayContainer"></div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Modal: User Auth (Google Sign-In or Student Roster) -->
+  <div id="modalUserAuth" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl relative">
+      <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center mx-auto border border-orange-500/20">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-black text-white">เข้าสู่ระบบ COMED Cloud Drive</h3>
+        <p class="text-xs text-slate-400">กรุณาเลือกวิธีการยืนยันตัวตนเพื่อเข้าถึงพื้นที่ 5GB</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Option 1: Google Sign-In -->
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3 text-center">
+          <span class="text-xs font-bold text-slate-300 block">วิธีที่ 1: ลงชื่อเข้าใช้ด้วย Google (@kkumail.com หรือ Gmail)</span>
+          <div id="googleBtnContainer" class="flex justify-center"></div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex-grow h-px bg-slate-800"></div>
+          <span class="text-[11px] text-slate-400 font-bold uppercase">หรือ</span>
+          <div class="flex-grow h-px bg-slate-800"></div>
+        </div>
+
+        <!-- Option 2: Student Roster Picker -->
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+          <span class="text-xs font-bold text-slate-300 block">วิธีที่ 2: เลือกจากทำเนียบรุ่น COMED KKU (60 คน)</span>
+          <select id="authStudentSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+            <option value="">-- กรุณาเลือกรายชื่อของคุณ --</option>
+          </select>
+          <button onclick="confirmStudentPickerAuth()" class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition cursor-pointer">
+            เข้าสู่ระบบด้วยรายชื่อนี้
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Modal: Create / Edit Folder -->
+  <div id="modalFolder" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative">
+      <button onclick="closeFolderModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+          <i data-lucide="folder-plus" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 id="folderModalTitle" class="text-base font-black text-white">สร้างโฟลเดอร์ใหม่</h3>
+          <p class="text-xs text-slate-400">จัดระเบียบไฟล์เอกสารและภาพถ่าย</p>
+        </div>
+      </div>
+
+      <form onsubmit="handleSaveFolderForm(event)" class="space-y-4">
+        <input type="hidden" id="folderEditId" value="">
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">ชื่อโฟลเดอร์ <span class="text-rose-400">*</span></label>
+          <input type="text" id="folderNameInput" required placeholder="เช่น เอกสารวิชาชีพครู, ภาพงานสัมมนา" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">สีของโฟลเดอร์</label>
+          <div class="flex items-center gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="folderColor" value="amber" checked class="peer hidden">
+              <span class="w-8 h-8 rounded-xl bg-amber-500/20 border-2 border-transparent peer-checked:border-amber-400 flex items-center justify-center text-amber-400">
+                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
+              </span>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="folderColor" value="sky" class="peer hidden">
+              <span class="w-8 h-8 rounded-xl bg-sky-500/20 border-2 border-transparent peer-checked:border-sky-400 flex items-center justify-center text-sky-400">
+                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
+              </span>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="folderColor" value="emerald" class="peer hidden">
+              <span class="w-8 h-8 rounded-xl bg-emerald-500/20 border-2 border-transparent peer-checked:border-emerald-400 flex items-center justify-center text-emerald-400">
+                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
+              </span>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="folderColor" value="purple" class="peer hidden">
+              <span class="w-8 h-8 rounded-xl bg-purple-500/20 border-2 border-transparent peer-checked:border-purple-400 flex items-center justify-center text-purple-400">
+                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
+              </span>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="folderColor" value="rose" class="peer hidden">
+              <span class="w-8 h-8 rounded-xl bg-rose-500/20 border-2 border-transparent peer-checked:border-rose-400 flex items-center justify-center text-rose-400">
+                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Optional Folder Lock Password -->
+        <div class="pt-2 border-t border-slate-800 space-y-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="folderLockCheckbox" onchange="document.getElementById('folderPasswordBox').classList.toggle('hidden', !this.checked)" class="w-4 h-4 rounded text-orange-500 focus:ring-0">
+            <span class="text-xs font-bold text-slate-300">ตั้งรหัสผ่านล็อคโฟลเดอร์นี้ (Folder Lock)</span>
+          </label>
+          <div id="folderPasswordBox" class="hidden pl-6 space-y-1">
+            <input type="password" id="folderPasswordInput" placeholder="กำหนดรหัสผ่าน (อย่างน้อย 4 หลัก)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+            <span class="text-[11px] text-slate-400">ผู้ที่ไม่มีรหัสผ่านจะไม่สามารถเปิดดูไฟล์ข้างในได้</span>
+          </div>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeFolderModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition">
+            ยกเลิก
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-black shadow-md transition">
+            บันทึกโฟลเดอร์
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Modal: Move File(s) to Folder -->
+  <div id="modalMoveFile" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative">
+      <button onclick="closeMoveModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+          <i data-lucide="folder-symlink" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white">ย้ายไฟล์ไปที่โฟลเดอร์</h3>
+          <p id="moveModalSubtext" class="text-xs text-slate-400">เลือกโฟลเดอร์ปลายทางที่ต้องการย้ายไป</p>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div id="moveDestinationsList" class="space-y-1.5 max-h-64 overflow-y-auto pr-1"></div>
+      </div>
+
+      <div class="pt-3 flex items-center justify-end gap-2">
+        <button type="button" onclick="closeMoveModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition">
+          ยกเลิก
+        </button>
+        <button type="button" onclick="confirmMoveFiles()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs font-black shadow-md transition">
+          ย้ายไฟล์ทันที
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Modal: Lock File / Password Protection -->
+  <div id="modalLockItem" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative">
+      <button onclick="closeLockModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20">
+          <i data-lucide="lock" class="w-6 h-6"></i>
+        </div>
+        <h3 id="lockModalTitle" class="text-base font-black text-white">ตั้งรหัสผ่านล็อคไฟล์</h3>
+        <p id="lockModalSubtext" class="text-xs text-slate-400">ผู้ที่จะเปิดดูหรือดาวน์โหลดไฟล์นี้จะต้องกรอกรหัสผ่านที่ถูกต้อง</p>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">รหัสผ่านสำหรับเปิดไฟล์</label>
+          <input type="password" id="itemLockPasswordInput" placeholder="กรอกรหัสผ่านที่ต้องการ" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+        </div>
+
+        <div id="unlockActionBtnArea" class="hidden">
+          <button type="button" onclick="removeCurrentItemLock()" class="w-full py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/20 transition">
+            🔓 ปลดล็อคและยกเลิกรหัสผ่าน
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="closeLockModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition">
+          ปิด
+        </button>
+        <button type="button" onclick="confirmSaveItemLock()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-black shadow-md transition">
+          บันทึกรหัสผ่าน
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Modal: Password Challenge (Prompt when opening a locked folder/file) -->
+  <div id="modalPasswordChallenge" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative">
+      <button onclick="closePasswordChallengeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto border border-rose-500/20">
+          <i data-lucide="shield-alert" class="w-6 h-6"></i>
+        </div>
+        <h3 id="challengeModalTitle" class="text-base font-black text-white">รายการนี้ถูกล็อคด้วยรหัสผ่าน</h3>
+        <p class="text-xs text-slate-400">กรุณากรอกรหัสผ่านเพื่อปลดล็อคเข้าใช้งาน</p>
+      </div>
+
+      <form onsubmit="handleChallengeSubmit(event)" class="space-y-3">
+        <input type="password" id="challengePasswordInput" required placeholder="กรอกรหัสผ่าน..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+        <p id="challengeErrorMsg" class="hidden text-xs text-rose-400 font-bold text-center">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</p>
+
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs shadow-md transition">
+          ปลดล็อคเข้าใช้งาน
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Modal: Advanced Share Link Generator -->
+  <div id="modalShareLink" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeShareModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center">
+          <i data-lucide="share-2" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white">แชร์ลิงก์และกำหนดสิทธิ์เข้าถึง</h3>
+          <p id="shareItemNameSubtext" class="text-xs text-slate-400 truncate max-w-xs sm:max-w-md">-</p>
+        </div>
+      </div>
+
+      <!-- Share Settings Form -->
+      <div class="space-y-4">
+        
+        <!-- Access Permission Level -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-2">สิทธิ์การเข้าถึงลิงก์นี้</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            
+            <!-- Public -->
+            <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10 cursor-pointer transition">
+              <input type="radio" name="shareAccessType" value="public" checked onchange="toggleShareAccessOptions('public')" class="hidden">
+              <div class="flex items-center gap-2 mb-1">
+                <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
+                <span class="text-xs font-black text-white">ทุกคน (Public)</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-tight">ใครมีลิงก์ก็เปิดดูหรือดาวน์โหลดได้</p>
+            </label>
+
+            <!-- COMED23 Member Only -->
+            <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10 cursor-pointer transition">
+              <input type="radio" name="shareAccessType" value="comed23" onchange="toggleShareAccessOptions('comed23')" class="hidden">
+              <div class="flex items-center gap-2 mb-1">
+                <i data-lucide="users" class="w-4 h-4 text-sky-400"></i>
+                <span class="text-xs font-black text-white">เฉพาะ COMED23</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-tight">เฉพาะสมาชิก @kkumail.com หรือทำเนียบรุ่น</p>
+            </label>
+
+            <!-- Specific People -->
+            <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10 cursor-pointer transition">
+              <input type="radio" name="shareAccessType" value="specific" onchange="toggleShareAccessOptions('specific')" class="hidden">
+              <div class="flex items-center gap-2 mb-1">
+                <i data-lucide="user-check" class="w-4 h-4 text-amber-400"></i>
+                <span class="text-xs font-black text-white">กำหนดคนเอง</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-tight">ระบุอีเมลผู้รับที่อนุญาตอย่างเจาะจง</p>
+            </label>
+
+          </div>
+        </div>
+
+        <!-- Specific Emails Field (Visible when specific selected) -->
+        <div id="shareSpecificEmailsBox" class="hidden space-y-1.5 p-3 rounded-2xl bg-slate-950 border border-slate-800">
+          <label class="block text-xs font-bold text-slate-300">ระบุอีเมลผู้ที่อนุญาตให้เปิดได้ (คั่นด้วยเครื่องหมายจุลภาค ,)</label>
+          <input type="text" id="shareSpecificEmailsInput" placeholder="เช่น friend1@kkumail.com, phupa5874@gmail.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+          <span class="text-[11px] text-slate-400">เฉพาะผู้ที่ลงชื่อเข้าใช้ด้วยอีเมลเหล่านี้เท่านั้นจึงจะเปิดได้</span>
+        </div>
+
+        <!-- Expiration Time -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">กำหนดวันหมดอายุของลิงก์</label>
+            <select id="shareExpiresSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+              <option value="0">♾️ ไม่มีวันหมดอายุ (ถาวร)</option>
+              <option value="1">⏱️ หมดอายุใน 1 ชั่วโมง</option>
+              <option value="24">📅 หมดอายุใน 24 ชั่วโมง (1 วัน)</option>
+              <option value="72">📅 หมดอายุใน 3 วัน</option>
+              <option value="168">📅 หมดอายุใน 7 วัน</option>
+              <option value="720">📅 หมดอายุใน 30 วัน</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">รหัสผ่านเปิดลิงก์ (ถ้าต้องการ)</label>
+            <input type="password" id="sharePasswordInput" placeholder="เว้นว่างได้หากไม่ต้องการล็อค" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+          </div>
+        </div>
+
+        <!-- Generate Button -->
+        <div class="pt-2">
+          <button onclick="handleGenerateShareLink()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+            <i data-lucide="link" class="w-4 h-4"></i>
+            <span>สร้างลิงก์แชร์และคัดลอก (Generate Link)</span>
+          </button>
+        </div>
+
+        <!-- Share Result Output Box -->
+        <div id="shareResultBox" class="hidden p-4 rounded-2xl bg-slate-950 border border-emerald-500/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span>สร้างลิงก์แชร์สำเร็จแล้ว!</span>
+            </span>
+            <span id="shareExpirationBadge" class="text-[10px] font-mono text-slate-400"></span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="text" id="shareGeneratedUrlInput" readonly class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-amber-300 font-mono select-all">
+            <button onclick="copyShareLinkToClipboard()" class="px-3 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition flex items-center gap-1 flex-shrink-0 cursor-pointer">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>คัดลอก</span>
+            </button>
+          </div>
+
+          <!-- QR Code Preview -->
+          <div class="flex items-center gap-4 pt-1">
+            <div id="shareQrCodeContainer" class="p-2 bg-white rounded-xl shadow"></div>
+            <div class="text-xs text-slate-400 space-y-1">
+              <p class="text-white font-bold">สแกน QR Code เพื่อเปิดลิงก์ทันที</p>
+              <p class="text-[11px]">สามารถส่ง QR Code หรือส่งลิงก์ด้านบนไปยัง Line, Facebook หรืออีเมลได้</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Modal: Keyboard Shortcuts Cheat Sheet -->
+  <div id="modalShortcuts" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-2xl relative">
+      <button onclick="closeShortcutsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+          <i data-lucide="command" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white">คีย์ลัดสำหรับใช้งาน (Keyboard Shortcuts)</h3>
+          <p class="text-xs text-slate-400">กดปุ่มบนคีย์บอร์ดเพื่อสั่งงานได้รวดเร็วทันใจ</p>
+        </div>
+      </div>
+
+      <div class="space-y-2 text-xs divide-y divide-slate-800/80">
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">เปิดหน้าต่างอัปโหลด / ลากไฟล์</span>
+          <div class="flex gap-1"><span class="kbd-badge">U</span> หรือ <span class="kbd-badge">Ctrl + U</span></div>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">สร้างโฟลเดอร์ใหม่</span>
+          <div class="flex gap-1"><span class="kbd-badge">N</span> หรือ <span class="kbd-badge">Ctrl + N</span></div>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ค้นหาไฟล์หรือโฟลเดอร์</span>
+          <span class="kbd-badge">/</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">สลับมุมมอง List View</span>
+          <span class="kbd-badge">1</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">สลับมุมมอง Grid View</span>
+          <span class="kbd-badge">2</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">เลือกไฟล์ทั้งหมดในโฟลเดอร์</span>
+          <span class="kbd-badge">Ctrl + A</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ลบไฟล์ที่เลือกทั้งหมด</span>
+          <span class="kbd-badge">Del</span> หรือ <span class="kbd-badge">Backspace</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ปิดหน้าต่าง / ยกเลิกการเลือก</span>
+          <span class="kbd-badge">Esc</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">เปิดคู่มือคีย์ลัดนี้</span>
+          <span class="kbd-badge">?</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="driveToast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 px-4 py-3 rounded-2xl bg-slate-900 border border-slate-700 text-white text-xs font-bold shadow-2xl flex items-center gap-2">
+    <span id="driveToastIcon">✨</span>
+    <span id="driveToastText">ดำเนินการสำเร็จ</span>
+  </div>
+
+  <!-- Main JavaScript Logic for storage.html -->
+  <script>
+    // Global State
+    let currentUser = null;
+    let currentFolderId = null; // null = Root
+    let driveViewMode = 'grid'; // 'grid' | 'list'
+    let driveSearchQuery = '';
+    let driveCategoryFilter = 'all';
+    let selectedFileIds = new Set();
+    let selectedFilesQueue = []; // Staged files for uploading
+    let isUncompressedMode = false;
+    let isUploadAreaCollapsed = false;
+
+    // Active item being locked/shared/moved/challenged
+    let targetItemForAction = null; // { type: 'file'|'folder', id, name, ... }
+
+    // Init Application
+    document.addEventListener('DOMContentLoaded', () => {
+      initUserSession();
+      populateStudentDropdown();
+      setupGoogleAuth();
+      setupKeyboardShortcuts();
+      checkIncomingShareParam();
+      renderDrive();
+    });
+
+    async function checkIncomingShareParam() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const shareCode = urlParams.get('share') || urlParams.get('s');
+      if (!shareCode) return;
+
+      const repo = getRepo();
+      const share = repo.getShareByCode(shareCode);
+      if (!share) {
+        alert(`⚠️ ไม่พบข้อมูลลิงก์แชร์ "${shareCode}" หรือลิงก์อาจหมดอายุแล้ว`);
+        return;
+      }
+
+      // Check Verification
+      const verify = repo.verifyShareAccess(shareCode, {
+        userEmail: getCurrentUserEmail()
+      });
+
+      if (!verify.allowed) {
+        if (verify.reason === 'EXPIRED') {
+          alert('⚠️ ขออภัย ลิงก์แชร์นี้หมดอายุการใช้งานแล้ว');
+        } else if (verify.reason === 'AUTH_REQUIRED_COMED23') {
+          alert('🔒 ลิงก์นี้อนุญาตเฉพาะนักศึกษาและบุคลากร COMED23 เท่านั้น กรุณาเข้าสู่ระบบด้วยบัญชี @kkumail.com');
+          openAuthModal();
+        } else if (verify.reason === 'UNAUTHORIZED_USER') {
+          alert('⛔ ขออภัย อีเมลของคุณไม่ได้รับสิทธิ์ให้เข้าถึงเนื้อหาของลิงก์นี้');
+        }
+        return;
+      }
+
+      if (verify.requiresPassword) {
+        openPasswordChallengeModal(share.targetType, share.targetId, `แชร์ลิงก์: ${share.shareCode}`);
+        return;
+      }
+
+      // If allowed without password:
+      if (share.targetType === 'folder') {
+        navigateToFolder(share.targetId);
+        showToast(`📁 เข้าสู่โฟลเดอร์ที่แชร์เรียบร้อยแล้ว`);
+      } else {
+        const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+        const targetFile = allFiles.find(f => f.id === share.targetId);
+        if (targetFile && targetFile.url) {
+          window.open(targetFile.url, '_blank');
+          showToast(`📄 เปิดไฟล์ที่แชร์เรียบร้อยแล้ว`);
+        }
+      }
+    }
+
+    // ----------------------------------------------------
+    // 1. User Session & Auth
+    // ----------------------------------------------------
+    function initUserSession() {
+      try {
+        const stored = localStorage.getItem('COMED_USER_SESSION');
+        if (stored) {
+          currentUser = JSON.parse(stored);
+        }
+      } catch (e) {
+        currentUser = null;
+      }
+      updateUserUI();
+    }
+
+    function updateUserUI() {
+      const guestArea = document.getElementById('headerGuestArea');
+      const userArea = document.getElementById('headerUserArea');
+      const banner = document.getElementById('loginRequiredBanner');
+      const quotaCard = document.getElementById('userQuotaCard');
+
+      if (currentUser && currentUser.email) {
+        guestArea.classList.add('hidden');
+        userArea.classList.remove('hidden');
+        userArea.classList.add('flex');
+        banner.classList.add('hidden');
+        quotaCard.classList.remove('hidden');
+
+        document.getElementById('userHeaderAvatar').src = currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.email}`;
+        document.getElementById('userHeaderName').textContent = currentUser.name;
+
+        document.getElementById('quotaAvatar').src = currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.email}`;
+        document.getElementById('quotaUserName').textContent = currentUser.nickname ? `${currentUser.name} (${currentUser.nickname})` : currentUser.name;
+        document.getElementById('quotaUserEmail').textContent = currentUser.email;
+
+        updateQuotaDisplay();
+      } else {
+        guestArea.classList.remove('hidden');
+        userArea.classList.add('hidden');
+        userArea.classList.remove('flex');
+        banner.classList.remove('hidden');
+        quotaCard.classList.add('hidden');
+      }
+
+      updateUploadFolderDropdown();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function getUserMaxQuotaBytes() {
+      if (!currentUser || !currentUser.email) return 5 * 1024 * 1024 * 1024;
+      const emailLower = currentUser.email.toLowerCase().trim();
+      const customQuotas = JSON.parse(localStorage.getItem('COMED_CUSTOM_QUOTAS_V1') || '{}');
+      if (customQuotas[emailLower]) {
+        return Number(customQuotas[emailLower]) * 1024 * 1024 * 1024;
+      }
+      if (currentUser.isSpecialTester || emailLower === 'phupa5874@gmail.com') {
+        return 100 * 1024 * 1024 * 1024; // 100 GB for Super Admin
+      }
+      return 5 * 1024 * 1024 * 1024; // 5 GB default
+    }
+
+    function getUserUsedBytes() {
+      if (!currentUser || !currentUser.email) return 0;
+      if (!window.MultiCloudUploader) return 0;
+      const allFiles = window.MultiCloudUploader.getAllFiles();
+      const userEmailLower = currentUser.email.toLowerCase().trim();
+
+      const userFiles = allFiles.filter(f => {
+        const fEmail = (f.uploaderEmail || '').toLowerCase().trim();
+        const fId = (f.uploaderId || '').trim();
+        return (fEmail && fEmail === userEmailLower) || (currentUser.studentId && fId === currentUser.studentId);
+      });
+
+      return userFiles.reduce((acc, f) => acc + (Number(f.size) || 0), 0);
+    }
+
+    function updateQuotaDisplay() {
+      const maxQuota = getUserMaxQuotaBytes();
+      const usedBytes = getUserUsedBytes();
+      const pct = Math.min(100, ((usedBytes / maxQuota) * 100)).toFixed(2);
+      const totalGBFormatted = (maxQuota / (1024 * 1024 * 1024)).toFixed(1);
+
+      const usedFormatted = formatBytes(usedBytes);
+      const remainFormatted = formatBytes(Math.max(0, maxQuota - usedBytes));
+
+      const bar = document.getElementById('quotaProgressBar');
+      if (bar) bar.style.width = pct + '%';
+
+      const usedText = document.getElementById('quotaUsedText');
+      if (usedText) usedText.textContent = usedFormatted;
+
+      const pctText = document.getElementById('quotaPercentText');
+      if (pctText) pctText.textContent = `ใช้ไป ${pct}% ของพื้นที่ ${totalGBFormatted} GB`;
+
+      const remainText = document.getElementById('quotaRemainText');
+      if (remainText) remainText.textContent = `คงเหลือ ${remainFormatted}`;
+
+      const headerBadge = document.getElementById('userHeaderQuotaBadge');
+      if (headerBadge) headerBadge.textContent = `${usedFormatted} / ${totalGBFormatted} GB`;
+    }
+
+    function logoutUser() {
+      if (confirm('คุณต้องการออกจากระบบไดรฟ์หรือไม่?')) {
+        localStorage.removeItem('COMED_USER_SESSION');
+        currentUser = null;
+        selectedFileIds.clear();
+        updateUserUI();
+        renderDrive();
+        showToast('👋 ออกจากระบบเรียบร้อยแล้ว');
+      }
+    }
+
+    function openAuthModal() {
+      document.getElementById('modalUserAuth')?.classList.remove('hidden');
+      document.getElementById('modalUserAuth')?.classList.add('flex');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('modalUserAuth')?.classList.add('hidden');
+      document.getElementById('modalUserAuth')?.classList.remove('flex');
+    }
+
+    function populateStudentDropdown() {
+      const sel = document.getElementById('authStudentSelect');
+      if (!sel) return;
+      sel.innerHTML = '<option value="">-- กรุณาเลือกรายชื่อของคุณ (60 คน) --</option>';
+
+      (window.STUDENTS_DATA || []).forEach(st => {
+        const opt = document.createElement('option');
+        opt.value = st.id;
+        opt.textContent = `${st.id} - ${st.name} (${st.nickname || ''})`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function confirmStudentPickerAuth() {
+      const sel = document.getElementById('authStudentSelect');
+      const stId = sel.value;
+      if (!stId) {
+        alert('กรุณาเลือกรหัสนักศึกษาของคุณก่อน');
+        return;
+      }
+
+      const st = (window.STUDENTS_DATA || []).find(s => s.id === stId);
+      if (!st) return;
+
+      currentUser = {
+        email: st.email || `${st.id}@kkumail.com`,
+        name: st.name,
+        nickname: st.nickname || '',
+        studentId: st.id,
+        avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${st.id}`,
+        isSpecialTester: false,
+        loggedInAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentUser));
+      closeAuthModal();
+      updateUserUI();
+      renderDrive();
+      showToast(`✨ ยินดีต้อนรับคุณ ${st.name}`);
+    }
+
+    function setupGoogleAuth() {
+      if (typeof google === 'undefined' || !google.accounts) return;
+      try {
+        google.accounts.id.initialize({
+          client_id: "870717469739-e93oikg549uprbms2c1c3f2r3q766n6s.apps.googleusercontent.com",
+          callback: handleGoogleCredentialResponse,
+          auto_select: false
+        });
+
+        const btnContainer = document.getElementById("googleBtnContainer");
+        if (btnContainer) {
+          google.accounts.id.renderButton(btnContainer, {
+            theme: "filled_blue",
+            size: "large",
+            shape: "pill",
+            text: "signin_with"
+          });
+        }
+      } catch (e) {
+        console.warn("Google Sign-In init error:", e);
+      }
+    }
+
+    function handleGoogleCredentialResponse(response) {
+      if (!response.credential) return;
+      const data = parseJwt(response.credential);
+      if (!data || !data.email) return;
+
+      const emailLower = data.email.toLowerCase().trim();
+      const isSuperTester = emailLower === 'phupa5874@gmail.com';
+      const isKKUMail = emailLower.endsWith('@kkumail.com');
+
+      if (!isSuperTester && !isKKUMail) {
+        alert("⚠️ ขออภัย ระบบอนุญาตเฉพาะบัญชีอีเมล @kkumail.com ของมหาวิทยาลัยขอนแก่น หรือผู้ดูแลระบบเท่านั้น");
+        return;
+      }
+
+      const studentIdMatch = emailLower.match(/([a-z0-9._-]+)@kkumail\.com/);
+      const possibleId = studentIdMatch ? studentIdMatch[1] : '';
+      const student = (window.STUDENTS_DATA || []).find(s => s.id === possibleId || (s.email && s.email.toLowerCase() === emailLower));
+
+      currentUser = {
+        email: emailLower,
+        name: student ? student.name : (isSuperTester ? 'ภูผา (Super Admin)' : data.name),
+        nickname: student ? student.nickname : (isSuperTester ? 'ภูผา' : ''),
+        studentId: student ? student.id : (isSuperTester ? 'ADMIN-TESTER' : ''),
+        avatar: data.picture || `https://api.dicebear.com/7.x/bottts/svg?seed=${emailLower}`,
+        isSpecialTester: isSuperTester,
+        loggedInAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentUser));
+      closeAuthModal();
+      updateUserUI();
+      renderDrive();
+      if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
+      showToast(`✨ เข้าสู่ระบบสำเร็จ: ${currentUser.name}`);
+    }
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // ----------------------------------------------------
+    // 2. Drive Navigation, Folders & File Explorer
+    // ----------------------------------------------------
+    function getRepo() {
+      return window.StorageDriveRepo;
+    }
+
+    function getCurrentUserEmail() {
+      return currentUser && currentUser.email ? currentUser.email.toLowerCase().trim() : '';
+    }
+
+    function navigateToFolder(folderId) {
+      currentFolderId = folderId;
+      selectedFileIds.clear();
+      updateBatchActionBar();
+      renderDrive();
+    }
+
+    function renderDrive() {
+      renderBreadcrumbs();
+      renderFoldersList();
+      renderFilesList();
+      updateUploadFolderDropdown();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function renderBreadcrumbs() {
+      const container = document.getElementById('driveBreadcrumbs');
+      if (!container) return;
+
+      let html = `
+        <button onclick="navigateToFolder(null)" class="text-slate-400 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded-xl hover:bg-slate-800/80 cursor-pointer">
+          <i data-lucide="hard-drive" class="w-4 h-4 text-orange-400"></i>
+          <span>คลาวด์ไดรฟ์ของฉัน</span>
+        </button>
+      `;
+
+      if (currentFolderId) {
+        const repo = getRepo();
+        const userEmail = getCurrentUserEmail();
+        const folders = repo.getUserFolders(userEmail);
+        const folder = folders.find(f => f.id === currentFolderId);
+
+        if (folder) {
+          html += `
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-600"></i>
+            <span class="text-white flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-800/60 border border-slate-700">
+              <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
+              <span>${escapeHtml(folder.name)}</span>
+              ${folder.isLocked ? '<i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400 ml-0.5"></i>' : ''}
+            </span>
+          `;
+        }
+      }
+
+      container.innerHTML = html;
+    }
+
+    function renderFoldersList() {
+      const container = document.getElementById('foldersListContainer');
+      const countText = document.getElementById('foldersCountText');
+      if (!container) return;
+
+      const userEmail = getCurrentUserEmail();
+      const repo = getRepo();
+      const allUserFolders = repo.getUserFolders(userEmail);
+
+      // Filter by current parent
+      let folders = allUserFolders.filter(f => (f.parentId || null) === currentFolderId);
+
+      // Search query filter
+      if (driveSearchQuery) {
+        const q = driveSearchQuery.toLowerCase();
+        folders = folders.filter(f => f.name.toLowerCase().includes(q));
+      }
+
+      if (countText) countText.textContent = folders.length;
+
+      if (folders.length === 0) {
+        if (!currentFolderId) {
+          container.innerHTML = `
+            <div class="col-span-full p-4 rounded-2xl bg-slate-900/40 border border-slate-800/60 text-center text-xs text-slate-500">
+              ไม่มีโฟลเดอร์ในหน้านี้ คลิก "+ สร้างโฟลเดอร์" เพื่อเริ่มต้นจัดหมวดหมู่
+            </div>
+          `;
+        } else {
+          container.innerHTML = '';
+        }
+        return;
+      }
+
+      container.innerHTML = folders.map(f => {
+        const colorClasses = {
+          amber: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+          sky: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+          emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+          purple: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+          rose: 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+        }[f.color || 'amber'] || 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+
+        return `
+          <div class="group relative p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between gap-3 cursor-pointer shadow-sm" onclick="handleFolderCardClick('${f.id}')">
+            
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-xl ${colorClasses} border flex items-center justify-center">
+                <i data-lucide="${f.isLocked ? 'folder-lock' : 'folder'}" class="w-5 h-5"></i>
+              </div>
+
+              <!-- Folder Actions Menu -->
+              <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition" onclick="event.stopPropagation()">
+                <button onclick="openShareModal('folder', '${f.id}', '${escapeHtml(f.name)}')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition" title="แชร์โฟลเดอร์">
+                  <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="openLockModal('folder', '${f.id}', '${escapeHtml(f.name)}')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-amber-400 transition" title="ตั้งรหัสผ่านล็อค">
+                  <i data-lucide="${f.isLocked ? 'unlock' : 'lock'}" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="handleDeleteFolder('${f.id}')" class="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition" title="ลบโฟลเดอร์">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h4 class="text-xs font-bold text-white truncate max-w-[150px]" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</h4>
+                ${f.isLocked ? '<i data-lucide="lock" class="w-3 h-3 text-amber-400 flex-shrink-0"></i>' : ''}
+              </div>
+              <span class="text-[10px] text-slate-400 block mt-0.5">โฟลเดอร์</span>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleFolderCardClick(folderId) {
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const folders = repo.getUserFolders(userEmail);
+      const folder = folders.find(f => f.id === folderId);
+      if (!folder) return;
+
+      if (folder.isLocked) {
+        // Must prompt password
+        openPasswordChallengeModal('folder', folder.id, folder.name);
+      } else {
+        navigateToFolder(folder.id);
+      }
+    }
+
+    function getUserFilesList() {
+      if (!window.MultiCloudUploader) return [];
+      const allFiles = window.MultiCloudUploader.getAllFiles();
+      if (!currentUser || !currentUser.email) return [];
+
+      const userEmailLower = currentUser.email.toLowerCase().trim();
+      const userFiles = allFiles.filter(f => {
+        const fEmail = (f.uploaderEmail || '').toLowerCase().trim();
+        const fId = (f.uploaderId || '').trim();
+        return (fEmail && fEmail === userEmailLower) || (currentUser.studentId && fId === currentUser.studentId);
+      });
+
+      const repo = getRepo();
+
+      return userFiles.map(f => {
+        const meta = repo.getFileMeta(f.id);
+        return {
+          ...f,
+          folderId: meta.folderId || null,
+          isLocked: !!meta.isLocked,
+          passwordHash: meta.passwordHash || null
+        };
+      });
+    }
+
+    function renderFilesList() {
+      const container = document.getElementById('filesDisplayContainer');
+      const countText = document.getElementById('filesCountText');
+      if (!container) return;
+
+      let files = getUserFilesList();
+
+      // 1. Filter by current folder
+      files = files.filter(f => (f.folderId || null) === currentFolderId);
+
+      // 2. Filter by search query
+      if (driveSearchQuery) {
+        const q = driveSearchQuery.toLowerCase();
+        files = files.filter(f => (f.originalName || f.id || '').toLowerCase().includes(q));
+      }
+
+      // 3. Filter by category
+      if (driveCategoryFilter !== 'all') {
+        files = files.filter(f => {
+          const type = (f.type || '').toLowerCase();
+          const ext = ((f.originalName || '').split('.').pop() || '').toLowerCase();
+
+          if (driveCategoryFilter === 'image') return type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
+          if (driveCategoryFilter === 'video') return type.startsWith('video/') || ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext);
+          if (driveCategoryFilter === 'audio') return type.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext);
+          if (driveCategoryFilter === 'document') return ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(ext);
+          if (driveCategoryFilter === 'other') return ['zip', 'rar', '7z', 'tar', 'gz'].includes(ext);
+          return true;
+        });
+      }
+
+      if (countText) countText.textContent = files.length;
+
+      if (files.length === 0) {
+        container.innerHTML = `
+          <div class="glass-card p-12 rounded-3xl border border-slate-800 text-center space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 text-slate-500 flex items-center justify-center mx-auto">
+              <i data-lucide="folder-open" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-white">ไม่มีไฟล์ในโฟลเดอร์นี้</h4>
+              <p class="text-xs text-slate-500 mt-0.5">คุณสามารถลากไฟล์มาวางที่กล่องอัปโหลดด้านบน หรือกดย้ายไฟล์จากโฟลเดอร์อื่นมาไว้ที่นี่</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (driveViewMode === 'grid') {
+        renderFilesGridView(files, container);
+      } else {
+        renderFilesListView(files, container);
+      }
+    }
+
+    function renderFilesGridView(files, container) {
+      container.innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          ${files.map(f => {
+            const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+            const isSelected = selectedFileIds.has(f.id);
+            const fileName = f.originalName || f.id;
+            const fileSizeFormatted = formatBytes(f.size);
+
+            return `
+              <div class="group relative rounded-2xl bg-slate-900/85 hover:bg-slate-850 border ${isSelected ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-800 hover:border-slate-700'} overflow-hidden transition-all duration-200 flex flex-col justify-between shadow-sm">
+                
+                <!-- Selection Checkbox & Top Overlay -->
+                <div class="absolute top-2 left-2 z-20">
+                  <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded text-orange-500 bg-slate-900/90 border-slate-700 focus:ring-0 cursor-pointer shadow">
+                </div>
+
+                <div class="absolute top-2 right-2 z-20 flex items-center gap-1">
+                  ${f.isLocked ? '<span class="w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xs"><i data-lucide="lock" class="w-3 h-3"></i></span>' : ''}
+                </div>
+
+                <!-- Preview Area -->
+                <div class="h-36 w-full bg-slate-950 flex items-center justify-center overflow-hidden relative cursor-pointer" onclick="handleFilePreviewClick('${f.id}')">
+                  ${isImg && !f.isLocked
+                    ? `<img src="${f.url}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
+                    : `<div class="text-center p-3 text-slate-500 group-hover:text-orange-400 transition">
+                         <i data-lucide="${f.isLocked ? 'file-lock' : getFileIconName(f.type, f.originalName)}" class="w-10 h-10 mx-auto mb-1 opacity-70"></i>
+                         <span class="text-[10px] font-mono uppercase">${((fileName.split('.').pop() || '')).slice(0, 5)}</span>
+                       </div>`
+                  }
+
+                  <!-- Hover Action Quick Overlay -->
+                  <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 backdrop-blur-[2px] transition-opacity duration-200 flex items-center justify-center gap-2">
+                    <button onclick="event.stopPropagation(); openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl bg-orange-600 hover:bg-orange-500 text-white flex items-center justify-center transition shadow-lg" title="แชร์ลิงก์">
+                      <i data-lucide="share-2" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="event.stopPropagation(); openSingleMoveModal('${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition shadow-lg" title="ย้ายไปโฟลเดอร์">
+                      <i data-lucide="folder-symlink" class="w-4 h-4"></i>
+                    </button>
+                    <a href="${f.url}" target="_blank" download onclick="event.stopPropagation()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition shadow-lg" title="ดาวน์โหลด">
+                      <i data-lucide="download" class="w-4 h-4"></i>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- File Info Footer -->
+                <div class="p-3 bg-slate-900/90 border-t border-slate-800/80 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white truncate max-w-[130px] block" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                    <span>${fileSizeFormatted}</span>
+                    <span class="capitalize text-slate-400">${f.provider || 'cloud'}</span>
+                  </div>
+                </div>
+
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderFilesListView(files, container) {
+      container.innerHTML = `
+        <div class="rounded-2xl bg-slate-900/90 border border-slate-800 overflow-hidden shadow-sm">
+          <div class="divide-y divide-slate-800/80">
+            ${files.map(f => {
+              const isSelected = selectedFileIds.has(f.id);
+              const fileName = f.originalName || f.id;
+              const fileSizeFormatted = formatBytes(f.size);
+              const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+
+              return `
+                <div class="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-850 transition ${isSelected ? 'bg-orange-950/20' : ''}">
+                  
+                  <div class="flex items-center gap-3 overflow-hidden">
+                    <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded text-orange-500 bg-slate-950 border-slate-700 focus:ring-0 cursor-pointer flex-shrink-0">
+                    
+                    <div class="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer" onclick="handleFilePreviewClick('${f.id}')">
+                      ${isImg && !f.isLocked
+                        ? `<img src="${f.url}" class="w-full h-full object-cover">`
+                        : `<i data-lucide="${f.isLocked ? 'file-lock' : getFileIconName(f.type, f.originalName)}" class="w-5 h-5 text-orange-400"></i>`
+                      }
+                    </div>
+
+                    <div class="space-y-0.5 overflow-hidden cursor-pointer" onclick="handleFilePreviewClick('${f.id}')">
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-white truncate max-w-xs sm:max-w-md block" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>
+                        ${f.isLocked ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">🔒 LOCKED</span>' : ''}
+                      </div>
+                      <div class="flex items-center gap-3 text-[11px] text-slate-400 font-mono">
+                        <span>${fileSizeFormatted}</span>
+                        <span>•</span>
+                        <span class="capitalize text-slate-400">${f.provider || 'cloud'}</span>
+                        <span>•</span>
+                        <span class="text-slate-400">${f.uploadedAt ? new Date(f.uploadedAt).toLocaleDateString('th-TH') : '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <button onclick="openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition" title="แชร์ลิงก์">
+                      <i data-lucide="share-2" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="openLockModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" title="ตั้งรหัสผ่าน">
+                      <i data-lucide="${f.isLocked ? 'unlock' : 'lock'}" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="openSingleMoveModal('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition" title="ย้ายไปโฟลเดอร์">
+                      <i data-lucide="folder-symlink" class="w-4 h-4"></i>
+                    </button>
+                    <a href="${f.url}" target="_blank" download class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition" title="ดาวน์โหลด">
+                      <i data-lucide="download" class="w-4 h-4"></i>
+                    </a>
+                    <button onclick="handleDeleteSingleFile('${f.id}')" class="p-2 rounded-xl hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition" title="ลบไฟล์">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function handleFilePreviewClick(fileId) {
+      const files = getUserFilesList();
+      const target = files.find(f => f.id === fileId);
+      if (!target) return;
+
+      if (target.isLocked) {
+        openPasswordChallengeModal('file', target.id, target.originalName || target.id);
+        return;
+      }
+
+      // Open directly in new window
+      window.open(target.url, '_blank');
+    }
+
+    function getFileIconName(type = '', name = '') {
+      const t = (type || '').toLowerCase();
+      const ext = ((name || '').split('.').pop() || '').toLowerCase();
+
+      if (t.startsWith('image/') || ['jpg', 'png', 'jpeg', 'webp', 'gif'].includes(ext)) return 'image';
+      if (t.startsWith('video/') || ['mp4', 'mov', 'avi'].includes(ext)) return 'video';
+      if (t.startsWith('audio/') || ['mp3', 'wav', 'ogg'].includes(ext)) return 'music';
+      if (['pdf'].includes(ext)) return 'file-text';
+      if (['doc', 'docx'].includes(ext)) return 'file-text';
+      if (['zip', 'rar', '7z'].includes(ext)) return 'archive';
+      return 'file';
+    }
+
+    function setDriveView(mode) {
+      driveViewMode = mode;
+      const btnGrid = document.getElementById('btnViewGrid');
+      const btnList = document.getElementById('btnViewList');
+
+      if (mode === 'grid') {
+        btnGrid.className = 'p-1.5 rounded-lg text-white bg-slate-800 transition cursor-pointer';
+        btnList.className = 'p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer';
+      } else {
+        btnList.className = 'p-1.5 rounded-lg text-white bg-slate-800 transition cursor-pointer';
+        btnGrid.className = 'p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer';
+      }
+
+      renderFilesList();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function handleDriveSearch(query) {
+      driveSearchQuery = (query || '').trim();
+      renderDrive();
+    }
+
+    function handleCategoryFilter(val) {
+      driveCategoryFilter = val || 'all';
+      renderFilesList();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function refreshDriveContents() {
+      const icon = document.getElementById('driveRefreshIcon');
+      if (icon) icon.classList.add('animate-spin');
+      setTimeout(() => {
+        renderDrive();
+        updateQuotaDisplay();
+        if (icon) icon.classList.remove('animate-spin');
+        showToast('🔄 รีเฟรชข้อมูลไดรฟ์เรียบร้อยแล้ว');
+      }, 400);
+    }
+
+    // ----------------------------------------------------
+    // 3. Selection & Batch Move / Delete
+    // ----------------------------------------------------
+    function handleToggleSelectFile(fileId, checked) {
+      if (checked) {
+        selectedFileIds.add(fileId);
+      } else {
+        selectedFileIds.delete(fileId);
+      }
+      updateBatchActionBar();
+    }
+
+    function toggleSelectAllFiles(select) {
+      const files = getUserFilesList().filter(f => (f.folderId || null) === currentFolderId);
+      if (select) {
+        files.forEach(f => selectedFileIds.add(f.id));
+      } else {
+        selectedFileIds.clear();
+      }
+      updateBatchActionBar();
+      renderFilesList();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function updateBatchActionBar() {
+      const bar = document.getElementById('batchActionBar');
+      const countText = document.getElementById('selectedFilesCountText');
+      const chkAll = document.getElementById('batchSelectAllCheckbox');
+
+      const count = selectedFileIds.size;
+      if (count > 0) {
+        bar.classList.remove('hidden');
+        if (countText) countText.textContent = count;
+      } else {
+        bar.classList.add('hidden');
+        if (chkAll) chkAll.checked = false;
+      }
+    }
+
+    async function deleteBatchSelectedFiles() {
+      const count = selectedFileIds.size;
+      if (count === 0) return;
+
+      if (!confirm(`⚠️ คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์ที่เลือกจำนวน ${count} ไฟล์ ออกจากไดรฟ์?`)) {
+        return;
+      }
+
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      const repo = getRepo();
+
+      for (const id of Array.from(selectedFileIds)) {
+        const target = allFiles.find(f => f.id === id);
+        if (target && window.MultiCloudUploader) {
+          try {
+            await window.MultiCloudUploader.deleteFile(target);
+          } catch(e) {}
+        }
+      }
+
+      selectedFileIds.clear();
+      updateBatchActionBar();
+      updateQuotaDisplay();
+      renderFilesList();
+      showToast(`🗑️ ลบไฟล์ที่เลือกเรียบร้อยแล้ว (${count} ไฟล์)`);
+    }
+
+    async function handleDeleteSingleFile(fileId) {
+      if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้ออกจากไดรฟ์?')) return;
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      const target = allFiles.find(f => f.id === fileId);
+
+      if (target && window.MultiCloudUploader) {
+        try {
+          await window.MultiCloudUploader.deleteFile(target);
+          selectedFileIds.delete(fileId);
+          updateBatchActionBar();
+          updateQuotaDisplay();
+          renderFilesList();
+          showToast('🗑️ ลบไฟล์เรียบร้อยแล้ว');
+        } catch(e) {
+          alert('เกิดข้อผิดพลาดในการลบไฟล์: ' + e.message);
+        }
+      }
+    }
+
+    // ----------------------------------------------------
+    // 4. Folder Operations (Create / Edit / Delete)
+    // ----------------------------------------------------
+    function openCreateFolderModal() {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+      document.getElementById('folderModalTitle').textContent = 'สร้างโฟลเดอร์ใหม่';
+      document.getElementById('folderEditId').value = '';
+      document.getElementById('folderNameInput').value = '';
+      document.getElementById('folderLockCheckbox').checked = false;
+      document.getElementById('folderPasswordBox').classList.add('hidden');
+      document.getElementById('folderPasswordInput').value = '';
+
+      const modal = document.getElementById('modalFolder');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('folderNameInput').focus(), 50);
+    }
+
+    function closeFolderModal() {
+      const modal = document.getElementById('modalFolder');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function handleSaveFolderForm(e) {
+      e.preventDefault();
+      const name = document.getElementById('folderNameInput').value.trim();
+      const editId = document.getElementById('folderEditId').value.trim();
+      const isLocked = document.getElementById('folderLockCheckbox').checked;
+      const pass = document.getElementById('folderPasswordInput').value.trim();
+
+      const colorElem = document.querySelector('input[name="folderColor"]:checked');
+      const color = colorElem ? colorElem.value : 'amber';
+
+      if (!name) return;
+      if (isLocked && !pass && !editId) {
+        alert('กรุณากรอกรหัสผ่านสำหรับล็อคโฟลเดอร์');
+        return;
+      }
+
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+
+      if (!editId) {
+        await repo.createFolder({
+          name: name,
+          color: color,
+          userEmail: userEmail,
+          parentId: currentFolderId,
+          password: isLocked ? pass : null
+        });
+        showToast(`📁 สร้างโฟลเดอร์ "${name}" สำเร็จ`);
+      } else {
+        await repo.updateFolder(editId, {
+          name: name,
+          color: color,
+          isLocked: isLocked,
+          password: pass || null
+        });
+        showToast(`📁 แก้ไขโฟลเดอร์ "${name}" สำเร็จ`);
+      }
+
+      closeFolderModal();
+      renderFoldersList();
+      updateUploadFolderDropdown();
+    }
+
+    function handleDeleteFolder(folderId) {
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const folders = repo.getUserFolders(userEmail);
+      const target = folders.find(f => f.id === folderId);
+      if (!target) return;
+
+      if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบโฟลเดอร์ "${target.name}"? (ไฟล์ข้างในจะถูกย้ายกลับมาที่หน้าแรกไดรฟ์)`)) {
+        repo.deleteFolder(folderId);
+        if (currentFolderId === folderId) {
+          currentFolderId = null;
+        }
+        renderDrive();
+        showToast('🗑️ ลบโฟลเดอร์เรียบร้อยแล้ว');
+      }
+    }
+
+    // ----------------------------------------------------
+    // 5. Move Files Modal & Operations
+    // ----------------------------------------------------
+    let filesPendingMove = []; // Array of file IDs
+
+    function openSingleMoveModal(fileId, fileName) {
+      filesPendingMove = [fileId];
+      renderMoveModalDestinations(`ไฟล์: ${fileName}`);
+    }
+
+    function openBatchMoveModal() {
+      const count = selectedFileIds.size;
+      if (count === 0) return;
+      filesPendingMove = Array.from(selectedFileIds);
+      renderMoveModalDestinations(`ไฟล์ที่เลือกทั้งหมด ${count} ไฟล์`);
+    }
+
+    function renderMoveModalDestinations(subtext) {
+      const modal = document.getElementById('modalMoveFile');
+      const sub = document.getElementById('moveModalSubtext');
+      const container = document.getElementById('moveDestinationsList');
+
+      if (sub) sub.textContent = subtext;
+
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const folders = repo.getUserFolders(userEmail);
+
+      let html = `
+        <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-700 transition">
+          <div class="flex items-center gap-3">
+            <input type="radio" name="destFolderRadio" value="" ${currentFolderId === null ? 'disabled' : 'checked'} class="text-sky-500">
+            <div class="flex items-center gap-2">
+              <i data-lucide="hard-drive" class="w-4 h-4 text-orange-400"></i>
+              <span class="text-xs font-bold text-white">หน้าแรกไดรฟ์ (Root)</span>
+            </div>
+          </div>
+          ${currentFolderId === null ? '<span class="text-[10px] text-slate-500 font-mono">อยู่ที่นี่แล้ว</span>' : ''}
+        </label>
+      `;
+
+      folders.forEach(f => {
+        const isCurrent = f.id === currentFolderId;
+        html += `
+          <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-700 transition ${isCurrent ? 'opacity-50' : ''}">
+            <div class="flex items-center gap-3">
+              <input type="radio" name="destFolderRadio" value="${f.id}" ${isCurrent ? 'disabled' : ''} class="text-sky-500">
+              <div class="flex items-center gap-2">
+                <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
+                <span class="text-xs font-bold text-white">${escapeHtml(f.name)}</span>
+              </div>
+            </div>
+            ${isCurrent ? '<span class="text-[10px] text-slate-500 font-mono">อยู่ที่นี่แล้ว</span>' : ''}
+          </label>
+        `;
+      });
+
+      container.innerHTML = html;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeMoveModal() {
+      const modal = document.getElementById('modalMoveFile');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function confirmMoveFiles() {
+      const checkedRadio = document.querySelector('input[name="destFolderRadio"]:checked');
+      if (!checkedRadio) {
+        alert('กรุณาเลือกโฟลเดอร์ปลายทาง');
+        return;
+      }
+
+      const targetFolderId = checkedRadio.value || null;
+      const repo = getRepo();
+
+      if (filesPendingMove.length === 1) {
+        repo.moveFile(filesPendingMove[0], targetFolderId);
+      } else {
+        repo.batchMoveFiles(filesPendingMove, targetFolderId);
+      }
+
+      closeMoveModal();
+      selectedFileIds.clear();
+      updateBatchActionBar();
+      renderFilesList();
+      showToast(`📦 ย้ายไฟล์จำนวน ${filesPendingMove.length} ไฟล์ เรียบร้อยแล้ว`);
+    }
+
+    // ----------------------------------------------------
+    // 6. Lock / Password Protection Modal
+    // ----------------------------------------------------
+    function openLockModal(type, id, name) {
+      targetItemForAction = { type, id, name };
+      const modal = document.getElementById('modalLockItem');
+      const title = document.getElementById('lockModalTitle');
+      const subtext = document.getElementById('lockModalSubtext');
+      const passInput = document.getElementById('itemLockPasswordInput');
+      const unlockArea = document.getElementById('unlockActionBtnArea');
+
+      passInput.value = '';
+
+      let isLocked = false;
+      const repo = getRepo();
+      if (type === 'folder') {
+        const folders = repo.getUserFolders(getCurrentUserEmail());
+        const f = folders.find(x => x.id === id);
+        isLocked = f && f.isLocked;
+        title.textContent = `ตั้งรหัสผ่านล็อคโฟลเดอร์: ${name}`;
+      } else {
+        const meta = repo.getFileMeta(id);
+        isLocked = !!meta.isLocked;
+        title.textContent = `ตั้งรหัสผ่านล็อคไฟล์: ${name}`;
+      }
+
+      if (isLocked) {
+        unlockArea.classList.remove('hidden');
+        subtext.textContent = 'รายการนี้ถูกล็อคอยู่แล้ว ท่านสามารถเปลี่ยนรหัสผ่านใหม่ หรือกดยกเลิกรหัสผ่าน';
+      } else {
+        unlockArea.classList.add('hidden');
+        subtext.textContent = 'ผู้ที่จะเปิดดูหรือดาวน์โหลดรายการนี้จะต้องกรอกรหัสผ่านที่ถูกต้อง';
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => passInput.focus(), 50);
+    }
+
+    function closeLockModal() {
+      const modal = document.getElementById('modalLockItem');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function confirmSaveItemLock() {
+      const pass = document.getElementById('itemLockPasswordInput').value.trim();
+      if (!pass) {
+        alert('กรุณากรอกรหัสผ่านที่ต้องการ');
+        return;
+      }
+
+      const repo = getRepo();
+      if (targetItemForAction.type === 'folder') {
+        await repo.updateFolder(targetItemForAction.id, {
+          isLocked: true,
+          password: pass
+        });
+      } else {
+        await repo.setFileLock(targetItemForAction.id, true, pass);
+      }
+
+      closeLockModal();
+      renderDrive();
+      showToast('🔒 บันทึกรหัสผ่านล็อคเรียบร้อยแล้ว');
+    }
+
+    async function removeCurrentItemLock() {
+      if (!confirm('คุณต้องการยกเลิกการล็อครหัสผ่านสำหรับรายการนี้หรือไม่?')) return;
+      const repo = getRepo();
+
+      if (targetItemForAction.type === 'folder') {
+        await repo.updateFolder(targetItemForAction.id, {
+          isLocked: false,
+          password: null
+        });
+      } else {
+        await repo.setFileLock(targetItemForAction.id, false, null);
+      }
+
+      closeLockModal();
+      renderDrive();
+      showToast('🔓 ปลดล็อครหัสผ่านเรียบร้อยแล้ว');
+    }
+
+    // ----------------------------------------------------
+    // 7. Password Challenge Modal (Opening Locked Content)
+    // ----------------------------------------------------
+    let pendingChallenge = null; // { type, id, name }
+
+    function openPasswordChallengeModal(type, id, name) {
+      pendingChallenge = { type, id, name };
+      const modal = document.getElementById('modalPasswordChallenge');
+      const title = document.getElementById('challengeModalTitle');
+      const passInput = document.getElementById('challengePasswordInput');
+      const err = document.getElementById('challengeErrorMsg');
+
+      passInput.value = '';
+      err.classList.add('hidden');
+      title.textContent = `ปลดล็อค: ${name}`;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => passInput.focus(), 50);
+    }
+
+    function closePasswordChallengeModal() {
+      const modal = document.getElementById('modalPasswordChallenge');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function handleChallengeSubmit(e) {
+      e.preventDefault();
+      const pass = document.getElementById('challengePasswordInput').value.trim();
+      const err = document.getElementById('challengeErrorMsg');
+      const repo = getRepo();
+
+      let ok = false;
+      if (pendingChallenge.type === 'folder') {
+        ok = await repo.checkFolderPassword(pendingChallenge.id, pass);
+      } else {
+        ok = await repo.checkFilePassword(pendingChallenge.id, pass);
+      }
+
+      if (ok) {
+        closePasswordChallengeModal();
+        if (pendingChallenge.type === 'folder') {
+          navigateToFolder(pendingChallenge.id);
+        } else {
+          const files = getUserFilesList();
+          const target = files.find(f => f.id === pendingChallenge.id);
+          if (target && target.url) {
+            window.open(target.url, '_blank');
+          }
+        }
+        showToast('🔓 ยืนยันรหัสผ่านถูกต้อง');
+      } else {
+        err.classList.remove('hidden');
+      }
+    }
+
+    // ----------------------------------------------------
+    // 8. Advanced Share Link Modal & Generator
+    // ----------------------------------------------------
+    function openShareModal(targetType, targetId, targetName) {
+      targetItemForAction = { type: targetType, id: targetId, name: targetName };
+      const modal = document.getElementById('modalShareLink');
+      const sub = document.getElementById('shareItemNameSubtext');
+      const resBox = document.getElementById('shareResultBox');
+
+      sub.textContent = `${targetType === 'folder' ? '📁 โฟลเดอร์: ' : '📄 ไฟล์: '} ${targetName}`;
+      resBox.classList.add('hidden');
+
+      // Reset form
+      document.querySelector('input[name="shareAccessType"][value="public"]').checked = true;
+      toggleShareAccessOptions('public');
+      document.getElementById('shareSpecificEmailsInput').value = '';
+      document.getElementById('shareExpiresSelect').value = '0';
+      document.getElementById('sharePasswordInput').value = '';
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeShareModal() {
+      const modal = document.getElementById('modalShareLink');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function toggleShareAccessOptions(type) {
+      const specBox = document.getElementById('shareSpecificEmailsBox');
+      if (type === 'specific') {
+        specBox.classList.remove('hidden');
+      } else {
+        specBox.classList.add('hidden');
+      }
+    }
+
+    async function handleGenerateShareLink() {
+      const accessElem = document.querySelector('input[name="shareAccessType"]:checked');
+      const accessType = accessElem ? accessElem.value : 'public';
+      const specificEmailsStr = document.getElementById('shareSpecificEmailsInput').value.trim();
+      const expiresHours = Number(document.getElementById('shareExpiresSelect').value) || 0;
+      const password = document.getElementById('sharePasswordInput').value.trim();
+
+      const allowedEmails = accessType === 'specific' 
+        ? specificEmailsStr.split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
+        : [];
+
+      if (accessType === 'specific' && allowedEmails.length === 0) {
+        alert('กรุณาระบุอีเมลอย่างน้อย 1 อีเมลสำหรับสิทธิ์เฉพาะคน');
+        return;
+      }
+
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+
+      const shareRecord = await repo.createShareLink({
+        targetType: targetItemForAction.type,
+        targetId: targetItemForAction.id,
+        accessType: accessType,
+        allowedEmails: allowedEmails,
+        password: password || null,
+        expiresInHours: expiresHours,
+        createdBy: userEmail
+      });
+
+      // Construct Share URL
+      const origin = window.location.origin;
+      const shareUrl = `${origin}/s/${shareRecord.shareCode}`;
+
+      // Render Result
+      const resBox = document.getElementById('shareResultBox');
+      const urlInput = document.getElementById('shareGeneratedUrlInput');
+      const badge = document.getElementById('shareExpirationBadge');
+      const qrContainer = document.getElementById('shareQrCodeContainer');
+
+      urlInput.value = shareUrl;
+      badge.textContent = expiresHours > 0 ? `⏱️ หมดอายุใน ${expiresHours} ชม.` : '♾️ ถาวร';
+
+      // Render QR Code
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: shareUrl,
+        width: 100,
+        height: 100,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      resBox.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      showToast('✨ สร้างลิงก์แชร์พร้อม QR Code สำเร็จแล้ว!');
+    }
+
+    function copyShareLinkToClipboard() {
+      const input = document.getElementById('shareGeneratedUrlInput');
+      if (!input) return;
+      input.select();
+      input.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(input.value).then(() => {
+        showToast('📋 คัดลอกลิงก์แชร์เรียบร้อยแล้ว!');
+      });
+    }
+
+    // ----------------------------------------------------
+    // 9. Upload Flow Integration (Single & Multi-File)
+    // ----------------------------------------------------
+    function toggleUploadAreaVisibility() {
+      isUploadAreaCollapsed = !isUploadAreaCollapsed;
+      const body = document.getElementById('driveUploadCollapsibleBody');
+      const icon = document.getElementById('toggleUploadIcon');
+      const text = document.getElementById('toggleUploadText');
+
+      if (isUploadAreaCollapsed) {
+        body.classList.add('hidden');
+        icon.setAttribute('data-lucide', 'chevron-down');
+        text.textContent = 'แสดงกล่องอัปโหลด';
+      } else {
+        body.classList.remove('hidden');
+        icon.setAttribute('data-lucide', 'chevron-up');
+        text.textContent = 'ซ่อนกล่องอัปโหลด';
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function triggerUploadModalOrZone() {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+      // Expand upload zone if collapsed
+      if (isUploadAreaCollapsed) {
+        toggleUploadAreaVisibility();
+      }
+      document.getElementById('fileInput').click();
+    }
+
+    function toggleCompressionMode() {
+      isUncompressedMode = !isUncompressedMode;
+      const text = document.getElementById('compressModeText');
+      if (isUncompressedMode) {
+        text.innerHTML = '💎 ต้นฉบับ 100% (ไม่บีบอัด)';
+        text.parentElement.classList.add('border-orange-500', 'text-orange-400');
+      } else {
+        text.innerHTML = '⚡ บีบอัดอัตโนมัติ';
+        text.parentElement.classList.remove('border-orange-500', 'text-orange-400');
+      }
+    }
+
+    function updateUploadFolderDropdown() {
+      const sel = document.getElementById('uploadTargetFolderSelect');
+      if (!sel) return;
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const folders = repo.getUserFolders(userEmail);
+
+      let html = '<option value="">📁 หน้าแรก (Root)</option>';
+      folders.forEach(f => {
+        const isSelected = f.id === currentFolderId;
+        html += `<option value="${f.id}" ${isSelected ? 'selected' : ''}>📁 ${escapeHtml(f.name)}</option>`;
+      });
+      sel.innerHTML = html;
+    }
+
+    function handleFilesSelected(e) {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+      selectedFilesQueue = files;
+      e.target.value = '';
+      renderStagedQueue();
+    }
+
+    function handleAddMoreFiles(e) {
+      const newFiles = Array.from(e.target.files || []);
+      if (newFiles.length === 0) return;
+      for (const nf of newFiles) {
+        if (!selectedFilesQueue.some(f => f.name === nf.name && f.size === nf.size)) {
+          selectedFilesQueue.push(nf);
+        }
+      }
+      e.target.value = '';
+      renderStagedQueue();
+    }
+
+    // Drag & Drop
+    const dropArea = document.getElementById('dropArea');
+    if (dropArea) {
+      ['dragenter', 'dragover'].forEach(name => {
+        dropArea.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropArea.classList.add('border-orange-500', 'bg-orange-500/10');
+        });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        dropArea.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropArea.classList.remove('border-orange-500', 'bg-orange-500/10');
+        });
+      });
+      dropArea.addEventListener('drop', (e) => {
+        const dropped = Array.from(e.dataTransfer.files || []);
+        if (dropped.length === 0) return;
+        for (const nf of dropped) {
+          if (!selectedFilesQueue.some(f => f.name === nf.name && f.size === nf.size)) {
+            selectedFilesQueue.push(nf);
+          }
+        }
+        renderStagedQueue();
+      });
+    }
+
+    function removeStagedFile(index) {
+      selectedFilesQueue.splice(index, 1);
+      renderStagedQueue();
+    }
+
+    function cancelAllStagedFiles() {
+      selectedFilesQueue = [];
+      renderStagedQueue();
+    }
+
+    function renderStagedQueue() {
+      const stagingCard = document.getElementById('fileStagingCard');
+      const dropBox = document.getElementById('dropArea');
+      const countBadge = document.getElementById('stagingTotalCountBadge');
+      const sizeText = document.getElementById('stagingTotalSizeText');
+      const listContainer = document.getElementById('stagedFilesList');
+      const batchAlert = document.getElementById('batchCompatibilityAlert');
+      const btnUpload = document.getElementById('btnConfirmUpload');
+
+      if (selectedFilesQueue.length === 0) {
+        stagingCard.classList.add('hidden');
+        dropBox.classList.remove('hidden');
+        return;
+      }
+
+      stagingCard.classList.remove('hidden');
+      dropBox.classList.add('hidden');
+
+      const totalBytes = selectedFilesQueue.reduce((acc, f) => acc + f.size, 0);
+      countBadge.textContent = `${selectedFilesQueue.length} ไฟล์`;
+      sizeText.textContent = `ขนาดรวม: ${formatBytes(totalBytes)}`;
+
+      listContainer.innerHTML = selectedFilesQueue.map((file, idx) => {
+        const isImg = file.type && file.type.startsWith('image/');
+        const ext = (file.name.split('.').pop() || '').toUpperCase();
+        const thumbSrc = isImg ? URL.createObjectURL(file) : '';
+
+        return `
+          <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 overflow-hidden">
+              <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                ${isImg 
+                  ? `<img src="${thumbSrc}" class="w-full h-full object-cover">`
+                  : `<span class="font-mono text-[10px] font-bold text-orange-400">${ext}</span>`
+                }
+              </div>
+              <div class="space-y-0.5 overflow-hidden">
+                <span class="text-xs font-bold text-white truncate max-w-xs block">${escapeHtml(file.name)}</span>
+                <span class="text-[10px] font-mono text-amber-400">${formatBytes(file.size)}</span>
+              </div>
+            </div>
+
+            <button onclick="removeStagedFile(${idx})" class="p-2 text-slate-500 hover:text-rose-400 transition" title="ลบไฟล์นี้">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      // Check Quota Limit
+      const currentUsed = getUserUsedBytes();
+      const maxQuota = getUserMaxQuotaBytes();
+      if (currentUsed + totalBytes > maxQuota) {
+        batchAlert.innerHTML = `
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 mt-0.5"></i>
+          <div>
+            <strong class="text-white block">ขนาดไฟล์รวมเกินโควตาคงเหลือของคุณ!</strong>
+            <span>ขนาดชุดไฟล์นี้รวม ${formatBytes(totalBytes)} แต่โควตาของคุณเหลือเพียง ${formatBytes(Math.max(0, maxQuota - currentUsed))}</span>
+          </div>
+        `;
+        batchAlert.classList.remove('hidden');
+        btnUpload.disabled = true;
+      } else {
+        batchAlert.classList.add('hidden');
+        btnUpload.disabled = false;
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    async function executeUpload() {
+      if (selectedFilesQueue.length === 0) return;
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const totalFiles = selectedFilesQueue.length;
+      const targetFolderId = document.getElementById('uploadTargetFolderSelect')?.value || currentFolderId || null;
+      const chosenProvider = document.getElementById('userPreferredProvider')?.value || 'cloudinary';
+
+      const stagingCard = document.getElementById('fileStagingCard');
+      const progressBox = document.getElementById('uploadProgressBox');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const percentText = document.getElementById('uploadPercentText');
+      const bytesText = document.getElementById('uploadBytesText');
+      const statusText = document.getElementById('uploadStatusText');
+
+      stagingCard.classList.add('hidden');
+      progressBox.classList.remove('hidden');
+
+      const repo = getRepo();
+      let completedCount = 0;
+
+      for (let i = 0; i < totalFiles; i++) {
+        const file = selectedFilesQueue[i];
+        const fileNum = i + 1;
+
+        statusText.innerHTML = `<span>กำลังอัปโหลดไฟล์ที่ ${fileNum}/${totalFiles}: <strong>${escapeHtml(file.name)}</strong></span>`;
+        bytesText.textContent = `ไฟล์ ${fileNum}/${totalFiles} (${formatBytes(file.size)})`;
+
+        try {
+          const res = await window.MultiCloudUploader.upload(file, {
+            preferredProvider: chosenProvider,
+            skipCompression: isUncompressedMode,
+            category: 'ไดรฟ์ส่วนตัว',
+            uploader: {
+              id: currentUser.studentId || currentUser.email,
+              name: currentUser.name,
+              email: currentUser.email
+            },
+            onProgress: (pct, msg) => {
+              const overallPct = Math.round(((i / totalFiles) * 100) + (pct * (1 / totalFiles)));
+              progressBar.style.width = overallPct + '%';
+              percentText.textContent = overallPct + '%';
+            }
+          });
+
+          if (res && res.id) {
+            // Bind newly uploaded file to target folder
+            if (targetFolderId) {
+              repo.moveFile(res.id, targetFolderId);
+            }
+            completedCount++;
+          }
+        } catch (err) {
+          console.error('File upload error:', err);
+        }
+      }
+
+      progressBar.style.width = '100%';
+      percentText.textContent = '100%';
+      statusText.innerHTML = `<span>✨ อัปโหลดสำเร็จครบทั้ง ${completedCount}/${totalFiles} ไฟล์แล้ว!</span>`;
+
+      setTimeout(() => {
+        progressBox.classList.add('hidden');
+        selectedFilesQueue = [];
+        updateQuotaDisplay();
+        renderDrive();
+        showToast(`🎉 อัปโหลดไฟล์สำเร็จ ${completedCount} ไฟล์`);
+      }, 600);
+    }
+
+    // ----------------------------------------------------
+    // 10. Keyboard Shortcuts Engine
+    // ----------------------------------------------------
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        // Ignore typing inside input, textarea, select
+        const tag = (e.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+          if (e.key === 'Escape') {
+            e.target.blur();
+          }
+          return;
+        }
+
+        const isCtrl = e.ctrlKey || e.metaKey;
+
+        // / : Focus Search
+        if (e.key === '/') {
+          e.preventDefault();
+          const searchInput = document.getElementById('driveSearchInput');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+          return;
+        }
+
+        // ? : Open Shortcuts modal
+        if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+          e.preventDefault();
+          openShortcutsModal();
+          return;
+        }
+
+        // Esc : Close all modals / cancel selection
+        if (e.key === 'Escape') {
+          closeShortcutsModal();
+          closeFolderModal();
+          closeMoveModal();
+          closeLockModal();
+          closeShareModal();
+          closeAuthModal();
+          closePasswordChallengeModal();
+          selectedFileIds.clear();
+          updateBatchActionBar();
+          renderFilesList();
+          return;
+        }
+
+        // Ctrl + A : Select all
+        if (isCtrl && (e.key === 'a' || e.key === 'A')) {
+          e.preventDefault();
+          toggleSelectAllFiles(true);
+          return;
+        }
+
+        // Delete / Backspace : Batch Delete
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          if (selectedFileIds.size > 0) {
+            e.preventDefault();
+            deleteBatchSelectedFiles();
+            return;
+          }
+        }
+
+        // N or Ctrl + N : Create Folder
+        if ((isCtrl && (e.key === 'n' || e.key === 'N')) || (!isCtrl && e.key === 'n')) {
+          e.preventDefault();
+          openCreateFolderModal();
+          return;
+        }
+
+        // U or Ctrl + U : Upload File
+        if ((isCtrl && (e.key === 'u' || e.key === 'U')) || (!isCtrl && e.key === 'u')) {
+          e.preventDefault();
+          triggerUploadModalOrZone();
+          return;
+        }
+
+        // 1 : List View
+        if (e.key === '1') {
+          e.preventDefault();
+          setDriveView('list');
+          return;
+        }
+
+        // 2 : Grid View
+        if (e.key === '2') {
+          e.preventDefault();
+          setDriveView('grid');
+          return;
+        }
+      });
+    }
+
+    function openShortcutsModal() {
+      const m = document.getElementById('modalShortcuts');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function closeShortcutsModal() {
+      const m = document.getElementById('modalShortcuts');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    // ----------------------------------------------------
+    // Utilities
+    // ----------------------------------------------------
+    function formatBytes(bytes) {
+      if (!bytes || bytes <= 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('driveToast');
+      const text = document.getElementById('driveToastText');
+      if (!t || !text) return;
+
+      text.textContent = msg;
+      t.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      t.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        t.classList.remove('translate-y-0', 'opacity-100');
+        t.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>

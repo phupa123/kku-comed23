@@ -37,6 +37,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
       pageKey = 'event';
     } else if (currentPath.includes('upload') || currentPath.includes('upload.html')) {
       pageKey = 'upload';
+    } else if (currentPath.includes('storage') || currentPath.includes('storage.html')) {
+      pageKey = 'storage';
     } else if (currentPath.includes('shortlink') || currentPath.includes('shortlink.html') || currentPath.includes('/s/')) {
       pageKey = 'shortlink';
     }

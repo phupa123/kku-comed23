@@ -114,6 +114,14 @@ export default {
       fetchUrl = new URL("/admin.html", url.origin).toString();
     } else if (path === "/index-admin") {
       fetchUrl = new URL("/index-admin.html", url.origin).toString();
+    } else if (path === "/storage" || path === "/storage.html") {
+      fetchUrl = new URL("/storage.html", url.origin).toString();
+    } else if (path === "/storage-admin" || path === "/storage-admin.html") {
+      fetchUrl = new URL("/storage-admin.html", url.origin).toString();
+    } else if (path === "/upload" || path === "/upload.html") {
+      fetchUrl = new URL("/upload.html", url.origin).toString();
+    } else if (path === "/upload-admin" || path === "/upload-admin.html") {
+      fetchUrl = new URL("/upload-admin.html", url.origin).toString();
     } else if (path === "/shortlink" || path === "/shortlink.html") {
       fetchUrl = new URL("/shortlink.html", url.origin).toString();
     } else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") {
@@ -149,6 +157,10 @@ export default {
     else if (path === "/eventclass" || path === "/eventclass.html") target = "/eventclass.html";
     else if (path === "/event-admin" || path === "/event-admin.html") target = "/event-admin.html";
     else if (path === "/eventclass-admin" || path === "/eventclass-admin.html") target = "/eventclass-admin.html";
+    else if (path === "/storage" || path === "/storage.html") target = "/storage.html";
+    else if (path === "/storage-admin" || path === "/storage-admin.html") target = "/storage-admin.html";
+    else if (path === "/upload" || path === "/upload.html") target = "/upload.html";
+    else if (path === "/upload-admin" || path === "/upload-admin.html") target = "/upload-admin.html";
     else if (path === "/shortlink" || path === "/shortlink.html" || path.startsWith("/s/")) target = "/shortlink.html";
     else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") target = "/shortlink-admin.html";
     else if (path === "/maintenance" || path === "/maintenance.html") target = "/maintenance.html";

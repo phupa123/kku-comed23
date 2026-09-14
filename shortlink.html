@@ -37,6 +37,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
   <script src="assets/js/shortlink_repo.js"></script>
+  <script src="assets/js/storage_drive_repo.js"></script>
 
   <style>
     .bg-mesh-glow {
@@ -352,6 +353,16 @@
 
     // 2. Perform Redirection Logic
     async function handleIncomingRedirection(code) {
+      // 2.1 Check if this code belongs to COMED Cloud Drive Shares (files/folders)
+      if (window.StorageDriveRepo) {
+        const driveShare = window.StorageDriveRepo.getShareByCode(code);
+        if (driveShare) {
+          // Redirect to storage viewer with share query
+          window.location.replace(`storage.html?share=${encodeURIComponent(code)}`);
+          return;
+        }
+      }
+
       const link = window.ShortlinkRepo.getByCode(code);
       const overlay = document.getElementById('redirectOverlay');
       const notFoundOverlay = document.getElementById('notFoundOverlay');
