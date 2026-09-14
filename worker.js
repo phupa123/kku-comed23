@@ -114,6 +114,15 @@ export default {
       fetchUrl = new URL("/admin.html", url.origin).toString();
     } else if (path === "/index-admin") {
       fetchUrl = new URL("/index-admin.html", url.origin).toString();
+    } else if (path === "/shortlink" || path === "/shortlink.html") {
+      fetchUrl = new URL("/shortlink.html", url.origin).toString();
+    } else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") {
+      fetchUrl = new URL("/shortlink-admin.html", url.origin).toString();
+    } else if (path.startsWith("/s/")) {
+      const shortCode = path.replace("/s/", "").split("/")[0].trim();
+      const targetUrl = new URL("/shortlink.html", url.origin);
+      if (shortCode) targetUrl.searchParams.set("go", shortCode);
+      fetchUrl = targetUrl.toString();
     } else if (path === "/maintenance") {
       fetchUrl = new URL("/maintenance.html", url.origin).toString();
     } else if (path === "/404") {
@@ -140,6 +149,8 @@ export default {
     else if (path === "/eventclass" || path === "/eventclass.html") target = "/eventclass.html";
     else if (path === "/event-admin" || path === "/event-admin.html") target = "/event-admin.html";
     else if (path === "/eventclass-admin" || path === "/eventclass-admin.html") target = "/eventclass-admin.html";
+    else if (path === "/shortlink" || path === "/shortlink.html" || path.startsWith("/s/")) target = "/shortlink.html";
+    else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") target = "/shortlink-admin.html";
     else if (path === "/maintenance" || path === "/maintenance.html") target = "/maintenance.html";
     else if (path === "/404" || path === "/404.html") target = "/404.html";
     else if (path.startsWith("/assets/") || path.startsWith("/config/") || path.endsWith(".png") || path.endsWith(".js") || path.endsWith(".css")) {

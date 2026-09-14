@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบย่อลิงก์ & ลิงก์ด่วน (Shortlink) | COMED KKU</title>
+  <meta name="description" content="ระบบสร้างและส่งต่อลิงก์ย่อ QR Code อัตโนมัติ สาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- QRCode Generator Lib -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <script src="assets/js/shortlink_repo.js"></script>
+
+  <style>
+    .bg-mesh-glow {
+      background: radial-gradient(circle at 10% 20%, rgba(249, 115, 22, 0.15) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
+                  radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.10) 0%, transparent 50%);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden bg-mesh-glow">
+
+  <!-- REDIRECTION LOADER OVERLAY (Shown if URL has ?go=code or /s/code) -->
+  <div id="redirectOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center">
+    <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-white shadow-2xl shadow-orange-500/40 animate-pulse mb-6">
+      <i data-lucide="external-link" class="w-10 h-10"></i>
+    </div>
+    <span class="px-3 py-1 rounded-full text-xs font-black bg-orange-500/10 text-orange-400 border border-orange-500/30 mb-2">
+      COMED REDIRECT ENGINE
+    </span>
+    <h2 class="text-2xl sm:text-3xl font-black text-white mb-2" id="redirectTitle">กำลังนำท่านไปยังปลายทาง...</h2>
+    <p class="text-sm text-slate-400 max-w-md mb-6" id="redirectTargetDisplay">https://...</p>
+    
+    <div class="w-64 h-2 rounded-full bg-slate-800 overflow-hidden mb-4">
+      <div id="redirectProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-sky-500 transition-all duration-300" style="width: 20%;"></div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a id="redirectManualBtn" href="#" class="px-5 py-2.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg transition flex items-center gap-2">
+        <span>คลิกที่นี่หากไม่เปลี่ยนหน้าอัตโนมัติ</span>
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </a>
+      <a href="shortlink.html" class="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+        ยกเลิก
+      </a>
+    </div>
+  </div>
+
+  <!-- NOT FOUND OVERLAY -->
+  <div id="notFoundOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center">
+    <div class="w-20 h-20 rounded-3xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-2xl shadow-rose-500/20 mb-6">
+      <i data-lucide="link-2-off" class="w-10 h-10"></i>
+    </div>
+    <span class="px-3 py-1 rounded-full text-xs font-black bg-rose-500/10 text-rose-400 border border-rose-500/30 mb-2">
+      404 LINK NOT FOUND
+    </span>
+    <h2 class="text-2xl sm:text-3xl font-black text-white mb-2">ไม่พบลิงก์ย่อนี้ในระบบ</h2>
+    <p class="text-sm text-slate-400 max-w-md mb-6" id="notFoundMsg">รหัสลิงก์ย่ออาจหมดอายุ ถูกระงับ หรือไม่มีอยู่ในระบบ</p>
+    <div class="flex items-center gap-3">
+      <a href="shortlink.html" class="px-5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition flex items-center gap-2">
+        <i data-lucide="home" class="w-4 h-4"></i>
+        <span>กลับหน้าหลักลิงก์ย่อ</span>
+      </a>
+      <a href="shortlink-admin.html" class="px-5 py-2.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition flex items-center gap-2">
+        <i data-lucide="sliders" class="w-4 h-4"></i>
+        <span>สร้างลิงก์นี้ในหลังบ้าน</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-white font-black shadow-lg shadow-orange-500/20">
+            <i data-lucide="link-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-sm sm:text-base font-black text-white">COMED Shortlink</h1>
+              <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+                KKU 69
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400">ระบบย่อลิงก์ด่วน & สร้าง QR Code อัตโนมัติ</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="shortlink-admin.html" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="sliders" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span class="hidden sm:inline">จัดการลิงก์หลังบ้าน</span>
+        </a>
+        <a href="index.html" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-black shadow-md shadow-orange-600/25 transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">หน้าแรก</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero & Fast Creator Section -->
+  <main class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 flex-grow space-y-8">
+
+    <div class="text-center max-w-2xl mx-auto space-y-3 pt-4">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-orange-400 text-xs font-black shadow-inner">
+        <i data-lucide="sparkles" class="w-4 h-4"></i>
+        <span>สร้างลิงก์ย่อสั้น สวยงาม พร้อม QR Code ทันที</span>
+      </div>
+      <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+        ย่อลิงก์ให้กระชับ แชร์ง่าย <br class="hidden sm:inline">
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-sky-400">
+          ติดตามสถิติได้แบบ Real-Time
+        </span>
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-400">
+        แปลง URL ยาวๆ ให้เป็นลิงก์สั้นของสาขาคอมพิวเตอร์ศึกษา ใช้งานได้ทั้งบนโทรศัพท์และคอมพิวเตอร์
+      </p>
+    </div>
+
+    <!-- Quick Shortener Box Card -->
+    <div class="max-w-3xl mx-auto p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+      <div class="absolute -top-12 -right-12 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <form id="publicShortenForm" onsubmit="handlePublicShorten(event)" class="space-y-4">
+        <!-- Target URL Input -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-300 flex items-center gap-2">
+            <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>วางลิงก์ปลายทางที่ต้องการย่อ (Long URL) *</span>
+          </label>
+          <div class="relative">
+            <input type="url" id="inputTargetUrl" required placeholder="https://example.com/very-long-url-path..."
+              class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition font-sans">
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+              <i data-lucide="link" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Optional Custom Code -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300 flex items-center justify-between">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="hash" class="w-3.5 h-3.5 text-orange-400"></i>
+                <span>กำหนดรหัสย่อเอง (กำหนดเองหรือไม่ก็ได้)</span>
+              </span>
+              <span class="text-[10px] text-slate-400">เช่น event2026</span>
+            </label>
+            <div class="flex items-center rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden focus-within:border-orange-500">
+              <span class="px-3 py-3 text-xs text-slate-500 font-mono bg-slate-900 border-r border-slate-800 flex-shrink-0 select-none">
+                /s/
+              </span>
+              <input type="text" id="inputCustomCode" placeholder="เว้นว่างไว้ให้สุ่ม" pattern="[A-Za-z0-9-_]+"
+                class="w-full px-3 py-3 bg-transparent text-white placeholder-slate-600 text-xs font-mono outline-none">
+            </div>
+          </div>
+
+          <!-- Title / Note -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="tag" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>ชื่ออ้างอิง / คำอธิบายสั้นๆ</span>
+            </label>
+            <input type="text" id="inputTitle" placeholder="เช่น สไลด์วิชาคอมพิวเตอร์..."
+              class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-xs focus:border-orange-500 outline-none">
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="btnShortenSubmit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-sm shadow-xl shadow-orange-600/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+          <i data-lucide="wand-2" class="w-4 h-4"></i>
+          <span>สร้างลิงก์ย่อทันที</span>
+        </button>
+      </form>
+
+      <!-- Created Result Modal / Card (Hidden by default) -->
+      <div id="newLinkResultCard" class="hidden mt-6 p-5 rounded-2xl bg-slate-950 border border-orange-500/40 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span>สร้างลิงก์ย่อเรียบร้อยแล้ว!</span>
+          </div>
+          <button onclick="dismissResultCard()" class="text-slate-400 hover:text-white p-1 text-xs">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center gap-5">
+          <!-- QR Code Canvas -->
+          <div class="p-3 bg-white rounded-2xl shadow-md flex-shrink-0">
+            <div id="resultQrContainer" class="w-32 h-32 flex items-center justify-center"></div>
+          </div>
+
+          <!-- Link Details -->
+          <div class="flex-grow space-y-3 w-full">
+            <div>
+              <span id="resTitleDisplay" class="text-xs font-bold text-slate-300 block">ลิงก์ย่อของคุณ:</span>
+              <div class="flex items-center gap-2 mt-1">
+                <input type="text" id="resShortUrlInput" readonly class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-orange-400 font-mono font-bold text-sm outline-none">
+                <button onclick="copyResultUrl()" class="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center gap-1.5 transition flex-shrink-0 cursor-pointer">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                  <span id="copyBtnText">คัดลอก</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-slate-400 flex items-center justify-between border-t border-slate-800/80 pt-2">
+              <span class="truncate max-w-xs">ปลายทาง: <strong id="resTargetDisplay" class="text-slate-300 font-mono font-normal"></strong></span>
+              <a id="resDirectLink" href="#" target="_blank" class="text-sky-400 hover:underline flex items-center gap-1 font-bold flex-shrink-0">
+                <span>ทดสอบเปิด</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Shortlinks Directory / Popular Links -->
+    <div class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+        <div>
+          <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+            <i data-lucide="layers" class="w-5 h-5 text-orange-400"></i>
+            <span>ลิงก์ย่อสาธารณะและลิงก์ทางการ (Official Directory)</span>
+          </h3>
+          <p class="text-xs text-slate-400">คลิกที่การ์ดเพื่อเปิดใช้งาน หรือคัดลอกลิงก์และ QR Code ได้ทันที</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Search box -->
+          <div class="relative">
+            <input type="text" id="searchLinksInput" oninput="filterDirectory()" placeholder="ค้นหารหัส / ปลายทาง..."
+              class="w-48 sm:w-64 pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-orange-500">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links Grid -->
+      <div id="linksGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- QR Code Modal -->
+  <div id="qrModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl space-y-4 relative">
+      <button onclick="closeQrModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="space-y-1">
+        <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+          QR CODE
+        </span>
+        <h4 id="qrModalTitle" class="text-base font-black text-white truncate">ชื่อลิงก์</h4>
+        <p id="qrModalCode" class="text-xs text-slate-400 font-mono">/s/code</p>
+      </div>
+
+      <div class="p-4 bg-white rounded-2xl inline-block shadow-lg mx-auto">
+        <div id="qrModalContainer" class="w-48 h-48 flex items-center justify-center"></div>
+      </div>
+
+      <div class="space-y-2 pt-2">
+        <input type="text" id="qrModalUrl" readonly class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-orange-400 font-mono text-xs text-center">
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="copyQrModalUrl()" class="py-2.5 px-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>คัดลอกลิงก์</span>
+          </button>
+          <button onclick="downloadQrModalImage()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>โหลดภาพ QR</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto px-4 space-y-1">
+      <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU 69)</p>
+      <p class="text-[11px] text-slate-600">Universal Shortlink Engine with Automatic Redirection & Real-Time Tracking</p>
+    </div>
+  </footer>
+
+  <script>
+    // 1. Initial State & Auto Redirection Check
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      // Check query parameter for automatic redirection (e.g. shortlink.html?go=pay or shortlink.html?s=pay)
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectCode = urlParams.get('go') || urlParams.get('s') || urlParams.get('code');
+
+      if (redirectCode) {
+        await handleIncomingRedirection(redirectCode);
+        return;
+      }
+
+      // Check path-based redirection (if loaded under /s/:code)
+      const pathParts = window.location.pathname.split('/');
+      const sIndex = pathParts.indexOf('s');
+      if (sIndex !== -1 && pathParts[sIndex + 1]) {
+        const pCode = pathParts[sIndex + 1];
+        await handleIncomingRedirection(pCode);
+        return;
+      }
+
+      renderLinksDirectory();
+    });
+
+    // 2. Perform Redirection Logic
+    async function handleIncomingRedirection(code) {
+      const link = window.ShortlinkRepo.getByCode(code);
+      const overlay = document.getElementById('redirectOverlay');
+      const notFoundOverlay = document.getElementById('notFoundOverlay');
+      const prog = document.getElementById('redirectProgressBar');
+      const title = document.getElementById('redirectTitle');
+      const targetDisplay = document.getElementById('redirectTargetDisplay');
+      const manualBtn = document.getElementById('redirectManualBtn');
+
+      if (!link) {
+        // Not found
+        notFoundOverlay.classList.remove('hidden');
+        document.getElementById('notFoundMsg').textContent = `ไม่พบรหัสย่อ "/s/${code}" ในระบบ`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      if (!link.isActive) {
+        notFoundOverlay.classList.remove('hidden');
+        document.getElementById('notFoundMsg').textContent = `ลิงก์ย่อ "/s/${code}" (${link.title}) ถูกปิดการใช้งานชั่วคราว`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      // Record Click Count in background
+      window.ShortlinkRepo.recordClick(code);
+
+      overlay.classList.remove('hidden');
+      title.textContent = `กำลังนำทางไปที่: ${link.title}`;
+      targetDisplay.textContent = link.targetUrl;
+      manualBtn.href = link.targetUrl;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      // Progress animation
+      let p = 20;
+      const interval = setInterval(() => {
+        p += 25;
+        if (prog) prog.style.width = p + '%';
+        if (p >= 100) {
+          clearInterval(interval);
+          window.location.replace(link.targetUrl);
+        }
+      }, 100);
+    }
+
+    // 3. Render Directory Cards
+    function renderLinksDirectory(query = '') {
+      const container = document.getElementById('linksGridContainer');
+      if (!container) return;
+
+      let list = window.ShortlinkRepo.getAll();
+
+      if (query) {
+        const q = query.toLowerCase();
+        list = list.filter(l => 
+          l.code.toLowerCase().includes(q) || 
+          l.title.toLowerCase().includes(q) || 
+          l.targetUrl.toLowerCase().includes(q) ||
+          (l.category && l.category.toLowerCase().includes(q))
+        );
+      }
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full p-8 text-center bg-slate-900/40 rounded-3xl border border-slate-800 text-slate-400 space-y-2">
+            <i data-lucide="search-x" class="w-8 h-8 mx-auto text-slate-500"></i>
+            <p class="text-sm font-bold">ไม่พบลิงก์ย่อที่ตรงกับการค้นหา</p>
+          </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      const origin = window.location.origin;
+
+      container.innerHTML = list.map(item => {
+        const fullShortUrl = `${origin}/s/${item.code}`;
+        return `
+          <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/40 transition group space-y-4 flex flex-col justify-between shadow-lg">
+            <div class="space-y-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                  ${item.category || 'ทั่วไป'}
+                </span>
+                <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <i data-lucide="mouse-pointer" class="w-3 h-3 text-sky-400"></i>
+                  <span>${item.clicks || 0} ครั้ง</span>
+                </span>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-orange-400 transition leading-snug line-clamp-1">
+                  ${item.title}
+                </h4>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="text-xs font-mono font-bold text-amber-400">/s/${item.code}</span>
+                  <span class="text-[10px] text-slate-400">•</span>
+                  <span class="text-[11px] text-slate-500 truncate max-w-[160px] font-mono">${item.targetUrl}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1">
+                <button onclick="copyLinkCode('${item.code}')" title="คัดลอกลิงก์ย่อ" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+                <button onclick="openQrModal('${item.id}')" title="ดู QR Code" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer">
+                  <i data-lucide="qr-code" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <a href="shortlink.html?go=${item.code}" target="_blank" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs transition flex items-center gap-1.5 shadow-md flex-shrink-0 cursor-pointer">
+                <span>เปิดลิงก์</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function filterDirectory() {
+      const q = document.getElementById('searchLinksInput')?.value || '';
+      renderLinksDirectory(q);
+    }
+
+    // 4. Handle Public Link Creation
+    async function handlePublicShorten(e) {
+      e.preventDefault();
+      const targetUrl = document.getElementById('inputTargetUrl').value.trim();
+      const customCode = document.getElementById('inputCustomCode').value.trim();
+      const title = document.getElementById('inputTitle').value.trim();
+      const submitBtn = document.getElementById('btnShortenSubmit');
+
+      if (!targetUrl) return;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>กำลังสร้างลิงก์...</span>`;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      try {
+        const created = await window.ShortlinkRepo.createLink({
+          targetUrl: targetUrl,
+          code: customCode,
+          title: title || undefined,
+          category: 'สร้างทั่วไป'
+        });
+
+        const shortUrl = `${window.location.origin}/s/${created.code}`;
+
+        // Show Result Card
+        const resultCard = document.getElementById('newLinkResultCard');
+        resultCard.classList.remove('hidden');
+        document.getElementById('resShortUrlInput').value = shortUrl;
+        document.getElementById('resTargetDisplay').textContent = created.targetUrl;
+        document.getElementById('resDirectLink').href = `shortlink.html?go=${created.code}`;
+
+        // Generate QR code inside result box
+        const qrContainer = document.getElementById('resultQrContainer');
+        qrContainer.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(qrContainer, {
+            text: shortUrl,
+            width: 120,
+            height: 120,
+            colorDark: "#0f172a",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        }
+
+        // Reset form
+        document.getElementById('inputTargetUrl').value = '';
+        document.getElementById('inputCustomCode').value = '';
+        document.getElementById('inputTitle').value = '';
+
+        renderLinksDirectory();
+
+      } catch (err) {
+        alert("⚠️ เกิดข้อผิดพลาด: " + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i data-lucide="wand-2" class="w-4 h-4"></i><span>สร้างลิงก์ย่อทันที</span>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    function dismissResultCard() {
+      document.getElementById('newLinkResultCard').classList.add('hidden');
+    }
+
+    function copyResultUrl() {
+      const input = document.getElementById('resShortUrlInput');
+      if (!input) return;
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      const btn = document.getElementById('copyBtnText');
+      btn.textContent = 'คัดลอกแล้ว!';
+      setTimeout(() => { btn.textContent = 'คัดลอก'; }, 2000);
+    }
+
+    function copyLinkCode(code) {
+      const fullUrl = `${window.location.origin}/s/${code}`;
+      navigator.clipboard.writeText(fullUrl);
+      alert(`📋 คัดลอกลิงก์ย่อ "${fullUrl}" เรียบร้อยแล้ว!`);
+    }
+
+    // 5. QR Code Modal View
+    let currentQrModalLink = null;
+    function openQrModal(linkId) {
+      const link = window.ShortlinkRepo.getById(linkId);
+      if (!link) return;
+
+      currentQrModalLink = link;
+      const fullUrl = `${window.location.origin}/s/${link.code}`;
+
+      document.getElementById('qrModalTitle').textContent = link.title;
+      document.getElementById('qrModalCode').textContent = `/s/${link.code}`;
+      document.getElementById('qrModalUrl').value = fullUrl;
+
+      const container = document.getElementById('qrModalContainer');
+      container.innerHTML = '';
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(container, {
+          text: fullUrl,
+          width: 180,
+          height: 180,
+          colorDark: "#0f172a",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      }
+
+      document.getElementById('qrModal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeQrModal() {
+      document.getElementById('qrModal').classList.add('hidden');
+      currentQrModalLink = null;
+    }
+
+    function copyQrModalUrl() {
+      const input = document.getElementById('qrModalUrl');
+      if (!input) return;
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      alert("📋 คัดลอกลิงก์เรียบร้อยแล้ว!");
+    }
+
+    function downloadQrModalImage() {
+      const container = document.getElementById('qrModalContainer');
+      const img = container.querySelector('img');
+      if (img && img.src) {
+        const a = document.createElement('a');
+        a.href = img.src;
+        a.download = `qrcode_${currentQrModalLink?.code || 'shortlink'}.png`;
+        a.click();
+      }
+    }
+  </script>
+</body>
+</html>

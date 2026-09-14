@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการระบบย่อลิงก์ (Shortlink Admin Console) | COMED KKU</title>
+  <meta name="description" content="แผงควบคุมหลังบ้านจัดการลิงก์ย่อ สถิติการคลิก และ QR Code สาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Instant Admin Security Guard -->
+  <script src="config/admin_guard.js"></script>
+  <!-- QRCode Generator Lib -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <script src="assets/js/shortlink_repo.js"></script>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="admin.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+              ADMIN CONTROL PANEL
+            </span>
+          </div>
+          <h1 class="text-sm sm:text-base font-black text-white">จัดการระบบย่อลิงก์ (Shortlink Master Admin)</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="shortlink.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span>ดูหน้าบ้าน User</span>
+        </a>
+        <button onclick="openCreateModal()" class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-600/20 cursor-pointer active:scale-95">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>+ สร้างลิงก์ย่อใหม่</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 flex-grow space-y-6">
+
+    <!-- Overview Metrics Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Total Links -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span class="font-bold">ลิงก์ย่อทั้งหมด</span>
+          <div class="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+            <i data-lucide="link-2" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-white" id="statTotalLinks">0</div>
+        <div class="text-[11px] text-slate-500">พร้อมใช้งานและออนไลน์ในระบบ</div>
+      </div>
+
+      <!-- Total Clicks -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span class="font-bold">ยอดคลิกสะสม</span>
+          <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+            <i data-lucide="mouse-pointer" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-sky-400 font-mono" id="statTotalClicks">0</div>
+        <div class="text-[11px] text-slate-500">นับยอดเข้าชมอัตโนมัติ Real-Time</div>
+      </div>
+
+      <!-- Active Links -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span class="font-bold">สถานะเปิดใช้งาน</span>
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-emerald-400" id="statActiveLinks">0</div>
+        <div class="text-[11px] text-slate-500">สามารถคลิกส่งต่อปลายทางได้ทันที</div>
+      </div>
+
+      <!-- Cloud Sync Status -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span class="font-bold">ระบบจัดเก็บ & Cloud Sync</span>
+          <div class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+            <i data-lucide="database" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="text-lg font-black text-purple-300 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Supabase Ready</span>
+        </div>
+        <div class="text-[11px] text-slate-500">แคชบนเครื่องและสำรองบนคลาวด์</div>
+      </div>
+
+    </div>
+
+    <!-- Links Management Table Card -->
+    <div class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-5">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h3 class="text-base font-black text-white flex items-center gap-2">
+            <i data-lucide="list" class="w-4 h-4 text-orange-400"></i>
+            <span>ตารางรายการลิงก์ย่อทั้งหมดในระบบ</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">
+            คลิกคัดลอก ลิงก์ตรง QR Code แก้ไขปลายทาง หรือเปิด-ปิดสถานะได้อิสระ
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Search input -->
+          <div class="relative">
+            <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="ค้นหารหัสย่อ, ชื่อ, URL..."
+              class="w-56 sm:w-72 pl-8 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+          </div>
+
+          <button onclick="refreshData()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer" title="รีเฟรช">
+            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-800">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-950/80 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider text-[11px]">
+            <tr>
+              <th class="px-4 py-3.5">รหัสย่อ (Short URL)</th>
+              <th class="px-4 py-3.5">ชื่ออ้างอิง & หมวดหมู่</th>
+              <th class="px-4 py-3.5">URL ปลายทาง (Target)</th>
+              <th class="px-4 py-3.5 text-center">สถิติคลิก</th>
+              <th class="px-4 py-3.5 text-center">สถานะ</th>
+              <th class="px-4 py-3.5 text-right">เครื่องมือจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody" class="divide-y divide-slate-800/80">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Create / Edit Modal -->
+  <div id="linkModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 relative">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-black text-white" id="modalTitle">สร้างลิงก์ย่อใหม่</h4>
+            <p class="text-[11px] text-slate-400">กำหนดรหัสและ URL ปลายทาง</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="linkForm" onsubmit="handleFormSubmit(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="formLinkId">
+
+        <!-- Target URL -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-slate-300 block">URL ปลายทาง (Target URL) *</label>
+          <input type="url" id="formTargetUrl" required placeholder="https://example.com/long-page..."
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 outline-none focus:border-orange-500 font-mono">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Short Code -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-slate-300 block">รหัสย่อ (Short Code) *</label>
+            <div class="flex items-center rounded-xl bg-slate-950 border border-slate-800 overflow-hidden focus-within:border-orange-500">
+              <span class="px-2.5 py-2 text-slate-500 font-mono select-none bg-slate-900 border-r border-slate-800">/s/</span>
+              <input type="text" id="formCode" required pattern="[A-Za-z0-9-_]+" placeholder="pay"
+                class="w-full px-3 py-2 bg-transparent text-white font-mono outline-none">
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-slate-300 block">หมวดหมู่ (Category)</label>
+            <select id="formCategory" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none focus:border-orange-500">
+              <option value="การเงิน">การเงิน (Payment)</option>
+              <option value="กิจกรรม">กิจกรรม (Events)</option>
+              <option value="เอกสาร">เอกสาร & สไลด์</option>
+              <option value="เครื่องมือ">เครื่องมือ (Tools)</option>
+              <option value="ทั่วไป">ทั่วไป (General)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-slate-300 block">ชื่ออ้างอิงของลิงก์ (Title)</label>
+          <input type="text" id="formTitle" placeholder="เช่น ระบบชำระเงิน COMED KKU..."
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 outline-none focus:border-orange-500">
+        </div>
+
+        <!-- Active Switch -->
+        <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="font-bold text-white block">เปิดใช้งานลิงก์นี้ (Active)</span>
+            <span class="text-[11px] text-slate-400">หากปิด ผู้ใช้งานจะไม่สามารถเข้าถึงปลายทางได้</span>
+          </div>
+          <input type="checkbox" id="formIsActive" checked class="w-4 h-4 accent-orange-500 rounded cursor-pointer">
+        </div>
+
+        <!-- Buttons -->
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="formSubmitBtn" class="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black shadow-md shadow-orange-600/25 transition">
+            บันทึกข้อมูล
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- QR Code Preview Modal -->
+  <div id="adminQrModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl space-y-4 relative">
+      <button onclick="closeAdminQrModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="space-y-1">
+        <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+          QR CODE PREVIEW
+        </span>
+        <h4 id="adminQrTitle" class="text-base font-black text-white truncate">ชื่อลิงก์</h4>
+        <p id="adminQrCode" class="text-xs text-slate-400 font-mono">/s/code</p>
+      </div>
+
+      <div class="p-4 bg-white rounded-2xl inline-block shadow-lg mx-auto">
+        <div id="adminQrContainer" class="w-48 h-48 flex items-center justify-center"></div>
+      </div>
+
+      <div class="space-y-2 pt-2">
+        <input type="text" id="adminQrUrlInput" readonly class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-orange-400 font-mono text-xs text-center">
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="copyAdminQrUrl()" class="py-2.5 px-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>คัดลอกลิงก์</span>
+          </button>
+          <button onclick="downloadAdminQr()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>โหลดภาพ QR</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      refreshData();
+    });
+
+    function refreshData() {
+      renderAdminTable();
+      updateMetrics();
+    }
+
+    function updateMetrics() {
+      const list = window.ShortlinkRepo.getAll();
+      const totalClicks = list.reduce((acc, curr) => acc + (curr.clicks || 0), 0);
+      const activeCount = list.filter(l => l.isActive).length;
+
+      document.getElementById('statTotalLinks').textContent = list.length;
+      document.getElementById('statTotalClicks').textContent = totalClicks.toLocaleString();
+      document.getElementById('statActiveLinks').textContent = activeCount;
+    }
+
+    function renderAdminTable() {
+      const tbody = document.getElementById('adminTableBody');
+      if (!tbody) return;
+
+      const q = (document.getElementById('adminSearchInput')?.value || '').toLowerCase().trim();
+      let list = window.ShortlinkRepo.getAll();
+
+      if (q) {
+        list = list.filter(l => 
+          l.code.toLowerCase().includes(q) ||
+          l.title.toLowerCase().includes(q) ||
+          l.targetUrl.toLowerCase().includes(q) ||
+          (l.category && l.category.toLowerCase().includes(q))
+        );
+      }
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-slate-500">
+              <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-600"></i>
+              <span>ไม่พบข้อมูลลิงก์ย่อในระบบ</span>
+            </td>
+          </tr>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      const origin = window.location.origin;
+
+      tbody.innerHTML = list.map(item => {
+        const fullShortUrl = `${origin}/s/${item.code}`;
+        const activeBadge = item.isActive
+          ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">ONLINE</span>`
+          : `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">OFFLINE</span>`;
+
+        return `
+          <tr class="hover:bg-slate-900/60 transition group">
+            <td class="px-4 py-3.5">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-black text-amber-400 text-sm">/s/${item.code}</span>
+                <button onclick="copyAdminLinkUrl('${item.code}')" title="คัดลอกลิงก์" class="p-1 text-slate-500 hover:text-slate-300 transition cursor-pointer">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </td>
+
+            <td class="px-4 py-3.5">
+              <div class="font-bold text-white text-xs">${item.title}</div>
+              <span class="inline-block mt-0.5 text-[10px] font-black uppercase text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+                ${item.category || 'ทั่วไป'}
+              </span>
+            </td>
+
+            <td class="px-4 py-3.5 max-w-xs">
+              <div class="truncate font-mono text-slate-400 text-xs" title="${item.targetUrl}">
+                ${item.targetUrl}
+              </div>
+              <a href="${item.targetUrl}" target="_blank" class="text-[10px] text-sky-400 hover:underline flex items-center gap-1 mt-0.5 font-bold">
+                <span>เปิดลิงก์จริง</span>
+                <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+              </a>
+            </td>
+
+            <td class="px-4 py-3.5 text-center">
+              <span class="font-mono font-bold text-sky-400 text-sm">${(item.clicks || 0).toLocaleString()}</span>
+              <span class="block text-[10px] text-slate-500">ครั้ง</span>
+            </td>
+
+            <td class="px-4 py-3.5 text-center">
+              ${activeBadge}
+            </td>
+
+            <td class="px-4 py-3.5 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="openAdminQr('${item.id}')" title="ดู QR Code" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer">
+                  <i data-lucide="qr-code" class="w-4 h-4"></i>
+                </button>
+                <button onclick="openEditModal('${item.id}')" title="แก้ไข" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 transition cursor-pointer">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                </button>
+                <button onclick="deleteLinkConfirm('${item.id}')" title="ลบ" class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition cursor-pointer">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Modal Operations
+    function openCreateModal() {
+      document.getElementById('modalTitle').textContent = 'สร้างลิงก์ย่อใหม่';
+      document.getElementById('formLinkId').value = '';
+      document.getElementById('formTargetUrl').value = '';
+      document.getElementById('formCode').value = window.ShortlinkRepo.generateCode(5);
+      document.getElementById('formCategory').value = 'ทั่วไป';
+      document.getElementById('formTitle').value = '';
+      document.getElementById('formIsActive').checked = true;
+
+      document.getElementById('linkModal').classList.remove('hidden');
+    }
+
+    function openEditModal(linkId) {
+      const link = window.ShortlinkRepo.getById(linkId);
+      if (!link) return;
+
+      document.getElementById('modalTitle').textContent = 'แก้ไขข้อมูลลิงก์ย่อ';
+      document.getElementById('formLinkId').value = link.id;
+      document.getElementById('formTargetUrl').value = link.targetUrl;
+      document.getElementById('formCode').value = link.code;
+      document.getElementById('formCategory').value = link.category || 'ทั่วไป';
+      document.getElementById('formTitle').value = link.title || '';
+      document.getElementById('formIsActive').checked = Boolean(link.isActive);
+
+      document.getElementById('linkModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('linkModal').classList.add('hidden');
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('formLinkId').value;
+      const targetUrl = document.getElementById('formTargetUrl').value.trim();
+      const code = document.getElementById('formCode').value.trim();
+      const category = document.getElementById('formCategory').value;
+      const title = document.getElementById('formTitle').value.trim();
+      const isActive = document.getElementById('formIsActive').checked;
+
+      try {
+        if (id) {
+          await window.ShortlinkRepo.updateLink(id, {
+            targetUrl,
+            code,
+            category,
+            title,
+            isActive
+          });
+        } else {
+          await window.ShortlinkRepo.createLink({
+            targetUrl,
+            code,
+            category,
+            title: title || undefined,
+            isActive
+          });
+        }
+        closeModal();
+        refreshData();
+      } catch (err) {
+        alert("⚠️ บันทึกไม่สำเร็จ: " + err.message);
+      }
+    }
+
+    async function deleteLinkConfirm(id) {
+      const link = window.ShortlinkRepo.getById(id);
+      if (!link) return;
+
+      if (confirm(`ยืนยันการลบรหัสย่อ "/s/${link.code}" (${link.title}) หรือไม่?\n\nเมื่อลบแล้วจะไม่สามารถเข้าผ่านลิงก์ย่อนี้ได้อีก`)) {
+        await window.ShortlinkRepo.deleteLink(id);
+        refreshData();
+      }
+    }
+
+    function copyAdminLinkUrl(code) {
+      const fullUrl = `${window.location.origin}/s/${code}`;
+      navigator.clipboard.writeText(fullUrl);
+      alert(`📋 คัดลอกลิงก์ย่อ "${fullUrl}" เรียบร้อยแล้ว!`);
+    }
+
+    // QR Preview in Admin
+    let currentAdminQrLink = null;
+    function openAdminQr(linkId) {
+      const link = window.ShortlinkRepo.getById(linkId);
+      if (!link) return;
+
+      currentAdminQrLink = link;
+      const fullUrl = `${window.location.origin}/s/${link.code}`;
+
+      document.getElementById('adminQrTitle').textContent = link.title;
+      document.getElementById('adminQrCode').textContent = `/s/${link.code}`;
+      document.getElementById('adminQrUrlInput').value = fullUrl;
+
+      const container = document.getElementById('adminQrContainer');
+      container.innerHTML = '';
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(container, {
+          text: fullUrl,
+          width: 180,
+          height: 180,
+          colorDark: "#0f172a",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      }
+
+      document.getElementById('adminQrModal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeAdminQrModal() {
+      document.getElementById('adminQrModal').classList.add('hidden');
+      currentAdminQrLink = null;
+    }
+
+    function copyAdminQrUrl() {
+      const input = document.getElementById('adminQrUrlInput');
+      if (!input) return;
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      alert("📋 คัดลอกลิงก์เรียบร้อยแล้ว!");
+    }
+
+    function downloadAdminQr() {
+      const container = document.getElementById('adminQrContainer');
+      const img = container.querySelector('img');
+      if (img && img.src) {
+        const a = document.createElement('a');
+        a.href = img.src;
+        a.download = `qrcode_${currentAdminQrLink?.code || 'shortlink'}.png`;
+        a.click();
+      }
+    }
+  </script>
+</body>
+</html>
