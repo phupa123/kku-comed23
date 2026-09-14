@@ -284,14 +284,54 @@
       return this.shares.find(s => s.shareCode === shareCode);
     }
 
+    getShareByTarget(targetType, targetId) {
+      return this.shares.find(s => s.targetType === targetType && s.targetId === targetId);
+    }
+
     getUserShares(userEmail) {
       const email = (userEmail || '').toLowerCase().trim();
       if (!email) return [];
       return this.shares.filter(s => s.creatorEmail === email);
     }
 
+    async updateShare(shareId, updateData = {}) {
+      const share = this.shares.find(s => s.id === shareId);
+      if (!share) return null;
+
+      if (updateData.accessType !== undefined) share.accessType = updateData.accessType;
+      if (updateData.allowedEmails !== undefined) {
+        share.allowedEmails = (updateData.allowedEmails || []).map(e => e.toLowerCase().trim());
+      }
+      if (updateData.expiresInHours !== undefined) {
+        if (updateData.expiresInHours > 0) {
+          share.expiresAt = new Date(Date.now() + updateData.expiresInHours * 60 * 60 * 1000).toISOString();
+        } else {
+          share.expiresAt = null;
+        }
+      }
+      if (updateData.password !== undefined) {
+        if (updateData.password) {
+          share.passwordHash = await this.hashPassword(updateData.password);
+          share.hasPassword = true;
+        } else if (updateData.removePassword) {
+          share.passwordHash = null;
+          share.hasPassword = false;
+        }
+      }
+
+      share.updatedAt = new Date().toISOString();
+      this.saveData(STORAGE_SHARES_KEY, this.shares);
+      return share;
+    }
+
     deleteShare(shareId) {
       this.shares = this.shares.filter(s => s.id !== shareId);
+      this.saveData(STORAGE_SHARES_KEY, this.shares);
+      return true;
+    }
+
+    revokeShareForTarget(targetType, targetId) {
+      this.shares = this.shares.filter(s => !(s.targetType === targetType && s.targetId === targetId));
       this.saveData(STORAGE_SHARES_KEY, this.shares);
       return true;
     }
