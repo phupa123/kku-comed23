@@ -3,8 +3,8 @@
  * EVENT CLASS CONTROLLER (4-Step Wizard Flow) - assets/js/eventclass.js
  * สาขาวิชาคอมพิวเตอร์ศึกษา COMED23 | รุ่นในมหาวิทยาลัย KKU63
  * Step-1: ระบุตัวตน + ตรวจสอบข้อมูลติดต่อ (เช่น เบอร์โทรศัพท์)
- * Step-2: เลือกกิจกรรม (สามารถเลือกได้ 2 กิจกรรม) *หากระบบเปิดจึงจะเลือก Step 2-3 ได้
- * Step-3: เลือกฝ่ายในกิจกรรมนั้นๆ
+ * Step-2: เลือกกิจกรรม (สามารถเลือกได้ทั้ง 2 กิจกรรม หรือเลือก 1 กิจกรรม)
+ * Step-3: เลือกฝ่ายในกิจกรรมที่เลือก
  * Step-4: ทำเนียบเพื่อน (สามารถแก้ไข/เปลี่ยนของตัวเองได้จนกว่าระบบจะปิด)
  * =========================================================================
  */
@@ -18,6 +18,9 @@ let pendingTrackSelection = null; // { trackId, deptId, roleId, trackTitle, dept
 let currentRosterFilter = 'all'; // 'all' | 'grad' | 'children' | 'both' | 'pending'
 let currentStepNumber = 1;
 
+// Multi-select state for Step-2
+let selectedTrackIds = ['track_grad']; // array of selected track IDs, e.g. ['track_grad'], ['track_children'], or both
+
 document.addEventListener('DOMContentLoaded', async () => {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -30,19 +33,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Check Session
   initUserSession();
 
-  // 4. Check system open status & update banners
+  // 4. Initialize selectedTrackIds based on user registrations or defaults
+  initSelectedTracks();
+
+  // 5. Check system open status & update banners
   updateSystemStatusBanner();
 
-  // 5. Initial Renderings
+  // 6. Initial Renderings
   renderStep2TrackCards();
   renderStep3Departments();
   updateUserSummaryStep4();
   renderClassRosterTable();
 
-  // 6. Setup Google Login
+  // 7. Setup Google Login
   initGoogleAuthStep1();
 
-  // 7. Background Cloud Sync
+  // 8. Background Cloud Sync
   try {
     await window.ComedEventManager.fetchCloudData(EVENT_CLASS_ID);
     currentClassEvent = window.ComedEventManager.getActiveEvent(EVENT_CLASS_ID);
@@ -51,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   startRealtimeLiveSync();
 
-  // 8. Auto step placement
+  // 9. Auto step placement
   if (currentStudent && currentStudent.studentId) {
     if (isSystemOpen()) {
       goToStep(2);
@@ -65,6 +71,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function isSystemOpen() {
   return currentClassEvent && currentClassEvent.status === 'open';
+}
+
+function initSelectedTracks() {
+  if (!currentStudent) {
+    selectedTrackIds = ['track_grad'];
+    return;
+  }
+  const myGrad = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_grad');
+  const myChild = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_children');
+
+  selectedTrackIds = [];
+  if (myGrad) selectedTrackIds.push('track_grad');
+  if (myChild) selectedTrackIds.push('track_children');
+
+  if (selectedTrackIds.length === 0) {
+    selectedTrackIds = ['track_grad']; // default
+  }
 }
 
 function updateSystemStatusBanner() {
@@ -146,6 +169,10 @@ function goToStep(step) {
     if (btn2) btn2.className = baseActive;
     renderStep2TrackCards();
   } else if (step === 3) {
+    // If activeTrackId is not among selectedTrackIds, pick the first selected
+    if (selectedTrackIds.length > 0 && !selectedTrackIds.includes(activeTrackId)) {
+      activeTrackId = selectedTrackIds[0];
+    }
     sec3?.classList.remove('hidden');
     if (btn1) btn1.className = baseCompleted;
     if (btn2) btn2.className = baseCompleted;
@@ -189,7 +216,6 @@ function initUserSession() {
           );
         }
 
-        // Check if phone was previously registered in any track
         let detectedPhone = user.phone || '';
         if (!detectedPhone && st) {
           const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
@@ -217,7 +243,6 @@ function handleStep1StudentChange(studentId) {
   const student = (window.STUDENTS_DATA || []).find(s => s.id === studentId);
   if (!student) return;
 
-  // Retrieve phone if already saved in registration
   let detectedPhone = '';
   const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
   const found = regs.find(r => r.studentId === student.id && (r.phone || (r.note && r.note.includes('TEL:'))));
@@ -234,6 +259,7 @@ function handleStep1StudentChange(studentId) {
   };
 
   localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentStudent));
+  initSelectedTracks();
   updateProfileCardsStep1();
 }
 
@@ -333,7 +359,6 @@ function submitStep1AndContinue() {
     return;
   }
 
-  // Check phone input
   const phoneVal = (document.getElementById('step1PhoneInput')?.value || '').trim();
   if (phoneVal) {
     currentStudent.phone = phoneVal;
@@ -392,6 +417,7 @@ function handleGoogleAuthResponse(response) {
     };
 
     localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentStudent));
+    initSelectedTracks();
     updateProfileCardsStep1();
 
     if (isSystemOpen()) {
@@ -402,7 +428,17 @@ function handleGoogleAuthResponse(response) {
   } catch(e) {}
 }
 
-// ================= STEP 2: เลือกกิจกรรม (2 กิจกรรมใหญ่) =================
+// ================= STEP 2: เลือกกิจกรรม (สามารถเลือก 2 กิจกรรมได้เลย) =================
+function toggleTrackSelection(trackId) {
+  const index = selectedTrackIds.indexOf(trackId);
+  if (index > -1) {
+    selectedTrackIds.splice(index, 1);
+  } else {
+    selectedTrackIds.push(trackId);
+  }
+  renderStep2TrackCards();
+}
+
 function renderStep2TrackCards() {
   const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
   const gradRegs = regs.filter(r => r.trackId === 'track_grad' || (r.departmentId && r.departmentId.startsWith('dept_grad_')));
@@ -411,6 +447,47 @@ function renderStep2TrackCards() {
   document.getElementById('step2GradEnrolledCount').textContent = `${gradRegs.length} / 30+ คน`;
   document.getElementById('step2ChildEnrolledCount').textContent = `${childRegs.length} / 30+ คน`;
 
+  const cardGrad = document.getElementById('cardTrackSelectGrad');
+  const cardChild = document.getElementById('cardTrackSelectChild');
+  const checkGrad = document.getElementById('checkIndicatorGrad');
+  const checkChild = document.getElementById('checkIndicatorChild');
+  const badgeGrad = document.getElementById('step2GradSelectionBadge');
+  const badgeChild = document.getElementById('step2ChildSelectionBadge');
+
+  const isGradSelected = selectedTrackIds.includes('track_grad');
+  const isChildSelected = selectedTrackIds.includes('track_children');
+
+  // Grad Card UI
+  if (cardGrad) {
+    if (isGradSelected) {
+      cardGrad.className = "p-5 rounded-2xl border transition cursor-pointer relative space-y-3 shadow-lg group track-choice-active border-amber-500 bg-amber-500/10";
+      if (checkGrad) checkGrad.className = "w-6 h-6 rounded-lg border-2 border-amber-500 bg-amber-500 text-slate-950 flex items-center justify-center font-black transition flex-shrink-0";
+      checkGrad?.querySelector('svg, i')?.classList.remove('hidden');
+      if (badgeGrad) badgeGrad.innerHTML = `<span class="text-amber-400 font-black">✓ เลือกเข้าร่วมงานนี้</span>`;
+    } else {
+      cardGrad.className = "p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-slate-700 transition cursor-pointer relative space-y-3 shadow-lg group";
+      if (checkGrad) checkGrad.className = "w-6 h-6 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0";
+      checkGrad?.querySelector('svg, i')?.classList.add('hidden');
+      if (badgeGrad) badgeGrad.innerHTML = `<span class="text-slate-500">แตะเพื่อเลือก</span>`;
+    }
+  }
+
+  // Child Card UI
+  if (cardChild) {
+    if (isChildSelected) {
+      cardChild.className = "p-5 rounded-2xl border transition cursor-pointer relative space-y-3 shadow-lg group track-choice-active border-sky-500 bg-sky-500/10";
+      if (checkChild) checkChild.className = "w-6 h-6 rounded-lg border-2 border-sky-500 bg-sky-500 text-slate-950 flex items-center justify-center font-black transition flex-shrink-0";
+      checkChild?.querySelector('svg, i')?.classList.remove('hidden');
+      if (badgeChild) badgeChild.innerHTML = `<span class="text-sky-400 font-black">✓ เลือกเข้าร่วมงานนี้</span>`;
+    } else {
+      cardChild.className = "p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-slate-700 transition cursor-pointer relative space-y-3 shadow-lg group";
+      if (checkChild) checkChild.className = "w-6 h-6 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0";
+      checkChild?.querySelector('svg, i')?.classList.add('hidden');
+      if (badgeChild) badgeChild.innerHTML = `<span class="text-slate-500">แตะเพื่อเลือก</span>`;
+    }
+  }
+
+  // Check user registration status
   if (currentStudent) {
     const myGrad = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_grad');
     const myChild = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_children');
@@ -419,34 +496,62 @@ function renderStep2TrackCards() {
     const childPill = document.getElementById('step2ChildMyStatusPill');
 
     if (gradPill) {
-      if (myGrad) {
-        gradPill.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-        gradPill.textContent = `✓ ลงแล้ว: ${myGrad.roleTitle}`;
-      } else {
-        gradPill.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
-        gradPill.textContent = "ยังไม่ได้ลงชื่อ";
-      }
+      gradPill.textContent = myGrad ? `ลงตำแหน่งแล้ว: ${myGrad.roleTitle}` : 'ยังไม่เคยลงตำแหน่ง';
+      gradPill.className = myGrad ? "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
     }
 
     if (childPill) {
-      if (myChild) {
-        childPill.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-        childPill.textContent = `✓ ลงแล้ว: ${myChild.roleTitle}`;
-      } else {
-        childPill.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
-        childPill.textContent = "ยังไม่ได้ลงชื่อ";
-      }
+      childPill.textContent = myChild ? `ลงตำแหน่งแล้ว: ${myChild.roleTitle}` : 'ยังไม่เคยลงตำแหน่ง';
+      childPill.className = myChild ? "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
     }
   }
+
+  // Summary Text & Button
+  const summaryText = document.getElementById('step2SummaryText');
+  const btnText = document.getElementById('btnConfirmStep2Text');
+  const btnConfirm = document.getElementById('btnConfirmStep2');
+
+  const count = selectedTrackIds.length;
+  if (count === 2) {
+    if (summaryText) summaryText.innerHTML = `<span class="text-purple-400 font-black">🌟 เลือกครบ 2 กิจกรรม</span> (ซุ้มพี่บัณฑิต + งานวันเด็ก)`;
+    if (btnText) btnText.textContent = "ยืนยัน 2 กิจกรรม (ไปเลือกฝ่ายใน Step-3)";
+    if (btnConfirm) btnConfirm.className = "px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-purple-600/30 cursor-pointer";
+  } else if (count === 1) {
+    const singleName = selectedTrackIds[0] === 'track_grad' ? 'ซุ้มพี่บัณฑิต' : 'งานวันเด็กแห่งชาติ';
+    if (summaryText) summaryText.innerHTML = `<span class="text-amber-400 font-bold">เลือก 1 กิจกรรม:</span> ${singleName}`;
+    if (btnText) btnText.textContent = "ยืนยัน 1 กิจกรรม หรือไม่? (ไปเลือกฝ่ายใน Step-3)";
+    if (btnConfirm) btnConfirm.className = "px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer";
+  } else {
+    if (summaryText) summaryText.innerHTML = `<span class="text-rose-400 font-bold">ยังไม่ได้เลือกกิจกรรม</span> (กรุณาแตะเลือกอย่างน้อย 1 กิจกรรม)`;
+    if (btnText) btnText.textContent = "กรุณาแตะเลือกกิจกรรมด้านบน";
+    if (btnConfirm) btnConfirm.className = "px-5 py-2.5 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-not-allowed";
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-function selectTrackAndGoToStep3(trackId) {
+function confirmStep2Selection() {
   if (!isSystemOpen()) {
     alert("ระบบปิดรับสมัครชั่วคราว");
     goToStep(4);
     return;
   }
-  activeTrackId = trackId;
+
+  const count = selectedTrackIds.length;
+  if (count === 0) {
+    alert("กรุณาแตะเลือกกิจกรรมที่คุณต้องการเข้าร่วมอย่างน้อย 1 กิจกรรมครับ (สามารถเลือก 2 กิจกรรมได้เลย)");
+    return;
+  }
+
+  if (count === 1) {
+    const singleName = selectedTrackIds[0] === 'track_grad' ? 'ซุ้มพี่บัณฑิต' : 'งานวันเด็กแห่งชาติ';
+    const otherName = selectedTrackIds[0] === 'track_grad' ? 'งานวันเด็กแห่งชาติ' : 'ซุ้มพี่บัณฑิต';
+    const agree = confirm(`คุณเลือกเข้าร่วม 1 กิจกรรม: "${singleName}"\n\n(คุณสามารถเลือกทั้ง 2 กิจกรรมได้ หากต้องการเข้าร่วม ${otherName} ด้วย สามารถกดยกเลิกแล้วติ๊กเพิ่มได้ครับ)\n\nต้องการ "ยืนยัน 1 กิจกรรม หรือไม่" เพื่อไปเลือกฝ่าย?`);
+    if (!agree) return;
+  }
+
+  // Set default activeTrackId for Step-3
+  activeTrackId = selectedTrackIds[0];
   goToStep(3);
 }
 
@@ -464,14 +569,24 @@ function renderStep3Departments() {
   const bannerStatusBadge = document.getElementById('step3CurrentTrackStatusBadge');
   const container = document.getElementById('step3DepartmentsContainer');
 
+  // Update button visibility & selection state
+  if (btnGrad) {
+    const isGradInSelection = selectedTrackIds.includes('track_grad');
+    btnGrad.style.display = isGradInSelection ? 'inline-flex' : 'none';
+  }
+  if (btnChild) {
+    const isChildInSelection = selectedTrackIds.includes('track_children');
+    btnChild.style.display = isChildInSelection ? 'inline-flex' : 'none';
+  }
+
   if (activeTrackId === 'track_grad') {
-    btnGrad.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-amber-500 text-slate-950 font-black cursor-pointer shadow-sm";
-    btnChild.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 text-slate-400 hover:text-white font-bold cursor-pointer";
+    if (btnGrad) btnGrad.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-amber-500 text-slate-950 font-black cursor-pointer shadow-sm";
+    if (btnChild) btnChild.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 text-slate-400 hover:text-white font-bold cursor-pointer";
     if (bannerTitle) bannerTitle.textContent = "กำลังดูฝ่าย: ทำซุ้มพี่บัณฑิต (ช่วง 20 ธ.ค. 2 วัน)";
     if (bannerDesc) bannerDesc.textContent = "โรงรถ 1 ล็อค คณะศึกษาศาสตร์ เน้นจัดฉากถ่ายรูปสวยงามและต้อนรับพี่บัณฑิต";
   } else {
-    btnChild.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-sky-500 text-slate-950 font-black cursor-pointer shadow-sm";
-    btnGrad.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 text-slate-400 hover:text-white font-bold cursor-pointer";
+    if (btnChild) btnChild.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-sky-500 text-slate-950 font-black cursor-pointer shadow-sm";
+    if (btnGrad) btnGrad.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 text-slate-400 hover:text-white font-bold cursor-pointer";
     if (bannerTitle) bannerTitle.textContent = "กำลังดูฝ่าย: งานวันเด็กแห่งชาติ (ช่วง 9 ม.ค. 2570)";
     if (bannerDesc) bannerDesc.textContent = "ลงทะเบียนซุ้ม ออกแบบกิจกรรม Bingo, หุ่นยนต์, ระบายสี AR 3D และแจกของขวัญ";
   }
@@ -647,8 +762,24 @@ async function submitTrackRoleRegistration() {
 
     closeConfirmRoleModal();
     refreshUI();
-    alert(`✅ บันทึกตำแหน่ง "${pendingTrackSelection.roleTitle}" เรียบร้อยแล้ว!`);
-    goToStep(4); // Advance to Step 4 to review
+
+    // Check if user selected 2 tracks and still hasn't registered the other track
+    const otherTrackId = pendingTrackSelection.trackId === 'track_grad' ? 'track_children' : 'track_grad';
+    const otherTrackName = otherTrackId === 'track_grad' ? 'ซุ้มพี่บัณฑิต' : 'งานวันเด็กแห่งชาติ';
+    const otherReg = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, otherTrackId);
+
+    if (selectedTrackIds.includes(otherTrackId) && !otherReg) {
+      const chooseNext = confirm(`✅ บันทึกตำแหน่ง "${pendingTrackSelection.roleTitle}" เรียบร้อยแล้ว!\n\nคุณได้เลือก "${otherTrackName}" ไว้ด้วย ต้องการสลับไปเลือกฝ่ายในงาน ${otherTrackName} เลยหรือไม่?`);
+      if (chooseNext) {
+        activeTrackId = otherTrackId;
+        renderStep3Departments();
+        return;
+      }
+    } else {
+      alert(`✅ บันทึกตำแหน่ง "${pendingTrackSelection.roleTitle}" เรียบร้อยแล้ว!`);
+    }
+
+    goToStep(4);
   } catch(err) {
     alert("⚠️ " + (err.message || "ไม่สามารถลงทะเบียนได้"));
   } finally {

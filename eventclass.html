@@ -78,6 +78,11 @@
       opacity: 0.5;
       cursor: not-allowed !important;
     }
+    .track-choice-active {
+      border-color: #f97316 !important;
+      background: rgba(249, 115, 22, 0.12) !important;
+      box-shadow: 0 0 20px rgba(249, 115, 22, 0.15);
+    }
   </style>
 </head>
 
@@ -159,7 +164,7 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- STEP 1: ระบุตัวตน + ตรวจสอบข้อมูลที่ยังไม่ได้บันทึก (เบอร์โทร) -->
+    <!-- STEP 1: ระบุตัวตน + ตรวจสอบข้อมูลติดต่อ (เบอร์โทรศัพท์) -->
     <!-- ========================================================= -->
     <section id="stepSection1" class="space-y-4">
       <div class="clean-card rounded-2xl p-5 sm:p-7 space-y-5">
@@ -256,7 +261,7 @@
     </section>
 
     <!-- ========================================================= -->
-    <!-- STEP 2: เลือกกิจกรรม (สามารถเลือกได้ทั้ง 2 กิจกรรม) -->
+    <!-- STEP 2: เลือกกิจกรรม (เลือกได้ทั้ง 2 กิจกรรม หรือเลือก 1 กิจกรรม) -->
     <!-- ========================================================= -->
     <section id="stepSection2" class="hidden space-y-4">
       <div class="clean-card rounded-2xl p-5 sm:p-7 space-y-5">
@@ -264,13 +269,13 @@
           <div>
             <div class="flex items-center gap-2">
               <span class="text-xs font-bold text-orange-400 uppercase">Step-2: เลือกกิจกรรม</span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
-                เลือกได้ 2 กิจกรรม
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
+                เลือกได้ทั้ง 2 กิจกรรม
               </span>
             </div>
-            <h2 class="text-lg sm:text-xl font-black text-white mt-0.5">คุณต้องการเข้าร่วมกิจกรรมใดบ้าง?</h2>
+            <h2 class="text-lg sm:text-xl font-black text-white mt-0.5">เลือกกิจกรรมที่คุณต้องการเข้าร่วม</h2>
             <p class="text-xs text-slate-400 mt-1">
-              แตะเลือกกิจกรรมที่สนใจ สามารถเข้าร่วมทั้ง 2 กิจกรรม หรือเลือกอย่างใดอย่างหนึ่ง จากนั้นไปเลือกฝ่ายใน Step-3
+              แตะที่การ์ดเพื่อเลือก สามารถเลือกได้ทั้ง 2 กิจกรรมพร้อมกัน หรือเลือกเพียง 1 กิจกรรมตามความสะดวก
             </p>
           </div>
           <div class="text-xs font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/80 px-3 py-1.5 rounded-xl self-start sm:self-auto">
@@ -278,31 +283,36 @@
           </div>
         </div>
 
-        <!-- 2 Big Activity Selection Cards -->
+        <!-- 2 Big Selectable Activity Cards (Multi-Select Support) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           
           <!-- Track 1: ซุ้มพี่บัณฑิต -->
-          <div id="cardTrackSelectGrad" onclick="selectTrackAndGoToStep3('track_grad')"
+          <div id="cardTrackSelectGrad" onclick="toggleTrackSelection('track_grad')"
             class="p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-amber-500/50 transition cursor-pointer relative space-y-3 shadow-lg group">
+            
+            <!-- Selection Checkbox Indicator -->
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
-                  <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                <div id="checkIndicatorGrad" class="w-6 h-6 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0">
+                  <i data-lucide="check" class="w-4 h-4 hidden"></i>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
+                  <i data-lucide="graduation-cap" class="w-5 h-5"></i>
                 </div>
                 <div>
                   <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 block">กิจกรรมที่ 1</span>
                   <h3 class="text-base font-black text-white group-hover:text-amber-300 transition">ทำซุ้มพี่บัณฑิต</h3>
                 </div>
               </div>
-              <span id="step2GradEnrolledCount" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/20">
+              <span id="step2GradEnrolledCount" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
                 0 / 30+ คน
               </span>
             </div>
 
-            <div class="space-y-1.5 text-xs text-slate-300">
+            <div class="space-y-1.5 text-xs text-slate-300 pl-9">
               <div class="flex items-center gap-2 text-amber-300/90">
                 <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0"></i>
-                <span>ช่วงประมาณ 20 ธันวาคม (เสาร์-อาทิตย์ 2 วัน)</span>
+                <span>ช่วง 20 ธันวาคม (เสาร์-อาทิตย์ 2 วัน)</span>
               </div>
               <div class="flex items-center gap-2 text-slate-400">
                 <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-orange-400"></i>
@@ -310,36 +320,40 @@
               </div>
             </div>
 
-            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs pl-9">
               <span id="step2GradMyStatusPill" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">
-                ยังไม่ได้ลงชื่อ
+                ยังไม่เคยเลือก
               </span>
-              <span class="text-amber-400 font-bold flex items-center gap-1 group-hover:translate-x-1 transition">
-                <span>เลือกฝ่ายในงานนี้</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              <span id="step2GradSelectionBadge" class="text-xs font-bold text-slate-500 flex items-center gap-1">
+                แตะเพื่อเลือก
               </span>
             </div>
           </div>
 
           <!-- Track 2: งานวันเด็กแห่งชาติ -->
-          <div id="cardTrackSelectChild" onclick="selectTrackAndGoToStep3('track_children')"
+          <div id="cardTrackSelectChild" onclick="toggleTrackSelection('track_children')"
             class="p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-sky-500/50 transition cursor-pointer relative space-y-3 shadow-lg group">
+            
+            <!-- Selection Checkbox Indicator -->
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-sky-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
-                  <i data-lucide="sparkles" class="w-6 h-6"></i>
+                <div id="checkIndicatorChild" class="w-6 h-6 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0">
+                  <i data-lucide="check" class="w-4 h-4 hidden"></i>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-sky-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
+                  <i data-lucide="sparkles" class="w-5 h-5"></i>
                 </div>
                 <div>
                   <span class="text-[10px] font-black uppercase tracking-wider text-sky-400 block">กิจกรรมที่ 2</span>
                   <h3 class="text-base font-black text-white group-hover:text-sky-300 transition">งานวันเด็กแห่งชาติ</h3>
                 </div>
               </div>
-              <span id="step2ChildEnrolledCount" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-300 border border-sky-500/20">
+              <span id="step2ChildEnrolledCount" class="text-xs font-bold px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">
                 0 / 30+ คน
               </span>
             </div>
 
-            <div class="space-y-1.5 text-xs text-slate-300">
+            <div class="space-y-1.5 text-xs text-slate-300 pl-9">
               <div class="flex items-center gap-2 text-sky-300/90">
                 <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0"></i>
                 <span>ช่วง 9 มกราคม 2570</span>
@@ -350,27 +364,44 @@
               </div>
             </div>
 
-            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs pl-9">
               <span id="step2ChildMyStatusPill" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">
-                ยังไม่ได้ลงชื่อ
+                ยังไม่เคยเลือก
               </span>
-              <span class="text-sky-400 font-bold flex items-center gap-1 group-hover:translate-x-1 transition">
-                <span>เลือกฝ่ายในงานนี้</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              <span id="step2ChildSelectionBadge" class="text-xs font-bold text-slate-500 flex items-center gap-1">
+                แตะเพื่อเลือก
               </span>
             </div>
           </div>
 
         </div>
 
+        <!-- Selected Summary Notification Bar -->
+        <div id="step2SelectionSummaryBar" class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2.5">
+            <div id="step2SummaryIcon" class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold flex-shrink-0">
+              <i data-lucide="layers" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[11px]">สถานะการเลือกใน Step-2:</span>
+              <strong id="step2SummaryText" class="text-white text-sm">ยังไม่ได้เลือกกิจกรรม</strong>
+            </div>
+          </div>
+          <button onclick="confirmStep2Selection()" id="btnConfirmStep2"
+            class="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer">
+            <span id="btnConfirmStep2Text">ยืนยันกิจกรรมที่เลือก</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
         <!-- Navigation buttons -->
-        <div class="flex items-center justify-between gap-3 pt-2">
+        <div class="flex items-center justify-between gap-3 pt-1">
           <button onclick="goToStep(1)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1">
             <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
             <span>ย้อนกลับไป Step-1</span>
           </button>
-          <button onclick="goToStep(4)" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1">
-            <span>ข้ามไปดูทำเนียบเพื่อน (Step-4)</span>
+          <button onclick="goToStep(4)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1">
+            <span>ดูทำเนียบเพื่อน (Step-4)</span>
             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -389,7 +420,7 @@
             <span class="text-xs font-bold text-orange-400 uppercase">Step-3: เลือกฝ่าย</span>
             <h2 class="text-lg sm:text-xl font-black text-white">เลือกฝ่ายและหน้าที่ความถนัดของคุณ</h2>
             <p class="text-xs text-slate-400 mt-0.5">
-              สามารถกดสลับกิจกรรมเพื่อเลือกลงทั้ง 2 งานได้ตามสะดวก
+              แตะสลับกิจกรรมด้านบนเพื่อเลือกฝ่ายในแต่ละงานที่คุณเข้าร่วม
             </p>
           </div>
 
@@ -434,7 +465,7 @@
       <div class="flex items-center justify-between gap-3 pt-2">
         <button onclick="goToStep(2)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-          <span>ย้อนกลับไป Step-2 (เลือกกิจกรรม)</span>
+          <span>ย้อนกลับไป Step-2 (เปลี่ยนกิจกรรม)</span>
         </button>
         <button onclick="goToStep(4)" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition flex items-center gap-1 shadow-md">
           <span>ไป Step-4: สรุปและดูทำเนียบเพื่อน</span>
@@ -460,10 +491,10 @@
             </div>
             <h3 id="step4UserName" class="text-base sm:text-lg font-black text-white">-</h3>
           </div>
-          <button onclick="goToStep(3)" id="btnStep4EditMore"
+          <button onclick="goToStep(2)" id="btnStep4EditMore"
             class="px-3.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition flex items-center gap-1 cursor-pointer">
             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-            <span>เลือกฝ่ายเพิ่ม / เปลี่ยนตำแหน่ง</span>
+            <span>แก้ไขกิจกรรม / เลือกฝ่ายเพิ่ม</span>
           </button>
         </div>
 
@@ -601,6 +632,6 @@
   </div>
 
   <!-- Page Logic Script -->
-  <script src="assets/js/eventclass.js?v=2.6.0"></script>
+  <script src="assets/js/eventclass.js?v=2.7.0"></script>
 </body>
 </html>
