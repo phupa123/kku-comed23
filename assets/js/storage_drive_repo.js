@@ -101,13 +101,25 @@
       return userFlds;
     }
 
-    async createFolder(userKey, { name, color = 'amber', icon = 'folder', parentId = null, password = '' }) {
-      const uKey = (userKey || 'guest').toLowerCase().trim();
+    async createFolder(arg1, arg2 = {}) {
+      let uKey = 'guest';
+      let options = {};
+
+      if (typeof arg1 === 'string') {
+        uKey = arg1;
+        options = arg2 || {};
+      } else if (arg1 && typeof arg1 === 'object') {
+        options = arg1;
+        uKey = options.userEmail || options.userKey || 'guest';
+      }
+
+      const { name = 'โฟลเดอร์ใหม่', color = 'amber', icon = 'folder', parentId = null, password = '' } = options;
+      uKey = (uKey || 'guest').toLowerCase().trim();
       const passHash = password ? await this.hashPassword(password) : null;
       
       const newFolder = {
         id: 'fld_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-        name: name.trim() || 'โฟลเดอร์ใหม่',
+        name: (name || 'โฟลเดอร์ใหม่').trim(),
         userKey: uKey,
         color: color,
         icon: icon,
@@ -122,15 +134,17 @@
       return newFolder;
     }
 
-    async updateFolder(folderId, { name, color, icon, password, removePassword }) {
+    async updateFolder(folderId, options = {}) {
       const fld = this.folders.find(f => f.id === folderId);
       if (!fld) throw new Error('ไม่พบโฟลเดอร์');
 
-      if (name !== undefined) fld.name = name.trim();
+      const { name, color, icon, password, removePassword, isLocked } = options;
+
+      if (name !== undefined && name !== null) fld.name = String(name).trim();
       if (color !== undefined) fld.color = color;
       if (icon !== undefined) fld.icon = icon;
 
-      if (removePassword) {
+      if (removePassword || isLocked === false) {
         fld.passwordHash = null;
         fld.isLocked = false;
       } else if (password) {
@@ -193,10 +207,18 @@
       return true;
     }
 
-    async setFileLock(fileId, password) {
+    async setFileLock(fileId, arg1, arg2) {
       if (!this.filesMeta[fileId]) {
         this.filesMeta[fileId] = { folderId: null, isLocked: false, passwordHash: null, tags: [] };
       }
+
+      let password = null;
+      if (typeof arg1 === 'boolean') {
+        password = arg1 ? arg2 : null;
+      } else {
+        password = arg1;
+      }
+
       if (!password) {
         this.filesMeta[fileId].passwordHash = null;
         this.filesMeta[fileId].isLocked = false;
@@ -216,16 +238,19 @@
     }
 
     // ================= 4. ADVANCED SHARING ENGINE =================
-    async createShareLink({
-      targetType = 'file', // 'file' | 'folder'
-      targetId,
-      title = 'แชร์ไฟล์',
-      accessType = 'public', // 'public' | 'comed23' | 'specific'
-      allowedEmails = [],
-      password = '',
-      expiresInHours = 0, // 0 = no expiration
-      creatorEmail = ''
-    }) {
+    async createShareLink(options = {}) {
+      const {
+        targetType = 'file', // 'file' | 'folder'
+        targetId,
+        title = 'แชร์ไฟล์',
+        accessType = 'public', // 'public' | 'comed23' | 'specific'
+        allowedEmails = [],
+        password = '',
+        expiresInHours = 0, // 0 = no expiration
+        creatorEmail = '',
+        createdBy = ''
+      } = options;
+      const finalCreator = (creatorEmail || createdBy || '').toLowerCase().trim();
       const code = 's_' + Math.random().toString(36).substring(2, 8);
       const passHash = password ? await this.hashPassword(password) : null;
 
@@ -246,7 +271,7 @@
         passwordHash: passHash,
         expiresAt,
         createdAt: new Date().toISOString(),
-        creatorEmail: creatorEmail.toLowerCase().trim(),
+        creatorEmail: finalCreator,
         clicks: 0
       };
 
