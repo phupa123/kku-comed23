@@ -64,24 +64,93 @@
     .clean-card:hover {
       border-color: #334155;
     }
-    .step-active {
-      background: #f97316 !important;
+    
+    /* Stepper Specific Active States */
+    .step-active-1 {
+      background: linear-gradient(135deg, #f97316, #ea580c) !important;
       color: #ffffff !important;
-      border-color: #ea580c !important;
+      box-shadow: 0 4px 15px rgba(249, 115, 22, 0.35);
+      border: 1px solid #fdba74 !important;
     }
+    .step-active-2 {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
+      border: 1px solid #c4b5fd !important;
+    }
+    .step-active-3 {
+      background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 15px rgba(14, 165, 233, 0.35);
+      border: 1px solid #7dd3fc !important;
+    }
+    .step-active-4 {
+      background: linear-gradient(135deg, #10b981, #059669) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+      border: 1px solid #6ee7b7 !important;
+    }
+
     .step-completed {
-      background: #10b981 !important;
-      color: #ffffff !important;
-      border-color: #059669 !important;
+      background: #1e293b !important;
+      color: #34d399 !important;
+      border: 1px solid #059669 !important;
     }
+    .step-completed .step-num {
+      background: #059669 !important;
+      color: #ffffff !important;
+    }
+
     .step-disabled {
       opacity: 0.5;
       cursor: not-allowed !important;
     }
-    .track-choice-active {
-      border-color: #f97316 !important;
-      background: rgba(249, 115, 22, 0.12) !important;
-      box-shadow: 0 0 20px rgba(249, 115, 22, 0.15);
+
+    /* Step Distinct Card Themes */
+    .card-step-1 {
+      background: radial-gradient(circle at top right, rgba(249, 115, 22, 0.08), transparent 45%), #0f172a;
+      border: 1px solid rgba(249, 115, 22, 0.25);
+    }
+    .card-step-2 {
+      background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.1), transparent 50%), #0f172a;
+      border: 1px solid rgba(139, 92, 246, 0.25);
+    }
+    .card-step-3 {
+      background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 50%), #0f172a;
+      border: 1px solid rgba(14, 165, 233, 0.25);
+    }
+    .card-step-4 {
+      background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 50%), #0f172a;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    /* Activity Specific Color Palettes (ซุ้มบัณฑิต vs วันเด็ก) */
+    /* ซุ้มบัณฑิต = โทนเหลืองส้มทอง Amber / Warm */
+    .bg-grad-theme-unselected {
+      background: linear-gradient(145deg, rgba(120, 53, 15, 0.15), rgba(15, 23, 42, 0.95)) !important;
+      border-color: rgba(245, 158, 11, 0.3) !important;
+    }
+    .bg-grad-theme-unselected:hover {
+      border-color: rgba(245, 158, 11, 0.6) !important;
+    }
+    .bg-grad-theme-selected {
+      background: linear-gradient(145deg, rgba(180, 83, 9, 0.35), rgba(120, 53, 15, 0.25), rgba(15, 23, 42, 0.95)) !important;
+      border-color: #f59e0b !important;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+    }
+
+    /* งานวันเด็ก = โทนฟ้าครามสดใส Sky / Cyan / Cool */
+    .bg-child-theme-unselected {
+      background: linear-gradient(145deg, rgba(12, 74, 110, 0.15), rgba(15, 23, 42, 0.95)) !important;
+      border-color: rgba(14, 165, 233, 0.3) !important;
+    }
+    .bg-child-theme-unselected:hover {
+      border-color: rgba(14, 165, 233, 0.6) !important;
+    }
+    .bg-child-theme-selected {
+      background: linear-gradient(145deg, rgba(3, 105, 161, 0.35), rgba(12, 74, 110, 0.25), rgba(15, 23, 42, 0.95)) !important;
+      border-color: #0ea5e9 !important;
+      box-shadow: 0 0 25px rgba(14, 165, 233, 0.25);
     }
   </style>
 </head>
@@ -167,7 +236,7 @@
     <!-- STEP 1: ระบุตัวตน + ตรวจสอบข้อมูลติดต่อ (เบอร์โทรศัพท์) -->
     <!-- ========================================================= -->
     <section id="stepSection1" class="space-y-4">
-      <div class="clean-card rounded-2xl p-5 sm:p-7 space-y-5">
+      <div class="clean-card card-step-1 rounded-2xl p-5 sm:p-7 space-y-5">
         <div>
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-orange-400 uppercase">Step-1: ระบุตัวตน</span>
@@ -264,11 +333,11 @@
     <!-- STEP 2: เลือกกิจกรรม (เลือกได้ทั้ง 2 กิจกรรม หรือเลือก 1 กิจกรรม) -->
     <!-- ========================================================= -->
     <section id="stepSection2" class="hidden space-y-4">
-      <div class="clean-card rounded-2xl p-5 sm:p-7 space-y-5">
+      <div class="clean-card card-step-2 rounded-2xl p-5 sm:p-7 space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-orange-400 uppercase">Step-2: เลือกกิจกรรม</span>
+              <span class="text-xs font-bold text-purple-400 uppercase">Step-2: เลือกกิจกรรม</span>
               <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
                 เลือกได้ทั้ง 2 กิจกรรม
               </span>
@@ -278,7 +347,7 @@
               แตะที่การ์ดเพื่อเลือก สามารถเลือกได้ทั้ง 2 กิจกรรมพร้อมกัน หรือเลือกเพียง 1 กิจกรรมตามความสะดวก
             </p>
           </div>
-          <div class="text-xs font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/80 px-3 py-1.5 rounded-xl self-start sm:self-auto">
+          <div class="text-xs font-bold text-purple-300 bg-purple-950/50 border border-purple-800/80 px-3 py-1.5 rounded-xl self-start sm:self-auto">
             ผู้ลงชื่อ: <span id="step2UserName" class="text-white">-</span>
           </div>
         </div>
@@ -286,89 +355,89 @@
         <!-- 2 Big Selectable Activity Cards (Multi-Select Support) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           
-          <!-- Track 1: ซุ้มพี่บัณฑิต -->
+          <!-- Track 1: ซุ้มพี่บัณฑิต (Theme: Amber / Gold / Warm) -->
           <div id="cardTrackSelectGrad" onclick="toggleTrackSelection('track_grad')"
-            class="p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-amber-500/50 transition cursor-pointer relative space-y-3 shadow-lg group">
+            class="p-5 rounded-2xl border bg-grad-theme-unselected transition cursor-pointer relative space-y-3 shadow-lg group">
             
             <!-- Selection Checkbox Indicator -->
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-center gap-3">
-                <div id="checkIndicatorGrad" class="w-6 h-6 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0">
+                <div id="checkIndicatorGrad" class="w-6 h-6 rounded-lg border-2 border-amber-500/50 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0">
                   <i data-lucide="check" class="w-4 h-4 hidden"></i>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
                   <i data-lucide="graduation-cap" class="w-5 h-5"></i>
                 </div>
                 <div>
-                  <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 block">กิจกรรมที่ 1</span>
+                  <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 block">กิจกรรมที่ 1 • ซุ้มถ่ายรูป</span>
                   <h3 class="text-base font-black text-white group-hover:text-amber-300 transition">ทำซุ้มพี่บัณฑิต</h3>
                 </div>
               </div>
-              <span id="step2GradEnrolledCount" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
+              <span id="step2GradEnrolledCount" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 0 / 30+ คน
               </span>
             </div>
 
             <div class="space-y-1.5 text-xs text-slate-300 pl-9">
-              <div class="flex items-center gap-2 text-amber-300/90">
-                <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0"></i>
+              <div class="flex items-center gap-2 text-amber-300/95 font-medium">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0 text-amber-400"></i>
                 <span>ช่วง 20 ธันวาคม (เสาร์-อาทิตย์ 2 วัน)</span>
               </div>
               <div class="flex items-center gap-2 text-slate-400">
-                <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-orange-400"></i>
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-amber-500"></i>
                 <span>คณะศึกษาศาสตร์ (โรงรถ 1 ล็อคที่จอดรถ เน้นถ่ายรูป)</span>
               </div>
             </div>
 
-            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs pl-9">
-              <span id="step2GradMyStatusPill" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">
+            <div class="pt-2 border-t border-amber-900/40 flex items-center justify-between text-xs pl-9">
+              <span id="step2GradMyStatusPill" class="text-[10px] px-2 py-0.5 rounded font-bold bg-amber-950/60 text-amber-300/80 border border-amber-900/50">
                 ยังไม่เคยเลือก
               </span>
-              <span id="step2GradSelectionBadge" class="text-xs font-bold text-slate-500 flex items-center gap-1">
+              <span id="step2GradSelectionBadge" class="text-xs font-bold text-amber-400/80 flex items-center gap-1">
                 แตะเพื่อเลือก
               </span>
             </div>
           </div>
 
-          <!-- Track 2: งานวันเด็กแห่งชาติ -->
+          <!-- Track 2: งานวันเด็กแห่งชาติ (Theme: Sky / Cyan / Cool) -->
           <div id="cardTrackSelectChild" onclick="toggleTrackSelection('track_children')"
-            class="p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-sky-500/50 transition cursor-pointer relative space-y-3 shadow-lg group">
+            class="p-5 rounded-2xl border bg-child-theme-unselected transition cursor-pointer relative space-y-3 shadow-lg group">
             
             <!-- Selection Checkbox Indicator -->
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-center gap-3">
-                <div id="checkIndicatorChild" class="w-6 h-6 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0">
+                <div id="checkIndicatorChild" class="w-6 h-6 rounded-lg border-2 border-sky-500/50 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0">
                   <i data-lucide="check" class="w-4 h-4 hidden"></i>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-sky-500 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-sky-600 text-slate-950 flex items-center justify-center font-black flex-shrink-0 shadow-md">
                   <i data-lucide="sparkles" class="w-5 h-5"></i>
                 </div>
                 <div>
-                  <span class="text-[10px] font-black uppercase tracking-wider text-sky-400 block">กิจกรรมที่ 2</span>
+                  <span class="text-[10px] font-black uppercase tracking-wider text-sky-400 block">กิจกรรมที่ 2 • ฐานกิจกรรม</span>
                   <h3 class="text-base font-black text-white group-hover:text-sky-300 transition">งานวันเด็กแห่งชาติ</h3>
                 </div>
               </div>
-              <span id="step2ChildEnrolledCount" class="text-xs font-bold px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">
+              <span id="step2ChildEnrolledCount" class="text-xs font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
                 0 / 30+ คน
               </span>
             </div>
 
             <div class="space-y-1.5 text-xs text-slate-300 pl-9">
-              <div class="flex items-center gap-2 text-sky-300/90">
-                <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0"></i>
+              <div class="flex items-center gap-2 text-sky-300/95 font-medium">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0 text-sky-400"></i>
                 <span>ช่วง 9 มกราคม 2570</span>
               </div>
               <div class="flex items-center gap-2 text-slate-400">
-                <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-indigo-400"></i>
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-sky-500"></i>
                 <span>ลงทะเบียนซุ้มสาขา ออกแบบกิจกรรม (Bingo, Robot, AR)</span>
               </div>
             </div>
 
-            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs pl-9">
-              <span id="step2ChildMyStatusPill" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">
+            <div class="pt-2 border-t border-sky-900/40 flex items-center justify-between text-xs pl-9">
+              <span id="step2ChildMyStatusPill" class="text-[10px] px-2 py-0.5 rounded font-bold bg-sky-950/60 text-sky-300/80 border border-sky-900/50">
                 ยังไม่เคยเลือก
               </span>
-              <span id="step2ChildSelectionBadge" class="text-xs font-bold text-slate-500 flex items-center gap-1">
+              <span id="step2ChildSelectionBadge" class="text-xs font-bold text-sky-400/80 flex items-center gap-1">
                 แตะเพื่อเลือก
               </span>
             </div>
@@ -414,10 +483,10 @@
     <section id="stepSection3" class="hidden space-y-4">
       
       <!-- Track Switcher Header -->
-      <div class="clean-card rounded-2xl p-4 sm:p-5 space-y-3">
+      <div id="step3HeaderCard" class="clean-card card-step-3 rounded-2xl p-4 sm:p-5 space-y-3 transition">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <span class="text-xs font-bold text-orange-400 uppercase">Step-3: เลือกฝ่าย</span>
+            <span class="text-xs font-bold text-sky-400 uppercase">Step-3: เลือกฝ่าย</span>
             <h2 class="text-lg sm:text-xl font-black text-white">เลือกฝ่ายและหน้าที่ความถนัดของคุณ</h2>
             <p class="text-xs text-slate-400 mt-0.5">
               แตะสลับกิจกรรมด้านบนเพื่อเลือกฝ่ายในแต่ละงานที่คุณเข้าร่วม
@@ -425,9 +494,9 @@
           </div>
 
           <!-- Activity Switcher Buttons -->
-          <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 self-start sm:self-auto">
+          <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/90 border border-slate-800 self-start sm:self-auto">
             <button onclick="switchStep3Track('track_grad')" id="step3BtnGrad"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 font-black cursor-pointer">
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 font-black cursor-pointer shadow-sm">
               <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
               <span>ซุ้มพี่บัณฑิต</span>
             </button>
@@ -440,7 +509,7 @@
         </div>
 
         <!-- Banner of Current Track -->
-        <div id="step3TrackBanner" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+        <div id="step3TrackBanner" class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 flex items-center justify-between transition">
           <div class="flex items-center gap-2">
             <div id="step3BannerIcon" class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold flex-shrink-0">
               <i data-lucide="info" class="w-4 h-4"></i>
@@ -480,7 +549,7 @@
     <section id="stepSection4" class="hidden space-y-4">
       
       <!-- Current User Self-Management Card -->
-      <div class="clean-card rounded-2xl p-5 space-y-3">
+      <div class="clean-card card-step-4 rounded-2xl p-5 space-y-3">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <div class="flex items-center gap-2">

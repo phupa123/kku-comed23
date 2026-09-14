@@ -148,7 +148,6 @@ function goToStep(step) {
   [sec1, sec2, sec3, sec4].forEach(s => s?.classList.add('hidden'));
 
   const baseInactive = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 bg-slate-800/80 text-slate-400 cursor-pointer";
-  const baseActive = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 step-active cursor-pointer";
   const baseCompleted = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 step-completed cursor-pointer";
 
   [btn1, btn2, btn3, btn4].forEach(b => {
@@ -162,11 +161,11 @@ function goToStep(step) {
 
   if (step === 1) {
     sec1?.classList.remove('hidden');
-    if (btn1) btn1.className = baseActive;
+    if (btn1) btn1.className = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 step-active-1 cursor-pointer";
   } else if (step === 2) {
     sec2?.classList.remove('hidden');
     if (btn1) btn1.className = baseCompleted;
-    if (btn2) btn2.className = baseActive;
+    if (btn2) btn2.className = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 step-active-2 cursor-pointer";
     renderStep2TrackCards();
   } else if (step === 3) {
     // If activeTrackId is not among selectedTrackIds, pick the first selected
@@ -176,14 +175,14 @@ function goToStep(step) {
     sec3?.classList.remove('hidden');
     if (btn1) btn1.className = baseCompleted;
     if (btn2) btn2.className = baseCompleted;
-    if (btn3) btn3.className = baseActive;
+    if (btn3) btn3.className = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 step-active-3 cursor-pointer";
     renderStep3Departments();
   } else if (step === 4) {
     sec4?.classList.remove('hidden');
     if (btn1 && currentStudent) btn1.className = baseCompleted;
     if (btn2 && currentStudent) btn2.className = baseCompleted;
     if (btn3 && currentStudent) btn3.className = baseCompleted;
-    if (btn4) btn4.className = baseActive;
+    if (btn4) btn4.className = "step-nav-btn py-2 px-1.5 sm:px-2 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 step-active-4 cursor-pointer";
     updateUserSummaryStep4();
     renderClassRosterTable();
   }
@@ -460,30 +459,30 @@ function renderStep2TrackCards() {
   // Grad Card UI
   if (cardGrad) {
     if (isGradSelected) {
-      cardGrad.className = "p-5 rounded-2xl border transition cursor-pointer relative space-y-3 shadow-lg group track-choice-active border-amber-500 bg-amber-500/10";
-      if (checkGrad) checkGrad.className = "w-6 h-6 rounded-lg border-2 border-amber-500 bg-amber-500 text-slate-950 flex items-center justify-center font-black transition flex-shrink-0";
+      cardGrad.className = "p-5 rounded-2xl border transition cursor-pointer relative space-y-3 shadow-lg group bg-grad-theme-selected";
+      if (checkGrad) checkGrad.className = "w-6 h-6 rounded-lg border-2 border-amber-400 bg-amber-500 text-slate-950 flex items-center justify-center font-black transition flex-shrink-0 shadow-sm";
       checkGrad?.querySelector('svg, i')?.classList.remove('hidden');
-      if (badgeGrad) badgeGrad.innerHTML = `<span class="text-amber-400 font-black">✓ เลือกเข้าร่วมงานนี้</span>`;
+      if (badgeGrad) badgeGrad.innerHTML = `<span class="text-amber-300 font-black">✓ เลือกเข้าร่วมงานนี้</span>`;
     } else {
-      cardGrad.className = "p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-slate-700 transition cursor-pointer relative space-y-3 shadow-lg group";
-      if (checkGrad) checkGrad.className = "w-6 h-6 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0";
+      cardGrad.className = "p-5 rounded-2xl border transition cursor-pointer relative space-y-3 shadow-lg group bg-grad-theme-unselected";
+      if (checkGrad) checkGrad.className = "w-6 h-6 rounded-lg border-2 border-amber-500/40 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0";
       checkGrad?.querySelector('svg, i')?.classList.add('hidden');
-      if (badgeGrad) badgeGrad.innerHTML = `<span class="text-slate-500">แตะเพื่อเลือก</span>`;
+      if (badgeGrad) badgeGrad.innerHTML = `<span class="text-amber-400/80">แตะเพื่อเลือก</span>`;
     }
   }
 
   // Child Card UI
   if (cardChild) {
     if (isChildSelected) {
-      cardChild.className = "p-5 rounded-2xl border transition cursor-pointer relative space-y-3 shadow-lg group track-choice-active border-sky-500 bg-sky-500/10";
-      if (checkChild) checkChild.className = "w-6 h-6 rounded-lg border-2 border-sky-500 bg-sky-500 text-slate-950 flex items-center justify-center font-black transition flex-shrink-0";
+      cardChild.className = "p-5 rounded-2xl border transition cursor-pointer relative space-y-3 shadow-lg group bg-child-theme-selected";
+      if (checkChild) checkChild.className = "w-6 h-6 rounded-lg border-2 border-sky-400 bg-sky-500 text-slate-950 flex items-center justify-center font-black transition flex-shrink-0 shadow-sm";
       checkChild?.querySelector('svg, i')?.classList.remove('hidden');
-      if (badgeChild) badgeChild.innerHTML = `<span class="text-sky-400 font-black">✓ เลือกเข้าร่วมงานนี้</span>`;
+      if (badgeChild) badgeChild.innerHTML = `<span class="text-sky-300 font-black">✓ เลือกเข้าร่วมงานนี้</span>`;
     } else {
-      cardChild.className = "p-5 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-slate-700 transition cursor-pointer relative space-y-3 shadow-lg group";
-      if (checkChild) checkChild.className = "w-6 h-6 rounded-lg border-2 border-slate-700 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0";
+      cardChild.className = "p-5 rounded-2xl border transition cursor-pointer relative space-y-3 shadow-lg group bg-child-theme-unselected";
+      if (checkChild) checkChild.className = "w-6 h-6 rounded-lg border-2 border-sky-500/40 bg-slate-950 flex items-center justify-center text-white transition flex-shrink-0";
       checkChild?.querySelector('svg, i')?.classList.add('hidden');
-      if (badgeChild) badgeChild.innerHTML = `<span class="text-slate-500">แตะเพื่อเลือก</span>`;
+      if (badgeChild) badgeChild.innerHTML = `<span class="text-sky-400/80">แตะเพื่อเลือก</span>`;
     }
   }
 
@@ -579,16 +578,36 @@ function renderStep3Departments() {
     btnChild.style.display = isChildInSelection ? 'inline-flex' : 'none';
   }
 
-  if (activeTrackId === 'track_grad') {
-    if (btnGrad) btnGrad.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-amber-500 text-slate-950 font-black cursor-pointer shadow-sm";
+  const isGrad = (activeTrackId === 'track_grad');
+  const headerCard = document.getElementById('step3HeaderCard');
+  const bannerBox = document.getElementById('step3TrackBanner');
+
+  if (isGrad) {
+    if (btnGrad) btnGrad.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-amber-500 text-slate-950 font-black cursor-pointer shadow-md";
     if (btnChild) btnChild.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 text-slate-400 hover:text-white font-bold cursor-pointer";
     if (bannerTitle) bannerTitle.textContent = "กำลังดูฝ่าย: ทำซุ้มพี่บัณฑิต (ช่วง 20 ธ.ค. 2 วัน)";
     if (bannerDesc) bannerDesc.textContent = "โรงรถ 1 ล็อค คณะศึกษาศาสตร์ เน้นจัดฉากถ่ายรูปสวยงามและต้อนรับพี่บัณฑิต";
+    if (headerCard) {
+      headerCard.style.background = "radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 50%), #0f172a";
+      headerCard.style.borderColor = "rgba(245, 158, 11, 0.35)";
+    }
+    if (bannerBox) {
+      bannerBox.style.background = "linear-gradient(135deg, rgba(120, 53, 15, 0.25), rgba(15, 23, 42, 0.95))";
+      bannerBox.style.borderColor = "rgba(245, 158, 11, 0.3)";
+    }
   } else {
-    if (btnChild) btnChild.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-sky-500 text-slate-950 font-black cursor-pointer shadow-sm";
+    if (btnChild) btnChild.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 bg-sky-500 text-slate-950 font-black cursor-pointer shadow-md";
     if (btnGrad) btnGrad.className = "px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 text-slate-400 hover:text-white font-bold cursor-pointer";
     if (bannerTitle) bannerTitle.textContent = "กำลังดูฝ่าย: งานวันเด็กแห่งชาติ (ช่วง 9 ม.ค. 2570)";
     if (bannerDesc) bannerDesc.textContent = "ลงทะเบียนซุ้ม ออกแบบกิจกรรม Bingo, หุ่นยนต์, ระบายสี AR 3D และแจกของขวัญ";
+    if (headerCard) {
+      headerCard.style.background = "radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 50%), #0f172a";
+      headerCard.style.borderColor = "rgba(14, 165, 233, 0.35)";
+    }
+    if (bannerBox) {
+      bannerBox.style.background = "linear-gradient(135deg, rgba(12, 74, 110, 0.25), rgba(15, 23, 42, 0.95))";
+      bannerBox.style.borderColor = "rgba(14, 165, 233, 0.3)";
+    }
   }
 
   // Track status badge
@@ -599,7 +618,7 @@ function renderStep3Departments() {
       bannerStatusBadge.className = "text-[10px] px-2.5 py-1 rounded-lg font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
     } else {
       bannerStatusBadge.textContent = "ยังไม่ได้เลือกฝ่ายในงานนี้";
-      bannerStatusBadge.className = "text-[10px] px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-slate-400";
+      bannerStatusBadge.className = isGrad ? "text-[10px] px-2.5 py-1 rounded-lg font-bold bg-amber-950/40 text-amber-300/80 border border-amber-800/40" : "text-[10px] px-2.5 py-1 rounded-lg font-bold bg-sky-950/40 text-sky-300/80 border border-sky-800/40";
     }
   }
 
@@ -612,6 +631,14 @@ function renderStep3Departments() {
 
   const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
   const myTrackReg = currentStudent ? window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, activeTrackId) : null;
+
+  const deptCardBg = isGrad 
+    ? "background: linear-gradient(145deg, rgba(120, 53, 15, 0.08), rgba(15, 23, 42, 0.95)); border-color: rgba(245, 158, 11, 0.25);"
+    : "background: linear-gradient(145deg, rgba(12, 74, 110, 0.08), rgba(15, 23, 42, 0.95)); border-color: rgba(14, 165, 233, 0.25);";
+
+  const deptIconBg = isGrad ? "bg-amber-500/20 text-amber-400" : "bg-sky-500/20 text-sky-400";
+  const deptCountBadge = isGrad ? "text-amber-400 bg-amber-500/10 border-amber-500/20" : "text-sky-400 bg-sky-500/10 border-sky-500/20";
+  const roleSelectBtnClass = isGrad ? "bg-amber-600 hover:bg-amber-500 text-white" : "bg-sky-600 hover:bg-sky-500 text-white";
 
   container.innerHTML = track.departments.map(dept => {
     const deptRegs = regs.filter(r => (r.trackId === activeTrackId || !r.trackId) && r.departmentId === dept.id);
@@ -636,7 +663,7 @@ function renderStep3Departments() {
       } else {
         actionBtn = `
           <button onclick="openSelectRoleModal('${activeTrackId}', '${track.title}', '${dept.id}', '${dept.name}', '${role.id}', '${role.title}')"
-            class="px-3.5 py-1.5 rounded-xl ${isFull ? 'bg-amber-600 hover:bg-amber-500' : 'bg-orange-600 hover:bg-orange-500'} text-white text-xs font-bold transition flex items-center gap-1 cursor-pointer flex-shrink-0">
+            class="px-3.5 py-1.5 rounded-xl ${roleSelectBtnClass} text-xs font-bold transition flex items-center gap-1 cursor-pointer flex-shrink-0 shadow-sm">
             <span>${isFull ? '+ ลงเพิ่ม' : 'เลือกตำแหน่งนี้'}</span>
             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </button>
@@ -650,7 +677,7 @@ function renderStep3Departments() {
       `).join(' ');
 
       return `
-        <div class="p-3 rounded-xl bg-slate-950 border ${isMyRole ? 'border-emerald-500/50 bg-emerald-950/10' : 'border-slate-800/80'} space-y-2">
+        <div class="p-3 rounded-xl bg-slate-950 border ${isMyRole ? 'border-emerald-500/50 bg-emerald-950/15' : 'border-slate-800/80'} space-y-2">
           <div class="flex items-center justify-between gap-2">
             <div>
               <div class="flex items-center gap-1.5">
@@ -672,10 +699,10 @@ function renderStep3Departments() {
     }).join('');
 
     return `
-      <div class="clean-card rounded-2xl p-4 sm:p-5 space-y-3">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+      <div class="clean-card rounded-2xl p-4 sm:p-5 space-y-3 transition" style="${deptCardBg}">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
           <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold flex-shrink-0">
+            <div class="w-8 h-8 rounded-lg ${deptIconBg} flex items-center justify-center font-bold flex-shrink-0">
               <i data-lucide="${dept.icon || 'star'}" class="w-4 h-4"></i>
             </div>
             <div>
@@ -683,7 +710,7 @@ function renderStep3Departments() {
               <p class="text-[11px] text-slate-400 leading-tight">${dept.description || ''}</p>
             </div>
           </div>
-          <span class="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
+          <span class="text-xs font-mono font-bold ${deptCountBadge} px-2 py-0.5 rounded border">
             ${deptRegs.length} คน
           </span>
         </div>
