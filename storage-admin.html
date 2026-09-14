@@ -200,21 +200,82 @@
           </button>
 
         </div>
+
+        <!-- Secondary Filter: File Type / Category Tabs & View Mode Switcher -->
+        <div class="pt-3 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <!-- File Category Filter Tabs -->
+          <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 sm:pb-0">
+            <button onclick="setCategoryFilter('all')" id="btnCatAll" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-orange-500/20 text-orange-400 border border-orange-500/30">
+              ทั้งหมด (<span id="countCatAll">0</span>)
+            </button>
+            <button onclick="setCategoryFilter('image')" id="btnCatImage" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1">
+              <i data-lucide="image" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>รูปภาพ (<span id="countCatImage">0</span>)</span>
+            </button>
+            <button onclick="setCategoryFilter('video')" id="btnCatVideo" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1">
+              <i data-lucide="video" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span>วิดีโอ (<span id="countCatVideo">0</span>)</span>
+            </button>
+            <button onclick="setCategoryFilter('audio')" id="btnCatAudio" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1">
+              <i data-lucide="music" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>เสียง (<span id="countCatAudio">0</span>)</span>
+            </button>
+            <button onclick="setCategoryFilter('document')" id="btnCatDocument" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1">
+              <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>ไฟล์เอกสาร (<span id="countCatDocument">0</span>)</span>
+            </button>
+            <button onclick="setCategoryFilter('other')" id="btnCatOther" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1">
+              <i data-lucide="archive" class="w-3.5 h-3.5 text-purple-400"></i>
+              <span>อื่นๆ (<span id="countCatOther">0</span>)</span>
+            </button>
+          </div>
+
+          <!-- View Mode Switcher (List vs Grid) -->
+          <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 flex-shrink-0">
+            <button onclick="switchViewMode('list')" id="btnViewList" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-sm" title="มุมมองแบบตาราง List">
+              <i data-lucide="list" class="w-3.5 h-3.5"></i>
+              <span>List</span>
+            </button>
+            <button onclick="switchViewMode('grid')" id="btnViewGrid" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white" title="มุมมองแบบการ์ดรูปภาพ Grid">
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+              <span>Grid</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- Main Files Audit Table -->
+      <!-- Main Files Audit Table & Grid Container -->
       <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-          <div class="flex items-center gap-2">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-3">
+          <div class="flex items-center gap-2 flex-wrap">
             <h2 class="text-base sm:text-lg font-black text-white">ตารางตรวจสอบไฟล์และผู้รับผิดชอบการอัปโหลด</h2>
             <span id="showingCountBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">กำลังแสดง 0 รายการ</span>
           </div>
+
+          <!-- Bulk Action Bar -->
+          <div class="flex items-center gap-2">
+            <div id="bulkSelectedCountBadge" class="hidden text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl items-center gap-1.5">
+              <span>เลือกแล้ว <strong id="bulkCountNum">0</strong> ไฟล์</span>
+            </div>
+            <button id="btnBulkDelete" onclick="deleteSelectedFiles()" class="hidden px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition items-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>ลบไฟล์ที่เลือก</span>
+            </button>
+            <button onclick="toggleSelectAllFiles()" id="btnSelectAllFiles" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+              <i data-lucide="check-square" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span id="selectAllBtnText">เลือกทั้งหมด</span>
+            </button>
+          </div>
         </div>
 
-        <div class="overflow-x-auto custom-scrollbar">
+        <!-- 1. List View (Table) -->
+        <div id="storageTableContainer" class="overflow-x-auto custom-scrollbar">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+                <th class="p-3 text-center w-10">
+                  <input type="checkbox" id="masterCheckbox" onchange="toggleSelectAllFromMaster(this.checked)" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-orange-500 focus:ring-0 cursor-pointer">
+                </th>
                 <th class="p-3 text-center w-12">ภาพตัวอย่าง</th>
                 <th class="p-3">ชื่อไฟล์ / หมวดหมู่</th>
                 <th class="p-3">ผู้ใช้ที่เป็นคนอัปโหลด (Uploader)</th>
@@ -225,13 +286,20 @@
             </thead>
             <tbody id="storageTableBody">
               <tr>
-                <td colspan="6" class="text-center py-12 text-slate-500 text-xs font-bold flex-col items-center justify-center">
+                <td colspan="7" class="text-center py-12 text-slate-500 text-xs font-bold flex-col items-center justify-center">
                   <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-orange-500 mx-auto mb-2"></i>
                   <span>กำลังโหลดข้อมูลคลังไฟล์จากทุกช่องทาง...</span>
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- 2. Grid View (Cards) -->
+        <div id="storageGridContainer" class="hidden">
+          <div id="storageGridBody" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <!-- Rendered via JS -->
+          </div>
         </div>
       </div>
 
@@ -675,8 +743,34 @@
   <script>
     let allStorageFiles = [];
     let currentProviderFilter = 'all';
+    let currentCategoryFilter = 'all';
+    let currentViewMode = 'list'; // 'list' | 'grid'
+    let selectedFileIds = new Set();
     let currentAdminTab = 'files'; // 'files' | 'members'
     let activeMemberFilter = null; // Filter files by specific student or uploader
+
+    // Helper: Detect file category based on MIME type or extension
+    function getFileCategory(file) {
+      const name = (file.name || '').toLowerCase();
+      const cat = (file.category || '').toLowerCase();
+      const mime = (file.type || '').toLowerCase();
+
+      if (cat.includes('สลิป')) return 'image'; // Slips are images
+
+      if (mime.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/.test(name)) {
+        return 'image';
+      }
+      if (mime.startsWith('video/') || /\.(mp4|mov|avi|mkv|webm|wmv|flv)$/.test(name)) {
+        return 'video';
+      }
+      if (mime.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac|flac)$/.test(name)) {
+        return 'audio';
+      }
+      if (mime.includes('pdf') || mime.includes('document') || mime.includes('sheet') || mime.includes('text') || /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|csv|md)$/.test(name)) {
+        return 'document';
+      }
+      return 'other';
+    }
 
     // 1. Load All Storage Data & Slips
     async function loadAllStorageData() {
@@ -752,6 +846,29 @@
       document.getElementById('countCatbox').textContent = cCatbox;
       document.getElementById('countImgbb').textContent = cImgbb;
       document.getElementById('countFreeimage').textContent = cFreeimage;
+
+      // Category Counts
+      const catCounts = {
+        image: 0,
+        video: 0,
+        audio: 0,
+        document: 0,
+        other: 0
+      };
+
+      allStorageFiles.forEach(f => {
+        const cat = getFileCategory(f);
+        if (catCounts[cat] !== undefined) catCounts[cat]++;
+        else catCounts.other++;
+      });
+
+      const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setEl('countCatAll', total);
+      setEl('countCatImage', catCounts.image);
+      setEl('countCatVideo', catCounts.video);
+      setEl('countCatAudio', catCounts.audio);
+      setEl('countCatDocument', catCounts.document);
+      setEl('countCatOther', catCounts.other);
     }
 
     // 2. Tab Navigation
@@ -779,7 +896,7 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // 3. Provider Filters
+    // 3. Provider & Category Filters & View Modes
     function setProviderFilter(p) {
       currentProviderFilter = p;
       const buttons = ['All', 'Cloudinary', 'Catbox', 'Imgbb', 'Freeimage'];
@@ -796,7 +913,142 @@
       renderStorageTable();
     }
 
-    // 4. File Audit Table Rendering & Member Filtering
+    function setCategoryFilter(c) {
+      currentCategoryFilter = c;
+      const cats = ['all', 'image', 'video', 'audio', 'document', 'other'];
+      cats.forEach(cat => {
+        const btn = document.getElementById('btnCat' + cat.charAt(0).toUpperCase() + cat.slice(1));
+        if (btn) {
+          if (cat === c) {
+            btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-orange-500/25 text-orange-400 border border-orange-500/50 flex items-center gap-1 shadow-sm';
+          } else {
+            btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1';
+          }
+        }
+      });
+      renderStorageTable();
+    }
+
+    function switchViewMode(mode) {
+      currentViewMode = mode;
+      const btnList = document.getElementById('btnViewList');
+      const btnGrid = document.getElementById('btnViewGrid');
+      const containerList = document.getElementById('storageTableContainer');
+      const containerGrid = document.getElementById('storageGridContainer');
+
+      if (mode === 'list') {
+        btnList.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-sm';
+        btnGrid.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white';
+        containerList.classList.remove('hidden');
+        containerGrid.classList.add('hidden');
+      } else {
+        btnGrid.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-sm';
+        btnList.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white';
+        containerList.classList.add('hidden');
+        containerGrid.classList.remove('hidden');
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      renderStorageTable();
+    }
+
+    // 4. File Selection & Bulk Delete Management
+    function toggleFileSelection(id) {
+      if (selectedFileIds.has(id)) {
+        selectedFileIds.delete(id);
+      } else {
+        selectedFileIds.add(id);
+      }
+      updateBulkUI();
+    }
+
+    function updateBulkUI() {
+      const countBadge = document.getElementById('bulkSelectedCountBadge');
+      const countNum = document.getElementById('bulkCountNum');
+      const btnBulkDelete = document.getElementById('btnBulkDelete');
+      const masterChk = document.getElementById('masterCheckbox');
+      const selectAllBtnText = document.getElementById('selectAllBtnText');
+
+      const count = selectedFileIds.size;
+      if (countNum) countNum.textContent = count;
+
+      if (count > 0) {
+        if (countBadge) { countBadge.classList.remove('hidden'); countBadge.classList.add('flex'); }
+        if (btnBulkDelete) { btnBulkDelete.classList.remove('hidden'); btnBulkDelete.classList.add('flex'); }
+      } else {
+        if (countBadge) { countBadge.classList.add('hidden'); countBadge.classList.remove('flex'); }
+        if (btnBulkDelete) { btnBulkDelete.classList.add('hidden'); btnBulkDelete.classList.remove('flex'); }
+      }
+
+      const visibleFiles = getFilteredStorageFiles();
+      const allSelected = visibleFiles.length > 0 && visibleFiles.every(f => selectedFileIds.has(f.id));
+      if (masterChk) masterChk.checked = allSelected;
+      if (selectAllBtnText) selectAllBtnText.textContent = allSelected ? 'ยกเลิกการเลือก' : 'เลือกทั้งหมด';
+    }
+
+    function toggleSelectAllFromMaster(checked) {
+      const visibleFiles = getFilteredStorageFiles();
+      if (checked) {
+        visibleFiles.forEach(f => selectedFileIds.add(f.id));
+      } else {
+        visibleFiles.forEach(f => selectedFileIds.delete(f.id));
+      }
+      renderStorageTable();
+      updateBulkUI();
+    }
+
+    function toggleSelectAllFiles() {
+      const visibleFiles = getFilteredStorageFiles();
+      const allSelected = visibleFiles.length > 0 && visibleFiles.every(f => selectedFileIds.has(f.id));
+      if (allSelected) {
+        visibleFiles.forEach(f => selectedFileIds.delete(f.id));
+      } else {
+        visibleFiles.forEach(f => selectedFileIds.add(f.id));
+      }
+      renderStorageTable();
+      updateBulkUI();
+    }
+
+    function getFilteredStorageFiles() {
+      let list = allStorageFiles;
+      const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+
+      // Filter by active member
+      if (activeMemberFilter) {
+        const k = activeMemberFilter.key;
+        list = list.filter(f => {
+          const fid = (f.uploaderId || '').toLowerCase().trim();
+          const femail = (f.uploaderEmail || '').toLowerCase().trim();
+          return fid === k || femail === k;
+        });
+      }
+
+      // Filter by provider
+      if (currentProviderFilter !== 'all') {
+        list = list.filter(f => f.provider === currentProviderFilter);
+      }
+
+      // Filter by category
+      if (currentCategoryFilter !== 'all') {
+        list = list.filter(f => getFileCategory(f) === currentCategoryFilter);
+      }
+
+      // Filter by search query
+      if (q) {
+        list = list.filter(f => 
+          (f.name && f.name.toLowerCase().includes(q)) ||
+          (f.uploaderId && f.uploaderId.toLowerCase().includes(q)) ||
+          (f.uploaderName && f.uploaderName.toLowerCase().includes(q)) ||
+          (f.uploaderEmail && f.uploaderEmail.toLowerCase().includes(q)) ||
+          (f.provider && f.provider.toLowerCase().includes(q)) ||
+          (f.category && f.category.toLowerCase().includes(q))
+        );
+      }
+
+      return list;
+    }
+
+    // 5. File Audit Table & Grid Rendering
     function filterFilesByMember(memberIdOrEmail, memberName) {
       activeMemberFilter = {
         key: memberIdOrEmail.toLowerCase().trim(),
@@ -826,46 +1078,22 @@
 
     function renderStorageTable() {
       const tbody = document.getElementById('storageTableBody');
-      const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+      const gridBody = document.getElementById('storageGridBody');
       const badge = document.getElementById('showingCountBadge');
-      if (!tbody) return;
+      if (!tbody || !gridBody) return;
 
-      let list = allStorageFiles;
-
-      // Filter by active member if selected
-      if (activeMemberFilter) {
-        const k = activeMemberFilter.key;
-        list = list.filter(f => {
-          const fid = (f.uploaderId || '').toLowerCase().trim();
-          const femail = (f.uploaderEmail || '').toLowerCase().trim();
-          return fid === k || femail === k;
-        });
-      }
-
-      // Filter by provider
-      if (currentProviderFilter !== 'all') {
-        list = list.filter(f => f.provider === currentProviderFilter);
-      }
-
-      // Filter by search query
-      if (q) {
-        list = list.filter(f => 
-          (f.name && f.name.toLowerCase().includes(q)) ||
-          (f.uploaderId && f.uploaderId.toLowerCase().includes(q)) ||
-          (f.uploaderName && f.uploaderName.toLowerCase().includes(q)) ||
-          (f.uploaderEmail && f.uploaderEmail.toLowerCase().includes(q)) ||
-          (f.provider && f.provider.toLowerCase().includes(q)) ||
-          (f.category && f.category.toLowerCase().includes(q))
-        );
-      }
+      const list = getFilteredStorageFiles();
 
       if (badge) badge.textContent = `กำลังแสดง ${list.length} รายการ`;
 
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-500 text-xs font-bold">ไม่พบไฟล์ที่ตรงกับเงื่อนไขการค้นหา</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-slate-500 text-xs font-bold">ไม่พบไฟล์ที่ตรงกับเงื่อนไขการค้นหาหรือหมวดหมู่นี้</td></tr>`;
+        gridBody.innerHTML = `<div class="col-span-full text-center py-16 text-slate-500 text-xs font-bold">ไม่พบไฟล์ที่ตรงกับเงื่อนไขการค้นหาหรือหมวดหมู่นี้</div>`;
+        updateBulkUI();
         return;
       }
 
+      // Render 1: Table List View
       tbody.innerHTML = list.map((f) => {
         let providerBadge = '';
         if (f.provider === 'cloudinary') {
@@ -879,15 +1107,27 @@
         }
 
         const sizeFormatted = f.size ? formatBytes(f.size) : '-';
+        const isChecked = selectedFileIds.has(f.id);
+        const cat = getFileCategory(f);
+
+        let iconTag = '<i data-lucide="file" class="w-3 h-3 text-slate-400"></i>';
+        if (cat === 'image') iconTag = '<i data-lucide="image" class="w-3 h-3 text-sky-400"></i>';
+        else if (cat === 'video') iconTag = '<i data-lucide="video" class="w-3 h-3 text-rose-400"></i>';
+        else if (cat === 'audio') iconTag = '<i data-lucide="music" class="w-3 h-3 text-emerald-400"></i>';
+        else if (cat === 'document') iconTag = '<i data-lucide="file-text" class="w-3 h-3 text-amber-400"></i>';
 
         return `
-          <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 transition">
+          <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 transition ${isChecked ? 'bg-orange-500/[0.08]' : ''}">
+            <td class="p-3 text-center">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleFileSelection('${f.id}')" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-orange-500 focus:ring-0 cursor-pointer">
+            </td>
             <td class="p-3 text-center">
               <img src="${f.url}" alt="Preview" class="w-10 h-10 object-cover rounded-lg bg-slate-950 border border-slate-800 mx-auto cursor-pointer hover:scale-110 transition" onclick="openFileDetailModal('${f.id}')" onerror="this.src='logo.png'">
             </td>
             <td class="p-3">
               <span class="font-bold text-white text-xs block truncate max-w-xs cursor-pointer hover:text-orange-400 transition" onclick="openFileDetailModal('${f.id}')">${f.name || 'ไฟล์ไม่มีชื่อ'}</span>
-              <div class="flex items-center gap-2 text-[10px] text-slate-400">
+              <div class="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
+                ${iconTag}
                 <span>${f.category || 'ทั่วไป'}</span>
                 <span>•</span>
                 <span class="font-mono text-slate-500">${sizeFormatted}</span>
@@ -926,6 +1166,75 @@
         `;
       }).join('');
 
+      // Render 2: Card Grid View
+      gridBody.innerHTML = list.map((f) => {
+        const sizeFormatted = f.size ? formatBytes(f.size) : '-';
+        const isChecked = selectedFileIds.has(f.id);
+        const cat = getFileCategory(f);
+
+        let iconTag = '<i data-lucide="file" class="w-3.5 h-3.5 text-slate-400"></i>';
+        if (cat === 'image') iconTag = '<i data-lucide="image" class="w-3.5 h-3.5 text-sky-400"></i>';
+        else if (cat === 'video') iconTag = '<i data-lucide="video" class="w-3.5 h-3.5 text-rose-400"></i>';
+        else if (cat === 'audio') iconTag = '<i data-lucide="music" class="w-3.5 h-3.5 text-emerald-400"></i>';
+        else if (cat === 'document') iconTag = '<i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>';
+
+        return `
+          <div class="relative group bg-slate-950/80 rounded-2xl border ${isChecked ? 'border-orange-500 shadow-md shadow-orange-500/20 ring-1 ring-orange-500' : 'border-slate-800/90 hover:border-slate-700'} overflow-hidden flex flex-col transition p-2.5">
+            <!-- Select Checkbox Overlay -->
+            <div class="absolute top-4 left-4 z-20">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleFileSelection('${f.id}')" class="w-4 h-4 rounded bg-slate-950/90 border-slate-700 text-orange-500 focus:ring-0 cursor-pointer shadow">
+            </div>
+
+            <!-- Provider Badge Top-Right -->
+            <div class="absolute top-4 right-4 z-20">
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-slate-900/90 text-slate-300 border border-slate-700 backdrop-blur shadow">
+                ${f.provider}
+              </span>
+            </div>
+
+            <!-- Media Preview Thumbnail -->
+            <div class="w-full h-36 rounded-xl bg-slate-900 border border-slate-800/80 overflow-hidden relative cursor-pointer flex items-center justify-center group-hover:scale-[1.02] transition" onclick="openFileDetailModal('${f.id}')">
+              <img src="${f.url}" alt="${f.name}" class="w-full h-full object-cover" onerror="this.src='logo.png'">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center p-2">
+                <span class="text-[11px] text-white font-bold flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-full border border-slate-700 shadow">
+                  <i data-lucide="eye" class="w-3 h-3 text-sky-400"></i>
+                  <span>ดูรายละเอียด</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Card Info -->
+            <div class="p-2 space-y-1.5 flex-grow flex flex-col justify-between">
+              <div>
+                <h4 class="text-xs font-bold text-white truncate hover:text-orange-400 cursor-pointer transition" onclick="openFileDetailModal('${f.id}')" title="${f.name || 'ไฟล์ไม่มีชื่อ'}">
+                  ${f.name || 'ไฟล์ไม่มีชื่อ'}
+                </h4>
+                <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono mt-1">
+                  <span class="flex items-center gap-1">${iconTag} ${f.category || 'ทั่วไป'}</span>
+                  <span>${sizeFormatted}</span>
+                </div>
+              </div>
+
+              <!-- Uploader & Quick Actions -->
+              <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1">
+                <span class="text-[10px] text-amber-300 truncate max-w-[90px] font-medium block hover:underline cursor-pointer" onclick="openMemberAuditModal('${f.uploaderId || f.uploaderEmail}')" title="${f.uploaderName || 'บุคคลทั่วไป'}">
+                  ${f.uploaderName || 'ทั่วไป'}
+                </span>
+                <div class="flex items-center gap-1">
+                  <button onclick="copyDirectUrl('${f.url}')" class="p-1 rounded-md bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-slate-800 transition" title="คัดลอกลิงก์">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                  <button onclick="deleteStorageFile('${f.id}')" class="p-1 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition" title="ลบไฟล์">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateBulkUI();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -1585,10 +1894,45 @@
       }
 
       allStorageFiles = allStorageFiles.filter(f => f.id !== id);
+      selectedFileIds.delete(id);
       updateSummaryCounts();
       renderStorageTable();
       renderMembersAuditTable();
       alert("🗑️ ลบไฟล์เรียบร้อยแล้ว!");
+    }
+
+    async function deleteSelectedFiles() {
+      const count = selectedFileIds.size;
+      if (count === 0) {
+        alert("กรุณาเลือกไฟล์ที่ต้องการลบก่อน");
+        return;
+      }
+
+      if (!confirm(`⚠️ คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์ที่เลือกทั้งหมดจำนวน ${count} ไฟล์ ออกจากระบบคลังข้อมูล?`)) {
+        return;
+      }
+
+      const idsToDelete = Array.from(selectedFileIds);
+      let successCount = 0;
+
+      for (const id of idsToDelete) {
+        const target = allStorageFiles.find(f => f.id === id);
+        if (target) {
+          if (window.MultiCloudUploader) {
+            try {
+              await window.MultiCloudUploader.deleteFile(target);
+            } catch(e) {}
+          }
+          successCount++;
+        }
+      }
+
+      allStorageFiles = allStorageFiles.filter(f => !selectedFileIds.has(f.id));
+      selectedFileIds.clear();
+      updateSummaryCounts();
+      renderStorageTable();
+      renderMembersAuditTable();
+      alert(`🗑️ ดำเนินการลบไฟล์ที่เลือกจำนวน ${successCount} ไฟล์ เรียบร้อยแล้ว!`);
     }
 
     async function refreshAllStorageData() {
