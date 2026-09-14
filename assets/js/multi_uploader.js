@@ -409,6 +409,7 @@
             }
 
             return {
+              id: fileItem.id,
               url: uploadResult.url,
               provider: provider,
               publicId: uploadResult.publicId || '',

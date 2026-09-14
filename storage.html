@@ -246,13 +246,13 @@
           </div>
         </div>
 
-        <button onclick="toggleUploadAreaVisibility()" id="btnToggleUploadCollapse" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-bold cursor-pointer">
-          <span id="toggleUploadText">ซ่อนกล่องอัปโหลด</span>
-          <i data-lucide="chevron-up" id="toggleUploadIcon" class="w-4 h-4"></i>
+        <button onclick="toggleUploadAreaVisibility()" id="btnToggleUploadCollapse" class="text-xs text-orange-400 hover:text-orange-300 flex items-center gap-1 font-bold cursor-pointer px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/20 transition">
+          <span id="toggleUploadText">เปิดกล่องอัปโหลด</span>
+          <i data-lucide="chevron-down" id="toggleUploadIcon" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div id="driveUploadCollapsibleBody" class="space-y-4 pt-1">
+      <div id="driveUploadCollapsibleBody" class="hidden space-y-4 pt-1">
         
         <!-- Controls: Provider & Compress Switch -->
         <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
@@ -906,7 +906,7 @@
     let selectedFileIds = new Set();
     let selectedFilesQueue = []; // Staged files for uploading
     let isUncompressedMode = false;
-    let isUploadAreaCollapsed = false;
+    let isUploadAreaCollapsed = true;
 
     // Active item being locked/shared/moved/challenged
     let targetItemForAction = null; // { type: 'file'|'folder', id, name, ... }
@@ -2372,29 +2372,39 @@
             }
           });
 
-          if (res && res.id) {
+          const uploadedFileId = res?.id || res?.fileItem?.id || (res?.url ? window.MultiCloudUploader.getAllFiles().find(f => f.url === res.url)?.id : null);
+          if (res && res.url) {
             // Bind newly uploaded file to target folder
-            if (targetFolderId) {
-              repo.moveFile(res.id, targetFolderId);
+            if (targetFolderId && uploadedFileId) {
+              repo.moveFile(uploadedFileId, targetFolderId);
             }
             completedCount++;
           }
         } catch (err) {
           console.error('File upload error:', err);
+          showToast(`⚠️ อัปโหลด "${file.name}" ไม่สำเร็จ: ${err.message || 'เกิดข้อผิดพลาด'}`, 'error');
         }
       }
 
       progressBar.style.width = '100%';
       percentText.textContent = '100%';
-      statusText.innerHTML = `<span>✨ อัปโหลดสำเร็จครบทั้ง ${completedCount}/${totalFiles} ไฟล์แล้ว!</span>`;
+      if (completedCount > 0) {
+        statusText.innerHTML = `<span>✨ อัปโหลดสำเร็จครบทั้ง ${completedCount}/${totalFiles} ไฟล์แล้ว!</span>`;
+      } else {
+        statusText.innerHTML = `<span class="text-rose-400">⚠️ ไม่สามารถอัปโหลดไฟล์ได้ กรุณาลองใหม่อีกครั้ง</span>`;
+      }
 
       setTimeout(() => {
         progressBox.classList.add('hidden');
         selectedFilesQueue = [];
         updateQuotaDisplay();
         renderDrive();
-        showToast(`🎉 อัปโหลดไฟล์สำเร็จ ${completedCount} ไฟล์`);
-      }, 600);
+        if (completedCount > 0) {
+          showToast(`🎉 อัปโหลดไฟล์สำเร็จ ${completedCount} ไฟล์`);
+        } else {
+          showToast(`❌ อัปโหลดไฟล์ไม่สำเร็จ กรุณาตรวจสอบไฟล์และการเชื่อมต่อ`, 'error');
+        }
+      }, 700);
     }
 
     // ----------------------------------------------------
@@ -2525,19 +2535,25 @@
         .replace(/'/g, '&#039;');
     }
 
-    function showToast(msg) {
+    function showToast(msg, type = 'success') {
       const t = document.getElementById('driveToast');
       const text = document.getElementById('driveToastText');
+      const icon = document.getElementById('driveToastIcon');
       if (!t || !text) return;
 
       text.textContent = msg;
-      t.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
-      t.classList.add('translate-y-0', 'opacity-100');
+      if (type === 'error') {
+        t.className = 'fixed bottom-6 right-6 z-50 transform translate-y-0 opacity-100 transition-all duration-300 px-4 py-3 rounded-2xl bg-rose-950 border border-rose-500/50 text-white text-xs font-bold shadow-2xl flex items-center gap-2';
+        if (icon) icon.textContent = '⚠️';
+      } else {
+        t.className = 'fixed bottom-6 right-6 z-50 transform translate-y-0 opacity-100 transition-all duration-300 px-4 py-3 rounded-2xl bg-slate-900 border border-slate-700 text-white text-xs font-bold shadow-2xl flex items-center gap-2';
+        if (icon) icon.textContent = '✨';
+      }
 
       setTimeout(() => {
         t.classList.remove('translate-y-0', 'opacity-100');
         t.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
-      }, 3000);
+      }, 3500);
     }
   </script>
 </body>
