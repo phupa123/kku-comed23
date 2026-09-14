@@ -253,6 +253,10 @@
             ค่าเริ่มต้นส่วนรวม: <span class="text-white font-bold" id="currentGlobalQuotaLabel">5 GB</span> | 
             ความคมชัด: <span class="text-white font-bold" id="currentGlobalResolutionLabel">1600px (82%)</span>
           </div>
+          <button onclick="openCustomAccountModal()" class="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+            <span>เพิ่มบัญชีกำหนดโควตา</span>
+          </button>
           <button onclick="openGlobalSettingsModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold transition flex items-center gap-1.5">
             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
             <span>แก้ไขส่วนรวม</span>
@@ -262,10 +266,15 @@
 
       <!-- Members Audit Table -->
       <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-3">
           <div class="flex items-center gap-2">
             <h2 class="text-base sm:text-lg font-black text-white">ตรวจสอบการอัปโหลดและปรับโควตา / ความคมชัดรายบุคคล</h2>
-            <span id="membersShowingCountBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">สมาชิกทั้งหมด 60 คน</span>
+            <span id="membersShowingCountBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">สมาชิกทั้งหมด 60+ คน</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="setMemberTypeFilter('all')" id="filterTabAll" class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition">ทั้งหมด</button>
+            <button onclick="setMemberTypeFilter('active')" id="filterTabActive" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition">มีไฟล์แล้ว</button>
+            <button onclick="setMemberTypeFilter('custom')" id="filterTabCustom" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition">โควตาพิเศษ</button>
           </div>
         </div>
 
@@ -514,6 +523,88 @@
             <span>บันทึกการตั้งค่าคนนี้</span>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADD CUSTOM ACCOUNT (เพิ่มบัญชีกำหนดโควตา) ================= -->
+  <div id="modalAddCustomAccount" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-black text-white flex items-center gap-2">
+            <i data-lucide="user-plus" class="w-5 h-5 text-emerald-400"></i>
+            <span>เพิ่มบัญชีกำหนดโควตาพิเศษ</span>
+          </h3>
+          <span class="text-[11px] text-slate-400">เพิ่ม Gmail, ผู้ทดสอบ, หรืออาจารย์</span>
+        </div>
+        <button onclick="closeCustomAccountModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="space-y-1.5">
+          <label class="font-bold text-slate-300 block">อีเมลบัญชีผู้ใช้ (Email): <span class="text-rose-400">*</span></label>
+          <input type="email" id="customAccountEmail" placeholder="เช่น phupa5874@gmail.com"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white font-mono text-xs outline-none">
+          <span class="text-[10px] text-slate-500 block">เช่น phupa5874@gmail.com หรือเมลอื่นๆ</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1.5">
+            <label class="font-bold text-slate-300 block">ชื่อ-นามสกุล:</label>
+            <input type="text" id="customAccountName" placeholder="เช่น ภูผา (Admin Special)"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white text-xs outline-none">
+          </div>
+          <div class="space-y-1.5">
+            <label class="font-bold text-slate-300 block">ชื่อเล่น / รหัสอ้างอิง:</label>
+            <input type="text" id="customAccountId" placeholder="เช่น ADMIN-TESTER"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white text-xs outline-none">
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-slate-300">กำหนดโควตาความจุ (GB):</label>
+            <span id="customAccountQuotaNote" class="text-emerald-400 font-bold font-mono">20 GB</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" onclick="setCustomAccountQuotaInput(5)" class="py-2 px-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-emerald-500 text-center">5 GB</button>
+            <button type="button" onclick="setCustomAccountQuotaInput(10)" class="py-2 px-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-emerald-500 text-center">10 GB</button>
+            <button type="button" onclick="setCustomAccountQuotaInput(20)" class="py-2 px-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-emerald-500 text-center">20 GB</button>
+            <button type="button" onclick="setCustomAccountQuotaInput(50)" class="py-2 px-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold hover:border-emerald-500 text-center">50 GB</button>
+          </div>
+          <div class="flex items-center gap-2 mt-1">
+            <input type="number" id="customAccountQuotaInput" min="1" max="500" value="20" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white font-mono text-xs outline-none">
+            <span class="text-slate-400 font-bold">GB</span>
+          </div>
+        </div>
+
+        <div class="space-y-1.5 pt-2 border-t border-slate-800">
+          <label class="font-bold text-slate-300 block">ความคมชัดภาพ:</label>
+          <select id="customAccountResolutionPreset" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white text-xs outline-none">
+            <option value="4000_1.0" selected>💎 ต้นฉบับไม่ลดคุณภาพ (Original Max 4000px, 100%)</option>
+            <option value="2048_0.90">🔥 ความละเอียดสูง HD (Max 2048px, 90%)</option>
+            <option value="1600_0.82">✨ มาตรฐานสวยคมชัด (Max 1600px, 82%)</option>
+            <option value="global">🌐 ใช้ตามค่าเริ่มต้นส่วนรวม</option>
+          </select>
+        </div>
+
+        <div class="space-y-1 pt-1">
+          <label class="font-bold text-slate-300 block">หมายเหตุ:</label>
+          <input type="text" id="customAccountNote" value="Super Admin / Special Tester" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-emerald-500 text-white text-xs outline-none">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+        <button onclick="closeCustomAccountModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white font-bold text-xs transition">
+          ยกเลิก
+        </button>
+        <button onclick="saveCustomAccountAction()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>บันทึกบัญชีนี้</span>
+        </button>
       </div>
     </div>
   </div>
@@ -838,7 +929,24 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // 5. Members Audit Table (60 Students + Adhoc Users)
+    // 5. Members Audit Table (60 Students + Super Admin + Adhoc / Uploaders)
+    let currentMemberTypeFilter = 'all';
+
+    function setMemberTypeFilter(type) {
+      currentMemberTypeFilter = type;
+      ['all', 'active', 'custom'].forEach(t => {
+        const btn = document.getElementById(`filterTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (btn) {
+          if (t === type) {
+            btn.className = "px-3 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition";
+          } else {
+            btn.className = "px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition";
+          }
+        }
+      });
+      renderMembersAuditTable();
+    }
+
     function renderMembersAuditTable() {
       const tbody = document.getElementById('membersTableBody');
       const q = (document.getElementById('memberSearchInput')?.value || '').toLowerCase().trim();
@@ -849,16 +957,95 @@
       const globalCfg = window.MultiCloudUploader?.memberSettings?.global || { quotaGB: 5, maxDimension: 1600, quality: 0.82 };
       const overrides = window.MultiCloudUploader?.memberSettings?.userOverrides || {};
 
-      // Aggregate upload stats per student
-      let memberRows = students.map(st => {
-        const idLower = st.id.toLowerCase().trim();
+      // 1. Build dictionary of all known accounts
+      const memberMap = new Map();
+
+      // (A) Add Special Super Admin Tester (phupa5874@gmail.com) first
+      memberMap.set('phupa5874@gmail.com', {
+        id: 'ADMIN-TESTER',
+        name: 'ภูผา (Super Admin / ผู้ทดสอบระบบ)',
+        nickname: 'ภูผา',
+        email: 'phupa5874@gmail.com',
+        isSuperAdmin: true
+      });
+
+      // (B) Add 60 Students from STUDENTS_DATA
+      students.forEach(st => {
+        const key = st.id || st.email.toLowerCase();
+        memberMap.set(key, {
+          id: st.id,
+          name: st.name,
+          nickname: st.nickname,
+          email: st.email,
+          isSuperAdmin: false
+        });
+      });
+
+      // (C) Add any custom accounts from overrides that are not in the list
+      Object.keys(overrides).forEach(ovKey => {
+        const ov = overrides[ovKey];
+        if (!ov) return;
+        const ovEmail = (ov.email || (ovKey.includes('@') ? ovKey : '')).toLowerCase();
+        const ovId = ov.studentId || (ovKey.includes('@') ? '' : ovKey);
+        
+        let found = false;
+        for (const [k, m] of memberMap.entries()) {
+          if ((ovEmail && m.email.toLowerCase() === ovEmail) || (ovId && m.id === ovId)) {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          const mapKey = ovEmail || ovId || ovKey;
+          memberMap.set(mapKey, {
+            id: ovId || 'CUSTOM',
+            name: ov.name || ovKey,
+            nickname: 'กำหนดพิเศษ',
+            email: ovEmail || ovKey,
+            isSuperAdmin: ovEmail === 'phupa5874@gmail.com'
+          });
+        }
+      });
+
+      // (D) Add any uploader from allStorageFiles who has uploaded files
+      allStorageFiles.forEach(f => {
+        const fEmail = (f.uploaderEmail || '').toLowerCase().trim();
+        const fId = (f.uploaderId || '').trim();
+        const fName = f.uploaderName || '';
+
+        if (!fEmail && !fId) return;
+
+        let found = false;
+        for (const [k, m] of memberMap.entries()) {
+          if ((fEmail && m.email.toLowerCase() === fEmail) || (fId && m.id === fId)) {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          const mapKey = fEmail || fId;
+          memberMap.set(mapKey, {
+            id: fId || 'UPLOADER',
+            name: fName || fEmail || fId,
+            nickname: 'ผู้ใช้อัปโหลด',
+            email: fEmail,
+            isSuperAdmin: fEmail === 'phupa5874@gmail.com'
+          });
+        }
+      });
+
+      // 2. Aggregate upload stats and overrides per member
+      let memberRows = Array.from(memberMap.values()).map(st => {
+        const idLower = (st.id || '').toLowerCase().trim();
         const emailLower = (st.email || '').toLowerCase().trim();
 
-        // Count files uploaded by this student
+        // Count files uploaded by this user
         const userFiles = allStorageFiles.filter(f => {
           const fid = (f.uploaderId || '').toLowerCase().trim();
           const femail = (f.uploaderEmail || '').toLowerCase().trim();
-          return fid === idLower || (emailLower && femail === emailLower);
+          return (idLower && fid === idLower) || (emailLower && femail === emailLower);
         });
 
         const totalBytes = userFiles.reduce((acc, f) => acc + (Number(f.size) || 0), 0);
@@ -866,19 +1053,20 @@
 
         // Check custom override
         const override = overrides[st.id] || overrides[emailLower] || null;
-        const currentQuotaGB = override && override.quotaGB !== undefined ? override.quotaGB : globalCfg.quotaGB;
+        const currentQuotaGB = override && override.quotaGB !== undefined ? override.quotaGB : (st.isSuperAdmin ? 20 : globalCfg.quotaGB);
         const currentMaxDim = override && override.maxDimension !== undefined ? override.maxDimension : globalCfg.maxDimension;
-        const currentQuality = override && override.quality !== undefined ? override.quality : globalCfg.quality;
+        const currentQuality = override && override.quality !== undefined ? override.quality : (st.isSuperAdmin ? 1.0 : globalCfg.quality);
 
         return {
           id: st.id,
           name: st.name,
           nickname: st.nickname,
           email: st.email,
+          isSuperAdmin: st.isSuperAdmin,
           fileCount,
           totalBytes,
-          hasOverride: !!override,
-          overrideNote: override?.note || '',
+          hasOverride: !!override || st.isSuperAdmin,
+          overrideNote: override?.note || (st.isSuperAdmin ? 'Super Admin / Tester' : ''),
           quotaGB: currentQuotaGB,
           maxDimension: currentMaxDim,
           quality: currentQuality,
@@ -886,20 +1074,35 @@
         };
       });
 
+      // Filter by Type Tab
+      if (currentMemberTypeFilter === 'active') {
+        memberRows = memberRows.filter(m => m.fileCount > 0);
+      } else if (currentMemberTypeFilter === 'custom') {
+        memberRows = memberRows.filter(m => m.hasOverride);
+      }
+
       // Filter by search query
       if (q) {
         memberRows = memberRows.filter(m => 
-          m.id.toLowerCase().includes(q) ||
-          m.name.toLowerCase().includes(q) ||
+          (m.id && m.id.toLowerCase().includes(q)) ||
+          (m.name && m.name.toLowerCase().includes(q)) ||
           (m.nickname && m.nickname.toLowerCase().includes(q)) ||
           (m.email && m.email.toLowerCase().includes(q))
         );
       }
 
-      if (badge) badge.textContent = `แสดง ${memberRows.length} จาก 60 สมาชิก`;
+      // Sort: Super Admin first, then active uploaders, then by ID
+      memberRows.sort((a, b) => {
+        if (a.isSuperAdmin) return -1;
+        if (b.isSuperAdmin) return 1;
+        if (b.fileCount !== a.fileCount) return b.fileCount - a.fileCount;
+        return a.name.localeCompare(b.name, 'th');
+      });
+
+      if (badge) badge.textContent = `แสดง ${memberRows.length} จาก ${memberMap.size} บัญชี`;
 
       if (memberRows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-500 text-xs font-bold">ไม่พบรายชื่อสมาชิกที่ค้นหา</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-500 text-xs font-bold">ไม่พบบัญชีหรือสมาชิกที่ตรงกับเงื่อนไข</td></tr>`;
         return;
       }
 
@@ -909,7 +1112,15 @@
         const pct = Math.min(100, (m.totalBytes / maxQuotaBytes) * 100).toFixed(1);
 
         let quotaBadge = '';
-        if (m.hasOverride) {
+        if (m.isSuperAdmin) {
+          quotaBadge = `
+            <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/40">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              <span>${m.quotaGB} GB (Super Admin)</span>
+            </div>
+            <span class="block text-[10px] text-orange-400/80 truncate max-w-[150px] font-bold">สิทธิ์เต็ม / ปรับได้</span>
+          `;
+        } else if (m.hasOverride) {
           quotaBadge = `
             <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
               <i data-lucide="shield-check" class="w-3 h-3"></i>
@@ -933,19 +1144,20 @@
         }
 
         return `
-          <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 transition">
+          <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 transition ${m.isSuperAdmin ? 'bg-orange-500/[0.04]' : ''}">
             <td class="p-3">
               <div class="flex items-center gap-3">
-                <img src="${m.avatar}" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 object-cover flex-shrink-0">
+                <img src="${m.avatar}" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 object-cover flex-shrink-0 ${m.isSuperAdmin ? 'ring-2 ring-orange-500/50' : ''}">
                 <div class="space-y-0.5">
-                  <div class="flex items-center gap-1.5">
+                  <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="font-bold text-white text-xs">${m.name}</span>
                     ${m.nickname ? `<span class="text-[11px] text-amber-400 font-bold">(${m.nickname})</span>` : ''}
+                    ${m.isSuperAdmin ? '<span class="px-2 py-0.2 rounded-md bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[9px] font-black uppercase">SUPER ADMIN</span>' : ''}
                   </div>
                   <div class="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
                     <span class="text-emerald-400 font-bold">${m.id}</span>
                     <span>•</span>
-                    <span class="truncate max-w-[150px]">${m.email}</span>
+                    <span class="truncate max-w-[170px] text-slate-300">${m.email}</span>
                   </div>
                 </div>
               </div>
@@ -976,11 +1188,11 @@
 
             <td class="p-3 text-center">
               <div class="flex items-center justify-center gap-1.5">
-                <button onclick="openMemberAuditModal('${m.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold transition flex items-center gap-1" title="ดูว่าคนนี้อัปอะไรไปบ้าง">
+                <button onclick="openMemberAuditModal('${m.email || m.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold transition flex items-center gap-1" title="ดูว่าคนนี้อัปอะไรไปบ้าง">
                   <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                   <span>ดูไฟล์ (${m.fileCount})</span>
                 </button>
-                <button onclick="openMemberQuotaEditModal('${m.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1" title="ปรับโควตาและความคมชัด">
+                <button onclick="openMemberQuotaEditModal('${m.email || m.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1" title="ปรับโควตาและความคมชัด">
                   <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
                   <span>ปรับโควตา</span>
                 </button>
@@ -1071,27 +1283,36 @@
     }
 
     // 7. Member Specific Override Logic
-    function openMemberQuotaEditModal(studentId) {
-      const student = (window.STUDENTS_DATA || []).find(st => st.id === studentId);
-      if (!student) return;
+    function openMemberQuotaEditModal(studentIdOrEmail) {
+      let student = (window.STUDENTS_DATA || []).find(st => 
+        (st.id && st.id.toLowerCase() === (studentIdOrEmail || '').toLowerCase()) ||
+        (st.email && st.email.toLowerCase() === (studentIdOrEmail || '').toLowerCase())
+      );
 
-      const userSettings = window.MultiCloudUploader.getUserSettings(student.id);
+      const isSpecialTester = ((studentIdOrEmail || '').toLowerCase() === 'phupa5874@gmail.com' || (student && student.email.toLowerCase() === 'phupa5874@gmail.com'));
+      
+      const userSettings = window.MultiCloudUploader.getUserSettings(student ? student.id : studentIdOrEmail);
       const overrides = window.MultiCloudUploader?.memberSettings?.userOverrides || {};
-      const override = overrides[student.id] || overrides[student.email.toLowerCase()] || null;
+      const override = overrides[student?.id] || overrides[(student?.email || studentIdOrEmail).toLowerCase()] || overrides[studentIdOrEmail] || null;
 
-      document.getElementById('editMemberKey').value = student.id;
-      document.getElementById('editMemberName').textContent = `${student.name} ${student.nickname ? `(${student.nickname})` : ''}`;
-      document.getElementById('editMemberId').textContent = student.id;
-      document.getElementById('editMemberEmail').textContent = student.email;
-      document.getElementById('editMemberAvatar').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${student.email || student.id}`;
+      const effectiveKey = student ? student.id : (studentIdOrEmail.includes('@') ? studentIdOrEmail.toLowerCase() : studentIdOrEmail);
+      const displayName = student ? `${student.name} ${student.nickname ? `(${student.nickname})` : ''}` : (isSpecialTester ? 'ภูผา (Super Admin / ผู้ทดสอบระบบ)' : studentIdOrEmail);
+      const displayId = student ? student.id : (isSpecialTester ? 'ADMIN-TESTER' : 'CUSTOM');
+      const displayEmail = student ? student.email : (studentIdOrEmail.includes('@') ? studentIdOrEmail : '-');
+
+      document.getElementById('editMemberKey').value = effectiveKey;
+      document.getElementById('editMemberName').textContent = displayName;
+      document.getElementById('editMemberId').textContent = displayId;
+      document.getElementById('editMemberEmail').textContent = displayEmail;
+      document.getElementById('editMemberAvatar').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${displayEmail || effectiveKey}`;
 
       document.getElementById('editMemberQuotaInput').value = userSettings.quotaGB;
       document.getElementById('editMemberQuotaNote').textContent = `${userSettings.quotaGB} GB`;
-      document.getElementById('editMemberNote').value = override?.note || '';
+      document.getElementById('editMemberNote').value = override?.note || (isSpecialTester ? 'Super Admin / Special Tester' : '');
 
       const resSelect = document.getElementById('editMemberResolutionPreset');
       if (!override || override.maxDimension === undefined) {
-        resSelect.value = 'global';
+        resSelect.value = isSpecialTester ? '4000_1.0' : 'global';
       } else if (override.quality >= 1.0) {
         resSelect.value = '4000_1.0';
       } else if (override.maxDimension <= 1280) {
@@ -1118,18 +1339,23 @@
     }
 
     function saveMemberQuotaAction() {
-      const studentId = document.getElementById('editMemberKey').value;
-      if (!studentId) return;
+      const memberKey = document.getElementById('editMemberKey').value;
+      if (!memberKey) return;
 
-      const student = (window.STUDENTS_DATA || []).find(st => st.id === studentId);
+      const student = (window.STUDENTS_DATA || []).find(st => 
+        (st.id && st.id.toLowerCase() === memberKey.toLowerCase()) ||
+        (st.email && st.email.toLowerCase() === memberKey.toLowerCase())
+      );
+
+      const isSpecial = memberKey.toLowerCase() === 'phupa5874@gmail.com' || (student && student.email.toLowerCase() === 'phupa5874@gmail.com');
       const quotaVal = parseFloat(document.getElementById('editMemberQuotaInput').value) || 5;
       const resPreset = document.getElementById('editMemberResolutionPreset').value;
       const note = document.getElementById('editMemberNote').value.trim();
 
       const overrideData = {
-        studentId: studentId,
-        email: student?.email || '',
-        name: student?.name || '',
+        studentId: student?.id || (memberKey.includes('@') ? (isSpecial ? 'ADMIN-TESTER' : 'CUSTOM') : memberKey),
+        email: student?.email || (memberKey.includes('@') ? memberKey.toLowerCase() : ''),
+        name: student?.name || (isSpecial ? 'ภูผา (Super Admin / ผู้ทดสอบระบบ)' : memberKey),
         quotaGB: quotaVal,
         note: note
       };
@@ -1147,26 +1373,90 @@
       }
 
       if (window.MultiCloudUploader) {
-        window.MultiCloudUploader.setUserOverride(studentId, overrideData);
+        window.MultiCloudUploader.setUserOverride(memberKey, overrideData);
+        // Also bind by email if available
+        if (overrideData.email) {
+          window.MultiCloudUploader.setUserOverride(overrideData.email, overrideData);
+        }
       }
 
       renderMembersAuditTable();
       closeMemberQuotaModal();
-      alert(`✅ บันทึกโควตาพิเศษเฉพาะคุณ "${student?.name || studentId}" เรียบร้อยแล้ว!\n- โควตาใหม่: ${quotaVal} GB`);
+      alert(`✅ บันทึกโควตาพิเศษสำหรับ "${overrideData.name || memberKey}" เรียบร้อยแล้ว!\n- โควตาใหม่: ${quotaVal} GB`);
     }
 
     function resetMemberOverrideToDefault() {
-      const studentId = document.getElementById('editMemberKey').value;
-      if (!studentId) return;
+      const memberKey = document.getElementById('editMemberKey').value;
+      if (!memberKey) return;
 
-      if (confirm("คุณต้องการล้างการตั้งค่าเฉพาะบุคคล และให้สมาชิกคนนี้กลับไปใช้ค่ามาตรฐานส่วนรวมใช่หรือไม่?")) {
+      if (confirm("คุณต้องการล้างการตั้งค่าเฉพาะบุคคล และให้บัญชีนี้กลับไปใช้ค่ามาตรฐานส่วนรวมใช่หรือไม่?")) {
         if (window.MultiCloudUploader) {
-          window.MultiCloudUploader.setUserOverride(studentId, { remove: true });
+          window.MultiCloudUploader.setUserOverride(memberKey, { remove: true });
         }
         renderMembersAuditTable();
         closeMemberQuotaModal();
         alert("🔄 รีเซ็ตเป็นค่าเริ่มต้นส่วนรวมเรียบร้อยแล้ว");
       }
+    }
+
+    // Modal: Add Custom Account Handlers
+    function openCustomAccountModal() {
+      const modal = document.getElementById('modalAddCustomAccount');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeCustomAccountModal() {
+      const modal = document.getElementById('modalAddCustomAccount');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function setCustomAccountQuotaInput(gb) {
+      document.getElementById('customAccountQuotaInput').value = gb;
+      document.getElementById('customAccountQuotaNote').textContent = `${gb} GB`;
+    }
+
+    function saveCustomAccountAction() {
+      const email = document.getElementById('customAccountEmail').value.trim().toLowerCase();
+      if (!email || !email.includes('@')) {
+        alert("กรุณาระบุอีเมลที่ถูกต้อง (เช่น phupa5874@gmail.com)");
+        return;
+      }
+
+      const name = document.getElementById('customAccountName').value.trim() || email;
+      const id = document.getElementById('customAccountId').value.trim() || (email === 'phupa5874@gmail.com' ? 'ADMIN-TESTER' : 'CUSTOM');
+      const quotaVal = parseFloat(document.getElementById('customAccountQuotaInput').value) || 20;
+      const resPreset = document.getElementById('customAccountResolutionPreset').value;
+      const note = document.getElementById('customAccountNote').value.trim();
+
+      const overrideData = {
+        studentId: id,
+        email: email,
+        name: name,
+        quotaGB: quotaVal,
+        note: note
+      };
+
+      if (resPreset !== 'global') {
+        let maxDim = 4000;
+        let quality = 1.0;
+        if (resPreset === '1280_0.75') { maxDim = 1280; quality = 0.75; }
+        else if (resPreset === '1600_0.82') { maxDim = 1600; quality = 0.82; }
+        else if (resPreset === '2048_0.90') { maxDim = 2048; quality = 0.90; }
+        else if (resPreset === '4000_1.0') { maxDim = 4000; quality = 1.0; }
+
+        overrideData.maxDimension = maxDim;
+        overrideData.quality = quality;
+      }
+
+      if (window.MultiCloudUploader) {
+        window.MultiCloudUploader.setUserOverride(email, overrideData);
+        if (id) window.MultiCloudUploader.setUserOverride(id, overrideData);
+      }
+
+      renderMembersAuditTable();
+      closeCustomAccountModal();
+      alert(`✅ เพิ่มบัญชีและกำหนดโควตา "${name}" (${email}) สำเร็จ!\n- โควตา: ${quotaVal} GB`);
     }
 
     // 8. Member File Audit Modal (ดูประวัติทั้งหมดว่าคนนี้อัปอะไรไปบ้าง)
