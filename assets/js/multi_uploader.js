@@ -63,6 +63,20 @@
       this.memberSettings = this.loadMemberSettings();
     }
 
+    loadConfig() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : { ...DEFAULT_CONFIG };
+      } catch (e) {
+        return { ...DEFAULT_CONFIG };
+      }
+    }
+
+    saveConfig(newCfg) {
+      this.config = { ...this.config, ...newCfg };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+    }
+
     loadMemberSettings() {
       try {
         const saved = localStorage.getItem(MEMBER_SETTINGS_KEY);
