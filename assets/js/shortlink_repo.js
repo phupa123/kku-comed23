@@ -220,39 +220,32 @@
     }
 
     /**
-     * Supabase Cloud Synchronization
+     * Supabase Cloud Synchronization (ตาราง shortlinks โดยตรงเท่านั้น ไม่ยุ่งกับ campaigns)
      */
     async initSync() {
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb) return;
 
-        // Fetch shortlink records from campaigns table with prefix 'shortlink_'
+        // Try dedicated shortlinks table if exists
         const { data, error } = await sb
-          .from('campaigns')
-          .select('*')
-          .like('id', 'shortlink_%');
+          .from('shortlinks')
+          .select('*');
 
         if (!error && Array.isArray(data) && data.length > 0) {
           let hasNew = false;
-          data.forEach(row => {
-            try {
-              if (row.closed_reason) {
-                const linkData = JSON.parse(row.closed_reason);
-                const localIdx = this.links.findIndex(l => l.id === linkData.id || l.code === linkData.code);
-                if (localIdx >= 0) {
-                  // Keep highest click count or newest update
-                  const local = this.links[localIdx];
-                  if ((linkData.clicks || 0) > (local.clicks || 0) || new Date(linkData.updatedAt) > new Date(local.updatedAt)) {
-                    this.links[localIdx] = linkData;
-                    hasNew = true;
-                  }
-                } else {
-                  this.links.push(linkData);
-                  hasNew = true;
-                }
+          data.forEach(linkData => {
+            const localIdx = this.links.findIndex(l => l.id === linkData.id || l.code === linkData.code);
+            if (localIdx >= 0) {
+              const local = this.links[localIdx];
+              if ((linkData.clicks || 0) > (local.clicks || 0) || new Date(linkData.updatedAt || linkData.updated_at) > new Date(local.updatedAt)) {
+                this.links[localIdx] = linkData;
+                hasNew = true;
               }
-            } catch (err) {}
+            } else {
+              this.links.push(linkData);
+              hasNew = true;
+            }
           });
 
           if (hasNew) {
@@ -270,17 +263,17 @@
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb) return;
 
-        const recordId = `shortlink_${link.code}`;
-        await sb.from('campaigns').upsert({
-          id: recordId,
-          code: `SL_${link.code.toUpperCase()}`.substring(0, 30),
-          title: `SHORTLINK_${link.code}`,
-          subtitle: link.title || '',
+        // Sync to dedicated 'shortlinks' table only (never touch campaigns)
+        await sb.from('shortlinks').upsert({
+          id: link.id,
+          code: link.code,
+          title: link.title || '',
+          target_url: link.targetUrl,
           category: link.category || 'Shortlink',
-          status: link.isActive ? 'open' : 'closed',
-          closed_reason: JSON.stringify(link),
+          clicks: link.clicks || 0,
+          is_active: link.isActive,
           updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+        }, { onConflict: 'code' }).catch(() => {});
       } catch (e) {
         console.warn("[ShortlinkRepo] Cloud sync error:", e);
       }
@@ -290,8 +283,7 @@
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb) return;
-        const recordId = `shortlink_${link.code}`;
-        await sb.from('campaigns').delete().eq('id', recordId);
+        await sb.from('shortlinks').delete().eq('code', link.code).catch(() => {});
       } catch (e) {
         console.warn("[ShortlinkRepo] Cloud delete error:", e);
       }

@@ -14,7 +14,7 @@ const GAS_CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Oh
 const DEFAULT_INDEX_CONFIG = {
   announcementText: "📢 ขอความร่วมมือเพื่อนๆ นักศึกษาชั้นปีที่ 1 ชำระค่าทำป้ายสาขาวิชาเอก คนละ ฿190.00 ภายในวันที่ 4 ก.ย. 69",
   announcementActive: true,
-  heroTag: "สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 69",
+  heroTag: "สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 63",
   heroTitle: "ระบบสารสนเทศ & จัดการข้อมูลรุ่น",
   heroSubtitle: "คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (Computer Education KKU)",
   aboutBranch: "สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น มุ่งเน้นผลิตบัณฑิตครูและนักเทคโนโลยีการศึกษาที่มีความรู้ความเชี่ยวชาญด้านวิทยาการคอมพิวเตอร์ นวัตกรรมดิจิทัล และศาสตร์การสอนสมัยใหม่ เพื่อพัฒนาการศึกษาของประเทศอย่างยั่งยืน",
@@ -43,7 +43,7 @@ function getMaintenanceConfig() {
   try {
     const s = localStorage.getItem(MAINT_CONFIG_KEY);
     return s ? { ...DEFAULT_MAINT_CONFIG, ...JSON.parse(s) } : DEFAULT_MAINT_CONFIG;
-  } catch(e) {
+  } catch (e) {
     return DEFAULT_MAINT_CONFIG;
   }
 }
@@ -95,14 +95,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
     }
-  } catch(e) {}
-  
+  } catch (e) { }
+
   if (window.ComedCampaignManager && typeof window.ComedCampaignManager.fetchFromCloud === 'function') {
     try {
       await window.ComedCampaignManager.fetchFromCloud();
-    } catch(e) {}
+    } catch (e) { }
   }
-  
+
   await loadStudentPaymentStatuses();
   renderCampaignsList();
   renderStudentsTable();
@@ -118,7 +118,7 @@ function updateLivePageBadges() {
   const badgeIndex = document.getElementById("pageBadgeIndex");
   const btnIndex = document.getElementById("btnToggleIndex");
   if (badgeIndex) {
-    badgeIndex.className = isIndexOff 
+    badgeIndex.className = isIndexOff
       ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
       : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
     badgeIndex.innerHTML = isIndexOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
@@ -298,9 +298,9 @@ function syncMaintenanceConfigToCloud(cfg) {
         status: 'open',
         closed_reason: JSON.stringify(cfg),
         updated_at: new Date().toISOString()
-      }, { onConflict: 'id' }).then(() => {});
+      }, { onConflict: 'id' }).then(() => { });
     }
-  } catch(e) {
+  } catch (e) {
     console.warn("Supabase Maintenance Sync Error:", e);
   }
 
@@ -314,7 +314,7 @@ function syncMaintenanceConfigToCloud(cfg) {
         config: cfg,
         adminEmail: sessionStorage.getItem(ADMIN_SESSION_KEY) || "Admin"
       })
-    }).catch(() => {});
+    }).catch(() => { });
   }
 }
 
@@ -367,7 +367,7 @@ async function handleQrFileUpload(event, previewImgId, inputId) {
 
   // Fallback to Base64 data URL
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const dataUrl = e.target.result;
     if (preview) preview.src = dataUrl;
     if (input) input.value = dataUrl;
@@ -721,7 +721,7 @@ async function renderStudentsTable() {
 
   let list = studentsList;
   if (q) {
-    list = list.filter(st => 
+    list = list.filter(st =>
       st.id.toLowerCase().includes(q) ||
       st.name.toLowerCase().includes(q) ||
       st.nickname.toLowerCase().includes(q) ||
@@ -863,7 +863,7 @@ function saveStudentChanges(e) {
     st.name = document.getElementById('editStudentName').value.trim();
     st.nickname = document.getElementById('editStudentNickname').value.trim();
     st.email = document.getElementById('editStudentEmail').value.trim();
-    
+
     localStorage.setItem('COMED_CUSTOM_STUDENTS_DATA', JSON.stringify(studentsList));
     closeEditStudentModal();
     renderStudentsTable();

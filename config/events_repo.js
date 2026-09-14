@@ -554,17 +554,6 @@ window.ComedEventManager = {
         departments: eventData.departments,
         updated_at: new Date().toISOString()
       }, { onConflict: 'id' }).catch(() => {});
-
-      // 2. Reliable Cloud Sync via 'campaigns' table
-      await sb.from('campaigns').upsert({
-        id: `event_cfg_${eventData.id}`,
-        code: `CFG_${eventData.id.toUpperCase()}`.substring(0, 30),
-        title: `EVENT_CONFIG_${eventData.id}`,
-        subtitle: eventData.title || '',
-        status: eventData.status || 'open',
-        closed_reason: JSON.stringify(eventData),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
     } catch(e) {
       console.warn("Supabase Event Sync Suppressed:", e);
     }
@@ -575,31 +564,14 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
       sb.from('events').delete().eq('id', eventId).catch(() => {});
-      sb.from('campaigns').delete().eq('id', `event_cfg_${eventId}`).catch(() => {});
-      sb.from('campaigns').delete().eq('id', `event_regs_${eventId}`).catch(() => {});
     } catch(e) {
       console.warn("Supabase Event Delete Suppressed:", e);
     }
   },
 
   syncAllRegistrationsToCloud: async function(eventId) {
-    const targetEventId = eventId || 'room_roles_69';
-    try {
-      const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
-      if (!sb) return;
-
-      const regs = this.getRegistrations(targetEventId);
-      await sb.from('campaigns').upsert({
-        id: `event_regs_${targetEventId}`,
-        code: `REGS_${targetEventId.toUpperCase()}`.substring(0, 30),
-        title: `EVENT_REGISTRATIONS_${targetEventId}`,
-        subtitle: `${regs.length} คนลงทะเบียนแล้ว`,
-        closed_reason: JSON.stringify(regs),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
-    } catch(e) {
-      console.warn("Supabase Batch Regs Sync Suppressed:", e);
-    }
+    // Không sync vào bảng campaigns nữa เพื่อป้องกันไม่ให้ข้อมูลปนกับระบบการเงิน
+    return;
   },
 
   syncRegistrationToSupabase: async function(regRecord) {
@@ -616,9 +588,9 @@ window.ComedEventManager = {
         }).catch(() => {});
       }
 
-      // 1. Primary: บันทึกลงตารางเฉพาะ event_registrations (Atomic Row Level)
+      // 1. บันทึกลงตารางเฉพาะ event_registrations (Atomic Row Level)
       const targetRowId = regRecord.id || `${regRecord.eventId}_${regRecord.studentId}`;
-      const upsertPromise = sb.from('event_registrations').upsert({
+      await sb.from('event_registrations').upsert({
         id: targetRowId,
         event_id: regRecord.eventId,
         student_id: regRecord.studentId,
@@ -632,11 +604,6 @@ window.ComedEventManager = {
         note: regRecord.note ? (regRecord.trackId ? `[TRACK:${regRecord.trackId}] ` + regRecord.note : regRecord.note) : (regRecord.trackId ? `[TRACK:${regRecord.trackId}]` : ''),
         registered_at: regRecord.registeredAt || new Date().toISOString()
       }, { onConflict: 'id' });
-
-      // 2. Secondary Broadcast: อัปเดตไปยัง 'campaigns' ขนานกันโดยไม่ต้องรอกัน
-      const backupPromise = this.syncAllRegistrationsToCloud(regRecord.eventId);
-
-      await Promise.allSettled([upsertPromise, backupPromise]);
     } catch(e) {
       console.warn("Supabase Registration Sync Suppressed:", e);
     }
@@ -678,26 +645,23 @@ window.ComedEventManager = {
 
       let hasUpdate = false;
 
-      // 1. Fetch Event Config
+      // 1. Fetch Event Config (จากตาราง events โดยตรง)
       try {
-        const { data: cfgRow } = await sb.from('campaigns')
-          .select('closed_reason')
-          .eq('id', `event_cfg_${targetEventId}`)
+        const { data: eventRow, error: evErr } = await sb.from('events')
+          .select('*')
+          .eq('id', targetEventId)
           .maybeSingle();
 
-        if (cfgRow && cfgRow.closed_reason) {
-          const parsedCfg = JSON.parse(cfgRow.closed_reason);
-          if (parsedCfg && parsedCfg.departments) {
-            const events = this.getAllEvents();
-            const idx = events.findIndex(e => e.id === targetEventId);
-            if (idx !== -1) {
-              events[idx] = { ...events[idx], ...parsedCfg };
-            } else {
-              events.unshift(parsedCfg);
-            }
-            localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(events));
-            hasUpdate = true;
+        if (!evErr && eventRow && eventRow.departments) {
+          const events = this.getAllEvents();
+          const idx = events.findIndex(e => e.id === targetEventId);
+          if (idx !== -1) {
+            events[idx] = { ...events[idx], ...eventRow };
+          } else {
+            events.unshift(eventRow);
           }
+          localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(events));
+          hasUpdate = true;
         }
       } catch(e) {}
 
@@ -735,21 +699,6 @@ window.ComedEventManager = {
               registeredAt: r.registered_at
             };
           });
-        } else {
-          // ถ้าตารางตรงยังว่าง ให้ fallback ดึงจาก campaigns store
-          const { data: regsRow } = await sb.from('campaigns')
-            .select('closed_reason')
-            .eq('id', `event_regs_${targetEventId}`)
-            .maybeSingle();
-
-          if (regsRow && regsRow.closed_reason) {
-            const cloudRegs = JSON.parse(regsRow.closed_reason);
-            if (Array.isArray(cloudRegs)) {
-              loadedRegs = cloudRegs;
-            }
-          }
-        }
-
         if (loadedRegs && Array.isArray(loadedRegs)) {
           const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
           const localStr = localStorage.getItem(key);
@@ -757,11 +706,6 @@ window.ComedEventManager = {
           if (localStr !== cloudStr) {
             localStorage.setItem(key, cloudStr);
             hasUpdate = true;
-          }
-        } else {
-          const localRegs = this.getRegistrations(targetEventId);
-          if (localRegs.length > 0) {
-            await this.syncAllRegistrationsToCloud(targetEventId);
           }
         }
       } catch(e) {}
@@ -886,19 +830,6 @@ window.ComedEventManager = {
 
             if (typeof onUpdateCallback === 'function') {
               onUpdateCallback({ type: 'table_change', payload });
-            }
-          })
-          .on('postgres_changes', { 
-            event: '*', 
-            schema: 'public', 
-            table: 'campaigns'
-          }, async (payload) => {
-            const rowId = payload?.new?.id || payload?.old?.id;
-            if (rowId === `event_regs_${targetEventId}` || rowId === `event_cfg_${targetEventId}`) {
-              await this.fetchCloudData(targetEventId, true);
-              if (typeof onUpdateCallback === 'function') {
-                onUpdateCallback({ type: 'cloud_change', payload });
-              }
             }
           })
           .subscribe((status) => {
