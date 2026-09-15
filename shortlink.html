@@ -394,31 +394,49 @@
       const manualBtn = document.getElementById('redirectManualBtn');
 
       if (!link) {
-        // Fallback: try querying Supabase shortlinks if available
+        // Fallback: try querying Supabase campaigns table (category: Shortlink or DriveShare)
         if (window.getSupabaseClient) {
           try {
             const sb = window.getSupabaseClient();
             if (sb) {
               for (const c of possibleCodes) {
-                const { data } = await sb.from('shortlinks').select('*').eq('code', c).maybeSingle();
+                const { data } = await sb
+                  .from('campaigns')
+                  .select('*')
+                  .or(`code.eq.${c},id.eq.slink_${c},id.eq.share_${c}`)
+                  .maybeSingle();
+
                 if (data) {
                   // If it's a DriveShare
-                  if ((data.category || '').includes('DriveShare') || (data.target_url || '').includes('storage.html?share=')) {
-                    window.location.replace(`storage.html?share=${encodeURIComponent(c)}`);
+                  if (data.category === 'DriveShare' || (data.code || '').startsWith('s_')) {
+                    window.location.replace(`storage.html?share=${encodeURIComponent(data.code || c)}`);
                     return;
                   }
-                  link = {
-                    code: data.code,
-                    title: data.title || '',
-                    targetUrl: data.target_url,
-                    isActive: data.is_active !== false,
-                    clicks: data.clicks || 0
-                  };
-                  break;
+
+                  let parsedMeta = {};
+                  try {
+                    if (data.subtitle) parsedMeta = JSON.parse(data.subtitle);
+                  } catch(e) {
+                    parsedMeta = { targetUrl: data.subtitle };
+                  }
+
+                  const targetUrl = parsedMeta.targetUrl || data.subtitle || '';
+                  if (targetUrl) {
+                    link = {
+                      code: data.code || c,
+                      title: data.title || '',
+                      targetUrl: targetUrl,
+                      isActive: data.status !== 'closed',
+                      clicks: Math.round(Number(data.amount) || 0)
+                    };
+                    break;
+                  }
                 }
               }
             }
-          } catch(e) {}
+          } catch(e) {
+            console.warn("[Shortlink] Supabase fallback query suppressed:", e);
+          }
         }
       }
 

@@ -83,9 +83,9 @@
         if (!sb) return;
 
         const { data, error } = await sb
-          .from('shortlinks')
+          .from('campaigns')
           .select('*')
-          .ilike('category', '%DriveShare%');
+          .eq('category', 'DriveShare');
 
         if (!error && Array.isArray(data) && data.length > 0) {
           let hasNew = false;
@@ -95,7 +95,7 @@
 
             let parsedMeta = {};
             try {
-              if (linkRow.notes) parsedMeta = JSON.parse(linkRow.notes);
+              if (linkRow.subtitle) parsedMeta = JSON.parse(linkRow.subtitle);
             } catch(e) {}
 
             const existingIdx = this.shares.findIndex(s => s.shareCode === code || s.id === linkRow.id);
@@ -112,8 +112,12 @@
               passwordHash: parsedMeta.passwordHash || null,
               expiresAt: parsedMeta.expiresAt || null,
               createdAt: linkRow.created_at || linkRow.createdAt || new Date().toISOString(),
-              creatorEmail: parsedMeta.creatorEmail || (linkRow.created_by || ''),
-              clicks: linkRow.clicks || 0,
+              creatorEmail: parsedMeta.creatorEmail || '',
+              clicks: Math.round(Number(linkRow.amount) || 0),
+              fileUrl: parsedMeta.fileUrl || '',
+              fileName: parsedMeta.fileName || '',
+              fileType: parsedMeta.fileType || '',
+              fileSize: parsedMeta.fileSize || 0,
               updatedAt: linkRow.updated_at || new Date().toISOString()
             };
 
@@ -141,6 +145,23 @@
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb || !shareRecord || !shareRecord.shareCode) return;
 
+        // Try to attach targetFile metadata if available (for direct opening on other devices)
+        let fileUrl = shareRecord.fileUrl || '';
+        let fileName = shareRecord.fileName || '';
+        let fileType = shareRecord.fileType || '';
+        let fileSize = shareRecord.fileSize || 0;
+
+        if (shareRecord.targetType === 'file' && (!fileUrl || !fileName)) {
+          const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+          const f = allFiles.find(item => item.id === shareRecord.targetId);
+          if (f) {
+            fileUrl = f.url || '';
+            fileName = f.name || '';
+            fileType = f.type || '';
+            fileSize = f.size || 0;
+          }
+        }
+
         const metaObj = {
           targetType: shareRecord.targetType,
           targetId: shareRecord.targetId,
@@ -150,22 +171,26 @@
           hasPassword: !!shareRecord.hasPassword,
           passwordHash: shareRecord.passwordHash || null,
           expiresAt: shareRecord.expiresAt || null,
-          creatorEmail: shareRecord.creatorEmail || ''
+          creatorEmail: shareRecord.creatorEmail || '',
+          fileUrl,
+          fileName,
+          fileType,
+          fileSize
         };
 
-        const targetUrl = `${window.location.origin}/storage.html?share=${encodeURIComponent(shareRecord.shareCode)}`;
+        const recId = 'share_' + shareRecord.shareCode;
 
-        await sb.from('shortlinks').upsert({
-          id: shareRecord.id,
+        await sb.from('campaigns').upsert({
+          id: recId,
           code: shareRecord.shareCode,
-          title: `[แชร์ไดรฟ์] ${shareRecord.title || shareRecord.targetType}`,
-          target_url: targetUrl,
+          title: `[แชร์ไดรฟ์] ${shareRecord.title || fileName || shareRecord.targetType}`,
+          subtitle: JSON.stringify(metaObj),
           category: 'DriveShare',
-          clicks: shareRecord.clicks || 0,
-          is_active: true,
-          notes: JSON.stringify(metaObj),
+          amount: Number(shareRecord.clicks) || 0,
+          status: 'open',
+          is_default: false,
           updated_at: new Date().toISOString()
-        }, { onConflict: 'code' }).catch(() => {});
+        }, { onConflict: 'id' }).catch(() => {});
       } catch(err) {
         console.warn("[StorageDriveRepo] Cloud share sync error:", err);
       }
@@ -175,7 +200,8 @@
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb || !shareCode) return;
-        await sb.from('shortlinks').delete().eq('code', shareCode).catch(() => {});
+        const recId = 'share_' + shareCode;
+        await sb.from('campaigns').delete().eq('id', recId).catch(() => {});
       } catch (err) {
         console.warn("[StorageDriveRepo] Cloud share delete error:", err);
       }
@@ -186,22 +212,25 @@
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb || !shareCode) return null;
 
+        // Try exact code or share_ id in campaigns
+        const cleanCode = String(shareCode).trim();
         const { data, error } = await sb
-          .from('shortlinks')
+          .from('campaigns')
           .select('*')
-          .eq('code', shareCode)
+          .eq('category', 'DriveShare')
+          .or(`code.eq.${cleanCode},id.eq.share_${cleanCode}`)
           .maybeSingle();
 
         if (error || !data) return null;
 
         let parsedMeta = {};
         try {
-          if (data.notes) parsedMeta = JSON.parse(data.notes);
+          if (data.subtitle) parsedMeta = JSON.parse(data.subtitle);
         } catch(e) {}
 
         const shareRecord = {
           id: data.id || ('shr_' + data.code),
-          shareCode: data.code,
+          shareCode: data.code || cleanCode,
           targetType: parsedMeta.targetType || 'file',
           targetId: parsedMeta.targetId || '',
           title: data.title ? data.title.replace(/^\[แชร์ไดรฟ์\]\s*/, '') : 'แชร์ไฟล์',
@@ -212,12 +241,16 @@
           passwordHash: parsedMeta.passwordHash || null,
           expiresAt: parsedMeta.expiresAt || null,
           createdAt: data.created_at || data.createdAt || new Date().toISOString(),
-          creatorEmail: parsedMeta.creatorEmail || (data.created_by || ''),
-          clicks: data.clicks || 0,
+          creatorEmail: parsedMeta.creatorEmail || '',
+          clicks: Math.round(Number(data.amount) || 0),
+          fileUrl: parsedMeta.fileUrl || '',
+          fileName: parsedMeta.fileName || '',
+          fileType: parsedMeta.fileType || '',
+          fileSize: parsedMeta.fileSize || 0,
           updatedAt: data.updated_at || new Date().toISOString()
         };
 
-        const existingIdx = this.shares.findIndex(s => s.shareCode === shareCode);
+        const existingIdx = this.shares.findIndex(s => s.shareCode === shareRecord.shareCode);
         if (existingIdx >= 0) {
           this.shares[existingIdx] = shareRecord;
         } else {

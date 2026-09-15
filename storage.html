@@ -1115,9 +1115,14 @@
       } else {
         const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
         const targetFile = allFiles.find(f => f.id === share.targetId);
-        if (targetFile && targetFile.url) {
-          window.open(targetFile.url, '_blank');
+        const fileUrl = (targetFile && targetFile.url) || share.fileUrl;
+        const fileName = (targetFile && targetFile.name) || share.fileName || share.title || 'ไฟล์ที่แชร์';
+
+        if (fileUrl) {
+          window.open(fileUrl, '_blank');
           showToast(`📄 เปิดไฟล์ที่แชร์เรียบร้อยแล้ว`);
+        } else {
+          showToast(`ℹ️ รายละเอียดไฟล์: ${escapeHtml(fileName)}`);
         }
       }
     }

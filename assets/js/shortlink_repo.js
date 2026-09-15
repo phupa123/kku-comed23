@@ -220,25 +220,53 @@
     }
 
     /**
-     * Supabase Cloud Synchronization (ตาราง shortlinks โดยตรงเท่านั้น ไม่ยุ่งกับ campaigns)
+     * Supabase Cloud Synchronization (จัดเก็บผ่านตาราง campaigns พร้อม category: 'Shortlink')
      */
     async initSync() {
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb) return;
 
-        // Try dedicated shortlinks table if exists
         const { data, error } = await sb
-          .from('shortlinks')
-          .select('*');
+          .from('campaigns')
+          .select('*')
+          .eq('category', 'Shortlink');
 
         if (!error && Array.isArray(data) && data.length > 0) {
           let hasNew = false;
-          data.forEach(linkData => {
+          data.forEach(linkRow => {
+            const rawId = linkRow.id || '';
+            const code = linkRow.code;
+            if (!code) return;
+
+            let parsedMeta = {};
+            try {
+              if (linkRow.subtitle) parsedMeta = JSON.parse(linkRow.subtitle);
+            } catch(e) {
+              parsedMeta = { targetUrl: linkRow.subtitle };
+            }
+
+            const targetUrl = parsedMeta.targetUrl || linkRow.subtitle || '';
+            if (!targetUrl) return;
+
+            const linkData = {
+              id: rawId,
+              code: code,
+              title: linkRow.title || '',
+              targetUrl: targetUrl,
+              category: parsedMeta.category || 'Shortlink',
+              clicks: Math.round(Number(linkRow.amount) || 0),
+              isActive: linkRow.status !== 'closed',
+              createdAt: linkRow.created_at || new Date().toISOString(),
+              updatedAt: linkRow.updated_at || new Date().toISOString(),
+              createdBy: parsedMeta.createdBy || 'ผู้ดูแลระบบ',
+              notes: parsedMeta.notes || ''
+            };
+
             const localIdx = this.links.findIndex(l => l.id === linkData.id || l.code === linkData.code);
             if (localIdx >= 0) {
               const local = this.links[localIdx];
-              if ((linkData.clicks || 0) > (local.clicks || 0) || new Date(linkData.updatedAt || linkData.updated_at) > new Date(local.updatedAt)) {
+              if ((linkData.clicks || 0) > (local.clicks || 0) || new Date(linkData.updatedAt) > new Date(local.updatedAt)) {
                 this.links[localIdx] = linkData;
                 hasNew = true;
               }
@@ -261,19 +289,27 @@
     async syncToSupabase(link) {
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
-        if (!sb) return;
+        if (!sb || !link || !link.code) return;
 
-        // Sync to dedicated 'shortlinks' table only (never touch campaigns)
-        await sb.from('shortlinks').upsert({
-          id: link.id,
-          code: link.code,
-          title: link.title || '',
-          target_url: link.targetUrl,
+        const recId = link.id && link.id.startsWith('slink_') ? link.id : ('slink_' + link.code);
+        const metaObj = {
+          targetUrl: link.targetUrl,
           category: link.category || 'Shortlink',
-          clicks: link.clicks || 0,
-          is_active: link.isActive,
+          createdBy: link.createdBy || '',
+          notes: link.notes || ''
+        };
+
+        await sb.from('campaigns').upsert({
+          id: recId,
+          code: link.code,
+          title: link.title || ('ลิงก์ย่อ ' + link.code),
+          subtitle: JSON.stringify(metaObj),
+          category: 'Shortlink',
+          amount: Number(link.clicks) || 0,
+          status: link.isActive ? 'open' : 'closed',
+          is_default: false,
           updated_at: new Date().toISOString()
-        }, { onConflict: 'code' }).catch(() => {});
+        }, { onConflict: 'id' }).catch(() => {});
       } catch (e) {
         console.warn("[ShortlinkRepo] Cloud sync error:", e);
       }
@@ -282,8 +318,9 @@
     async deleteFromSupabase(link) {
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
-        if (!sb) return;
-        await sb.from('shortlinks').delete().eq('code', link.code).catch(() => {});
+        if (!sb || !link) return;
+        const recId = link.id && link.id.startsWith('slink_') ? link.id : ('slink_' + link.code);
+        await sb.from('campaigns').delete().eq('id', recId).catch(() => {});
       } catch (e) {
         console.warn("[ShortlinkRepo] Cloud delete error:", e);
       }
