@@ -44,6 +44,12 @@
 
   <!-- Multi-Cloud Engine -->
   <script src="assets/js/multi_uploader.js"></script>
+  <!-- JSZip for batch folder download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Multi-Downloader Library -->
+  <script src="assets/js/multi_downloader.js"></script>
+  <!-- Drag-to-Select Engine -->
+  <script src="assets/js/drag_select.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
@@ -266,6 +272,32 @@
             <div id="bulkSelectedCountBadge" class="hidden text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl items-center gap-1.5">
               <span>เลือกแล้ว <strong id="bulkCountNum">0</strong> ไฟล์</span>
             </div>
+
+            <!-- Download Dropdown -->
+            <div class="relative inline-block text-left hidden" id="bulkDownloadDropdown">
+              <button type="button" onclick="toggleAdminBatchDownloadMenu()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>ดาวน์โหลด</span>
+                <i data-lucide="chevron-down" class="w-3 h-3"></i>
+              </button>
+              <div id="adminBatchDownloadMenu" class="hidden absolute right-0 mt-1.5 w-56 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl z-50 p-1.5 space-y-1">
+                <button onclick="downloadAdminSelectedSequentially(); toggleAdminBatchDownloadMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-200 hover:bg-slate-800 hover:text-white transition flex items-center gap-2 cursor-pointer">
+                  <i data-lucide="files" class="w-4 h-4 text-sky-400"></i>
+                  <div>
+                    <strong class="block font-bold">ดาวน์โหลดทีละไฟล์</strong>
+                    <span class="text-[10px] text-slate-400">ดาวน์โหลดแยกแต่ละไฟล์</span>
+                  </div>
+                </button>
+                <button onclick="downloadAdminSelectedAsZip(); toggleAdminBatchDownloadMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-200 hover:bg-slate-800 hover:text-white transition flex items-center gap-2 cursor-pointer">
+                  <i data-lucide="folder-archive" class="w-4 h-4 text-emerald-400"></i>
+                  <div>
+                    <strong class="block font-bold">ดาวน์โหลดเป็นโฟลเดอร์ (ZIP)</strong>
+                    <span class="text-[10px] text-slate-400">บีบอัดรวมเป็นโฟลเดอร์ ZIP เดียว</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             <button id="btnBulkDelete" onclick="deleteSelectedFiles()" class="hidden px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition items-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               <span>ลบไฟล์ที่เลือก</span>
@@ -971,10 +1003,61 @@
       updateBulkUI();
     }
 
+    function toggleAdminBatchDownloadMenu() {
+      const m = document.getElementById('adminBatchDownloadMenu');
+      if (m) m.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const dd = document.getElementById('bulkDownloadDropdown');
+      const menu = document.getElementById('adminBatchDownloadMenu');
+      if (menu && dd && !dd.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    function getAdminSelectedFilesObjects() {
+      const ids = Array.from(selectedFileIds);
+      return ids.map(id => allStorageFiles.find(f => f.id === id)).filter(Boolean);
+    }
+
+    async function downloadAdminSelectedSequentially() {
+      const files = getAdminSelectedFilesObjects();
+      if (files.length === 0) {
+        alert('กรุณาเลือกไฟล์ที่ต้องการดาวน์โหลด');
+        return;
+      }
+      showToast(`⏳ กำลังเริ่มดาวน์โหลด ${files.length} ไฟล์แยกทีละไฟล์...`);
+      await window.MultiDownloader.downloadFilesSequentially(files, (curr, total, name) => {
+        showToast(`📥 กำลังโหลด (${curr}/${total}): ${name}`);
+      });
+      showToast(`✨ ดาวน์โหลดเสร็จสิ้นทั้งหมด ${files.length} ไฟล์!`);
+    }
+
+    async function downloadAdminSelectedAsZip() {
+      const files = getAdminSelectedFilesObjects();
+      if (files.length === 0) {
+        alert('กรุณาเลือกไฟล์ที่ต้องการดาวน์โหลด');
+        return;
+      }
+      const zipName = `comed23_admin_export_${Date.now()}.zip`;
+      showToast(`📦 กำลังรวมไฟล์ ${files.length} ไฟล์เป็นโฟลเดอร์ ZIP...`);
+      try {
+        await window.MultiDownloader.downloadAsZip(files, zipName, (pct, msg) => {
+          showToast(`📦 กำลังบีบอัด (${pct}%): ${msg}`);
+        });
+        showToast(`🎉 ดาวน์โหลดโฟลเดอร์ ZIP สำเร็จเรียบร้อย!`);
+      } catch (err) {
+        console.error('ZIP Error:', err);
+        alert(`เกิดข้อผิดพลาดในการรวม ZIP: ${err.message}`);
+      }
+    }
+
     function updateBulkUI() {
       const countBadge = document.getElementById('bulkSelectedCountBadge');
       const countNum = document.getElementById('bulkCountNum');
       const btnBulkDelete = document.getElementById('btnBulkDelete');
+      const bulkDownloadDropdown = document.getElementById('bulkDownloadDropdown');
       const masterChk = document.getElementById('masterCheckbox');
       const selectAllBtnText = document.getElementById('selectAllBtnText');
 
@@ -984,9 +1067,13 @@
       if (count > 0) {
         if (countBadge) { countBadge.classList.remove('hidden'); countBadge.classList.add('flex'); }
         if (btnBulkDelete) { btnBulkDelete.classList.remove('hidden'); btnBulkDelete.classList.add('flex'); }
+        if (bulkDownloadDropdown) { bulkDownloadDropdown.classList.remove('hidden'); }
       } else {
         if (countBadge) { countBadge.classList.add('hidden'); countBadge.classList.remove('flex'); }
         if (btnBulkDelete) { btnBulkDelete.classList.add('hidden'); btnBulkDelete.classList.remove('flex'); }
+        if (bulkDownloadDropdown) { bulkDownloadDropdown.classList.add('hidden'); }
+        const menu = document.getElementById('adminBatchDownloadMenu');
+        if (menu) menu.classList.add('hidden');
       }
 
       const visibleFiles = getFilteredStorageFiles();
@@ -1126,7 +1213,7 @@
         else if (cat === 'document') iconTag = '<i data-lucide="file-text" class="w-3 h-3 text-amber-400"></i>';
 
         return `
-          <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 transition ${isChecked ? 'bg-orange-500/[0.08]' : ''}">
+          <tr data-file-id="${f.id}" class="hover:bg-slate-800/40 border-b border-slate-800/60 transition ${isChecked ? 'bg-orange-500/[0.08]' : ''}">
             <td class="p-3 text-center">
               <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleFileSelection('${f.id}')" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-orange-500 focus:ring-0 cursor-pointer">
             </td>
@@ -1188,7 +1275,7 @@
         else if (cat === 'document') iconTag = '<i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>';
 
         return `
-          <div class="relative group bg-slate-950/80 rounded-2xl border ${isChecked ? 'border-orange-500 shadow-md shadow-orange-500/20 ring-1 ring-orange-500' : 'border-slate-800/90 hover:border-slate-700'} overflow-hidden flex flex-col transition p-2.5">
+          <div data-file-id="${f.id}" class="relative group bg-slate-950/80 rounded-2xl border ${isChecked ? 'border-orange-500 shadow-md shadow-orange-500/20 ring-1 ring-orange-500' : 'border-slate-800/90 hover:border-slate-700'} overflow-hidden flex flex-col transition p-2.5">
             <!-- Select Checkbox Overlay -->
             <div class="absolute top-4 left-4 z-20">
               <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleFileSelection('${f.id}')" class="w-4 h-4 rounded bg-slate-950/90 border-slate-700 text-orange-500 focus:ring-0 cursor-pointer shadow">
@@ -2020,6 +2107,15 @@
           }
         }
 
+        // D or Ctrl + D : Download Selected Files as ZIP
+        if ((isCtrl && (e.key === 'd' || e.key === 'D')) || (!isCtrl && (e.key === 'd' || e.key === 'D'))) {
+          if (selectedFileIds.size > 0) {
+            e.preventDefault();
+            downloadAdminSelectedAsZip();
+            return;
+          }
+        }
+
         // 1 : List View
         if (e.key === '1') {
           e.preventDefault();
@@ -2059,9 +2155,58 @@
       }
     }
 
+    let adminDragSelectInstance = null;
+
+    function initAdminDragSelect() {
+      const container = document.getElementById('storageTableContainer');
+      const gridContainer = document.getElementById('storageGridContainer');
+
+      if (typeof DragSelectEngine === 'undefined') return;
+
+      const handleSelection = (selectedIds) => {
+        selectedFileIds = new Set(selectedIds);
+        updateBulkUI();
+        // Update checkboxes smoothly in both table and grid
+        document.querySelectorAll('[data-file-id]').forEach(el => {
+          const fid = el.getAttribute('data-file-id');
+          const isSel = selectedFileIds.has(fid);
+          const chk = el.querySelector('input[type="checkbox"]');
+          if (chk) chk.checked = isSel;
+          if (el.tagName === 'TR') {
+            if (isSel) el.classList.add('bg-orange-500/[0.08]');
+            else el.classList.remove('bg-orange-500/[0.08]');
+          } else {
+            if (isSel) {
+              el.classList.add('border-orange-500', 'shadow-md', 'shadow-orange-500/20', 'ring-1', 'ring-orange-500');
+              el.classList.remove('border-slate-800/90');
+            } else {
+              el.classList.remove('border-orange-500', 'shadow-md', 'shadow-orange-500/20', 'ring-1', 'ring-orange-500');
+              el.classList.add('border-slate-800/90');
+            }
+          }
+        });
+      };
+
+      if (container) {
+        new DragSelectEngine({
+          containerElement: container,
+          itemSelector: 'tr[data-file-id]',
+          onSelectionChange: handleSelection
+        });
+      }
+      if (gridContainer) {
+        new DragSelectEngine({
+          containerElement: gridContainer,
+          itemSelector: 'div[data-file-id]',
+          onSelectionChange: handleSelection
+        });
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       loadAllStorageData();
       setupAdminKeyboardShortcuts();
+      initAdminDragSelect();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     });
   </script>
@@ -2087,6 +2232,14 @@
         <div class="flex items-center justify-between py-2">
           <span class="text-slate-300">ค้นหาไฟล์หรือชื่อผู้ใช้</span>
           <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] font-bold text-slate-400">/</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ดาวน์โหลดไฟล์ที่เลือกเป็นโฟลเดอร์ ZIP</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] font-bold text-slate-400">D หรือ Ctrl + D</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ลากเมาส์คลุมเลือกไฟล์</span>
+          <span class="text-[11px] text-orange-400 font-medium">คลิกซ้ายแล้วลากคลุม (Lasso Drag)</span>
         </div>
         <div class="flex items-center justify-between py-2">
           <span class="text-slate-300">สลับมุมมอง List View (ตาราง)</span>

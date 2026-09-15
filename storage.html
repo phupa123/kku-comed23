@@ -49,6 +49,13 @@
   <!-- Multi-Cloud File Uploader Core -->
   <script src="assets/js/multi_uploader.js"></script>
 
+  <!-- JSZip for Folder / Multi-File Downloads -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Multi-Downloader Core -->
+  <script src="assets/js/multi_downloader.js"></script>
+  <!-- Drag to Select Mouse Engine -->
+  <script src="assets/js/drag_select.js"></script>
+
   <!-- Storage Drive Repository -->
   <script src="assets/js/storage_drive_repo.js"></script>
 
@@ -430,7 +437,32 @@
           <span class="font-bold text-white">เลือกอยู่ <span id="selectedFilesCountText" class="text-orange-400 font-mono font-bold">0</span> ไฟล์</span>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Download Options Dropdown -->
+          <div class="relative inline-block text-left" id="batchDownloadDropdown">
+            <button type="button" onclick="toggleBatchDownloadMenu()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>ดาวน์โหลดไฟล์</span>
+              <i data-lucide="chevron-down" class="w-3 h-3"></i>
+            </button>
+            <div id="batchDownloadMenu" class="hidden absolute right-0 mt-1.5 w-56 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl z-50 p-1.5 space-y-1">
+              <button onclick="downloadSelectedFilesSequentially(); toggleBatchDownloadMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-200 hover:bg-slate-800 hover:text-white transition flex items-center gap-2 cursor-pointer">
+                <i data-lucide="files" class="w-4 h-4 text-sky-400"></i>
+                <div>
+                  <strong class="block font-bold">ดาวน์โหลดทีละไฟล์</strong>
+                  <span class="text-[10px] text-slate-400">โหลดแยกทีละไฟล์ลงเครื่อง</span>
+                </div>
+              </button>
+              <button onclick="downloadSelectedFilesAsZip(); toggleBatchDownloadMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-200 hover:bg-slate-800 hover:text-white transition flex items-center gap-2 cursor-pointer">
+                <i data-lucide="folder-archive" class="w-4 h-4 text-emerald-400"></i>
+                <div>
+                  <strong class="block font-bold">ดาวน์โหลดเป็นโฟลเดอร์ (ZIP)</strong>
+                  <span class="text-[10px] text-slate-400">บีบอัดรวมเป็นโฟลเดอร์ไฟล์เดียว</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <button onclick="openBatchMoveModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="folder-symlink" class="w-3.5 h-3.5 text-amber-400"></i>
             <span>ย้ายไปที่โฟลเดอร์</span>
@@ -758,7 +790,7 @@
                 <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
                 <span class="text-xs font-black text-white">ทุกคน (Public)</span>
               </div>
-              <p class="text-[11px] text-slate-400 leading-tight">ใครมีลิงก์ก็เปิดดูหรือดาวน์โหลดได้</p>
+              <p class="text-[11px] text-slate-400 leading-tight">ใครมีลิงก์ก็เปิดดูตามบทบาทที่กำหนดได้</p>
             </label>
 
             <!-- COMED23 Member Only -->
@@ -779,6 +811,46 @@
                 <span class="text-xs font-black text-white">กำหนดคนเอง</span>
               </div>
               <p class="text-[11px] text-slate-400 leading-tight">ระบุอีเมลผู้รับที่อนุญาตอย่างเจาะจง</p>
+            </label>
+
+          </div>
+        </div>
+
+        <!-- Role Permission Level (สิทธิ์: อ่าน / แสดงความคิดเห็น / แก้ไข) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-2">
+            ระดับสิทธิ์ของผู้รับ (Permission Role)
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            
+            <!-- 1. Viewer (สิทธิ์อ่าน) -->
+            <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 has-[:checked]:border-sky-500 has-[:checked]:bg-sky-500/10 cursor-pointer transition">
+              <input type="radio" name="shareRole" value="viewer" checked class="hidden">
+              <div class="flex items-center gap-2 mb-1">
+                <i data-lucide="eye" class="w-4 h-4 text-sky-400"></i>
+                <span class="text-xs font-black text-white">มีสิทธิ์อ่าน (Viewer)</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-tight">ดูตัวอย่างและดาวน์โหลดไฟล์ได้อย่างเดียว</p>
+            </label>
+
+            <!-- 2. Commenter (สิทธิ์แสดงความคิดเห็น) -->
+            <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-500/10 cursor-pointer transition">
+              <input type="radio" name="shareRole" value="commenter" class="hidden">
+              <div class="flex items-center gap-2 mb-1">
+                <i data-lucide="message-square" class="w-4 h-4 text-amber-400"></i>
+                <span class="text-xs font-black text-white">แสดงความคิดเห็น (Commenter)</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-tight">อ่าน ดู ดาวน์โหลด และเขียนข้อเสนอแนะได้</p>
+            </label>
+
+            <!-- 3. Editor (สิทธิ์แก้ไข/จัดการไฟล์) -->
+            <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10 cursor-pointer transition">
+              <input type="radio" name="shareRole" value="editor" class="hidden">
+              <div class="flex items-center gap-2 mb-1">
+                <i data-lucide="edit-3" class="w-4 h-4 text-emerald-400"></i>
+                <span class="text-xs font-black text-white">มีสิทธิ์แก้ไข (Editor)</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-tight">จัดการ อัปโหลดเพิ่ม ย้าย และลบไฟล์ได้</p>
             </label>
 
           </div>
@@ -895,6 +967,14 @@
           <span class="kbd-badge">Ctrl + A</span>
         </div>
         <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ดาวน์โหลดไฟล์ที่เลือกเป็นโฟลเดอร์ ZIP</span>
+          <div class="flex gap-1"><span class="kbd-badge">D</span> หรือ <span class="kbd-badge">Ctrl + D</span></div>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ลากเมาส์คลุมเลือกไฟล์</span>
+          <span class="text-[11px] text-orange-400 font-medium">คลิกซ้ายแล้วลากคลุม (Lasso Drag)</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
           <span class="text-slate-300">ลบไฟล์ที่เลือกทั้งหมด</span>
           <span class="kbd-badge">Del</span> หรือ <span class="kbd-badge">Backspace</span>
         </div>
@@ -932,15 +1012,46 @@
     // Active item being locked/shared/moved/challenged
     let targetItemForAction = null; // { type: 'file'|'folder', id, name, ... }
 
+    let dragSelectInstance = null;
+
     // Init Application
     document.addEventListener('DOMContentLoaded', async () => {
       initUserSession();
       populateStudentDropdown();
       setupGoogleAuth();
       setupKeyboardShortcuts();
+      initDragSelection();
       await checkIncomingFolderOrShareParam();
       renderDrive();
     });
+
+    function initDragSelection() {
+      const container = document.getElementById('filesDisplayContainer');
+      if (!container || typeof DragSelectEngine === 'undefined') return;
+
+      dragSelectInstance = new DragSelectEngine({
+        containerElement: container,
+        itemSelector: '[data-file-id]',
+        onSelectionChange: (selectedIds) => {
+          selectedFileIds = new Set(selectedIds);
+          updateBatchActionBar();
+          // Update checkbox state in DOM without full re-render for buttery smoothness
+          container.querySelectorAll('[data-file-id]').forEach(el => {
+            const fid = el.getAttribute('data-file-id');
+            const isSel = selectedFileIds.has(fid);
+            const chk = el.querySelector('input[type="checkbox"]');
+            if (chk) chk.checked = isSel;
+            if (isSel) {
+              el.classList.add('border-orange-500', 'ring-2', 'ring-orange-500/20');
+              if (el.classList.contains('p-3.5')) el.classList.add('bg-orange-950/20');
+            } else {
+              el.classList.remove('border-orange-500', 'ring-2', 'ring-orange-500/20');
+              if (el.classList.contains('p-3.5')) el.classList.remove('bg-orange-950/20');
+            }
+          });
+        }
+      });
+    }
 
     window.addEventListener('popstate', (e) => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -1507,7 +1618,7 @@
             const isShared = !!shareInfo;
 
             return `
-              <div class="group relative rounded-2xl bg-slate-900/85 hover:bg-slate-850 border ${isSelected ? 'border-orange-500 ring-2 ring-orange-500/20' : isShared ? 'border-orange-500/40' : 'border-slate-800 hover:border-slate-700'} overflow-hidden transition-all duration-200 flex flex-col justify-between shadow-sm">
+              <div data-file-id="${f.id}" class="group relative rounded-2xl bg-slate-900/85 hover:bg-slate-850 border ${isSelected ? 'border-orange-500 ring-2 ring-orange-500/20' : isShared ? 'border-orange-500/40' : 'border-slate-800 hover:border-slate-700'} overflow-hidden transition-all duration-200 flex flex-col justify-between shadow-sm select-none">
                 
                 <!-- Selection Checkbox & Top Overlay -->
                 <div class="absolute top-2 left-2 z-20">
@@ -1575,7 +1686,7 @@
               const isShared = !!shareInfo;
 
               return `
-                <div class="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-850 transition ${isSelected ? 'bg-orange-950/20' : ''}">
+                <div data-file-id="${f.id}" class="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-850 transition select-none ${isSelected ? 'bg-orange-950/20' : ''}">
                   
                   <div class="flex items-center gap-3 overflow-hidden">
                     <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded text-orange-500 bg-slate-950 border-slate-700 focus:ring-0 cursor-pointer flex-shrink-0">
@@ -1726,6 +1837,57 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
+    function toggleBatchDownloadMenu() {
+      const menu = document.getElementById('batchDownloadMenu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const dd = document.getElementById('batchDownloadDropdown');
+      const menu = document.getElementById('batchDownloadMenu');
+      if (menu && dd && !dd.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    function getSelectedFilesObjects() {
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      const ids = Array.from(selectedFileIds);
+      return ids.map(id => allFiles.find(f => f.id === id)).filter(Boolean);
+    }
+
+    async function downloadSelectedFilesSequentially() {
+      const files = getSelectedFilesObjects();
+      if (files.length === 0) {
+        showToast('⚠️ กรุณาเลือกไฟล์ที่ต้องการดาวน์โหลด', 'error');
+        return;
+      }
+      showToast(`⏳ กำลังเริ่มดาวน์โหลด ${files.length} ไฟล์แยกทีละไฟล์...`);
+      await window.MultiDownloader.downloadFilesSequentially(files, (curr, total, name) => {
+        showToast(`📥 กำลังโหลด (${curr}/${total}): ${name}`);
+      });
+      showToast(`✨ ดาวน์โหลดเสร็จสิ้นทั้งหมด ${files.length} ไฟล์!`);
+    }
+
+    async function downloadSelectedFilesAsZip() {
+      const files = getSelectedFilesObjects();
+      if (files.length === 0) {
+        showToast('⚠️ กรุณาเลือกไฟล์ที่ต้องการดาวน์โหลด', 'error');
+        return;
+      }
+      const zipName = `comed23_drive_files_${Date.now()}.zip`;
+      showToast(`📦 กำลังรวมไฟล์ ${files.length} ไฟล์เป็นโฟลเดอร์ ZIP...`);
+      try {
+        await window.MultiDownloader.downloadAsZip(files, zipName, (pct, msg) => {
+          showToast(`📦 กำลังบีบอัด (${pct}%): ${msg}`);
+        });
+        showToast(`🎉 ดาวน์โหลดโฟลเดอร์ ZIP สำเร็จเรียบร้อย!`);
+      } catch (err) {
+        console.error('ZIP Error:', err);
+        showToast(`❌ เกิดข้อผิดพลาดในการรวม ZIP: ${err.message}`, 'error');
+      }
+    }
+
     function updateBatchActionBar() {
       const bar = document.getElementById('batchActionBar');
       const countText = document.getElementById('selectedFilesCountText');
@@ -1738,6 +1900,8 @@
       } else {
         bar.classList.add('hidden');
         if (chkAll) chkAll.checked = false;
+        const menu = document.getElementById('batchDownloadMenu');
+        if (menu) menu.classList.add('hidden');
       }
     }
 
@@ -2136,6 +2300,9 @@
         if (accessRadio) accessRadio.checked = true;
         toggleShareAccessOptions(currentEditingShare.accessType || 'public');
 
+        const roleRadio = document.querySelector(`input[name="shareRole"][value="${currentEditingShare.role || 'viewer'}"]`);
+        if (roleRadio) roleRadio.checked = true;
+
         document.getElementById('shareSpecificEmailsInput').value = (currentEditingShare.allowedEmails || []).join(', ');
         
         // Expiration
@@ -2164,6 +2331,9 @@
 
         document.querySelector('input[name="shareAccessType"][value="public"]').checked = true;
         toggleShareAccessOptions('public');
+        const defaultRoleRadio = document.querySelector('input[name="shareRole"][value="viewer"]');
+        if (defaultRoleRadio) defaultRoleRadio.checked = true;
+
         document.getElementById('shareSpecificEmailsInput').value = '';
         document.getElementById('shareExpiresSelect').value = '0';
         document.getElementById('sharePasswordInput').value = '';
@@ -2203,11 +2373,14 @@
       urlInput.value = shareUrl;
       if (title) title.textContent = isNew ? 'สร้างลิงก์แชร์สำเร็จแล้ว!' : 'ลิงก์แชร์ปัจจุบัน (พร้อมใช้งาน)';
 
+      const roleLabels = { viewer: '👀 สิทธิ์อ่านอย่างเดียว', commenter: '💬 สิทธิ์แสดงความคิดเห็น', editor: '✏️ สิทธิ์แก้ไขจัดการไฟล์' };
+      const roleText = roleLabels[shareRecord.role || 'viewer'] || 'สิทธิ์อ่าน';
+
       if (shareRecord.expiresAt) {
         const d = new Date(shareRecord.expiresAt);
-        badge.textContent = `⏱️ หมดอายุ: ${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
+        badge.textContent = `[${roleText}] ⏱️ หมดอายุ: ${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
       } else {
-        badge.textContent = '♾️ ถาวร (ไม่มีวันหมดอายุ)';
+        badge.textContent = `[${roleText}] ♾️ ถาวร (ไม่มีวันหมดอายุ)`;
       }
 
       // Render QR Code
@@ -2228,6 +2401,8 @@
     async function handleGenerateShareLink() {
       const accessElem = document.querySelector('input[name="shareAccessType"]:checked');
       const accessType = accessElem ? accessElem.value : 'public';
+      const roleElem = document.querySelector('input[name="shareRole"]:checked');
+      const shareRole = roleElem ? roleElem.value : 'viewer';
       const specificEmailsStr = document.getElementById('shareSpecificEmailsInput').value.trim();
       const expiresHours = Number(document.getElementById('shareExpiresSelect').value) || 0;
       const password = document.getElementById('sharePasswordInput').value.trim();
@@ -2250,6 +2425,7 @@
         // Update Existing Share
         const updateData = {
           accessType: accessType,
+          role: shareRole,
           allowedEmails: allowedEmails,
           expiresInHours: expiresHours
         };
@@ -2266,6 +2442,7 @@
           targetType: targetItemForAction.type,
           targetId: targetItemForAction.id,
           accessType: accessType,
+          role: shareRole,
           allowedEmails: allowedEmails,
           password: password || null,
           expiresInHours: expiresHours,
@@ -2642,6 +2819,15 @@
           if (selectedFileIds.size > 0) {
             e.preventDefault();
             deleteBatchSelectedFiles();
+            return;
+          }
+        }
+
+        // D or Ctrl + D : Download selected files
+        if ((isCtrl && (e.key === 'd' || e.key === 'D')) || (!isCtrl && (e.key === 'd' || e.key === 'D'))) {
+          if (selectedFileIds.size > 0) {
+            e.preventDefault();
+            downloadSelectedFilesAsZip();
             return;
           }
         }

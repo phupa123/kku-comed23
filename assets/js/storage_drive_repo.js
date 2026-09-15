@@ -13,6 +13,7 @@
   const STORAGE_FOLDERS_KEY = 'COMED_DRIVE_FOLDERS_V1';
   const STORAGE_FILES_META_KEY = 'COMED_DRIVE_FILES_META_V1';
   const STORAGE_SHARES_KEY = 'COMED_DRIVE_SHARES_V1';
+  const STORAGE_COMMENTS_KEY = 'COMED_DRIVE_COMMENTS_V1';
 
   // Default Folders for each new user
   const DEFAULT_USER_FOLDERS = [
@@ -52,7 +53,8 @@
     constructor() {
       this.folders = this.loadData(STORAGE_FOLDERS_KEY, []);
       this.filesMeta = this.loadData(STORAGE_FILES_META_KEY, {}); // { fileId: { folderId, isLocked, passwordHash, ... } }
-      this.shares = this.loadData(STORAGE_SHARES_KEY, []); // [ { id, shareCode, targetType: 'file'|'folder', targetId, accessType: 'public'|'comed23'|'specific', allowedEmails: [], passwordHash, expiresAt, ... } ]
+      this.shares = this.loadData(STORAGE_SHARES_KEY, []); // [ { id, shareCode, targetType: 'file'|'folder', targetId, accessType: 'public'|'comed23'|'specific', allowedEmails: [], passwordHash, expiresAt, role: 'viewer'|'commenter'|'editor', ... } ]
+      this.comments = this.loadData(STORAGE_COMMENTS_KEY, []); // [ { id, targetType, targetId, authorName, authorEmail, content, createdAt } ]
       this.hasSyncedCloud = false;
       this.initSync();
     }
@@ -104,6 +106,7 @@
               targetId: parsedMeta.targetId || '',
               title: linkRow.title ? linkRow.title.replace(/^\[แชร์ไดรฟ์\]\s*/, '') : 'แชร์ไฟล์',
               accessType: parsedMeta.accessType || 'public',
+              role: parsedMeta.role || 'viewer', // 'viewer' | 'commenter' | 'editor'
               allowedEmails: parsedMeta.allowedEmails || [],
               hasPassword: !!parsedMeta.hasPassword,
               passwordHash: parsedMeta.passwordHash || null,
@@ -142,6 +145,7 @@
           targetType: shareRecord.targetType,
           targetId: shareRecord.targetId,
           accessType: shareRecord.accessType,
+          role: shareRecord.role || 'viewer',
           allowedEmails: shareRecord.allowedEmails || [],
           hasPassword: !!shareRecord.hasPassword,
           passwordHash: shareRecord.passwordHash || null,
@@ -202,6 +206,7 @@
           targetId: parsedMeta.targetId || '',
           title: data.title ? data.title.replace(/^\[แชร์ไดรฟ์\]\s*/, '') : 'แชร์ไฟล์',
           accessType: parsedMeta.accessType || 'public',
+          role: parsedMeta.role || 'viewer',
           allowedEmails: parsedMeta.allowedEmails || [],
           hasPassword: !!parsedMeta.hasPassword,
           passwordHash: parsedMeta.passwordHash || null,
@@ -399,6 +404,7 @@
         targetId,
         title = 'แชร์ไฟล์',
         accessType = 'public', // 'public' | 'comed23' | 'specific'
+        role = 'viewer', // 'viewer' | 'commenter' | 'editor'
         allowedEmails = [],
         password = '',
         expiresInHours = 0, // 0 = no expiration
@@ -421,6 +427,7 @@
         targetId,
         title,
         accessType, // public, comed23, specific
+        role: role || 'viewer', // viewer, commenter, editor
         allowedEmails: (allowedEmails || []).map(e => e.toLowerCase().trim()),
         hasPassword: !!passHash,
         passwordHash: passHash,
@@ -463,6 +470,7 @@
       if (!share) return null;
 
       if (updateData.accessType !== undefined) share.accessType = updateData.accessType;
+      if (updateData.role !== undefined) share.role = updateData.role;
       if (updateData.allowedEmails !== undefined) {
         share.allowedEmails = (updateData.allowedEmails || []).map(e => e.toLowerCase().trim());
       }
@@ -487,6 +495,38 @@
       this.saveData(STORAGE_SHARES_KEY, this.shares);
       this.syncShareToCloud(share).catch(() => {});
       return share;
+    }
+
+    // ================= COMMENTS ENGINE =================
+    getTargetComments(targetType, targetId) {
+      return this.comments.filter(c => c.targetType === targetType && c.targetId === targetId);
+    }
+
+    addComment(targetType, targetId, author, content) {
+      const authorName = (author && (author.name || author.displayName || author.email)) || 'ผู้ใช้งาน';
+      const authorEmail = (author && author.email) || '';
+      const authorAvatar = (author && author.avatar) || '';
+
+      const comment = {
+        id: 'cmt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        targetType,
+        targetId,
+        authorName,
+        authorEmail,
+        authorAvatar,
+        content: (content || '').trim(),
+        createdAt: new Date().toISOString()
+      };
+
+      this.comments.unshift(comment);
+      this.saveData(STORAGE_COMMENTS_KEY, this.comments);
+      return comment;
+    }
+
+    deleteComment(commentId) {
+      this.comments = this.comments.filter(c => c.id !== commentId);
+      this.saveData(STORAGE_COMMENTS_KEY, this.comments);
+      return true;
     }
 
     deleteShare(shareId) {

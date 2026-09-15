@@ -43,6 +43,10 @@
 
   <!-- Multi-Cloud File Uploader Core -->
   <script src="assets/js/multi_uploader.js"></script>
+  <!-- JSZip for ZIP folder download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Multi-Downloader Library -->
+  <script src="assets/js/multi_downloader.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
@@ -413,10 +417,35 @@
           <p class="text-xs text-slate-400">ตรวจสอบไฟล์ของคุณ ลิงก์ดาวน์โหลด และสามารถลบไฟล์เพื่อคืนพื้นที่ได้</p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <span id="myFilesCountBadge" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
             0 รายการ
           </span>
+
+          <!-- Batch Download Dropdown -->
+          <div class="relative inline-block text-left" id="myFilesDownloadDropdown">
+            <button type="button" onclick="toggleMyFilesDownloadMenu()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>ดาวน์โหลดไฟล์</span>
+              <i data-lucide="chevron-down" class="w-3 h-3"></i>
+            </button>
+            <div id="myFilesDownloadMenu" class="hidden absolute right-0 mt-1.5 w-56 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl z-50 p-1.5 space-y-1">
+              <button onclick="downloadMyFiles(false); toggleMyFilesDownloadMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-200 hover:bg-slate-800 hover:text-white transition flex items-center gap-2 cursor-pointer">
+                <i data-lucide="files" class="w-4 h-4 text-sky-400"></i>
+                <div>
+                  <strong class="block font-bold">ดาวน์โหลดทีละไฟล์</strong>
+                  <span class="text-[10px] text-slate-400">โหลดแยกทีละไฟล์ลงเครื่อง</span>
+                </div>
+              </button>
+              <button onclick="downloadMyFiles(true); toggleMyFilesDownloadMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-200 hover:bg-slate-800 hover:text-white transition flex items-center gap-2 cursor-pointer">
+                <i data-lucide="folder-archive" class="w-4 h-4 text-emerald-400"></i>
+                <div>
+                  <strong class="block font-bold">ดาวน์โหลดเป็นโฟลเดอร์ (ZIP)</strong>
+                  <span class="text-[10px] text-slate-400">รวมไฟล์ทั้งหมดเป็น ZIP เดียว</span>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1365,6 +1394,53 @@
 
       container.innerHTML = html;
       if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function toggleMyFilesDownloadMenu() {
+      const m = document.getElementById('myFilesDownloadMenu');
+      if (m) m.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const dd = document.getElementById('myFilesDownloadDropdown');
+      const menu = document.getElementById('myFilesDownloadMenu');
+      if (menu && dd && !dd.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    async function downloadMyFiles(asZip = false) {
+      if (!currentUser || !currentUser.email) {
+        alert('กรุณาเข้าสู่ระบบก่อนดาวน์โหลดไฟล์');
+        return;
+      }
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      const userEmailLower = currentUser.email.toLowerCase().trim();
+      const userFiles = allFiles.filter(f => {
+        const fEmail = (f.uploaderEmail || '').toLowerCase().trim();
+        const fId = (f.uploaderId || '').trim();
+        return (fEmail && fEmail === userEmailLower) || (currentUser.studentId && fId === currentUser.studentId);
+      });
+
+      if (userFiles.length === 0) {
+        alert('ไม่มีไฟล์ในประวัติของคุณ');
+        return;
+      }
+
+      if (asZip) {
+        const zipName = `my_uploaded_files_${Date.now()}.zip`;
+        alert(`📦 เริ่มการรวม ${userFiles.length} ไฟล์เป็นโฟลเดอร์ ZIP กรุณารอสักครู่...`);
+        try {
+          await window.MultiDownloader.downloadAsZip(userFiles, zipName);
+          alert('🎉 ดาวน์โหลดโฟลเดอร์ ZIP เสร็จสมบูรณ์!');
+        } catch (err) {
+          alert(`เกิดข้อผิดพลาดในการสร้าง ZIP: ${err.message}`);
+        }
+      } else {
+        alert(`📥 เริ่มการดาวน์โหลด ${userFiles.length} ไฟล์แยกทีละไฟล์...`);
+        await window.MultiDownloader.downloadFilesSequentially(userFiles);
+        alert('✨ ดาวน์โหลดครบทุกไฟล์เรียบร้อยแล้ว!');
+      }
     }
 
     function copyDirectUrl(url) {
