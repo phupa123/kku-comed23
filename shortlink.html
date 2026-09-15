@@ -354,22 +354,38 @@
     // 2. Perform Redirection Logic
     async function handleIncomingRedirection(code) {
       if (!code) return;
-      const cleanCode = String(code).trim();
+      let cleanCode = String(code).trim();
+      // Remove leading slashes if any
+      cleanCode = cleanCode.replace(/^\/+/, '');
+
+      const possibleCodes = [cleanCode];
+      if (cleanCode.startsWith('s_')) {
+        possibleCodes.push(cleanCode.substring(2));
+      } else {
+        possibleCodes.push('s_' + cleanCode);
+      }
 
       // 2.1 Check if this code belongs to COMED Cloud Drive Shares (files/folders)
       if (window.StorageDriveRepo) {
-        let driveShare = window.StorageDriveRepo.getShareByCode(cleanCode);
-        if (!driveShare && window.StorageDriveRepo.fetchShareByCodeFromCloud) {
-          driveShare = await window.StorageDriveRepo.fetchShareByCodeFromCloud(cleanCode);
-        }
-        if (driveShare) {
-          // Redirect to storage viewer with share query
-          window.location.replace(`storage.html?share=${encodeURIComponent(cleanCode)}`);
-          return;
+        for (const c of possibleCodes) {
+          let driveShare = window.StorageDriveRepo.getShareByCode(c);
+          if (!driveShare && window.StorageDriveRepo.fetchShareByCodeFromCloud) {
+            driveShare = await window.StorageDriveRepo.fetchShareByCodeFromCloud(c);
+          }
+          if (driveShare) {
+            // Redirect to storage viewer with share query
+            window.location.replace(`storage.html?share=${encodeURIComponent(driveShare.shareCode || c)}`);
+            return;
+          }
         }
       }
 
-      let link = window.ShortlinkRepo.getByCode(cleanCode);
+      let link = null;
+      for (const c of possibleCodes) {
+        link = window.ShortlinkRepo.getByCode(c);
+        if (link) break;
+      }
+
       const overlay = document.getElementById('redirectOverlay');
       const notFoundOverlay = document.getElementById('notFoundOverlay');
       const prog = document.getElementById('redirectProgressBar');
@@ -383,20 +399,23 @@
           try {
             const sb = window.getSupabaseClient();
             if (sb) {
-              const { data } = await sb.from('shortlinks').select('*').eq('code', cleanCode).maybeSingle();
-              if (data) {
-                // If it's a DriveShare
-                if ((data.category || '').includes('DriveShare') || (data.target_url || '').includes('storage.html?share=')) {
-                  window.location.replace(`storage.html?share=${encodeURIComponent(cleanCode)}`);
-                  return;
+              for (const c of possibleCodes) {
+                const { data } = await sb.from('shortlinks').select('*').eq('code', c).maybeSingle();
+                if (data) {
+                  // If it's a DriveShare
+                  if ((data.category || '').includes('DriveShare') || (data.target_url || '').includes('storage.html?share=')) {
+                    window.location.replace(`storage.html?share=${encodeURIComponent(c)}`);
+                    return;
+                  }
+                  link = {
+                    code: data.code,
+                    title: data.title || '',
+                    targetUrl: data.target_url,
+                    isActive: data.is_active !== false,
+                    clicks: data.clicks || 0
+                  };
+                  break;
                 }
-                link = {
-                  code: data.code,
-                  title: data.title || '',
-                  targetUrl: data.target_url,
-                  isActive: data.is_active !== false,
-                  clicks: data.clicks || 0
-                };
               }
             }
           } catch(e) {}
