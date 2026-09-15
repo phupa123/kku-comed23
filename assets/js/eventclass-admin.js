@@ -453,3 +453,393 @@ function exportClassRosterExcel() {
   const today = new Date().toISOString().slice(0, 10);
   XLSX.writeFile(wb, `รายชื่อกิจกรรม_COMED23_KKU63_ซุ้มบัณฑิต_วันเด็ก_${today}.xlsx`);
 }
+
+// =========================================================================
+// 🤖 BOT SIMULATION & STRESS TEST ENGINE (จำลองเหตุการณ์แย่งฝ่ายเสมือนจริง)
+// =========================================================================
+
+let isSimulationRunning = false;
+let simAbortController = false;
+
+function getLoggedAdminInfo() {
+  const adminEmail = (sessionStorage.getItem('COMED_KKU69_ADMIN_LOGGED_USER') || '').toLowerCase().trim();
+  let adminStudent = null;
+  if (window.STUDENTS_DATA && adminEmail) {
+    adminStudent = window.STUDENTS_DATA.find(s => s.email.toLowerCase() === adminEmail);
+  }
+  return {
+    email: adminEmail || 'admin@comed.kku',
+    studentId: adminStudent ? adminStudent.id : null,
+    name: adminStudent ? adminStudent.name : 'คุณ (ผู้ดูแลระบบ)'
+  };
+}
+
+function openSimModal() {
+  const modal = document.getElementById('modalSimulation');
+  if (!modal) return;
+
+  const adminInfo = getLoggedAdminInfo();
+  const badge = document.getElementById('simExcludedAdminBadge');
+  if (badge) {
+    badge.textContent = adminInfo.studentId 
+      ? `ยกเว้น: [${adminInfo.studentId}] ${adminInfo.name} (${adminInfo.email})`
+      : `ยกเว้น: ${adminInfo.email}`;
+  }
+
+  // Ensure default state
+  document.getElementById('simConfigSection')?.classList.remove('hidden');
+  document.getElementById('simMonitorSection')?.classList.add('hidden');
+
+  modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeSimModal() {
+  const modal = document.getElementById('modalSimulation');
+  if (modal) modal.classList.add('hidden');
+}
+
+function simLog(message, type = 'info') {
+  const feed = document.getElementById('simConsoleFeed');
+  if (!feed) return;
+
+  const now = new Date().toLocaleTimeString('th-TH', { hour12: false });
+  const row = document.createElement('div');
+  row.className = 'flex items-start gap-2 py-0.5 leading-relaxed';
+
+  let colorClass = 'text-slate-300';
+  let prefixIcon = '•';
+
+  if (type === 'join') {
+    colorClass = 'text-sky-400 font-bold';
+    prefixIcon = '👤';
+  } else if (type === 'switch') {
+    colorClass = 'text-amber-400 font-bold';
+    prefixIcon = '🔄';
+  } else if (type === 'cancel') {
+    colorClass = 'text-rose-400';
+    prefixIcon = '❌';
+  } else if (type === 'rush') {
+    colorClass = 'text-purple-300 font-bold';
+    prefixIcon = '⚡';
+  } else if (type === 'success') {
+    colorClass = 'text-emerald-400 font-black';
+    prefixIcon = '🎉';
+  }
+
+  row.innerHTML = `
+    <span class="text-slate-600 select-none">[${now}]</span>
+    <span class="${colorClass}">${prefixIcon} ${message}</span>
+  `;
+
+  feed.appendChild(row);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function setSimProgress(percent, statusText) {
+  const pBar = document.getElementById('simProgressBar');
+  const pText = document.getElementById('simProgressPercentText');
+  const sText = document.getElementById('simProgressStatusText');
+
+  const rounded = Math.min(100, Math.max(0, Math.round(percent)));
+  if (pBar) pBar.style.width = `${rounded}%`;
+  if (pText) pText.textContent = `${rounded}%`;
+  if (sText && statusText) sText.textContent = statusText;
+}
+
+function stopBotSimulation() {
+  if (!isSimulationRunning) return;
+  simAbortController = true;
+  simLog("⚠️ ได้รับคำสั่งให้หยุดการจำลองกลางคัน...", "cancel");
+}
+
+async function sleepSim(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Helper: สุ่มลำดับอาเรย์
+function shuffleArray(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+// Flatten all roles across tracks and departments
+function getAllAvailableRoles(eventObj) {
+  const list = [];
+  if (!eventObj || !eventObj.tracks) return list;
+
+  eventObj.tracks.forEach(track => {
+    (track.departments || []).forEach(dept => {
+      (dept.roles || []).forEach(role => {
+        list.push({
+          trackId: track.id,
+          trackTitle: track.title,
+          deptId: dept.id,
+          deptName: dept.name,
+          roleId: role.id,
+          roleTitle: role.title,
+          maxSeats: role.maxSeats || 10
+        });
+      });
+    });
+  });
+  return list;
+}
+
+async function startBotSimulation() {
+  if (isSimulationRunning) return;
+
+  const botCount = parseInt(document.getElementById('simBotCountInput')?.value || '30', 10);
+  const intensity = document.getElementById('simIntensitySelect')?.value || 'high';
+  const speedMode = document.getElementById('simSpeedSelect')?.value || 'normal';
+  const targetChoice = document.getElementById('simTargetChoiceSelect')?.value || 'complete_all';
+
+  const baseDelay = speedMode === 'fast' ? 120 : 450;
+  const adminInfo = getLoggedAdminInfo();
+
+  // 1. คัดกรองนักศึกษาทั้งหมดที่ไม่ใช่เรา (Exclusion Guard)
+  const allStudents = window.STUDENTS_DATA || [];
+  const candidateStudents = allStudents.filter(st => {
+    if (adminInfo.studentId && st.id === adminInfo.studentId) return false;
+    if (adminInfo.email && st.email.toLowerCase() === adminInfo.email.toLowerCase()) return false;
+    // ป้องกันแอดมินภูผาพิเศษ
+    if (st.email.toLowerCase() === 'phupa5874@gmail.com' || st.email.toLowerCase() === 'thitiwut.a@kkumail.com') return false;
+    return true;
+  });
+
+  if (candidateStudents.length === 0) {
+    alert("ไม่พบบัญชีนักศึกษาสำหรับจำลองเหตุการณ์");
+    return;
+  }
+
+  const selectedBots = shuffleArray(candidateStudents).slice(0, Math.min(botCount, candidateStudents.length));
+
+  // 2. ปรับ UI เข้าสู่โหมดจำลองสด
+  isSimulationRunning = true;
+  simAbortController = false;
+
+  document.getElementById('simConfigSection')?.classList.add('hidden');
+  const monitorSec = document.getElementById('simMonitorSection');
+  if (monitorSec) monitorSec.classList.remove('hidden');
+
+  const feed = document.getElementById('simConsoleFeed');
+  if (feed) feed.innerHTML = '';
+
+  setSimProgress(0, `เตรียมปล่อยบอท ${selectedBots.length} คนเข้าสู่ระบบ...`);
+  simLog(`🚀 เริ่มการจำลองระบบ: มีบอทเข้าร่วม ${selectedBots.length} คน (ไม่รวมบัญชีของคุณ)`, "rush");
+  simLog(`🔒 บัญชีปลอดภัยของคุณ: [${adminInfo.studentId || '-'}] ${adminInfo.name} ได้รับการยกเว้น 100%`, "info");
+
+  const allRoles = getAllAvailableRoles(currentClassEvent);
+  if (allRoles.length === 0) {
+    simLog("⚠️ ไม่พบข้อมูลฝ่ายและตำแหน่งในระบบ", "cancel");
+    isSimulationRunning = false;
+    return;
+  }
+
+  const totalActions = selectedBots.length * (intensity === 'high' ? 3 : (intensity === 'medium' ? 2 : 1));
+  let completedActions = 0;
+
+  try {
+    // -------------------------------------------------------------
+    // PHASE 1: การกรูกันเข้ามาแย่งเลือกตำแหน่ง (Rush & First Selection)
+    // -------------------------------------------------------------
+    simLog("--- 🏁 เฟส 1: เริ่มกรูเข้ามาเลือกฝ่ายและจองตำแหน่ง ---", "rush");
+
+    for (let i = 0; i < selectedBots.length; i++) {
+      if (simAbortController) break;
+
+      const bot = selectedBots[i];
+      // สุ่มตำแหน่งเริ่มต้น
+      const randomRole = allRoles[Math.floor(Math.random() * allRoles.length)];
+
+      await window.ComedEventManager.registerTrackRole(
+        EVENT_CLASS_ID,
+        {
+          studentId: bot.id,
+          studentName: bot.name,
+          nickname: bot.nickname || '',
+          email: bot.email,
+          phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
+          note: '🤖 บอทจำลองเหตุการณ์เสมือนจริง'
+        },
+        randomRole.trackId,
+        randomRole.deptId,
+        randomRole.roleId
+      );
+
+      completedActions++;
+      setSimProgress((completedActions / totalActions) * 100, `บอท ${bot.name} กำลังเลือกตำแหน่ง...`);
+      simLog(`[${bot.id}] ${bot.name} (${bot.nickname || 'บอท'}) เข้าชิงตำแหน่ง "${randomRole.roleTitle}" ใน ${randomRole.deptName} (${randomRole.trackTitle})`, "join");
+
+      refreshAdminUI();
+      await sleepSim(baseDelay + Math.random() * 200);
+    }
+
+    // -------------------------------------------------------------
+    // PHASE 2: การเปลี่ยนใจ ลังเล สลับฝ่าย หรือยกเลิกไปมา (Chaotic / Stress)
+    // -------------------------------------------------------------
+    if (!simAbortController && intensity !== 'direct') {
+      simLog("--- 🔄 เฟส 2: เกิดการแย่งชิงโควตา บางคนเปลี่ยนใจ / ยกเลิก / ย้ายฝ่าย ---", "rush");
+
+      // สุ่มบอท 50-70% ให้สลับฝ่าย
+      const shufflerBots = shuffleArray(selectedBots).slice(0, Math.floor(selectedBots.length * 0.65));
+
+      for (let j = 0; j < shufflerBots.length; j++) {
+        if (simAbortController) break;
+
+        const bot = shufflerBots[j];
+        // ดึงการลงทะเบียนเดิมของบอท
+        const existingRegs = window.ComedEventManager.getAllStudentRegistrations(EVENT_CLASS_ID, bot.id);
+        if (existingRegs.length === 0) continue;
+
+        const curReg = existingRegs[0];
+        const doCancelFirst = Math.random() > 0.45;
+
+        if (doCancelFirst) {
+          // จำลองการกดยกเลิก
+          await window.ComedEventManager.cancelTrackRegistration(EVENT_CLASS_ID, bot.id, curReg.trackId);
+          simLog(`[${bot.id}] ${bot.name} กดยกเลิกสิทธิ์ออกจาก "${curReg.roleTitle}" เพื่อเปลี่ยนฝ่ายใหม่`, "cancel");
+          refreshAdminUI();
+          await sleepSim(baseDelay);
+        }
+
+        // ย้ายไปตำแหน่งใหม่คนละฝ่าย
+        const alternativeRoles = allRoles.filter(r => r.roleId !== curReg.roleId);
+        const newRole = alternativeRoles[Math.floor(Math.random() * alternativeRoles.length)];
+
+        await window.ComedEventManager.registerTrackRole(
+          EVENT_CLASS_ID,
+          {
+            studentId: bot.id,
+            studentName: bot.name,
+            nickname: bot.nickname || '',
+            email: bot.email,
+            phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
+            note: '🤖 บอทจำลองเหตุการณ์ (ย้ายฝ่าย)'
+          },
+          newRole.trackId,
+          newRole.deptId,
+          newRole.roleId
+        );
+
+        completedActions++;
+        setSimProgress((completedActions / totalActions) * 100, `บอท ${bot.name} กำลังย้ายฝ่าย...`);
+        simLog(`[${bot.id}] ${bot.name} ย้ายไปลง "${newRole.roleTitle}" ฝ่าย ${newRole.deptName} แทน`, "switch");
+
+        refreshAdminUI();
+        await sleepSim(baseDelay + Math.random() * 200);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // PHASE 3: จัดสรรตำแหน่งรอบสุดท้ายให้ลงครบถ้วน 100%
+    // -------------------------------------------------------------
+    if (!simAbortController && targetChoice === 'complete_all') {
+      simLog("--- 🎯 เฟส 3: จัดสรรตำแหน่งให้บอททุกคนได้สังกัดครบ 100% ---", "rush");
+
+      for (let k = 0; k < selectedBots.length; k++) {
+        if (simAbortController) break;
+        const bot = selectedBots[k];
+
+        const hasReg = window.ComedEventManager.getAllStudentRegistrations(EVENT_CLASS_ID, bot.id);
+        if (hasReg.length === 0) {
+          // จัดตำแหน่งที่ยังว่างให้
+          const safeRole = allRoles[k % allRoles.length];
+          await window.ComedEventManager.registerTrackRole(
+            EVENT_CLASS_ID,
+            {
+              studentId: bot.id,
+              studentName: bot.name,
+              nickname: bot.nickname || '',
+              email: bot.email,
+              phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
+              note: '🤖 บอทจำลองเหตุการณ์ (จัดสรรรอบสุดท้าย)'
+            },
+            safeRole.trackId,
+            safeRole.deptId,
+            safeRole.roleId
+          );
+          simLog(`[${bot.id}] ${bot.name} ได้รับการจัดสรรเข้า "${safeRole.roleTitle}" สำเร็จ`, "join");
+          refreshAdminUI();
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // OPTIONAL: สุ่มบอทบางส่วนให้ลงทั้ง 2 กิจกรรมพร้อมกัน (Multi-track)
+    // -------------------------------------------------------------
+    if (!simAbortController && targetChoice === 'random_both') {
+      simLog("--- 🌟 เฟสพิเศษ: จำลองบอทเลือกลงครบทั้ง 2 กิจกรรมพร้อมกัน ---", "rush");
+      const multiBots = shuffleArray(selectedBots).slice(0, Math.floor(selectedBots.length * 0.4));
+
+      for (const mBot of multiBots) {
+        if (simAbortController) break;
+        const currentRegs = window.ComedEventManager.getAllStudentRegistrations(EVENT_CLASS_ID, mBot.id);
+        const hasGrad = currentRegs.some(r => r.trackId === 'track_grad');
+        const hasChild = currentRegs.some(r => r.trackId === 'track_children');
+
+        const needTrack = !hasGrad ? 'track_grad' : (!hasChild ? 'track_children' : null);
+        if (needTrack) {
+          const trackRoles = allRoles.filter(r => r.trackId === needTrack);
+          const pickRole = trackRoles[Math.floor(Math.random() * trackRoles.length)];
+
+          await window.ComedEventManager.registerTrackRole(
+            EVENT_CLASS_ID,
+            {
+              studentId: mBot.id,
+              studentName: mBot.name,
+              nickname: mBot.nickname || '',
+              email: mBot.email,
+              note: '🤖 บอทจำลองเหตุการณ์ (ร่วม 2 งาน)'
+            },
+            pickRole.trackId,
+            pickRole.deptId,
+            pickRole.roleId
+          );
+          simLog(`🌟 [${mBot.id}] ${mBot.name} เลือกร่วมเพิ่มอีก 1 กิจกรรม: "${pickRole.roleTitle}" (${pickRole.trackTitle})`, "join");
+          refreshAdminUI();
+          await sleepSim(baseDelay / 2);
+        }
+      }
+    }
+
+    // Finished
+    setSimProgress(100, simAbortController ? "การจำลองถูกยกเลิกแล้ว" : "การจำลองเหตุการณ์เสร็จสิ้นสมบูรณ์ 100%!");
+    if (!simAbortController) {
+      simLog("🎉 การทดสอบความเสถียรของระบบ (Stress Test) สำเร็จเรียบร้อย! ข้อมูลถูกซิงค์และบันทึกลงตารางทันที", "success");
+    }
+
+  } catch(err) {
+    simLog("⚠️ เกิดข้อผิดพลาดระหว่างจำลอง: " + err.message, "cancel");
+  } finally {
+    isSimulationRunning = false;
+    refreshAdminUI();
+  }
+}
+
+// ฟังก์ชันล้างข้อมูลการลงชื่อในกิจกรรมนี้ทั้งหมด เพื่อเตรียมทดสอบใหม่
+async function resetClassRegistrationsQuick() {
+  if (!confirm("⚠️ ต้องการล้างข้อมูลการลงชื่อทั้งหมดของกิจกรรมนี้ เพื่อเริ่มต้นทดสอบระบบใหม่ ใช่หรือไม่?")) return;
+
+  try {
+    const key = `COMED_EVENT_REGS_V1_${EVENT_CLASS_ID}`;
+    localStorage.removeItem(key);
+
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+    if (sb) {
+      await sb.from('event_registrations').delete().eq('event_id', EVENT_CLASS_ID).catch(() => {});
+    }
+
+    refreshAdminUI();
+    alert("🧹 ล้างข้อมูลการลงชื่อทั้งหมดเรียบร้อยแล้ว พร้อมเริ่มทดสอบรอบใหม่!");
+    const feed = document.getElementById('simConsoleFeed');
+    if (feed) feed.innerHTML = '';
+    setSimProgress(0, "ระบบพร้อมเริ่มทดสอบรอบใหม่");
+  } catch(e) {
+    alert("เกิดข้อผิดพลาดในการล้างข้อมูล: " + e.message);
+  }
+}

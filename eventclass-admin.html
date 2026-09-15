@@ -107,7 +107,12 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btnOpenSimModal" onclick="openSimModal()"
+            class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-xs font-black shadow-lg shadow-purple-900/30 transition flex items-center gap-2 text-white cursor-pointer active:scale-95">
+            <i data-lucide="bot" class="w-4 h-4 text-amber-200 animate-bounce"></i>
+            <span>🤖 จำลองเหตุการณ์ทดสอบระบบ (Bot Simulation)</span>
+          </button>
           <button id="btnToggleClassStatus" onclick="toggleClassEventStatus()"
             class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-xs font-bold border border-slate-700 transition flex items-center gap-2 text-slate-200 cursor-pointer">
             <i data-lucide="power" class="w-4 h-4 text-emerald-400"></i>
@@ -315,6 +320,143 @@
           บันทึกการจัดสรร
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: BOT SIMULATION TEST ================= -->
+  <div id="modalSimulation" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="hub-glass rounded-3xl max-w-2xl w-full p-6 space-y-5 border border-purple-500/50 shadow-2xl text-left my-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <i data-lucide="bot" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <span>ระบบจำลองทดสอบฝูงชน (Bot Simulation Test)</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                Stress & Rush Test
+              </span>
+            </h3>
+            <p class="text-xs text-slate-400">จำลองเพื่อนเข้ามาแย่งฝ่าย เปลี่ยนใจ ยกเลิก สลับฝ่ายไปมาจนลงครบทุกคน</p>
+          </div>
+        </div>
+        <button onclick="closeSimModal()" class="text-slate-400 hover:text-white p-1 rounded-xl bg-slate-900 border border-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Exclusion Notice (Excludes You / Admin) -->
+      <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs">
+        <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5"></i>
+        <div>
+          <span class="font-bold text-amber-300 block">ปลอดภัย 100%: ไม่แตะต้องบัญชีของคุณเด็ดขาด</span>
+          <span class="text-slate-400">
+            ระบบตรวจจับผู้ดูแลระบบที่กำลังล็อกอิน (<code id="simExcludedAdminBadge" class="text-white font-mono bg-slate-900 px-1.5 py-0.5 rounded">กำลังตรวจจับ...</code>) และตัดชื่อออกจากรายชื่อบอทโดยอัตโนมัติ เพื่อไม่ให้การทดสอบคลาดเคลื่อน
+          </span>
+        </div>
+      </div>
+
+      <!-- Controls & Parameters Form -->
+      <div id="simConfigSection" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Bot Count Selector -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300 flex items-center justify-between">
+              <span>จำนวนบอทที่จะเข้ามาทดสอบ:</span>
+              <span id="simBotCountLabel" class="text-purple-400 font-mono font-black text-sm">30 คน</span>
+            </label>
+            <input type="range" id="simBotCountInput" min="5" max="59" value="30" step="1"
+              oninput="document.getElementById('simBotCountLabel').textContent = this.value + ' คน'"
+              class="w-full accent-purple-500 bg-slate-900 rounded-lg cursor-pointer h-2">
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span>5 คน</span>
+              <span>30 คน (แนะนำ)</span>
+              <span>59 คน (สูงสุด)</span>
+            </div>
+          </div>
+
+          <!-- Rush & Switch Intensity -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300">พฤติกรรมจำลองความปั่นป่วน (Chaotic Level):</label>
+            <select id="simIntensitySelect" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-purple-500">
+              <option value="high" selected>🔥 สมจริงมาก: แย่งชิงโควตา + ลังเลเปลี่ยนฝ่าย 2-3 รอบ</option>
+              <option value="medium">⚡ ปานกลาง: เลือกฝ่าย สลับ 1 ครั้ง แล้วยืนยัน</option>
+              <option value="direct">🚀 เรียบง่าย: เลือกตรงๆ จนครบทุกคนทันที</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Simulation Speed & Options -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300">ความเร็วการจำลอง (Simulation Speed):</label>
+            <select id="simSpeedSelect" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-purple-500">
+              <option value="normal" selected>⏱️ ดูแบบสด (Realtime delay 300-800ms) - เห็นแอนิเมชันแย่งกัน</option>
+              <option value="fast">⚡ รวดเร็วทันใจ (100-200ms) - เสร็จในไม่กี่วินาที</option>
+            </select>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300">ทางเลือกเป้าหมายตอนจบ:</label>
+            <select id="simTargetChoiceSelect" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-purple-500">
+              <option value="complete_all" selected>🎯 ทุกบอทต้องได้สังกัดครบทุกคน (100% Filled)</option>
+              <option value="random_both">🌟 บอทบางส่วนลง 2 งานพร้อมกัน (Multi-track)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2.5 pt-2">
+          <button id="btnStartSimulation" onclick="startBotSimulation()"
+            class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-white font-black text-xs shadow-lg shadow-purple-600/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+            <span>เริ่มปล่อยบอทจำลองเหตุการณ์ทันที</span>
+          </button>
+          <button onclick="resetClassRegistrationsQuick()"
+            class="px-4 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
+            title="ล้างข้อมูลการลงชื่อทั้งหมด เพื่อเริ่มทดสอบใหม่">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">ล้างข้อมูลบอท</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Simulation Monitor & Activity Terminal -->
+      <div id="simMonitorSection" class="space-y-3 hidden">
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold text-white" id="simProgressStatusText">กำลังดำเนินการจำลอง...</span>
+          </div>
+          <span id="simProgressPercentText" class="font-mono text-purple-400 font-black">0%</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full h-2.5 rounded-full bg-slate-900 border border-slate-800 overflow-hidden">
+          <div id="simProgressBar" class="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-emerald-400 transition-all duration-300" style="width: 0%;"></div>
+        </div>
+
+        <!-- Terminal Console Feed -->
+        <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 font-mono text-[11px] space-y-1.5 h-44 overflow-y-auto" id="simConsoleFeed">
+          <!-- Stream logs -->
+        </div>
+
+        <!-- Stop Simulation Button -->
+        <div class="flex items-center justify-between pt-1">
+          <button id="btnStopSimulation" onclick="stopBotSimulation()"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-rose-900/40 text-rose-300 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="square" class="w-3.5 h-3.5 fill-rose-400"></i>
+            <span>หยุดการจำลอง (Stop)</span>
+          </button>
+          <button onclick="closeSimModal()" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow transition cursor-pointer">
+            ดูผลลัพธ์บนตาราง Roster
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 
