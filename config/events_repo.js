@@ -699,6 +699,8 @@ window.ComedEventManager = {
               registeredAt: r.registered_at
             };
           });
+        }
+
         if (loadedRegs && Array.isArray(loadedRegs)) {
           const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
           const localStr = localStorage.getItem(key);
