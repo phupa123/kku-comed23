@@ -394,40 +394,32 @@
       const manualBtn = document.getElementById('redirectManualBtn');
 
       if (!link) {
-        // Fallback: try querying Supabase campaigns table (category: Shortlink or DriveShare)
+        // Fallback: try querying Supabase shortlinks table directly
         if (window.getSupabaseClient) {
           try {
             const sb = window.getSupabaseClient();
             if (sb) {
               for (const c of possibleCodes) {
                 const { data } = await sb
-                  .from('campaigns')
+                  .from('shortlinks')
                   .select('*')
-                  .or(`code.eq.${c},id.eq.slink_${c},id.eq.share_${c}`)
+                  .eq('code', c)
                   .maybeSingle();
 
                 if (data) {
                   // If it's a DriveShare
-                  if (data.category === 'DriveShare' || (data.code || '').startsWith('s_')) {
+                  if ((data.category || '').includes('DriveShare') || (data.code || '').startsWith('s_') || (data.target_url || '').includes('storage.html?share=')) {
                     window.location.replace(`storage.html?share=${encodeURIComponent(data.code || c)}`);
                     return;
                   }
 
-                  let parsedMeta = {};
-                  try {
-                    if (data.subtitle) parsedMeta = JSON.parse(data.subtitle);
-                  } catch(e) {
-                    parsedMeta = { targetUrl: data.subtitle };
-                  }
-
-                  const targetUrl = parsedMeta.targetUrl || data.subtitle || '';
-                  if (targetUrl) {
+                  if (data.target_url) {
                     link = {
                       code: data.code || c,
                       title: data.title || '',
-                      targetUrl: targetUrl,
-                      isActive: data.status !== 'closed',
-                      clicks: Math.round(Number(data.amount) || 0)
+                      targetUrl: data.target_url,
+                      isActive: data.is_active !== false,
+                      clicks: Number(data.clicks) || 0
                     };
                     break;
                   }

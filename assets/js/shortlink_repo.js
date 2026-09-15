@@ -220,7 +220,7 @@
     }
 
     /**
-     * Supabase Cloud Synchronization (จัดเก็บผ่านตาราง campaigns พร้อม category: 'Shortlink')
+     * Supabase Cloud Synchronization (ตาราง shortlinks โดยเฉพาะ 100%)
      */
     async initSync() {
       try {
@@ -228,39 +228,28 @@
         if (!sb) return;
 
         const { data, error } = await sb
-          .from('campaigns')
+          .from('shortlinks')
           .select('*')
-          .eq('category', 'Shortlink');
+          .neq('category', 'DriveShare');
 
         if (!error && Array.isArray(data) && data.length > 0) {
           let hasNew = false;
           data.forEach(linkRow => {
-            const rawId = linkRow.id || '';
             const code = linkRow.code;
             if (!code) return;
 
-            let parsedMeta = {};
-            try {
-              if (linkRow.subtitle) parsedMeta = JSON.parse(linkRow.subtitle);
-            } catch(e) {
-              parsedMeta = { targetUrl: linkRow.subtitle };
-            }
-
-            const targetUrl = parsedMeta.targetUrl || linkRow.subtitle || '';
-            if (!targetUrl) return;
-
             const linkData = {
-              id: rawId,
+              id: linkRow.id || ('lnk_' + code),
               code: code,
-              title: linkRow.title || '',
-              targetUrl: targetUrl,
-              category: parsedMeta.category || 'Shortlink',
-              clicks: Math.round(Number(linkRow.amount) || 0),
-              isActive: linkRow.status !== 'closed',
+              title: linkRow.title || ('ลิงก์ย่อ ' + code),
+              targetUrl: linkRow.target_url || '',
+              category: linkRow.category || 'Shortlink',
+              clicks: Number(linkRow.clicks) || 0,
+              isActive: linkRow.is_active !== false,
               createdAt: linkRow.created_at || new Date().toISOString(),
               updatedAt: linkRow.updated_at || new Date().toISOString(),
-              createdBy: parsedMeta.createdBy || 'ผู้ดูแลระบบ',
-              notes: parsedMeta.notes || ''
+              createdBy: linkRow.created_by || 'ผู้ดูแลระบบ',
+              notes: linkRow.notes || ''
             };
 
             const localIdx = this.links.findIndex(l => l.id === linkData.id || l.code === linkData.code);
@@ -291,25 +280,18 @@
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb || !link || !link.code) return;
 
-        const recId = link.id && link.id.startsWith('slink_') ? link.id : ('slink_' + link.code);
-        const metaObj = {
-          targetUrl: link.targetUrl,
-          category: link.category || 'Shortlink',
-          createdBy: link.createdBy || '',
-          notes: link.notes || ''
-        };
-
-        await sb.from('campaigns').upsert({
-          id: recId,
+        await sb.from('shortlinks').upsert({
+          id: link.id || ('lnk_' + link.code),
           code: link.code,
           title: link.title || ('ลิงก์ย่อ ' + link.code),
-          subtitle: JSON.stringify(metaObj),
-          category: 'Shortlink',
-          amount: Number(link.clicks) || 0,
-          status: link.isActive ? 'open' : 'closed',
-          is_default: false,
+          target_url: link.targetUrl,
+          category: link.category || 'Shortlink',
+          clicks: Number(link.clicks) || 0,
+          is_active: link.isActive !== false,
+          notes: link.notes || '',
+          created_by: link.createdBy || '',
           updated_at: new Date().toISOString()
-        }, { onConflict: 'id' }).catch(() => {});
+        }, { onConflict: 'code' }).catch(() => {});
       } catch (e) {
         console.warn("[ShortlinkRepo] Cloud sync error:", e);
       }
@@ -319,8 +301,7 @@
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb || !link) return;
-        const recId = link.id && link.id.startsWith('slink_') ? link.id : ('slink_' + link.code);
-        await sb.from('campaigns').delete().eq('id', recId).catch(() => {});
+        await sb.from('shortlinks').delete().eq('code', link.code).catch(() => {});
       } catch (e) {
         console.warn("[ShortlinkRepo] Cloud delete error:", e);
       }
