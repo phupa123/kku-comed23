@@ -131,6 +131,11 @@ export default {
       const targetUrl = new URL("/shortlink.html", url.origin);
       if (shortCode) targetUrl.searchParams.set("go", shortCode);
       fetchUrl = targetUrl.toString();
+    } else if (path.startsWith("/share/")) {
+      const shareCode = path.replace("/share/", "").split("/")[0].trim();
+      const targetUrl = new URL("/storage.html", url.origin);
+      if (shareCode) targetUrl.searchParams.set("share", shareCode);
+      fetchUrl = targetUrl.toString();
     } else if (path === "/maintenance") {
       fetchUrl = new URL("/maintenance.html", url.origin).toString();
     } else if (path === "/404") {
@@ -157,7 +162,7 @@ export default {
     else if (path === "/eventclass" || path === "/eventclass.html") target = "/eventclass.html";
     else if (path === "/event-admin" || path === "/event-admin.html") target = "/event-admin.html";
     else if (path === "/eventclass-admin" || path === "/eventclass-admin.html") target = "/eventclass-admin.html";
-    else if (path === "/storage" || path === "/storage.html") target = "/storage.html";
+    else if (path === "/storage" || path === "/storage.html" || path.startsWith("/share/")) target = "/storage.html";
     else if (path === "/storage-admin" || path === "/storage-admin.html") target = "/storage-admin.html";
     else if (path === "/upload" || path === "/upload.html") target = "/upload.html";
     else if (path === "/upload-admin" || path === "/upload-admin.html") target = "/upload-admin.html";

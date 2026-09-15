@@ -53,6 +53,8 @@
       this.folders = this.loadData(STORAGE_FOLDERS_KEY, []);
       this.filesMeta = this.loadData(STORAGE_FILES_META_KEY, {}); // { fileId: { folderId, isLocked, passwordHash, ... } }
       this.shares = this.loadData(STORAGE_SHARES_KEY, []); // [ { id, shareCode, targetType: 'file'|'folder', targetId, accessType: 'public'|'comed23'|'specific', allowedEmails: [], passwordHash, expiresAt, ... } ]
+      this.hasSyncedCloud = false;
+      this.initSync();
     }
 
     loadData(key, fallback) {
@@ -69,6 +71,159 @@
         localStorage.setItem(key, JSON.stringify(val));
       } catch (e) {
         console.warn('LocalStorage save error:', e);
+      }
+    }
+
+    // ================= SUPABASE CLOUD SYNC FOR SHARES =================
+    async initSync() {
+      try {
+        const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!sb) return;
+
+        const { data, error } = await sb
+          .from('shortlinks')
+          .select('*')
+          .ilike('category', '%DriveShare%');
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          let hasNew = false;
+          data.forEach(linkRow => {
+            const code = linkRow.code;
+            if (!code) return;
+
+            let parsedMeta = {};
+            try {
+              if (linkRow.notes) parsedMeta = JSON.parse(linkRow.notes);
+            } catch(e) {}
+
+            const existingIdx = this.shares.findIndex(s => s.shareCode === code || s.id === linkRow.id);
+            const shareRecord = {
+              id: linkRow.id || ('shr_' + code),
+              shareCode: code,
+              targetType: parsedMeta.targetType || 'file',
+              targetId: parsedMeta.targetId || '',
+              title: linkRow.title ? linkRow.title.replace(/^\[แชร์ไดรฟ์\]\s*/, '') : 'แชร์ไฟล์',
+              accessType: parsedMeta.accessType || 'public',
+              allowedEmails: parsedMeta.allowedEmails || [],
+              hasPassword: !!parsedMeta.hasPassword,
+              passwordHash: parsedMeta.passwordHash || null,
+              expiresAt: parsedMeta.expiresAt || null,
+              createdAt: linkRow.created_at || linkRow.createdAt || new Date().toISOString(),
+              creatorEmail: parsedMeta.creatorEmail || (linkRow.created_by || ''),
+              clicks: linkRow.clicks || 0,
+              updatedAt: linkRow.updated_at || new Date().toISOString()
+            };
+
+            if (existingIdx >= 0) {
+              this.shares[existingIdx] = { ...this.shares[existingIdx], ...shareRecord };
+              hasNew = true;
+            } else {
+              this.shares.push(shareRecord);
+              hasNew = true;
+            }
+          });
+
+          if (hasNew) {
+            this.saveData(STORAGE_SHARES_KEY, this.shares);
+          }
+        }
+        this.hasSyncedCloud = true;
+      } catch (e) {
+        console.warn("[StorageDriveRepo] Supabase share initSync suppressed:", e);
+      }
+    }
+
+    async syncShareToCloud(shareRecord) {
+      try {
+        const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!sb || !shareRecord || !shareRecord.shareCode) return;
+
+        const metaObj = {
+          targetType: shareRecord.targetType,
+          targetId: shareRecord.targetId,
+          accessType: shareRecord.accessType,
+          allowedEmails: shareRecord.allowedEmails || [],
+          hasPassword: !!shareRecord.hasPassword,
+          passwordHash: shareRecord.passwordHash || null,
+          expiresAt: shareRecord.expiresAt || null,
+          creatorEmail: shareRecord.creatorEmail || ''
+        };
+
+        const targetUrl = `${window.location.origin}/storage.html?share=${encodeURIComponent(shareRecord.shareCode)}`;
+
+        await sb.from('shortlinks').upsert({
+          id: shareRecord.id,
+          code: shareRecord.shareCode,
+          title: `[แชร์ไดรฟ์] ${shareRecord.title || shareRecord.targetType}`,
+          target_url: targetUrl,
+          category: 'DriveShare',
+          clicks: shareRecord.clicks || 0,
+          is_active: true,
+          notes: JSON.stringify(metaObj),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'code' }).catch(() => {});
+      } catch(err) {
+        console.warn("[StorageDriveRepo] Cloud share sync error:", err);
+      }
+    }
+
+    async deleteShareFromCloud(shareCode) {
+      try {
+        const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!sb || !shareCode) return;
+        await sb.from('shortlinks').delete().eq('code', shareCode).catch(() => {});
+      } catch (err) {
+        console.warn("[StorageDriveRepo] Cloud share delete error:", err);
+      }
+    }
+
+    async fetchShareByCodeFromCloud(shareCode) {
+      try {
+        const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!sb || !shareCode) return null;
+
+        const { data, error } = await sb
+          .from('shortlinks')
+          .select('*')
+          .eq('code', shareCode)
+          .maybeSingle();
+
+        if (error || !data) return null;
+
+        let parsedMeta = {};
+        try {
+          if (data.notes) parsedMeta = JSON.parse(data.notes);
+        } catch(e) {}
+
+        const shareRecord = {
+          id: data.id || ('shr_' + data.code),
+          shareCode: data.code,
+          targetType: parsedMeta.targetType || 'file',
+          targetId: parsedMeta.targetId || '',
+          title: data.title ? data.title.replace(/^\[แชร์ไดรฟ์\]\s*/, '') : 'แชร์ไฟล์',
+          accessType: parsedMeta.accessType || 'public',
+          allowedEmails: parsedMeta.allowedEmails || [],
+          hasPassword: !!parsedMeta.hasPassword,
+          passwordHash: parsedMeta.passwordHash || null,
+          expiresAt: parsedMeta.expiresAt || null,
+          createdAt: data.created_at || data.createdAt || new Date().toISOString(),
+          creatorEmail: parsedMeta.creatorEmail || (data.created_by || ''),
+          clicks: data.clicks || 0,
+          updatedAt: data.updated_at || new Date().toISOString()
+        };
+
+        const existingIdx = this.shares.findIndex(s => s.shareCode === shareCode);
+        if (existingIdx >= 0) {
+          this.shares[existingIdx] = shareRecord;
+        } else {
+          this.shares.push(shareRecord);
+        }
+        this.saveData(STORAGE_SHARES_KEY, this.shares);
+
+        return shareRecord;
+      } catch(err) {
+        console.warn("[StorageDriveRepo] fetchShareByCodeFromCloud error:", err);
+        return null;
       }
     }
 
@@ -277,11 +432,20 @@
 
       this.shares.unshift(shareRecord);
       this.saveData(STORAGE_SHARES_KEY, this.shares);
+      this.syncShareToCloud(shareRecord).catch(() => {});
       return shareRecord;
     }
 
     getShareByCode(shareCode) {
-      return this.shares.find(s => s.shareCode === shareCode);
+      if (!shareCode) return null;
+      const clean = String(shareCode).trim();
+      return this.shares.find(s => s.shareCode === clean);
+    }
+
+    async getShareByCodeAsync(shareCode) {
+      const local = this.getShareByCode(shareCode);
+      if (local) return local;
+      return await this.fetchShareByCodeFromCloud(shareCode);
     }
 
     getShareByTarget(targetType, targetId) {
@@ -321,23 +485,35 @@
 
       share.updatedAt = new Date().toISOString();
       this.saveData(STORAGE_SHARES_KEY, this.shares);
+      this.syncShareToCloud(share).catch(() => {});
       return share;
     }
 
     deleteShare(shareId) {
+      const target = this.shares.find(s => s.id === shareId);
       this.shares = this.shares.filter(s => s.id !== shareId);
       this.saveData(STORAGE_SHARES_KEY, this.shares);
+      if (target && target.shareCode) {
+        this.deleteShareFromCloud(target.shareCode).catch(() => {});
+      }
       return true;
     }
 
     revokeShareForTarget(targetType, targetId) {
+      const targets = this.shares.filter(s => s.targetType === targetType && s.targetId === targetId);
       this.shares = this.shares.filter(s => !(s.targetType === targetType && s.targetId === targetId));
       this.saveData(STORAGE_SHARES_KEY, this.shares);
+      targets.forEach(t => {
+        if (t.shareCode) this.deleteShareFromCloud(t.shareCode).catch(() => {});
+      });
       return true;
     }
 
     async verifyShareAccess(shareCode, currentUser, inputPassword = '') {
-      const share = this.getShareByCode(shareCode);
+      let share = this.getShareByCode(shareCode);
+      if (!share) {
+        share = await this.fetchShareByCodeFromCloud(shareCode);
+      }
       if (!share) return { allowed: false, reason: 'ไม่พบลิงก์แชร์นี้' };
 
       // 1. Check expiration
@@ -359,29 +535,31 @@
       }
 
       // 3. Check access rights
+      const userObj = currentUser && typeof currentUser === 'object' ? currentUser : {};
+      const userEmail = (userObj.email || userObj.userEmail || (typeof currentUser === 'string' ? currentUser : '') || '').toLowerCase().trim();
+
       if (share.accessType === 'comed23') {
-        if (!currentUser || !currentUser.email) {
+        if (!userEmail) {
           return { allowed: false, requireLogin: true, reason: 'เข้าถึงได้เฉพาะสมาชิก COMED23 เท่านั้น กรุณาเข้าสู่ระบบด้วย @kkumail.com' };
         }
-        const email = currentUser.email.toLowerCase();
-        const isComed = email.endsWith('@kkumail.com') || email === 'phupa5874@gmail.com';
+        const isComed = userEmail.endsWith('@kkumail.com') || userEmail === 'phupa5874@gmail.com';
         if (!isComed) {
           return { allowed: false, reason: 'ขออภัย ลิงก์นี้จำกัดเฉพาะสมาชิก COMED23' };
         }
       } else if (share.accessType === 'specific') {
-        if (!currentUser || !currentUser.email) {
+        if (!userEmail) {
           return { allowed: false, requireLogin: true, reason: 'ลิงก์นี้จำกัดเฉพาะบุคคลที่กำหนด กรุณาเข้าสู่ระบบ' };
         }
-        const email = currentUser.email.toLowerCase();
-        const isAllowed = share.allowedEmails.includes(email) || share.creatorEmail === email || email === 'phupa5874@gmail.com';
+        const isAllowed = (share.allowedEmails || []).includes(userEmail) || share.creatorEmail === userEmail || userEmail === 'phupa5874@gmail.com';
         if (!isAllowed) {
-          return { allowed: false, reason: `ขออภัย บัญชี "${currentUser.email}" ไม่ได้รับสิทธิ์เข้าถึงเนื้อหานี้` };
+          return { allowed: false, reason: `ขออภัย บัญชี "${userEmail}" ไม่ได้รับสิทธิ์เข้าถึงเนื้อหานี้` };
         }
       }
 
       // Increment click
       share.clicks = (share.clicks || 0) + 1;
       this.saveData(STORAGE_SHARES_KEY, this.shares);
+      this.syncShareToCloud(share).catch(() => {});
 
       return { allowed: true, share };
     }

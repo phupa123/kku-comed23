@@ -353,17 +353,23 @@
 
     // 2. Perform Redirection Logic
     async function handleIncomingRedirection(code) {
+      if (!code) return;
+      const cleanCode = String(code).trim();
+
       // 2.1 Check if this code belongs to COMED Cloud Drive Shares (files/folders)
       if (window.StorageDriveRepo) {
-        const driveShare = window.StorageDriveRepo.getShareByCode(code);
+        let driveShare = window.StorageDriveRepo.getShareByCode(cleanCode);
+        if (!driveShare && window.StorageDriveRepo.fetchShareByCodeFromCloud) {
+          driveShare = await window.StorageDriveRepo.fetchShareByCodeFromCloud(cleanCode);
+        }
         if (driveShare) {
           // Redirect to storage viewer with share query
-          window.location.replace(`storage.html?share=${encodeURIComponent(code)}`);
+          window.location.replace(`storage.html?share=${encodeURIComponent(cleanCode)}`);
           return;
         }
       }
 
-      const link = window.ShortlinkRepo.getByCode(code);
+      let link = window.ShortlinkRepo.getByCode(cleanCode);
       const overlay = document.getElementById('redirectOverlay');
       const notFoundOverlay = document.getElementById('notFoundOverlay');
       const prog = document.getElementById('redirectProgressBar');
@@ -372,9 +378,35 @@
       const manualBtn = document.getElementById('redirectManualBtn');
 
       if (!link) {
+        // Fallback: try querying Supabase shortlinks if available
+        if (window.getSupabaseClient) {
+          try {
+            const sb = window.getSupabaseClient();
+            if (sb) {
+              const { data } = await sb.from('shortlinks').select('*').eq('code', cleanCode).maybeSingle();
+              if (data) {
+                // If it's a DriveShare
+                if ((data.category || '').includes('DriveShare') || (data.target_url || '').includes('storage.html?share=')) {
+                  window.location.replace(`storage.html?share=${encodeURIComponent(cleanCode)}`);
+                  return;
+                }
+                link = {
+                  code: data.code,
+                  title: data.title || '',
+                  targetUrl: data.target_url,
+                  isActive: data.is_active !== false,
+                  clicks: data.clicks || 0
+                };
+              }
+            }
+          } catch(e) {}
+        }
+      }
+
+      if (!link) {
         // Not found
         notFoundOverlay.classList.remove('hidden');
-        document.getElementById('notFoundMsg').textContent = `ไม่พบรหัสย่อ "/s/${code}" ในระบบ`;
+        document.getElementById('notFoundMsg').textContent = `ไม่พบรหัสย่อ "/s/${cleanCode}" ในระบบ`;
         if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
       }

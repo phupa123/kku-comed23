@@ -39,6 +39,9 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Supabase JS CDN & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
 
   <!-- Student Database (60 Students) -->
   <script src="students_data.js"></script>
@@ -930,29 +933,48 @@
     let targetItemForAction = null; // { type: 'file'|'folder', id, name, ... }
 
     // Init Application
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       initUserSession();
       populateStudentDropdown();
       setupGoogleAuth();
       setupKeyboardShortcuts();
-      checkIncomingShareParam();
+      await checkIncomingFolderOrShareParam();
       renderDrive();
     });
 
-    async function checkIncomingShareParam() {
+    window.addEventListener('popstate', (e) => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const folderParam = urlParams.get('folder');
+      currentFolderId = folderParam || null;
+      selectedFileIds.clear();
+      updateBatchActionBar();
+      renderDrive();
+    });
+
+    async function checkIncomingFolderOrShareParam() {
       const urlParams = new URLSearchParams(window.location.search);
       const shareCode = urlParams.get('share') || urlParams.get('s');
+      const folderParam = urlParams.get('folder');
+
+      if (folderParam) {
+        currentFolderId = folderParam;
+      }
+
       if (!shareCode) return;
 
       const repo = getRepo();
-      const share = repo.getShareByCode(shareCode);
+      let share = repo.getShareByCode(shareCode);
+      if (!share && repo.fetchShareByCodeFromCloud) {
+        share = await repo.fetchShareByCodeFromCloud(shareCode);
+      }
+
       if (!share) {
         alert(`⚠️ ไม่พบข้อมูลลิงก์แชร์ "${shareCode}" หรือลิงก์อาจหมดอายุแล้ว`);
         return;
       }
 
       // Check Verification
-      const verify = repo.verifyShareAccess(shareCode, {
+      const verify = await repo.verifyShareAccess(shareCode, {
         userEmail: getCurrentUserEmail()
       });
 
@@ -964,11 +986,13 @@
           openAuthModal();
         } else if (verify.reason === 'UNAUTHORIZED_USER') {
           alert('⛔ ขออภัย อีเมลของคุณไม่ได้รับสิทธิ์ให้เข้าถึงเนื้อหาของลิงก์นี้');
+        } else {
+          alert(`⛔ ${verify.reason || 'ไม่ได้รับสิทธิ์เข้าถึงลิงก์นี้'}`);
         }
         return;
       }
 
-      if (verify.requiresPassword) {
+      if (verify.requirePassword || verify.requiresPassword) {
         openPasswordChallengeModal(share.targetType, share.targetId, `แชร์ลิงก์: ${share.shareCode}`);
         return;
       }
@@ -1235,6 +1259,20 @@
       selectedFileIds.clear();
       updateBatchActionBar();
       renderDrive();
+
+      // Update Browser URL Address Bar without reload
+      try {
+        const url = new URL(window.location.href);
+        if (folderId) {
+          url.searchParams.set('folder', folderId);
+        } else {
+          url.searchParams.delete('folder');
+        }
+        // Clean up one-time share param when navigating inside drive
+        url.searchParams.delete('share');
+        url.searchParams.delete('s');
+        window.history.pushState({ folderId: folderId }, '', url.toString());
+      } catch (e) {}
     }
 
     function renderDrive() {
@@ -2160,7 +2198,7 @@
       const qrContainer = document.getElementById('shareQrCodeContainer');
 
       const origin = window.location.origin;
-      const shareUrl = `${origin}/s/${shareRecord.shareCode}`;
+      const shareUrl = `${origin}/share/${shareRecord.shareCode}`;
 
       urlInput.value = shareUrl;
       if (title) title.textContent = isNew ? 'สร้างลิงก์แชร์สำเร็จแล้ว!' : 'ลิงก์แชร์ปัจจุบัน (พร้อมใช้งาน)';
