@@ -126,9 +126,13 @@ CREATE TABLE IF NOT EXISTS events (
   status TEXT DEFAULT 'open',
   deadline TIMESTAMPTZ,
   departments JSONB,
+  tracks JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- ปรับให้ตาราง events รองรับคอลัมน์ tracks ในกรณีสร้างตารางไปก่อนหน้านี้
+ALTER TABLE events ADD COLUMN IF NOT EXISTS tracks JSONB;
 
 CREATE TABLE IF NOT EXISTS event_registrations (
   id TEXT PRIMARY KEY,
@@ -137,6 +141,7 @@ CREATE TABLE IF NOT EXISTS event_registrations (
   student_name TEXT NOT NULL,
   nickname TEXT,
   email TEXT,
+  phone TEXT,
   department_id TEXT NOT NULL,
   department_name TEXT NOT NULL,
   role_id TEXT NOT NULL,
@@ -144,6 +149,9 @@ CREATE TABLE IF NOT EXISTS event_registrations (
   note TEXT,
   registered_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- ปรับให้ตาราง event_registrations มีคอลัมน์ phone
+ALTER TABLE event_registrations ADD COLUMN IF NOT EXISTS phone TEXT;
 
 ALTER TABLE IF EXISTS events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS event_registrations ENABLE ROW LEVEL SECURITY;
@@ -159,8 +167,8 @@ CREATE POLICY "Allow Modify Events" ON events FOR ALL TO anon, authenticated USI
 CREATE POLICY "Public Read Registrations" ON event_registrations FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY "Allow Modify Registrations" ON event_registrations FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
--- เพิ่ม Unique Index เพื่อป้องกันไม่ให้นักศึกษา 1 คน ลงซ้ำได้เกิน 1 ตำแหน่งต่อ 1 กิจกรรม
-CREATE UNIQUE INDEX IF NOT EXISTS idx_event_student_unique 
+-- Index ช่วยเพิ่มความเร็วในการค้นหาและจัดสรรตำแหน่ง
+CREATE INDEX IF NOT EXISTS idx_event_reg_student 
 ON event_registrations (event_id, student_id);
 
 CREATE INDEX IF NOT EXISTS idx_event_dept_role 
