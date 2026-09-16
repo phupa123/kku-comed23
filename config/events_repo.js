@@ -760,7 +760,9 @@ window.ComedEventManager = {
                 } else if (data.studentId) {
                   currentRegs = currentRegs.filter(r => r.studentId !== data.studentId);
                 }
-                localStorage.setItem(key, JSON.stringify(currentRegs));
+              } else if (data.action === 'reset_all') {
+                currentRegs = [];
+                localStorage.removeItem(key);
               }
 
               if (typeof onUpdateCallback === 'function') {

@@ -831,7 +831,22 @@ async function resetClassRegistrationsQuick() {
 
     const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
     if (sb) {
-      await sb.from('event_registrations').delete().eq('event_id', EVENT_CLASS_ID).catch(() => {});
+      try {
+        await sb.from('event_registrations').delete().eq('event_id', EVENT_CLASS_ID);
+      } catch (err) {
+        console.warn("Supabase bulk delete warning:", err);
+      }
+
+      // Broadcast Realtime Event so all connected clients clear their local view
+      if (window.ComedEventManager && window.ComedEventManager._activeRealtimeChannel) {
+        try {
+          window.ComedEventManager._activeRealtimeChannel.send({
+            type: 'broadcast',
+            event: 'REGISTRATION_UPDATE',
+            payload: { action: 'reset_all', eventId: EVENT_CLASS_ID }
+          });
+        } catch(e) {}
+      }
     }
 
     refreshAdminUI();
