@@ -500,13 +500,17 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (sb) {
         if (this._activeRealtimeChannel) {
-          this._activeRealtimeChannel.send({
-            type: 'broadcast',
-            event: 'REGISTRATION_UPDATE',
-            payload: { action: 'delete', studentId: target.studentId, trackId: trackId, id: compositeId }
-          }).catch(() => {});
+          try {
+            this._activeRealtimeChannel.send({
+              type: 'broadcast',
+              event: 'REGISTRATION_UPDATE',
+              payload: { action: 'delete', studentId: target.studentId, trackId: trackId, id: compositeId }
+            });
+          } catch(e) {}
         }
-        sb.from('event_registrations').delete().eq('id', compositeId).catch(() => {});
+        try {
+          await sb.from('event_registrations').delete().eq('id', compositeId);
+        } catch(e) {}
         this.syncAllRegistrationsToCloud(eventId);
       }
     }
@@ -534,6 +538,39 @@ window.ComedEventManager = {
       });
     }
     return target;
+  },
+
+  // ล้างการลงทะเบียนทั้งหมดของกิจกรรมนี้ (Reset All)
+  clearAllRegistrations: async function(eventId) {
+    const targetEventId = eventId || 'room_roles_69';
+    // ลบ LocalStorage ทุกคีย์ที่เกี่ยวข้อง
+    const key1 = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
+    const key2 = `COMED_EVENT_REGS_V1_${targetEventId}`;
+    localStorage.removeItem(key1);
+    localStorage.removeItem(key2);
+    localStorage.setItem(key1, JSON.stringify([]));
+    this._lastLocalWriteTime = Date.now();
+
+    // ลบบน Cloud Supabase
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+    if (sb) {
+      try {
+        await sb.from('event_registrations').delete().eq('event_id', targetEventId);
+      } catch (err) {
+        console.warn("Cloud bulk delete error:", err);
+      }
+
+      // Realtime Broadcast แจ้งทุกเครื่องทันที
+      if (this._activeRealtimeChannel) {
+        try {
+          this._activeRealtimeChannel.send({
+            type: 'broadcast',
+            event: 'REGISTRATION_UPDATE',
+            payload: { action: 'reset_all', eventId: targetEventId }
+          });
+        } catch(e) {}
+      }
+    }
   },
 
   // Supabase Sync Methods (Safe & non-blocking with Dual Sync Architecture)
@@ -674,7 +711,7 @@ window.ComedEventManager = {
           .select('*')
           .eq('event_id', targetEventId);
 
-        if (!directErr && Array.isArray(directRows) && directRows.length > 0) {
+        if (!directErr && Array.isArray(directRows)) {
           loadedRegs = directRows.map(r => {
             let parsedTrackId = null;
             if (r.id && r.id.includes('_track_')) {
@@ -699,11 +736,9 @@ window.ComedEventManager = {
               registeredAt: r.registered_at
             };
           });
-        }
 
-        if (loadedRegs && Array.isArray(loadedRegs)) {
           const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
-          const localStr = localStorage.getItem(key);
+          const localStr = localStorage.getItem(key) || '[]';
           const cloudStr = JSON.stringify(loadedRegs);
           if (localStr !== cloudStr) {
             localStorage.setItem(key, cloudStr);
