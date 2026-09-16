@@ -922,6 +922,7 @@ async function startBotSimulation() {
 
       const bot = selectedBots[i];
       // สุ่มตำแหน่งเริ่มต้น
+      const randomRole = allRoles[Math.floor(Math.random() * allRoles.length)];
       let regSuccess = false;
       try {
         await window.ComedEventManager.registerTrackRole(
