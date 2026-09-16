@@ -45,6 +45,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <!-- HTML2Canvas for ID Card Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- SheetJS with full style -->
@@ -560,11 +562,18 @@
             </div>
             <h3 id="step4UserName" class="text-base sm:text-lg font-black text-white">-</h3>
           </div>
-          <button onclick="goToStep(2)" id="btnStep4EditMore"
-            class="px-3.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-            <span>แก้ไขกิจกรรม / เลือกฝ่ายเพิ่ม</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="openIdCardModal()" id="btnStep4ViewIdCard"
+              class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs font-black transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-orange-500/20">
+              <i data-lucide="contact" class="w-4 h-4"></i>
+              <span>ดูบัตรประจำตัว (ID Card)</span>
+            </button>
+            <button onclick="goToStep(2)" id="btnStep4EditMore"
+              class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>แก้ไขฝ่าย / เพิ่มงาน</span>
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -649,6 +658,7 @@
                 <th class="p-3 text-amber-400">ซุ้มพี่บัณฑิต</th>
                 <th class="p-3 text-sky-400">งานวันเด็ก</th>
                 <th class="p-3 text-center">สถานะ</th>
+                <th class="p-3 text-center">บัตรประจำตัว</th>
               </tr>
             </thead>
             <tbody id="classRosterTableBody" class="divide-y divide-slate-800/80 bg-slate-950/40">
@@ -697,6 +707,165 @@
           ยืนยัน
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: EVENTCLASS E-ID CARD ================= -->
+  <div id="modalEventClassIdCard" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="relative w-full max-w-md my-auto flex flex-col items-center">
+      
+      <!-- Top Action Bar -->
+      <div class="w-full flex items-center justify-between pb-3 text-slate-300">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/30">
+            <i data-lucide="award" class="w-4 h-4"></i>
+          </span>
+          <span class="text-xs font-bold text-white tracking-wide uppercase">COMED23 Event Pass Badge</span>
+        </div>
+        <button onclick="closeIdCardModal()" class="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- ID CARD CONTAINER (Target for html2canvas) -->
+      <div id="idCardBadgeElement" class="w-full rounded-3xl p-5 sm:p-6 relative overflow-hidden shadow-2xl transition-all duration-300"
+        style="background: linear-gradient(145deg, #0b1120 0%, #0f172a 40%, #1e1b4b 100%); border: 1.5px solid rgba(249, 115, 22, 0.35); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(249, 115, 22, 0.15);">
+        
+        <!-- Subtle Glow Orbs Background -->
+        <div class="absolute -top-14 -right-14 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-14 -left-14 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/2 right-1/4 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- Lanyard / Badge Hole Punch Simulation -->
+        <div class="flex justify-center -mt-2 mb-3">
+          <div class="w-14 h-2.5 rounded-full bg-slate-950 border border-slate-700/80 shadow-inner flex items-center justify-center">
+            <div class="w-8 h-1 rounded-full bg-slate-800"></div>
+          </div>
+        </div>
+
+        <!-- Card Header: Faculty & University Identity -->
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 relative z-10">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 p-0.5 shadow-md shadow-orange-500/30 flex items-center justify-center">
+              <img src="logo.png" alt="COMED Logo" class="w-full h-full object-cover rounded-xl bg-slate-900" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+              <span style="display:none;" class="text-[10px] font-black text-white">ED</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-black px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono">COMED23</span>
+                <span class="text-[10px] font-bold text-slate-400 font-mono">KKU63</span>
+              </div>
+              <h4 class="text-xs font-bold text-slate-200 leading-tight">สาขาวิชาคอมพิวเตอร์ศึกษา</h4>
+              <p class="text-[9px] text-slate-400">คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-[9px] font-bold text-emerald-400 uppercase tracking-wider block">OFFICIAL PASS</span>
+            <span id="idCardSerialNo" class="text-[10px] font-mono font-bold text-slate-400">#ED69-000</span>
+          </div>
+        </div>
+
+        <!-- Card Body: User Profile & Photo Avatar -->
+        <div class="pt-4 pb-2 relative z-10">
+          <div class="flex items-center gap-4">
+            <!-- Avatar / Initial -->
+            <div class="relative">
+              <div id="idCardAvatarWrap" class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-indigo-600 p-0.5 shadow-lg shadow-orange-500/25 flex items-center justify-center">
+                <div id="idCardAvatarText" class="w-full h-full rounded-2xl bg-slate-950 flex items-center justify-center text-xl sm:text-2xl font-black text-orange-400">
+                  -
+                </div>
+              </div>
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-slate-950 flex items-center justify-center text-[10px] text-white" title="Verified Member">
+                ✓
+              </div>
+            </div>
+
+            <!-- Identity Info -->
+            <div class="flex-1 min-w-0 space-y-0.5">
+              <div class="flex items-center gap-2">
+                <h3 id="idCardName" class="text-sm sm:text-base font-black text-white truncate tracking-tight">-</h3>
+                <span id="idCardNickname" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex-shrink-0">
+                  -
+                </span>
+              </div>
+              <p id="idCardStudentId" class="text-xs font-mono font-semibold text-slate-300 tracking-wider">693050xxx-x</p>
+              <p id="idCardEmail" class="text-[10px] text-slate-400 truncate">student@kkumail.com</p>
+              <p id="idCardPhone" class="text-[10px] font-mono text-emerald-400">📞 -</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role Badges Assignment Section -->
+        <div class="my-3 p-3 rounded-2xl bg-slate-950/70 border border-slate-800/90 space-y-2.5 relative z-10">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+            <span>ภารกิจ & ฝ่ายที่ได้รับมอบหมาย</span>
+            <span id="idCardTrackCountBadge" class="text-[9px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold">1 กิจกรรม</span>
+          </div>
+
+          <!-- Track 1: ซุ้มพี่บัณฑิต -->
+          <div id="idCardTrackGradBox" class="flex items-start gap-2.5 text-xs">
+            <div class="w-6 h-6 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+              🎓
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-amber-300">ซุ้มพี่บัณฑิต (20 ธ.ค.)</span>
+                <span id="idCardGradStatus" class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-emerald-500/20 text-emerald-400">สังกัดแล้ว</span>
+              </div>
+              <p id="idCardGradRole" class="text-[11px] font-semibold text-white truncate">-</p>
+              <p id="idCardGradDept" class="text-[10px] text-slate-400 truncate">-</p>
+            </div>
+          </div>
+
+          <!-- Track 2: งานวันเด็กแห่งชาติ -->
+          <div id="idCardTrackChildBox" class="flex items-start gap-2.5 text-xs pt-2 border-t border-slate-800/60">
+            <div class="w-6 h-6 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+              🎪
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-sky-300">งานวันเด็ก (9 ม.ค. 70)</span>
+                <span id="idCardChildStatus" class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-emerald-500/20 text-emerald-400">สังกัดแล้ว</span>
+              </div>
+              <p id="idCardChildRole" class="text-[11px] font-semibold text-white truncate">-</p>
+              <p id="idCardChildDept" class="text-[10px] text-slate-400 truncate">-</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Verification Code & Barcode/QR Style -->
+        <div class="pt-2 flex items-center justify-between border-t border-slate-800/80 relative z-10">
+          <div class="space-y-0.5">
+            <span class="text-[8px] font-mono uppercase text-slate-500 tracking-widest block">SECURITY VERIFICATION</span>
+            <div id="idCardSecurityHash" class="text-[9px] font-mono text-slate-400">VERIFIED-COMED23-KKU63</div>
+            <span class="text-[8px] text-slate-500">ออกโดย สโมสรนักศึกษา/คณะทำงาน COMED23</span>
+          </div>
+          <!-- Dynamic QR Code Container -->
+          <div class="flex flex-col items-center">
+            <div id="idCardQrWrapper" class="p-1 rounded-lg bg-white shadow flex items-center justify-center">
+              <img id="idCardQrImg" src="" alt="Badge QR" class="w-11 h-11 object-contain">
+            </div>
+            <span class="text-[7px] font-mono text-slate-400 mt-0.5">SCAN TO VERIFY</span>
+          </div>
+        </div>
+
+      </div>
+      <!-- END ID CARD BADGE -->
+
+      <!-- Action Buttons Below ID Card -->
+      <div class="w-full flex flex-col sm:flex-row items-center gap-2.5 pt-4">
+        <button id="btnDownloadIdCardPng" onclick="downloadIdCardAsPng()"
+          class="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-slate-950 font-black text-xs transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>บันทึกรูปภาพบัตร (PNG)</span>
+        </button>
+        <button onclick="closeIdCardModal()"
+          class="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>ปิดหน้าต่าง</span>
+        </button>
+      </div>
+
     </div>
   </div>
 

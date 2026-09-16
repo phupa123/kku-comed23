@@ -804,6 +804,10 @@ async function submitTrackRoleRegistration() {
       }
     } else {
       alert(`✅ บันทึกตำแหน่ง "${pendingTrackSelection.roleTitle}" เรียบร้อยแล้ว!`);
+      // Open ID card modal for instant preview and download
+      setTimeout(() => {
+        openIdCardModal(currentStudent.studentId);
+      }, 400);
     }
 
     goToStep(4);
@@ -881,6 +885,16 @@ function updateUserSummaryStep4() {
     badgeChild.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
     detailChild.textContent = "ยังไม่ได้เลือกฝ่ายในกิจกรรมนี้";
     actionChild?.classList.add('hidden');
+  }
+
+  // Update ID Card button visibility in Step 4
+  const btnViewIdCard = document.getElementById('btnStep4ViewIdCard');
+  if (btnViewIdCard) {
+    if (myGrad || myChild) {
+      btnViewIdCard.classList.remove('hidden');
+    } else {
+      btnViewIdCard.classList.add('hidden');
+    }
   }
 }
 
@@ -960,11 +974,13 @@ function renderClassRosterTable() {
   }
 
   if (rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">ไม่พบรายชื่อตามเงื่อนไขที่ค้นหา</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-500">ไม่พบรายชื่อตามเงื่อนไขที่ค้นหา</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = rows.map(r => `
+  tbody.innerHTML = rows.map(r => {
+    const hasReg = r.isGrad || r.isChild;
+    return `
     <tr class="hover:bg-slate-900/60 transition">
       <td class="p-3 text-slate-500 font-mono">${r.index}</td>
       <td class="p-3 font-mono text-slate-300 font-bold">${r.studentId}</td>
@@ -987,8 +1003,20 @@ function renderClassRosterTable() {
           </span>
         `}
       </td>
+      <td class="p-3 text-center">
+        ${hasReg ? `
+          <button onclick="openIdCardModal('${r.studentId}')"
+            class="px-2.5 py-1 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 border border-orange-500/30 text-[11px] font-bold transition inline-flex items-center gap-1 cursor-pointer">
+            <i data-lucide="contact" class="w-3 h-3"></i>
+            <span>ดูบัตร</span>
+          </button>
+        ` : `
+          <span class="text-slate-600 text-xs">-</span>
+        `}
+      </td>
     </tr>
-  `).join('');
+    `;
+  }).join('');
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -1056,4 +1084,194 @@ function exportClassRosterExcel() {
 
   const today = new Date().toISOString().slice(0, 10);
   XLSX.writeFile(wb, `รายชื่อกิจกรรมCOMED23_KKU63_ซุ้มบัณฑิต_วันเด็ก_${today}.xlsx`);
+}
+
+// ================= EVENTCLASS ID CARD / PASS BADGE =================
+function openIdCardModal(targetStudentId = null) {
+  const modal = document.getElementById('modalEventClassIdCard');
+  if (!modal) return;
+
+  const stId = targetStudentId || (currentStudent ? currentStudent.studentId : null);
+  if (!stId) {
+    alert("กรุณาระบุตัวตนก่อนดูบัตรประจำตัว");
+    return;
+  }
+
+  const students = window.STUDENTS_DATA || [];
+  const student = students.find(s => s.id === stId) || (currentStudent && currentStudent.studentId === stId ? currentStudent : null);
+  if (!student) {
+    alert("ไม่พบข้อมูลนักศึกษา");
+    return;
+  }
+
+  const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
+  const gradReg = regs.find(r => r.studentId === stId && (r.trackId === 'track_grad' || (r.departmentId && r.departmentId.startsWith('dept_grad_'))));
+  const childReg = regs.find(r => r.studentId === stId && (r.trackId === 'track_children' || (r.departmentId && r.departmentId.startsWith('dept_child_'))));
+
+  // Determine phone number
+  const studentPhone = (gradReg && gradReg.phone) || 
+                       (childReg && childReg.phone) || 
+                       (currentStudent && currentStudent.studentId === stId && currentStudent.phone) || 
+                       (gradReg && gradReg.note && (gradReg.note.match(/\[TEL:(.*?)\]/) || [])[1]) || 
+                       (childReg && childReg.note && (childReg.note.match(/\[TEL:(.*?)\]/) || [])[1]) || 
+                       '-';
+
+  // 1. Populate Basic Info
+  const serialNo = 'ED69-' + stId.replace(/[^0-9]/g, '').slice(-4);
+  document.getElementById('idCardSerialNo').textContent = `#${serialNo}`;
+  document.getElementById('idCardName').textContent = student.name || '-';
+  document.getElementById('idCardNickname').textContent = student.nickname ? `น้อง${student.nickname}` : '-';
+  document.getElementById('idCardStudentId').textContent = student.id || '-';
+  document.getElementById('idCardEmail').textContent = student.email || `${stId}@kkumail.com`;
+  document.getElementById('idCardPhone').textContent = studentPhone && studentPhone !== '-' ? `📞 ${studentPhone}` : '📞 ยังไม่ระบุเบอร์โทร';
+
+  // Avatar Initials
+  const avatarText = document.getElementById('idCardAvatarText');
+  if (avatarText) {
+    const initial = student.nickname ? student.nickname.charAt(0) : (student.name ? student.name.charAt(0) : 'E');
+    avatarText.textContent = initial;
+  }
+
+  // 2. Populate Track Roles
+  const boxGrad = document.getElementById('idCardTrackGradBox');
+  const gradRole = document.getElementById('idCardGradRole');
+  const gradDept = document.getElementById('idCardGradDept');
+  const gradStatus = document.getElementById('idCardGradStatus');
+
+  const boxChild = document.getElementById('idCardTrackChildBox');
+  const childRole = document.getElementById('idCardChildRole');
+  const childDept = document.getElementById('idCardChildDept');
+  const childStatus = document.getElementById('idCardChildStatus');
+
+  const trackCountBadge = document.getElementById('idCardTrackCountBadge');
+
+  let activeCount = 0;
+
+  if (gradReg) {
+    activeCount++;
+    if (boxGrad) boxGrad.classList.remove('opacity-40');
+    if (gradRole) gradRole.textContent = gradReg.roleTitle || 'สมาชิกฝ่าย';
+    if (gradDept) gradDept.textContent = gradReg.departmentName || 'ฝ่ายทั่วไป';
+    if (gradStatus) {
+      gradStatus.textContent = 'สังกัดแล้ว ✓';
+      gradStatus.className = 'text-[9px] px-1.5 py-0.2 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+    }
+  } else {
+    if (boxGrad) boxGrad.classList.add('opacity-40');
+    if (gradRole) gradRole.textContent = 'ยังไม่ได้เลือกลงกิจกรรมนี้';
+    if (gradDept) gradDept.textContent = 'ซุ้มพี่บัณฑิต (20 ธ.ค.)';
+    if (gradStatus) {
+      gradStatus.textContent = 'ไม่ได้เข้าร่วม';
+      gradStatus.className = 'text-[9px] px-1.5 py-0.2 rounded font-bold bg-slate-800 text-slate-500';
+    }
+  }
+
+  if (childReg) {
+    activeCount++;
+    if (boxChild) boxChild.classList.remove('opacity-40');
+    if (childRole) childRole.textContent = childReg.roleTitle || 'สมาชิกฝ่าย';
+    if (childDept) childDept.textContent = childReg.departmentName || 'ฝ่ายทั่วไป';
+    if (childStatus) {
+      childStatus.textContent = 'สังกัดแล้ว ✓';
+      childStatus.className = 'text-[9px] px-1.5 py-0.2 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+    }
+  } else {
+    if (boxChild) boxChild.classList.add('opacity-40');
+    if (childRole) childRole.textContent = 'ยังไม่ได้เลือกลงกิจกรรมนี้';
+    if (childDept) childDept.textContent = 'งานวันเด็กแห่งชาติ (9 ม.ค. 70)';
+    if (childStatus) {
+      childStatus.textContent = 'ไม่ได้เข้าร่วม';
+      childStatus.className = 'text-[9px] px-1.5 py-0.2 rounded font-bold bg-slate-800 text-slate-500';
+    }
+  }
+
+  if (trackCountBadge) {
+    if (activeCount >= 2) {
+      trackCountBadge.textContent = '🌟 ร่วมทั้ง 2 กิจกรรม';
+      trackCountBadge.className = 'text-[9px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30';
+    } else if (activeCount === 1) {
+      trackCountBadge.textContent = '1 กิจกรรม';
+      trackCountBadge.className = 'text-[9px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 font-bold border border-orange-500/30';
+    } else {
+      trackCountBadge.textContent = 'ยังไม่ลงกิจกรรม';
+      trackCountBadge.className = 'text-[9px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold';
+    }
+  }
+
+  // 3. Security Code & Dynamic QR Code
+  const hashStr = `COMED23-${serialNo}-${stId.slice(-3)}`;
+  const hashEl = document.getElementById('idCardSecurityHash');
+  if (hashEl) hashEl.textContent = hashStr;
+
+  // Generate QR Code URL via reliable QuickChart QR API
+  const qrImg = document.getElementById('idCardQrImg');
+  if (qrImg) {
+    const qrData = encodeURIComponent(`https://kku.world/comed23-event?sid=${stId}&serial=${serialNo}`);
+    qrImg.src = `https://quickchart.io/qr?text=${qrData}&size=140&margin=1&ecLevel=M`;
+  }
+
+  // Show Modal
+  modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeIdCardModal() {
+  const modal = document.getElementById('modalEventClassIdCard');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function downloadIdCardAsPng() {
+  const cardElement = document.getElementById('idCardBadgeElement');
+  const btn = document.getElementById('btnDownloadIdCardPng');
+  if (!cardElement) return;
+
+  if (typeof html2canvas === 'undefined') {
+    alert("⚠️ กำลังโหลดไลบรารีบันทึกรูปภาพ กรุณารอสักครู่แล้วลองอีกครั้ง");
+    return;
+  }
+
+  const originalBtnHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-slate-950" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+      <span>กำลังสร้างภาพบัตร...</span>
+    `;
+  }
+
+  try {
+    const studentIdText = document.getElementById('idCardStudentId')?.textContent?.trim() || 'student';
+    const nicknameText = document.getElementById('idCardNickname')?.textContent?.replace(/[^a-zA-Z0-9ก-๙]/g, '') || '';
+
+    const canvas = await html2canvas(cardElement, {
+      scale: 3, // High-resolution output for crisp retina printing
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null, // preserve rounded transparent corners
+      logging: false
+    });
+
+    const link = document.createElement('a');
+    link.download = `COMED23_Badge_${nicknameText}_${studentIdText}.png`;
+    link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    if (typeof confetti !== 'undefined') {
+      try { confetti({ particleCount: 35, spread: 50, origin: { y: 0.6 } }); } catch(e) {}
+    }
+  } catch (err) {
+    console.error("Error generating ID card image:", err);
+    alert("⚠️ เกิดข้อผิดพลาดในการบันทึกรูปภาพ: " + (err.message || ''));
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHtml;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+  }
 }
