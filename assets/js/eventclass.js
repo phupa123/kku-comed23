@@ -887,13 +887,46 @@ function updateUserSummaryStep4() {
     actionChild?.classList.add('hidden');
   }
 
-  // Update ID Card button visibility in Step 4
+  // Update ID Card & Reset button visibility in Step 4
   const btnViewIdCard = document.getElementById('btnStep4ViewIdCard');
+  const btnResetMy = document.getElementById('btnResetMyRegistration');
+  const hasAnyReg = !!(myGrad || myChild);
+
   if (btnViewIdCard) {
-    if (myGrad || myChild) {
-      btnViewIdCard.classList.remove('hidden');
-    } else {
-      btnViewIdCard.classList.add('hidden');
+    if (hasAnyReg) btnViewIdCard.classList.remove('hidden');
+    else btnViewIdCard.classList.add('hidden');
+  }
+
+  if (btnResetMy) {
+    if (hasAnyReg && isSystemOpen()) btnResetMy.classList.remove('hidden');
+    else btnResetMy.classList.add('hidden');
+  }
+}
+
+async function handleResetMyRegistration() {
+  if (!isSystemOpen()) {
+    alert("⚠️ ไม่สามารถรีเซ็ตได้เนื่องจากระบบปิดรับสมัครแล้ว");
+    return;
+  }
+  if (!currentStudent) return;
+
+  if (confirm(`⚠️ ยืนยันการรีเซ็ตข้อมูลการเลือกฝ่ายของคุณทั้งหมด?\n\nตำแหน่งที่คุณสังกัดอยู่จะถูกปล่อยว่างให้เพื่อนคนอื่นเลือกได้ทันที`)) {
+    try {
+      const myGrad = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_grad');
+      const myChild = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_children');
+
+      if (myGrad) {
+        await window.ComedEventManager.cancelTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_grad');
+      }
+      if (myChild) {
+        await window.ComedEventManager.cancelTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_children');
+      }
+
+      refreshUI();
+      alert("✅ รีเซ็ตการเลือกกิจกรรมของคุณเรียบร้อยแล้ว คุณสามารถเลือกใหม่ได้ทันที");
+      goToStep(2);
+    } catch(err) {
+      alert("⚠️ เกิดข้อผิดพลาด: " + (err.message || ''));
     }
   }
 }
