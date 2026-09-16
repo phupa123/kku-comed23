@@ -768,6 +768,7 @@ async function startBotSimulation() {
         const bot = selectedBots[k];
 
         const hasReg = window.ComedEventManager.getAllStudentRegistrations(EVENT_CLASS_ID, bot.id);
+        if (hasReg.length === 0) {
           // หาตำแหน่งที่ยังมีที่นั่งว่างจริง
           const currentRegs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
           const availableRoles = allRoles.filter(r => {
