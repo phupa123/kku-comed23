@@ -595,10 +595,14 @@ async function startBotSimulation() {
 
   const botCount = parseInt(document.getElementById('simBotCountInput')?.value || '30', 10);
   const intensity = document.getElementById('simIntensitySelect')?.value || 'high';
-  const speedMode = document.getElementById('simSpeedSelect')?.value || 'normal';
+  const speedMode = document.getElementById('simSpeedSelect')?.value || 'turbo';
   const targetChoice = document.getElementById('simTargetChoiceSelect')?.value || 'complete_all';
 
-  const baseDelay = speedMode === 'fast' ? 120 : 450;
+  let baseDelay = 30; // default turbo
+  if (speedMode === 'instant') baseDelay = 0;
+  else if (speedMode === 'turbo') baseDelay = 25;
+  else if (speedMode === 'fast') baseDelay = 100;
+  else if (speedMode === 'normal') baseDelay = 400;
   const adminInfo = getLoggedAdminInfo();
 
   // 1. คัดกรองนักศึกษาทั้งหมดที่ไม่ใช่เรา (Exclusion Guard)
@@ -676,7 +680,9 @@ async function startBotSimulation() {
       simLog(`[${bot.id}] ${bot.name} (${bot.nickname || 'บอท'}) เข้าชิงตำแหน่ง "${randomRole.roleTitle}" ใน ${randomRole.deptName} (${randomRole.trackTitle})`, "join");
 
       refreshAdminUI();
-      await sleepSim(baseDelay + Math.random() * 200);
+      if (baseDelay > 0) {
+        await sleepSim(baseDelay === 25 ? Math.random() * 25 + 15 : (baseDelay + Math.random() * 100));
+      }
     }
 
     // -------------------------------------------------------------
@@ -704,7 +710,7 @@ async function startBotSimulation() {
           await window.ComedEventManager.cancelTrackRegistration(EVENT_CLASS_ID, bot.id, curReg.trackId);
           simLog(`[${bot.id}] ${bot.name} กดยกเลิกสิทธิ์ออกจาก "${curReg.roleTitle}" เพื่อเปลี่ยนฝ่ายใหม่`, "cancel");
           refreshAdminUI();
-          await sleepSim(baseDelay);
+          if (baseDelay > 0) await sleepSim(baseDelay);
         }
 
         // ย้ายไปตำแหน่งใหม่คนละฝ่าย
@@ -731,7 +737,9 @@ async function startBotSimulation() {
         simLog(`[${bot.id}] ${bot.name} ย้ายไปลง "${newRole.roleTitle}" ฝ่าย ${newRole.deptName} แทน`, "switch");
 
         refreshAdminUI();
-        await sleepSim(baseDelay + Math.random() * 200);
+        if (baseDelay > 0) {
+          await sleepSim(baseDelay === 25 ? Math.random() * 25 + 15 : (baseDelay + Math.random() * 100));
+        }
       }
     }
 
@@ -802,7 +810,7 @@ async function startBotSimulation() {
           );
           simLog(`🌟 [${mBot.id}] ${mBot.name} เลือกร่วมเพิ่มอีก 1 กิจกรรม: "${pickRole.roleTitle}" (${pickRole.trackTitle})`, "join");
           refreshAdminUI();
-          await sleepSim(baseDelay / 2);
+          if (baseDelay > 0) await sleepSim(Math.max(10, baseDelay / 2));
         }
       }
     }
