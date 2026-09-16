@@ -59,10 +59,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 9. Auto step placement
   if (currentStudent && currentStudent.studentId) {
-    if (isSystemOpen()) {
-      goToStep(2);
-    } else {
+    initSelectedTracks();
+    const myGrad = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_grad');
+    const myChild = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, 'track_children');
+    
+    // ถ้าผู้ใช้ลงทะเบียนไว้แล้ว ให้พาไป Step 4 (ทำเนียบเพื่อนและดูบัตร) ทันที
+    // ถ้ายังไม่เคยลงทะเบียน และระบบเปิด ให้ไป Step 2 (เลือกกิจกรรม)
+    if (myGrad || myChild || !isSystemOpen()) {
       goToStep(4);
+    } else {
+      goToStep(2);
     }
   } else {
     goToStep(1);
@@ -1090,6 +1096,7 @@ function startRealtimeLiveSync() {
 
 function refreshUI() {
   currentClassEvent = window.ComedEventManager.getActiveEvent(EVENT_CLASS_ID);
+  initSelectedTracks();
   updateSystemStatusBanner();
   updateProfileCardsStep1();
   renderStep2TrackCards();

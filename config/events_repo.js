@@ -602,7 +602,17 @@ window.ComedEventManager = {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
       if (!sb) return;
 
-      // 1. Try dedicated events table if exists
+      // จัดเก็บโครงสร้างลง departments JSONB (ซึ่งมีอยู่จริงในฐานข้อมูล Supabase)
+      // หากมี tracks ให้เก็บ { _hasTracks: true, tracks: eventData.tracks, list: eventData.departments || [] }
+      let deptsPayload = eventData.departments || [];
+      if (eventData.tracks && eventData.tracks.length > 0) {
+        deptsPayload = {
+          _isMultiTrack: true,
+          tracks: eventData.tracks,
+          departments: eventData.departments || []
+        };
+      }
+
       const payload = {
         id: eventData.id,
         code: eventData.code || eventData.id.toUpperCase(),
@@ -611,13 +621,14 @@ window.ComedEventManager = {
         category: eventData.category || 'กิจกรรม',
         status: eventData.status || 'open',
         deadline: eventData.deadline ? new Date(eventData.deadline).toISOString() : null,
-        departments: eventData.departments || [],
+        departments: deptsPayload,
         updated_at: new Date().toISOString()
       };
-      if (eventData.tracks) {
-        payload.tracks = eventData.tracks;
+
+      const { error } = await sb.from('events').upsert(payload, { onConflict: 'id' });
+      if (error) {
+        console.warn("Supabase Event Sync Error:", error);
       }
-      sb.from('events').upsert(payload, { onConflict: 'id' }).catch(() => {});
     } catch(e) {
       console.warn("Supabase Event Sync Suppressed:", e);
     }
@@ -653,22 +664,34 @@ window.ComedEventManager = {
       }
 
       // 1. บันทึกลงตารางเฉพาะ event_registrations (Atomic Row Level)
+      // หมายเหตุ: ตาราง event_registrations ใน Supabase ไม่มีคอลัมน์ phone ให้เก็บเบอร์โทรไว้ใน note เป็น [TEL:xxx]
       const targetRowId = regRecord.id || `${regRecord.eventId}_${regRecord.studentId}`;
-      await sb.from('event_registrations').upsert({
+      let composedNote = regRecord.note || '';
+      if (regRecord.trackId && !composedNote.includes(`[TRACK:${regRecord.trackId}]`)) {
+        composedNote = `[TRACK:${regRecord.trackId}] ${composedNote}`.trim();
+      }
+      if (regRecord.phone && !composedNote.includes(`[TEL:${regRecord.phone}]`)) {
+        composedNote = `[TEL:${regRecord.phone}] ${composedNote}`.trim();
+      }
+
+      const { error: regErr } = await sb.from('event_registrations').upsert({
         id: targetRowId,
         event_id: regRecord.eventId,
         student_id: regRecord.studentId,
         student_name: regRecord.studentName,
         nickname: regRecord.nickname || '',
         email: regRecord.email,
-        phone: regRecord.phone || '',
         department_id: regRecord.departmentId,
         department_name: regRecord.trackTitle ? `[${regRecord.trackTitle}] ${regRecord.departmentName}` : regRecord.departmentName,
         role_id: regRecord.roleId,
         role_title: regRecord.roleTitle,
-        note: regRecord.note ? (regRecord.trackId ? `[TRACK:${regRecord.trackId}] ` + regRecord.note : regRecord.note) : (regRecord.trackId ? `[TRACK:${regRecord.trackId}]` : ''),
+        note: composedNote,
         registered_at: regRecord.registeredAt || new Date().toISOString()
       }, { onConflict: 'id' });
+
+      if (regErr) {
+        console.warn("Supabase Registration Sync Error:", regErr);
+      }
     } catch(e) {
       console.warn("Supabase Registration Sync Suppressed:", e);
     }
@@ -718,12 +741,28 @@ window.ComedEventManager = {
           .maybeSingle();
 
         if (!evErr && eventRow && (eventRow.tracks || eventRow.departments)) {
+          let unpackedTracks = eventRow.tracks;
+          let unpackedDepts = eventRow.departments;
+
+          // ถ้าบรรจุ tracks ไว้ใน departments JSONB (_isMultiTrack)
+          if (eventRow.departments && eventRow.departments._isMultiTrack && Array.isArray(eventRow.departments.tracks)) {
+            unpackedTracks = eventRow.departments.tracks;
+            unpackedDepts = eventRow.departments.departments || [];
+          }
+
           const events = this.getAllEvents();
           const idx = events.findIndex(e => e.id === targetEventId);
+          const mergedEvent = {
+            ...(idx !== -1 ? events[idx] : {}),
+            ...eventRow,
+            tracks: unpackedTracks || (idx !== -1 ? events[idx].tracks : null),
+            departments: unpackedDepts || (idx !== -1 ? events[idx].departments : [])
+          };
+
           if (idx !== -1) {
-            events[idx] = { ...events[idx], ...eventRow };
+            events[idx] = mergedEvent;
           } else {
-            events.unshift(eventRow);
+            events.unshift(mergedEvent);
           }
           localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(events));
           hasUpdate = true;
@@ -768,6 +807,15 @@ window.ComedEventManager = {
 
           const key = `${COMED_EVENT_REGS_KEY}_${targetEventId}`;
           const localStr = localStorage.getItem(key) || '[]';
+          const localArr = JSON.parse(localStr);
+
+          // ถ้า Cloud ว่างเปล่าแต่ Local มีข้อมูลที่เพิ่งเขียนไม่เกิน 15 วินาที อย่าเพิ่งล้าง
+          const isRecentLocalWrite = (Date.now() - (this._lastLocalWriteTime || 0)) < 15000;
+          if (loadedRegs.length === 0 && localArr.length > 0 && isRecentLocalWrite) {
+            // รอให้ cloud sync ทำงานเสร็จ
+            return hasUpdate;
+          }
+
           const cloudStr = JSON.stringify(loadedRegs);
           if (localStr !== cloudStr) {
             localStorage.setItem(key, cloudStr);
@@ -841,16 +889,21 @@ window.ComedEventManager = {
             console.log("[Supabase Broadcast] ⚡⚡ Event status update received:", msg.payload);
             try {
               if (msg.payload && msg.payload.id) {
+                let payloadData = { ...msg.payload };
+                if (payloadData.departments && payloadData.departments._isMultiTrack && Array.isArray(payloadData.departments.tracks)) {
+                  payloadData.tracks = payloadData.departments.tracks;
+                  payloadData.departments = payloadData.departments.departments || [];
+                }
                 const events = this.getAllEvents();
-                const idx = events.findIndex(e => e.id === msg.payload.id);
+                const idx = events.findIndex(e => e.id === payloadData.id);
                 if (idx !== -1) {
-                  events[idx] = { ...events[idx], ...msg.payload };
+                  events[idx] = { ...events[idx], ...payloadData };
                 } else {
-                  events.unshift(msg.payload);
+                  events.unshift(payloadData);
                 }
                 localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(events));
                 if (typeof onUpdateCallback === 'function') {
-                  onUpdateCallback({ type: 'event_status_changed', payload: msg.payload });
+                  onUpdateCallback({ type: 'event_status_changed', payload: payloadData });
                 }
               }
             } catch(e) {
