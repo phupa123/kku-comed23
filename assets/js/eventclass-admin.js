@@ -154,9 +154,17 @@ function renderDeptsGrid() {
               <p class="text-[11px] text-slate-400">${dept.description || ''}</p>
             </div>
           </div>
-          <span class="text-xs font-mono font-bold text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/20">
-            ${deptRegs.length} คน
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/20">
+              ${deptRegs.length} คน
+            </span>
+            <button onclick="openEditDeptModal('${activeAdminTrackId}', '${dept.id}')"
+              class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+              title="แก้ไขฝ่าย & ปรับจำนวนบุคคลในฝ่าย">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5 text-purple-400"></i>
+              <span>จัดการฝ่าย</span>
+            </button>
+          </div>
         </div>
 
         <div class="space-y-2">
@@ -391,6 +399,262 @@ async function submitAssignRole() {
   } catch(err) {
     alert("⚠️ " + (err.message || "ไม่สามารถกำหนดตำแหน่งได้"));
   }
+}
+
+// ================= DEPARTMENT & ROLE MANAGEMENT (CUSTOM DEPT & SEATS) =================
+
+function openAddDeptModal() {
+  const trackSel = document.getElementById('newDeptTrackSelect');
+  if (trackSel) trackSel.value = activeAdminTrackId;
+
+  const nameInput = document.getElementById('newDeptNameInput');
+  if (nameInput) nameInput.value = '';
+
+  const descInput = document.getElementById('newDeptDescInput');
+  if (descInput) descInput.value = '';
+
+  const container = document.getElementById('newDeptRolesContainer');
+  if (container) {
+    container.innerHTML = '';
+    // ใส่แถวเริ่มต้นให้ 2 ตำแหน่ง
+    addNewDeptRoleRow('หัวหน้าฝ่าย', 1);
+    addNewDeptRoleRow('ทีมงานฝ่าย', 2);
+  }
+
+  const modal = document.getElementById('modalAddDepartment');
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeAddDeptModal() {
+  const modal = document.getElementById('modalAddDepartment');
+  if (modal) modal.classList.add('hidden');
+}
+
+function addNewDeptRoleRow(defaultTitle = '', defaultSeats = 1) {
+  const container = document.getElementById('newDeptRolesContainer');
+  if (!container) return;
+
+  const row = document.createElement('div');
+  row.className = "new-dept-role-row flex items-center gap-2 bg-slate-900/90 p-2 rounded-xl border border-slate-800";
+  row.innerHTML = `
+    <input type="text" placeholder="ชื่อตำแหน่ง เช่น หัวหน้าฝ่าย" value="${defaultTitle}"
+      class="role-title-input flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-emerald-500">
+    <div class="flex items-center gap-1">
+      <span class="text-[11px] text-slate-400">รับ:</span>
+      <input type="number" min="1" max="60" value="${defaultSeats}"
+        class="role-seats-input w-16 px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-amber-400 font-mono font-bold text-xs text-center outline-none focus:border-emerald-500">
+      <span class="text-[11px] text-slate-400">คน</span>
+    </div>
+    <button type="button" onclick="this.closest('.new-dept-role-row').remove()" class="p-1 text-rose-400 hover:text-rose-300 transition" title="ลบตำแหน่งนี้">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  `;
+  container.appendChild(row);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function submitCreateDepartment() {
+  const trackId = document.getElementById('newDeptTrackSelect')?.value || activeAdminTrackId;
+  const deptName = document.getElementById('newDeptNameInput')?.value.trim();
+  const deptDesc = document.getElementById('newDeptDescInput')?.value.trim();
+
+  if (!deptName) {
+    alert("⚠️ กรุณาระบุชื่อฝ่ายที่ต้องการสร้าง");
+    return;
+  }
+
+  const roleRows = document.querySelectorAll('#newDeptRolesContainer .new-dept-role-row');
+  const roles = [];
+  roleRows.forEach((row, idx) => {
+    const title = row.querySelector('.role-title-input')?.value.trim();
+    const seats = parseInt(row.querySelector('.role-seats-input')?.value || '1', 10);
+    if (title) {
+      roles.push({
+        id: `role_custom_${Date.now()}_${idx}`,
+        title: title,
+        maxSeats: Math.max(1, seats)
+      });
+    }
+  });
+
+  if (roles.length === 0) {
+    alert("⚠️ กรุณากำหนดตำแหน่งในฝ่ายอย่างน้อย 1 ตำแหน่ง");
+    return;
+  }
+
+  if (!currentClassEvent || !currentClassEvent.tracks) {
+    alert("⚠️ ไม่พบข้อมูลกิจกรรม");
+    return;
+  }
+
+  const track = currentClassEvent.tracks.find(t => t.id === trackId);
+  if (!track) {
+    alert("⚠️ ไม่พบกิจกรรมที่เลือก");
+    return;
+  }
+
+  if (!track.departments) track.departments = [];
+
+  const newDeptId = `dept_custom_${Date.now()}`;
+  const newDepartment = {
+    id: newDeptId,
+    name: deptName,
+    icon: 'briefcase',
+    color: 'from-purple-500 to-indigo-600',
+    badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    description: deptDesc || '',
+    roles: roles
+  };
+
+  track.departments.push(newDepartment);
+
+  // บันทึกลง Storage และ Supabase
+  window.ComedEventManager.saveEvent(currentClassEvent);
+
+  closeAddDeptModal();
+  activeAdminTrackId = trackId;
+  switchAdminTrack(trackId);
+  populateAssignStudentPicker();
+  refreshAdminUI();
+
+  alert(`✅ เพิ่มฝ่าย "${deptName}" ใน${track.title} เรียบร้อยแล้ว!`);
+}
+
+function openEditDeptModal(trackId, deptId) {
+  if (!currentClassEvent) return;
+  const track = currentClassEvent.tracks?.find(t => t.id === trackId);
+  const dept = track?.departments?.find(d => d.id === deptId);
+  if (!dept) return;
+
+  document.getElementById('editDeptTrackId').value = trackId;
+  document.getElementById('editDeptId').value = deptId;
+  document.getElementById('editDeptModalTitle').textContent = `จัดการ: ${dept.name}`;
+  document.getElementById('editDeptModalSubtitle').textContent = `กิจกรรม: ${track.title}`;
+  document.getElementById('editDeptNameInput').value = dept.name;
+  document.getElementById('editDeptDescInput').value = dept.description || '';
+
+  const container = document.getElementById('editDeptRolesContainer');
+  if (container) {
+    container.innerHTML = '';
+    (dept.roles || []).forEach(role => {
+      addEditDeptRoleRow(role.id, role.title, role.maxSeats);
+    });
+  }
+
+  const modal = document.getElementById('modalEditDepartment');
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeEditDeptModal() {
+  const modal = document.getElementById('modalEditDepartment');
+  if (modal) modal.classList.add('hidden');
+}
+
+function addEditDeptRoleRow(roleId = '', title = '', seats = 1) {
+  const container = document.getElementById('editDeptRolesContainer');
+  if (!container) return;
+
+  const actualRoleId = roleId || `role_custom_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+  const row = document.createElement('div');
+  row.className = "edit-dept-role-row flex items-center gap-2 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800";
+  row.dataset.roleId = actualRoleId;
+  row.innerHTML = `
+    <input type="text" placeholder="ชื่อตำแหน่ง" value="${title}"
+      class="edit-role-title-input flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-purple-500">
+    <div class="flex items-center gap-1">
+      <span class="text-[11px] text-slate-400">โควตา:</span>
+      <input type="number" min="1" max="60" value="${seats}"
+        class="edit-role-seats-input w-16 px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-amber-400 font-mono font-bold text-xs text-center outline-none focus:border-purple-500">
+      <span class="text-[11px] text-slate-400">คน</span>
+    </div>
+    <button type="button" onclick="this.closest('.edit-dept-role-row').remove()" class="p-1 text-rose-400 hover:text-rose-300 transition" title="ลบตำแหน่งนี้">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  `;
+  container.appendChild(row);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function submitSaveEditDepartment() {
+  const trackId = document.getElementById('editDeptTrackId')?.value;
+  const deptId = document.getElementById('editDeptId')?.value;
+  const newName = document.getElementById('editDeptNameInput')?.value.trim();
+  const newDesc = document.getElementById('editDeptDescInput')?.value.trim();
+
+  if (!newName) {
+    alert("⚠️ กรุณาระบุชื่อฝ่าย");
+    return;
+  }
+
+  const track = currentClassEvent?.tracks?.find(t => t.id === trackId);
+  const dept = track?.departments?.find(d => d.id === deptId);
+  if (!dept) {
+    alert("⚠️ ไม่พบฝ่ายที่ต้องการแก้ไข");
+    return;
+  }
+
+  const roleRows = document.querySelectorAll('#editDeptRolesContainer .edit-dept-role-row');
+  const updatedRoles = [];
+  roleRows.forEach((row, idx) => {
+    const rId = row.dataset.roleId || `role_${Date.now()}_${idx}`;
+    const rTitle = row.querySelector('.edit-role-title-input')?.value.trim();
+    const rSeats = parseInt(row.querySelector('.edit-role-seats-input')?.value || '1', 10);
+    if (rTitle) {
+      updatedRoles.push({
+        id: rId,
+        title: rTitle,
+        maxSeats: Math.max(1, rSeats)
+      });
+    }
+  });
+
+  if (updatedRoles.length === 0) {
+    alert("⚠️ ฝ่ายนี้ต้องมีตำแหน่งอย่างน้อย 1 ตำแหน่ง");
+    return;
+  }
+
+  dept.name = newName;
+  dept.description = newDesc;
+  dept.roles = updatedRoles;
+
+  // บันทึกการเปลี่ยนแปลง
+  window.ComedEventManager.saveEvent(currentClassEvent);
+
+  closeEditDeptModal();
+  populateAssignStudentPicker();
+  refreshAdminUI();
+
+  alert(`✅ บันทึกการแก้ไขฝ่าย "${newName}" และอัปเดตจำนวนบุคคลเรียบร้อยแล้ว!`);
+}
+
+async function confirmDeleteCurrentDept() {
+  const trackId = document.getElementById('editDeptTrackId')?.value;
+  const deptId = document.getElementById('editDeptId')?.value;
+
+  const track = currentClassEvent?.tracks?.find(t => t.id === trackId);
+  const dept = track?.departments?.find(d => d.id === deptId);
+  if (!dept) return;
+
+  const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
+  const occupiedCount = regs.filter(r => (r.trackId === trackId || !r.trackId) && r.departmentId === deptId).length;
+
+  let promptMsg = `ยืนยันการลบฝ่าย "${dept.name}" ใช่หรือไม่?`;
+  if (occupiedCount > 0) {
+    promptMsg = `⚠️ คำเตือน: ปัจจุบันมีเพื่อนลงชื่อในฝ่าย "${dept.name}" อยู่จำนวน ${occupiedCount} คน\n\nหากลบฝ่ายนี้ รายชื่อที่สังกัดฝ่ายนี้อาจต้องเลือกฝ่ายใหม่\n\nยืนยันการลบฝ่ายใช่หรือไม่?`;
+  }
+
+  if (!confirm(promptMsg)) return;
+
+  track.departments = track.departments.filter(d => d.id !== deptId);
+  window.ComedEventManager.saveEvent(currentClassEvent);
+
+  closeEditDeptModal();
+  populateAssignStudentPicker();
+  refreshAdminUI();
+
+  alert(`🗑️ ลบฝ่าย "${dept.name}" เรียบร้อยแล้ว`);
 }
 
 // ================= EXPORT EXCEL (.XLSX) =================

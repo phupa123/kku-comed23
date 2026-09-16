@@ -246,8 +246,8 @@ window.ComedEventManager = {
             if (idx === -1) {
               parsed.push(defEvt);
               hasChange = true;
-            } else if (defEvt.tracks) {
-              // อัปเดตโครงสร้างฝ่ายและโควตาที่นั่งให้เป็นไปตามค่ากำหนดล่าสุด โดยคงสถานะ status เดิมไว้
+            } else if (!parsed[idx].tracks || parsed[idx].tracks.length === 0) {
+              // ถ้ายังไม่มี tracks ให้ใส่ default เข้าไป
               parsed[idx].tracks = defEvt.tracks;
               parsed[idx].title = defEvt.title;
               hasChange = true;
@@ -603,7 +603,7 @@ window.ComedEventManager = {
       if (!sb) return;
 
       // 1. Try dedicated events table if exists
-      sb.from('events').upsert({
+      const payload = {
         id: eventData.id,
         code: eventData.code || eventData.id.toUpperCase(),
         title: eventData.title,
@@ -611,9 +611,13 @@ window.ComedEventManager = {
         category: eventData.category || 'กิจกรรม',
         status: eventData.status || 'open',
         deadline: eventData.deadline ? new Date(eventData.deadline).toISOString() : null,
-        departments: eventData.departments,
+        departments: eventData.departments || [],
         updated_at: new Date().toISOString()
-      }, { onConflict: 'id' }).catch(() => {});
+      };
+      if (eventData.tracks) {
+        payload.tracks = eventData.tracks;
+      }
+      sb.from('events').upsert(payload, { onConflict: 'id' }).catch(() => {});
     } catch(e) {
       console.warn("Supabase Event Sync Suppressed:", e);
     }
@@ -712,7 +716,7 @@ window.ComedEventManager = {
           .eq('id', targetEventId)
           .maybeSingle();
 
-        if (!evErr && eventRow && eventRow.departments) {
+        if (!evErr && eventRow && (eventRow.tracks || eventRow.departments)) {
           const events = this.getAllEvents();
           const idx = events.findIndex(e => e.id === targetEventId);
           if (idx !== -1) {
