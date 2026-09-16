@@ -660,11 +660,19 @@ function renderStep3Departments() {
             </button>
           </div>
         `;
+      } else if (isFull) {
+        actionBtn = `
+          <button onclick="alert('⚠️ ขออภัยครับ ตำแหน่ง ${role.title} เต็มจำนวนแล้ว (${roleRegs.length}/${role.maxSeats} คน)')"
+            class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold border border-slate-700/80 transition flex items-center gap-1 cursor-not-allowed flex-shrink-0 shadow-sm opacity-85">
+            <i data-lucide="lock" class="w-3.5 h-3.5 text-rose-400"></i>
+            <span>เต็มแล้ว (${roleRegs.length}/${role.maxSeats})</span>
+          </button>
+        `;
       } else {
         actionBtn = `
           <button onclick="openSelectRoleModal('${activeTrackId}', '${track.title}', '${dept.id}', '${dept.name}', '${role.id}', '${role.title}')"
             class="px-3.5 py-1.5 rounded-xl ${roleSelectBtnClass} text-xs font-bold transition flex items-center gap-1 cursor-pointer flex-shrink-0 shadow-sm">
-            <span>${isFull ? '+ ลงเพิ่ม' : 'เลือกตำแหน่งนี้'}</span>
+            <span>เลือกตำแหน่งนี้</span>
             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </button>
         `;
@@ -728,7 +736,7 @@ function renderStep3Departments() {
 // ================= MODAL & CONFIRM ROLE REGISTRATION =================
 function openSelectRoleModal(trackId, trackTitle, deptId, deptName, roleId, roleTitle) {
   if (!isSystemOpen()) {
-    alert("ระบบปิดรับสมัครชั่วคราว");
+    alert("⚠️ ระบบปิดรับสมัครชั่วคราว ไม่สามารถเลือกตำแหน่งได้ในขณะนี้");
     goToStep(4);
     return;
   }
@@ -736,6 +744,23 @@ function openSelectRoleModal(trackId, trackTitle, deptId, deptName, roleId, role
     alert("กรุณาระบุตัวตนก่อนครับ");
     goToStep(1);
     return;
+  }
+
+  // Pre-check Quota ก่อนเปิด Modal
+  const regs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
+  const myTrackReg = window.ComedEventManager.getStudentTrackRegistration(EVENT_CLASS_ID, currentStudent.studentId, trackId);
+  const isMyCurrentRole = myTrackReg && myTrackReg.departmentId === deptId && myTrackReg.roleId === roleId;
+  const targetTrack = currentClassEvent?.tracks?.find(t => t.id === trackId);
+  const targetDept = targetTrack?.departments?.find(d => d.id === deptId);
+  const targetRole = targetDept?.roles?.find(r => r.id === roleId);
+
+  if (targetRole) {
+    const roleRegs = regs.filter(r => (r.trackId === trackId || !r.trackId) && r.departmentId === deptId && r.roleId === roleId);
+    if (!isMyCurrentRole && roleRegs.length >= targetRole.maxSeats) {
+      alert(`⚠️ ขออภัยครับ ตำแหน่ง "${roleTitle}" เต็มจำนวนแล้ว (${roleRegs.length}/${targetRole.maxSeats} คน)\nกรุณาเลือกตำแหน่งอื่นที่ยังมีที่ว่างครับ`);
+      renderStep3Departments();
+      return;
+    }
   }
 
   pendingTrackSelection = { trackId, trackTitle, deptId, deptName, roleId, roleTitle };

@@ -372,14 +372,14 @@
           <div class="space-y-1.5">
             <label class="text-xs font-bold text-slate-300 flex items-center justify-between">
               <span>จำนวนบอทที่จะเข้ามาทดสอบ:</span>
-              <span id="simBotCountLabel" class="text-purple-400 font-mono font-black text-sm">30 คน</span>
+              <span id="simBotCountLabel" class="text-purple-400 font-mono font-black text-sm">3 คน</span>
             </label>
-            <input type="range" id="simBotCountInput" min="5" max="59" value="30" step="1"
+            <input type="range" id="simBotCountInput" min="3" max="59" value="3" step="1"
               oninput="document.getElementById('simBotCountLabel').textContent = this.value + ' คน'"
               class="w-full accent-purple-500 bg-slate-900 rounded-lg cursor-pointer h-2">
             <div class="flex justify-between text-[10px] text-slate-500 font-mono">
-              <span>5 คน</span>
-              <span>30 คน (แนะนำ)</span>
+              <span>3 คน (ทดสอบแย่งกัน)</span>
+              <span>15 คน</span>
               <span>59 คน (สูงสุด)</span>
             </div>
           </div>
@@ -469,6 +469,6 @@
   </div>
 
   <!-- Page Logic Script -->
-  <script src="assets/js/eventclass-admin.js?v=2.9.0"></script>
+  <script src="assets/js/eventclass-admin.js?v=3.0.0"></script>
 </body>
 </html>

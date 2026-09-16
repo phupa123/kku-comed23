@@ -658,26 +658,32 @@ async function startBotSimulation() {
 
       const bot = selectedBots[i];
       // สุ่มตำแหน่งเริ่มต้น
-      const randomRole = allRoles[Math.floor(Math.random() * allRoles.length)];
-
-      await window.ComedEventManager.registerTrackRole(
-        EVENT_CLASS_ID,
-        {
-          studentId: bot.id,
-          studentName: bot.name,
-          nickname: bot.nickname || '',
-          email: bot.email,
-          phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
-          note: '🤖 บอทจำลองเหตุการณ์เสมือนจริง'
-        },
-        randomRole.trackId,
-        randomRole.deptId,
-        randomRole.roleId
-      );
+      let regSuccess = false;
+      try {
+        await window.ComedEventManager.registerTrackRole(
+          EVENT_CLASS_ID,
+          {
+            studentId: bot.id,
+            studentName: bot.name,
+            nickname: bot.nickname || '',
+            email: bot.email,
+            phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
+            note: '🤖 บอทจำลองเหตุการณ์เสมือนจริง'
+          },
+          randomRole.trackId,
+          randomRole.deptId,
+          randomRole.roleId
+        );
+        regSuccess = true;
+      } catch(regErr) {
+        simLog(`❌ [${bot.id}] ${bot.name} แย่งตำแหน่ง "${randomRole.roleTitle}" ไม่ทัน! (${regErr.message})`, "cancel");
+      }
 
       completedActions++;
       setSimProgress((completedActions / totalActions) * 100, `บอท ${bot.name} กำลังเลือกตำแหน่ง...`);
-      simLog(`[${bot.id}] ${bot.name} (${bot.nickname || 'บอท'}) เข้าชิงตำแหน่ง "${randomRole.roleTitle}" ใน ${randomRole.deptName} (${randomRole.trackTitle})`, "join");
+      if (regSuccess) {
+        simLog(`[${bot.id}] ${bot.name} (${bot.nickname || 'บอท'}) จองตำแหน่ง "${randomRole.roleTitle}" ใน ${randomRole.deptName} สำเร็จ!`, "join");
+      }
 
       refreshAdminUI();
       if (baseDelay > 0) {
@@ -717,24 +723,32 @@ async function startBotSimulation() {
         const alternativeRoles = allRoles.filter(r => r.roleId !== curReg.roleId);
         const newRole = alternativeRoles[Math.floor(Math.random() * alternativeRoles.length)];
 
-        await window.ComedEventManager.registerTrackRole(
-          EVENT_CLASS_ID,
-          {
-            studentId: bot.id,
-            studentName: bot.name,
-            nickname: bot.nickname || '',
-            email: bot.email,
-            phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
-            note: '🤖 บอทจำลองเหตุการณ์ (ย้ายฝ่าย)'
-          },
-          newRole.trackId,
-          newRole.deptId,
-          newRole.roleId
-        );
+        let switchSuccess = false;
+        try {
+          await window.ComedEventManager.registerTrackRole(
+            EVENT_CLASS_ID,
+            {
+              studentId: bot.id,
+              studentName: bot.name,
+              nickname: bot.nickname || '',
+              email: bot.email,
+              phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
+              note: '🤖 บอทจำลองเหตุการณ์ (ย้ายฝ่าย)'
+            },
+            newRole.trackId,
+            newRole.deptId,
+            newRole.roleId
+          );
+          switchSuccess = true;
+        } catch(swErr) {
+          simLog(`❌ [${bot.id}] ${bot.name} ย้ายไป "${newRole.roleTitle}" ไม่สำเร็จ (${swErr.message})`, "cancel");
+        }
 
         completedActions++;
         setSimProgress((completedActions / totalActions) * 100, `บอท ${bot.name} กำลังย้ายฝ่าย...`);
-        simLog(`[${bot.id}] ${bot.name} ย้ายไปลง "${newRole.roleTitle}" ฝ่าย ${newRole.deptName} แทน`, "switch");
+        if (switchSuccess) {
+          simLog(`[${bot.id}] ${bot.name} ย้ายไปลง "${newRole.roleTitle}" ฝ่าย ${newRole.deptName} แทน`, "switch");
+        }
 
         refreshAdminUI();
         if (baseDelay > 0) {
@@ -754,24 +768,33 @@ async function startBotSimulation() {
         const bot = selectedBots[k];
 
         const hasReg = window.ComedEventManager.getAllStudentRegistrations(EVENT_CLASS_ID, bot.id);
-        if (hasReg.length === 0) {
-          // จัดตำแหน่งที่ยังว่างให้
-          const safeRole = allRoles[k % allRoles.length];
-          await window.ComedEventManager.registerTrackRole(
-            EVENT_CLASS_ID,
-            {
-              studentId: bot.id,
-              studentName: bot.name,
-              nickname: bot.nickname || '',
-              email: bot.email,
-              phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
-              note: '🤖 บอทจำลองเหตุการณ์ (จัดสรรรอบสุดท้าย)'
-            },
-            safeRole.trackId,
-            safeRole.deptId,
-            safeRole.roleId
-          );
-          simLog(`[${bot.id}] ${bot.name} ได้รับการจัดสรรเข้า "${safeRole.roleTitle}" สำเร็จ`, "join");
+          // หาตำแหน่งที่ยังมีที่นั่งว่างจริง
+          const currentRegs = window.ComedEventManager.getRegistrations(EVENT_CLASS_ID);
+          const availableRoles = allRoles.filter(r => {
+            const count = currentRegs.filter(reg => (reg.trackId === r.trackId || !reg.trackId) && reg.departmentId === r.deptId && reg.roleId === r.roleId).length;
+            return count < r.maxSeats;
+          });
+
+          const safeRole = availableRoles.length > 0 ? availableRoles[0] : allRoles[k % allRoles.length];
+          try {
+            await window.ComedEventManager.registerTrackRole(
+              EVENT_CLASS_ID,
+              {
+                studentId: bot.id,
+                studentName: bot.name,
+                nickname: bot.nickname || '',
+                email: bot.email,
+                phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
+                note: '🤖 บอทจำลองเหตุการณ์ (จัดสรรรอบสุดท้าย)'
+              },
+              safeRole.trackId,
+              safeRole.deptId,
+              safeRole.roleId
+            );
+            simLog(`[${bot.id}] ${bot.name} ได้รับการจัดสรรเข้า "${safeRole.roleTitle}" สำเร็จ`, "join");
+          } catch(e) {
+            simLog(`⚠️ [${bot.id}] ${bot.name} ทุกตำแหน่งเต็มหมดแล้ว ไม่สามารถจัดสรรเพิ่มได้`, "cancel");
+          }
           refreshAdminUI();
         }
       }

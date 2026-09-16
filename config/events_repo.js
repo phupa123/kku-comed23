@@ -122,9 +122,9 @@ const DEFAULT_COMED_EVENTS = [
             badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
             description: 'เนรมิตฉากถ่ายรูป 1 ล็อคโรงรถ เลือกธีม ออกแบบ Backdrop พร็อพถ่ายรูป ป้ายแสดงความยินดี',
             roles: [
-              { id: 'role_grad_design_lead', title: 'หัวหน้าทีมออกแบบและจัดฉาก', maxSeats: 4 },
-              { id: 'role_grad_craft', title: 'ทีมประดิษฐ์และประกอบฉาก', maxSeats: 8 },
-              { id: 'role_grad_painter', title: 'ทีมวาดภาพ ระบายสี และตกแต่ง', maxSeats: 6 }
+              { id: 'role_grad_design_lead', title: 'หัวหน้าทีมออกแบบและจัดฉาก', maxSeats: 1 },
+              { id: 'role_grad_craft', title: 'ทีมประดิษฐ์และประกอบฉาก', maxSeats: 1 },
+              { id: 'role_grad_painter', title: 'ทีมวาดภาพ ระบายสี และตกแต่ง', maxSeats: 1 }
             ]
           },
           {
@@ -135,8 +135,8 @@ const DEFAULT_COMED_EVENTS = [
             badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
             description: 'ถ่ายภาพนิ่ง วิดีโอเก็บบรรยากาศพี่บัณฑิต ทำคลิปสั้น และสื่อโซเชียลมีเดียของรุ่น',
             roles: [
-              { id: 'role_grad_photographer', title: 'ช่างภาพนิ่ง (Photo)', maxSeats: 4 },
-              { id: 'role_grad_videographer', title: 'ช่างวิดีโอ & ครีเอทีฟคลิป (Video)', maxSeats: 4 }
+              { id: 'role_grad_photographer', title: 'ช่างภาพนิ่ง (Photo)', maxSeats: 1 },
+              { id: 'role_grad_videographer', title: 'ช่างวิดีโอ & ครีเอทีฟคลิป (Video)', maxSeats: 1 }
             ]
           },
           {
@@ -147,8 +147,8 @@ const DEFAULT_COMED_EVENTS = [
             badgeColor: 'bg-pink-500/10 text-pink-400 border-pink-500/30',
             description: 'ดูแลของที่ระลึก สายสะพาย มงกุฎ ต้อนรับพี่บัณฑิตและญาติๆ ให้ประทับใจ',
             roles: [
-              { id: 'role_grad_welcome_team', title: 'ทีมต้อนรับและประสานงานพี่บัณฑิต', maxSeats: 6 },
-              { id: 'role_grad_souvenir', title: 'ทีมจัดเตรียมและมอบของขวัญที่ระลึก', maxSeats: 4 }
+              { id: 'role_grad_welcome_team', title: 'ทีมต้อนรับและประสานงานพี่บัณฑิต', maxSeats: 1 },
+              { id: 'role_grad_souvenir', title: 'ทีมจัดเตรียมและมอบของขวัญที่ระลึก', maxSeats: 1 }
             ]
           },
           {
@@ -159,8 +159,8 @@ const DEFAULT_COMED_EVENTS = [
             badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
             description: 'จัดเตรียมโต๊ะ เก้าอี้ พัดลม ลากปลั๊กไฟ อาหาร น้ำดื่ม และดูแลความสะอาดพื้นที่โรงรถ',
             roles: [
-              { id: 'role_grad_venue', title: 'ทีมจัดการสถานที่และระบบไฟ', maxSeats: 4 },
-              { id: 'role_grad_catering', title: 'ทีมสวัสดิการ น้ำดื่ม และอาหาร', maxSeats: 4 }
+              { id: 'role_grad_venue', title: 'ทีมจัดการสถานที่และระบบไฟ', maxSeats: 1 },
+              { id: 'role_grad_catering', title: 'ทีมสวัสดิการ น้ำดื่ม และอาหาร', maxSeats: 1 }
             ]
           }
         ]
@@ -185,8 +185,8 @@ const DEFAULT_COMED_EVENTS = [
             badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
             description: 'เตรียมภาพระบายสี AR เซ็ตแท็บเล็ต/มือถือ แนะนำเด็กๆ สแกนดูผลงาน 3D มีชีวิต',
             roles: [
-              { id: 'role_child_ar_lead', title: 'ผู้ดูแลระบบ AR และอุปกรณ์ไอที', maxSeats: 4 },
-              { id: 'role_child_ar_staff', title: 'พี่เลี้ยงแนะนำน้องๆ ระบายสี AR', maxSeats: 8 }
+              { id: 'role_child_ar_lead', title: 'ผู้ดูแลระบบ AR และอุปกรณ์ไอที', maxSeats: 1 },
+              { id: 'role_child_ar_staff', title: 'พี่เลี้ยงแนะนำน้องๆ ระบายสี AR', maxSeats: 1 }
             ]
           },
           {
@@ -197,8 +197,8 @@ const DEFAULT_COMED_EVENTS = [
             badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
             description: 'นำหุ่นยนต์ อุปกรณ์ Microcontroller มาจัดแสดง สาธิต และให้น้องๆ ได้ทดลองกดเล่น',
             roles: [
-              { id: 'role_child_robot_demo', title: 'ทีมสาธิตหุ่นยนต์ & ให้ความรู้เด็กๆ', maxSeats: 6 },
-              { id: 'role_child_tech_display', title: 'ทีมจัดแสดงบอร์ดนวัตกรรมและเทค', maxSeats: 4 }
+              { id: 'role_child_robot_demo', title: 'ทีมสาธิตหุ่นยนต์ & ให้ความรู้เด็กๆ', maxSeats: 1 },
+              { id: 'role_child_tech_display', title: 'ทีมจัดแสดงบอร์ดนวัตกรรมและเทค', maxSeats: 1 }
             ]
           },
           {
@@ -209,8 +209,8 @@ const DEFAULT_COMED_EVENTS = [
             badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
             description: 'จัดกิจกรรม Bingo สุดมันส์ เกมตอบคำถามชิงรางวัล ดึงดูดเด็กๆ และผู้ปกครองเข้าซุ้ม',
             roles: [
-              { id: 'role_child_bingo_mc', title: 'พิธีกรดำเนินเกม Bingo & สันทนาการ', maxSeats: 4 },
-              { id: 'role_child_bingo_staff', title: 'ทีมแจกการ์ดบิงโกและตรวจผลรางวัล', maxSeats: 6 }
+              { id: 'role_child_bingo_mc', title: 'พิธีกรดำเนินเกม Bingo & สันทนาการ', maxSeats: 1 },
+              { id: 'role_child_bingo_staff', title: 'ทีมแจกการ์ดบิงโกและตรวจผลรางวัล', maxSeats: 1 }
             ]
           },
           {
@@ -221,8 +221,8 @@ const DEFAULT_COMED_EVENTS = [
             badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
             description: 'จัดสรรของรางวัล ตุ๊กตา สมุด ดินสอ ขนม นมกล่อง และต้อนรับลงทะเบียนน้องๆ',
             roles: [
-              { id: 'role_child_reward_manager', title: 'ทีมคุมสต็อกของรางวัลและแจกของขวัญ', maxSeats: 6 },
-              { id: 'role_child_hospitality', title: 'ทีมต้อนรับ ลงทะเบียนเด็ก และสวัสดิการ', maxSeats: 6 }
+              { id: 'role_child_reward_manager', title: 'ทีมคุมสต็อกของรางวัลและแจกของขวัญ', maxSeats: 1 },
+              { id: 'role_child_hospitality', title: 'ทีมต้อนรับ ลงทะเบียนเด็ก และสวัสดิการ', maxSeats: 1 }
             ]
           }
         ]
@@ -242,9 +242,14 @@ window.ComedEventManager = {
           // ตรวจสอบว่ามี default events ทุกตัวหรือไม่ ถ้าไม่มีให้รวมเข้ามา
           let hasChange = false;
           DEFAULT_COMED_EVENTS.forEach(defEvt => {
-            const exists = parsed.some(e => e.id === defEvt.id);
-            if (!exists) {
+            const idx = parsed.findIndex(e => e.id === defEvt.id);
+            if (idx === -1) {
               parsed.push(defEvt);
+              hasChange = true;
+            } else if (defEvt.tracks) {
+              // อัปเดตโครงสร้างฝ่ายและโควตาที่นั่งให้เป็นไปตามค่ากำหนดล่าสุด โดยคงสถานะ status เดิมไว้
+              parsed[idx].tracks = defEvt.tracks;
+              parsed[idx].title = defEvt.title;
               hasChange = true;
             }
           });
@@ -279,6 +284,16 @@ window.ComedEventManager = {
       events.unshift({ ...eventData, createdAt: new Date().toISOString() });
     }
     localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(events));
+    // ⚡ Realtime Broadcast แจ้งเปลี่ยนสถานะเปิด/ปิดกิจกรรม ให้ทุกจออัปเดตทันที (<50ms)
+    if (this._activeRealtimeChannel) {
+      try {
+        this._activeRealtimeChannel.send({
+          type: 'broadcast',
+          event: 'EVENT_STATUS_UPDATE',
+          payload: eventData
+        });
+      } catch(e) {}
+    }
     this.syncEventToSupabase(eventData);
   },
 
@@ -442,6 +457,14 @@ window.ComedEventManager = {
        (r.email && studentInfo.email && r.email.toLowerCase() === studentInfo.email.toLowerCase())) &&
       (r.trackId === trackId)
     );
+
+    // ⚡ ตรวจสอบโควตาที่นั่งว่างของตำแหน่ง (Enforce Quota / MaxSeats Guard)
+    const occupiedSeats = regs.filter(r => (r.trackId === trackId || !r.trackId) && r.departmentId === deptId && r.roleId === roleId).length;
+    const isSelfCurrentRole = existingTrackIdx !== -1 && regs[existingTrackIdx].departmentId === deptId && regs[existingTrackIdx].roleId === roleId;
+
+    if (!isSelfCurrentRole && occupiedSeats >= targetRole.maxSeats) {
+      throw new Error(`ขออภัย ตำแหน่ง "${targetRole.title}" (${targetDept.name}) เต็มจำนวนแล้ว (${occupiedSeats}/${targetRole.maxSeats})`);
+    }
 
     const newRecord = {
       id: `${event.id}_${studentInfo.studentId}_${trackId}`,
@@ -805,6 +828,27 @@ window.ComedEventManager = {
               }
             } catch(bErr) {
               console.warn("Broadcast parse error:", bErr);
+            }
+          })
+          // ⚡ Broadcast Channel: ดักฟังการเปลี่ยนสถานะเปิด/ปิดกิจกรรมจาก Admin ทันที (< 80ms)
+          .on('broadcast', { event: 'EVENT_STATUS_UPDATE' }, (msg) => {
+            console.log("[Supabase Broadcast] ⚡⚡ Event status update received:", msg.payload);
+            try {
+              if (msg.payload && msg.payload.id) {
+                const events = this.getAllEvents();
+                const idx = events.findIndex(e => e.id === msg.payload.id);
+                if (idx !== -1) {
+                  events[idx] = { ...events[idx], ...msg.payload };
+                } else {
+                  events.unshift(msg.payload);
+                }
+                localStorage.setItem(COMED_EVENTS_KEY, JSON.stringify(events));
+                if (typeof onUpdateCallback === 'function') {
+                  onUpdateCallback({ type: 'event_status_changed', payload: msg.payload });
+                }
+              }
+            } catch(e) {
+              console.warn("Event status broadcast error:", e);
             }
           })
           // 2. Postgres Changes Database Event (Backup Verification)
