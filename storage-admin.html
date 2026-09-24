@@ -50,6 +50,10 @@
   <script src="assets/js/multi_downloader.js"></script>
   <!-- Drag-to-Select Engine -->
   <script src="assets/js/drag_select.js"></script>
+  <!-- QRCode Generator & Scanner Suite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
@@ -78,6 +82,18 @@
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">
+        <!-- QR Scanner Button -->
+        <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code ตรวจสอบไฟล์/ลิงก์' })" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="สแกน QR Code">
+          <i data-lucide="scan-line" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span class="hidden sm:inline">สแกน QR</span>
+        </button>
+
+        <!-- Share Page QR Button -->
+        <button onclick="window.QRSuite.openPageQrModal({ title: 'ระบบคลาวด์ไดรฟ์ (Storage)', userUrl: `${window.location.origin}/storage.html`, adminUrl: window.location.href, defaultMode: 'admin', subtitle: 'เลือกสแกนเข้าหน้าไดรฟ์ผู้ใช้ (Storage) หรือหน้าแอดมิน (Storage Admin)' })" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="เปิด QR ให้เพื่อนสแกนเข้าหน้านี้">
+          <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span>เปิด QR หน้านี้</span>
+        </button>
+
         <!-- Keyboard Shortcut Button -->
         <button onclick="openShortcutsModal()" class="w-9 h-9 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 flex items-center justify-center transition cursor-pointer" title="คีย์ลัดช่วยเหลือ (?)">
           <i data-lucide="keyboard" class="w-4 h-4"></i>

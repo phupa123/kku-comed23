@@ -37,8 +37,10 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <!-- Google Sign-In Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- QRCode.js -->
+  <!-- QRCode.js & QR Scanner Suite -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
   <!-- Supabase JS CDN & Config -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
@@ -137,6 +139,18 @@
       <!-- Action Center & User Profile -->
       <div class="flex items-center gap-2 sm:gap-2.5">
         
+        <!-- QR Scanner Button -->
+        <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code (เปิดลิงก์ / ค้นหาไฟล์แชร์)' })" class="px-3 py-2 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition flex items-center gap-1.5 cursor-pointer text-xs font-bold" title="สแกน QR Code">
+          <i data-lucide="scan-line" class="w-4 h-4 text-emerald-400"></i>
+          <span class="hidden sm:inline">สแกน QR</span>
+        </button>
+
+        <!-- Share Page QR Code Button -->
+        <button onclick="window.QRSuite.openPageQrModal({ title: 'คลาวด์ไดรฟ์ส่วนตัวและโฟลเดอร์', userUrl: window.location.href, subtitle: 'สแกนเพื่อเข้าสู่คลังไดรฟ์ส่วนตัว KKU COMED' })" class="px-3 py-2 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition flex items-center gap-1.5 cursor-pointer text-xs font-bold" title="เปิด QR ให้เพื่อนสแกนเข้าหน้านี้">
+          <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
+          <span class="hidden sm:inline">แชร์ QR หน้านี้</span>
+        </button>
+
         <!-- Keyboard Shortcut Button -->
         <button onclick="openShortcutsModal()" class="w-9 h-9 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 flex items-center justify-center transition cursor-pointer" title="คีย์ลัดช่วยเหลือ (?)">
           <i data-lucide="keyboard" class="w-4 h-4"></i>

@@ -43,6 +43,10 @@
   <script src="students_data.js"></script>
   <script src="config/events_repo.js?v=2.3.0"></script>
   <link rel="stylesheet" href="assets/css/master-admin.css">
+  <!-- QRCode Generator & Scanner Suite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
 
   <style>
     .hub-glass {
@@ -74,7 +78,17 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code ตรวจสอบข้อมูลฝ่าย' })" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="สแกน QR Code">
+          <i data-lucide="scan-line" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span class="hidden sm:inline">สแกน QR</span>
+        </button>
+
+        <button onclick="window.QRSuite.openPageQrModal({ title: 'ระบบเลือกฝ่าย (event.html)', userUrl: `${window.location.origin}/event.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้าระบบเลือกฝ่ายสำหรับเพื่อนนักศึกษา' })" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="เปิด QR ให้เพื่อนสแกน">
+          <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span>เปิด QR หน้านี้</span>
+        </button>
+
         <a href="event.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
           <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">ดูหน้าเว็บจริง</span>

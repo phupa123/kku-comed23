@@ -40,6 +40,10 @@
   <!-- Master Admin CSS -->
   <link rel="stylesheet" href="assets/css/master-admin.css">
   <script src="config/campaigns_repo.js"></script>
+  <!-- QRCode Generator & Scanner Suite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden bg-mesh-dark">
@@ -63,7 +67,17 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code (เปิดลิงก์ / ค้นหาข้อมูล)' })" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="สแกน QR Code">
+          <i data-lucide="scan-line" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span class="hidden sm:inline">สแกน QR</span>
+        </button>
+
+        <button onclick="window.QRSuite.openPageQrModal({ title: 'หน้าแรกเว็บไซต์ (index.html)', userUrl: `${window.location.origin}/index.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้าแรกสำหรับนักศึกษา หรือหน้าจัดการแอดมิน' })" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="เปิด QR ให้เพื่อนสแกนเข้าหน้านี้">
+          <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span>เปิด QR หน้านี้</span>
+        </button>
+
         <a href="index.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
           <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">ดูหน้าจริง (Live Preview)</span>

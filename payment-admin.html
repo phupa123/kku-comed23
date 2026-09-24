@@ -58,6 +58,10 @@
   <script src="config/admin_guard.js"></script>
   <!-- Custom Admin CSS -->
   <link rel="stylesheet" href="assets/css/admin.css">
+  <!-- QRCode Generator & Scanner Suite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
   <script src="config/campaigns_repo.js"></script>
 </head>
 
@@ -215,6 +219,20 @@
         </div>
 
         <div class="hidden sm:flex items-center gap-2.5">
+          <!-- QR Scanner -->
+          <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code ตรวจสอบสลิป / ค้นหาข้อมูล' })"
+            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer" title="สแกน QR Code">
+            <i data-lucide="scan-line" class="w-4 h-4 text-emerald-400"></i>
+            <span>สแกน QR</span>
+          </button>
+
+          <!-- Share Page QR -->
+          <button onclick="window.QRSuite.openPageQrModal({ title: 'ระบบชำระเงินค่าป้ายเอก (payment.html)', userUrl: `${window.location.origin}/payment.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้ารับชำระเงินสำหรับเพื่อนนักศึกษา' })"
+            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer" title="เปิด QR ให้เพื่อนสแกน">
+            <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
+            <span>เปิด QR หน้านี้</span>
+          </button>
+
           <button onclick="refreshDataFromCloud()"
             class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-sky-400 bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 transition shadow-sm group">
             <i data-lucide="rotate-cw" id="adminRefreshIcon"

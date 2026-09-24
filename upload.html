@@ -47,6 +47,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Multi-Downloader Library -->
   <script src="assets/js/multi_downloader.js"></script>
+  <!-- QRCode Generator & Scanner Suite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
@@ -95,6 +99,17 @@
             <i data-lucide="log-out" class="w-4 h-4"></i>
           </button>
         </div>
+
+        <!-- QR Scanner & Share Buttons -->
+        <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code (เปิดลิงก์ / ค้นหาไฟล์)' })" title="สแกน QR Code" class="px-3 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="scan-line" class="w-4 h-4 text-emerald-400"></i>
+          <span class="hidden sm:inline">สแกน QR</span>
+        </button>
+
+        <button onclick="window.QRSuite.openPageQrModal({ title: 'หน้าอัปโหลดไฟล์คลาวด์', userUrl: window.location.href, subtitle: 'สแกนเพื่อเปิดหน้าอัปโหลดไฟล์คลาวด์ KKU COMED' })" title="เปิด QR ให้เพื่อนสแกนเข้าหน้านี้" class="px-3 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
+          <span class="hidden sm:inline">แชร์ QR หน้านี้</span>
+        </button>
 
         <a href="upload-admin.html" title="ตั้งค่า API คลาวด์" class="px-3 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5">
           <i data-lucide="sliders" class="w-4 h-4 text-orange-400"></i>
