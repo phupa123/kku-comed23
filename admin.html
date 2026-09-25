@@ -252,6 +252,11 @@
             <span class="hidden md:inline">เปิด QR</span>
           </button>
 
+          <a href="settings.html" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5" title="ตั้งค่าระบบ (Settings)">
+            <i data-lucide="settings" class="w-4 h-4 text-amber-400"></i>
+            <span class="hidden md:inline">ตั้งค่า</span>
+          </a>
+
           <a href="index.html" target="_blank" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5" title="เปิดดูหน้าแรกของเว็บ">
             <i data-lucide="external-link" class="w-4 h-4 text-sky-400"></i>
             <span class="hidden lg:inline">เปิดหน้าแรก</span>
@@ -944,8 +949,18 @@
                 <span class="font-bold text-white block">ผู้ดูแลระบบ (Admins)</span>
                 <span id="hubStatAdminCount" class="text-slate-400">3 บัญชี</span>
               </div>
-              <a href="payment-admin.html?tab=admins" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold transition">
+              <a href="settings.html?tab=admins" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold transition">
                 จัดการสิทธิ์
+              </a>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-white block">ตั้งค่าระบบ & Backup</span>
+                <span class="text-slate-400 text-[11px]">API, กิจกรรม, สำรองข้อมูล</span>
+              </div>
+              <a href="settings.html" class="px-3 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold border border-orange-500/20 transition">
+                เปิดหน้าตั้งค่า
               </a>
             </div>
 
