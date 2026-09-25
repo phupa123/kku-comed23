@@ -208,57 +208,58 @@
   <!-- ================= 2. MASTER ADMIN DASHBOARD (HUB CONSOLE) ================= -->
   <div id="adminDashboard" class="hidden flex-grow flex flex-col min-h-screen">
     
-    <!-- Top Sticky Header Bar (Cloud Theme) -->
-    <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-sky-900/30">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <!-- Top Sticky Header Bar (Cloud Theme & Mobile Optimized) -->
+    <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-2xl border-b border-sky-900/30">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
         
         <!-- Left: Hub Title & Badge -->
-        <div class="flex items-center gap-3.5">
-          <a href="index.html" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500/20 to-blue-500/20 border border-sky-400/30 p-2 flex items-center justify-center text-sky-300 hover:scale-105 transition shadow-sm">
-            <i data-lucide="cloud-cog" class="w-6 h-6"></i>
+        <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+          <a href="index.html" class="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-sky-500/20 to-blue-500/20 border border-sky-400/30 p-1.5 sm:p-2 flex items-center justify-center text-sky-300 hover:scale-105 transition shadow-sm flex-shrink-0">
+            <i data-lucide="cloud-cog" class="w-5 h-5 sm:w-6 sm:h-6"></i>
           </a>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-[11px] font-black uppercase tracking-wider text-sky-400">COMED23</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-950/60 text-sky-300 border border-sky-500/30">KKU63</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-live"></span> Cloud Live Control
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-sky-400">COMED23</span>
+              <span class="px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-mono font-bold bg-sky-950/60 text-sky-300 border border-sky-500/30">KKU63</span>
+              <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-live"></span> Cloud Live
               </span>
             </div>
-            <h1 class="text-base sm:text-lg font-black text-white leading-tight">ระบบควบคุมศูนย์กลาง (Central Admin Hub)</h1>
+            <h1 class="text-xs sm:text-lg font-black text-white leading-tight truncate">ระบบควบคุมศูนย์กลาง <span class="hidden md:inline">(Central Admin Hub)</span></h1>
           </div>
         </div>
 
-        <!-- Right: Logged In Admin Profile & Switcher -->
-        <div class="flex items-center gap-3">
-          <div class="hidden sm:flex items-center gap-3 p-1.5 pr-3 rounded-2xl bg-slate-900/90 border border-slate-800">
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
-              <i data-lucide="user-check" class="w-4 h-4"></i>
+        <!-- Right: Actions for Desktop & Mobile -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+          <!-- Profile Pill (Desktop) -->
+          <div class="hidden lg:flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-slate-900/90 border border-slate-800">
+            <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+              <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
             </div>
             <div class="text-left">
               <span id="currentAdminName" class="text-xs font-black text-white block leading-tight">Admin User</span>
-              <span id="currentAdminEmail" class="text-[10px] text-slate-400 font-mono block leading-tight">admin@kkumail.com</span>
+              <span id="currentAdminEmail" class="text-[9px] text-slate-400 font-mono block leading-tight">admin@kkumail.com</span>
             </div>
           </div>
 
-          <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code ตรวจสอบข้อมูล/เปิดหน้าเว็บ' })" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="สแกน QR Code">
-            <i data-lucide="scan-line" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span class="hidden sm:inline">สแกน QR</span>
+          <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code ตรวจสอบข้อมูล/เปิดหน้าเว็บ' })" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="สแกน QR Code">
+            <i data-lucide="scan-line" class="w-4 h-4 text-emerald-400"></i>
+            <span class="hidden md:inline">สแกน QR</span>
           </button>
 
-          <button onclick="window.QRSuite.openPageQrModal({ title: 'หน้าหลักระบบ COMED23', userUrl: `${window.location.origin}/index.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้าแรกสำหรับนักศึกษาหรือเข้าใช้งานระบบ' })" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="เปิด QR ให้เพื่อนสแกน">
-            <i data-lucide="qr-code" class="w-3.5 h-3.5 text-sky-400"></i>
-            <span class="hidden sm:inline">เปิด QR</span>
+          <button onclick="window.QRSuite.openPageQrModal({ title: 'หน้าหลักระบบ COMED23', userUrl: `${window.location.origin}/index.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้าแรกสำหรับนักศึกษาหรือเข้าใช้งานระบบ' })" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="เปิด QR ให้เพื่อนสแกน">
+            <i data-lucide="qr-code" class="w-4 h-4 text-sky-400"></i>
+            <span class="hidden md:inline">เปิด QR</span>
           </button>
 
-          <a href="index.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
-            <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
-            <span class="hidden md:inline">เปิดหน้าแรก</span>
+          <a href="index.html" target="_blank" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5" title="เปิดดูหน้าแรกของเว็บ">
+            <i data-lucide="external-link" class="w-4 h-4 text-sky-400"></i>
+            <span class="hidden lg:inline">เปิดหน้าแรก</span>
           </a>
 
-          <button onclick="handleAdminLogout()" class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline">ออกจากระบบ</span>
+          <button onclick="handleAdminLogout()" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer" title="ออกจากระบบ">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">ออก</span>
           </button>
         </div>
       </div>
@@ -1073,11 +1074,37 @@
     </main>
 
     <!-- Footer -->
-    <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 mb-16 md:mb-0 text-center text-xs text-slate-500">
       <div class="max-w-7xl mx-auto px-4">
         <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED23 • KKU63)</p>
       </div>
     </footer>
+
+    <!-- Mobile Quick Navigation Bar (Fixed Bottom Bar on Mobile Devices) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-2xl border-t border-sky-900/40 px-3 py-2 flex items-center justify-around shadow-2xl">
+      <button type="button" onclick="setHubCategory('all'); window.scrollTo({top: 0, behavior: 'smooth'});" class="flex flex-col items-center gap-1 text-slate-400 hover:text-sky-400 text-[10px] font-bold">
+        <i data-lucide="layout-grid" class="w-5 h-5 text-sky-400"></i>
+        <span>ระบบทั้งหมด</span>
+      </button>
+      <button type="button" onclick="setHubCategory('finance'); document.getElementById('hubModulesGrid')?.scrollIntoView({behavior: 'smooth'});" class="flex flex-col items-center gap-1 text-slate-400 hover:text-orange-400 text-[10px] font-bold">
+        <i data-lucide="credit-card" class="w-5 h-5 text-orange-400"></i>
+        <span>การเงิน</span>
+      </button>
+      <button type="button" onclick="document.getElementById('adminHubSearch')?.focus();" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white text-[10px] font-bold">
+        <div class="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center -mt-3 shadow-md">
+          <i data-lucide="search" class="w-4 h-4"></i>
+        </div>
+        <span>ค้นหา</span>
+      </button>
+      <button type="button" onclick="document.getElementById('pageBadgeIndex')?.scrollIntoView({behavior: 'smooth'});" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-[10px] font-bold">
+        <i data-lucide="radio" class="w-5 h-5 text-emerald-400"></i>
+        <span>สวิตช์เว็บ</span>
+      </button>
+      <button type="button" onclick="handleAdminLogout();" class="flex flex-col items-center gap-1 text-slate-400 hover:text-rose-400 text-[10px] font-bold">
+        <i data-lucide="log-out" class="w-5 h-5 text-rose-400"></i>
+        <span>ออก</span>
+      </button>
+    </nav>
 
   </div>
 

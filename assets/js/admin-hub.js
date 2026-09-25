@@ -363,15 +363,22 @@ const MAINT_CONFIG_KEY = "COMED_MAINTENANCE_CONFIG_V1";
 const DEFAULT_MAINT_CONFIG = {
   all: { active: false, title: "กำลังปิดปรับปรุงระบบชั่วคราว", reason: "ระบบกำลังอยู่ระหว่างการปรับปรุงและอัปเกรดฐานข้อมูลเพื่อเพิ่มความเสถียรและความปลอดภัย", endTime: "" },
   index: { active: false, title: "หน้าหลักกำลังปรับปรุงชั่วคราว", reason: "กำลังอัปเดตข้อมูลและระบบสารสนเทศของสาขาวิชา", endTime: "" },
-  payment: { active: false, title: "ระบบรับชำระเงินปิดปรับปรุงชั่วคราว", reason: "ระบบการเงินกำลังอยู่ระหว่างการสรุปยอดและบำรุงรักษาระบบ", endTime: "" }
+  payment: { active: false, title: "ระบบรับชำระเงินปิดปรับปรุงชั่วคราว", reason: "ระบบการเงินกำลังอยู่ระหว่างการสรุปยอดและบำรุงรักษาระบบ", endTime: "" },
+  event: { active: false, title: "ระบบเลือกฝ่ายกำลังปรับปรุงชั่วคราว", reason: "กำลังอัปเดตข้อมูลรายชื่อและโครงสร้างฝ่าย", endTime: "" },
+  eventclass: { active: false, title: "ระบบกิจกรรมซุ้มบัณฑิต/วันเด็กปิดปรับปรุงชั่วคราว", reason: "กำลังสรุปยอดผู้เข้าร่วมกิจกรรม", endTime: "" },
+  shortlink: { active: false, title: "ระบบย่อลิงก์ปิดปรับปรุงชั่วคราว", reason: "กำลังบำรุงรักษาระบบส่งต่อ URL", endTime: "" },
+  upload: { active: false, title: "ระบบอัปโหลดไฟล์ปิดปรับปรุงชั่วคราว", reason: "กำลังเชื่อมต่อและบำรุงรักษา Storage API", endTime: "" },
+  storage: { active: false, title: "ระบบคลาวด์ไดรฟ์ปิดปรับปรุงชั่วคราว", reason: "กำลังสำรองข้อมูลและจัดระเบียบพื้นที่จัดเก็บ", endTime: "" }
 };
 
 function getMaintenanceConfig() {
   try {
     const s = localStorage.getItem(MAINT_CONFIG_KEY);
-    return s ? { ...DEFAULT_MAINT_CONFIG, ...JSON.parse(s) } : DEFAULT_MAINT_CONFIG;
+    if (!s) return { ...DEFAULT_MAINT_CONFIG };
+    const parsed = JSON.parse(s);
+    return { ...DEFAULT_MAINT_CONFIG, ...parsed };
   } catch(e) {
-    return DEFAULT_MAINT_CONFIG;
+    return { ...DEFAULT_MAINT_CONFIG };
   }
 }
 
@@ -390,7 +397,7 @@ function closeMaintenanceModal() {
 function loadMaintenanceFormByScope() {
   const scope = document.getElementById("maintTargetScope")?.value || "all";
   const cfg = getMaintenanceConfig();
-  const item = cfg[scope] || cfg["all"];
+  const item = cfg[scope] || cfg["all"] || {};
 
   const activeChk = document.getElementById("maintActiveCheckbox");
   const titleIn = document.getElementById("maintTitleInput");
@@ -419,7 +426,7 @@ function saveMaintenanceSettings(e) {
   closeMaintenanceModal();
   updateMaintenanceStatusBadge();
   updateLivePageBadges();
-  alert("✨ บันทึกการตั้งค่าเปิด-ปิดปรับปรุงระบบสำเร็จเรียบร้อย!");
+  syncMaintenanceConfigToCloud(cfg);
 }
 
 function updateMaintenanceStatusBadge() {
@@ -427,9 +434,13 @@ function updateMaintenanceStatusBadge() {
   if (!badge) return;
 
   const cfg = getMaintenanceConfig();
+  const isAllOff = !!(cfg.all && cfg.all.active);
   const isAnyActive = Object.values(cfg).some(item => item && item.active);
 
-  if (isAnyActive) {
+  if (isAllOff) {
+    badge.textContent = "⛔ ปิดปรับปรุงทั้งเว็บไซต์ (Global Lock)";
+    badge.className = "text-rose-400 font-bold text-[11px] animate-pulse";
+  } else if (isAnyActive) {
     badge.textContent = "⚠️ มีบางหน้าปิดปรับปรุง";
     badge.className = "text-amber-400 font-bold text-[11px] animate-pulse";
   } else {
@@ -449,7 +460,7 @@ const PAGE_SCOPES = [
   { key: 'shortlink', name: 'ระบบย่อลิงก์', badgeId: 'pageBadgeShortlink', btnId: 'btnToggleShortlink' },
   { key: 'upload', name: 'อัปโหลดไฟล์', badgeId: 'pageBadgeUpload', btnId: 'btnToggleUpload' },
   { key: 'storage', name: 'คลาวด์ไดรฟ์', badgeId: 'pageBadgeStorage', btnId: 'btnToggleStorage' },
-  { key: 'all', name: 'ทั้งเว็บไซต์', badgeId: 'pageBadgeAll', btnId: 'btnToggleAll' }
+  { key: 'all', name: 'ทั้งเว็บไซต์ (Global)', badgeId: 'pageBadgeAll', btnId: 'btnToggleAll' }
 ];
 
 function updateLivePageBadges() {
@@ -457,24 +468,29 @@ function updateLivePageBadges() {
   const isGlobalOff = !!(cfg.all && cfg.all.active);
 
   PAGE_SCOPES.forEach(p => {
+    // When global lock is on, all pages appear locked
     const isOff = p.key === 'all' ? isGlobalOff : (isGlobalOff || !!(cfg[p.key] && cfg[p.key].active));
     const badge = document.getElementById(p.badgeId);
     const btn = document.getElementById(p.btnId);
 
     if (badge) {
-      badge.className = isOff
-        ? "text-[10px] text-amber-400 font-bold flex items-center gap-1"
-        : "text-[10px] text-emerald-400 font-bold flex items-center gap-1";
-      badge.innerHTML = isOff
-        ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง'
-        : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+      if (isOff) {
+        badge.className = "text-[10px] text-amber-400 font-bold flex items-center gap-1";
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> ปิดปรับปรุง';
+      } else {
+        badge.className = "text-[10px] text-emerald-400 font-bold flex items-center gap-1";
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ONLINE';
+      }
     }
 
     if (btn) {
-      btn.className = isOff
-        ? "px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-bold border border-emerald-500/30 transition cursor-pointer"
-        : "px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer";
-      btn.textContent = isOff ? "เปิดให้บริการ" : (p.key === 'all' ? "ปิดทั้งเว็บ" : "ปิดปรับปรุง");
+      if (isOff) {
+        btn.className = "px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-bold border border-emerald-500/30 transition cursor-pointer";
+        btn.textContent = "เปิดให้บริการ";
+      } else {
+        btn.className = "px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer";
+        btn.textContent = (p.key === 'all') ? "ปิดทั้งเว็บ" : "ปิดปรับปรุง";
+      }
     }
   });
 
@@ -486,7 +502,21 @@ function toggleSinglePageLive(scope) {
   if (!cfg[scope]) {
     cfg[scope] = { active: false, title: "กำลังปรับปรุงระบบชั่วคราว", reason: "กำลังอัปเดตระบบเพื่อเพิ่มประสิทธิภาพ", endTime: "" };
   }
+  
+  // If global lock is active and user clicks to toggle a single page to off/on,
+  // handle intelligently: if trying to open an individual page while global lock is on, also release global lock
+  if (scope === 'all') {
+    const willLock = !cfg.all.active;
+    toggleAllPagesQuick(willLock);
+    return;
+  }
+
   cfg[scope].active = !cfg[scope].active;
+  // If individual page is opened but global was active, release global lock
+  if (!cfg[scope].active && cfg.all && cfg.all.active) {
+    cfg.all.active = false;
+  }
+
   localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
   updateMaintenanceStatusBadge();
   updateLivePageBadges();
@@ -509,7 +539,6 @@ function toggleAllPagesQuick(shouldLock) {
   updateLivePageBadges();
   syncMaintenanceConfigToCloud(cfg);
 }
-
 
 function syncMaintenanceConfigToCloud(cfg) {
   // 1. Instant Realtime Push to Supabase Cloud
