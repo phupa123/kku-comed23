@@ -22,7 +22,13 @@
     publicProfile: true,
     avatarSeed: '',
     avatarFrame: 'none',     // 'none' | 'cyber' | 'gold' | 'neon' | 'emerald'
-    avatarAnim: 'none'       // 'none' | 'pulse' | 'glow' | 'float' | 'bounce' | 'rainbow'
+    avatarAnim: 'none',      // 'none' | 'pulse' | 'glow' | 'float' | 'bounce' | 'rainbow'
+    avatarTransform: {
+      rotate: 0,
+      scale: 1,
+      flipX: false,
+      flipY: false
+    }
   };
 
   let adminUploadConfig = {
@@ -140,6 +146,18 @@
     renderUserProfile();
     populateFormValues();
     highlightSelectedDecorations();
+
+    // Sync transform controls with loaded user preferences
+    const tf = userPrefs.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
+    const zoomSlider = document.getElementById('avatarZoomSlider');
+    const zoomVal = document.getElementById('avatarZoomValue');
+    const btnFlipX = document.getElementById('btnFlipX');
+    const btnFlipY = document.getElementById('btnFlipY');
+
+    if (zoomSlider) zoomSlider.value = tf.scale || 1;
+    if (zoomVal) zoomVal.textContent = `${Math.round((tf.scale || 1) * 100)}%`;
+    if (btnFlipX) btnFlipX.classList.toggle('border-sky-500', !!tf.flipX);
+    if (btnFlipY) btnFlipY.classList.toggle('border-sky-500', !!tf.flipY);
   }
 
   // Tab Navigation Controller
@@ -263,6 +281,13 @@
       if (activeAnim !== 'none' && adminUploadConfig.allowAnimations !== false) {
         cAvatar.classList.add(`avatar-anim-${activeAnim}`);
       }
+
+      // Apply CSS Transformations (Rotate, Zoom, Flip)
+      const tf = userPrefs.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
+      const scaleX = (tf.flipX ? -1 : 1) * (tf.scale || 1);
+      const scaleY = (tf.flipY ? -1 : 1) * (tf.scale || 1);
+      const rotate = tf.rotate || 0;
+      cAvatar.style.transform = `scale(${scaleX}, ${scaleY}) rotate(${rotate}deg)`;
     }
   }
 
@@ -270,20 +295,38 @@
     // Frame buttons
     document.querySelectorAll('.btn-frame-opt').forEach(btn => {
       const val = btn.getAttribute('data-frame-val');
-      if (val === (userPrefs.avatarFrame || 'none')) {
-        btn.classList.add('border-sky-500', 'bg-sky-500/10');
+      const isSelected = (val === (userPrefs.avatarFrame || 'none'));
+      if (isSelected) {
+        btn.classList.add('border-sky-500', 'bg-sky-500/10', 'ring-1', 'ring-sky-500/50');
+        if (!btn.querySelector('.active-check-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'active-check-badge text-sky-400 text-xs mt-1 block';
+          badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> ใช้งานอยู่';
+          btn.appendChild(badge);
+        }
       } else {
-        btn.classList.remove('border-sky-500', 'bg-sky-500/10');
+        btn.classList.remove('border-sky-500', 'bg-sky-500/10', 'ring-1', 'ring-sky-500/50');
+        const badge = btn.querySelector('.active-check-badge');
+        if (badge) badge.remove();
       }
     });
 
     // Animation buttons
     document.querySelectorAll('.btn-anim-opt').forEach(btn => {
       const val = btn.getAttribute('data-anim-val');
-      if (val === (userPrefs.avatarAnim || 'none')) {
-        btn.classList.add('border-sky-500', 'bg-sky-500/10');
+      const isSelected = (val === (userPrefs.avatarAnim || 'none'));
+      if (isSelected) {
+        btn.classList.add('border-sky-500', 'bg-sky-500/10', 'ring-1', 'ring-sky-500/50');
+        if (!btn.querySelector('.active-check-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'active-check-badge text-sky-400 text-xs mt-1 block';
+          badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> ใช้งานอยู่';
+          btn.appendChild(badge);
+        }
       } else {
-        btn.classList.remove('border-sky-500', 'bg-sky-500/10');
+        btn.classList.remove('border-sky-500', 'bg-sky-500/10', 'ring-1', 'ring-sky-500/50');
+        const badge = btn.querySelector('.active-check-badge');
+        if (badge) badge.remove();
       }
     });
   }
@@ -331,12 +374,35 @@
           if (targetBadge) targetBadge.textContent = `Priority: ${uploader.config.providerPriority.join(' → ')}`;
         }
 
+      if (window.MultiCloudUploader) {
+        // MultiCloudUploader instance
+        const uploader = window.MultiCloudUploader;
+
+        // Apply provider priority according to Admin settings
+        if (adminUploadConfig.strategy === 'single') {
+          if (uploader.config) uploader.config.activeProvider = adminUploadConfig.singleTarget || 'cloudinary';
+          if (targetBadge) targetBadge.textContent = `Provider: ${adminUploadConfig.singleTarget}`;
+        } else {
+          if (uploader.config) {
+            uploader.config.activeProvider = 'auto';
+            if (Array.isArray(adminUploadConfig.priority) && adminUploadConfig.priority.length > 0) {
+              uploader.config.providerPriority = [...adminUploadConfig.priority];
+            }
+          }
+          if (targetBadge) targetBadge.textContent = `Cloud Multi-Storage`;
+        }
+
         if (progressText) progressText.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>กำลังอัปโหลดขึ้น ${targetBadge ? targetBadge.textContent : 'Cloud'}...</span>`;
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
-        const uploadResult = await uploader.uploadFile(file, {
+        // Call .upload() method
+        const uploadResult = await uploader.upload(file, {
           folder: 'comed_user_avatars',
-          tags: ['avatar', currentUser.email]
+          tags: ['avatar', currentUser.email],
+          uploaderEmail: currentUser.email,
+          onProgress: (percent, msg) => {
+            if (progressText) progressText.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>${msg || 'กำลังอัปโหลด...'}</span>`;
+          }
         });
 
         if (uploadResult && uploadResult.url) {
@@ -345,23 +411,18 @@
         }
       }
 
-      // Fallback: If MultiCloudUploader is unavailable or failed, read as Data URL
+      // Fallback: If cloud upload is unavailable or failed, compress heavily before DataURL to prevent QuotaExceededError
       if (!uploadedUrl) {
-        uploadedUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-        usedProvider = 'DataURL';
+        uploadedUrl = await compressImageToDataUrl(file, 256, 256, 0.75);
+        usedProvider = 'Local Compressed';
       }
 
       // Update current user avatar
       currentUser.avatar = uploadedUrl;
       renderUserProfile();
 
-      // Auto update in index.html user session if active
-      localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+      // Safe update in localStorage (Prevent QuotaExceededError)
+      safeSaveUserSession(currentUser);
 
       if (progressBox) progressBox.classList.add('hidden');
       showToast(`✨ อัปโหลดรูปโปรไฟล์ขึ้น ${usedProvider} สำเร็จแล้ว!`, 'success');
@@ -369,8 +430,121 @@
     } catch (err) {
       console.error("Avatar Upload Error", err);
       if (progressBox) progressBox.classList.add('hidden');
-      showToast('เกิดข้อผิดพลาดในการอัปโหลดภาพ กรุณาลองใหม่อีกครั้ง', 'error');
+      showToast('เกิดข้อผิดพลาดในการอัปโหลดภาพ: ' + (err.message || 'กรุณาลองใหม่อีกครั้ง'), 'error');
     }
+  };
+
+  // Helper to compress image to compact DataURL
+  function compressImageToDataUrl(file, maxWidth = 300, maxHeight = 300, quality = 0.75) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Safe LocalStorage Saving
+  function safeSaveUserSession(user) {
+    try {
+      localStorage.setItem(USER_SESSION_KEY, JSON.stringify(user));
+    } catch (err) {
+      if (err.name === 'QuotaExceededError' || err.code === 22) {
+        console.warn("LocalStorage Quota exceeded, saving lightweight user session without heavy data url");
+        const lightUser = { ...user };
+        // If avatar is heavy data URL, avoid breaking localStorage
+        if (lightUser.avatar && lightUser.avatar.startsWith('data:') && lightUser.avatar.length > 50000) {
+          lightUser.avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(user.email)}`;
+        }
+        try {
+          localStorage.setItem(USER_SESSION_KEY, JSON.stringify(lightUser));
+        } catch(e2) {
+          console.error("Unable to save user session even with light avatar", e2);
+        }
+      }
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // AVATAR DIMENSION STUDIO: ROTATE, ZOOM, FLIP CONTROLS
+  // -------------------------------------------------------------------------
+  window.adjustAvatarTransform = function (type, val) {
+    if (!userPrefs.avatarTransform) {
+      userPrefs.avatarTransform = { rotate: 0, scale: 1, flipX: false, flipY: false };
+    }
+
+    const tf = userPrefs.avatarTransform;
+
+    if (type === 'rotate') {
+      tf.rotate = ((tf.rotate || 0) + val) % 360;
+    } else if (type === 'scale') {
+      tf.scale = Math.max(0.5, Math.min(2.5, val));
+      const valEl = document.getElementById('avatarZoomValue');
+      if (valEl) valEl.textContent = `${Math.round(tf.scale * 100)}%`;
+    } else if (type === 'flipX') {
+      tf.flipX = !tf.flipX;
+      const btn = document.getElementById('btnFlipX');
+      if (btn) btn.classList.toggle('border-sky-500', tf.flipX);
+    } else if (type === 'flipY') {
+      tf.flipY = !tf.flipY;
+      const btn = document.getElementById('btnFlipY');
+      if (btn) btn.classList.toggle('border-sky-500', tf.flipY);
+    }
+
+    if (currentUser) {
+      currentUser.avatarTransform = { ...tf };
+    }
+
+    renderUserProfile();
+    safeSaveUserSession(currentUser);
+    localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+  };
+
+  window.resetAvatarTransforms = function () {
+    userPrefs.avatarTransform = { rotate: 0, scale: 1, flipX: false, flipY: false };
+    if (currentUser) {
+      currentUser.avatarTransform = { ...userPrefs.avatarTransform };
+    }
+
+    const zoomSlider = document.getElementById('avatarZoomSlider');
+    const zoomVal = document.getElementById('avatarZoomValue');
+    const btnFlipX = document.getElementById('btnFlipX');
+    const btnFlipY = document.getElementById('btnFlipY');
+
+    if (zoomSlider) zoomSlider.value = 1;
+    if (zoomVal) zoomVal.textContent = '100%';
+    if (btnFlipX) btnFlipX.classList.remove('border-sky-500');
+    if (btnFlipY) btnFlipY.classList.remove('border-sky-500');
+
+    renderUserProfile();
+    safeSaveUserSession(currentUser);
+    localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+    showToast('รีเซ็ตการปรับแต่งรูปโปรไฟล์แล้ว', 'info');
   };
 
   // Random and Seed Avatar Helpers
