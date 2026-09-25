@@ -447,6 +447,8 @@
     if (failView) failView.classList.add('hidden');
 
     if (bar) bar.style.width = '0%';
+    const ring = document.getElementById('_progressRing');
+    if (ring) ring.style.strokeDashoffset = '326.7';
     if (percentEl) percentEl.textContent = '0%';
     if (stepEl) stepEl.textContent = 'กำลังเตรียมข้อมูล...';
     if (subtextEl) subtextEl.textContent = 'กรุณารอสักครู่ ระบบกำลังประมวลผล';
@@ -463,9 +465,19 @@
     const stepEl = document.getElementById('uiverseProgressStep');
     const statusEl = document.getElementById('uiverseProgressStatus');
     const bytesEl = document.getElementById('uiverseProgressBytes');
+    const ring = document.getElementById('_progressRing');
 
     const cleanPct = Math.min(100, Math.max(0, Math.round(percent)));
+
+    // Linear bar (width %)
     if (bar) bar.style.width = `${cleanPct}%`;
+
+    // Circular ring: dashoffset = circumference * (1 - pct/100), circumference ≈ 326.7
+    if (ring) {
+      const circumference = 326.7;
+      ring.style.strokeDashoffset = String(circumference * (1 - cleanPct / 100));
+    }
+
     if (percentEl) percentEl.textContent = `${cleanPct}%`;
     if (stepEl && stepText) stepEl.textContent = stepText;
     if (statusEl && statusText) statusEl.textContent = statusText;
@@ -620,9 +632,26 @@
           tags: ['avatar', currentUser.email],
           uploaderEmail: currentUser.email,
           signal: currentAbortController ? currentAbortController.signal : undefined,
-          onProgress: (percent, msg) => {
-            const mappedPct = Math.round(25 + ((percent || 0) * 0.65));
-            updateProgressModal(mappedPct, msg || 'กำลังส่งข้อมูลไปยังคลาวด์...', `${Math.round(percent || 0)}%`, fileSizeStr);
+          onProgress: (percent, msg, meta) => {
+            // percent = 0-100 from the uploader (already mapped to 10-95 range in uploader)
+            // meta = { phase, provider, percent: xhrPct, loadedBytes, totalBytes }
+            const xhrPct = (meta && meta.percent != null) ? meta.percent : percent;
+            const displayPct = Math.min(98, Math.max(10, Math.round(percent || 0)));
+
+            // Build bytes string from actual XHR transfer data
+            let bytesStr = fileSizeStr;
+            if (meta && meta.loadedBytes && meta.totalBytes) {
+              const loadedMB = (meta.loadedBytes / (1024 * 1024)).toFixed(1);
+              const totalMB  = (meta.totalBytes  / (1024 * 1024)).toFixed(1);
+              bytesStr = `${loadedMB} / ${totalMB} MB`;
+            }
+
+            // Status text: show real XHR % if in uploading phase
+            const statusText = (meta && meta.phase === 'uploading')
+              ? `${xhrPct}% — กำลังส่ง...`
+              : `${displayPct}%`;
+
+            updateProgressModal(displayPct, msg || 'กำลังส่งข้อมูลไปยังคลาวด์...', statusText, bytesStr);
           }
         });
 

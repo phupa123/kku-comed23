@@ -21,7 +21,8 @@
   // Default keys and fallbacks
   const DEFAULT_CONFIG = {
     activeProvider: 'auto', // 'auto' | 'imgbb' | 'cloudinary' | 'freeimage' | 'catbox'
-    enabledProviders: ['cloudinary', 'catbox', 'imgbb', 'freeimage'],
+    // freeimage disabled by default — freeimage.host blocks Cloudflare Worker IPs (Error 103)
+    enabledProviders: ['cloudinary', 'catbox', 'imgbb'],
     providerPriority: ['cloudinary', 'catbox', 'imgbb', 'freeimage'],
     
     // Auto compression settings
@@ -66,7 +67,14 @@
     loadConfig() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : { ...DEFAULT_CONFIG };
+        const cfg = saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : { ...DEFAULT_CONFIG };
+        // Migration: freeimage.host blocks Cloudflare Worker IPs — remove from enabled list
+        if (Array.isArray(cfg.enabledProviders) && cfg.enabledProviders.includes('freeimage')) {
+          cfg.enabledProviders = cfg.enabledProviders.filter(p => p !== 'freeimage');
+          // Persist the fix so it doesn't re-add on next reload
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg)); } catch(_) {}
+        }
+        return cfg;
       } catch (e) {
         return { ...DEFAULT_CONFIG };
       }
@@ -404,11 +412,13 @@
             if (window.getSupabaseClient) {
               const sb = window.getSupabaseClient();
               if (sb) {
-                sb.from('admin_logs').insert({
-                  admin_email: uploaderInfo.email || 'system',
-                  action: `Upload [${provider}]`,
-                  detail: JSON.stringify(fileItem)
-                }).catch(() => {});
+                try {
+                  await sb.from('admin_logs').insert({
+                    admin_email: uploaderInfo.email || 'system',
+                    action: `Upload [${provider}]`,
+                    detail: JSON.stringify(fileItem)
+                  });
+                } catch (_) {} // fire-and-forget: ignore log errors
               }
             }
 
@@ -483,50 +493,82 @@
      */
     async uploadToFreeImage(fileObj, base64Clean, onProgress) {
       const apiKey = this.config.freeimageApiKey || '6d207e02198a847aa98d0a2a901485a5';
-      const formData = new FormData();
-      formData.append('key', apiKey);
-      formData.append('action', 'upload');
-      formData.append('format', 'json');
 
-      if (base64Clean) {
-        formData.append('source', base64Clean);
-      } else {
-        formData.append('source', fileObj);
+      // Helper: build FormData payload
+      const buildFormData = () => {
+        const fd = new FormData();
+        fd.append('key', apiKey);
+        fd.append('action', 'upload');
+        fd.append('format', 'json');
+        fd.append('source', base64Clean || fileObj);
+        return fd;
+      };
+
+      // Helper: parse result
+      const parseResult = (json) => {
+        if (json && json.image && json.image.url) {
+          return { url: json.image.display_url || json.image.url, publicId: json.image.name || '' };
+        }
+        return null;
+      };
+
+      // 1. Try direct API first (avoids Cloudflare Worker IP block)
+      try {
+        const directRes = await fetch('https://freeimage.host/api/1/upload', {
+          method: 'POST',
+          body: buildFormData()
+        });
+        if (directRes.ok) {
+          const json = await directRes.json().catch(() => null);
+          const result = parseResult(json);
+          if (result) return result;
+        }
+        // If direct gets a 4xx, fall through to proxy attempt
+        if (directRes.status === 403 || directRes.status === 400) {
+          // direct also blocked — skip proxy, throw fast
+          throw new Error('FreeImage.host ปฏิเสธการอัปโหลด (HTTP ' + directRes.status + ')');
+        }
+      } catch (directErr) {
+        // CORS block = fetch throws; continue to Worker proxy
+        if (!directErr.message.includes('ปฏิเสธ')) {
+          console.warn('[FreeImage] Direct API failed (likely CORS), trying Worker proxy...', directErr.message);
+        } else {
+          throw directErr; // explicit 4xx — don't waste time on proxy
+        }
       }
 
-      const endpoints = [
+      // 2. Fallback: Cloudflare Worker proxy
+      const proxyEndpoints = [
         '/api/freeimage-proxy',
         'https://kku-comed23.edspace.workers.dev/api/freeimage-proxy'
       ];
 
       let lastErr = null;
-      for (const ep of endpoints) {
+      for (const ep of proxyEndpoints) {
         try {
-          const response = await fetch(ep, {
-            method: 'POST',
-            body: formData
-          });
+          const response = await fetch(ep, { method: 'POST', body: buildFormData() });
 
+          // Detect Worker-level block (freeimage.host returns 400/403 to CF IPs)
           if (response.status === 400 || response.status === 403) {
             const errData = await response.json().catch(() => null);
-            if (errData?.error?.code === 103 || errData?.error?.message?.includes('forbidden')) {
-              throw new Error("FreeImage.host บล็อกการเชื่อมต่อจาก Cloudflare Worker Proxy (Error 103 Forbidden)");
+            const code = errData?.error?.code;
+            const msg = errData?.error?.message || '';
+            if (code === 103 || msg.toLowerCase().includes('forbidden') || msg.toLowerCase().includes('blocked')) {
+              throw new Error('FreeImage.host บล็อก Cloudflare Worker IP (Error ' + (code || response.status) + ')');
             }
           }
 
           const json = await response.json().catch(() => null);
-          if (json && json.image && json.image.url) {
-            return {
-              url: json.image.display_url || json.image.url,
-              publicId: json.image.name || ''
-            };
-          }
-        } catch(e) {
+          const result = parseResult(json);
+          if (result) return result;
+        } catch (e) {
           lastErr = e;
+          // If blocked error, stop trying more endpoints
+          if (e.message.includes('บล็อก') || e.message.includes('ปฏิเสธ')) break;
         }
       }
 
-      throw new Error("FreeImage upload rejected: " + (lastErr?.message || "เซิร์ฟเวอร์ FreeImage ปิดกั้นการเข้าถึง"));
+      throw new Error('FreeImage upload rejected: ' + (lastErr?.message || 'เซิร์ฟเวอร์ FreeImage ปิดกั้นการเข้าถึง'));
     }
 
     /**

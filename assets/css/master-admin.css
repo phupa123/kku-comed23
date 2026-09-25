@@ -971,3 +971,22 @@ html, body {
 
 
 
+
+/* =====================================================
+   PROGRESS MODAL — Shimmer glow bar + ring animation
+   ===================================================== */
+@keyframes shimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+#_progressGlowBar {
+  background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #38bdf8);
+  background-size: 300% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
+/* Ring smooth transition already set via inline style */
+#_progressRing {
+  transition: stroke-dashoffset 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}

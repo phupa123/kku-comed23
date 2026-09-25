@@ -719,100 +719,98 @@
        - Cancel Button (✕) with AbortController
        - Dynamic Success & Failure Animations + Error messages
        ========================================================================= -->
-  <div id="uiverseProgressModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300">
-    <div class="relative w-full max-w-md bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col items-center text-center space-y-5">
-      
-      <!-- Top Bar: Title & Cancel (✕) Button -->
-      <div class="w-full flex items-center justify-between border-b border-slate-800 pb-3">
-        <span id="uiverseModalTitle" class="text-xs font-black uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
-          <i class="bi bi-cloud-arrow-up-fill text-sky-400"></i>
-          <span>กำลังประมวลผล...</span>
-        </span>
-        <button type="button" id="btnCancelProgress" onclick="cancelCurrentProgress()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 flex items-center justify-center transition cursor-pointer" title="ยกเลิก">
-          <i class="bi bi-x-lg text-xs"></i>
-        </button>
-      </div>
+  <div id="uiverseProgressModal" class="fixed inset-0 z-[999] bg-slate-950/90 backdrop-blur-xl hidden flex items-center justify-center p-4">
+    <div class="relative w-full max-w-sm bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-700/60 rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.9)] overflow-hidden">
 
-      <!-- State 1: Active Progress (3 Combined Uiverse Loaders) -->
-      <div id="uiverseProgressActiveView" class="w-full flex flex-col items-center space-y-5">
-        
-        <!-- Combined Animation Display Area: Dual Slide Box + Floating Pegtops -->
-        <div class="flex items-center justify-center gap-5 py-2">
-          <!-- Uiverse Loader 1: Boryanakrasteva Dual Slide Box -->
-          <div class="uiverse-slide-box flex-shrink-0" title="Slide Engine"></div>
+      <!-- Animated top glow bar -->
+      <div class="h-0.5 w-full bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500" style="background-size:200%;animation:shimmer 2s linear infinite" id="_progressGlowBar"></div>
 
-          <!-- Uiverse Loader 2: Andrew-manzyk Pegtop Falling Flowers -->
-          <div class="uiverse-flow-loader flex-shrink-0" title="Flower Flow">
-            <svg id="pegtopone" width="34" height="34" viewBox="0 0 100 100">
-              <g><path d="M50 0 C60 30 90 40 100 50 C90 60 60 70 50 100 C40 70 10 60 0 50 C10 40 40 30 50 0 Z" fill="#38bdf8"/></g>
-            </svg>
-            <svg id="pegtoptwo" width="34" height="34" viewBox="0 0 100 100">
-              <g><path d="M50 0 C60 30 90 40 100 50 C90 60 60 70 50 100 C40 70 10 60 0 50 C10 40 40 30 50 0 Z" fill="#818cf8"/></g>
-            </svg>
-            <svg id="pegtopthree" width="34" height="34" viewBox="0 0 100 100">
-              <g><path d="M50 0 C60 30 90 40 100 50 C90 60 60 70 50 100 C40 70 10 60 0 50 C10 40 40 30 50 0 Z" fill="#c084fc"/></g>
-            </svg>
-          </div>
-        </div>
+      <div class="p-6 flex flex-col items-center text-center space-y-5">
 
-        <!-- Status Message & Subtext -->
-        <div class="space-y-1">
-          <h4 id="uiverseProgressStep" class="text-sm sm:text-base font-extrabold text-white">กำลังบันทึกข้อมูล...</h4>
-          <p id="uiverseProgressSubtext" class="text-xs text-slate-400">กรุณารอสักครู่ ระบบกำลังจัดเก็บข้อมูลและส่งต่อไปยังคลาวด์</p>
-        </div>
-
-        <!-- Uiverse Loader 3: Rust_1966 Glowing Particle Progress Bar -->
-        <div class="w-full flex flex-col items-center gap-2">
-          <div class="uiverse-progress-container">
-            <div id="uiverseProgressBar" class="uiverse-progress-bar"></div>
-            <div class="uiverse-particles">
-              <span class="uiverse-particle"></span>
-              <span class="uiverse-particle"></span>
-              <span class="uiverse-particle"></span>
-              <span class="uiverse-particle"></span>
-              <span class="uiverse-particle"></span>
-            </div>
-            <span id="uiverseProgressPercent" class="uiverse-progress-text">0%</span>
-          </div>
-
-          <div class="w-full flex items-center justify-between text-[11px] text-slate-400 px-1">
-            <span id="uiverseProgressStatus">กำลังส่งข้อมูล...</span>
-            <span id="uiverseProgressBytes" class="font-mono text-sky-400"></span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- State 2: Success Animation View -->
-      <div id="uiverseProgressSuccessView" class="hidden w-full flex flex-col items-center space-y-4 py-3">
-        <div class="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 text-emerald-400 flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(16,185,129,0.5)] animate-bounce">
-          <i class="bi bi-check-lg"></i>
-        </div>
-        <div class="space-y-1">
-          <h4 id="uiverseSuccessTitle" class="text-base font-black text-white">ดำเนินการสำเร็จเรียบร้อย!</h4>
-          <p id="uiverseSuccessMsg" class="text-xs text-slate-300">ข้อมูลและเอฟเฟกต์โปรไฟล์ของคุณถูกอัปเดตแล้ว</p>
-        </div>
-        <button type="button" onclick="closeProgressModal()" class="px-6 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/30 transition">
-          ตกลง
-        </button>
-      </div>
-
-      <!-- State 3: Failure Animation View -->
-      <div id="uiverseProgressFailView" class="hidden w-full flex flex-col items-center space-y-4 py-3">
-        <div class="w-20 h-20 rounded-full bg-rose-500/20 border-2 border-rose-500 text-rose-400 flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(244,63,94,0.5)] animate-pulse">
-          <i class="bi bi-x-circle-fill"></i>
-        </div>
-        <div class="space-y-1">
-          <h4 id="uiverseFailTitle" class="text-base font-black text-white">การดำเนินการล้มเหลว</h4>
-          <p id="uiverseFailReason" class="text-xs text-rose-300 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20 font-mono break-all max-h-24 overflow-y-auto">เกิดข้อผิดพลาดในการเชื่อมต่อ</p>
-        </div>
-        <div class="flex gap-2 w-full justify-center">
-          <button type="button" onclick="closeProgressModal()" class="px-5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition">
-            ปิด
+        <!-- Header row -->
+        <div class="w-full flex items-center justify-between">
+          <span id="uiverseModalTitle" class="text-[11px] font-black uppercase tracking-widest text-sky-400 flex items-center gap-1.5">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+            <span>กำลังประมวลผล...</span>
+          </span>
+          <button type="button" id="btnCancelProgress" onclick="cancelCurrentProgress()" class="w-7 h-7 rounded-full bg-slate-800/80 hover:bg-rose-500/30 hover:text-rose-400 text-slate-500 flex items-center justify-center transition-all cursor-pointer" title="ยกเลิก">
+            <i class="bi bi-x-lg text-xs"></i>
           </button>
         </div>
-      </div>
 
+        <!-- === ACTIVE STATE === -->
+        <div id="uiverseProgressActiveView" class="w-full flex flex-col items-center space-y-4">
+
+          <!-- Big % display -->
+          <div class="relative flex items-center justify-center w-28 h-28">
+            <svg class="absolute inset-0" viewBox="0 0 120 120" fill="none" style="transform:rotate(-90deg)">
+              <circle cx="60" cy="60" r="52" stroke="#1e293b" stroke-width="10"/>
+              <circle id="_progressRing" cx="60" cy="60" r="52" stroke="url(#pgGrad)" stroke-width="10"
+                stroke-linecap="round"
+                stroke-dasharray="326.7"
+                stroke-dashoffset="326.7"
+                style="transition:stroke-dashoffset 0.3s ease"/>
+              <defs>
+                <linearGradient id="pgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#38bdf8"/>
+                  <stop offset="100%" stop-color="#818cf8"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="relative flex flex-col items-center leading-none">
+              <span id="uiverseProgressPercent" class="text-3xl font-black text-white tabular-nums">0%</span>
+              <span id="uiverseProgressStatus" class="text-[9px] text-slate-400 font-mono mt-0.5">รอส่ง</span>
+            </div>
+          </div>
+
+          <!-- Step text -->
+          <div class="space-y-1 w-full px-1">
+            <h4 id="uiverseProgressStep" class="text-sm font-extrabold text-white leading-snug">กำลังบันทึกข้อมูล...</h4>
+            <p id="uiverseProgressSubtext" class="text-[11px] text-slate-400">กรุณารอสักครู่</p>
+          </div>
+
+          <!-- Linear progress bar -->
+          <div class="w-full">
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div id="uiverseProgressBar" class="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-300 ease-out" style="width:0%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1 px-0.5">
+              <span>ถ่ายโอนข้อมูล...</span>
+              <span id="uiverseProgressBytes" class="font-mono text-sky-400"></span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- === SUCCESS STATE === -->
+        <div id="uiverseProgressSuccessView" class="hidden w-full flex flex-col items-center space-y-4 py-2">
+          <div class="w-20 h-20 rounded-full bg-emerald-500/15 border-2 border-emerald-400 text-emerald-400 flex items-center justify-center text-4xl"
+               style="box-shadow:0 0 32px rgba(16,185,129,0.4);animation:pulse 1.5s ease-in-out infinite">
+            <i class="bi bi-check-lg"></i>
+          </div>
+          <div class="space-y-1">
+            <h4 id="uiverseSuccessTitle" class="text-base font-black text-white">ดำเนินการสำเร็จ!</h4>
+            <p id="uiverseSuccessMsg" class="text-xs text-slate-300 leading-relaxed">ข้อมูลโปรไฟล์ถูกอัปเดตแล้ว</p>
+          </div>
+          <button type="button" onclick="closeProgressModal()" class="px-6 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/30 transition-all">ตกลง</button>
+        </div>
+
+        <!-- === FAIL STATE === -->
+        <div id="uiverseProgressFailView" class="hidden w-full flex flex-col items-center space-y-4 py-2">
+          <div class="w-20 h-20 rounded-full bg-rose-500/15 border-2 border-rose-500 text-rose-400 flex items-center justify-center text-4xl"
+               style="box-shadow:0 0 32px rgba(244,63,94,0.4);animation:pulse 1.5s ease-in-out infinite">
+            <i class="bi bi-x-circle-fill"></i>
+          </div>
+          <div class="space-y-1 w-full">
+            <h4 id="uiverseFailTitle" class="text-base font-black text-white">การดำเนินการล้มเหลว</h4>
+            <p id="uiverseFailReason" class="text-[11px] text-rose-300 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20 font-mono break-all max-h-24 overflow-y-auto text-left mt-1">เกิดข้อผิดพลาด</p>
+          </div>
+          <div class="flex gap-2 w-full justify-center">
+            <button type="button" onclick="closeProgressModal()" class="px-5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition">ปิด</button>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
