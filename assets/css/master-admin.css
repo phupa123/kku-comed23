@@ -79,6 +79,48 @@ html, body {
   opacity: 1;
 }
 
+/* Category Filter Pills */
+.filter-tab-btn {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+.filter-tab-btn.active {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(2, 132, 199, 0.35) 100%);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 4px 14px -2px rgba(14, 165, 233, 0.3);
+}
+
+/* Status Pulse Badge */
+.live-pulse-dot {
+  position: relative;
+  display: inline-flex;
+}
+.live-pulse-dot::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  opacity: 0.75;
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Keyboard Shortcut Chip */
+.kbd-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
 /* Glowing Cloud Mesh Background */
 .bg-mesh-dark {
   background-image:

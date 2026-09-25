@@ -193,6 +193,14 @@ function loadHubOverviewStats() {
   if (pPercentEl) pPercentEl.textContent = `${percent}%`;
   if (pProgressEl) pProgressEl.style.width = `${percent}%`;
 
+  // Top KPI Stat Elements
+  const kpiPaidCountEl = document.getElementById('kpiPaidCount');
+  const kpiPaidPercentEl = document.getElementById('kpiPaidPercent');
+  const kpiTotalMoneyEl = document.getElementById('kpiTotalMoney');
+  if (kpiPaidCountEl) kpiPaidCountEl.textContent = `${paidCount} / ${totalStudents}`;
+  if (kpiPaidPercentEl) kpiPaidPercentEl.textContent = `${percent}% ชำระแล้ว`;
+  if (kpiTotalMoneyEl) kpiTotalMoneyEl.textContent = `฿${totalMoney.toLocaleString()}`;
+
   // 2. Issue Desk Stats
   let issues = [];
   try {
@@ -203,9 +211,11 @@ function loadHubOverviewStats() {
   const pendingIssues = issues.filter(i => i.status !== 'แก้ไขแล้ว').length;
   const issueCountEl = document.getElementById('hubStatPendingIssues');
   const issueTotalEl = document.getElementById('hubStatTotalIssues');
+  const kpiIssuesEl = document.getElementById('kpiIssuesCount');
 
   if (issueCountEl) issueCountEl.textContent = `${pendingIssues} รายการ`;
   if (issueTotalEl) issueTotalEl.textContent = `(ทั้งหมด ${issues.length} เรื่อง)`;
+  if (kpiIssuesEl) kpiIssuesEl.textContent = `${pendingIssues}`;
 
   // 3. Admin Accounts
   const adminCountEl = document.getElementById('hubStatAdminCount');
@@ -223,6 +233,70 @@ function loadHubOverviewStats() {
 
   renderRecentLogs(logs.slice(0, 5));
 }
+
+// ================= SEARCH & CATEGORY FILTER CONTROLLER =================
+let activeHubCategory = 'all';
+
+function setHubCategory(category) {
+  activeHubCategory = category;
+  const tabs = ['all', 'finance', 'activity', 'cloud', 'web'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`tabCat${t.charAt(0).toUpperCase() + t.slice(1)}`);
+    if (btn) {
+      if (t === category) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+  });
+  filterHubModules();
+}
+
+function filterHubModules() {
+  const searchInput = document.getElementById('adminHubSearch');
+  const query = (searchInput?.value || '').trim().toLowerCase();
+  const cards = document.querySelectorAll('#hubModulesGrid > div[data-category]');
+  const emptyBox = document.getElementById('hubSearchEmpty');
+  let visibleCount = 0;
+
+  cards.forEach(card => {
+    const cat = card.getAttribute('data-category') || '';
+    const keywords = (card.getAttribute('data-keywords') || '').toLowerCase();
+    const textContent = card.textContent.toLowerCase();
+
+    const matchesCat = (activeHubCategory === 'all') || (cat === activeHubCategory);
+    const matchesSearch = !query || keywords.includes(query) || textContent.includes(query);
+
+    if (matchesCat && matchesSearch) {
+      card.classList.remove('hidden');
+      visibleCount++;
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+
+  if (emptyBox) {
+    if (visibleCount === 0) {
+      emptyBox.classList.remove('hidden');
+    } else {
+      emptyBox.classList.add('hidden');
+    }
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// Global Keyboard Shortcut: '/' focuses search input
+document.addEventListener('keydown', (e) => {
+  if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+    const searchInput = document.getElementById('adminHubSearch');
+    if (searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  }
+});
 
 function renderRecentLogs(logs) {
   const container = document.getElementById('hubRecentLogsContainer');

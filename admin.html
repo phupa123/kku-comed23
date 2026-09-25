@@ -267,41 +267,484 @@
     <!-- Main Command Hub Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
       
-      <!-- Welcome Hero Banner (Cloud Command Center) -->
+      <!-- 1. HERO BANNER & QUICK STATS BAR -->
       <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-sky-900/40 relative overflow-hidden">
         <!-- Floating Cloud Orbs -->
         <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-sky-500/15 rounded-full blur-3xl pointer-events-none cloud-drift-1"></div>
         <div class="absolute top-0 right-1/3 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl pointer-events-none cloud-drift-2"></div>
         
-        <div class="max-w-2xl space-y-2 relative z-10">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-sky-400/30 text-sky-300 text-xs font-bold shadow-md">
-            <i data-lucide="cloud-lightning" class="w-3.5 h-3.5 text-sky-400"></i>
-            <span>COMED Cloud Command & Orchestration Hub</span>
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div class="max-w-2xl space-y-2">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-sky-400/30 text-sky-300 text-xs font-bold shadow-md">
+              <i data-lucide="cloud-lightning" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>COMED Central Admin Command Center</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">แผงควบคุมระบบศูนย์กลาง</h2>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              จัดการทุกระบบย่อยได้ในที่เดียว: ตรวจสอบการเงิน ฿190, จัดการฝ่ายกิจกรรมนักศึกษา, คลาวด์ไดรฟ์ 5GB, ย่อลิงก์ด่วน และตั้งค่าความปลอดภัย
+            </p>
           </div>
-          <h2 class="text-2xl sm:text-3xl font-black text-white">แผงควบคุมและสั่งการระบบศูนย์กลาง</h2>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            บริหารจัดการระบบรับชำระเงิน, ฝ่ายกิจกรรมนักศึกษา, Cloud Drive 5GB, และระบบความปลอดภัยทั้งหมดได้จากที่นี่โดยตรง
-          </p>
+
+          <!-- Quick Stat KPI Pills -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ชำระเงินแล้ว</span>
+              <span id="kpiPaidCount" class="text-lg font-black text-emerald-400 font-mono mt-0.5">-- / 60</span>
+              <span id="kpiPaidPercent" class="text-[10px] text-emerald-500 font-bold">0%</span>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ยอดเงินรวม</span>
+              <span id="kpiTotalMoney" class="text-lg font-black text-amber-400 font-mono mt-0.5">฿0</span>
+              <span class="text-[10px] text-slate-500 font-normal">เป้าหมาย ฿11,400</span>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">เรื่องแจ้งปัญหา</span>
+              <span id="kpiIssuesCount" class="text-lg font-black text-rose-400 font-mono mt-0.5">0</span>
+              <span class="text-[10px] text-slate-500 font-normal">รอดำเนินการ</span>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center justify-center text-center">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">สถานะระบบ</span>
+              <span class="text-lg font-black text-emerald-400 flex items-center justify-center gap-1.5 mt-0.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">Cloud Live Sync</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      
-      <!-- ================= LIVE WEBSITE STATUS & DIRECT TOGGLE CONTROLLER (CLOUD PULSE) ================= -->
-      <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-sky-900/30 space-y-6 relative overflow-hidden">
-        <!-- Floating Subtle Cloud Glow in Status Box -->
-        <div class="absolute -top-10 -right-10 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none cloud-drift-1"></div>
+      <!-- 2. QUICK SEARCH & CATEGORY FILTER TABS (หาง่าย เป็นระเบียบ) -->
+      <div class="hub-glass p-4 rounded-2xl border border-slate-800/90 flex flex-col md:flex-row items-center justify-between gap-4">
+        <!-- Search Input -->
+        <div class="relative w-full md:w-80">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+          <input type="text" id="adminHubSearch" oninput="filterHubModules()" placeholder="ค้นหาระบบ เช่น สลิป, ไดรฟ์, ฝ่าย, ลิงก์..."
+            class="w-full pl-10 pr-12 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-sky-500 transition font-sans">
+          <span class="absolute right-3 top-2.5 text-[10px] text-slate-500 font-mono kbd-chip hidden sm:inline-block">/</span>
+        </div>
 
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4 relative z-10">
+        <!-- Filter Category Tabs -->
+        <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 custom-scrollbar">
+          <button type="button" onclick="setHubCategory('all')" id="tabCatAll" class="filter-tab-btn active px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+            <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+            <span>ทั้งหมด (8)</span>
+          </button>
+          <button type="button" onclick="setHubCategory('finance')" id="tabCatFinance" class="filter-tab-btn px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+            <i data-lucide="credit-card" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>การเงิน & สลิป</span>
+          </button>
+          <button type="button" onclick="setHubCategory('activity')" id="tabCatActivity" class="filter-tab-btn px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+            <i data-lucide="award" class="w-3.5 h-3.5 text-purple-400"></i>
+            <span>กิจกรรม & ฝ่าย</span>
+          </button>
+          <button type="button" onclick="setHubCategory('cloud')" id="tabCatCloud" class="filter-tab-btn px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+            <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>คลาวด์ไดรฟ์ & ไฟล์</span>
+          </button>
+          <button type="button" onclick="setHubCategory('web')" id="tabCatWeb" class="filter-tab-btn px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+            <i data-lucide="globe" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>หน้าเว็บ & ลิงก์</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. ALL ADMIN SYSTEM CARDS (จัดหมวดหมู่ ชัดเจน สวยงาม หาง่าย) -->
+      <div id="hubModulesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        
+        <!-- CARD 1: Payment Admin Console -->
+        <div class="hub-glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group border-orange-500/30"
+          data-category="finance" data-keywords="การเงิน สลิป โอนเงิน บัญชี ตรวจสอบ ยอดเงิน excel payment slip">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/25 group-hover:scale-110 transition">
+                <i data-lucide="receipt" class="w-6 h-6"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                การเงิน & สลิป
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h3 class="text-base font-black text-white group-hover:text-orange-400 transition">ระบบแอดมินการเงิน & สลิป</h3>
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                ตรวจสอบหลักฐานสลิป ฿190, อนุมัติยอด, ส่งออก Excel และสรุปการชำระเงิน
+              </p>
+            </div>
+
+            <!-- Mini Live Stat -->
+            <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1.5 text-xs">
+              <div class="flex justify-between items-center text-slate-400 text-[11px]">
+                <span>ยอดชำระแล้ว:</span>
+                <span id="hubStatPaidCount" class="font-mono font-bold text-emerald-400">กำลังโหลด...</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                <div id="hubStatProgress" class="h-full bg-gradient-to-r from-orange-500 to-emerald-500 rounded-full transition-all duration-500" style="width: 0%;"></div>
+              </div>
+              <div class="flex justify-between text-[10px] text-slate-400">
+                <span>ยอดเงิน: <strong id="hubStatTotalMoney" class="text-white">฿0</strong></span>
+                <span id="hubStatPercent" class="font-bold text-orange-400">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <a href="payment-admin.html"
+              class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-600/25 transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+              <span>แอดมินการเงิน</span>
+            </a>
+            <a href="payment.html" target="_blank"
+              class="py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>หน้าชำระเงิน</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- CARD 2: Help Desk & Issue Resolution Desk -->
+        <div class="hub-glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group border-amber-500/30"
+          data-category="finance" data-keywords="แจ้งปัญหา ปัญหา สลิปไม่ขึ้น ช่วยเหลือ helpdesk issue ticket">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:scale-110 transition">
+                <i data-lucide="life-buoy" class="w-6 h-6"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                Help Desk
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h3 class="text-base font-black text-white group-hover:text-amber-400 transition">ศูนย์รับเรื่องแจ้งปัญหา</h3>
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                ตรวจสอบและตอบกลับเรื่องร้องเรียน เช่น สลิปไม่ตรง, โอนผิดบัญชี, อัปโหลดไม่ผ่าน
+              </p>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>รอดำเนินการ:</span>
+                <span id="hubStatPendingIssues" class="font-bold text-amber-400">0 รายการ</span>
+              </div>
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>เรื่องทั้งหมด:</span>
+                <span id="hubStatTotalIssues" class="font-mono text-slate-300">0 เรื่อง</span>
+              </div>
+            </div>
+          </div>
+
+          <a href="payment-admin.html?tab=issues"
+            class="w-full py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md shadow-amber-600/25 transition flex items-center justify-center gap-1.5 active:scale-95">
+            <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+            <span>จัดการเรื่องแจ้งปัญหา</span>
+          </a>
+        </div>
+
+        <!-- CARD 3: Event & Committee Management -->
+        <div class="hub-glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group border-purple-500/30"
+          data-category="activity" data-keywords="ฝ่าย กิจกรรม กรรมการ เลือกฝ่าย บริหาร วิชาการ นันทนาการ สวัสดิการ event committee">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/25 group-hover:scale-110 transition">
+                <i data-lucide="award" class="w-6 h-6"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">
+                กิจกรรม & ฝ่าย
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h3 class="text-base font-black text-white group-hover:text-purple-400 transition">ระบบเลือกฝ่ายห้อง & กรรมการ</h3>
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                จัดการฝ่ายบริหาร 5 ตำแหน่ง, ฝ่ายกิจกรรม, นันทนาการ, สวัสดิการ พร้อม Export Excel
+              </p>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>โควตานักศึกษา:</span>
+                <span class="font-bold text-emerald-400">60 คน (ครบทั้งรุ่น)</span>
+              </div>
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>รูปแบบ:</span>
+                <span class="text-slate-300">เลือกลำดับ & ตำแหน่ง</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <a href="event-admin.html"
+              class="py-2.5 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+              <span>จัดการฝ่าย</span>
+            </a>
+            <a href="event.html" target="_blank"
+              class="py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-purple-400"></i>
+              <span>หน้าเลือกฝ่าย</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- CARD 4: EventClass (ซุ้มพี่บัณฑิต & วันเด็ก) -->
+        <div class="hub-glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group border-amber-500/30"
+          data-category="activity" data-keywords="กิจกรรม ซุ้ม บัณฑิต วันเด็ก ห้อง eventclass graduation children day">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-600 text-white flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:scale-110 transition">
+                <i data-lucide="sparkles" class="w-6 h-6"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                2 กิจกรรมใหญ่
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h3 class="text-base font-black text-white group-hover:text-amber-400 transition">กิจกรรมซุ้มบัณฑิต & วันเด็ก</h3>
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                ลงชื่อเลือก 2 กิจกรรมใหญ่ (ซุ้มพี่บัณฑิต 20 ธ.ค. / งานวันเด็ก 9 ม.ค. 70) โควตา 30+ คน
+              </p>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>กิจกรรม 1:</span>
+                <span class="text-white font-medium">ซุ้มพี่บัณฑิต (20 ธ.ค.)</span>
+              </div>
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>กิจกรรม 2:</span>
+                <span class="text-white font-medium">งานวันเด็ก (9 ม.ค. 70)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <a href="eventclass-admin.html"
+              class="py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+              <span>จัดการกิจกรรม</span>
+            </a>
+            <a href="eventclass.html" target="_blank"
+              class="py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>หน้ากิจกรรม</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- CARD 5: COMED Cloud Drive & Storage Infrastructure Manager -->
+        <div class="hub-glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group border-sky-500/30"
+          data-category="cloud" data-keywords="ไดรฟ์ คลาวด์ พื้นที่ 5gb ไฟล์ โฟลเดอร์ cloud drive storage file folder">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-400 via-blue-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-sky-500/25 group-hover:scale-110 transition border border-sky-400/30">
+                <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
+                <span>Drive 5GB</span>
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h3 class="text-base font-black text-white group-hover:text-sky-400 transition">คลาวด์ไดรฟ์ & จัดเก็บไฟล์</h3>
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                คลาวด์ไดรฟ์ส่วนตัวนักศึกษา 5GB/คน, โฟลเดอร์งาน, ตรวจสอบไฟล์สาธารณะ และตั้งรหัสผ่าน
+              </p>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>ความจุต่อคน:</span>
+                <span class="font-mono text-sky-400 font-bold">5 GB Personal Cloud</span>
+              </div>
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>การแชร์:</span>
+                <span class="text-emerald-400">ลิงก์ตรง + รหัสผ่านล็อค</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <a href="storage-admin.html"
+              class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-sky-600/25 transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
+              <span>ตรวจสอบไฟล์</span>
+            </a>
+            <a href="storage.html" target="_blank"
+              class="py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>หน้าไดรฟ์</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- CARD 6: Multi-Cloud Upload & Storage APIs -->
+        <div class="hub-glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group border-teal-500/30"
+          data-category="cloud" data-keywords="อัปโหลด ไฟล์ รูปภาพ cloudinary imgbb catbox api upload multi-cloud">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-400 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-teal-500/25 group-hover:scale-110 transition">
+                <i data-lucide="cloud-upload" class="w-6 h-6"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-500/10 text-teal-400 border border-teal-500/30">
+                Multi-Cloud API
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h3 class="text-base font-black text-white group-hover:text-teal-400 transition">ระบบอัปโหลด & API คลาวด์</h3>
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                ตั้งค่า Multi-Cloud API (Cloudinary, ImgBB, Catbox) พร้อมระบบ Auto-Failover อัตโนมัติ
+              </p>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>Cloud Provider:</span>
+                <span class="text-white font-mono">Cloudinary, Catbox</span>
+              </div>
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>ระบบสำรอง:</span>
+                <span class="text-emerald-400">Auto Failover 3 ชั้น</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <a href="upload-admin.html"
+              class="py-2.5 px-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+              <span>ตั้งค่า API</span>
+            </a>
+            <a href="upload.html" target="_blank"
+              class="py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-teal-400"></i>
+              <span>หน้าอัปโหลด</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- CARD 7: Shortlink & QR Code Manager -->
+        <div class="hub-glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group border-amber-500/30"
+          data-category="web" data-keywords="ย่อลิงก์ qr code คิวอาร์ ลิงก์ สถิติ คลิก shortlink url qr generator">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-lg shadow-orange-500/25 group-hover:scale-110 transition">
+                <i data-lucide="link-2" class="w-6 h-6"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                ย่อลิงก์ & QR
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h3 class="text-base font-black text-white group-hover:text-amber-400 transition">ระบบย่อลิงก์ & QR Code</h3>
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                สร้างลิงก์ย่อ (/s/...) พร้อมระบบสถิติจำนวนคนคลิก และดาวน์โหลด QR Code คมชัดสูง
+              </p>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>รูปแบบย่อ:</span>
+                <span class="font-mono text-amber-400 font-bold">/s/[ชื่อลิงก์]</span>
+              </div>
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>สถิติคลิก:</span>
+                <span class="text-emerald-400">บันทึกแบบ Real-Time</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <a href="shortlink-admin.html"
+              class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+              <span>จัดการลิงก์</span>
+            </a>
+            <a href="shortlink.html" target="_blank"
+              class="py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>หน้าสร้างลิงก์</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- CARD 8: Index Page & Students Portal Management -->
+        <div class="hub-glass-card rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group border-sky-500/30"
+          data-category="web" data-keywords="หน้าแรก ทำเนียบรุ่น 60 คน นักศึกษา index แบนเนอร์ ข้อมูลสาขา portal student">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/25 group-hover:scale-110 transition">
+                <i data-lucide="globe" class="w-6 h-6"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30">
+                Landing & Portal
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h3 class="text-base font-black text-white group-hover:text-sky-400 transition">หน้าหลัก & ทำเนียบรุ่น 60 คน</h3>
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                จัดการแบนเนอร์, ข้อมูลสาขาวิชา, ทำเนียบรุ่นนักศึกษา 60 คน และลิงก์สำคัญของระบบ
+              </p>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>นักศึกษาในระบบ:</span>
+                <span class="font-mono text-white font-bold">60 คน (ครบทุกสาย)</span>
+              </div>
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>สถานะ:</span>
+                <span class="text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> พร้อมใช้งานสาธารณะ
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <a href="index-admin.html"
+              class="py-2.5 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>จัดการหน้าหลัก</span>
+            </a>
+            <a href="index.html" target="_blank"
+              class="py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>ดูหน้าเว็บ</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- No Search Results Found Message -->
+      <div id="hubSearchEmpty" class="hidden hub-glass p-8 rounded-3xl text-center space-y-3 border border-slate-800">
+        <i data-lucide="search-x" class="w-10 h-10 text-slate-500 mx-auto"></i>
+        <h4 class="text-base font-bold text-white">ไม่พบระบบที่ตรงกับคำค้นหา</h4>
+        <p class="text-xs text-slate-400">ลองค้นหาด้วยคำอื่น เช่น "สลิป", "ฝ่าย", "ไดรฟ์", "ลิงก์" หรือกดดู "ทั้งหมด"</p>
+        <button type="button" onclick="setHubCategory('all'); document.getElementById('adminHubSearch').value = ''; filterHubModules();"
+          class="px-4 py-2 rounded-xl bg-sky-500/20 text-sky-300 text-xs font-bold border border-sky-500/30 hover:bg-sky-500/30 transition cursor-pointer">
+          ล้างการค้นหา
+        </button>
+      </div>
+
+
+      <!-- 4. LIVE PAGE STATUS & DIRECT TOGGLE CONTROLLER (จัดระเบียบแบบกระชับ ดูแลง่าย) -->
+      <div class="hub-glass p-6 sm:p-7 rounded-3xl border border-sky-900/30 space-y-5 relative overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center font-bold shadow-md shadow-sky-500/10">
               <i data-lucide="radio" class="w-5 h-5 animate-pulse"></i>
             </div>
             <div>
-              <h3 class="text-lg font-black text-white flex items-center gap-2">
-                <span>สถานะหน้าเว็บไซต์ที่กำลังออนไลน์ (Live Page Status)</span>
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                <span>สวิตช์ควบคุมสถานะหน้าเว็บ (Live Site Controller)</span>
               </h3>
-              <p class="text-xs text-slate-400">ตรวจสอบและสั่งเปิด หรือ ปิดปรับปรุงแต่ละหน้าได้ทันทีจากที่นี่ (Cloud Sync)</p>
+              <p class="text-xs text-slate-400">สั่งเปิดใช้งาน หรือ สั่งปิดปรับปรุงเฉพาะหน้าได้ทันที มีผลแบบ Real-Time ทั่วทั้งระบบ</p>
             </div>
           </div>
 
@@ -317,283 +760,154 @@
           </div>
         </div>
 
-        <!-- Pages Matrix Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Clean Compact Status Matrix Table/Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           
-          <!-- PAGE 1: Index.html -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
-                  <i data-lucide="home" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white">หน้าหลัก (index.html)</h4>
-                  <span class="text-[11px] text-slate-500 font-mono">/index.html</span>
-                </div>
+          <!-- 1. index.html -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+                <i data-lucide="home" class="w-4 h-4"></i>
               </div>
-              <span id="pageBadgeIndex" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
-              </span>
+              <div>
+                <span class="text-xs font-bold text-white block">หน้าหลัก</span>
+                <span id="pageBadgeIndex" class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                </span>
+              </div>
             </div>
-
-            <p class="text-xs text-slate-400 leading-relaxed">
-              หน้าแรก แนะนำสาขาวิชา หลักสูตร และทำเนียบรุ่นนักศึกษา 60 คน
-            </p>
-
-            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-              <a href="index-admin.html" class="text-xs text-sky-400 hover:underline font-bold flex items-center gap-1">
-                <i data-lucide="settings-2" class="w-3.5 h-3.5"></i> จัดการเนื้อหา
-              </a>
-              <button id="btnToggleIndex" onclick="toggleSinglePageLive('index')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
-                สั่งปิดปรับปรุงหน้านี้
-              </button>
-            </div>
+            <button id="btnToggleIndex" onclick="toggleSinglePageLive('index')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer">
+              ปิดปรับปรุง
+            </button>
           </div>
 
-          <!-- PAGE 2: Payment.html -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
-                  <i data-lucide="credit-card" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white">ระบบชำระเงิน (payment.html)</h4>
-                  <span class="text-[11px] text-slate-500 font-mono">/payment.html</span>
-                </div>
+          <!-- 2. payment.html -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+                <i data-lucide="credit-card" class="w-4 h-4"></i>
               </div>
-              <span id="pageBadgePayment" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
-              </span>
+              <div>
+                <span class="text-xs font-bold text-white block">ระบบชำระเงิน</span>
+                <span id="pageBadgePayment" class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                </span>
+              </div>
             </div>
-
-            <p class="text-xs text-slate-400 leading-relaxed">
-              ระบบรับชำระเงินค่ากิจกรรม แนบสลิป และตรวจสอบประวัติการโอน
-            </p>
-
-            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-              <a href="payment-admin.html" class="text-xs text-orange-400 hover:underline font-bold flex items-center gap-1">
-                <i data-lucide="sliders" class="w-3.5 h-3.5"></i> ตรวจสอบสลิป
-              </a>
-              <button id="btnTogglePayment" onclick="toggleSinglePageLive('payment')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
-                สั่งปิดปรับปรุงหน้านี้
-              </button>
-            </div>
+            <button id="btnTogglePayment" onclick="toggleSinglePageLive('payment')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer">
+              ปิดปรับปรุง
+            </button>
           </div>
 
-          <!-- PAGE 3: Event.html -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
-                  <i data-lucide="award" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white">เลือกฝ่าย (event.html)</h4>
-                  <span class="text-[11px] text-slate-500 font-mono">/event.html</span>
-                </div>
+          <!-- 3. event.html -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                <i data-lucide="award" class="w-4 h-4"></i>
               </div>
-              <span id="pageBadgeEvent" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
-              </span>
-            </div>
-
-            <p class="text-xs text-slate-400 leading-relaxed">
-              ระบบเลือกฝ่ายบริหารและกรรมการดำเนินงาน 60 คน
-            </p>
-
-              <div class="flex items-center gap-2">
-                <a href="event.html" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
-                  <i data-lucide="external-link" class="w-3 h-3"></i> หน้าเว็บ
-                </a>
-                <a href="event-admin.html" class="text-xs text-purple-400 hover:underline font-bold flex items-center gap-1">
-                  <i data-lucide="sliders" class="w-3.5 h-3.5"></i> จัดการฝ่าย
-                </a>
+              <div>
+                <span class="text-xs font-bold text-white block">เลือกฝ่ายห้อง</span>
+                <span id="pageBadgeEvent" class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                </span>
               </div>
-              <button id="btnToggleEvent" onclick="toggleSinglePageLive('event')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
-                สั่งปิดปรับปรุง
-              </button>
             </div>
+            <button id="btnToggleEvent" onclick="toggleSinglePageLive('event')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer">
+              ปิดปรับปรุง
+            </button>
           </div>
 
-          <!-- PAGE 3.5: EventClass.html -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                  <i data-lucide="sparkles" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white">กิจกรรมห้อง (eventclass.html)</h4>
-                  <span class="text-[11px] text-slate-500 font-mono">/eventclass.html</span>
-                </div>
+          <!-- 4. eventclass.html -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
               </div>
-              <span id="pageBadgeEventclass" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
-              </span>
-            </div>
-
-            <p class="text-xs text-slate-400 leading-relaxed">
-              กิจกรรมซุ้มพี่บัณฑิต (20 ธ.ค.) & งานวันเด็ก (9 ม.ค. 70) 2 ตัวเลือกใหญ่ โควตา 30+ คน
-            </p>
-
-            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-              <div class="flex items-center gap-2">
-                <a href="eventclass.html" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
-                  <i data-lucide="external-link" class="w-3 h-3"></i> หน้าเว็บ
-                </a>
-                <a href="eventclass-admin.html" class="text-xs text-purple-400 hover:underline font-bold flex items-center gap-1">
-                  <i data-lucide="sliders" class="w-3.5 h-3.5"></i> จัดการหลังบ้าน
-                </a>
+              <div>
+                <span class="text-xs font-bold text-white block">ซุ้มบัณฑิต/วันเด็ก</span>
+                <span id="pageBadgeEventclass" class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                </span>
               </div>
-              <button id="btnToggleEventclass" onclick="toggleSinglePageLive('eventclass')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
-                สั่งปิดปรับปรุง
-              </button>
             </div>
+            <button id="btnToggleEventclass" onclick="toggleSinglePageLive('eventclass')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer">
+              ปิดปรับปรุง
+            </button>
           </div>
 
-          <!-- PAGE 4: Entire Public Site (Global All) -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                  <i data-lucide="globe-2" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white">ทั้งเว็บไซต์ (Global Lock)</h4>
-                  <span class="text-[11px] text-slate-500 font-mono">ทุกหน้าสาธารณะ</span>
-                </div>
+          <!-- 5. shortlink.html -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <i data-lucide="link-2" class="w-4 h-4"></i>
               </div>
-              <span id="pageBadgeAll" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
-              </span>
+              <div>
+                <span class="text-xs font-bold text-white block">ระบบย่อลิงก์</span>
+                <span id="pageBadgeShortlink" class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                </span>
+              </div>
             </div>
-
-            <p class="text-xs text-slate-400 leading-relaxed">
-              สวิตช์หลักสำหรับปิดปรับปรุงทั้งระบบพร้อมกันทุกหน้าในคลิกเดียว
-            </p>
-
-            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-              <button onclick="openMaintenanceModal()" class="text-xs text-amber-400 hover:underline font-bold flex items-center gap-1 cursor-pointer">
-                <i data-lucide="timer" class="w-3.5 h-3.5"></i> ตั้งเวลานับถอยหลัง
-              </button>
-              <button id="btnToggleAll" onclick="toggleSinglePageLive('all')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
-                สั่งปิดทั้งเว็บ
-              </button>
-            </div>
+            <button id="btnToggleShortlink" onclick="toggleSinglePageLive('shortlink')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer">
+              ปิดปรับปรุง
+            </button>
           </div>
 
-          <!-- PAGE 5: Shortlink (shortlink.html) -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                  <i data-lucide="link-2" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white">ย่อลิงก์ (shortlink.html)</h4>
-                  <span class="text-[11px] text-slate-500 font-mono">/shortlink.html, /s/*</span>
-                </div>
+          <!-- 6. upload.html -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center">
+                <i data-lucide="cloud-upload" class="w-4 h-4"></i>
               </div>
-              <span id="pageBadgeShortlink" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
-              </span>
-            </div>
-
-            <p class="text-xs text-slate-400 leading-relaxed">
-              ระบบย่อลิงก์ด่วน สร้าง QR Code อัตโนมัติ และสถิติการคลิกของสาขาวิชา
-            </p>
-
-            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-              <div class="flex items-center gap-2">
-                <a href="shortlink.html" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
-                  <i data-lucide="external-link" class="w-3 h-3"></i> หน้าเว็บ
-                </a>
-                <a href="shortlink-admin.html" class="text-xs text-amber-400 hover:underline font-bold flex items-center gap-1">
-                  <i data-lucide="sliders" class="w-3.5 h-3.5"></i> จัดการหลังบ้าน
-                </a>
+              <div>
+                <span class="text-xs font-bold text-white block">อัปโหลดไฟล์</span>
+                <span id="pageBadgeUpload" class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                </span>
               </div>
-              <button id="btnToggleShortlink" onclick="toggleSinglePageLive('shortlink')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
-                สั่งปิดปรับปรุง
-              </button>
             </div>
+            <button id="btnToggleUpload" onclick="toggleSinglePageLive('upload')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer">
+              ปิดปรับปรุง
+            </button>
           </div>
 
-          <!-- PAGE 6: Upload (upload.html) -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center">
-                  <i data-lucide="cloud-upload" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white">อัปโหลดไฟล์ (upload.html)</h4>
-                  <span class="text-[11px] text-slate-500 font-mono">/upload.html</span>
-                </div>
+          <!-- 7. storage.html -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+                <i data-lucide="hard-drive" class="w-4 h-4"></i>
               </div>
-              <span id="pageBadgeUpload" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
-              </span>
-            </div>
-
-            <p class="text-xs text-slate-400 leading-relaxed">
-              บริการอัปโหลด Multi-Cloud (Cloudinary, ImgBB, Catbox) โควตา 5GB ต่อคน
-            </p>
-
-            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-              <div class="flex items-center gap-2">
-                <a href="upload.html" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
-                  <i data-lucide="external-link" class="w-3 h-3"></i> หน้าเว็บ
-                </a>
-                <button type="button" onclick="window.QRSuite.openPageQrModal({ title: 'หน้าอัปโหลดไฟล์ (upload.html)', userUrl: `${window.location.origin}/upload.html`, adminUrl: `${window.location.origin}/upload-admin.html`, subtitle: 'สแกนเพื่อเปิดหน้าระบบอัปโหลดไฟล์' })" class="text-xs text-orange-400 hover:underline font-bold flex items-center gap-1 cursor-pointer" title="เปิด QR ให้เพื่อนสแกน">
-                  <i data-lucide="qr-code" class="w-3 h-3"></i> QR
-                </button>
-                <a href="upload-admin.html" class="text-xs text-teal-400 hover:underline font-bold flex items-center gap-1">
-                  <i data-lucide="sliders" class="w-3.5 h-3.5"></i> ตั้งค่า API
-                </a>
+              <div>
+                <span class="text-xs font-bold text-white block">คลาวด์ไดรฟ์</span>
+                <span id="pageBadgeStorage" class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                </span>
               </div>
-              <button id="btnToggleUpload" onclick="toggleSinglePageLive('upload')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
-                สั่งปิดปรับปรุง
-              </button>
             </div>
+            <button id="btnToggleStorage" onclick="toggleSinglePageLive('storage')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer">
+              ปิดปรับปรุง
+            </button>
           </div>
 
-          <!-- PAGE 7: Storage Drive (storage.html) -->
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                  <i data-lucide="hard-drive" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white">ไดรฟ์และโฟลเดอร์ (storage.html)</h4>
-                  <span class="text-[11px] text-slate-500 font-mono">/storage.html</span>
-                </div>
+          <!-- 8. Global All Switch -->
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
+                <i data-lucide="globe-2" class="w-4 h-4"></i>
               </div>
-              <span id="pageBadgeStorage" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
-              </span>
+              <div>
+                <span class="text-xs font-bold text-white block">ทั้งเว็บไซต์ (Global)</span>
+                <span id="pageBadgeAll" class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                </span>
+              </div>
             </div>
-
-            <p class="text-xs text-slate-400 leading-relaxed">
-              ระบบโฟลเดอร์ คลาวด์ไดรฟ์ส่วนตัว แชร์ลิงก์ภายนอก/ภายใน และตั้งรหัสผ่านล็อคไฟล์
-            </p>
-
-            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-              <div class="flex items-center gap-2">
-                <a href="storage.html" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
-                  <i data-lucide="external-link" class="w-3 h-3"></i> หน้าไดรฟ์
-                </a>
-                <button type="button" onclick="window.QRSuite.openPageQrModal({ title: 'หน้าคลังไดรฟ์ (storage.html)', userUrl: `${window.location.origin}/storage.html`, adminUrl: `${window.location.origin}/storage-admin.html`, subtitle: 'สแกนเพื่อเปิดคลังไดรฟ์ส่วนตัวและโฟลเดอร์' })" class="text-xs text-orange-400 hover:underline font-bold flex items-center gap-1 cursor-pointer" title="เปิด QR ให้เพื่อนสแกน">
-                  <i data-lucide="qr-code" class="w-3 h-3"></i> QR
-                </button>
-                <a href="storage-admin.html" class="text-xs text-amber-400 hover:underline font-bold flex items-center gap-1">
-                  <i data-lucide="sliders" class="w-3.5 h-3.5"></i> ตรวจสอบไฟล์
-                </a>
-              </div>
-              <button id="btnToggleStorage" onclick="toggleSinglePageLive('storage')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
-                สั่งปิดปรับปรุง
+            <div class="flex items-center gap-1">
+              <button onclick="openMaintenanceModal()" title="ตั้งเวลานับถอยหลัง" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 transition cursor-pointer">
+                <i data-lucide="timer" class="w-3.5 h-3.5"></i>
+              </button>
+              <button id="btnToggleAll" onclick="toggleSinglePageLive('all')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer">
+                ปิดทั้งเว็บ
               </button>
             </div>
           </div>
@@ -601,285 +915,7 @@
         </div>
       </div>
 
-
-      <!-- Core Admin Portals Navigation Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
-        <!-- MODULE 1: Index Page Management -->
-        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/20 group-hover:scale-110 transition">
-                <i data-lucide="globe" class="w-7 h-7"></i>
-              </div>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30">
-                Landing & Portal
-              </span>
-            </div>
-
-            <div class="space-y-1.5">
-              <h3 class="text-lg font-black text-white group-hover:text-sky-400 transition">หน้าหลัก (Index Portal)</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">
-                จัดการแบนเนอร์, ข้อมูลแนะนำสาขาวิชา, หลักสูตร, ทำเนียบรุ่นนักศึกษา 60 คน และลิงก์สำคัญ
-              </p>
-            </div>
-
-            <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5 text-xs">
-              <div class="flex justify-between text-slate-400">
-                <span>นักศึกษาในระบบ:</span>
-                <span class="font-mono font-bold text-white">60 คน (ครบทุกสาย)</span>
-              </div>
-              <div class="flex justify-between text-slate-400">
-                <span>สถานะหน้าเว็บ:</span>
-                <span class="font-bold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> พร้อมใช้งานสาธารณะ
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <a href="index-admin.html"
-              class="py-3 px-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md shadow-sky-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
-              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              <span>จัดการหน้าหลัก</span>
-            </a>
-            <a href="index.html" target="_blank"
-              class="py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
-              <span>ดูหน้าเว็บ</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- MODULE 2: Payment Admin Console -->
-        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group border-orange-500/30">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-110 transition">
-                <i data-lucide="receipt" class="w-7 h-7"></i>
-              </div>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30">
-                Payment Master
-              </span>
-            </div>
-
-            <div class="space-y-1.5">
-              <h3 class="text-lg font-black text-white group-hover:text-orange-400 transition">ระบบแอดมินการเงิน & สลิป</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">
-                ตรวจสอบหลักฐานสลิป ฿190, ยืนยันยอดชำระ, ย้ายไปถังขยะ, และส่งออกไฟล์ Excel แท้ (.xlsx)
-              </p>
-            </div>
-
-            <!-- Real-time Mini Stats -->
-            <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-2 text-xs">
-              <div class="flex justify-between items-center">
-                <span class="text-slate-400">ยอดชำระแล้ว:</span>
-                <span id="hubStatPaidCount" class="font-mono font-bold text-emerald-400">กำลังดึงข้อมูล...</span>
-              </div>
-              <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                <div id="hubStatProgress" class="h-full bg-gradient-to-r from-orange-500 to-emerald-500 rounded-full transition-all duration-500" style="width: 0%;"></div>
-              </div>
-              <div class="flex justify-between text-[11px] text-slate-400">
-                <span>ยอดเงินรวม: <strong id="hubStatTotalMoney" class="text-white">฿0.00</strong></span>
-                <span id="hubStatPercent" class="font-bold text-orange-400">0%</span>
-              </div>
-            </div>
-          </div>
-
-          <a href="payment-admin.html"
-            class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-            <i data-lucide="sliders" class="w-4 h-4"></i>
-            <span>เข้าสู่ระบบแอดมินการเงิน</span>
-          </a>
-        </div>
-
-        <!-- MODULE 3: Help Desk & Issue Resolution Desk -->
-        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-110 transition">
-                <i data-lucide="life-buoy" class="w-7 h-7"></i>
-              </div>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                Help Desk
-              </span>
-            </div>
-
-            <div class="space-y-1.5">
-              <h3 class="text-lg font-black text-white group-hover:text-amber-400 transition">ศูนย์รับเรื่องแจ้งปัญหา</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">
-                รายการแจ้งปัญหาจากนักศึกษา เช่น ข้อมูลผิดพลาด, โอนเงินแล้วไม่ขึ้น, หรือต้องการตรวจสอบใหม่
-              </p>
-            </div>
-
-            <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5 text-xs">
-              <div class="flex justify-between text-slate-400">
-                <span>รอดำเนินการ:</span>
-                <span id="hubStatPendingIssues" class="font-bold text-amber-400">0 รายการ</span>
-              </div>
-              <div class="flex justify-between text-slate-400">
-                <span>เรื่องทั้งหมด:</span>
-                <span id="hubStatTotalIssues" class="font-mono text-slate-300">(ทั้งหมด 0 เรื่อง)</span>
-              </div>
-            </div>
-          </div>
-
-          <a href="payment-admin.html?tab=issues"
-            class="w-full py-3.5 px-4 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md shadow-amber-600/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-            <i data-lucide="message-square" class="w-4 h-4"></i>
-            <span>จัดการเรื่องแจ้งปัญหา</span>
-          </a>
-        </div>
-
-        <!-- MODULE 5: Event & Committee Management -->
-        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group border-orange-500/20">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:scale-110 transition">
-                <i data-lucide="award" class="w-7 h-7"></i>
-              </div>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">
-                Committee CMS
-              </span>
-            </div>
-
-            <div class="space-y-1.5">
-              <h3 class="text-lg font-black text-white group-hover:text-purple-400 transition">ระบบเลือกฝ่าย & กิจกรรม</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">
-                จัดการฝ่ายบริหาร 5 ตำแหน่ง, ฝ่ายวิชาการ, นันทนาการ, สวัสดิการ, เทคโนโลยี และปฏิคม พร้อม Export Excel
-              </p>
-            </div>
-
-            <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5 text-xs">
-              <div class="flex justify-between text-slate-400">
-                <span>กิจกรรมปัจจุบัน:</span>
-                <span class="font-bold text-white">เลือกฝ่ายห้อง 69</span>
-              </div>
-              <div class="flex justify-between text-slate-400">
-                <span>เป้าหมายนักศึกษา:</span>
-                <span class="font-mono text-emerald-400 font-bold">60 คน</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <a href="event-admin.html"
-              class="py-3 px-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
-              <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
-              <span>จัดการฝ่าย</span>
-            </a>
-            <a href="event.html" target="_blank"
-              class="py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-purple-400"></i>
-              <span>หน้าเลือกรุ่น</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- MODULE 4: COMED Cloud Drive & Storage Infrastructure Manager -->
-        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group border-sky-500/30">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-400 via-blue-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-sky-500/25 group-hover:scale-110 transition border border-sky-400/30">
-                <i data-lucide="cloud-lightning" class="w-7 h-7"></i>
-              </div>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
-                <span>Cloud Drive 5GB</span>
-              </span>
-            </div>
-
-            <div class="space-y-1.5">
-              <h3 class="text-lg font-black text-white group-hover:text-sky-400 transition flex items-center gap-1.5">
-                <span>ระบบคลาวด์ไดรฟ์ & จัดเก็บไฟล์</span>
-              </h3>
-              <p class="text-xs text-slate-400 leading-relaxed">
-                คลาวด์ไดรฟ์ส่วนตัวนักศึกษา 5GB/คน, โฟลเดอร์งานวิชาการ, ตรวจสอบไฟล์สาธารณะ และตั้งค่า API (Cloudinary, Catbox)
-              </p>
-            </div>
-
-            <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5 text-xs">
-              <div class="flex justify-between text-slate-400">
-                <span>พื้นที่คลาวด์ต่อคน:</span>
-                <span class="font-mono text-sky-400 font-bold">5 GB (Personal Drive)</span>
-              </div>
-              <div class="flex justify-between text-slate-400">
-                <span>ระบบเชื่อมต่อ:</span>
-                <span class="font-bold text-emerald-400">Multi-Cloud Auto Failover</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-2">
-            <a href="storage-admin.html"
-              class="py-3 px-2 rounded-2xl bg-gradient-to-r from-sky-600 via-blue-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-sky-600/25 transition flex items-center justify-center gap-1 cursor-pointer active:scale-95">
-              <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
-              <span>ตรวจสอบไฟล์</span>
-            </a>
-            <a href="upload-admin.html"
-              class="py-3 px-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1 cursor-pointer active:scale-95">
-              <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>ตั้งค่า API</span>
-            </a>
-            <a href="storage.html" target="_blank"
-              class="py-3 px-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1 cursor-pointer active:scale-95">
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
-              <span>หน้าไดรฟ์</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- MODULE 6: Shortlink & QR Code Manager -->
-        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group border-orange-500/20">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-600 text-white flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-110 transition">
-                <i data-lucide="link-2" class="w-7 h-7"></i>
-              </div>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30">
-                Short URL Engine
-              </span>
-            </div>
-
-            <div class="space-y-1.5">
-              <h3 class="text-lg font-black text-white group-hover:text-orange-400 transition">ระบบย่อลิงก์ & QR Code</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">
-                สร้างและย่อลิงก์ด่วน (/s/...) พร้อมระบบสถิติจำนวนการคลิก และดาวน์โหลด QR Code อัตโนมัติ
-              </p>
-            </div>
-
-            <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5 text-xs">
-              <div class="flex justify-between text-slate-400">
-                <span>รูปแบบ URL ย่อ:</span>
-                <span class="font-mono text-amber-400 font-bold">/s/[code]</span>
-              </div>
-              <div class="flex justify-between text-slate-400">
-                <span>ระบบสถิติ:</span>
-                <span class="font-bold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Real-Time Clicks
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <a href="shortlink-admin.html"
-              class="py-3 px-3 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
-              <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
-              <span>จัดการลิงก์</span>
-            </a>
-            <a href="shortlink.html" target="_blank"
-              class="py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-orange-400"></i>
-              <span>หน้าสร้างลิงก์</span>
-            </a>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Quick Control System & Recent Activity Logs -->
+      <!-- 5. SYSTEM STATS & AUDIT LOG MONITOR -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Left: Master System Configurations -->
@@ -894,28 +930,28 @@
           <div class="space-y-3 pt-2 text-xs">
             <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
               <div>
-                <span class="font-bold text-white block">เปิด-ปิดปรับปรุงระบบ (Maintenance)</span>
+                <span class="font-bold text-white block">โหมดปิดปรับปรุงระบบ</span>
                 <span id="hubStatMaintenanceStatus" class="text-emerald-400 text-[11px]">เปิดให้บริการปกติ</span>
               </div>
               <button onclick="openMaintenanceModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold border border-amber-500/20 transition cursor-pointer">
-                ตั้งค่า
+                ตั้งเวลา
               </button>
             </div>
 
             <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
               <div>
-                <span class="font-bold text-white block">ผู้ดูแลระบบ (Admin)</span>
+                <span class="font-bold text-white block">ผู้ดูแลระบบ (Admins)</span>
                 <span id="hubStatAdminCount" class="text-slate-400">3 บัญชี</span>
               </div>
               <a href="payment-admin.html?tab=admins" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold transition">
-                จัดการ
+                จัดการสิทธิ์
               </a>
             </div>
 
             <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
               <div>
-                <span class="font-bold text-white block">ระบบประวัติ (Logs)</span>
-                <span id="hubStatLogCount" class="text-slate-400">0 บันทึก</span>
+                <span class="font-bold text-white block">บันทึกกิจกรรม (Audit Logs)</span>
+                <span id="hubStatLogCount" class="text-slate-400">0 รายการ</span>
               </div>
               <a href="payment-admin.html?tab=logs" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold transition">
                 ดูทั้งหมด
@@ -924,8 +960,8 @@
 
             <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
               <div>
-                <span class="font-bold text-white block">Google Apps Script API</span>
-                <span class="text-emerald-400 font-mono text-[11px]">Connected</span>
+                <span class="font-bold text-white block">Google Apps Script & Supabase</span>
+                <span class="text-emerald-400 font-mono text-[11px]">Cloud Live Sync</span>
               </div>
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-live"></span>
             </div>
@@ -939,7 +975,7 @@
               <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold">
                 <i data-lucide="history" class="w-4 h-4"></i>
               </div>
-              <h3 class="text-base font-black text-white">บันทึกกิจกรรมล่าสุด (Recent Audit Logs)</h3>
+              <h3 class="text-base font-black text-white">ประวัติกิจกรรมล่าสุด (Recent Audit Logs)</h3>
             </div>
             <a href="payment-admin.html?tab=logs" class="text-xs text-orange-400 hover:underline font-bold">
               ดูประวัติทั้งหมด →
