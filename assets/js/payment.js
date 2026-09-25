@@ -1642,7 +1642,16 @@ function checkPaymentUserSession() {
         loggedNav.classList.remove('hidden');
         loggedNav.classList.add('flex');
       }
-      if (avatarEl) avatarEl.src = user.avatar;
+      if (avatarEl) {
+        avatarEl.src = user.avatar;
+        avatarEl.className = 'w-7 h-7 rounded-xl object-cover border border-orange-300 transition-all duration-300';
+        if (user.avatarFrame && user.avatarFrame !== 'none') {
+          avatarEl.classList.add(`avatar-frame-${user.avatarFrame}`);
+        }
+        if (user.avatarAnim && user.avatarAnim !== 'none') {
+          avatarEl.classList.add(`avatar-anim-${user.avatarAnim}`);
+        }
+      }
       if (nameEl) nameEl.textContent = user.nickname ? `${user.name} (${user.nickname})` : user.name;
 
       // Check if already paid

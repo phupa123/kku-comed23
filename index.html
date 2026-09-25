@@ -109,11 +109,15 @@
       </div>
 
       <!-- Action CTA -->
-      <div class="pt-2">
+      <div class="pt-2 space-y-2">
         <button onclick="closeLoginSuccessModal()" class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-orange-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
           <i data-lucide="sparkles" class="w-4 h-4"></i>
           <span>เข้าสู่หน้าเว็บไซต์</span>
         </button>
+        <a href="settings.html" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5">
+          <i data-lucide="palette" class="w-3.5 h-3.5 text-orange-500"></i>
+          <span>ตกแต่งโปรไฟล์ / เปลี่ยน Avatar</span>
+        </a>
       </div>
 
     </div>
@@ -321,12 +325,15 @@
         <!-- Logged In State (When authenticated) -->
         <div id="navUserLoggedIn" class="hidden items-center gap-2">
           <div class="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 pr-2 sm:pr-2.5 rounded-2xl bg-orange-50/90 border border-orange-200 shadow-xs">
-            <a href="settings.html" class="flex items-center gap-1.5 group" title="ตั้งค่าโปรไฟล์ส่วนตัว">
-              <img id="navUserAvatar" src="" alt="Avatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl object-cover border border-orange-300 group-hover:scale-105 transition">
+            <a href="settings.html" class="flex items-center gap-1.5 group cursor-pointer" title="คลิกเพื่อเปลี่ยนรูป Avatar หรือตกแต่งโปรไฟล์">
+              <div class="relative">
+                <img id="navUserAvatar" src="" alt="Avatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl object-cover border border-orange-300 group-hover:scale-110 group-hover:shadow-md transition">
+                <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-white"></span>
+              </div>
               <span id="navUserName" class="text-xs font-bold text-slate-800 max-w-[90px] sm:max-w-[120px] truncate group-hover:text-orange-600 transition">ชื่อผู้ใช้</span>
             </a>
-            <a href="settings.html" class="p-1 text-slate-400 hover:text-sky-600 rounded-lg hover:bg-white transition" title="ตั้งค่าโปรไฟล์">
-              <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+            <a href="settings.html" class="p-1 text-slate-400 hover:text-sky-600 rounded-lg hover:bg-white transition" title="ตกแต่ง Avatar & โปรไฟล์">
+              <i data-lucide="palette" class="w-3.5 h-3.5 text-orange-500"></i>
             </a>
             <button onclick="handleGoogleLogout()" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition" title="ออกจากระบบ">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
