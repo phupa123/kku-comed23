@@ -119,8 +119,8 @@
           
           <!-- Avatar Frame & Quick Seed Switcher -->
           <div class="relative group">
-            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-slate-900 p-1 border-2 border-sky-400/40 shadow-xl overflow-hidden">
-              <img id="cardUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar" class="w-full h-full object-cover rounded-2xl">
+            <div id="cardUserAvatarFrame" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-slate-900 p-1 border-2 border-sky-400/40 shadow-xl overflow-hidden transition-all duration-300">
+              <img id="cardUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar" class="w-full h-full object-cover rounded-2xl transition-all duration-300">
             </div>
             <button type="button" onclick="generateRandomAvatar()" class="absolute -bottom-2 -right-2 p-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/30 transition transform hover:scale-110 cursor-pointer" title="สุ่มรูปอวาตาร์">
               <i data-lucide="refresh-cw" class="w-4 h-4"></i>
@@ -221,35 +221,148 @@
 
           </div>
 
-          <!-- Select Preset Avatars -->
-          <div class="space-y-3 pt-2 border-t border-slate-800/80">
-            <span class="text-xs font-bold text-slate-300 block">เลือกสไตล์ Avatar สำเร็จรูป</span>
-            <div class="grid grid-cols-4 sm:grid-cols-8 gap-3">
-              <button type="button" onclick="changeAvatarSeed('astro')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=astro" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-              </button>
-              <button type="button" onclick="changeAvatarSeed('cosmo')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cosmo" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-              </button>
-              <button type="button" onclick="changeAvatarSeed('cyber')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cyber" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-              </button>
-              <button type="button" onclick="changeAvatarSeed('galaxy')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=galaxy" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-              </button>
-              <button type="button" onclick="changeAvatarSeed('spark')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=spark" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-              </button>
-              <button type="button" onclick="changeAvatarSeed('nova')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=nova" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-              </button>
-              <button type="button" onclick="changeAvatarSeed('quantum')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=quantum" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-              </button>
-              <button type="button" onclick="generateRandomAvatar()" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition flex flex-col items-center justify-center text-sky-400 gap-1">
-                <i data-lucide="shuffle" class="w-5 h-5"></i>
-                <span class="text-[9px] font-bold">สุ่มรูป</span>
-              </button>
+          <!-- Avatar Upload & Decoration Controls -->
+          <div class="space-y-4 pt-2 border-t border-slate-800/80">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-white block">ปรับแต่งภาพโปรไฟล์ & กรอบรูป (Avatar & Frames)</span>
+                <span class="text-[11px] text-slate-400">อัปโหลดรูปตัวเอง หรือเลือกรูปสำเร็จรูป พร้อมใส่กรอบนีออน/ทองคำ</span>
+              </div>
+              <span id="badgeUploadAllowedStatus" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                เปิดให้อัปโหลด
+              </span>
+            </div>
+
+            <!-- Upload Custom Profile Box (Controlled by Admin Permission) -->
+            <div id="userUploadAvatarContainer" class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold">
+                    <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <span class="font-bold text-white text-xs block">อัปโหลดรูปภาพโปรไฟล์ของคุณเอง</span>
+                    <span class="text-slate-400 text-[10px]">รองรับ JPG, PNG, GIF, WebP (บีบอัดและซิงก์ขึ้น Cloud ปลอดภัย)</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <input type="file" id="userProfileFileInput" accept="image/*" class="hidden" onchange="handleUserAvatarUpload(event)">
+                  <button type="button" onclick="document.getElementById('userProfileFileInput').click()" id="btnTriggerAvatarUpload"
+                    class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-sky-500/20 transition flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="image-plus" class="w-4 h-4"></i>
+                    <span>เลือกรูปภาพ</span>
+                  </button>
+                  <button type="button" onclick="resetToDefaultAvatar()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition" title="กลับไปใช้รูปเริ่มต้น">
+                    รีเซ็ต
+                  </button>
+                </div>
+              </div>
+
+              <!-- Upload Progress / Status Message -->
+              <div id="uploadAvatarProgressBox" class="hidden p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs font-mono">
+                <span id="uploadAvatarProgressText" class="text-sky-400 flex items-center gap-2">
+                  <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                  <span>กำลังประมวลผลและอัปโหลดภาพขึ้นคลาวด์...</span>
+                </span>
+                <span id="uploadAvatarTargetBadge" class="text-[10px] text-slate-400">Cloud Storage</span>
+              </div>
+            </div>
+
+            <!-- Upload Disabled Notice (if admin disabled) -->
+            <div id="userUploadDisabledNotice" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-center gap-2.5">
+              <i data-lucide="lock" class="w-4 h-4 flex-shrink-0"></i>
+              <span>ผู้ดูแลระบบปิดการอัปโหลดไฟล์ภาพจากภายนอกชั่วคราว คุณสามารถเลือกใช้ Avatar สำเร็จรูปและเอฟเฟกต์กรอบด้านล่างได้ตามปกติ</span>
+            </div>
+
+            <!-- Frame Customizer -->
+            <div class="space-y-2">
+              <span class="text-xs font-bold text-slate-300 block">สไตล์กรอบรูปโปรไฟล์ (Avatar Frame)</span>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                <button type="button" onclick="selectAvatarFrame('none')" data-frame-val="none" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-slate-300 block">ไม่มีกรอบ</span>
+                  <span class="text-[10px] text-slate-500">แบบเรียบง่าย</span>
+                </button>
+                <button type="button" onclick="selectAvatarFrame('cyber')" data-frame-val="cyber" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-sky-400 block">Cyber Blue</span>
+                  <span class="text-[10px] text-slate-500">นีออนฟ้าสดใส</span>
+                </button>
+                <button type="button" onclick="selectAvatarFrame('gold')" data-frame-val="gold" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-amber-400 block">Gold Royal</span>
+                  <span class="text-[10px] text-slate-500">ขอบทองคำหรู</span>
+                </button>
+                <button type="button" onclick="selectAvatarFrame('neon')" data-frame-val="neon" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-pink-400 block">Neon Pink</span>
+                  <span class="text-[10px] text-slate-500">ม่วงชมพูสตรีท</span>
+                </button>
+                <button type="button" onclick="selectAvatarFrame('emerald')" data-frame-val="emerald" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-emerald-400 block">Emerald Live</span>
+                  <span class="text-[10px] text-slate-500">เขียวคลาวด์</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Animation Customizer -->
+            <div id="userAvatarAnimationContainer" class="space-y-2">
+              <span class="text-xs font-bold text-slate-300 block">เอฟเฟกต์แอนิเมชันรูปโปรไฟล์ (Profile Animation) ✨</span>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <button type="button" onclick="selectAvatarAnim('none')" data-anim-val="none" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-slate-300 block">ภาพนิ่ง</span>
+                  <span class="text-[10px] text-slate-500">Static</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('pulse')" data-anim-val="pulse" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-sky-400 block">Pulse ย่อขยาย</span>
+                  <span class="text-[10px] text-slate-500">หายใจนุ่มนวล</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('glow')" data-anim-val="glow" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-amber-400 block">Glow เรืองแสง</span>
+                  <span class="text-[10px] text-slate-500">แสงนีออนรอบรูป</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('float')" data-anim-val="float" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-purple-400 block">Float ลอยน้ำ</span>
+                  <span class="text-[10px] text-slate-500">ลอยขึ้นลงช้าๆ</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('bounce')" data-anim-val="bounce" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-emerald-400 block">Bounce เด้ง</span>
+                  <span class="text-[10px] text-slate-500">ขยับดุ๊กดิ๊ก</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('rainbow')" data-anim-val="rainbow" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-pink-400 block">Rainbow สายรุ้ง</span>
+                  <span class="text-[10px] text-slate-500">เปลี่ยนเฉดสีหมุนเวียน</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Select Preset Avatars -->
+            <div class="space-y-2 pt-2">
+              <span class="text-xs font-bold text-slate-300 block">หรือเลือก Avatar Bottts สำเร็จรูป</span>
+              <div class="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                <button type="button" onclick="changeAvatarSeed('astro')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=astro" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('cosmo')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cosmo" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('cyber')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cyber" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('galaxy')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=galaxy" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('spark')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=spark" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('nova')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=nova" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('quantum')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=quantum" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="generateRandomAvatar()" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition flex flex-col items-center justify-center text-sky-400 gap-1">
+                  <i data-lucide="shuffle" class="w-5 h-5"></i>
+                  <span class="text-[9px] font-bold">สุ่มรูป</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -395,6 +508,8 @@
     </div>
   </footer>
 
+  <!-- Universal Cloud Uploader Engine -->
+  <script src="assets/js/multi_uploader.js"></script>
   <!-- User Settings Controller Script -->
   <script src="assets/js/settings-user.js"></script>
 </body>

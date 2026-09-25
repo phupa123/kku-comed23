@@ -286,7 +286,17 @@ function updateUserUI(user) {
       loggedNav.classList.remove('hidden');
       loggedNav.classList.add('flex');
     }
-    if (avatarEl) avatarEl.src = user.avatar;
+    if (avatarEl) {
+      avatarEl.src = user.avatar;
+      // Remove any prior frame/anim
+      avatarEl.className = 'w-6 h-6 sm:w-7 sm:h-7 rounded-xl object-cover border border-orange-300 group-hover:scale-105 transition-all duration-300';
+      if (user.avatarFrame && user.avatarFrame !== 'none') {
+        avatarEl.classList.add(`avatar-frame-${user.avatarFrame}`);
+      }
+      if (user.avatarAnim && user.avatarAnim !== 'none') {
+        avatarEl.classList.add(`avatar-anim-${user.avatarAnim}`);
+      }
+    }
     if (nameEl) nameEl.textContent = user.nickname ? `${user.name} (${user.nickname})` : user.name;
     if (emailEl) emailEl.textContent = user.email;
 

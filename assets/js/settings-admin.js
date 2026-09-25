@@ -27,7 +27,7 @@ function checkAccess() {
 
 // Switch Tabs
 function switchSettingsTab(tabName) {
-  const tabs = ['admins', 'apis', 'site', 'backup'];
+  const tabs = ['admins', 'apis', 'site', 'storage', 'backup'];
   tabs.forEach(t => {
     const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
     const sec = document.getElementById(`sectionSettings${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -145,7 +145,91 @@ function handleSaveSiteInfo(e) {
   alert("✨ บันทึกข้อมูลเว็บไซต์และข้อความประกาศสำเร็จเรียบร้อย!");
 }
 
-// 4. Backup & Restore
+// 4. Profile Storage & Provider Configuration
+const PROFILE_UPLOAD_CONFIG_KEY = 'COMED_PROFILE_UPLOAD_CONFIG_V1';
+
+const DEFAULT_PROFILE_UPLOAD_CONFIG = {
+  allowUserUpload: true,
+  strategy: 'priority', // 'single' | 'priority'
+  singleTarget: 'cloudinary',
+  priority: ['cloudinary', 'catbox', 'imgbb'],
+  maxSizeMB: 5,
+  allowAnimations: true
+};
+
+function toggleStorageStrategyUI() {
+  const strat = document.querySelector('input[name="storageStrategy"]:checked')?.value || 'priority';
+  const boxSingle = document.getElementById('boxSingleProvider');
+  const boxPriority = document.getElementById('boxPriorityProviders');
+
+  if (strat === 'single') {
+    if (boxSingle) boxSingle.classList.remove('hidden');
+    if (boxPriority) boxPriority.classList.add('hidden');
+  } else {
+    if (boxSingle) boxSingle.classList.add('hidden');
+    if (boxPriority) boxPriority.classList.remove('hidden');
+  }
+}
+
+function loadProfileStorageConfig() {
+  let cfg = DEFAULT_PROFILE_UPLOAD_CONFIG;
+  try {
+    const raw = localStorage.getItem(PROFILE_UPLOAD_CONFIG_KEY);
+    if (raw) cfg = { ...cfg, ...JSON.parse(raw) };
+  } catch(e) {}
+
+  const chkUpload = document.getElementById('admAllowUserUpload');
+  const radSingle = document.getElementById('stratSingle');
+  const radPriority = document.getElementById('stratPriority');
+  const selSingle = document.getElementById('admSingleTarget');
+  const pri1 = document.getElementById('admPriority1');
+  const pri2 = document.getElementById('admPriority2');
+  const pri3 = document.getElementById('admPriority3');
+  const inpSize = document.getElementById('admMaxProfileSizeMB');
+  const selAnim = document.getElementById('admAllowAnimations');
+
+  if (chkUpload) chkUpload.checked = cfg.allowUserUpload;
+  if (cfg.strategy === 'single') {
+    if (radSingle) radSingle.checked = true;
+  } else {
+    if (radPriority) radPriority.checked = true;
+  }
+  if (selSingle) selSingle.value = cfg.singleTarget || 'cloudinary';
+  if (pri1 && cfg.priority[0]) pri1.value = cfg.priority[0];
+  if (pri2 && cfg.priority[1]) pri2.value = cfg.priority[1];
+  if (pri3 && cfg.priority[2]) pri3.value = cfg.priority[2];
+  if (inpSize) inpSize.value = cfg.maxSizeMB || 5;
+  if (selAnim) selAnim.value = String(cfg.allowAnimations !== false);
+
+  toggleStorageStrategyUI();
+}
+
+function handleSaveProfileStorageConfig(e) {
+  if (e) e.preventDefault();
+  const chkUpload = document.getElementById('admAllowUserUpload')?.checked ?? true;
+  const strat = document.querySelector('input[name="storageStrategy"]:checked')?.value || 'priority';
+  const selSingle = document.getElementById('admSingleTarget')?.value || 'cloudinary';
+  const pri1 = document.getElementById('admPriority1')?.value || 'cloudinary';
+  const pri2 = document.getElementById('admPriority2')?.value || 'catbox';
+  const pri3 = document.getElementById('admPriority3')?.value || 'imgbb';
+  const inpSize = parseFloat(document.getElementById('admMaxProfileSizeMB')?.value || '5');
+  const selAnim = document.getElementById('admAllowAnimations')?.value === 'true';
+
+  const newConfig = {
+    allowUserUpload: chkUpload,
+    strategy: strat,
+    singleTarget: selSingle,
+    priority: [pri1, pri2, pri3],
+    maxSizeMB: isNaN(inpSize) ? 5 : inpSize,
+    allowAnimations: selAnim,
+    updatedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem(PROFILE_UPLOAD_CONFIG_KEY, JSON.stringify(newConfig));
+  alert("🎉 บันทึกการตั้งค่าระบบจัดเก็บรูปโปรไฟล์และการควบคุมเรียบร้อยแล้ว!");
+}
+
+// 5. Backup & Restore
 function exportFullSystemBackup() {
   const backupData = {
     exportedAt: new Date().toISOString(),
@@ -153,6 +237,7 @@ function exportFullSystemBackup() {
     paymentData: localStorage.getItem('COMED_KKU69_PAYMENT_DATA_V1'),
     adminAccounts: localStorage.getItem('COMED_KKU69_ADMIN_ACCOUNTS_V2'),
     maintenanceConfig: localStorage.getItem('COMED_MAINTENANCE_CONFIG_V1'),
+    profileStorageConfig: localStorage.getItem(PROFILE_UPLOAD_CONFIG_KEY),
     issues: localStorage.getItem('COMED_KKU69_ISSUES_V2'),
     siteConfig: localStorage.getItem('COMED_SITE_CONFIG_V1')
   };
@@ -178,6 +263,7 @@ function handleRestoreBackupFile(e) {
         if (data.paymentData) localStorage.setItem('COMED_KKU69_PAYMENT_DATA_V1', data.paymentData);
         if (data.adminAccounts) localStorage.setItem('COMED_KKU69_ADMIN_ACCOUNTS_V2', data.adminAccounts);
         if (data.maintenanceConfig) localStorage.setItem('COMED_MAINTENANCE_CONFIG_V1', data.maintenanceConfig);
+        if (data.profileStorageConfig) localStorage.setItem(PROFILE_UPLOAD_CONFIG_KEY, data.profileStorageConfig);
         if (data.issues) localStorage.setItem('COMED_KKU69_ISSUES_V2', data.issues);
         if (data.siteConfig) localStorage.setItem('COMED_SITE_CONFIG_V1', data.siteConfig);
         alert("🎉 กู้คืนข้อมูลระบบสำเร็จเรียบร้อยแล้ว!");
@@ -193,5 +279,6 @@ function handleRestoreBackupFile(e) {
 document.addEventListener('DOMContentLoaded', () => {
   checkAccess();
   renderAdminTable();
+  loadProfileStorageConfig();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });

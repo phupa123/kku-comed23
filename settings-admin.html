@@ -117,6 +117,10 @@
         <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
         <span>ข้อมูลเว็บไซต์ & ประชาสัมพันธ์</span>
       </button>
+      <button type="button" onclick="switchSettingsTab('storage')" id="btnTabStorage" class="filter-tab-btn px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap cursor-pointer">
+        <i data-lucide="image" class="w-4 h-4 text-pink-400"></i>
+        <span>อัปโหลดโปรไฟล์ & คลาวด์จัดเก็บ (Profile Storage)</span>
+      </button>
       <button type="button" onclick="switchSettingsTab('backup')" id="btnTabBackup" class="filter-tab-btn px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap cursor-pointer">
         <i data-lucide="database" class="w-4 h-4 text-purple-400"></i>
         <span>สำรอง & คืนค่าข้อมูล (Backup)</span>
@@ -322,7 +326,130 @@
       </div>
     </div>
 
-    <!-- TAB 4: BACKUP & DATA RESTORE -->
+    <!-- TAB 4: PROFILE STORAGE & PROVIDER MANAGEMENT -->
+    <div id="sectionSettingsStorage" class="hidden space-y-6">
+      <div class="hub-glass p-6 sm:p-7 rounded-3xl border border-slate-800 space-y-6">
+        <div class="flex items-center gap-3 border-b border-slate-800/80 pb-4">
+          <div class="w-10 h-10 rounded-2xl bg-pink-500/10 text-pink-400 border border-pink-500/20 flex items-center justify-center font-bold">
+            <i data-lucide="image" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">จัดการการอัปโหลดและสถานที่จัดเก็บรูปโปรไฟล์</h3>
+            <p class="text-xs text-slate-400">ควบคุมการอนุญาตให้อัปโหลดรูป, เลือกผู้ให้บริการคลาวด์ปลายทาง, หรือกำหนดลำดับความสำคัญ (Fallback)</p>
+          </div>
+        </div>
+
+        <form id="formProfileStorageConfig" onsubmit="handleSaveProfileStorageConfig(event)" class="space-y-5 text-xs">
+          <!-- Switch 1: Allow Custom Profile Upload -->
+          <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-4">
+            <div>
+              <span class="font-bold text-white text-sm block">เปิดให้อนุญาตผู้ใช้อัปโหลดรูปโปรไฟล์ของตนเอง</span>
+              <span class="text-slate-400 text-xs">หากปิด ผู้ใช้จะเลือกได้เฉพาะ Avatar สำเร็จรูปหรือกรอบตกแต่งเท่านั้น</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="admAllowUserUpload" checked class="sr-only peer">
+              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500"></div>
+            </label>
+          </div>
+
+          <!-- Mode selector: Single Provider vs Priority Failover -->
+          <div class="space-y-2">
+            <label class="font-bold text-slate-300">รูปแบบการจัดเก็บภาพ (Storage Strategy)</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 cursor-pointer flex items-start gap-3 hover:border-sky-500/50 transition">
+                <input type="radio" name="storageStrategy" value="single" id="stratSingle" class="mt-1 accent-sky-500" onchange="toggleStorageStrategyUI()">
+                <div>
+                  <span class="font-bold text-white block">เจ้าเดียวตามที่ระบุ (Single Provider Only)</span>
+                  <span class="text-slate-400 text-[11px]">ส่งรูปไปเก็บที่คลาวด์เจ้าเดียวที่เลือกเสมอ</span>
+                </div>
+              </label>
+
+              <label class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 cursor-pointer flex items-start gap-3 hover:border-sky-500/50 transition">
+                <input type="radio" name="storageStrategy" value="priority" id="stratPriority" checked class="mt-1 accent-sky-500" onchange="toggleStorageStrategyUI()">
+                <div>
+                  <span class="font-bold text-white block">ตามลำดับความสำคัญ (Priority Failover)</span>
+                  <span class="text-slate-400 text-[11px]">ลองเจ้าแรกก่อน หากโควตาเต็มหรือมีปัญหา จะสลับไปเจ้าถัดไปอัตโนมัติ</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Strategy: Single Provider Selection -->
+          <div id="boxSingleProvider" class="hidden p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+            <label class="font-bold text-slate-300">เลือกคลาวด์จัดเก็บปลายทาง</label>
+            <select id="admSingleTarget" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold outline-none focus:border-sky-500">
+              <option value="cloudinary">☁️ Cloudinary (แนะนำ - เสถียรและเร็วสุด)</option>
+              <option value="catbox">🐱 Catbox.moe (ฟรี ถาวร รองรับไฟล์ใหญ่)</option>
+              <option value="imgbb">🖼️ ImgBB (ยอดนิยม ปลอดภัย)</option>
+              <option value="supabase">⚡ Supabase Storage (ในโปรเจกต์)</option>
+            </select>
+          </div>
+
+          <!-- Strategy: Priority Order Selection -->
+          <div id="boxPriorityProviders" class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+            <span class="font-bold text-white block">ลำดับความสำคัญของคลาวด์ (Priority Order)</span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="space-y-1">
+                <span class="text-[11px] text-sky-400 font-bold">อันดับที่ 1 (หลัก)</span>
+                <select id="admPriority1" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold outline-none">
+                  <option value="cloudinary" selected>1. Cloudinary</option>
+                  <option value="catbox">Catbox.moe</option>
+                  <option value="imgbb">ImgBB</option>
+                  <option value="supabase">Supabase Storage</option>
+                </select>
+              </div>
+
+              <div class="space-y-1">
+                <span class="text-[11px] text-amber-400 font-bold">อันดับที่ 2 (สำรอง 1)</span>
+                <select id="admPriority2" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold outline-none">
+                  <option value="cloudinary">Cloudinary</option>
+                  <option value="catbox" selected>2. Catbox.moe</option>
+                  <option value="imgbb">ImgBB</option>
+                  <option value="supabase">Supabase Storage</option>
+                </select>
+              </div>
+
+              <div class="space-y-1">
+                <span class="text-[11px] text-purple-400 font-bold">อันดับที่ 3 (สำรอง 2)</span>
+                <select id="admPriority3" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold outline-none">
+                  <option value="cloudinary">Cloudinary</option>
+                  <option value="catbox">Catbox.moe</option>
+                  <option value="imgbb" selected>3. ImgBB</option>
+                  <option value="supabase">Supabase Storage</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Max File Size Limit & Compression -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="font-bold text-slate-300">ขนาดไฟล์สูงสุดที่อนุญาต (MB)</label>
+              <input type="number" id="admMaxProfileSizeMB" value="5" min="1" max="25"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono outline-none focus:border-pink-500">
+              <span class="text-[10px] text-slate-500">ระบบจะทำการบีบอัดขนาดไฟล์ก่อนส่งขึ้นคลาวด์เพื่อประหยัดพื้นที่</span>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="font-bold text-slate-300">อนุญาตการตกแต่ง Animation บนโปรไฟล์</label>
+              <select id="admAllowAnimations" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold outline-none focus:border-pink-500">
+                <option value="true" selected>เปิดใช้งานเอฟเฟกต์แอนิเมชันทั้งหมด (Glow, Float, Pulse, Rainbow)</option>
+                <option value="false">ปิดเอฟเฟกต์แอนิเมชัน (แสดงเฉพาะภาพนิ่ง)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-3 border-t border-slate-800">
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold transition flex items-center gap-2 shadow-lg shadow-pink-600/25 cursor-pointer">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>บันทึกการตั้งค่าอัปโหลด</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 5: BACKUP & DATA RESTORE -->
     <div id="sectionSettingsBackup" class="hidden space-y-6">
       <div class="hub-glass p-6 sm:p-7 rounded-3xl border border-slate-800 space-y-6">
         <div class="flex items-center gap-3 border-b border-slate-800/80 pb-4">

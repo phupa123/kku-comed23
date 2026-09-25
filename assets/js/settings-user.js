@@ -10,6 +10,7 @@
   const USER_SESSION_KEY = 'COMED_USER_SESSION';
   const USER_PREFS_KEY = 'COMED_USER_PREFERENCES';
   const STORAGE_KEY_ISSUES = 'COMED_USER_REPORTED_ISSUES';
+  const PROFILE_UPLOAD_CONFIG_KEY = 'COMED_PROFILE_UPLOAD_CONFIG_V1';
 
   let currentUser = null;
   let userPrefs = {
@@ -19,10 +20,22 @@
     notifyCloud: true,
     cloudAutoSave: true,
     publicProfile: true,
-    avatarSeed: ''
+    avatarSeed: '',
+    avatarFrame: 'none',     // 'none' | 'cyber' | 'gold' | 'neon' | 'emerald'
+    avatarAnim: 'none'       // 'none' | 'pulse' | 'glow' | 'float' | 'bounce' | 'rainbow'
+  };
+
+  let adminUploadConfig = {
+    allowUserUpload: true,
+    strategy: 'priority',
+    singleTarget: 'cloudinary',
+    priority: ['cloudinary', 'catbox', 'imgbb'],
+    maxSizeMB: 5,
+    allowAnimations: true
   };
 
   document.addEventListener('DOMContentLoaded', () => {
+    loadAdminUploadPolicy();
     initUserSession();
     initTabs();
     initSettingsForm();
@@ -30,6 +43,42 @@
     loadUserActivity();
     if (typeof lucide !== 'undefined') lucide.createIcons();
   });
+
+  // Load Admin Upload & Storage Policy
+  function loadAdminUploadPolicy() {
+    try {
+      const raw = localStorage.getItem(PROFILE_UPLOAD_CONFIG_KEY);
+      if (raw) {
+        adminUploadConfig = { ...adminUploadConfig, ...JSON.parse(raw) };
+      }
+    } catch (e) {}
+
+    // Apply Admin Policy to User UI
+    const uploadBox = document.getElementById('userUploadAvatarContainer');
+    const disabledNotice = document.getElementById('userUploadDisabledNotice');
+    const badgeStatus = document.getElementById('badgeUploadAllowedStatus');
+    const animContainer = document.getElementById('userAvatarAnimationContainer');
+
+    if (!adminUploadConfig.allowUserUpload) {
+      if (uploadBox) uploadBox.classList.add('hidden');
+      if (disabledNotice) disabledNotice.classList.remove('hidden');
+      if (badgeStatus) {
+        badgeStatus.textContent = 'ปิดรับไฟล์ชั่วคราว';
+        badgeStatus.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
+      }
+    } else {
+      if (uploadBox) uploadBox.classList.remove('hidden');
+      if (disabledNotice) disabledNotice.classList.add('hidden');
+      if (badgeStatus) {
+        badgeStatus.textContent = 'เปิดให้อัปโหลด';
+        badgeStatus.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      }
+    }
+
+    if (!adminUploadConfig.allowAnimations && animContainer) {
+      animContainer.classList.add('hidden');
+    }
+  }
 
   // 1. Session & Auth Gate
   function initUserSession() {
@@ -50,6 +99,12 @@
       }
     } catch (e) {}
 
+    // Synchronize frame and anim from user object if stored there
+    if (currentUser) {
+      if (currentUser.avatarFrame) userPrefs.avatarFrame = currentUser.avatarFrame;
+      if (currentUser.avatarAnim) userPrefs.avatarAnim = currentUser.avatarAnim;
+    }
+
     // Check if user is logged in
     const guestState = document.getElementById('userSettingsGuestNotice');
     const contentState = document.getElementById('userSettingsMainContent');
@@ -68,6 +123,7 @@
 
     renderUserProfile();
     populateFormValues();
+    highlightSelectedDecorations();
   }
 
   function renderUserProfile() {
@@ -83,6 +139,7 @@
 
     // Profile Card
     const cAvatar = document.getElementById('cardUserAvatar');
+    const cFrame = document.getElementById('cardUserAvatarFrame');
     const cName = document.getElementById('cardUserName');
     const cEmail = document.getElementById('cardUserEmail');
     const cId = document.getElementById('cardUserId');
@@ -101,91 +158,164 @@
         cBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30';
       }
     }
-  }
 
-  function populateFormValues() {
-    if (!currentUser) return;
+    // Apply Decoration Frame
+    if (cFrame) {
+      // Remove all previous frame classes
+      cFrame.classList.remove('avatar-frame-cyber', 'avatar-frame-gold', 'avatar-frame-neon', 'avatar-frame-emerald', 'avatar-frame-galaxy');
+      const activeFrame = userPrefs.avatarFrame || 'none';
+      if (activeFrame !== 'none') {
+        cFrame.classList.add(`avatar-frame-${activeFrame}`);
+      }
+    }
 
-    const inputName = document.getElementById('prefDisplayName');
-    const inputNick = document.getElementById('prefNickname');
-    const inputPhone = document.getElementById('prefPhone');
-    const inputBio = document.getElementById('prefBio');
-    const inputStudentId = document.getElementById('prefStudentId');
-    const inputEmail = document.getElementById('prefEmail');
-
-    if (inputName) inputName.value = currentUser.name || '';
-    if (inputNick) inputNick.value = currentUser.nickname || '';
-    if (inputPhone) inputPhone.value = currentUser.phone || '';
-    if (inputBio) inputBio.value = currentUser.bio || '';
-    if (inputStudentId) inputStudentId.value = currentUser.studentId || '';
-    if (inputEmail) inputEmail.value = currentUser.email || '';
-
-    // Checkboxes & Preferences
-    const chkNotifyPay = document.getElementById('chkNotifyPayment');
-    const chkNotifyEvent = document.getElementById('chkNotifyEvent');
-    const chkNotifyCloud = document.getElementById('chkNotifyCloud');
-    const chkCloudAuto = document.getElementById('chkCloudAutoSave');
-    const chkPublicProfile = document.getElementById('chkPublicProfile');
-
-    if (chkNotifyPay) chkNotifyPay.checked = userPrefs.notifyPayment;
-    if (chkNotifyEvent) chkNotifyEvent.checked = userPrefs.notifyEvent;
-    if (chkNotifyCloud) chkNotifyCloud.checked = userPrefs.notifyCloud;
-    if (chkCloudAuto) chkCloudAuto.checked = userPrefs.cloudAutoSave;
-    if (chkPublicProfile) chkPublicProfile.checked = userPrefs.publicProfile;
-  }
-
-  // 2. Tab Navigation
-  function initTabs() {
-    const tabs = document.querySelectorAll('[data-user-tab]');
-    const tabContents = document.querySelectorAll('.user-tab-pane');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        e.preventDefault();
-        const target = tab.getAttribute('data-user-tab');
-
-        tabs.forEach(t => {
-          t.classList.remove('bg-sky-500', 'text-white', 'shadow-lg', 'shadow-sky-500/25');
-          t.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-900/60');
-        });
-        tab.classList.add('bg-sky-500', 'text-white', 'shadow-lg', 'shadow-sky-500/25');
-        tab.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-900/60');
-
-        tabContents.forEach(pane => {
-          pane.classList.add('hidden');
-        });
-
-        const activePane = document.getElementById(`tabPane-${target}`);
-        if (activePane) {
-          activePane.classList.remove('hidden');
-          if (typeof gsap !== 'undefined') {
-            gsap.fromTo(activePane, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' });
-          }
-        }
-      });
-    });
-
-    // Check URL parameters for tab
-    const urlParams = new URLSearchParams(window.location.search);
-    const requestedTab = urlParams.get('tab');
-    if (requestedTab) {
-      const match = document.querySelector(`[data-user-tab="${requestedTab}"]`);
-      if (match) match.click();
+    // Apply Animation Effect
+    if (cAvatar) {
+      // Remove all previous anim classes
+      cAvatar.classList.remove('avatar-anim-pulse', 'avatar-anim-glow', 'avatar-anim-float', 'avatar-anim-bounce', 'avatar-anim-rainbow', 'avatar-anim-spin-slow');
+      const activeAnim = userPrefs.avatarAnim || 'none';
+      if (activeAnim !== 'none' && adminUploadConfig.allowAnimations !== false) {
+        cAvatar.classList.add(`avatar-anim-${activeAnim}`);
+      }
     }
   }
 
-  // 3. Avatar Generators & Choices
-  window.changeAvatarSeed = function (seed) {
-    if (!currentUser) return;
-    const newAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
-    currentUser.avatar = newAvatar;
-    renderUserProfile();
-    showToast('เปลี่ยนรูปแบบอวาตาร์ชั่วคราวแล้ว กด "บันทึกข้อมูล" เพื่อยืนยัน', 'info');
+  function highlightSelectedDecorations() {
+    // Frame buttons
+    document.querySelectorAll('.btn-frame-opt').forEach(btn => {
+      const val = btn.getAttribute('data-frame-val');
+      if (val === (userPrefs.avatarFrame || 'none')) {
+        btn.classList.add('border-sky-500', 'bg-sky-500/10');
+      } else {
+        btn.classList.remove('border-sky-500', 'bg-sky-500/10');
+      }
+    });
+
+    // Animation buttons
+    document.querySelectorAll('.btn-anim-opt').forEach(btn => {
+      const val = btn.getAttribute('data-anim-val');
+      if (val === (userPrefs.avatarAnim || 'none')) {
+        btn.classList.add('border-sky-500', 'bg-sky-500/10');
+      } else {
+        btn.classList.remove('border-sky-500', 'bg-sky-500/10');
+      }
+    });
+  }
+
+  // 3. User Avatar Upload Handler
+  window.handleUserAvatarUpload = async function (e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!adminUploadConfig.allowUserUpload) {
+      showToast('ระบบปิดรับการอัปโหลดรูปโปรไฟล์จากภายนอกชั่วคราว', 'error');
+      return;
+    }
+
+    // Check size limit
+    const maxBytes = (adminUploadConfig.maxSizeMB || 5) * 1024 * 1024;
+    if (file.size > maxBytes) {
+      showToast(`ขนาดไฟล์ภาพเกินกำหนด (สูงสุด ${adminUploadConfig.maxSizeMB || 5}MB)`, 'error');
+      return;
+    }
+
+    const progressBox = document.getElementById('uploadAvatarProgressBox');
+    const progressText = document.getElementById('uploadAvatarProgressText');
+    const targetBadge = document.getElementById('uploadAvatarTargetBadge');
+
+    if (progressBox) progressBox.classList.remove('hidden');
+
+    try {
+      // Determine strategy: Single Provider vs Priority
+      let uploadedUrl = null;
+      let usedProvider = 'Local/Cloud';
+
+      if (window.MultiCloudUploader && typeof window.MultiCloudUploader.getInstance === 'function') {
+        const uploader = window.MultiCloudUploader.getInstance();
+
+        // Apply provider priority according to Admin settings
+        if (adminUploadConfig.strategy === 'single') {
+          uploader.config.activeProvider = adminUploadConfig.singleTarget || 'cloudinary';
+          if (targetBadge) targetBadge.textContent = `Provider: ${adminUploadConfig.singleTarget}`;
+        } else {
+          uploader.config.activeProvider = 'auto';
+          if (Array.isArray(adminUploadConfig.priority) && adminUploadConfig.priority.length > 0) {
+            uploader.config.providerPriority = [...adminUploadConfig.priority];
+          }
+          if (targetBadge) targetBadge.textContent = `Priority: ${uploader.config.providerPriority.join(' → ')}`;
+        }
+
+        if (progressText) progressText.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>กำลังอัปโหลดขึ้น ${targetBadge ? targetBadge.textContent : 'Cloud'}...</span>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        const uploadResult = await uploader.uploadFile(file, {
+          folder: 'comed_user_avatars',
+          tags: ['avatar', currentUser.email]
+        });
+
+        if (uploadResult && uploadResult.url) {
+          uploadedUrl = uploadResult.url;
+          usedProvider = uploadResult.provider || 'Cloud';
+        }
+      }
+
+      // Fallback: If MultiCloudUploader is unavailable or failed, read as Data URL
+      if (!uploadedUrl) {
+        uploadedUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        usedProvider = 'DataURL';
+      }
+
+      // Update current user avatar
+      currentUser.avatar = uploadedUrl;
+      renderUserProfile();
+
+      // Auto update in index.html user session if active
+      localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+
+      if (progressBox) progressBox.classList.add('hidden');
+      showToast(`✨ อัปโหลดรูปโปรไฟล์ขึ้น ${usedProvider} สำเร็จแล้ว!`, 'success');
+
+    } catch (err) {
+      console.error("Avatar Upload Error", err);
+      if (progressBox) progressBox.classList.add('hidden');
+      showToast('เกิดข้อผิดพลาดในการอัปโหลดภาพ กรุณาลองใหม่อีกครั้ง', 'error');
+    }
   };
 
-  window.generateRandomAvatar = function () {
-    const randomSeed = Math.random().toString(36).substring(7);
-    window.changeAvatarSeed(randomSeed);
+  // Reset to default Dicebear avatar
+  window.resetToDefaultAvatar = function () {
+    if (!currentUser) return;
+    currentUser.avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(currentUser.email)}`;
+    renderUserProfile();
+    localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+    showToast('รีเซ็ตรูปโปรไฟล์กลับเป็นค่าเริ่มต้นแล้ว', 'info');
+  };
+
+  // Select Avatar Frame
+  window.selectAvatarFrame = function (frameName) {
+    userPrefs.avatarFrame = frameName;
+    if (currentUser) currentUser.avatarFrame = frameName;
+    renderUserProfile();
+    highlightSelectedDecorations();
+    showToast(`เลือกกรอบรูป: ${frameName.toUpperCase()}`, 'info');
+  };
+
+  // Select Avatar Animation
+  window.selectAvatarAnim = function (animName) {
+    if (adminUploadConfig.allowAnimations === false && animName !== 'none') {
+      showToast('ผู้ดูแลระบบปิดการแสดงแอนิเมชันชั่วคราว', 'error');
+      return;
+    }
+    userPrefs.avatarAnim = animName;
+    if (currentUser) currentUser.avatarAnim = animName;
+    renderUserProfile();
+    highlightSelectedDecorations();
+    showToast(`เลือกแอนิเมชัน: ${animName.toUpperCase()}`, 'info');
   };
 
   // 4. Save User Profile Form
@@ -209,6 +339,10 @@
       if (inputBio) currentUser.bio = inputBio.value.trim();
       if (inputStudentId) currentUser.studentId = inputStudentId.value.trim();
 
+      // Ensure decoration settings are saved in user session
+      currentUser.avatarFrame = userPrefs.avatarFrame || 'none';
+      currentUser.avatarAnim = userPrefs.avatarAnim || 'none';
+
       // Save Preferences
       const chkNotifyPay = document.getElementById('chkNotifyPayment');
       const chkNotifyEvent = document.getElementById('chkNotifyEvent');
@@ -222,7 +356,9 @@
         notifyEvent: chkNotifyEvent ? chkNotifyEvent.checked : true,
         notifyCloud: chkNotifyCloud ? chkNotifyCloud.checked : true,
         cloudAutoSave: chkCloudAuto ? chkCloudAuto.checked : true,
-        publicProfile: chkPublicProfile ? chkPublicProfile.checked : true
+        publicProfile: chkPublicProfile ? chkPublicProfile.checked : true,
+        avatarFrame: userPrefs.avatarFrame,
+        avatarAnim: userPrefs.avatarAnim
       };
 
       // Persist in LocalStorage
@@ -230,7 +366,7 @@
       localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
 
       renderUserProfile();
-      showToast('บันทึกการตั้งค่าโปรไฟล์ส่วนตัวเรียบร้อยแล้ว!', 'success');
+      showToast('🎉 บันทึกการตั้งค่าโปรไฟล์และเอฟเฟกต์เรียบร้อยแล้ว!', 'success');
     });
   }
 

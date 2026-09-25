@@ -472,9 +472,89 @@ html, body {
 
 .btn:hover .btn-svg {
   fill: #fff;
-  filter: drop-shadow(0 0 4px hsl(var(--highlight-color-hue), 100%, 70%))
-    drop-shadow(0 -4px 6px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 0 4px hsl(var(--highlight-color-hue), 100%, 70%)) drop-shadow(0 -4px 6px rgba(0, 0, 0, 0.5));
   animation: none;
+}
+
+/* =========================================================================
+   AVATAR DECORATION & ANIMATION STYLES (COMED23 PROFILE CUSTOMIZER)
+   ========================================================================= */
+
+/* 1. Frames */
+.avatar-frame-cyber {
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.6), inset 0 0 10px rgba(56, 189, 248, 0.4);
+  border: 2px solid #38bdf8 !important;
+}
+
+.avatar-frame-gold {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.7), inset 0 0 12px rgba(245, 158, 11, 0.5);
+  border: 2px solid #f59e0b !important;
+}
+
+.avatar-frame-neon {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.7), inset 0 0 12px rgba(236, 72, 153, 0.6);
+  border: 2px solid #ec4899 !important;
+}
+
+.avatar-frame-emerald {
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.7), inset 0 0 10px rgba(16, 185, 129, 0.4);
+  border: 2px solid #10b981 !important;
+}
+
+.avatar-frame-galaxy {
+  background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+  padding: 3px;
+  box-shadow: 0 0 25px rgba(147, 51, 234, 0.6);
+}
+
+/* 2. Animations */
+.avatar-anim-pulse {
+  animation: avatarPulse 2.5s infinite ease-in-out;
+}
+@keyframes avatarPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(56, 189, 248, 0)); }
+  50% { transform: scale(1.04); filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.6)); }
+}
+
+.avatar-anim-glow {
+  animation: avatarGlow 3s infinite alternate;
+}
+@keyframes avatarGlow {
+  0% { filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.4)); }
+  100% { filter: drop-shadow(0 0 18px rgba(249, 115, 22, 0.85)) drop-shadow(0 0 8px rgba(234, 179, 8, 0.6)); }
+}
+
+.avatar-anim-float {
+  animation: avatarFloat 4s ease-in-out infinite;
+}
+@keyframes avatarFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+
+.avatar-anim-spin-slow {
+  animation: avatarSpinSlow 20s linear infinite;
+}
+@keyframes avatarSpinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.avatar-anim-bounce {
+  animation: avatarBounce 2s infinite;
+}
+@keyframes avatarBounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+  60% { transform: translateY(-4px); }
+}
+
+.avatar-anim-rainbow {
+  animation: avatarRainbow 4s linear infinite;
+}
+@keyframes avatarRainbow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
 }
 
 
