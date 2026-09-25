@@ -122,6 +122,10 @@ export default {
       fetchUrl = new URL("/upload.html", url.origin).toString();
     } else if (path === "/upload-admin" || path === "/upload-admin.html") {
       fetchUrl = new URL("/upload-admin.html", url.origin).toString();
+    } else if (path === "/settings" || path === "/settings.html") {
+      fetchUrl = new URL("/settings.html", url.origin).toString();
+    } else if (path === "/settings-admin" || path === "/settings-admin.html") {
+      fetchUrl = new URL("/settings-admin.html", url.origin).toString();
     } else if (path === "/shortlink" || path === "/shortlink.html") {
       fetchUrl = new URL("/shortlink.html", url.origin).toString();
     } else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") {
@@ -166,6 +170,8 @@ export default {
     else if (path === "/storage-admin" || path === "/storage-admin.html") target = "/storage-admin.html";
     else if (path === "/upload" || path === "/upload.html") target = "/upload.html";
     else if (path === "/upload-admin" || path === "/upload-admin.html") target = "/upload-admin.html";
+    else if (path === "/settings" || path === "/settings.html") target = "/settings.html";
+    else if (path === "/settings-admin" || path === "/settings-admin.html") target = "/settings-admin.html";
     else if (path === "/shortlink" || path === "/shortlink.html" || path.startsWith("/s/")) target = "/shortlink.html";
     else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") target = "/shortlink-admin.html";
     else if (path === "/maintenance" || path === "/maintenance.html") target = "/maintenance.html";
