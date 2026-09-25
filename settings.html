@@ -124,7 +124,9 @@
           <!-- Avatar Frame & Quick Seed Switcher (Click opens Wardrobe Dressing Room Drawer) -->
           <div class="relative group cursor-pointer" onclick="openAvatarDrawer()" title="คลิกที่รูปโปรไฟล์เพื่อเปิดห้องแต่งตัว & ปรับแต่ง Avatar">
             <div id="cardUserAvatarFrame" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-slate-900 p-1 border-2 border-sky-400/40 shadow-xl overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:border-sky-300">
-              <img id="cardUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar" class="w-full h-full object-cover rounded-2xl transition-all duration-300">
+              <div id="cardUserAvatarAnimWrapper" class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center">
+                <img id="cardUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar" class="w-full h-full object-cover rounded-2xl transition-transform duration-200">
+              </div>
               <div class="absolute inset-0 bg-slate-950/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex flex-col items-center justify-center text-white text-[10px] font-bold gap-1 pointer-events-none">
                 <i class="bi bi-magic text-sky-300 text-lg animate-bounce"></i>
                 <span>แต่งตัว / กรอบ</span>
@@ -229,202 +231,26 @@
 
           </div>
 
-          <!-- Avatar Upload & Decoration Controls -->
-          <div class="space-y-4 pt-2 border-t border-slate-800/80">
-            <div class="flex items-center justify-between">
+          <!-- Avatar Quick Wardrobe Launcher Banner (Replaced on-page duplicate) -->
+          <div class="p-5 rounded-3xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-purple-500/10 border border-sky-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 text-center sm:text-left">
+              <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xl border border-sky-500/30 flex-shrink-0">
+                <i class="bi bi-magic"></i>
+              </div>
               <div>
-                <span class="text-xs font-bold text-white block">ปรับแต่งภาพโปรไฟล์ & กรอบรูป (Avatar & Frames)</span>
-                <span class="text-[11px] text-slate-400">อัปโหลดรูปตัวเอง หรือเลือกรูปสำเร็จรูป พร้อมใส่กรอบนีออน/ทองคำ</span>
-              </div>
-              <span id="badgeUploadAllowedStatus" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                เปิดให้อัปโหลด
-              </span>
-            </div>
-
-            <!-- Upload Custom Profile Box (Controlled by Admin Permission) -->
-            <div id="userUploadAvatarContainer" class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold">
-                    <i data-lucide="upload-cloud" class="w-5 h-5"></i>
-                  </div>
-                  <div>
-                    <span class="font-bold text-white text-xs block">อัปโหลดรูปภาพโปรไฟล์ของคุณเอง</span>
-                    <span class="text-slate-400 text-[10px]">รองรับ JPG, PNG, GIF, WebP (ปรับแต่ง หมุน ย่อ/ขยาย พลิกภาพได้)</span>
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <input type="file" id="userProfileFileInput" accept="image/*" class="hidden" onchange="handleUserAvatarUpload(event)">
-                  <button type="button" onclick="document.getElementById('userProfileFileInput').click()" id="btnTriggerAvatarUpload"
-                    class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-sky-500/20 transition flex items-center gap-1.5 cursor-pointer">
-                    <i data-lucide="image-plus" class="w-4 h-4"></i>
-                    <span>เลือกรูปภาพ</span>
-                  </button>
-                  <button type="button" onclick="resetToDefaultAvatar()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition" title="กลับไปใช้รูปเริ่มต้น">
-                    รีเซ็ต
-                  </button>
-                </div>
-              </div>
-
-              <!-- Live Image Transform & Adjustment Studio (Bootstrap-style Studio Controls) -->
-              <div id="avatarTransformToolbar" class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800/90 space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
-                    <i class="bi bi-sliders text-sky-400"></i>
-                    <span>ปรับแต่งมิติรูปโปรไฟล์ (Rotate, Zoom & Flip)</span>
-                  </span>
-                  <button type="button" onclick="resetAvatarTransforms()" class="text-[11px] text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                    <span>ล้างค่า</span>
-                  </button>
-                </div>
-
-                <!-- Control Buttons Group (Bootstrap Style) -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <!-- Rotate Left / Right -->
-                  <div class="flex gap-1.5">
-                    <button type="button" onclick="adjustAvatarTransform('rotate', -90)" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition" title="หมุนซ้าย 90°">
-                      <i class="bi bi-arrow-counterclockwise"></i>
-                      <span>-90°</span>
-                    </button>
-                    <button type="button" onclick="adjustAvatarTransform('rotate', 90)" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition" title="หมุนขวา 90°">
-                      <i class="bi bi-arrow-clockwise"></i>
-                      <span>+90°</span>
-                    </button>
-                  </div>
-
-                  <!-- Flip Horizontal / Vertical -->
-                  <div class="flex gap-1.5">
-                    <button type="button" onclick="adjustAvatarTransform('flipX')" id="btnFlipX" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition" title="พลิกซ้าย-ขวา">
-                      <i class="bi bi-symmetry-vertical"></i>
-                      <span>แนวนอน</span>
-                    </button>
-                    <button type="button" onclick="adjustAvatarTransform('flipY')" id="btnFlipY" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition" title="พลิกบน-ล่าง">
-                      <i class="bi bi-symmetry-horizontal"></i>
-                      <span>แนวตั้ง</span>
-                    </button>
-                  </div>
-
-                  <!-- Zoom In / Out Slider -->
-                  <div class="sm:col-span-2 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800">
-                    <i class="bi bi-zoom-out text-slate-400 text-xs"></i>
-                    <input type="range" id="avatarZoomSlider" min="0.5" max="2.5" step="0.05" value="1" oninput="adjustAvatarTransform('scale', parseFloat(this.value))" class="flex-grow accent-sky-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-                    <i class="bi bi-zoom-in text-sky-400 text-xs"></i>
-                    <span id="avatarZoomValue" class="text-[11px] font-mono text-sky-300 w-10 text-right">100%</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Upload Progress / Status Message -->
-              <div id="uploadAvatarProgressBox" class="hidden p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs font-mono">
-                <span id="uploadAvatarProgressText" class="text-sky-400 flex items-center gap-2">
-                  <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-                  <span>กำลังประมวลผลและอัปโหลดภาพขึ้นคลาวด์...</span>
-                </span>
-                <span id="uploadAvatarTargetBadge" class="text-[10px] text-slate-400">Cloud Storage</span>
+                <span class="text-sm font-black text-white block">ห้องแต่งตัวอวาตาร์ & กรอบรูป (Avatar Wardrobe Studio)</span>
+                <span class="text-xs text-slate-400">อัปโหลดรูปภาพ ลากวางไฟล์ หมุน/ย่อขยาย และเลือกกรอบนีออน/ทองคำได้ในห้องแต่งตัว</span>
               </div>
             </div>
 
-            <!-- Upload Disabled Notice (if admin disabled) -->
-            <div id="userUploadDisabledNotice" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-center gap-2.5">
-              <i data-lucide="lock" class="w-4 h-4 flex-shrink-0"></i>
-              <span>ผู้ดูแลระบบปิดการอัปโหลดไฟล์ภาพจากภายนอกชั่วคราว คุณสามารถเลือกใช้ Avatar สำเร็จรูปและเอฟเฟกต์กรอบด้านล่างได้ตามปกติ</span>
-            </div>
-
-            <!-- Frame Customizer -->
-            <div class="space-y-2">
-              <span class="text-xs font-bold text-slate-300 block">สไตล์กรอบรูปโปรไฟล์ (Avatar Frame)</span>
-              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                <button type="button" onclick="selectAvatarFrame('none')" data-frame-val="none" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-slate-300 block">ไม่มีกรอบ</span>
-                  <span class="text-[10px] text-slate-500">แบบเรียบง่าย</span>
-                </button>
-                <button type="button" onclick="selectAvatarFrame('cyber')" data-frame-val="cyber" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-sky-400 block">Cyber Blue</span>
-                  <span class="text-[10px] text-slate-500">นีออนฟ้าสดใส</span>
-                </button>
-                <button type="button" onclick="selectAvatarFrame('gold')" data-frame-val="gold" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-amber-400 block">Gold Royal</span>
-                  <span class="text-[10px] text-slate-500">ขอบทองคำหรู</span>
-                </button>
-                <button type="button" onclick="selectAvatarFrame('neon')" data-frame-val="neon" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-pink-400 block">Neon Pink</span>
-                  <span class="text-[10px] text-slate-500">ม่วงชมพูสตรีท</span>
-                </button>
-                <button type="button" onclick="selectAvatarFrame('emerald')" data-frame-val="emerald" class="btn-frame-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-emerald-400 block">Emerald Live</span>
-                  <span class="text-[10px] text-slate-500">เขียวคลาวด์</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Animation Customizer -->
-            <div id="userAvatarAnimationContainer" class="space-y-2">
-              <span class="text-xs font-bold text-slate-300 block">เอฟเฟกต์แอนิเมชันรูปโปรไฟล์ (Profile Animation) ✨</span>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                <button type="button" onclick="selectAvatarAnim('none')" data-anim-val="none" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-slate-300 block">ภาพนิ่ง</span>
-                  <span class="text-[10px] text-slate-500">Static</span>
-                </button>
-                <button type="button" onclick="selectAvatarAnim('pulse')" data-anim-val="pulse" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-sky-400 block">Pulse ย่อขยาย</span>
-                  <span class="text-[10px] text-slate-500">หายใจนุ่มนวล</span>
-                </button>
-                <button type="button" onclick="selectAvatarAnim('glow')" data-anim-val="glow" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-amber-400 block">Glow เรืองแสง</span>
-                  <span class="text-[10px] text-slate-500">แสงนีออนรอบรูป</span>
-                </button>
-                <button type="button" onclick="selectAvatarAnim('float')" data-anim-val="float" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-purple-400 block">Float ลอยน้ำ</span>
-                  <span class="text-[10px] text-slate-500">ลอยขึ้นลงช้าๆ</span>
-                </button>
-                <button type="button" onclick="selectAvatarAnim('bounce')" data-anim-val="bounce" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-emerald-400 block">Bounce เด้ง</span>
-                  <span class="text-[10px] text-slate-500">ขยับดุ๊กดิ๊ก</span>
-                </button>
-                <button type="button" onclick="selectAvatarAnim('rainbow')" data-anim-val="rainbow" class="btn-anim-opt p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-pink-400 block">Rainbow สายรุ้ง</span>
-                  <span class="text-[10px] text-slate-500">เปลี่ยนเฉดสีหมุนเวียน</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Select Preset Avatars -->
-            <div class="space-y-2 pt-2">
-              <span class="text-xs font-bold text-slate-300 block">หรือเลือก Avatar Bottts สำเร็จรูป</span>
-              <div class="grid grid-cols-4 sm:grid-cols-8 gap-3">
-                <button type="button" onclick="changeAvatarSeed('astro')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=astro" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('cosmo')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cosmo" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('cyber')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cyber" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('galaxy')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=galaxy" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('spark')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=spark" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('nova')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=nova" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('quantum')" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=quantum" alt="avatar" class="w-full h-12 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="generateRandomAvatar()" class="p-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition flex flex-col items-center justify-center text-sky-400 gap-1">
-                  <i data-lucide="shuffle" class="w-5 h-5"></i>
-                  <span class="text-[9px] font-bold">สุ่มรูป</span>
-                </button>
-              </div>
-            </div>
+            <button type="button" onclick="openAvatarDrawer()" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-sky-500/25 transition transform active:scale-95 flex items-center gap-2 cursor-pointer flex-shrink-0">
+              <i class="bi bi-person-gear text-sm"></i>
+              <span>เปิดห้องแต่งตัว Avatar</span>
+            </button>
           </div>
 
           <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition flex items-center gap-2 cursor-pointer">
+            <button type="submit" id="btnSaveUserProfile" class="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition flex items-center gap-2 cursor-pointer">
               <i data-lucide="save" class="w-4 h-4"></i>
               <span>บันทึกการเปลี่ยนแปลง</span>
             </button>
@@ -608,7 +434,9 @@
               <!-- Big Centered Live Avatar Showcase -->
               <div class="py-4 flex flex-col items-center justify-center">
                 <div id="drawerUserAvatarFrame" class="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-slate-900 p-1.5 border-2 border-sky-400/40 shadow-2xl overflow-hidden transition-all duration-300 relative group">
-                  <img id="drawerUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar Preview" class="w-full h-full object-cover rounded-2xl transition-all duration-300">
+                  <div id="drawerUserAvatarAnimWrapper" class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center">
+                    <img id="drawerUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar Preview" class="w-full h-full object-cover rounded-2xl transition-transform duration-200">
+                  </div>
                 </div>
 
                 <div class="mt-4 space-y-1">
@@ -754,42 +582,108 @@
               </div>
             </div>
 
-            <!-- 4. Upload Custom Photo or Choose Preset Bottts -->
-            <div class="space-y-3 pt-2 border-t border-slate-800/80">
+            <!-- 4. Upload Custom Photo with Doodle Drag-and-Drop Uploader (Mamyapro123) -->
+            <div class="space-y-4 pt-3 border-t border-slate-800/80">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-white flex items-center gap-1.5">
                   <i class="bi bi-cloud-arrow-up text-sky-400"></i>
-                  <span>อัปโหลดรูปตัวเอง หรือเลือกรูปสำเร็จรูป</span>
+                  <span>อัปโหลดรูปตัวเอง (ลากไฟล์มาใส่ หรือคลิกเพื่อเลือก)</span>
                 </span>
-                <button type="button" onclick="document.getElementById('userProfileFileInput').click()" class="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md shadow-sky-500/20 transition">
-                  <i class="bi bi-image"></i>
-                  <span>เลือกไฟล์รูป</span>
-                </button>
+                <span class="text-[10px] text-slate-400">JPG, PNG, GIF, WebP</span>
+              </div>
+
+              <!-- Doodle Drag & Drop Container -->
+              <div class="flex justify-center w-full py-2">
+                <div class="doodle-upload-container group" id="doodleDropZone" onclick="document.getElementById('userProfileFileInput')?.click()">
+                  <input type="file" id="userProfileFileInput" accept="image/*" class="hidden-file-input" onchange="handleUserAvatarUpload(event)">
+                  
+                  <div class="doodle-paperclip">
+                    <svg viewBox="0 0 40 40" fill="none" class="w-full h-full drop-shadow">
+                      <path d="M12 20 L25 8 A8 8 0 0 1 36 19 L18 36 A6 6 0 0 1 9 27 L24 12 A3 3 0 0 1 28 16 L14 30" stroke="#1e1e24" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    </svg>
+                  </div>
+
+                  <div class="doodle-decor sparkle-1">
+                    <svg viewBox="0 0 24 24" fill="#ffd166">
+                      <path d="M12 0L14 9L23 12L14 15L12 24L10 15L1 12L10 9Z"/>
+                    </svg>
+                  </div>
+
+                  <div class="doodle-decor star-1">
+                    <svg viewBox="0 0 24 24" fill="#c0bbfe">
+                      <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9"/>
+                    </svg>
+                  </div>
+
+                  <!-- Folder Graphics -->
+                  <div class="doodle-folder">
+                    <div class="folder-tab"></div>
+                    <div class="folder-back"></div>
+                    <div class="doodle-papers">
+                      <div class="paper file-1">
+                        <div class="scribble-line"></div>
+                        <div class="scribble-line short"></div>
+                        <div class="w-4 h-4 rounded-full bg-sky-200 mt-2 mx-auto"></div>
+                      </div>
+                      <div class="paper file-2">
+                        <div class="scribble-line"></div>
+                        <div class="scribble-line"></div>
+                        <div class="scribble-line short"></div>
+                      </div>
+                    </div>
+                    <div class="folder-front">
+                      <div class="folder-smile">
+                        <svg viewBox="0 0 30 30" fill="none">
+                          <circle cx="9" cy="11" r="2.5" fill="#1e1e24"/>
+                          <circle cx="21" cy="11" r="2.5" fill="#1e1e24"/>
+                          <path d="M7 17 Q15 25 23 17" stroke="#1e1e24" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Button -->
+                  <div class="doodle-btn">
+                    <span class="btn-text">วางรูป หรือคลิกเลือกไฟล์</span>
+                  </div>
+                </div>
               </div>
 
               <!-- Preset Bottts Grid -->
-              <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
-                <button type="button" onclick="changeAvatarSeed('astro')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=astro" alt="astro" class="w-full h-10 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('cosmo')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cosmo" alt="cosmo" class="w-full h-10 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('cyber')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cyber" alt="cyber" class="w-full h-10 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('galaxy')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=galaxy" alt="galaxy" class="w-full h-10 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('spark')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=spark" alt="spark" class="w-full h-10 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('nova')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=nova" alt="nova" class="w-full h-10 object-contain group-hover:scale-110 transition">
-                </button>
-                <button type="button" onclick="changeAvatarSeed('quantum')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=quantum" alt="quantum" class="w-full h-10 object-contain group-hover:scale-110 transition">
-                </button>
+              <div class="space-y-2 pt-2">
+                <div class="flex items-center justify-between text-xs text-slate-300">
+                  <span class="font-bold flex items-center gap-1.5">
+                    <i class="bi bi-robot text-sky-400"></i>
+                    <span>หรือเลือก Avatar Bottts สำเร็จรูป</span>
+                  </span>
+                  <button type="button" onclick="generateRandomAvatar()" class="text-sky-400 hover:text-sky-300 text-[11px] font-bold flex items-center gap-1 cursor-pointer">
+                    <i class="bi bi-shuffle"></i>
+                    <span>สุ่มใหม่</span>
+                  </button>
+                </div>
+                <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                  <button type="button" onclick="changeAvatarSeed('astro')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group" title="Astro">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=astro" alt="astro" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                  </button>
+                  <button type="button" onclick="changeAvatarSeed('cosmo')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group" title="Cosmo">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cosmo" alt="cosmo" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                  </button>
+                  <button type="button" onclick="changeAvatarSeed('cyber')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group" title="Cyber">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cyber" alt="cyber" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                  </button>
+                  <button type="button" onclick="changeAvatarSeed('galaxy')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group" title="Galaxy">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=galaxy" alt="galaxy" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                  </button>
+                  <button type="button" onclick="changeAvatarSeed('spark')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group" title="Spark">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=spark" alt="spark" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                  </button>
+                  <button type="button" onclick="changeAvatarSeed('nova')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group" title="Nova">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=nova" alt="nova" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                  </button>
+                  <button type="button" onclick="changeAvatarSeed('quantum')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group" title="Quantum">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=quantum" alt="quantum" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -808,6 +702,112 @@
           <i class="bi bi-check-lg"></i>
           <span>เสร็จสิ้น / ปิดหน้าต่าง</span>
         </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       COMBINED UIVERSE MULTI-STAGE PROGRESS & UPLOAD MODAL
+       - Box 1: Dual Slide Green Diamond Box (Boryanakrasteva)
+       - Box 2: Pegtop Falling Flowers Shimmer (Andrew-manzyk)
+       - Box 3: Glowing Particle Progress Bar (Rust_1966)
+       - Real Upload & Save Progress
+       - Cancel Button (✕) with AbortController
+       - Dynamic Success & Failure Animations + Error messages
+       ========================================================================= -->
+  <div id="uiverseProgressModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300">
+    <div class="relative w-full max-w-md bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col items-center text-center space-y-5">
+      
+      <!-- Top Bar: Title & Cancel (✕) Button -->
+      <div class="w-full flex items-center justify-between border-b border-slate-800 pb-3">
+        <span id="uiverseModalTitle" class="text-xs font-black uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
+          <i class="bi bi-cloud-arrow-up-fill text-sky-400"></i>
+          <span>กำลังประมวลผล...</span>
+        </span>
+        <button type="button" id="btnCancelProgress" onclick="cancelCurrentProgress()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 flex items-center justify-center transition cursor-pointer" title="ยกเลิก">
+          <i class="bi bi-x-lg text-xs"></i>
+        </button>
+      </div>
+
+      <!-- State 1: Active Progress (3 Combined Uiverse Loaders) -->
+      <div id="uiverseProgressActiveView" class="w-full flex flex-col items-center space-y-5">
+        
+        <!-- Combined Animation Display Area: Dual Slide Box + Floating Pegtops -->
+        <div class="flex items-center justify-center gap-5 py-2">
+          <!-- Uiverse Loader 1: Boryanakrasteva Dual Slide Box -->
+          <div class="uiverse-slide-box flex-shrink-0" title="Slide Engine"></div>
+
+          <!-- Uiverse Loader 2: Andrew-manzyk Pegtop Falling Flowers -->
+          <div class="uiverse-flow-loader flex-shrink-0" title="Flower Flow">
+            <svg id="pegtopone" width="34" height="34" viewBox="0 0 100 100">
+              <g><path d="M50 0 C60 30 90 40 100 50 C90 60 60 70 50 100 C40 70 10 60 0 50 C10 40 40 30 50 0 Z" fill="#38bdf8"/></g>
+            </svg>
+            <svg id="pegtoptwo" width="34" height="34" viewBox="0 0 100 100">
+              <g><path d="M50 0 C60 30 90 40 100 50 C90 60 60 70 50 100 C40 70 10 60 0 50 C10 40 40 30 50 0 Z" fill="#818cf8"/></g>
+            </svg>
+            <svg id="pegtopthree" width="34" height="34" viewBox="0 0 100 100">
+              <g><path d="M50 0 C60 30 90 40 100 50 C90 60 60 70 50 100 C40 70 10 60 0 50 C10 40 40 30 50 0 Z" fill="#c084fc"/></g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Status Message & Subtext -->
+        <div class="space-y-1">
+          <h4 id="uiverseProgressStep" class="text-sm sm:text-base font-extrabold text-white">กำลังบันทึกข้อมูล...</h4>
+          <p id="uiverseProgressSubtext" class="text-xs text-slate-400">กรุณารอสักครู่ ระบบกำลังจัดเก็บข้อมูลและส่งต่อไปยังคลาวด์</p>
+        </div>
+
+        <!-- Uiverse Loader 3: Rust_1966 Glowing Particle Progress Bar -->
+        <div class="w-full flex flex-col items-center gap-2">
+          <div class="uiverse-progress-container">
+            <div id="uiverseProgressBar" class="uiverse-progress-bar"></div>
+            <div class="uiverse-particles">
+              <span class="uiverse-particle"></span>
+              <span class="uiverse-particle"></span>
+              <span class="uiverse-particle"></span>
+              <span class="uiverse-particle"></span>
+              <span class="uiverse-particle"></span>
+            </div>
+            <span id="uiverseProgressPercent" class="uiverse-progress-text">0%</span>
+          </div>
+
+          <div class="w-full flex items-center justify-between text-[11px] text-slate-400 px-1">
+            <span id="uiverseProgressStatus">กำลังส่งข้อมูล...</span>
+            <span id="uiverseProgressBytes" class="font-mono text-sky-400"></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- State 2: Success Animation View -->
+      <div id="uiverseProgressSuccessView" class="hidden w-full flex flex-col items-center space-y-4 py-3">
+        <div class="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 text-emerald-400 flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(16,185,129,0.5)] animate-bounce">
+          <i class="bi bi-check-lg"></i>
+        </div>
+        <div class="space-y-1">
+          <h4 id="uiverseSuccessTitle" class="text-base font-black text-white">ดำเนินการสำเร็จเรียบร้อย!</h4>
+          <p id="uiverseSuccessMsg" class="text-xs text-slate-300">ข้อมูลและเอฟเฟกต์โปรไฟล์ของคุณถูกอัปเดตแล้ว</p>
+        </div>
+        <button type="button" onclick="closeProgressModal()" class="px-6 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/30 transition">
+          ตกลง
+        </button>
+      </div>
+
+      <!-- State 3: Failure Animation View -->
+      <div id="uiverseProgressFailView" class="hidden w-full flex flex-col items-center space-y-4 py-3">
+        <div class="w-20 h-20 rounded-full bg-rose-500/20 border-2 border-rose-500 text-rose-400 flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(244,63,94,0.5)] animate-pulse">
+          <i class="bi bi-x-circle-fill"></i>
+        </div>
+        <div class="space-y-1">
+          <h4 id="uiverseFailTitle" class="text-base font-black text-white">การดำเนินการล้มเหลว</h4>
+          <p id="uiverseFailReason" class="text-xs text-rose-300 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20 font-mono break-all max-h-24 overflow-y-auto">เกิดข้อผิดพลาดในการเชื่อมต่อ</p>
+        </div>
+        <div class="flex gap-2 w-full justify-center">
+          <button type="button" onclick="closeProgressModal()" class="px-5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition">
+            ปิด
+          </button>
+        </div>
       </div>
 
     </div>

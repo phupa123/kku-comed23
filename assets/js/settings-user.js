@@ -47,6 +47,7 @@
     initSettingsForm();
     initIssueForm();
     loadUserActivity();
+    initDoodleDropZone();
     if (typeof lucide !== 'undefined') lucide.createIcons();
   });
 
@@ -251,6 +252,7 @@
 
     // Profile Card & Drawer Mirror
     const cAvatar = document.getElementById('cardUserAvatar');
+    const cAnimWrapper = document.getElementById('cardUserAvatarAnimWrapper');
     const cFrame = document.getElementById('cardUserAvatarFrame');
     const cName = document.getElementById('cardUserName');
     const cEmail = document.getElementById('cardUserEmail');
@@ -258,6 +260,7 @@
     const cBadge = document.getElementById('cardUserBadge');
 
     const dAvatar = document.getElementById('drawerUserAvatar');
+    const dAnimWrapper = document.getElementById('drawerUserAvatarAnimWrapper');
     const dFrame = document.getElementById('drawerUserAvatarFrame');
     const dName = document.getElementById('drawerUserName');
     const dEmail = document.getElementById('drawerUserEmail');
@@ -296,8 +299,20 @@
       }
     });
 
-    // Apply Animation Effect
+    // Apply Animation Effect (on Wrapper so transform is NOT overridden)
     const activeAnim = userPrefs.avatarAnim || 'none';
+    const animWrappers = [cAnimWrapper, dAnimWrapper];
+    const animClasses = ['avatar-anim-pulse', 'avatar-anim-glow', 'avatar-anim-float', 'avatar-anim-bounce', 'avatar-anim-rainbow', 'avatar-anim-spin-slow'];
+
+    animWrappers.forEach(wrapperEl => {
+      if (!wrapperEl) return;
+      wrapperEl.classList.remove(...animClasses);
+      if (activeAnim !== 'none' && adminUploadConfig.allowAnimations !== false) {
+        wrapperEl.classList.add(`avatar-anim-${activeAnim}`);
+      }
+    });
+
+    // Apply Dimension Matrix (Rotate, Zoom, Flip) directly on inner <img>
     const tf = userPrefs.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
     const scaleX = (tf.flipX ? -1 : 1) * (tf.scale || 1);
     const scaleY = (tf.flipY ? -1 : 1) * (tf.scale || 1);
@@ -306,10 +321,8 @@
 
     [cAvatar, dAvatar].forEach(avatarEl => {
       if (!avatarEl) return;
-      avatarEl.classList.remove('avatar-anim-pulse', 'avatar-anim-glow', 'avatar-anim-float', 'avatar-anim-bounce', 'avatar-anim-rainbow', 'avatar-anim-spin-slow');
-      if (activeAnim !== 'none' && adminUploadConfig.allowAnimations !== false) {
-        avatarEl.classList.add(`avatar-anim-${activeAnim}`);
-      }
+      // Clean any accidental anim class on img
+      avatarEl.classList.remove(...animClasses);
       avatarEl.style.transform = transformStr;
     });
   }
@@ -354,9 +367,159 @@
     });
   }
 
+  // =========================================================================
+  // UIVERSE COMBINED PROGRESS MODAL CONTROLLER & ABORT CONTROLLER
+  // =========================================================================
+  let currentAbortController = null;
+  let isProgressActive = false;
+
+  window.openProgressModal = function (title = 'กำลังดำเนินการ...', onCancelCallback = null) {
+    const modal = document.getElementById('uiverseProgressModal');
+    const titleEl = document.getElementById('uiverseModalTitle');
+    const activeView = document.getElementById('uiverseProgressActiveView');
+    const successView = document.getElementById('uiverseProgressSuccessView');
+    const failView = document.getElementById('uiverseProgressFailView');
+    const bar = document.getElementById('uiverseProgressBar');
+    const percentEl = document.getElementById('uiverseProgressPercent');
+    const stepEl = document.getElementById('uiverseProgressStep');
+    const subtextEl = document.getElementById('uiverseProgressSubtext');
+    const statusEl = document.getElementById('uiverseProgressStatus');
+    const bytesEl = document.getElementById('uiverseProgressBytes');
+
+    if (!modal) return;
+
+    currentAbortController = new AbortController();
+    isProgressActive = true;
+
+    if (titleEl) titleEl.innerHTML = `<i class="bi bi-arrow-repeat animate-spin text-sky-400"></i><span>${title}</span>`;
+    if (activeView) activeView.classList.remove('hidden');
+    if (successView) successView.classList.add('hidden');
+    if (failView) failView.classList.add('hidden');
+
+    if (bar) bar.style.width = '0%';
+    if (percentEl) percentEl.textContent = '0%';
+    if (stepEl) stepEl.textContent = 'กำลังเตรียมข้อมูล...';
+    if (subtextEl) subtextEl.textContent = 'กรุณารอสักครู่ ระบบกำลังประมวลผล';
+    if (statusEl) statusEl.textContent = 'พร้อมส่ง...';
+    if (bytesEl) bytesEl.textContent = '';
+
+    modal.classList.remove('hidden');
+    window._onProgressCancelCallback = onCancelCallback;
+  };
+
+  window.updateProgressModal = function (percent, stepText = '', statusText = '', bytesText = '') {
+    const bar = document.getElementById('uiverseProgressBar');
+    const percentEl = document.getElementById('uiverseProgressPercent');
+    const stepEl = document.getElementById('uiverseProgressStep');
+    const statusEl = document.getElementById('uiverseProgressStatus');
+    const bytesEl = document.getElementById('uiverseProgressBytes');
+
+    const cleanPct = Math.min(100, Math.max(0, Math.round(percent)));
+    if (bar) bar.style.width = `${cleanPct}%`;
+    if (percentEl) percentEl.textContent = `${cleanPct}%`;
+    if (stepEl && stepText) stepEl.textContent = stepText;
+    if (statusEl && statusText) statusEl.textContent = statusText;
+    if (bytesEl && bytesText) bytesEl.textContent = bytesText;
+  };
+
+  window.showProgressSuccess = function (title = 'ดำเนินการสำเร็จเรียบร้อย!', msg = 'ข้อมูลและอวาตาร์ของคุณได้รับการบันทึกแล้ว') {
+    isProgressActive = false;
+    currentAbortController = null;
+    const activeView = document.getElementById('uiverseProgressActiveView');
+    const successView = document.getElementById('uiverseProgressSuccessView');
+    const failView = document.getElementById('uiverseProgressFailView');
+    const successTitle = document.getElementById('uiverseSuccessTitle');
+    const successMsg = document.getElementById('uiverseSuccessMsg');
+
+    if (activeView) activeView.classList.add('hidden');
+    if (failView) failView.classList.add('hidden');
+    if (successView) {
+      successView.classList.remove('hidden');
+      if (successTitle) successTitle.textContent = title;
+      if (successMsg) successMsg.textContent = msg;
+    }
+
+    setTimeout(() => {
+      closeProgressModal();
+    }, 2500);
+  };
+
+  window.showProgressError = function (title = 'เกิดข้อผิดพลาด', reason = 'ไม่สามารถดำเนินการให้สำเร็จได้') {
+    isProgressActive = false;
+    currentAbortController = null;
+    const activeView = document.getElementById('uiverseProgressActiveView');
+    const successView = document.getElementById('uiverseProgressSuccessView');
+    const failView = document.getElementById('uiverseProgressFailView');
+    const failTitle = document.getElementById('uiverseFailTitle');
+    const failReason = document.getElementById('uiverseFailReason');
+
+    if (activeView) activeView.classList.add('hidden');
+    if (successView) successView.classList.add('hidden');
+    if (failView) {
+      failView.classList.remove('hidden');
+      if (failTitle) failTitle.textContent = title;
+      if (failReason) failReason.textContent = reason;
+    }
+  };
+
+  window.cancelCurrentProgress = function () {
+    if (currentAbortController) {
+      currentAbortController.abort();
+    }
+    isProgressActive = false;
+    if (typeof window._onProgressCancelCallback === 'function') {
+      try { window._onProgressCancelCallback(); } catch (e) {}
+    }
+    closeProgressModal();
+    showToast('ยกเลิกการทำงานแล้ว', 'info');
+  };
+
+  window.closeProgressModal = function () {
+    const modal = document.getElementById('uiverseProgressModal');
+    if (modal) modal.classList.add('hidden');
+    isProgressActive = false;
+  };
+
+  // Wire Doodle Drag & Drop Zone
+  function initDoodleDropZone() {
+    const dropZone = document.getElementById('doodleDropZone');
+    const fileInput = document.getElementById('userProfileFileInput');
+    if (!dropZone || !fileInput) return;
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('ring-4', 'ring-sky-400', 'scale-105');
+      });
+    });
+
+    ['dragleave', 'dragend', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('ring-4', 'ring-sky-400', 'scale-105');
+      });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt?.files;
+      if (files && files.length > 0) {
+        processUploadedAvatarFile(files[0]);
+      }
+    });
+  }
+
   // 3. User Avatar Upload Handler
-  window.handleUserAvatarUpload = async function (e) {
+  window.handleUserAvatarUpload = function (e) {
     const file = e.target.files?.[0];
+    if (!file) return;
+    processUploadedAvatarFile(file);
+    e.target.value = ''; // Reset input to allow re-uploading same file
+  };
+
+  async function processUploadedAvatarFile(file) {
     if (!file) return;
 
     if (!adminUploadConfig.allowUserUpload) {
@@ -371,14 +534,15 @@
       return;
     }
 
-    const progressBox = document.getElementById('uploadAvatarProgressBox');
-    const progressText = document.getElementById('uploadAvatarProgressText');
-    const targetBadge = document.getElementById('uploadAvatarTargetBadge');
+    const fileSizeStr = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
 
-    if (progressBox) progressBox.classList.remove('hidden');
+    // Launch Uiverse Combined Progress Modal
+    openProgressModal('กำลังอัปโหลดรูปโปรไฟล์...', () => {
+      console.log('Upload cancelled by user.');
+    });
+    updateProgressModal(10, 'กำลังอ่านไฟล์รูปภาพ...', 'เตรียมข้อมูล...', fileSizeStr);
 
     try {
-      // Determine strategy: Single Provider vs Priority
       let uploadedUrl = null;
       let usedProvider = 'Local/Cloud';
 
@@ -387,10 +551,8 @@
           ? window.MultiCloudUploader.getInstance() 
           : window.MultiCloudUploader;
 
-        // Apply provider priority according to Admin settings
         if (adminUploadConfig.strategy === 'single') {
           if (uploader.config) uploader.config.activeProvider = adminUploadConfig.singleTarget || 'cloudinary';
-          if (targetBadge) targetBadge.textContent = `Provider: ${adminUploadConfig.singleTarget || 'cloudinary'}`;
         } else {
           if (uploader.config) {
             uploader.config.activeProvider = 'auto';
@@ -398,19 +560,19 @@
               uploader.config.providerPriority = [...adminUploadConfig.priority];
             }
           }
-          if (targetBadge) targetBadge.textContent = `Cloud Multi-Storage`;
         }
 
-        if (progressText) progressText.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>กำลังอัปโหลดขึ้น ${targetBadge ? targetBadge.textContent : 'Cloud'}...</span>`;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        updateProgressModal(25, `กำลังเชื่อมต่อระบบ Cloud Multi-Storage...`, 'กำลังส่งไบต์...', fileSizeStr);
 
-        // Call .upload() method
+        // Upload with real progress callbacks
         const uploadResult = await uploader.upload(file, {
           folder: 'comed_user_avatars',
           tags: ['avatar', currentUser.email],
           uploaderEmail: currentUser.email,
+          signal: currentAbortController ? currentAbortController.signal : undefined,
           onProgress: (percent, msg) => {
-            if (progressText) progressText.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>${msg || 'กำลังอัปโหลด...'}</span>`;
+            const mappedPct = Math.round(25 + ((percent || 0) * 0.65));
+            updateProgressModal(mappedPct, msg || 'กำลังส่งข้อมูลไปยังคลาวด์...', `${Math.round(percent || 0)}%`, fileSizeStr);
           }
         });
 
@@ -420,11 +582,18 @@
         }
       }
 
-      // Fallback: If cloud upload is unavailable or failed, compress heavily before DataURL to prevent QuotaExceededError
+      if (!isProgressActive) return; // User cancelled
+
+      // Fallback: If cloud upload is unavailable or failed, compress heavily before DataURL
       if (!uploadedUrl) {
+        updateProgressModal(92, 'กำลังแปลงและบีบอัดรูปภาพโปรไฟล์...', 'ประมวลผลในเบราว์เซอร์...', fileSizeStr);
         uploadedUrl = await compressImageToDataUrl(file, 256, 256, 0.75);
-        usedProvider = 'Local Compressed';
+        usedProvider = 'Local Optimized';
       }
+
+      if (!isProgressActive) return; // User cancelled
+
+      updateProgressModal(100, 'บันทึกรูปภาพโปรไฟล์เรียบร้อย!', '100%', fileSizeStr);
 
       // Update current user avatar
       currentUser.avatar = uploadedUrl;
@@ -433,15 +602,26 @@
       // Safe update in localStorage (Prevent QuotaExceededError)
       safeSaveUserSession(currentUser);
 
-      if (progressBox) progressBox.classList.add('hidden');
+      // Show Success State inside Modal
+      showProgressSuccess(
+        'อัปโหลดรูปภาพสำเร็จ!',
+        `รูปโปรไฟล์ถูกอัปโหลดขึ้น ${usedProvider} เรียบร้อยแล้วและพร้อมใช้งานทันที`
+      );
       showToast(`✨ อัปโหลดรูปโปรไฟล์ขึ้น ${usedProvider} สำเร็จแล้ว!`, 'success');
 
     } catch (err) {
       console.error("Avatar Upload Error", err);
-      if (progressBox) progressBox.classList.add('hidden');
+      if (err.name === 'AbortError' || !isProgressActive) {
+        // Cancelled by user
+        return;
+      }
+      showProgressError(
+        'อัปโหลดรูปภาพไม่สำเร็จ',
+        err.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อไปยังเซิร์ฟเวอร์ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต'
+      );
       showToast('เกิดข้อผิดพลาดในการอัปโหลดภาพ: ' + (err.message || 'กรุณาลองใหม่อีกครั้ง'), 'error');
     }
-  };
+  }
 
   // Helper to compress image to compact DataURL
   function compressImageToDataUrl(file, maxWidth = 300, maxHeight = 300, quality = 0.75) {
@@ -680,7 +860,7 @@
     const form = document.getElementById('userProfileForm');
     if (!form) return;
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentUser) return;
 
@@ -699,6 +879,7 @@
       // Ensure decoration settings are saved in user session
       currentUser.avatarFrame = userPrefs.avatarFrame || 'none';
       currentUser.avatarAnim = userPrefs.avatarAnim || 'none';
+      currentUser.avatarTransform = userPrefs.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
 
       // Save Preferences
       const chkNotifyPay = document.getElementById('chkNotifyPayment');
@@ -715,15 +896,64 @@
         cloudAutoSave: chkCloudAuto ? chkCloudAuto.checked : true,
         publicProfile: chkPublicProfile ? chkPublicProfile.checked : true,
         avatarFrame: userPrefs.avatarFrame,
-        avatarAnim: userPrefs.avatarAnim
+        avatarAnim: userPrefs.avatarAnim,
+        avatarTransform: userPrefs.avatarTransform
       };
 
-      // Persist in LocalStorage
-      localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
-      localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+      // Show Uiverse Multi-stage Progress Modal
+      openProgressModal('กำลังบันทึกข้อมูลโปรไฟล์...');
+      updateProgressModal(25, 'กำลังตรวจสอบข้อมูลส่วนตัว...', 'ตรวจสอบความถูกต้อง...', '1/3');
 
-      renderUserProfile();
-      showToast('🎉 บันทึกการตั้งค่าโปรไฟล์และเอฟเฟกต์เรียบร้อยแล้ว!', 'success');
+      try {
+        await new Promise(r => setTimeout(r, 400));
+        if (!isProgressActive) return;
+
+        updateProgressModal(65, 'กำลังซิงค์และบันทึกอวาตาร์ & กรอบ...', 'กำลังเขียนข้อมูล...', '2/3');
+
+        // Persist in LocalStorage
+        safeSaveUserSession(currentUser);
+        localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+
+        // Save into COMED_CUSTOM_USERS_PROFILES_V1 for ecosystem sync
+        try {
+          const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
+          const storedProfiles = JSON.parse(localStorage.getItem(profilesKey) || '{}');
+          if (currentUser.email) {
+            storedProfiles[currentUser.email.toLowerCase().trim()] = {
+              name: currentUser.name,
+              nickname: currentUser.nickname,
+              phone: currentUser.phone,
+              bio: currentUser.bio,
+              studentId: currentUser.studentId,
+              avatar: currentUser.avatar,
+              avatarFrame: currentUser.avatarFrame,
+              avatarAnim: currentUser.avatarAnim,
+              avatarTransform: currentUser.avatarTransform,
+              updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem(profilesKey, JSON.stringify(storedProfiles));
+          }
+        } catch (e) {
+          console.warn("Could not sync to custom profiles table", e);
+        }
+
+        await new Promise(r => setTimeout(r, 400));
+        if (!isProgressActive) return;
+
+        updateProgressModal(100, 'อัปเดตข้อมูลสำเร็จแล้ว!', '100%', '3/3');
+        renderUserProfile();
+
+        showProgressSuccess(
+          'บันทึกข้อมูลสำเร็จ!',
+          'ข้อมูลโปรไฟล์ อวาตาร์ และเอฟเฟกต์แอนิเมชันถูกบันทึกเรียบร้อยแล้ว'
+        );
+        showToast('🎉 บันทึกการตั้งค่าโปรไฟล์และเอฟเฟกต์เรียบร้อยแล้ว!', 'success');
+
+      } catch (err) {
+        console.error("Save profile error", err);
+        showProgressError('บันทึกข้อมูลไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        showToast('เกิดข้อผิดพลาด: ' + (err.message || 'บันทึกไม่สำเร็จ'), 'error');
+      }
     });
   }
 
