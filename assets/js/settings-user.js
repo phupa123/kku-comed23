@@ -126,6 +126,45 @@
     highlightSelectedDecorations();
   }
 
+  // Tab Navigation Controller
+  function initTabs() {
+    const tabs = document.querySelectorAll('[data-user-tab]');
+    const tabContents = document.querySelectorAll('.user-tab-pane');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = tab.getAttribute('data-user-tab');
+
+        tabs.forEach(t => {
+          t.classList.remove('bg-sky-500', 'text-white', 'shadow-lg', 'shadow-sky-500/25');
+          t.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-900/60');
+        });
+        tab.classList.add('bg-sky-500', 'text-white', 'shadow-lg', 'shadow-sky-500/25');
+        tab.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-900/60');
+
+        tabContents.forEach(pane => {
+          pane.classList.add('hidden');
+        });
+
+        const activePane = document.getElementById(`tabPane-${target}`);
+        if (activePane) {
+          activePane.classList.remove('hidden');
+          if (typeof gsap !== 'undefined') {
+            gsap.fromTo(activePane, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' });
+          }
+        }
+      });
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedTab = urlParams.get('tab');
+    if (requestedTab) {
+      const match = document.querySelector(`[data-user-tab="${requestedTab}"]`);
+      if (match) match.click();
+    }
+  }
+
   function populateFormValues() {
     if (!currentUser) return;
 
