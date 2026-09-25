@@ -359,29 +359,15 @@
       let uploadedUrl = null;
       let usedProvider = 'Local/Cloud';
 
-      if (window.MultiCloudUploader && typeof window.MultiCloudUploader.getInstance === 'function') {
-        const uploader = window.MultiCloudUploader.getInstance();
-
-        // Apply provider priority according to Admin settings
-        if (adminUploadConfig.strategy === 'single') {
-          uploader.config.activeProvider = adminUploadConfig.singleTarget || 'cloudinary';
-          if (targetBadge) targetBadge.textContent = `Provider: ${adminUploadConfig.singleTarget}`;
-        } else {
-          uploader.config.activeProvider = 'auto';
-          if (Array.isArray(adminUploadConfig.priority) && adminUploadConfig.priority.length > 0) {
-            uploader.config.providerPriority = [...adminUploadConfig.priority];
-          }
-          if (targetBadge) targetBadge.textContent = `Priority: ${uploader.config.providerPriority.join(' → ')}`;
-        }
-
       if (window.MultiCloudUploader) {
-        // MultiCloudUploader instance
-        const uploader = window.MultiCloudUploader;
+        const uploader = typeof window.MultiCloudUploader.getInstance === 'function' 
+          ? window.MultiCloudUploader.getInstance() 
+          : window.MultiCloudUploader;
 
         // Apply provider priority according to Admin settings
         if (adminUploadConfig.strategy === 'single') {
           if (uploader.config) uploader.config.activeProvider = adminUploadConfig.singleTarget || 'cloudinary';
-          if (targetBadge) targetBadge.textContent = `Provider: ${adminUploadConfig.singleTarget}`;
+          if (targetBadge) targetBadge.textContent = `Provider: ${adminUploadConfig.singleTarget || 'cloudinary'}`;
         } else {
           if (uploader.config) {
             uploader.config.activeProvider = 'auto';
