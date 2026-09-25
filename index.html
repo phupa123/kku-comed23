@@ -320,8 +320,13 @@
         <!-- Logged In State (When authenticated) -->
         <div id="navUserLoggedIn" class="hidden items-center gap-2">
           <div class="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 pr-2 sm:pr-2.5 rounded-2xl bg-orange-50/90 border border-orange-200 shadow-xs">
-            <img id="navUserAvatar" src="" alt="Avatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl object-cover border border-orange-300">
-            <span id="navUserName" class="text-xs font-bold text-slate-800 max-w-[90px] sm:max-w-[120px] truncate">ชื่อผู้ใช้</span>
+            <a href="settings.html" class="flex items-center gap-1.5 group" title="ตั้งค่าโปรไฟล์ส่วนตัว">
+              <img id="navUserAvatar" src="" alt="Avatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl object-cover border border-orange-300 group-hover:scale-105 transition">
+              <span id="navUserName" class="text-xs font-bold text-slate-800 max-w-[90px] sm:max-w-[120px] truncate group-hover:text-orange-600 transition">ชื่อผู้ใช้</span>
+            </a>
+            <a href="settings.html" class="p-1 text-slate-400 hover:text-sky-600 rounded-lg hover:bg-white transition" title="ตั้งค่าโปรไฟล์">
+              <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+            </a>
             <button onclick="handleGoogleLogout()" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition" title="ออกจากระบบ">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             </button>
@@ -378,6 +383,10 @@
       <a href="storage.html" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-sky-500/10 text-sky-700 font-bold text-xs">
         <i data-lucide="cloud" class="w-4 h-4 text-sky-600"></i>
         <span>ระบบ Cloud Drive 5GB (แฟ้มงาน & โฟลเดอร์)</span>
+      </a>
+      <a href="settings.html" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs">
+        <i data-lucide="settings" class="w-4 h-4 text-slate-600"></i>
+        <span>ตั้งค่าโปรไฟล์ส่วนตัว (Settings)</span>
       </a>
       <a href="upload.html" target="_blank" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-slate-700 hover:bg-slate-50 font-medium text-xs">
         <i data-lucide="cloud-upload" class="w-4 h-4 text-sky-500"></i>
