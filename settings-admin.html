@@ -441,6 +441,47 @@
             </button>
           </div>
         </form>
+
+        <!-- Zero-Trust Cloud Security Architecture Notice -->
+        <div class="p-5 rounded-2xl bg-slate-900/60 border border-emerald-500/20 space-y-3">
+          <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+            <span>สถาปัตยกรรมความปลอดภัยป้องกันแอดมินขโมยข้อมูล (Admin Zero-Trust Defense)</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] text-slate-300">
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+              <div class="font-bold text-white flex items-center gap-1.5 text-sky-400">
+                <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+                <span>1. ไม่เก็บ Master Secret บน Browser</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">ใช้ <b>Unsigned Upload Preset</b> สำหรับ Cloudinary และคีย์สาธารณะ (Anon Key / Google Client ID) เท่านั้น แม้แอดมินคนอื่นจะเปิด F12 Inspect ดูก็จะไม่ได้สิทธิ์ลบหรือขโมยโปรเจกต์</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+              <div class="font-bold text-white flex items-center gap-1.5 text-amber-400">
+                <i data-lucide="server" class="w-3.5 h-3.5"></i>
+                <span>2. Cloudflare Worker Secure Proxy</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">ซ่อน Token และส่งคำขอผ่าน <code>worker.js</code> โดยเก็บ Secret Key ไว้ใน Environment Secrets ของ Cloudflare แอดมินทั่วไปไม่สามารถมองเห็นได้</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+              <div class="font-bold text-white flex items-center gap-1.5 text-purple-400">
+                <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+                <span>3. Row Level Security (RLS)</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">ฐานข้อมูล Supabase ถูกป้องกันด้วย RLS บังคับให้นักศึกษาแก้ไขได้เฉพาะสิทธิ์ของตนเอง และห้ามลบตารางหลักโดยไม่ผ่านสิทธิ์ Super Admin</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+              <div class="font-bold text-white flex items-center gap-1.5 text-emerald-400">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                <span>4. บันทึก Audit Log ถาวร (admin_logs)</span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">ทุกครั้งที่มีการเปลี่ยนการตั้งค่าหรือปรับสิทธิ์ ระบบจะบันทึกอีเมลแอดมินผู้กระทำและเวลาลงตาราง <code>admin_logs</code> อัตโนมัติ ป้องกันการแอบเปลี่ยนโดยไร้ร่องรอย</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -491,13 +532,22 @@
     <!-- TAB 4: PROFILE STORAGE & PROVIDER MANAGEMENT -->
     <div id="sectionSettingsStorage" class="hidden space-y-6">
       <div class="hub-glass p-6 sm:p-7 rounded-3xl border border-slate-800 space-y-6">
-        <div class="flex items-center gap-3 border-b border-slate-800/80 pb-4">
-          <div class="w-10 h-10 rounded-2xl bg-pink-500/10 text-pink-400 border border-pink-500/20 flex items-center justify-center font-bold">
-            <i data-lucide="image" class="w-5 h-5"></i>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-pink-500/10 text-pink-400 border border-pink-500/20 flex items-center justify-center font-bold">
+              <i data-lucide="image" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-white">จัดการการอัปโหลดและสถานที่จัดเก็บรูปโปรไฟล์</h3>
+              <p class="text-xs text-slate-400">ควบคุมการอนุญาตให้อัปโหลดรูป, เลือกผู้ให้บริการคลาวด์ปลายทาง, หรือกำหนดลำดับความสำคัญ (Fallback)</p>
+            </div>
           </div>
-          <div>
-            <h3 class="text-base font-black text-white">จัดการการอัปโหลดและสถานที่จัดเก็บรูปโปรไฟล์</h3>
-            <p class="text-xs text-slate-400">ควบคุมการอนุญาตให้อัปโหลดรูป, เลือกผู้ให้บริการคลาวด์ปลายทาง, หรือกำหนดลำดับความสำคัญ (Fallback)</p>
+
+          <div class="flex items-center gap-2">
+            <span id="storageConfigSyncBadge" class="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono flex items-center gap-1.5">
+              <i data-lucide="cloud-check" class="w-3.5 h-3.5"></i>
+              <span id="storageConfigSyncText">ซิงค์กับแอดมินทุกคนแล้ว</span>
+            </span>
           </div>
         </div>
 

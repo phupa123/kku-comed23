@@ -174,13 +174,30 @@ function toggleStorageStrategyUI() {
   }
 }
 
-function loadProfileStorageConfig() {
-  let cfg = DEFAULT_PROFILE_UPLOAD_CONFIG;
-  try {
-    const raw = localStorage.getItem(PROFILE_UPLOAD_CONFIG_KEY);
-    if (raw) cfg = { ...cfg, ...JSON.parse(raw) };
-  } catch(e) {}
+const SYSTEM_STORAGE_CONFIG_ID = 'system_profile_storage_config';
 
+function updateStorageSyncBadge(status, text) {
+  const badge = document.getElementById('storageConfigSyncBadge');
+  const txt = document.getElementById('storageConfigSyncText');
+  if (!badge || !txt) return;
+
+  if (status === 'syncing') {
+    badge.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono flex items-center gap-1.5 animate-pulse';
+    txt.textContent = text || 'กำลังซิงค์กับคลาวด์...';
+  } else if (status === 'synced') {
+    badge.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono flex items-center gap-1.5';
+    txt.textContent = text || 'ซิงค์กับแอดมินทุกคนแล้ว';
+  } else if (status === 'local') {
+    badge.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono flex items-center gap-1.5';
+    txt.textContent = text || 'บันทึกในเครื่อง (ออฟไลน์)';
+  } else if (status === 'error') {
+    badge.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono flex items-center gap-1.5';
+    txt.textContent = text || 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function applyProfileStorageConfigToUI(cfg) {
   const chkUpload = document.getElementById('admAllowUserUpload');
   const radSingle = document.getElementById('stratSingle');
   const radPriority = document.getElementById('stratPriority');
@@ -191,23 +208,88 @@ function loadProfileStorageConfig() {
   const inpSize = document.getElementById('admMaxProfileSizeMB');
   const selAnim = document.getElementById('admAllowAnimations');
 
-  if (chkUpload) chkUpload.checked = cfg.allowUserUpload;
+  if (chkUpload) chkUpload.checked = cfg.allowUserUpload !== false;
   if (cfg.strategy === 'single') {
     if (radSingle) radSingle.checked = true;
   } else {
     if (radPriority) radPriority.checked = true;
   }
   if (selSingle) selSingle.value = cfg.singleTarget || 'cloudinary';
-  if (pri1 && cfg.priority[0]) pri1.value = cfg.priority[0];
-  if (pri2 && cfg.priority[1]) pri2.value = cfg.priority[1];
-  if (pri3 && cfg.priority[2]) pri3.value = cfg.priority[2];
+  if (pri1 && cfg.priority && cfg.priority[0]) pri1.value = cfg.priority[0];
+  if (pri2 && cfg.priority && cfg.priority[1]) pri2.value = cfg.priority[1];
+  if (pri3 && cfg.priority && cfg.priority[2]) pri3.value = cfg.priority[2];
   if (inpSize) inpSize.value = cfg.maxSizeMB || 5;
   if (selAnim) selAnim.value = String(cfg.allowAnimations !== false);
 
   toggleStorageStrategyUI();
 }
 
-function handleSaveProfileStorageConfig(e) {
+async function loadProfileStorageConfig() {
+  let cfg = DEFAULT_PROFILE_UPLOAD_CONFIG;
+  try {
+    const raw = localStorage.getItem(PROFILE_UPLOAD_CONFIG_KEY);
+    if (raw) cfg = { ...cfg, ...JSON.parse(raw) };
+  } catch(e) {}
+
+  applyProfileStorageConfigToUI(cfg);
+
+  // Asynchronously fetch latest config from Supabase cloud database so all admins see what was set
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (sb) {
+    updateStorageSyncBadge('syncing', 'กำลังดึงค่าจากคลาวด์...');
+    try {
+      const { data, error } = await sb
+        .from('campaigns')
+        .select('*')
+        .eq('id', SYSTEM_STORAGE_CONFIG_ID)
+        .maybeSingle();
+
+      if (!error && data && data.subtitle) {
+        try {
+          const cloudCfg = JSON.parse(data.subtitle);
+          cfg = { ...cfg, ...cloudCfg };
+          localStorage.setItem(PROFILE_UPLOAD_CONFIG_KEY, JSON.stringify(cfg));
+          applyProfileStorageConfigToUI(cfg);
+          updateStorageSyncBadge('synced', 'ซิงค์กับแอดมินทุกคนแล้ว');
+        } catch(pe) {
+          console.warn("Parse cloud storage config error:", pe);
+          updateStorageSyncBadge('local', 'ใช้การตั้งค่าในเครื่อง');
+        }
+      } else {
+        updateStorageSyncBadge('synced', 'พร้อมใช้งานบนคลาวด์');
+      }
+
+      // Realtime subscription: if another admin saves new settings, update UI in real-time!
+      if (!window._profileConfigRealtimeSubscribed) {
+        window._profileConfigRealtimeSubscribed = true;
+        sb.channel('realtime_profile_storage_config')
+          .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'campaigns',
+            filter: `id=eq.${SYSTEM_STORAGE_CONFIG_ID}`
+          }, payload => {
+            if (payload.new && payload.new.subtitle) {
+              try {
+                const updatedCloudCfg = JSON.parse(payload.new.subtitle);
+                localStorage.setItem(PROFILE_UPLOAD_CONFIG_KEY, JSON.stringify(updatedCloudCfg));
+                applyProfileStorageConfigToUI(updatedCloudCfg);
+                updateStorageSyncBadge('synced', 'แอดมินอื่นเพิ่งอัปเดตการตั้งค่า');
+              } catch(err) {}
+            }
+          })
+          .subscribe();
+      }
+    } catch(err) {
+      console.warn("Could not sync profile storage config with Supabase:", err);
+      updateStorageSyncBadge('local', 'ออฟไลน์ (ใช้ค่าในเครื่อง)');
+    }
+  } else {
+    updateStorageSyncBadge('local', 'บันทึกในเครื่อง');
+  }
+}
+
+async function handleSaveProfileStorageConfig(e) {
   if (e) e.preventDefault();
   const chkUpload = document.getElementById('admAllowUserUpload')?.checked ?? true;
   const strat = document.querySelector('input[name="storageStrategy"]:checked')?.value || 'priority';
@@ -218,6 +300,8 @@ function handleSaveProfileStorageConfig(e) {
   const inpSize = parseFloat(document.getElementById('admMaxProfileSizeMB')?.value || '5');
   const selAnim = document.getElementById('admAllowAnimations')?.value === 'true';
 
+  const loggedAdmin = sessionStorage.getItem(ADMIN_SESSION_KEY) || 'admin';
+
   const newConfig = {
     allowUserUpload: chkUpload,
     strategy: strat,
@@ -225,11 +309,69 @@ function handleSaveProfileStorageConfig(e) {
     priority: [pri1, pri2, pri3],
     maxSizeMB: isNaN(inpSize) ? 5 : inpSize,
     allowAnimations: selAnim,
+    updatedBy: loggedAdmin,
     updatedAt: new Date().toISOString()
   };
 
+  // 1. Save to Local Storage immediately
   localStorage.setItem(PROFILE_UPLOAD_CONFIG_KEY, JSON.stringify(newConfig));
-  alert("🎉 บันทึกการตั้งค่าระบบจัดเก็บรูปโปรไฟล์และการควบคุมเรียบร้อยแล้ว!");
+  updateStorageSyncBadge('syncing', 'กำลังบันทึกขึ้นคลาวด์...');
+
+  // 2. Persist to Supabase Database (campaigns table KV storage)
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  let cloudSuccess = false;
+
+  if (sb) {
+    try {
+      const payload = {
+        id: SYSTEM_STORAGE_CONFIG_ID,
+        code: 'PROFILE_STORAGE_CONFIG',
+        title: 'System Profile Storage Configuration',
+        subtitle: JSON.stringify(newConfig),
+        category: 'System Config',
+        amount: 0,
+        currency: 'THB',
+        deadline: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+        deadline_display: 'System Managed',
+        bank_name: 'COMED Cloud Storage Engine',
+        account_number: 'N/A',
+        account_name: loggedAdmin,
+        qr_image: 'system',
+        status: 'open',
+        closed_reason: '',
+        show_on_index: false,
+        created_at: new Date().toISOString()
+      };
+
+      const { error } = await sb.from('campaigns').upsert(payload, { onConflict: 'id' });
+      if (!error) {
+        cloudSuccess = true;
+        updateStorageSyncBadge('synced', 'ซิงค์กับแอดมินทุกคนแล้ว');
+
+        // Log admin activity audit trail
+        try {
+          await sb.from('admin_logs').insert([{
+            admin_email: loggedAdmin,
+            action: 'UPDATE_PROFILE_STORAGE_CONFIG',
+            details: `Updated profile storage policy (strategy: ${strat}, allowUpload: ${chkUpload}, maxSize: ${inpSize}MB)`,
+            created_at: new Date().toISOString()
+          }]);
+        } catch(lErr) {}
+      } else {
+        console.warn("Supabase upsert storage config failed:", error);
+        updateStorageSyncBadge('local', 'บันทึกเฉพาะในเครื่อง (DB แจ้งเตือน)');
+      }
+    } catch(dbErr) {
+      console.warn("Error persisting storage config to Supabase:", dbErr);
+      updateStorageSyncBadge('local', 'บันทึกเฉพาะในเครื่อง');
+    }
+  }
+
+  if (cloudSuccess) {
+    alert("🎉 บันทึกการตั้งค่าระบบจัดเก็บรูปโปรไฟล์ขึ้นระบบคลาวด์ส่วนกลางเรียบร้อยแล้ว!\nแอดมินคนอื่นๆ ทุกเครื่องจะมองเห็นการตั้งค่านี้ตรงกันทันที");
+  } else {
+    alert("✅ บันทึกการตั้งค่าลงในเครื่องเรียบร้อยแล้ว (กำลังรอเชื่อมต่อกับฐานข้อมูลคลาวด์ส่วนกลาง)");
+  }
 }
 
 // 5. Backup & Restore

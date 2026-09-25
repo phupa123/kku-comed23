@@ -52,15 +52,7 @@
   });
 
   // Load Admin Upload & Storage Policy
-  function loadAdminUploadPolicy() {
-    try {
-      const raw = localStorage.getItem(PROFILE_UPLOAD_CONFIG_KEY);
-      if (raw) {
-        adminUploadConfig = { ...adminUploadConfig, ...JSON.parse(raw) };
-      }
-    } catch (e) {}
-
-    // Apply Admin Policy to User UI
+  function applyAdminUploadPolicyUI() {
     const uploadBox = document.getElementById('userUploadAvatarContainer');
     const disabledNotice = document.getElementById('userUploadDisabledNotice');
     const badgeStatus = document.getElementById('badgeUploadAllowedStatus');
@@ -84,6 +76,64 @@
 
     if (!adminUploadConfig.allowAnimations && animContainer) {
       animContainer.classList.add('hidden');
+    } else if (animContainer) {
+      animContainer.classList.remove('hidden');
+    }
+  }
+
+  async function loadAdminUploadPolicy() {
+    try {
+      const raw = localStorage.getItem(PROFILE_UPLOAD_CONFIG_KEY);
+      if (raw) {
+        adminUploadConfig = { ...adminUploadConfig, ...JSON.parse(raw) };
+      }
+    } catch (e) {}
+
+    applyAdminUploadPolicyUI();
+
+    // Fetch latest storage policy from Supabase if connected
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+    if (sb) {
+      try {
+        const { data, error } = await sb
+          .from('campaigns')
+          .select('subtitle')
+          .eq('id', 'system_profile_storage_config')
+          .maybeSingle();
+
+        if (!error && data && data.subtitle) {
+          try {
+            const cloudCfg = JSON.parse(data.subtitle);
+            adminUploadConfig = { ...adminUploadConfig, ...cloudCfg };
+            localStorage.setItem(PROFILE_UPLOAD_CONFIG_KEY, JSON.stringify(adminUploadConfig));
+            applyAdminUploadPolicyUI();
+          } catch(err) {}
+        }
+
+        // Realtime subscription for instant policy sync across user sessions
+        if (!window._userPolicySubscribed) {
+          window._userPolicySubscribed = true;
+          sb.channel('realtime_user_upload_policy')
+            .on('postgres_changes', {
+              event: '*',
+              schema: 'public',
+              table: 'campaigns',
+              filter: 'id=eq.system_profile_storage_config'
+            }, payload => {
+              if (payload.new && payload.new.subtitle) {
+                try {
+                  const updatedCloudCfg = JSON.parse(payload.new.subtitle);
+                  adminUploadConfig = { ...adminUploadConfig, ...updatedCloudCfg };
+                  localStorage.setItem(PROFILE_UPLOAD_CONFIG_KEY, JSON.stringify(adminUploadConfig));
+                  applyAdminUploadPolicyUI();
+                } catch(e) {}
+              }
+            })
+            .subscribe();
+        }
+      } catch(e) {
+        console.warn("Could not sync user upload policy with cloud:", e);
+      }
     }
   }
 
