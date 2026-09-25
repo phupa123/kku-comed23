@@ -55,25 +55,28 @@
   <script src="config/campaigns_repo.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden bg-mesh-dark">
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white overflow-x-hidden bg-mesh-dark">
 
-  <!-- ================= 1. ULTRA-SECURE LOGIN OVERLAY ================= -->
+  <!-- ================= 1. ULTRA-SECURE LOGIN OVERLAY (CLOUD COMMAND) ================= -->
   <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/95 backdrop-blur-2xl">
-    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/15 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Ambient Cloud Glow Behind Login -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[350px] bg-sky-500/15 rounded-full blur-[90px] pointer-events-none cloud-drift-1"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[300px] bg-orange-500/10 rounded-full blur-[80px] pointer-events-none cloud-drift-2"></div>
 
-    <div class="relative max-w-md w-full bg-slate-900/90 backdrop-blur-2xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black space-y-6 text-center">
+    <div class="relative max-w-md w-full bg-slate-900/90 backdrop-blur-3xl border border-sky-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-sky-950/50 space-y-6 text-center">
       
-      <!-- Hub Badge & Logo -->
-      <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 p-0.5 shadow-lg shadow-orange-500/30 flex items-center justify-center">
-        <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-orange-400">
-          <i data-lucide="shield-alert" class="w-8 h-8"></i>
+      <!-- Hub Badge & Logo with Cloud Glow -->
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-sky-400 via-blue-500 to-orange-500 p-0.5 shadow-xl shadow-sky-500/25 flex items-center justify-center">
+        <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-sky-400">
+          <i data-lucide="cloud-cog" class="w-8 h-8"></i>
         </div>
       </div>
 
       <div class="space-y-1.5">
-        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-orange-500/10 text-orange-400 border border-orange-500/30 inline-block">
-          Master Command Center
-        </span>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-300 border border-sky-500/30">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>Cloud Master Command Center</span>
+        </div>
         <h2 class="text-2xl font-black text-white">ระบบควบคุมแอดมินศูนย์กลาง</h2>
         <p class="text-xs text-slate-400">สาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น (COMED23 KKU63)</p>
       </div>
@@ -81,7 +84,7 @@
       <!-- Login Mode Switcher Tabs -->
       <div class="p-1 rounded-2xl bg-slate-950 border border-slate-800 flex gap-1">
         <button id="tabModeGoogle" onclick="switchLoginMode('google')"
-          class="flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md cursor-pointer">
+          class="flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/25 cursor-pointer">
           <i data-lucide="mail" class="w-3.5 h-3.5"></i>
           <span>KKU Google Mail</span>
         </button>
@@ -96,11 +99,11 @@
       <div id="authModeGoogle" class="space-y-4">
         <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-400 text-left space-y-2">
           <div class="flex items-center gap-1.5 font-bold text-slate-300">
-            <i data-lucide="info" class="w-4 h-4 text-orange-400"></i>
+            <i data-lucide="info" class="w-4 h-4 text-sky-400"></i>
             <span>สิทธิ์การเข้าถึงสำหรับผู้ดูแลระบบ</span>
           </div>
           <p class="text-[11px] leading-relaxed">
-            ระบบตรวจสอบสิทธิ์จากอีเมล <span class="font-mono text-orange-400 font-bold">@kkumail.com</span> ที่ได้รับอนุญาตเท่านั้น บุคคลทั่วไปไม่สามารถเข้าใช้งานได้
+            ระบบตรวจสอบสิทธิ์จากอีเมล <span class="font-mono text-sky-400 font-bold">@kkumail.com</span> ที่ได้รับอนุญาตเท่านั้น บุคคลทั่วไปไม่สามารถเข้าใช้งานได้
           </p>
         </div>
 
@@ -120,7 +123,7 @@
           <div class="relative">
             <i data-lucide="mail" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"></i>
             <input type="email" id="adminInputEmail" placeholder="admin@kkumail.com"
-              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500 font-mono transition">
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-sky-500 font-mono transition">
           </div>
         </div>
 
@@ -129,12 +132,12 @@
           <div class="relative">
             <i data-lucide="lock" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"></i>
             <input type="password" id="adminInputPassword" placeholder="••••••••••••"
-              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500 font-mono transition">
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-sky-500 font-mono transition">
           </div>
         </div>
 
         <button onclick="handlePasswordLogin()"
-          class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs shadow-lg shadow-orange-500/25 transition cursor-pointer flex items-center justify-center gap-2">
+          class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xs shadow-lg shadow-sky-500/25 transition cursor-pointer flex items-center justify-center gap-2">
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>เข้าสู่ระบบด้วยรหัสผ่าน</span>
         </button>
@@ -149,7 +152,7 @@
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
           <span>กลับหน้าแรก</span>
         </a>
-        <span class="font-mono text-[10px]">v2.5.0 • KKU Security</span>
+        <span class="font-mono text-[10px]">Cloud Ops v2.6.0</span>
       </div>
 
     </div>
@@ -158,21 +161,21 @@
   <!-- ================= 2. MASTER ADMIN DASHBOARD (HUB CONSOLE) ================= -->
   <div id="adminDashboard" class="hidden flex-grow flex flex-col min-h-screen">
     
-    <!-- Top Sticky Header Bar -->
-    <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
+    <!-- Top Sticky Header Bar (Cloud Theme) -->
+    <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-sky-900/30">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         <!-- Left: Hub Title & Badge -->
         <div class="flex items-center gap-3.5">
-          <a href="index.html" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-500/20 to-amber-500/20 border border-orange-500/30 p-2 flex items-center justify-center text-orange-400 hover:scale-105 transition shadow-sm">
-            <i data-lucide="layout-grid" class="w-6 h-6"></i>
+          <a href="index.html" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500/20 to-blue-500/20 border border-sky-400/30 p-2 flex items-center justify-center text-sky-300 hover:scale-105 transition shadow-sm">
+            <i data-lucide="cloud-cog" class="w-6 h-6"></i>
           </a>
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-[11px] font-black uppercase tracking-wider text-orange-500">COMED23</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-950/50 text-orange-300 border border-orange-500/30">KKU63</span>
+              <span class="text-[11px] font-black uppercase tracking-wider text-sky-400">COMED23</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-950/60 text-sky-300 border border-sky-500/30">KKU63</span>
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-live"></span> Master Control
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-live"></span> Cloud Live Control
               </span>
             </div>
             <h1 class="text-base sm:text-lg font-black text-white leading-tight">ระบบควบคุมศูนย์กลาง (Central Admin Hub)</h1>
@@ -181,8 +184,8 @@
 
         <!-- Right: Logged In Admin Profile & Switcher -->
         <div class="flex items-center gap-3">
-          <div class="hidden sm:flex items-center gap-3 p-1.5 pr-3 rounded-2xl bg-slate-900 border border-slate-800">
-            <div class="w-8 h-8 rounded-xl bg-orange-500 text-white flex items-center justify-center font-black text-xs shadow-sm">
+          <div class="hidden sm:flex items-center gap-3 p-1.5 pr-3 rounded-2xl bg-slate-900/90 border border-slate-800">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
               <i data-lucide="user-check" class="w-4 h-4"></i>
             </div>
             <div class="text-left">
@@ -197,13 +200,13 @@
           </button>
 
           <button onclick="window.QRSuite.openPageQrModal({ title: 'หน้าหลักระบบ COMED23', userUrl: `${window.location.origin}/index.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้าแรกสำหรับนักศึกษาหรือเข้าใช้งานระบบ' })" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5 cursor-pointer" title="เปิด QR ให้เพื่อนสแกน">
-            <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
-            <span class="hidden sm:inline">เปิด QR ให้เพื่อนสแกน</span>
+            <i data-lucide="qr-code" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span class="hidden sm:inline">เปิด QR</span>
           </button>
 
           <a href="index.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
-            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-            <span class="hidden md:inline">เปิดดูหน้าบ้าน</span>
+            <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span class="hidden md:inline">เปิดหน้าแรก</span>
           </a>
 
           <button onclick="handleAdminLogout()" class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">
@@ -217,35 +220,41 @@
     <!-- Main Command Hub Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
       
-      <!-- Welcome Hero Banner -->
-      <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="max-w-2xl space-y-2">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span>ยินดีต้อนรับสู่แผงควบคุมระบบหลัก</span>
+      <!-- Welcome Hero Banner (Cloud Command Center) -->
+      <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-sky-900/40 relative overflow-hidden">
+        <!-- Floating Cloud Orbs -->
+        <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-sky-500/15 rounded-full blur-3xl pointer-events-none cloud-drift-1"></div>
+        <div class="absolute top-0 right-1/3 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl pointer-events-none cloud-drift-2"></div>
+        
+        <div class="max-w-2xl space-y-2 relative z-10">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-sky-400/30 text-sky-300 text-xs font-bold shadow-md">
+            <i data-lucide="cloud-lightning" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>COMED Cloud Command & Orchestration Hub</span>
           </div>
-          <h2 class="text-2xl sm:text-3xl font-black text-white">เลือกโมดูลการบริหารจัดการ</h2>
-          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            ท่านสามารถเข้าถึงและควบคุมระบบย่อยทั้งหมดของสาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น ได้จากที่นี่โดยตรง
+          <h2 class="text-2xl sm:text-3xl font-black text-white">แผงควบคุมและสั่งการระบบศูนย์กลาง</h2>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            บริหารจัดการระบบรับชำระเงิน, ฝ่ายกิจกรรมนักศึกษา, Cloud Drive 5GB, และระบบความปลอดภัยทั้งหมดได้จากที่นี่โดยตรง
           </p>
         </div>
       </div>
 
       
-      <!-- ================= LIVE WEBSITE STATUS & DIRECT TOGGLE CONTROLLER ================= -->
-      <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+      <!-- ================= LIVE WEBSITE STATUS & DIRECT TOGGLE CONTROLLER (CLOUD PULSE) ================= -->
+      <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-sky-900/30 space-y-6 relative overflow-hidden">
+        <!-- Floating Subtle Cloud Glow in Status Box -->
+        <div class="absolute -top-10 -right-10 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none cloud-drift-1"></div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4 relative z-10">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
+            <div class="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center font-bold shadow-md shadow-sky-500/10">
               <i data-lucide="radio" class="w-5 h-5 animate-pulse"></i>
             </div>
             <div>
               <h3 class="text-lg font-black text-white flex items-center gap-2">
                 <span>สถานะหน้าเว็บไซต์ที่กำลังออนไลน์ (Live Page Status)</span>
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
               </h3>
-              <p class="text-xs text-slate-400">ตรวจสอบและสั่งเปิด หรือ ปิดปรับปรุงแต่ละหน้าได้ทันทีจากที่นี่</p>
+              <p class="text-xs text-slate-400">ตรวจสอบและสั่งเปิด หรือ ปิดปรับปรุงแต่ละหน้าได้ทันทีจากที่นี่ (Cloud Sync)</p>
             </div>
           </div>
 
@@ -721,40 +730,43 @@
           </div>
         </div>
 
-        <!-- MODULE 4: Multi-Cloud File Storage Manager -->
-        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group">
+        <!-- MODULE 4: COMED Cloud Drive & Storage Infrastructure Manager -->
+        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group border-sky-500/30">
           <div class="space-y-4">
             <div class="flex items-center justify-between">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition">
-                <i data-lucide="cloud-upload" class="w-7 h-7"></i>
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-400 via-blue-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-sky-500/25 group-hover:scale-110 transition border border-sky-400/30">
+                <i data-lucide="cloud-lightning" class="w-7 h-7"></i>
               </div>
-              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                Cloud Storage
+              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
+                <span>Cloud Drive 5GB</span>
               </span>
             </div>
 
             <div class="space-y-1.5">
-              <h3 class="text-lg font-black text-white group-hover:text-emerald-400 transition">ระบบคลาวด์และ API เก็บไฟล์</h3>
+              <h3 class="text-lg font-black text-white group-hover:text-sky-400 transition flex items-center gap-1.5">
+                <span>ระบบคลาวด์ไดรฟ์ & จัดเก็บไฟล์</span>
+              </h3>
               <p class="text-xs text-slate-400 leading-relaxed">
-                ตั้งค่า API สำหรับ Cloudinary, ImgBB, FreeImage และ Catbox.moe และหน้าอัปโหลดไฟล์สาธารณะ
+                คลาวด์ไดรฟ์ส่วนตัวนักศึกษา 5GB/คน, โฟลเดอร์งานวิชาการ, ตรวจสอบไฟล์สาธารณะ และตั้งค่า API (Cloudinary, Catbox)
               </p>
             </div>
 
             <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5 text-xs">
               <div class="flex justify-between text-slate-400">
-                <span>ผู้ให้บริการคลาวด์:</span>
-                <span class="font-bold text-emerald-400">4 ช่องทาง (Auto Failover)</span>
+                <span>พื้นที่คลาวด์ต่อคน:</span>
+                <span class="font-mono text-sky-400 font-bold">5 GB (Personal Drive)</span>
               </div>
               <div class="flex justify-between text-slate-400">
-                <span>สถานะจัดเก็บ:</span>
-                <span class="font-mono text-white font-bold">ฟรีถาวร ไม่จำกัด</span>
+                <span>ระบบเชื่อมต่อ:</span>
+                <span class="font-bold text-emerald-400">Multi-Cloud Auto Failover</span>
               </div>
             </div>
           </div>
 
           <div class="grid grid-cols-3 gap-2">
             <a href="storage-admin.html"
-              class="py-3 px-2 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold text-xs shadow-md shadow-teal-600/25 transition flex items-center justify-center gap-1 cursor-pointer active:scale-95">
+              class="py-3 px-2 rounded-2xl bg-gradient-to-r from-sky-600 via-blue-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-sky-600/25 transition flex items-center justify-center gap-1 cursor-pointer active:scale-95">
               <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
               <span>ตรวจสอบไฟล์</span>
             </a>
@@ -763,10 +775,10 @@
               <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
               <span>ตั้งค่า API</span>
             </a>
-            <a href="upload.html" target="_blank"
+            <a href="storage.html" target="_blank"
               class="py-3 px-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1 cursor-pointer active:scale-95">
-              <i data-lucide="external-link" class="w-3.5 h-3.5 text-emerald-400"></i>
-              <span>ทดสอบอัปโหลด</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>หน้าไดรฟ์</span>
             </a>
           </div>
         </div>
@@ -835,9 +847,6 @@
           <div class="space-y-3 pt-2 text-xs">
             <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
               <div>
-                
-            <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
-              <div>
                 <span class="font-bold text-white block">เปิด-ปิดปรับปรุงระบบ (Maintenance)</span>
                 <span id="hubStatMaintenanceStatus" class="text-emerald-400 text-[11px]">เปิดให้บริการปกติ</span>
               </div>
@@ -846,7 +855,9 @@
               </button>
             </div>
 
-            <span class="font-bold text-white block">ผู้ดูแลระบบ (Admin)</span>
+            <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-white block">ผู้ดูแลระบบ (Admin)</span>
                 <span id="hubStatAdminCount" class="text-slate-400">3 บัญชี</span>
               </div>
               <a href="payment-admin.html?tab=admins" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold transition">
@@ -918,7 +929,7 @@
             <!-- 1. Scope selector -->
             <div class="space-y-1.5">
               <label class="font-bold text-slate-300">เลือกหน้าที่ต้องการควบคุม</label>
-              <select id="maintTargetScope" onchange="loadMaintenanceFormByScope()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white font-bold outline-none">
+              <select id="maintTargetScope" onchange="loadMaintenanceFormByScope()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-sky-500 text-white font-bold outline-none">
                 <option value="all">🌐 ปิดปรับปรุงทั้งเว็บไซต์ (All Public Pages)</option>
                 <option value="index">🏠 เฉพาะหน้าแรก (index.html)</option>
                 <option value="payment">💳 เฉพาะหน้ารับชำระเงิน (payment.html)</option>
@@ -926,6 +937,7 @@
                 <option value="eventclass">✨ เฉพาะหน้า 2 กิจกรรม ซุ้มบัณฑิต & วันเด็ก (eventclass.html)</option>
                 <option value="shortlink">🔗 เฉพาะหน้าระบบย่อลิงก์ (shortlink.html)</option>
                 <option value="upload">☁️ เฉพาะหน้าระบบอัปโหลดไฟล์ (upload.html)</option>
+                <option value="storage">📂 เฉพาะหน้าระบบคลาวด์ไดรฟ์ (storage.html)</option>
               </select>
             </div>
 
