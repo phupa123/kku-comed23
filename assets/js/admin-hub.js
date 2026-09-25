@@ -427,10 +427,10 @@ function updateMaintenanceStatusBadge() {
   if (!badge) return;
 
   const cfg = getMaintenanceConfig();
-  const isAnyActive = cfg.all?.active || cfg.index?.active || cfg.payment?.active;
+  const isAnyActive = Object.values(cfg).some(item => item && item.active);
 
   if (isAnyActive) {
-    badge.textContent = "⚠️ อยู่ในโหมดปิดปรับปรุง";
+    badge.textContent = "⚠️ มีบางหน้าปิดปรับปรุง";
     badge.className = "text-amber-400 font-bold text-[11px] animate-pulse";
   } else {
     badge.textContent = "เปิดให้บริการปกติ (Online)";
@@ -441,76 +441,44 @@ function updateMaintenanceStatusBadge() {
 
 
 // ================= LIVE PAGE STATUS CONTROLLERS =================
+const PAGE_SCOPES = [
+  { key: 'index', name: 'หน้าหลัก', badgeId: 'pageBadgeIndex', btnId: 'btnToggleIndex' },
+  { key: 'payment', name: 'ระบบชำระเงิน', badgeId: 'pageBadgePayment', btnId: 'btnTogglePayment' },
+  { key: 'event', name: 'เลือกฝ่ายห้อง', badgeId: 'pageBadgeEvent', btnId: 'btnToggleEvent' },
+  { key: 'eventclass', name: 'ซุ้มบัณฑิต/วันเด็ก', badgeId: 'pageBadgeEventclass', btnId: 'btnToggleEventclass' },
+  { key: 'shortlink', name: 'ระบบย่อลิงก์', badgeId: 'pageBadgeShortlink', btnId: 'btnToggleShortlink' },
+  { key: 'upload', name: 'อัปโหลดไฟล์', badgeId: 'pageBadgeUpload', btnId: 'btnToggleUpload' },
+  { key: 'storage', name: 'คลาวด์ไดรฟ์', badgeId: 'pageBadgeStorage', btnId: 'btnToggleStorage' },
+  { key: 'all', name: 'ทั้งเว็บไซต์', badgeId: 'pageBadgeAll', btnId: 'btnToggleAll' }
+];
+
 function updateLivePageBadges() {
   const cfg = getMaintenanceConfig();
+  const isGlobalOff = !!(cfg.all && cfg.all.active);
 
-  // 1. Index Page
-  const isIndexOff = (cfg.all && cfg.all.active) || (cfg.index && cfg.index.active);
-  const badgeIndex = document.getElementById("pageBadgeIndex");
-  const btnIndex = document.getElementById("btnToggleIndex");
-  if (badgeIndex) {
-    badgeIndex.className = isIndexOff 
-      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
-      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
-    badgeIndex.innerHTML = isIndexOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
-  }
-  if (btnIndex) {
-    btnIndex.className = isIndexOff
-      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
-      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
-    btnIndex.textContent = isIndexOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุงหน้านี้";
-  }
+  PAGE_SCOPES.forEach(p => {
+    const isOff = p.key === 'all' ? isGlobalOff : (isGlobalOff || !!(cfg[p.key] && cfg[p.key].active));
+    const badge = document.getElementById(p.badgeId);
+    const btn = document.getElementById(p.btnId);
 
-  // 2. Payment Page
-  const isPaymentOff = (cfg.all && cfg.all.active) || (cfg.payment && cfg.payment.active);
-  const badgePayment = document.getElementById("pageBadgePayment");
-  const btnPayment = document.getElementById("btnTogglePayment");
-  if (badgePayment) {
-    badgePayment.className = isPaymentOff
-      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
-      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
-    badgePayment.innerHTML = isPaymentOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
-  }
-  if (btnPayment) {
-    btnPayment.className = isPaymentOff
-      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
-      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
-    btnPayment.textContent = isPaymentOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุงหน้านี้";
-  }
+    if (badge) {
+      badge.className = isOff
+        ? "text-[10px] text-amber-400 font-bold flex items-center gap-1"
+        : "text-[10px] text-emerald-400 font-bold flex items-center gap-1";
+      badge.innerHTML = isOff
+        ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง'
+        : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+    }
 
-  // 3. Event Page
-  const isEventOff = (cfg.all && cfg.all.active) || (cfg.event && cfg.event.active);
-  const badgeEvent = document.getElementById("pageBadgeEvent");
-  const btnEvent = document.getElementById("btnToggleEvent");
-  if (badgeEvent) {
-    badgeEvent.className = isEventOff
-      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
-      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
-    badgeEvent.innerHTML = isEventOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
-  }
-  if (btnEvent) {
-    btnEvent.className = isEventOff
-      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
-      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
-    btnEvent.textContent = isEventOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุง";
-  }
+    if (btn) {
+      btn.className = isOff
+        ? "px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-bold border border-emerald-500/30 transition cursor-pointer"
+        : "px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold border border-rose-500/30 transition cursor-pointer";
+      btn.textContent = isOff ? "เปิดให้บริการ" : (p.key === 'all' ? "ปิดทั้งเว็บ" : "ปิดปรับปรุง");
+    }
+  });
 
-  // 4. Global All
-  const isAllOff = !!(cfg.all && cfg.all.active);
-  const badgeAll = document.getElementById("pageBadgeAll");
-  const btnAll = document.getElementById("btnToggleAll");
-  if (badgeAll) {
-    badgeAll.className = isAllOff
-      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
-      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
-    badgeAll.innerHTML = isAllOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
-  }
-  if (btnAll) {
-    btnAll.className = isAllOff
-      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
-      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
-    btnAll.textContent = isAllOff ? "เปิดทุกหน้า" : "สั่งปิดทั้งเว็บ";
-  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function toggleSinglePageLive(scope) {
@@ -523,26 +491,23 @@ function toggleSinglePageLive(scope) {
   updateMaintenanceStatusBadge();
   updateLivePageBadges();
   syncMaintenanceConfigToCloud(cfg);
-  updateLivePageBadges();
 }
 
 function toggleAllPagesQuick(shouldLock) {
   const cfg = getMaintenanceConfig();
-  if (!cfg.all) cfg.all = {};
-  if (!cfg.index) cfg.index = {};
-  if (!cfg.payment) cfg.payment = {};
-  if (!cfg.event) cfg.event = {};
+  const scopes = ['all', 'index', 'payment', 'event', 'eventclass', 'shortlink', 'upload', 'storage'];
 
-  cfg.all.active = shouldLock;
-  cfg.index.active = shouldLock;
-  cfg.payment.active = shouldLock;
-  cfg.event.active = shouldLock;
+  scopes.forEach(s => {
+    if (!cfg[s]) {
+      cfg[s] = { title: "กำลังปรับปรุงระบบชั่วคราว", reason: "ระบบกำลังอยู่ระหว่างการบำรุงรักษา", endTime: "" };
+    }
+    cfg[s].active = shouldLock;
+  });
 
   localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
   updateMaintenanceStatusBadge();
   updateLivePageBadges();
   syncMaintenanceConfigToCloud(cfg);
-  updateLivePageBadges();
 }
 
 
