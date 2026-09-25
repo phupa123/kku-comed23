@@ -71,8 +71,8 @@ function ensureGoogleInitialized() {
 
 async function handleGoogleAdminCredential(response) {
   const data = parseJwt(response.credential);
-  const errBox = document.getElementById('loginErrorMsg');
-  const errText = document.getElementById('loginErrorText');
+  const errBox = document.getElementById('loginAuthError');
+  const errText = document.getElementById('loginAuthErrorText');
 
   if (!data || !data.email) {
     if (errBox && errText) {
@@ -83,7 +83,7 @@ async function handleGoogleAdminCredential(response) {
   }
 
   const email = data.email.toLowerCase().trim();
-  const admin = adminAccounts.find(a => a.email.toLowerCase() === email);
+  const admin = adminAccounts.find(a => a.email.toLowerCase() === email) || DEFAULT_ADMINS.find(a => a.email.toLowerCase() === email);
 
   if (admin) {
     currentLoggedInAdmin = admin;
@@ -98,39 +98,14 @@ async function handleGoogleAdminCredential(response) {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-function switchLoginMode(mode) {
-  const tabGoogle = document.getElementById('tabModeGoogle');
-  const tabPassword = document.getElementById('tabModePassword');
-  const viewGoogle = document.getElementById('viewModeGoogle');
-  const viewPassword = document.getElementById('viewModePassword');
-  const errBox = document.getElementById('loginErrorMsg');
+async function handlePasswordLogin(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const errBox = document.getElementById('loginAuthError');
+  const errText = document.getElementById('loginAuthErrorText');
   if (errBox) errBox.classList.add('hidden');
 
-  if (mode === 'google') {
-    if (tabGoogle) tabGoogle.className = 'py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md cursor-pointer';
-    if (tabPassword) tabPassword.className = 'py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer';
-    if (viewGoogle) viewGoogle.classList.remove('hidden');
-    if (viewPassword) viewPassword.classList.add('hidden');
-    if (ensureGoogleInitialized()) {
-      google.accounts.id.prompt();
-    }
-  } else {
-    if (tabGoogle) tabGoogle.className = 'py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer';
-    if (tabPassword) tabPassword.className = 'py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md cursor-pointer';
-    if (viewGoogle) viewGoogle.classList.add('hidden');
-    if (viewPassword) viewPassword.classList.remove('hidden');
-  }
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
-async function handleAdminLogin(e) {
-  e.preventDefault();
-  const errBox = document.getElementById('loginErrorMsg');
-  const errText = document.getElementById('loginErrorText');
-  if (errBox) errBox.classList.add('hidden');
-
-  const emailInput = document.getElementById('adminEmailInput')?.value.trim().toLowerCase() || '';
-  const pwdInput = document.getElementById('adminPasswordInput')?.value.trim() || '';
+  const emailInput = (document.getElementById('adminInputEmail')?.value || document.getElementById('adminEmailInput')?.value || '').trim().toLowerCase();
+  const pwdInput = (document.getElementById('adminInputPassword')?.value || document.getElementById('adminPasswordInput')?.value || '').trim();
 
   let admin = adminAccounts.find(a => a.email.toLowerCase() === emailInput) || DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailInput);
   let isValid = false;
@@ -156,6 +131,9 @@ async function handleAdminLogin(e) {
   }
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
+
+// Backward compatibility alias
+const handleAdminLogin = handlePasswordLogin;
 
 function handleAdminLogout() {
   if (confirm("ต้องการออกจากระบบแอดมินส่วนกลางหรือไม่?")) {
@@ -275,11 +253,12 @@ function renderRecentLogs(logs) {
 function initGoogleButton() {
   try {
     if (ensureGoogleInitialized()) {
-      const wrapper = document.getElementById('googleAdminButtonWrapper');
+      const wrapper = document.getElementById('googleAdminBtnWrapper') || document.getElementById('googleAdminButtonWrapper');
       if (wrapper) {
+        wrapper.innerHTML = '';
         google.accounts.id.renderButton(
           wrapper,
-          { theme: "filled_blue", size: "large", width: 280, text: "signin_with", shape: "pill" }
+          { theme: "filled_blue", size: "large", width: 280, text: "signin_with", shape: "pill", logo_alignment: "left" }
         );
       }
       setTimeout(() => google.accounts.id.prompt(), 400);
