@@ -71,10 +71,10 @@
 
       <!-- Right: User Profile Quick Bar & Action Buttons -->
       <div class="flex items-center gap-2">
-        <div id="userHeaderProfile" class="hidden sm:flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-slate-900/90 border border-slate-800">
-          <img id="userHeaderAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar" class="w-7 h-7 rounded-xl object-cover border border-sky-500/30">
+        <div id="userHeaderProfile" onclick="openAvatarDrawer()" class="hidden sm:flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 cursor-pointer transition group" title="คลิกเพื่อเปิดห้องแต่งตัว Avatar & กรอบรูป">
+          <img id="userHeaderAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar" class="w-7 h-7 rounded-xl object-cover border border-sky-500/30 group-hover:scale-105 transition">
           <div class="text-left">
-            <span id="userHeaderName" class="text-xs font-bold text-white block leading-tight truncate max-w-[120px]">ชื่อผู้ใช้</span>
+            <span id="userHeaderName" class="text-xs font-bold text-white block leading-tight truncate max-w-[120px] group-hover:text-sky-300">ชื่อผู้ใช้</span>
             <span id="userHeaderEmail" class="text-[9px] text-slate-400 font-mono block leading-tight truncate max-w-[120px]">email@kkumail.com</span>
           </div>
         </div>
@@ -121,13 +121,13 @@
 
         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10 text-center sm:text-left">
           
-          <!-- Avatar Frame & Quick Seed Switcher -->
-          <div class="relative group cursor-pointer" onclick="document.getElementById('userProfileFileInput')?.click()" title="คลิกที่รูปโปรไฟล์เพื่อเปลี่ยนภาพ">
+          <!-- Avatar Frame & Quick Seed Switcher (Click opens Wardrobe Dressing Room Drawer) -->
+          <div class="relative group cursor-pointer" onclick="openAvatarDrawer()" title="คลิกที่รูปโปรไฟล์เพื่อเปิดห้องแต่งตัว & ปรับแต่ง Avatar">
             <div id="cardUserAvatarFrame" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-slate-900 p-1 border-2 border-sky-400/40 shadow-xl overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:border-sky-300">
               <img id="cardUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar" class="w-full h-full object-cover rounded-2xl transition-all duration-300">
-              <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex flex-col items-center justify-center text-white text-[10px] font-bold gap-1 pointer-events-none">
-                <i data-lucide="camera" class="w-5 h-5 text-sky-300"></i>
-                <span>เปลี่ยนรูป</span>
+              <div class="absolute inset-0 bg-slate-950/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex flex-col items-center justify-center text-white text-[10px] font-bold gap-1 pointer-events-none">
+                <i class="bi bi-magic text-sky-300 text-lg animate-bounce"></i>
+                <span>แต่งตัว / กรอบ</span>
               </div>
             </div>
             <button type="button" onclick="event.stopPropagation(); generateRandomAvatar()" class="absolute -bottom-2 -right-2 p-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/30 transition transform hover:scale-110 cursor-pointer z-10" title="สุ่มรูปอวาตาร์">
@@ -557,6 +557,261 @@
     </div>
 
   </main>
+
+  <!-- =========================================================================
+       AVATAR & FRAMES WARDROBE DRESSING STUDIO DRAWER (SLIDE-OVER FROM RIGHT)
+       หน้าต่างแต่งตัว Avatar: ฝั่งซ้ายกระจกจำลอง Live Avatar & กรอบ ฝั่งขวาเลือกชุด/ปรับแต่ง
+       ========================================================================= -->
+  <div id="avatarDrawerBackdrop" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex justify-end" onclick="closeAvatarDrawer(event)">
+    
+    <!-- Slide-over Drawer Panel (Translates from Right: translateX(100%) to 0) -->
+    <div id="avatarDrawerPanel" onclick="event.stopPropagation()" class="w-full max-w-3xl sm:max-w-4xl h-full bg-slate-950/95 border-l border-slate-800 shadow-[0_0_60px_rgba(0,0,0,0.8)] flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-hidden">
+      
+      <!-- Drawer Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-800/80 bg-slate-900/60 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/20">
+            <i class="bi bi-magic text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <span>ห้องแต่งตัวโปรไฟล์ & กรอบรูป (Avatar Studio)</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">Live Dress-up</span>
+            </h3>
+            <p class="text-xs text-slate-400">เลือกกรอบ แอนิเมชัน หมุน/ย่อขยาย หรืออัปโหลดภาพของคุณเองได้ตามสไตล์</p>
+          </div>
+        </div>
+
+        <button type="button" onclick="closeAvatarDrawer()" class="w-9 h-9 rounded-xl bg-slate-850 hover:bg-slate-800 border border-slate-700/80 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer" title="ปิดหน้าต่าง">
+          <i class="bi bi-x-lg text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Body: Split Layout (Left: Live Fitting Room Mirror, Right: Wardrobe Controls) -->
+      <div class="flex-grow overflow-y-auto custom-scrollbar p-4 sm:p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- LEFT COLUMN: Live Wardrobe Mirror / Fitting Showcase (เสมือนหน้าแต่งตัว) -->
+          <div class="lg:col-span-5 sticky top-0 space-y-4">
+            <div class="p-6 rounded-3xl bg-gradient-to-b from-slate-900/90 to-slate-950 border border-sky-500/20 shadow-xl text-center space-y-4 relative overflow-hidden">
+              <div class="absolute -top-12 -left-12 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+              <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-800/80 pb-3">
+                <span class="font-bold flex items-center gap-1.5 text-sky-400">
+                  <i class="bi bi-person-bounding-box"></i>
+                  <span>กระจกจำลอง (Fitting Mirror)</span>
+                </span>
+                <span id="drawerActiveFrameBadge" class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Frame: None</span>
+              </div>
+
+              <!-- Big Centered Live Avatar Showcase -->
+              <div class="py-4 flex flex-col items-center justify-center">
+                <div id="drawerUserAvatarFrame" class="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-slate-900 p-1.5 border-2 border-sky-400/40 shadow-2xl overflow-hidden transition-all duration-300 relative group">
+                  <img id="drawerUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar Preview" class="w-full h-full object-cover rounded-2xl transition-all duration-300">
+                </div>
+
+                <div class="mt-4 space-y-1">
+                  <div class="text-sm font-black text-white" id="drawerUserName">ชื่อผู้ใช้</div>
+                  <div class="text-xs text-sky-400 font-mono" id="drawerUserEmail">user@kkumail.com</div>
+                </div>
+              </div>
+
+              <!-- Quick Mirror Action Buttons -->
+              <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-xs">
+                <button type="button" onclick="generateRandomAvatar()" class="py-2.5 px-3 rounded-xl bg-slate-850 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold flex items-center justify-center gap-1.5 transition cursor-pointer">
+                  <i class="bi bi-shuffle text-sky-400"></i>
+                  <span>สุ่ม Bottts</span>
+                </button>
+                <button type="button" onclick="resetAvatarTransforms()" class="py-2.5 px-3 rounded-xl bg-slate-850 hover:bg-slate-800 border border-slate-700 text-slate-300 font-bold flex items-center justify-center gap-1.5 transition cursor-pointer">
+                  <i class="bi bi-arrow-counterclockwise text-amber-400"></i>
+                  <span>รีเซ็ตสเกล</span>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Hint Box -->
+            <div class="p-3.5 rounded-2xl bg-sky-500/5 border border-sky-500/20 text-[11px] text-slate-400 flex items-start gap-2.5">
+              <i class="bi bi-info-circle-fill text-sky-400 flex-shrink-0 mt-0.5"></i>
+              <span>การปรับแต่งในกระจกนี้จะแสดงผลจริงแบบเรียลไทม์ และจะบันทึกพร้อมโปรไฟล์ของคุณอัตโนมัติ</span>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Wardrobe & Decoration Accessories (ตู้เสื้อผ้าและของตกแต่ง) -->
+          <div class="lg:col-span-7 space-y-6">
+
+            <!-- 1. Transform Studio: Rotate, Zoom & Flip (Bootstrap UI) -->
+            <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+                  <i class="bi bi-sliders2 text-sky-400"></i>
+                  <span>ปรับแต่งมิติรูปภาพ (Rotate, Zoom & Flip)</span>
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono">Transform Matrix</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <!-- Rotate -->
+                <div class="flex gap-1.5">
+                  <button type="button" onclick="adjustAvatarTransform('rotate', -90)" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition" title="หมุนซ้าย 90°">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    <span>-90°</span>
+                  </button>
+                  <button type="button" onclick="adjustAvatarTransform('rotate', 90)" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition" title="หมุนขวา 90°">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>+90°</span>
+                  </button>
+                </div>
+
+                <!-- Flip -->
+                <div class="flex gap-1.5">
+                  <button type="button" onclick="adjustAvatarTransform('flipX')" id="btnDrawerFlipX" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition" title="พลิกแนวนอน">
+                    <i class="bi bi-symmetry-vertical"></i>
+                    <span>แนวนอน</span>
+                  </button>
+                  <button type="button" onclick="adjustAvatarTransform('flipY')" id="btnDrawerFlipY" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center justify-center gap-1 transition" title="พลิกแนวตั้ง">
+                    <i class="bi bi-symmetry-horizontal"></i>
+                    <span>แนวตั้ง</span>
+                  </button>
+                </div>
+
+                <!-- Zoom Slider -->
+                <div class="col-span-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800">
+                  <i class="bi bi-zoom-out text-slate-400 text-xs"></i>
+                  <input type="range" id="drawerZoomSlider" min="0.5" max="2.5" step="0.05" value="1" oninput="adjustAvatarTransform('scale', parseFloat(this.value))" class="flex-grow accent-sky-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                  <i class="bi bi-zoom-in text-sky-400 text-xs"></i>
+                  <span id="drawerZoomValue" class="text-[11px] font-mono text-sky-300 w-10 text-right">100%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Avatar Frames Wardrobe -->
+            <div class="space-y-2.5">
+              <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                <i class="bi bi-bounding-box-circles text-amber-400"></i>
+                <span>ตู้เสื้อผ้ากรอบรูป (Avatar Frames)</span>
+              </span>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <button type="button" onclick="selectAvatarFrame('none')" data-frame-val="none" class="btn-frame-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-slate-300 block">ไม่มีกรอบ</span>
+                  <span class="text-[10px] text-slate-500">แบบเรียบง่าย</span>
+                </button>
+                <button type="button" onclick="selectAvatarFrame('cyber')" data-frame-val="cyber" class="btn-frame-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-sky-400 block">Cyber Blue</span>
+                  <span class="text-[10px] text-slate-500">นีออนฟ้าสดใส</span>
+                </button>
+                <button type="button" onclick="selectAvatarFrame('gold')" data-frame-val="gold" class="btn-frame-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-amber-400 block">Gold Royal</span>
+                  <span class="text-[10px] text-slate-500">ขอบทองคำหรู</span>
+                </button>
+                <button type="button" onclick="selectAvatarFrame('neon')" data-frame-val="neon" class="btn-frame-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-pink-400 block">Neon Pink</span>
+                  <span class="text-[10px] text-slate-500">ม่วงชมพูสตรีท</span>
+                </button>
+                <button type="button" onclick="selectAvatarFrame('emerald')" data-frame-val="emerald" class="btn-frame-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-emerald-400 block">Emerald Live</span>
+                  <span class="text-[10px] text-slate-500">เขียวคลาวด์</span>
+                </button>
+                <button type="button" onclick="selectAvatarFrame('galaxy')" data-frame-val="galaxy" class="btn-frame-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-purple-400 block">Galaxy Cosmic</span>
+                  <span class="text-[10px] text-slate-500">กาแล็กซีพรีเมียม</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Avatar Animation Effects -->
+            <div id="drawerAvatarAnimationContainer" class="space-y-2.5">
+              <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                <i class="bi bi-stars text-pink-400"></i>
+                <span>เอฟเฟกต์แอนิเมชันขยับได้ (Avatar Animations) ✨</span>
+              </span>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <button type="button" onclick="selectAvatarAnim('none')" data-anim-val="none" class="btn-anim-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-slate-300 block">ภาพนิ่ง</span>
+                  <span class="text-[10px] text-slate-500">Static</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('pulse')" data-anim-val="pulse" class="btn-anim-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-sky-400 block">Pulse ย่อขยาย</span>
+                  <span class="text-[10px] text-slate-500">หายใจนุ่มนวล</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('glow')" data-anim-val="glow" class="btn-anim-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-amber-400 block">Glow เรืองแสง</span>
+                  <span class="text-[10px] text-slate-500">แสงนีออนรอบรูป</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('float')" data-anim-val="float" class="btn-anim-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-purple-400 block">Float ลอยน้ำ</span>
+                  <span class="text-[10px] text-slate-500">ลอยขึ้นลงช้าๆ</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('bounce')" data-anim-val="bounce" class="btn-anim-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-emerald-400 block">Bounce เด้ง</span>
+                  <span class="text-[10px] text-slate-500">ขยับดุ๊กดิ๊ก</span>
+                </button>
+                <button type="button" onclick="selectAvatarAnim('rainbow')" data-anim-val="rainbow" class="btn-anim-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
+                  <span class="font-bold text-xs text-pink-400 block">Rainbow สายรุ้ง</span>
+                  <span class="text-[10px] text-slate-500">หมุนเวียนเฉดสี</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 4. Upload Custom Photo or Choose Preset Bottts -->
+            <div class="space-y-3 pt-2 border-t border-slate-800/80">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <i class="bi bi-cloud-arrow-up text-sky-400"></i>
+                  <span>อัปโหลดรูปตัวเอง หรือเลือกรูปสำเร็จรูป</span>
+                </span>
+                <button type="button" onclick="document.getElementById('userProfileFileInput').click()" class="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md shadow-sky-500/20 transition">
+                  <i class="bi bi-image"></i>
+                  <span>เลือกไฟล์รูป</span>
+                </button>
+              </div>
+
+              <!-- Preset Bottts Grid -->
+              <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                <button type="button" onclick="changeAvatarSeed('astro')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=astro" alt="astro" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('cosmo')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cosmo" alt="cosmo" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('cyber')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=cyber" alt="cyber" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('galaxy')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=galaxy" alt="galaxy" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('spark')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=spark" alt="spark" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('nova')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=nova" alt="nova" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                </button>
+                <button type="button" onclick="changeAvatarSeed('quantum')" class="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition group">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=quantum" alt="quantum" class="w-full h-10 object-contain group-hover:scale-110 transition">
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="p-4 border-t border-slate-800/80 bg-slate-900/70 flex items-center justify-between">
+        <button type="button" onclick="resetToDefaultAvatar()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer">
+          <i class="bi bi-arrow-repeat"></i>
+          <span>ใช้ภาพเริ่มต้นระบบ</span>
+        </button>
+        <button type="button" onclick="closeAvatarDrawer()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition cursor-pointer flex items-center gap-2">
+          <i class="bi bi-check-lg"></i>
+          <span>เสร็จสิ้น / ปิดหน้าต่าง</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">

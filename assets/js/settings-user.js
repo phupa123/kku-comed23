@@ -197,6 +197,14 @@
       const match = document.querySelector(`[data-user-tab="${requestedTab}"]`);
       if (match) match.click();
     }
+
+    if (urlParams.get('drawer') === 'avatar' || urlParams.get('edit') === 'avatar') {
+      setTimeout(() => {
+        if (typeof window.openAvatarDrawer === 'function') {
+          window.openAvatarDrawer();
+        }
+      }, 300);
+    }
   }
 
   function populateFormValues() {
@@ -241,7 +249,7 @@
     if (hEmail) hEmail.textContent = currentUser.email;
     if (hAvatar) hAvatar.src = currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.email}`;
 
-    // Profile Card
+    // Profile Card & Drawer Mirror
     const cAvatar = document.getElementById('cardUserAvatar');
     const cFrame = document.getElementById('cardUserAvatarFrame');
     const cName = document.getElementById('cardUserName');
@@ -249,9 +257,22 @@
     const cId = document.getElementById('cardUserId');
     const cBadge = document.getElementById('cardUserBadge');
 
-    if (cAvatar) cAvatar.src = currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.email}`;
+    const dAvatar = document.getElementById('drawerUserAvatar');
+    const dFrame = document.getElementById('drawerUserAvatarFrame');
+    const dName = document.getElementById('drawerUserName');
+    const dEmail = document.getElementById('drawerUserEmail');
+    const dBadgeFrame = document.getElementById('drawerActiveFrameBadge');
+
+    const avatarSrc = currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.email}`;
+    if (cAvatar) cAvatar.src = avatarSrc;
+    if (dAvatar) dAvatar.src = avatarSrc;
+
     if (cName) cName.textContent = currentUser.name;
+    if (dName) dName.textContent = currentUser.name;
+
     if (cEmail) cEmail.textContent = currentUser.email;
+    if (dEmail) dEmail.textContent = currentUser.email;
+
     if (cId) cId.textContent = currentUser.studentId || 'ไม่ระบุรหัสประจำตัว';
     if (cBadge) {
       if (currentUser.isSpecialTester) {
@@ -264,31 +285,33 @@
     }
 
     // Apply Decoration Frame
-    if (cFrame) {
-      // Remove all previous frame classes
-      cFrame.classList.remove('avatar-frame-cyber', 'avatar-frame-gold', 'avatar-frame-neon', 'avatar-frame-emerald', 'avatar-frame-galaxy');
-      const activeFrame = userPrefs.avatarFrame || 'none';
+    const activeFrame = userPrefs.avatarFrame || 'none';
+    if (dBadgeFrame) dBadgeFrame.textContent = `Frame: ${activeFrame.toUpperCase()}`;
+
+    [cFrame, dFrame].forEach(frameEl => {
+      if (!frameEl) return;
+      frameEl.classList.remove('avatar-frame-cyber', 'avatar-frame-gold', 'avatar-frame-neon', 'avatar-frame-emerald', 'avatar-frame-galaxy');
       if (activeFrame !== 'none') {
-        cFrame.classList.add(`avatar-frame-${activeFrame}`);
+        frameEl.classList.add(`avatar-frame-${activeFrame}`);
       }
-    }
+    });
 
     // Apply Animation Effect
-    if (cAvatar) {
-      // Remove all previous anim classes
-      cAvatar.classList.remove('avatar-anim-pulse', 'avatar-anim-glow', 'avatar-anim-float', 'avatar-anim-bounce', 'avatar-anim-rainbow', 'avatar-anim-spin-slow');
-      const activeAnim = userPrefs.avatarAnim || 'none';
-      if (activeAnim !== 'none' && adminUploadConfig.allowAnimations !== false) {
-        cAvatar.classList.add(`avatar-anim-${activeAnim}`);
-      }
+    const activeAnim = userPrefs.avatarAnim || 'none';
+    const tf = userPrefs.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
+    const scaleX = (tf.flipX ? -1 : 1) * (tf.scale || 1);
+    const scaleY = (tf.flipY ? -1 : 1) * (tf.scale || 1);
+    const rotate = tf.rotate || 0;
+    const transformStr = `scale(${scaleX}, ${scaleY}) rotate(${rotate}deg)`;
 
-      // Apply CSS Transformations (Rotate, Zoom, Flip)
-      const tf = userPrefs.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
-      const scaleX = (tf.flipX ? -1 : 1) * (tf.scale || 1);
-      const scaleY = (tf.flipY ? -1 : 1) * (tf.scale || 1);
-      const rotate = tf.rotate || 0;
-      cAvatar.style.transform = `scale(${scaleX}, ${scaleY}) rotate(${rotate}deg)`;
-    }
+    [cAvatar, dAvatar].forEach(avatarEl => {
+      if (!avatarEl) return;
+      avatarEl.classList.remove('avatar-anim-pulse', 'avatar-anim-glow', 'avatar-anim-float', 'avatar-anim-bounce', 'avatar-anim-rainbow', 'avatar-anim-spin-slow');
+      if (activeAnim !== 'none' && adminUploadConfig.allowAnimations !== false) {
+        avatarEl.classList.add(`avatar-anim-${activeAnim}`);
+      }
+      avatarEl.style.transform = transformStr;
+    });
   }
 
   function highlightSelectedDecorations() {
@@ -491,15 +514,27 @@
     } else if (type === 'scale') {
       tf.scale = Math.max(0.5, Math.min(2.5, val));
       const valEl = document.getElementById('avatarZoomValue');
-      if (valEl) valEl.textContent = `${Math.round(tf.scale * 100)}%`;
+      const drawerValEl = document.getElementById('drawerZoomValue');
+      const pctStr = `${Math.round(tf.scale * 100)}%`;
+      if (valEl) valEl.textContent = pctStr;
+      if (drawerValEl) drawerValEl.textContent = pctStr;
+
+      const zoomSlider = document.getElementById('avatarZoomSlider');
+      const drawerZoomSlider = document.getElementById('drawerZoomSlider');
+      if (zoomSlider) zoomSlider.value = tf.scale;
+      if (drawerZoomSlider) drawerZoomSlider.value = tf.scale;
     } else if (type === 'flipX') {
       tf.flipX = !tf.flipX;
       const btn = document.getElementById('btnFlipX');
+      const btnDrawer = document.getElementById('btnDrawerFlipX');
       if (btn) btn.classList.toggle('border-sky-500', tf.flipX);
+      if (btnDrawer) btnDrawer.classList.toggle('border-sky-500', tf.flipX);
     } else if (type === 'flipY') {
       tf.flipY = !tf.flipY;
       const btn = document.getElementById('btnFlipY');
+      const btnDrawer = document.getElementById('btnDrawerFlipY');
       if (btn) btn.classList.toggle('border-sky-500', tf.flipY);
+      if (btnDrawer) btnDrawer.classList.toggle('border-sky-500', tf.flipY);
     }
 
     if (currentUser) {
@@ -519,18 +554,72 @@
 
     const zoomSlider = document.getElementById('avatarZoomSlider');
     const zoomVal = document.getElementById('avatarZoomValue');
+    const drawerZoomSlider = document.getElementById('drawerZoomSlider');
+    const drawerZoomVal = document.getElementById('drawerZoomValue');
     const btnFlipX = document.getElementById('btnFlipX');
     const btnFlipY = document.getElementById('btnFlipY');
+    const btnDrawerFlipX = document.getElementById('btnDrawerFlipX');
+    const btnDrawerFlipY = document.getElementById('btnDrawerFlipY');
 
     if (zoomSlider) zoomSlider.value = 1;
     if (zoomVal) zoomVal.textContent = '100%';
+    if (drawerZoomSlider) drawerZoomSlider.value = 1;
+    if (drawerZoomVal) drawerZoomVal.textContent = '100%';
+
     if (btnFlipX) btnFlipX.classList.remove('border-sky-500');
     if (btnFlipY) btnFlipY.classList.remove('border-sky-500');
+    if (btnDrawerFlipX) btnDrawerFlipX.classList.remove('border-sky-500');
+    if (btnDrawerFlipY) btnDrawerFlipY.classList.remove('border-sky-500');
 
     renderUserProfile();
     safeSaveUserSession(currentUser);
     localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
     showToast('รีเซ็ตการปรับแต่งรูปโปรไฟล์แล้ว', 'info');
+  };
+
+  // -------------------------------------------------------------------------
+  // AVATAR DRESSING ROOM SLIDE DRAWER CONTROLLERS (SLIDE FROM RIGHT)
+  // -------------------------------------------------------------------------
+  window.openAvatarDrawer = function () {
+    const backdrop = document.getElementById('avatarDrawerBackdrop');
+    const panel = document.getElementById('avatarDrawerPanel');
+    if (!backdrop || !panel) return;
+
+    renderUserProfile();
+    highlightSelectedDecorations();
+
+    // Sync drawer controls with current preferences
+    const tf = userPrefs.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
+    const drawerZoomSlider = document.getElementById('drawerZoomSlider');
+    const drawerZoomVal = document.getElementById('drawerZoomValue');
+    const btnDrawerFlipX = document.getElementById('btnDrawerFlipX');
+    const btnDrawerFlipY = document.getElementById('btnDrawerFlipY');
+
+    if (drawerZoomSlider) drawerZoomSlider.value = tf.scale || 1;
+    if (drawerZoomVal) drawerZoomVal.textContent = `${Math.round((tf.scale || 1) * 100)}%`;
+    if (btnDrawerFlipX) btnDrawerFlipX.classList.toggle('border-sky-500', !!tf.flipX);
+    if (btnDrawerFlipY) btnDrawerFlipY.classList.toggle('border-sky-500', !!tf.flipY);
+
+    backdrop.classList.remove('opacity-0', 'pointer-events-none');
+    backdrop.classList.add('opacity-100');
+    panel.classList.remove('translate-x-full');
+    panel.classList.add('translate-x-0');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeAvatarDrawer = function (e) {
+    if (e && e.target && e.target !== document.getElementById('avatarDrawerBackdrop')) {
+      // If clicking inside drawer, do nothing unless clicking close button
+    }
+    const backdrop = document.getElementById('avatarDrawerBackdrop');
+    const panel = document.getElementById('avatarDrawerPanel');
+    if (!backdrop || !panel) return;
+
+    panel.classList.remove('translate-x-0');
+    panel.classList.add('translate-x-full');
+    backdrop.classList.remove('opacity-100');
+    backdrop.classList.add('opacity-0', 'pointer-events-none');
+    document.body.style.overflow = '';
   };
 
   // Random and Seed Avatar Helpers
