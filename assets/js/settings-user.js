@@ -126,6 +126,37 @@
     highlightSelectedDecorations();
   }
 
+  function populateFormValues() {
+    if (!currentUser) return;
+
+    const inputName = document.getElementById('prefDisplayName');
+    const inputNick = document.getElementById('prefNickname');
+    const inputPhone = document.getElementById('prefPhone');
+    const inputBio = document.getElementById('prefBio');
+    const inputStudentId = document.getElementById('prefStudentId');
+    const inputEmail = document.getElementById('prefEmail');
+
+    if (inputName) inputName.value = currentUser.name || '';
+    if (inputNick) inputNick.value = currentUser.nickname || '';
+    if (inputPhone) inputPhone.value = currentUser.phone || '';
+    if (inputBio) inputBio.value = currentUser.bio || '';
+    if (inputStudentId) inputStudentId.value = currentUser.studentId || '';
+    if (inputEmail) inputEmail.value = currentUser.email || '';
+
+    // Checkboxes & Preferences
+    const chkNotifyPay = document.getElementById('chkNotifyPayment');
+    const chkNotifyEvent = document.getElementById('chkNotifyEvent');
+    const chkNotifyCloud = document.getElementById('chkNotifyCloud');
+    const chkCloudAuto = document.getElementById('chkCloudAutoSave');
+    const chkPublicProfile = document.getElementById('chkPublicProfile');
+
+    if (chkNotifyPay) chkNotifyPay.checked = userPrefs.notifyPayment !== false;
+    if (chkNotifyEvent) chkNotifyEvent.checked = userPrefs.notifyEvent !== false;
+    if (chkNotifyCloud) chkNotifyCloud.checked = userPrefs.notifyCloud !== false;
+    if (chkCloudAuto) chkCloudAuto.checked = userPrefs.cloudAutoSave !== false;
+    if (chkPublicProfile) chkPublicProfile.checked = userPrefs.publicProfile !== false;
+  }
+
   function renderUserProfile() {
     if (!currentUser) return;
 
