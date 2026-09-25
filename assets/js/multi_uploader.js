@@ -831,4 +831,30 @@
   window.MultiCloudUploader.instance = window.multiCloudUploader;
   window.MultiCloudUploader.getInstance = () => window.multiCloudUploader;
 
+  // Delegate all instance methods & getters/setters directly to window.MultiCloudUploader static object
+  // so callers like `window.MultiCloudUploader.getAllFiles()`, `.upload()`, `.config`, etc. work seamlessly
+  const instance = window.multiCloudUploader;
+  const proto = MultiCloudUploader.prototype;
+  Object.getOwnPropertyNames(proto).forEach(prop => {
+    if (prop !== 'constructor' && typeof proto[prop] === 'function') {
+      if (!MultiCloudUploader[prop]) {
+        MultiCloudUploader[prop] = function(...args) {
+          return instance[prop].apply(instance, args);
+        };
+      }
+    }
+  });
+
+  // Proxy state properties: config, fileCatalog, memberSettings
+  ['config', 'fileCatalog', 'memberSettings'].forEach(prop => {
+    if (!(prop in MultiCloudUploader)) {
+      Object.defineProperty(MultiCloudUploader, prop, {
+        get() { return instance[prop]; },
+        set(val) { instance[prop] = val; },
+        configurable: true,
+        enumerable: true
+      });
+    }
+  });
+
 })(window);

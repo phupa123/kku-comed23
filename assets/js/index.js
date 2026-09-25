@@ -682,13 +682,16 @@ function checkUserSession() {
 }
 
 // Render Students Roster with Avatar & Frames
-function getStudentProfileData(email) {
-  if (!email) return null;
-  const cleanEmail = email.toLowerCase().trim();
+function getStudentProfileData(email, studentId) {
+  const cleanEmail = email ? email.toLowerCase().trim() : '';
+  const cleanId = studentId ? studentId.trim() : '';
   try {
     const profiles = JSON.parse(localStorage.getItem('COMED_CUSTOM_USERS_PROFILES_V1') || '{}');
-    if (profiles[cleanEmail]) {
+    if (cleanEmail && profiles[cleanEmail]) {
       return profiles[cleanEmail];
+    }
+    if (cleanId && profiles[cleanId]) {
+      return profiles[cleanId];
     }
   } catch (e) {}
 
@@ -697,7 +700,10 @@ function getStudentProfileData(email) {
     const sessionRaw = localStorage.getItem('COMED_USER_SESSION');
     if (sessionRaw) {
       const sess = JSON.parse(sessionRaw);
-      if (sess.email && sess.email.toLowerCase().trim() === cleanEmail) {
+      if (cleanEmail && sess.email && sess.email.toLowerCase().trim() === cleanEmail) {
+        return sess;
+      }
+      if (cleanId && sess.studentId && sess.studentId.trim() === cleanId) {
         return sess;
       }
     }
@@ -716,7 +722,7 @@ function renderRoster(students) {
   }
 
   grid.innerHTML = students.map((st, idx) => {
-    const customProfile = getStudentProfileData(st.email);
+    const customProfile = getStudentProfileData(st.email, st.id);
     
     // Determine Avatar URL
     const avatarUrl = customProfile?.avatar 
@@ -784,7 +790,7 @@ function openStudentProfileModal(studentId) {
   const student = allStudents.find(s => s.id === studentId);
   if (!student) return;
 
-  const customProfile = getStudentProfileData(student.email);
+  const customProfile = getStudentProfileData(student.email, student.id);
   const modal = document.getElementById('modalStudentProfile');
   const card = document.getElementById('studentProfileCard');
   if (!modal || !card) return;

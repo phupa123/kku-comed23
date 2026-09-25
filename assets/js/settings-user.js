@@ -630,7 +630,10 @@
         const uploadResult = await uploader.upload(file, {
           folder: 'comed_user_avatars',
           tags: ['avatar', currentUser.email],
+          uploaderId: currentUser.studentId || currentUser.id || 'Member',
+          uploaderName: currentUser.name || 'สมาชิก KKU COMED',
           uploaderEmail: currentUser.email,
+          category: 'รูปโปรไฟล์',
           signal: currentAbortController ? currentAbortController.signal : undefined,
           onProgress: (percent, msg, meta) => {
             // percent = 0-100 from the uploader (already mapped to 10-95 range in uploader)
@@ -925,7 +928,7 @@
       const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
       const storedProfiles = JSON.parse(localStorage.getItem(profilesKey) || '{}');
       const emailKey = currentUser.email.toLowerCase().trim();
-      storedProfiles[emailKey] = {
+      const profileData = {
         name: currentUser.name,
         nickname: currentUser.nickname,
         phone: currentUser.phone,
@@ -937,6 +940,10 @@
         avatarTransform: currentUser.avatarTransform || userPrefs.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false },
         updatedAt: new Date().toISOString()
       };
+      storedProfiles[emailKey] = profileData;
+      if (currentUser.studentId) {
+        storedProfiles[currentUser.studentId.trim()] = profileData;
+      }
       localStorage.setItem(profilesKey, JSON.stringify(storedProfiles));
     } catch (e) {
       console.warn("syncCustomProfileToStorage failed", e);
