@@ -681,7 +681,31 @@ function checkUserSession() {
   } catch(e) {}
 }
 
-// Render Students Roster
+// Render Students Roster with Avatar & Frames
+function getStudentProfileData(email) {
+  if (!email) return null;
+  const cleanEmail = email.toLowerCase().trim();
+  try {
+    const profiles = JSON.parse(localStorage.getItem('COMED_CUSTOM_USERS_PROFILES_V1') || '{}');
+    if (profiles[cleanEmail]) {
+      return profiles[cleanEmail];
+    }
+  } catch (e) {}
+
+  // Check current session if it matches
+  try {
+    const sessionRaw = localStorage.getItem('COMED_USER_SESSION');
+    if (sessionRaw) {
+      const sess = JSON.parse(sessionRaw);
+      if (sess.email && sess.email.toLowerCase().trim() === cleanEmail) {
+        return sess;
+      }
+    }
+  } catch (e) {}
+
+  return null;
+}
+
 function renderRoster(students) {
   const grid = document.getElementById('rosterGrid');
   if (!grid) return;
@@ -692,26 +716,165 @@ function renderRoster(students) {
   }
 
   grid.innerHTML = students.map((st, idx) => {
+    const customProfile = getStudentProfileData(st.email);
+    
+    // Determine Avatar URL
+    const avatarUrl = customProfile?.avatar 
+      ? customProfile.avatar 
+      : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(st.email || st.name)}`;
+
+    // Frame & Animation
+    const frame = customProfile?.avatarFrame && customProfile.avatarFrame !== 'none' 
+      ? `avatar-frame-${customProfile.avatarFrame}` 
+      : 'border-2 border-orange-500/30';
+
+    const anim = customProfile?.avatarAnim && customProfile.avatarAnim !== 'none'
+      ? `avatar-anim-${customProfile.avatarAnim}`
+      : '';
+
+    // Transform Matrix
+    const tf = customProfile?.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
+    const scaleX = (tf.flipX ? -1 : 1) * (tf.scale || 1);
+    const scaleY = (tf.flipY ? -1 : 1) * (tf.scale || 1);
+    const rotate = tf.rotate || 0;
+    const transformStyle = `transform: scale(${scaleX}, ${scaleY}) rotate(${rotate}deg);`;
+
+    const displayName = customProfile?.name || st.name;
+    const displayNick = customProfile?.nickname || st.nickname;
+
     return `
-      <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-orange-500/50 hover:bg-slate-900 transition-all duration-300 group hover:-translate-y-0.5 shadow-md">
+      <div onclick="openStudentProfileModal('${st.id}')"
+        class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-orange-500/50 hover:bg-slate-900/95 transition-all duration-300 group hover:-translate-y-0.5 shadow-md cursor-pointer relative overflow-hidden"
+        title="คลิกดูโปรไฟล์ของ ${displayName}">
+        
         <div class="flex items-center gap-3.5">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-500/20 to-amber-500/15 text-orange-400 border border-orange-500/30 flex items-center justify-center font-black text-sm flex-shrink-0 group-hover:scale-105 group-hover:border-orange-500 transition shadow-inner">
-            ${st.nickname.slice(0, 1) || st.name.slice(0, 1)}
+          <!-- Profile Avatar with Frame & Animation Wrapper -->
+          <div class="w-12 h-12 rounded-2xl bg-slate-950 p-0.5 ${frame} flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden relative shadow-inner">
+            <div class="w-full h-full rounded-xl overflow-hidden flex items-center justify-center ${anim}">
+              <img src="${avatarUrl}" alt="${displayName}" class="w-full h-full object-cover rounded-xl" style="${transformStyle}" loading="lazy">
+            </div>
           </div>
+
           <div class="min-w-0 flex-grow">
             <div class="flex items-center justify-between gap-1.5">
-              <span class="font-bold text-white text-xs truncate group-hover:text-orange-300 transition-colors">${st.name}</span>
-              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800/90 text-amber-300 font-black flex-shrink-0 border border-amber-400/20">น้อง${st.nickname}</span>
+              <span class="font-bold text-white text-xs truncate group-hover:text-orange-300 transition-colors">${displayName}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800/90 text-amber-300 font-black flex-shrink-0 border border-amber-400/20">น้อง${displayNick}</span>
             </div>
-            <div class="text-[11px] text-slate-400 font-mono mt-0.5 truncate flex items-center gap-1">
-              <i data-lucide="hash" class="w-3 h-3 text-slate-500"></i>
-              <span>${st.id}</span>
+            <div class="text-[11px] text-slate-400 font-mono mt-1 truncate flex items-center justify-between">
+              <span class="flex items-center gap-1">
+                <i data-lucide="hash" class="w-3 h-3 text-slate-500"></i>
+                <span>${st.id}</span>
+              </span>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-600 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all"></i>
             </div>
           </div>
         </div>
       </div>
     `;
   }).join('');
+
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  }
+}
+
+// Open Friend Profile Modal
+function openStudentProfileModal(studentId) {
+  const allStudents = window.STUDENTS_DATA || [];
+  const student = allStudents.find(s => s.id === studentId);
+  if (!student) return;
+
+  const customProfile = getStudentProfileData(student.email);
+  const modal = document.getElementById('modalStudentProfile');
+  const card = document.getElementById('studentProfileCard');
+  if (!modal || !card) return;
+
+  const nameEl = document.getElementById('modalStudentName');
+  const nickEl = document.getElementById('modalStudentNickname');
+  const idEl = document.getElementById('modalStudentId');
+  const emailEl = document.getElementById('modalStudentEmail');
+  const bioEl = document.getElementById('modalStudentBio');
+  const avatarImg = document.getElementById('modalStudentAvatar');
+  const avatarFrame = document.getElementById('modalStudentAvatarFrame');
+  const avatarAnimWrapper = document.getElementById('modalStudentAvatarAnimWrapper');
+
+  const avatarUrl = customProfile?.avatar 
+    ? customProfile.avatar 
+    : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(student.email || student.name)}`;
+
+  if (nameEl) nameEl.textContent = customProfile?.name || student.name;
+  if (nickEl) nickEl.textContent = `น้อง${customProfile?.nickname || student.nickname}`;
+  if (idEl) idEl.innerHTML = `<i data-lucide="hash" class="w-3.5 h-3.5 text-slate-500"></i><span>${student.id}</span>`;
+  if (emailEl) {
+    emailEl.textContent = student.email;
+    emailEl.href = `mailto:${student.email}`;
+  }
+  if (bioEl) {
+    bioEl.textContent = customProfile?.bio ? `"${customProfile.bio}"` : `"ยินดีที่ได้รู้จักเพื่อนๆ COMED23 ทุกคนครับ/ค่ะ"`;
+  }
+
+  // Set Avatar, Frame & Animation
+  if (avatarImg) {
+    avatarImg.src = avatarUrl;
+    const tf = customProfile?.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
+    const scaleX = (tf.flipX ? -1 : 1) * (tf.scale || 1);
+    const scaleY = (tf.flipY ? -1 : 1) * (tf.scale || 1);
+    const rotate = tf.rotate || 0;
+    avatarImg.style.transform = `scale(${scaleX}, ${scaleY}) rotate(${rotate}deg)`;
+  }
+
+  if (avatarFrame) {
+    avatarFrame.className = 'w-28 h-28 rounded-3xl bg-slate-900 p-1 border-2 shadow-2xl overflow-hidden relative';
+    if (customProfile?.avatarFrame && customProfile.avatarFrame !== 'none') {
+      avatarFrame.classList.add(`avatar-frame-${customProfile.avatarFrame}`);
+    } else {
+      avatarFrame.classList.add('border-orange-500/40');
+    }
+  }
+
+  if (avatarAnimWrapper) {
+    avatarAnimWrapper.className = 'w-full h-full rounded-2xl overflow-hidden flex items-center justify-center';
+    if (customProfile?.avatarAnim && customProfile.avatarAnim !== 'none') {
+      avatarAnimWrapper.classList.add(`avatar-anim-${customProfile.avatarAnim}`);
+    }
+  }
+
+  modal.classList.remove('hidden');
+
+  if (typeof gsap !== 'undefined') {
+    gsap.fromTo(card, 
+      { opacity: 0, scale: 0.85, y: 25 }, 
+      { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: "back.out(1.6)" }
+    );
+  }
+
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  }
+}
+
+function closeStudentProfileModal(e) {
+  if (e && e.target && e.target !== document.getElementById('modalStudentProfile')) {
+    return;
+  }
+  const modal = document.getElementById('modalStudentProfile');
+  const card = document.getElementById('studentProfileCard');
+  if (!modal || !card) return;
+
+  if (typeof gsap !== 'undefined') {
+    gsap.to(card, {
+      opacity: 0,
+      scale: 0.85,
+      y: 15,
+      duration: 0.25,
+      ease: "power2.in",
+      onComplete: () => {
+        modal.classList.add('hidden');
+      }
+    });
+  } else {
+    modal.classList.add('hidden');
+  }
 }
 
 function filterRoster() {
@@ -723,12 +886,14 @@ function filterRoster() {
     renderRoster(allStudents);
     return;
   }
-  const filtered = allStudents.filter(st => 
-    st.name.toLowerCase().includes(q) ||
-    st.nickname.toLowerCase().includes(q) ||
-    st.id.replace(/-/g, '').includes(q.replace(/-/g, '')) ||
-    st.email.toLowerCase().includes(q)
-  );
+  const filtered = allStudents.filter(st => {
+    const custom = getStudentProfileData(st.email);
+    const nameMatch = (st.name.toLowerCase().includes(q)) || (custom?.name && custom.name.toLowerCase().includes(q));
+    const nickMatch = (st.nickname.toLowerCase().includes(q)) || (custom?.nickname && custom.nickname.toLowerCase().includes(q));
+    const idMatch = st.id.replace(/-/g, '').includes(q.replace(/-/g, ''));
+    const emailMatch = st.email.toLowerCase().includes(q);
+    return nameMatch || nickMatch || idMatch || emailMatch;
+  });
   renderRoster(filtered);
 }
 

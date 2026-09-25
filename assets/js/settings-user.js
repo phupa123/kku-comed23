@@ -601,6 +601,7 @@
 
       // Safe update in localStorage (Prevent QuotaExceededError)
       safeSaveUserSession(currentUser);
+      syncCustomProfileToStorage();
 
       // Show Success State inside Modal
       showProgressSuccess(
@@ -724,6 +725,7 @@
     renderUserProfile();
     safeSaveUserSession(currentUser);
     localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+    syncCustomProfileToStorage();
   };
 
   window.resetAvatarTransforms = function () {
@@ -754,6 +756,7 @@
     renderUserProfile();
     safeSaveUserSession(currentUser);
     localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+    syncCustomProfileToStorage();
     showToast('รีเซ็ตการปรับแต่งรูปโปรไฟล์แล้ว', 'info');
   };
 
@@ -809,8 +812,9 @@
     userPrefs.avatarSeed = randomSeed;
     currentUser.avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${randomSeed}`;
     renderUserProfile();
-    localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+    safeSaveUserSession(currentUser);
     localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+    syncCustomProfileToStorage();
     showToast('🎲 สุ่มรูปอวาตาร์ใหม่เรียบร้อยแล้ว!', 'info');
   };
 
@@ -819,8 +823,9 @@
     userPrefs.avatarSeed = seed;
     currentUser.avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
     renderUserProfile();
-    localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+    safeSaveUserSession(currentUser);
     localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+    syncCustomProfileToStorage();
     showToast(`เลือกอวาตาร์: ${seed}`, 'info');
   };
 
@@ -829,9 +834,35 @@
     if (!currentUser) return;
     currentUser.avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(currentUser.email)}`;
     renderUserProfile();
-    localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+    safeSaveUserSession(currentUser);
+    syncCustomProfileToStorage();
     showToast('รีเซ็ตรูปโปรไฟล์กลับเป็นค่าเริ่มต้นแล้ว', 'info');
   };
+
+  // Sync User Profile for Public Roster & Directory Display
+  function syncCustomProfileToStorage() {
+    if (!currentUser || !currentUser.email) return;
+    try {
+      const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
+      const storedProfiles = JSON.parse(localStorage.getItem(profilesKey) || '{}');
+      const emailKey = currentUser.email.toLowerCase().trim();
+      storedProfiles[emailKey] = {
+        name: currentUser.name,
+        nickname: currentUser.nickname,
+        phone: currentUser.phone,
+        bio: currentUser.bio,
+        studentId: currentUser.studentId,
+        avatar: currentUser.avatar,
+        avatarFrame: currentUser.avatarFrame || userPrefs.avatarFrame || 'none',
+        avatarAnim: currentUser.avatarAnim || userPrefs.avatarAnim || 'none',
+        avatarTransform: currentUser.avatarTransform || userPrefs.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false },
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(profilesKey, JSON.stringify(storedProfiles));
+    } catch (e) {
+      console.warn("syncCustomProfileToStorage failed", e);
+    }
+  }
 
   // Select Avatar Frame
   window.selectAvatarFrame = function (frameName) {
@@ -839,6 +870,9 @@
     if (currentUser) currentUser.avatarFrame = frameName;
     renderUserProfile();
     highlightSelectedDecorations();
+    safeSaveUserSession(currentUser);
+    localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+    syncCustomProfileToStorage();
     showToast(`เลือกกรอบรูป: ${frameName.toUpperCase()}`, 'info');
   };
 
@@ -852,6 +886,9 @@
     if (currentUser) currentUser.avatarAnim = animName;
     renderUserProfile();
     highlightSelectedDecorations();
+    safeSaveUserSession(currentUser);
+    localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+    syncCustomProfileToStorage();
     showToast(`เลือกแอนิเมชัน: ${animName.toUpperCase()}`, 'info');
   };
 
