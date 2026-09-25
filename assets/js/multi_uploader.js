@@ -246,6 +246,10 @@
      * @param {Object} options - { onProgress: function(percent, statusText), preferredProvider: string, customName: string }
      * @returns {Promise<{url: string, provider: string, publicId: string, success: boolean}>}
      */
+    async uploadFile(fileInput, options = {}) {
+      return this.upload(fileInput, options);
+    }
+
     async upload(fileInput, options = {}) {
       const onProgress = options.onProgress || (() => {});
       const preferred = options.preferredProvider || this.config.activeProvider || 'auto';
@@ -779,7 +783,10 @@
     }
   }
 
-  // Expose global instance
-  window.MultiCloudUploader = new MultiCloudUploader();
+  // Expose both class constructor and singleton instance on window
+  window.MultiCloudUploader = MultiCloudUploader;
+  window.multiCloudUploader = new MultiCloudUploader();
+  window.MultiCloudUploader.instance = window.multiCloudUploader;
+  window.MultiCloudUploader.getInstance = () => window.multiCloudUploader;
 
 })(window);

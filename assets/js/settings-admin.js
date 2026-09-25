@@ -658,20 +658,27 @@ async function handleAdminUploadUserAvatar(e) {
     let uploadedUrl = null;
     let providerName = 'Cloud';
 
-    if (window.MultiCloudUploader) {
-      const uploader = new window.MultiCloudUploader({
-        strategy: 'priority',
-        priority: ['cloudinary', 'catbox', 'imgbb']
-      });
+    if (window.MultiCloudUploader || window.multiCloudUploader) {
+      let uploader = null;
+      if (typeof window.MultiCloudUploader === 'function') {
+        uploader = new window.MultiCloudUploader();
+      } else if (window.multiCloudUploader) {
+        uploader = window.multiCloudUploader;
+      } else {
+        uploader = window.MultiCloudUploader;
+      }
 
-      const res = await uploader.uploadFile(file, {
-        folder: 'comed_admin_managed_avatars',
-        tags: ['admin_override', currentEditingUserEmail || 'user']
-      });
+      if (uploader && typeof (uploader.upload || uploader.uploadFile) === 'function') {
+        const uploadFn = uploader.uploadFile ? uploader.uploadFile.bind(uploader) : uploader.upload.bind(uploader);
+        const res = await uploadFn(file, {
+          folder: 'comed_admin_managed_avatars',
+          tags: ['admin_override', currentEditingUserEmail || 'user']
+        });
 
-      if (res && res.url) {
-        uploadedUrl = res.url;
-        providerName = res.provider || 'Cloud';
+        if (res && res.url) {
+          uploadedUrl = res.url;
+          providerName = res.provider || 'Cloud';
+        }
       }
     }
 
