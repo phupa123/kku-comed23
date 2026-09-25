@@ -281,6 +281,17 @@ function updateUserUI(user) {
   const emailEl = document.getElementById('navUserEmail');
 
   if (user && user.email) {
+    // Sync with custom profile overrides from admin/settings if present
+    try {
+      const storedProfiles = JSON.parse(localStorage.getItem('COMED_CUSTOM_USERS_PROFILES_V1') || '{}');
+      const custom = storedProfiles[user.email.toLowerCase().trim()];
+      if (custom) {
+        if (custom.avatar) user.avatar = custom.avatar;
+        if (custom.avatarFrame) user.avatarFrame = custom.avatarFrame;
+        if (custom.avatarAnim) user.avatarAnim = custom.avatarAnim;
+      }
+    } catch(e) {}
+
     if (guestNav) guestNav.classList.add('hidden');
     if (loggedNav) {
       loggedNav.classList.remove('hidden');

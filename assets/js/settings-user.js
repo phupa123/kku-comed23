@@ -99,8 +99,24 @@
       }
     } catch (e) {}
 
-    // Synchronize frame and anim from user object if stored there
-    if (currentUser) {
+    // Synchronize frame and anim from user object or admin overridden store
+    if (currentUser && currentUser.email) {
+      try {
+        const storedProfiles = JSON.parse(localStorage.getItem('COMED_CUSTOM_USERS_PROFILES_V1') || '{}');
+        const custom = storedProfiles[currentUser.email.toLowerCase().trim()];
+        if (custom) {
+          if (custom.avatar) currentUser.avatar = custom.avatar;
+          if (custom.avatarFrame) {
+            currentUser.avatarFrame = custom.avatarFrame;
+            userPrefs.avatarFrame = custom.avatarFrame;
+          }
+          if (custom.avatarAnim) {
+            currentUser.avatarAnim = custom.avatarAnim;
+            userPrefs.avatarAnim = custom.avatarAnim;
+          }
+        }
+      } catch(e) {}
+
       if (currentUser.avatarFrame) userPrefs.avatarFrame = currentUser.avatarFrame;
       if (currentUser.avatarAnim) userPrefs.avatarAnim = currentUser.avatarAnim;
     }
@@ -355,6 +371,28 @@
       if (progressBox) progressBox.classList.add('hidden');
       showToast('เกิดข้อผิดพลาดในการอัปโหลดภาพ กรุณาลองใหม่อีกครั้ง', 'error');
     }
+  };
+
+  // Random and Seed Avatar Helpers
+  window.generateRandomAvatar = function () {
+    if (!currentUser) return;
+    const randomSeed = 'comed_' + Math.random().toString(36).substring(2, 9);
+    userPrefs.avatarSeed = randomSeed;
+    currentUser.avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${randomSeed}`;
+    renderUserProfile();
+    localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+    localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+    showToast('🎲 สุ่มรูปอวาตาร์ใหม่เรียบร้อยแล้ว!', 'info');
+  };
+
+  window.changeAvatarSeed = function (seed) {
+    if (!currentUser) return;
+    userPrefs.avatarSeed = seed;
+    currentUser.avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
+    renderUserProfile();
+    localStorage.setItem(USER_SESSION_KEY, JSON.stringify(currentUser));
+    localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
+    showToast(`เลือกอวาตาร์: ${seed}`, 'info');
   };
 
   // Reset to default Dicebear avatar

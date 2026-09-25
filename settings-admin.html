@@ -106,8 +106,16 @@
     <!-- Navigation Settings Tabs -->
     <div class="hub-glass p-2.5 rounded-2xl border border-slate-800/90 flex items-center gap-2 overflow-x-auto custom-scrollbar">
       <button type="button" onclick="switchSettingsTab('admins')" id="btnTabAdmins" class="filter-tab-btn active px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap cursor-pointer">
-        <i data-lucide="users" class="w-4 h-4 text-sky-400"></i>
+        <i data-lucide="shield" class="w-4 h-4 text-sky-400"></i>
         <span>ผู้ดูแลระบบ (Admins)</span>
+      </button>
+      <button type="button" onclick="switchSettingsTab('users')" id="btnTabUsers" class="filter-tab-btn px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap cursor-pointer">
+        <i data-lucide="users" class="w-4 h-4 text-cyan-400"></i>
+        <span>ผู้ใช้ & โปรไฟล์ (Users & Profiles)</span>
+      </button>
+      <button type="button" onclick="switchSettingsTab('storage')" id="btnTabStorage" class="filter-tab-btn px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap cursor-pointer">
+        <i data-lucide="cloud-upload" class="w-4 h-4 text-pink-400"></i>
+        <span>เลือกคลาวด์จัดเก็บ (Profile Storage)</span>
       </button>
       <button type="button" onclick="switchSettingsTab('apis')" id="btnTabApis" class="filter-tab-btn px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap cursor-pointer">
         <i data-lucide="key" class="w-4 h-4 text-amber-400"></i>
@@ -116,10 +124,6 @@
       <button type="button" onclick="switchSettingsTab('site')" id="btnTabSite" class="filter-tab-btn px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap cursor-pointer">
         <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
         <span>ข้อมูลเว็บไซต์ & ประชาสัมพันธ์</span>
-      </button>
-      <button type="button" onclick="switchSettingsTab('storage')" id="btnTabStorage" class="filter-tab-btn px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap cursor-pointer">
-        <i data-lucide="image" class="w-4 h-4 text-pink-400"></i>
-        <span>อัปโหลดโปรไฟล์ & คลาวด์จัดเก็บ (Profile Storage)</span>
       </button>
       <button type="button" onclick="switchSettingsTab('backup')" id="btnTabBackup" class="filter-tab-btn px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-2 whitespace-nowrap cursor-pointer">
         <i data-lucide="database" class="w-4 h-4 text-purple-400"></i>
@@ -212,6 +216,164 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- TAB: USERS & PROFILES MANAGEMENT -->
+    <div id="sectionSettingsUsers" class="hidden space-y-6">
+      
+      <!-- Users Search & Overview Hub -->
+      <div class="hub-glass p-6 sm:p-7 rounded-3xl border border-slate-800 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold">
+              <i data-lucide="users" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-white">จัดการข้อมูลผู้ใช้ & โปรไฟล์ (Users & Avatars)</h3>
+              <p class="text-xs text-slate-400">ตรวจสอบ แก้ไขรูปภาพโปรไฟล์ เปลี่ยนกรอบนีออน หรือแอนิเมชันให้ผู้ใช้และนักศึกษาทุกคน</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <span id="badgeUsersTotal" class="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">
+              60 คน
+            </span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+          <div class="relative flex-grow w-full">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            <input type="text" id="adminUserSearchInput" oninput="filterAdminUserList()" placeholder="ค้นหาด้วยชื่อ, ชื่อเล่น, รหัสนักศึกษา หรืออีเมล..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-cyan-500 transition">
+          </div>
+          <button type="button" onclick="renderAdminUsersTable()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span>รีเฟรช</span>
+          </button>
+        </div>
+
+        <!-- Users Table -->
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+                <th class="py-3 px-4">รูปภาพ / อวาตาร์</th>
+                <th class="py-3 px-4">ชื่อ - นามสกุล</th>
+                <th class="py-3 px-4">รหัสนักศึกษา</th>
+                <th class="py-3 px-4">อีเมล KKU</th>
+                <th class="py-3 px-4">กรอบรูป / แอนิเมชัน</th>
+                <th class="py-3 px-4 text-center">จัดการโปรไฟล์</th>
+              </tr>
+            </thead>
+            <tbody id="adminUsersTableBody" class="divide-y divide-slate-800/60">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MODAL: EDIT USER PROFILE & AVATAR DECORATIONS -->
+    <div id="modalAdminEditUser" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+      <div class="relative bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-slate-800 shadow-2xl space-y-5 overflow-hidden">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">
+              <i data-lucide="user-cog" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-white">จัดการและตกแต่งโปรไฟล์ผู้ใช้</h3>
+              <p id="admEditUserSub" class="text-[11px] text-slate-400">แก้ไขรูปภาพ กรอบรูป และเอฟเฟกต์แอนิเมชัน</p>
+            </div>
+          </div>
+          <button type="button" onclick="closeAdminEditUserModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Preview Card -->
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center gap-4">
+          <div class="relative flex-shrink-0">
+            <div id="admEditAvatarFrame" class="w-16 h-16 rounded-2xl bg-slate-900 p-1 border-2 border-slate-800 flex items-center justify-center overflow-hidden transition-all duration-300">
+              <img id="admEditAvatarImg" src="" alt="Avatar" class="w-full h-full object-cover rounded-xl transition-all duration-300">
+            </div>
+          </div>
+          <div class="min-w-0 flex-grow">
+            <h4 id="admEditUserName" class="text-sm font-black text-white truncate">ชื่อผู้ใช้</h4>
+            <p id="admEditUserEmail" class="text-xs text-sky-400 font-mono truncate">email@kkumail.com</p>
+            <div class="flex items-center gap-2 mt-1">
+              <span id="admEditBadgeFrame" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">กรอบ: ไม่มี</span>
+              <span id="admEditBadgeAnim" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">แอนิเมชัน: ไม่มี</span>
+            </div>
+          </div>
+        </div>
+
+        <form id="formAdminEditUser" onsubmit="handleSaveAdminUserEdit(event)" class="space-y-4 text-xs">
+          <input type="hidden" id="admEditUserKey">
+
+          <!-- Upload or Random Picture -->
+          <div class="space-y-2">
+            <label class="font-bold text-slate-300">เปลี่ยนรูปโปรไฟล์ (Avatar URL หรืออัปโหลดตรง)</label>
+            <div class="flex gap-2">
+              <input type="text" id="admEditAvatarUrl" placeholder="https://..." class="flex-grow px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-[11px] outline-none focus:border-cyan-500">
+              <button type="button" onclick="adminRandomizeAvatar()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="shuffle" class="w-3.5 h-3.5"></i>
+                <span>สุ่ม</span>
+              </button>
+            </div>
+            
+            <div class="flex items-center gap-2 pt-1">
+              <input type="file" id="admUploadAvatarInput" accept="image/*" class="hidden" onchange="handleAdminUploadUserAvatar(event)">
+              <button type="button" onclick="document.getElementById('admUploadAvatarInput').click()" class="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-bold text-[11px] flex items-center gap-1.5 cursor-pointer">
+                <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                <span>อัปโหลดรูปให้ผู้ใช้นี้ (ผ่าน Cloud ที่เลือก)</span>
+              </button>
+              <span id="admUploadStatus" class="text-[11px] text-slate-400 hidden">กำลังอัปโหลด...</span>
+            </div>
+          </div>
+
+          <!-- Select Frame -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-slate-300">เลือกกรอบรูป (Avatar Frame)</label>
+            <select id="admEditFrameSelect" onchange="previewAdminUserDecorations()" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold outline-none focus:border-cyan-500">
+              <option value="none">ไม่มีกรอบรูป (Normal)</option>
+              <option value="cyber">Cyber Cyan (นีออนฟ้าสดใส)</option>
+              <option value="gold">Golden Luxury (ทองคำพรีเมียม)</option>
+              <option value="neon">Neon Pink (ชมพูนีออนสตรีทสไตล์)</option>
+              <option value="emerald">Emerald Cloud (มรกตธรรมชาติ)</option>
+              <option value="galaxy">Galaxy Orbit (กาแล็กซีพรีเมียม)</option>
+            </select>
+          </div>
+
+          <!-- Select Animation -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-slate-300">เอฟเฟกต์เคลื่อนไหว (Animation)</label>
+            <select id="admEditAnimSelect" onchange="previewAdminUserDecorations()" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold outline-none focus:border-cyan-500">
+              <option value="none">ภาพนิ่ง (Static)</option>
+              <option value="pulse">Pulse (ย่อขยายตามจังหวะ)</option>
+              <option value="glow">Glow (เรืองแสงนีออนรอบรูป)</option>
+              <option value="float">Float (ลอยขึ้นลงนุ่มนวล)</option>
+              <option value="bounce">Bounce (เด้งดุ๊กดิ๊ก)</option>
+              <option value="rainbow">Rainbow (เฉดสีหมุนเวียน)</option>
+            </select>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+            <button type="button" onclick="closeAdminEditUserModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+              ยกเลิก
+            </button>
+            <button type="submit" class="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold shadow-md shadow-cyan-600/25 transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>บันทึกโปรไฟล์ผู้ใช้</span>
+            </button>
+          </div>
+        </form>
+
+      </div>
     </div>
 
     <!-- TAB 2: APIS & CLOUD CREDENTIALS -->
@@ -508,6 +670,9 @@
     </div>
   </footer>
 
+  <!-- Students Data & Cloud Uploader Engine -->
+  <script src="students_data.js"></script>
+  <script src="assets/js/multi_uploader.js"></script>
   <!-- Settings Application Logic Script -->
   <script src="assets/js/settings-admin.js"></script>
 </body>

@@ -27,7 +27,7 @@ function checkAccess() {
 
 // Switch Tabs
 function switchSettingsTab(tabName) {
-  const tabs = ['admins', 'apis', 'site', 'storage', 'backup'];
+  const tabs = ['admins', 'users', 'storage', 'apis', 'site', 'backup'];
   tabs.forEach(t => {
     const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
     const sec = document.getElementById(`sectionSettings${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -41,6 +41,9 @@ function switchSettingsTab(tabName) {
       }
     }
   });
+  if (tabName === 'users') {
+    renderAdminUsersTable();
+  }
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
@@ -276,9 +279,331 @@ function handleRestoreBackupFile(e) {
   reader.readAsText(file);
 }
 
+// -------------------------------------------------------------
+// USER PROFILES & DECORATIONS MANAGEMENT (ADMIN VIEW)
+// -------------------------------------------------------------
+const USER_SESSION_KEY = 'COMED_USER_SESSION';
+const USER_PROFILES_STORE_KEY = 'COMED_CUSTOM_USERS_PROFILES_V1';
+
+function getAllStoredUserProfiles() {
+  try {
+    const raw = localStorage.getItem(USER_PROFILES_STORE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveStoredUserProfiles(profilesMap) {
+  localStorage.setItem(USER_PROFILES_STORE_KEY, JSON.stringify(profilesMap));
+}
+
+function getEnrichedStudentsList() {
+  const baseStudents = window.STUDENTS_DATA || [];
+  const profilesMap = getAllStoredUserProfiles();
+
+  // Also read current logged in session if any
+  let activeUser = null;
+  try {
+    const rawActive = localStorage.getItem(USER_SESSION_KEY);
+    if (rawActive) activeUser = JSON.parse(rawActive);
+  } catch(e) {}
+
+  return baseStudents.map(st => {
+    const emailKey = st.email.toLowerCase().trim();
+    const custom = profilesMap[emailKey] || {};
+
+    let avatar = custom.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(st.email)}`;
+    let frame = custom.avatarFrame || 'none';
+    let anim = custom.avatarAnim || 'none';
+
+    // If active session matches this user, sync latest
+    if (activeUser && activeUser.email && activeUser.email.toLowerCase() === emailKey) {
+      if (activeUser.avatar) avatar = activeUser.avatar;
+      if (activeUser.avatarFrame) frame = activeUser.avatarFrame;
+      if (activeUser.avatarAnim) anim = activeUser.avatarAnim;
+    }
+
+    return {
+      ...st,
+      avatar,
+      avatarFrame: frame,
+      avatarAnim: anim
+    };
+  });
+}
+
+let cachedAdminUsers = [];
+
+function renderAdminUsersTable(filterKeyword = '') {
+  const tbody = document.getElementById('adminUsersTableBody');
+  const badgeTotal = document.getElementById('badgeUsersTotal');
+  if (!tbody) return;
+
+  const allUsers = getEnrichedStudentsList();
+  cachedAdminUsers = allUsers;
+
+  const keyword = filterKeyword.toLowerCase().trim();
+  const filtered = allUsers.filter(u => {
+    if (!keyword) return true;
+    return (
+      (u.name && u.name.toLowerCase().includes(keyword)) ||
+      (u.nickname && u.nickname.toLowerCase().includes(keyword)) ||
+      (u.id && u.id.toLowerCase().includes(keyword)) ||
+      (u.email && u.email.toLowerCase().includes(keyword))
+    );
+  });
+
+  if (badgeTotal) {
+    badgeTotal.textContent = `${filtered.length} / ${allUsers.length} คน`;
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="py-8 text-center text-slate-500 font-medium">
+          ไม่พบข้อมูลผู้ใช้ที่ตรงกับ "${filterKeyword}"
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(u => {
+    const frameClass = u.avatarFrame && u.avatarFrame !== 'none' ? `avatar-frame-${u.avatarFrame}` : '';
+    const animClass = u.avatarAnim && u.avatarAnim !== 'none' ? `avatar-anim-${u.avatarAnim}` : '';
+
+    return `
+      <tr class="hover:bg-slate-900/60 transition group">
+        <td class="py-3 px-4">
+          <div class="relative w-11 h-11 rounded-2xl bg-slate-950 p-0.5 border border-slate-800 overflow-hidden flex items-center justify-center ${frameClass}">
+            <img src="${u.avatar}" alt="${u.name}" class="w-full h-full object-cover rounded-xl ${animClass}">
+          </div>
+        </td>
+        <td class="py-3 px-4">
+          <div class="font-bold text-white leading-snug">${u.name}</div>
+          <div class="text-[11px] text-cyan-400">น้อง${u.nickname || '-'}</div>
+        </td>
+        <td class="py-3 px-4 font-mono font-bold text-slate-300">${u.id || '-'}</td>
+        <td class="py-3 px-4 font-mono text-slate-400">${u.email}</td>
+        <td class="py-3 px-4 space-y-1">
+          <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+            u.avatarFrame !== 'none' ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-400'
+          }">
+            <i data-lucide="sparkle" class="w-3 h-3"></i>
+            <span>${u.avatarFrame || 'none'}</span>
+          </div>
+          <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+            u.avatarAnim !== 'none' ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30' : 'bg-slate-800 text-slate-400'
+          }">
+            <i data-lucide="play" class="w-3 h-3"></i>
+            <span>${u.avatarAnim || 'none'}</span>
+          </div>
+        </td>
+        <td class="py-3 px-4 text-center">
+          <button type="button" onclick="openAdminEditUserModal('${u.email}')" 
+            class="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold transition flex items-center gap-1.5 mx-auto cursor-pointer"
+            title="แก้ไขโปรไฟล์และตกแต่ง">
+            <i data-lucide="palette" class="w-3.5 h-3.5"></i>
+            <span>ตกแต่งโปรไฟล์</span>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function filterAdminUserList() {
+  const keyword = document.getElementById('adminUserSearchInput')?.value || '';
+  renderAdminUsersTable(keyword);
+}
+
+// Edit Modal Functions
+let currentEditingUserEmail = null;
+
+function openAdminEditUserModal(email) {
+  const modal = document.getElementById('modalAdminEditUser');
+  if (!modal) return;
+
+  const users = getEnrichedStudentsList();
+  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (!user) return;
+
+  currentEditingUserEmail = user.email.toLowerCase();
+
+  const keyInput = document.getElementById('admEditUserKey');
+  const nameEl = document.getElementById('admEditUserName');
+  const emailEl = document.getElementById('admEditUserEmail');
+  const urlInput = document.getElementById('admEditAvatarUrl');
+  const frameSelect = document.getElementById('admEditFrameSelect');
+  const animSelect = document.getElementById('admEditAnimSelect');
+
+  if (keyInput) keyInput.value = user.email;
+  if (nameEl) nameEl.textContent = `${user.name} (น้อง${user.nickname || '-'})`;
+  if (emailEl) emailEl.textContent = user.email;
+  if (urlInput) urlInput.value = user.avatar || '';
+  if (frameSelect) frameSelect.value = user.avatarFrame || 'none';
+  if (animSelect) animSelect.value = user.avatarAnim || 'none';
+
+  previewAdminUserDecorations();
+
+  modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeAdminEditUserModal() {
+  const modal = document.getElementById('modalAdminEditUser');
+  if (modal) modal.classList.add('hidden');
+}
+
+function previewAdminUserDecorations() {
+  const imgEl = document.getElementById('admEditAvatarImg');
+  const frameEl = document.getElementById('admEditAvatarFrame');
+  const urlInput = document.getElementById('admEditAvatarUrl');
+  const frameSelect = document.getElementById('admEditFrameSelect');
+  const animSelect = document.getElementById('admEditAnimSelect');
+  const badgeFrame = document.getElementById('admEditBadgeFrame');
+  const badgeAnim = document.getElementById('admEditBadgeAnim');
+
+  const avatarUrl = urlInput?.value || 'https://api.dicebear.com/7.x/bottts/svg?seed=user';
+  const frame = frameSelect?.value || 'none';
+  const anim = animSelect?.value || 'none';
+
+  if (imgEl) {
+    imgEl.src = avatarUrl;
+    imgEl.className = 'w-full h-full object-cover rounded-xl transition-all duration-300';
+    if (anim !== 'none') {
+      imgEl.classList.add(`avatar-anim-${anim}`);
+    }
+  }
+
+  if (frameEl) {
+    frameEl.className = 'w-16 h-16 rounded-2xl bg-slate-900 p-1 border-2 border-slate-800 flex items-center justify-center overflow-hidden transition-all duration-300';
+    if (frame !== 'none') {
+      frameEl.classList.add(`avatar-frame-${frame}`);
+    }
+  }
+
+  if (badgeFrame) badgeFrame.textContent = `กรอบ: ${frame.toUpperCase()}`;
+  if (badgeAnim) badgeAnim.textContent = `แอนิเมชัน: ${anim.toUpperCase()}`;
+}
+
+function adminRandomizeAvatar() {
+  const randomSeed = 'comed_admin_' + Math.random().toString(36).substring(2, 9);
+  const newUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${randomSeed}`;
+  const urlInput = document.getElementById('admEditAvatarUrl');
+  if (urlInput) {
+    urlInput.value = newUrl;
+    previewAdminUserDecorations();
+  }
+}
+
+// Upload Avatar from Admin Modal using Cloud Uploader
+async function handleAdminUploadUserAvatar(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('admUploadStatus');
+  const urlInput = document.getElementById('admEditAvatarUrl');
+  if (statusEl) {
+    statusEl.classList.remove('hidden');
+    statusEl.textContent = '☁️ กำลังส่งภาพขึ้นคลาวด์...';
+  }
+
+  try {
+    let uploadedUrl = null;
+    let providerName = 'Cloud';
+
+    if (window.MultiCloudUploader) {
+      const uploader = new window.MultiCloudUploader({
+        strategy: 'priority',
+        priority: ['cloudinary', 'catbox', 'imgbb']
+      });
+
+      const res = await uploader.uploadFile(file, {
+        folder: 'comed_admin_managed_avatars',
+        tags: ['admin_override', currentEditingUserEmail || 'user']
+      });
+
+      if (res && res.url) {
+        uploadedUrl = res.url;
+        providerName = res.provider || 'Cloud';
+      }
+    }
+
+    if (!uploadedUrl) {
+      uploadedUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      providerName = 'Local';
+    }
+
+    if (urlInput) {
+      urlInput.value = uploadedUrl;
+      previewAdminUserDecorations();
+    }
+
+    if (statusEl) {
+      statusEl.textContent = `✨ อัปโหลดขึ้น ${providerName} สำเร็จ!`;
+      setTimeout(() => statusEl.classList.add('hidden'), 3000);
+    }
+  } catch (err) {
+    console.error("Admin upload failed", err);
+    if (statusEl) statusEl.textContent = '❌ อัปโหลดไม่สำเร็จ กรุณาลองใหม่';
+  }
+}
+
+function handleSaveAdminUserEdit(e) {
+  if (e) e.preventDefault();
+  if (!currentEditingUserEmail) return;
+
+  const urlInput = document.getElementById('admEditAvatarUrl');
+  const frameSelect = document.getElementById('admEditFrameSelect');
+  const animSelect = document.getElementById('admEditAnimSelect');
+
+  const avatar = urlInput?.value.trim() || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(currentEditingUserEmail)}`;
+  const avatarFrame = frameSelect?.value || 'none';
+  const avatarAnim = animSelect?.value || 'none';
+
+  // Update Global Profiles Store
+  const profilesMap = getAllStoredUserProfiles();
+  profilesMap[currentEditingUserEmail] = {
+    avatar,
+    avatarFrame,
+    avatarAnim,
+    updatedBy: 'Admin',
+    updatedAt: new Date().toISOString()
+  };
+  saveStoredUserProfiles(profilesMap);
+
+  // If this happens to be the active logged user session, update it directly too!
+  try {
+    const rawActive = localStorage.getItem(USER_SESSION_KEY);
+    if (rawActive) {
+      const activeUser = JSON.parse(rawActive);
+      if (activeUser.email && activeUser.email.toLowerCase() === currentEditingUserEmail) {
+        activeUser.avatar = avatar;
+        activeUser.avatarFrame = avatarFrame;
+        activeUser.avatarAnim = avatarAnim;
+        localStorage.setItem(USER_SESSION_KEY, JSON.stringify(activeUser));
+      }
+    }
+  } catch(e) {}
+
+  closeAdminEditUserModal();
+  renderAdminUsersTable(document.getElementById('adminUserSearchInput')?.value || '');
+  alert("🎉 บันทึกการเปลี่ยนรูปโปรไฟล์และตกแต่งให้ผู้ใช้เรียบร้อยแล้ว!");
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   checkAccess();
   renderAdminTable();
   loadProfileStorageConfig();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });
+
