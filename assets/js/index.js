@@ -705,6 +705,9 @@ async function syncCloudProfilesToLocal() {
           name: p.name,
           nickname: p.nickname,
           phone: p.phone,
+          lineId: p.line_id || null,
+          instagram: p.instagram || null,
+          facebookUrl: p.facebook_url || null,
           bio: p.bio,
           studentId: p.student_id,
           avatar: p.avatar,
@@ -750,6 +753,9 @@ async function syncCloudProfilesToLocal() {
               name: p.name,
               nickname: p.nickname,
               phone: p.phone,
+              lineId: p.line_id || null,
+              instagram: p.instagram || null,
+              facebookUrl: p.facebook_url || null,
               bio: p.bio,
               studentId: p.student_id,
               avatar: p.avatar,
@@ -913,6 +919,59 @@ function openStudentProfileModal(studentId) {
   }
   if (bioEl) {
     bioEl.textContent = customProfile?.bio ? `"${customProfile.bio}"` : `"ยินดีที่ได้รู้จักเพื่อนๆ COMED23 ทุกคนครับ/ค่ะ"`;
+  }
+
+  // Social Media & Contact Links
+  const lineBtn = document.getElementById('modalStudentLineBtn');
+  const lineText = document.getElementById('modalStudentLineText');
+  const igBtn = document.getElementById('modalStudentIgBtn');
+  const igText = document.getElementById('modalStudentIgText');
+  const fbBtn = document.getElementById('modalStudentFbBtn');
+  const phoneBtn = document.getElementById('modalStudentPhoneBtn');
+  const phoneText = document.getElementById('modalStudentPhoneText');
+
+  const lineId = customProfile?.lineId || customProfile?.line_id;
+  if (lineBtn) {
+    if (lineId) {
+      lineBtn.classList.remove('hidden');
+      lineBtn.href = `https://line.me/ti/p/~${encodeURIComponent(lineId.replace(/^@/, ''))}`;
+      if (lineText) lineText.textContent = lineId.startsWith('@') ? lineId : `@${lineId}`;
+    } else {
+      lineBtn.classList.add('hidden');
+    }
+  }
+
+  const igUser = customProfile?.instagram;
+  if (igBtn) {
+    if (igUser) {
+      const cleanIg = igUser.replace(/^@/, '').trim();
+      igBtn.classList.remove('hidden');
+      igBtn.href = `https://instagram.com/${encodeURIComponent(cleanIg)}`;
+      if (igText) igText.textContent = `@${cleanIg}`;
+    } else {
+      igBtn.classList.add('hidden');
+    }
+  }
+
+  const fbUrl = customProfile?.facebookUrl || customProfile?.facebook_url;
+  if (fbBtn) {
+    if (fbUrl) {
+      fbBtn.classList.remove('hidden');
+      fbBtn.href = fbUrl.startsWith('http') ? fbUrl : `https://${fbUrl}`;
+    } else {
+      fbBtn.classList.add('hidden');
+    }
+  }
+
+  const phone = customProfile?.phone;
+  if (phoneBtn) {
+    if (phone) {
+      phoneBtn.classList.remove('hidden');
+      phoneBtn.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
+      if (phoneText) phoneText.textContent = phone;
+    } else {
+      phoneBtn.classList.add('hidden');
+    }
   }
 
   // Set Avatar, Frame & Animation
