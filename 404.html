@@ -117,22 +117,24 @@
     /* === 404 CANDLE SCENE ANIMATION === */
     .c404-wrapper {
       position: relative;
-      left: 50%;
-      top: 10%;
-      transform: scale(1.1, 1.1) translate(-50%, -10%);
       width: 250px;
       height: 160px;
       margin: 0 auto;
+      transform: scale(1.05);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .c404-floor {
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 350px;
-      height: 5px;
+      width: 260px;
+      height: 4px;
+      border-radius: 2px;
       background: #673c63;
       transform: translate(-50%, -50%);
-      box-shadow: 0px 2px 5px #111;
+      box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.5);
       z-index: 2;
     }
     .c404-candles {
