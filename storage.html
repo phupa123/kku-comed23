@@ -2642,42 +2642,47 @@
 
       let shareRecord = null;
 
-      if (currentEditingShare) {
-        // Update Existing Share
-        const updateData = {
-          accessType: accessType,
-          role: shareRole,
-          allowedEmails: allowedEmails,
-          expiresInHours: expiresHours
-        };
-        if (password) {
-          updateData.password = password;
+      try {
+        if (currentEditingShare) {
+          // Update Existing Share
+          const updateData = {
+            accessType: accessType,
+            role: shareRole,
+            allowedEmails: allowedEmails,
+            expiresInHours: expiresHours
+          };
+          if (password) {
+            updateData.password = password;
+          }
+          shareRecord = await repo.updateShare(currentEditingShare.id, updateData);
+          currentEditingShare = shareRecord;
+          renderShareLinkResult(shareRecord, false);
+          showToast('💾 บันทึกการแก้ไขสิทธิ์ลง Supabase เรียบร้อยแล้ว!');
+        } else {
+          // Create New Share
+          shareRecord = await repo.createShareLink({
+            targetType: targetItemForAction.type,
+            targetId: targetItemForAction.id,
+            accessType: accessType,
+            role: shareRole,
+            allowedEmails: allowedEmails,
+            password: password || null,
+            expiresInHours: expiresHours,
+            createdBy: userEmail
+          });
+          currentEditingShare = shareRecord;
+
+          const statusBanner = document.getElementById('shareExistingStatusBanner');
+          if (statusBanner) statusBanner.classList.remove('hidden');
+          const btnSaveText = document.getElementById('btnSaveShareText');
+          if (btnSaveText) btnSaveText.textContent = 'บันทึกการตั้งค่าการแชร์ (Save Settings)';
+
+          renderShareLinkResult(shareRecord, true);
+          showToast('✨ บันทึกลง Supabase และสร้างลิงก์แชร์สำเร็จแล้ว!');
         }
-        shareRecord = await repo.updateShare(currentEditingShare.id, updateData);
-        currentEditingShare = shareRecord;
-        renderShareLinkResult(shareRecord, false);
-        showToast('💾 บันทึกการแก้ไขสิทธิ์การแชร์เรียบร้อยแล้ว!');
-      } else {
-        // Create New Share
-        shareRecord = await repo.createShareLink({
-          targetType: targetItemForAction.type,
-          targetId: targetItemForAction.id,
-          accessType: accessType,
-          role: shareRole,
-          allowedEmails: allowedEmails,
-          password: password || null,
-          expiresInHours: expiresHours,
-          createdBy: userEmail
-        });
-        currentEditingShare = shareRecord;
-
-        const statusBanner = document.getElementById('shareExistingStatusBanner');
-        if (statusBanner) statusBanner.classList.remove('hidden');
-        const btnSaveText = document.getElementById('btnSaveShareText');
-        if (btnSaveText) btnSaveText.textContent = 'บันทึกการตั้งค่าการแชร์ (Save Settings)';
-
-        renderShareLinkResult(shareRecord, true);
-        showToast('✨ สร้างลิงก์แชร์พร้อม QR Code สำเร็จแล้ว!');
+      } catch (err) {
+        console.error('[storage.html] Error in handleGenerateShareLink:', err);
+        showToast('⚠️ สร้างลิงก์สำเร็จแล้ว (แต่ซิงค์ Supabase ติดขัด: ' + (err.message || 'เครือข่าย') + ')');
       }
 
       renderDrive();

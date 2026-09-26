@@ -241,7 +241,7 @@
         const targetUrl = `${window.location.origin}/storage.html?share=${encodeURIComponent(shareRecord.shareCode)}`;
 
         // Sync to dedicated 'shortlinks' table
-        await sb.from('shortlinks').upsert({
+        const { data, error } = await sb.from('shortlinks').upsert({
           id: shareRecord.id || ('shr_' + shareRecord.shareCode),
           code: shareRecord.shareCode,
           title: `[แชร์ไดรฟ์] ${shareRecord.title || fileName || (folderMeta && folderMeta.name) || shareRecord.targetType}`,
@@ -252,9 +252,16 @@
           notes: JSON.stringify(metaObj),
           created_by: shareRecord.creatorEmail || '',
           updated_at: new Date().toISOString()
-        }, { onConflict: 'code' }).catch(() => {});
+        }, { onConflict: 'code' }).select();
+
+        if (error) {
+          console.error("[StorageDriveRepo] ❌ Supabase upsert error:", error);
+          throw error;
+        }
+        console.log("[StorageDriveRepo] ✅ Synced share link to Supabase:", shareRecord.shareCode, data);
       } catch(err) {
-        console.warn("[StorageDriveRepo] Cloud share sync error:", err);
+        console.error("[StorageDriveRepo] Cloud share sync error:", err);
+        throw err;
       }
     }
 
@@ -666,7 +673,11 @@
 
       share.updatedAt = new Date().toISOString();
       this.saveData(STORAGE_SHARES_KEY, this.shares);
-      this.syncShareToCloud(share).catch(() => {});
+      try {
+        await this.syncShareToCloud(share);
+      } catch (err) {
+        console.warn("[StorageDriveRepo] Cloud sync on updateShare failed:", err);
+      }
       return share;
     }
 
@@ -794,6 +805,17 @@
   }
 
   // Export to Global
-  window.StorageDriveRepo = new StorageDriveRepo();
+  const repoInstance = new StorageDriveRepo();
+  window.StorageDriveRepo = repoInstance;
+
+  // Ensure initSync is triggered once DOM and Supabase library are fully ready
+  if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      repoInstance.initSync();
+    });
+    window.addEventListener('load', () => {
+      repoInstance.initSync();
+    });
+  }
 
 })(window);
