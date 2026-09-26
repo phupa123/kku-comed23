@@ -582,17 +582,27 @@
       formData.append('fileToUpload', fileObj);
 
       const proxies = [
-        '/api/catbox-proxy', // Internal Cloudflare Worker proxy (Zero CORS issues)
+        '/api/catbox-proxy', // Internal Cloudflare Worker proxy (if running on same host)
         'https://kku-comed23.edspace.workers.dev/api/catbox-proxy',
         'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://catbox.moe/user/api.php')
       ];
 
+      // Filter out absolute worker URL if known to be unresponsive or on different origin
+      const validProxies = proxies.filter(p => {
+        // If testing on localhost or file://, '/api/catbox-proxy' won't exist
+        if (p === '/api/catbox-proxy' && (window.location.protocol === 'file:' || window.location.hostname === 'localhost')) {
+          return false;
+        }
+        return true;
+      });
+
       let lastError = null;
-      for (const targetUrl of proxies) {
+      for (const targetUrl of validProxies) {
         try {
           const res = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', targetUrl);
+            xhr.timeout = 7000; // Fail quickly on 522 Cloudflare Origin Connection Time-out
 
             if (xhr.upload && typeof onProgress === 'function') {
               xhr.upload.onprogress = (evt) => {
@@ -611,17 +621,19 @@
                   publicId: text.split('/').pop()
                 });
               } else {
-                reject(new Error(text || `HTTP ${xhr.status}`));
+                reject(new Error(`Proxy ${targetUrl} returned HTTP ${xhr.status}: ${text.slice(0, 100)}`));
               }
             };
 
-            xhr.onerror = () => reject(new Error("Catbox connection error"));
+            xhr.ontimeout = () => reject(new Error(`Connection to ${targetUrl} timed out (HTTP 522/timeout)`));
+            xhr.onerror = () => reject(new Error(`Catbox connection error via ${targetUrl}`));
             xhr.send(formData);
           });
 
           if (res && res.url) return res;
         } catch(e) {
           lastError = e;
+          console.warn("[MultiUploader] Catbox proxy candidate failed:", targetUrl, e.message);
         }
       }
 

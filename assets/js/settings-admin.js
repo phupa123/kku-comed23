@@ -744,6 +744,21 @@ function handleSaveAdminUserEdit(e) {
     }
   } catch(e) {}
 
+  // 🌐 Sync to Supabase Cloud Database user_profiles table
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (sb && currentEditingUserEmail) {
+    sb.from('user_profiles').upsert({
+      email: currentEditingUserEmail.toLowerCase().trim(),
+      avatar: avatar || null,
+      avatar_frame: avatarFrame || 'none',
+      avatar_anim: avatarAnim || 'none',
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'email' }).then(({ error }) => {
+      if (error) console.warn("[Admin] Supabase user_profiles update error:", error.message);
+      else console.log("[Admin] Synced updated profile to Supabase for", currentEditingUserEmail);
+    }).catch(err => console.warn("[Admin] Supabase sync exception:", err));
+  }
+
   closeAdminEditUserModal();
   renderAdminUsersTable(document.getElementById('adminUserSearchInput')?.value || '');
   alert("🎉 บันทึกการเปลี่ยนรูปโปรไฟล์และตกแต่งให้ผู้ใช้เรียบร้อยแล้ว!");
