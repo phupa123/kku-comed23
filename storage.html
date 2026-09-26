@@ -880,6 +880,12 @@
             </button>
           </div>
 
+          <!-- Trash / Recycle Bin Button -->
+          <button onclick="toggleTrashView()" id="btnTrashView" class="p-2 rounded-xl bg-slate-900 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/40 transition cursor-pointer relative" title="ถังขยะ (ไฟล์ที่ถูกลบ)">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span id="trashCountBadge" class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center"></span>
+          </button>
+
           <!-- Refresh Button -->
           <button onclick="refreshDriveContents()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition cursor-pointer" title="รีเฟรชไดรฟ์">
             <i data-lucide="rotate-cw" id="driveRefreshIcon" class="w-4 h-4"></i>
@@ -930,10 +936,20 @@
             <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
             <span>แชร์รวมเป็น ZIP</span>
           </button>
-          <button onclick="deleteBatchSelectedFiles()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/30 transition flex items-center gap-1.5 cursor-pointer">
+          <!-- Normal view: move to trash -->
+          <button id="batchMoveToTrashBtn" onclick="deleteBatchSelectedFiles()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/30 transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
-            <span>ลบที่เลือก</span>
+            <span>ย้ายไปถังขยะ</span>
             <span class="kbd-badge text-rose-400 border-rose-500/30">Del</span>
+          </button>
+          <!-- Trash view: restore or permanent delete -->
+          <button id="batchRestoreBtn" onclick="batchRestoreSelectedFromTrash()" class="hidden px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold border border-emerald-500/30 transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="undo-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>กู้คืนที่เลือก</span>
+          </button>
+          <button id="batchPermDeleteBtn" onclick="batchPermanentDeleteSelected()" class="hidden px-3 py-1.5 rounded-xl bg-red-700/30 hover:bg-red-700/50 text-red-300 text-xs font-bold border border-red-600/40 transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-400"></i>
+            <span>ลบถาวรที่เลือก</span>
           </button>
         </div>
       </div>
@@ -1600,6 +1616,7 @@
     let selectedFilesQueue = []; // Staged files for uploading
     let isUncompressedMode = false;
     let isUploadAreaCollapsed = true;
+    let isTrashView = false; // true = showing Recycle Bin
 
     // Active item being locked/shared/moved/challenged
     let targetItemForAction = null; // { type: 'file'|'folder', id, name, ... }
@@ -2047,6 +2064,7 @@
       renderFilesList();
       updateUploadFolderDropdown();
       if (typeof updateTagFilterDropdown === 'function') updateTagFilterDropdown();
+      updateTrashBadge();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -2236,7 +2254,20 @@
       const countText = document.getElementById('filesCountText');
       if (!container) return;
 
+      // === TRASH VIEW MODE ===
+      if (isTrashView) {
+        renderTrashView(container, countText);
+        return;
+      }
+
       let files = getUserFilesList();
+      const repo = getRepo();
+
+      // 0. Exclude trashed files from normal view
+      files = files.filter(f => {
+        const meta = repo.getFileMeta(f.id);
+        return !meta.isTrash;
+      });
 
       // 1. Filter by current folder
       files = files.filter(f => (f.folderId || null) === currentFolderId);
@@ -2263,7 +2294,6 @@
 
       // 4. Filter by tag
       if (driveTagFilter && driveTagFilter !== 'all') {
-        const repo = getRepo();
         files = files.filter(f => {
           const tags = repo.getFileTags(f.id) || [];
           return tags.includes(driveTagFilter);
@@ -2297,6 +2327,119 @@
       } else {
         renderFilesListView(files, container);
       }
+    }
+
+    // ============================================================
+    // TRASH VIEW RENDERER
+    // ============================================================
+    function renderTrashView(container, countText) {
+      const repo = getRepo();
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
+
+      const trashedFiles = allFiles.filter(f => {
+        const ownerEmail = (f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+        if (userEmailLower && ownerEmail !== userEmailLower) return false;
+        const meta = repo.getFileMeta(f.id);
+        return !!meta.isTrash;
+      }).map(f => {
+        const meta = repo.getFileMeta(f.id);
+        return { ...f, folderId: meta.folderId, isTrash: true, trashedAt: meta.trashedAt, originalFolderId: meta.originalFolderId };
+      });
+
+      // Update trash count badge
+      updateTrashBadge(trashedFiles.length);
+
+      if (countText) countText.textContent = trashedFiles.length;
+
+      if (trashedFiles.length === 0) {
+        container.innerHTML = `
+          <div class="uiverse-glass-card p-12 rounded-3xl text-center space-y-4 shadow-2xl relative overflow-hidden border-rose-500/10">
+            <div class="w-20 h-20 rounded-3xl bg-rose-900/20 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto shadow-inner">
+              <i data-lucide="trash-2" class="w-10 h-10"></i>
+            </div>
+            <div>
+              <h4 class="text-base font-black text-white">ถังขยะว่างเปล่า</h4>
+              <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">ไม่มีไฟล์ในถังขยะ ไฟล์ที่คุณลบจะปรากฏที่นี่ก่อนถูกลบอย่างถาวร</p>
+            </div>
+            <button onclick="toggleTrashView()" class="px-4 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black inline-flex items-center gap-1.5 cursor-pointer active:scale-95 border border-slate-700">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+              <span>กลับไปไดรฟ์</span>
+            </button>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="rounded-2xl bg-slate-900/90 border border-rose-500/20 overflow-hidden shadow-sm">
+          <!-- Trash header bar -->
+          <div class="p-3 bg-rose-900/20 border-b border-rose-500/20 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-rose-300 text-xs font-bold">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
+              <span>${trashedFiles.length} ไฟล์ในถังขยะ · ไฟล์จะถูกลบถาวรหากกู้คืนไม่ทัน</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="emptyTrashAll()" class="px-3 py-1.5 rounded-xl bg-red-800/40 hover:bg-red-700/60 text-red-300 text-xs font-bold border border-red-600/30 transition flex items-center gap-1.5 cursor-pointer">
+                <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                <span>ล้างถังขยะทั้งหมด</span>
+              </button>
+              <button onclick="restoreAllFromTrash()" class="px-3 py-1.5 rounded-xl bg-emerald-800/40 hover:bg-emerald-700/60 text-emerald-300 text-xs font-bold border border-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer">
+                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+                <span>กู้คืนทั้งหมด</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="divide-y divide-slate-800/80">
+            ${trashedFiles.map(f => {
+              const isSelected = selectedFileIds.has(f.id);
+              const fileName = f.originalName || f.id;
+              const fileSizeFormatted = formatBytes(f.size || 0);
+              const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+              const trashedDate = f.trashedAt ? new Date(f.trashedAt).toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+
+              return `
+                <div data-file-id="${f.id}" class="p-3.5 flex items-center justify-between gap-3 hover:bg-rose-950/20 transition select-none ${isSelected ? 'bg-rose-950/30' : ''}">
+                  <div class="flex items-center gap-3 overflow-hidden">
+                    <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded text-rose-500 bg-slate-950 border-slate-700 focus:ring-0 cursor-pointer flex-shrink-0">
+
+                    <div class="w-10 h-10 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden opacity-60">
+                      ${isImg
+                        ? `<img src="${f.url}" class="w-full h-full object-cover grayscale">`
+                        : `<i data-lucide="${getFileIconName(f.type, f.originalName)}" class="w-5 h-5 text-rose-400"></i>`
+                      }
+                    </div>
+
+                    <div class="space-y-0.5 overflow-hidden">
+                      <span class="text-xs font-bold text-slate-400 truncate max-w-xs sm:max-w-md block line-through" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>
+                      <div class="flex items-center gap-3 text-[11px] text-slate-500 font-mono">
+                        <span>${fileSizeFormatted}</span>
+                        <span>•</span>
+                        <span class="capitalize">${f.provider || 'cloud'}</span>
+                        <span>•</span>
+                        <span class="text-rose-400/70">🗑️ ลบเมื่อ ${trashedDate}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <button onclick="restoreSingleFromTrash('${f.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center gap-1 cursor-pointer" title="กู้คืนไฟล์">
+                      <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+                      <span>กู้คืน</span>
+                    </button>
+                    <button onclick="permanentDeleteSingle('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-red-700/30 text-slate-500 hover:text-red-400 transition" title="ลบถาวร">
+                      <i data-lucide="x-circle" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
     }
 
     function renderFilesGridView(files, container) {
@@ -2622,45 +2765,206 @@
       const count = selectedFileIds.size;
       if (count === 0) return;
 
-      if (!confirm(`⚠️ คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์ที่เลือกจำนวน ${count} ไฟล์ ออกจากไดรฟ์?`)) {
+      if (!confirm(`⚠️ ย้ายไฟล์ที่เลือก ${count} ไฟล์ ไปยังถังขยะ?\n\nคุณสามารถกู้คืนได้จากถังขยะในภายหลัง`)) {
         return;
       }
 
-      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
       const repo = getRepo();
-
-      for (const id of Array.from(selectedFileIds)) {
-        const target = allFiles.find(f => f.id === id);
-        if (target && window.MultiCloudUploader) {
-          try {
-            await window.MultiCloudUploader.deleteFile(target);
-          } catch(e) {}
-        }
-      }
+      const ids = Array.from(selectedFileIds);
+      await repo.batchMoveToTrash(ids);
 
       selectedFileIds.clear();
       updateBatchActionBar();
       updateQuotaDisplay();
+      updateTrashBadge();
       renderFilesList();
-      showToast(`🗑️ ลบไฟล์ที่เลือกเรียบร้อยแล้ว (${count} ไฟล์)`);
+      showToast(`🗑️ ย้าย ${count} ไฟล์ ไปยังถังขยะแล้ว`);
     }
 
     async function handleDeleteSingleFile(fileId) {
-      if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้ออกจากไดรฟ์?')) return;
+      if (!confirm('ย้ายไฟล์นี้ไปยังถังขยะ?\n\nคุณสามารถกู้คืนได้จากถังขยะในภายหลัง')) return;
+      const repo = getRepo();
+      try {
+        await repo.moveToTrash(fileId);
+        selectedFileIds.delete(fileId);
+        updateBatchActionBar();
+        updateQuotaDisplay();
+        updateTrashBadge();
+        renderFilesList();
+        showToast('🗑️ ย้ายไฟล์ไปถังขยะแล้ว — กู้คืนได้จากถังขยะ');
+      } catch(e) {
+        alert('เกิดข้อผิดพลาด: ' + e.message);
+      }
+    }
+
+    // ============================================================
+    // RECYCLE BIN ACTIONS
+    // ============================================================
+    function toggleTrashView() {
+      isTrashView = !isTrashView;
+      selectedFileIds.clear();
+      updateBatchActionBar();
+
+      const btn = document.getElementById('btnTrashView');
+      const foldersSection = document.getElementById('foldersSection');
+      const filesHeader = document.querySelector('#filesSection > div:first-child');
+      const batchMoveToTrashBtn = document.getElementById('batchMoveToTrashBtn');
+      const batchRestoreBtn = document.getElementById('batchRestoreBtn');
+      const batchPermDeleteBtn = document.getElementById('batchPermDeleteBtn');
+
+      if (isTrashView) {
+        if (btn) { btn.classList.add('bg-rose-900/30', 'text-rose-400', 'border-rose-500/40'); btn.title = 'กลับไปไดรฟ์'; }
+        if (foldersSection) foldersSection.style.display = 'none';
+        if (batchMoveToTrashBtn) batchMoveToTrashBtn.classList.add('hidden');
+        if (batchRestoreBtn) batchRestoreBtn.classList.remove('hidden');
+        if (batchPermDeleteBtn) batchPermDeleteBtn.classList.remove('hidden');
+      } else {
+        if (btn) { btn.classList.remove('bg-rose-900/30', 'text-rose-400', 'border-rose-500/40'); btn.title = 'ถังขยะ (ไฟล์ที่ถูกลบ)'; }
+        if (foldersSection) foldersSection.style.display = '';
+        if (batchMoveToTrashBtn) batchMoveToTrashBtn.classList.remove('hidden');
+        if (batchRestoreBtn) batchRestoreBtn.classList.add('hidden');
+        if (batchPermDeleteBtn) batchPermDeleteBtn.classList.add('hidden');
+      }
+
+      renderFilesList();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    async function restoreSingleFromTrash(fileId) {
+      const repo = getRepo();
+      await repo.restoreFromTrash(fileId);
+      selectedFileIds.delete(fileId);
+      updateBatchActionBar();
+      updateTrashBadge();
+      renderFilesList();
+      showToast('✅ กู้คืนไฟล์สำเร็จ — ไฟล์กลับมาในไดรฟ์แล้ว');
+    }
+
+    async function permanentDeleteSingle(fileId, fileName) {
+      if (!confirm(`⚠️ ลบ "${fileName}" อย่างถาวร?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้!`)) return;
+      const repo = getRepo();
       const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
       const target = allFiles.find(f => f.id === fileId);
-
-      if (target && window.MultiCloudUploader) {
-        try {
+      try {
+        if (target && window.MultiCloudUploader) {
           await window.MultiCloudUploader.deleteFile(target);
-          selectedFileIds.delete(fileId);
-          updateBatchActionBar();
-          updateQuotaDisplay();
-          renderFilesList();
-          showToast('🗑️ ลบไฟล์เรียบร้อยแล้ว');
-        } catch(e) {
-          alert('เกิดข้อผิดพลาดในการลบไฟล์: ' + e.message);
+        } else {
+          await repo.permanentDeleteFileMeta(fileId);
         }
+        selectedFileIds.delete(fileId);
+        updateBatchActionBar();
+        updateQuotaDisplay();
+        updateTrashBadge();
+        renderFilesList();
+        showToast('🗑️ ลบไฟล์ถาวรแล้ว');
+      } catch(e) {
+        alert('เกิดข้อผิดพลาด: ' + e.message);
+      }
+    }
+
+    async function batchRestoreSelectedFromTrash() {
+      const ids = Array.from(selectedFileIds);
+      if (ids.length === 0) return;
+      const repo = getRepo();
+      await repo.batchRestoreFromTrash(ids);
+      selectedFileIds.clear();
+      updateBatchActionBar();
+      updateTrashBadge();
+      renderFilesList();
+      showToast(`✅ กู้คืน ${ids.length} ไฟล์ สำเร็จ`);
+    }
+
+    async function batchPermanentDeleteSelected() {
+      const ids = Array.from(selectedFileIds);
+      if (ids.length === 0) return;
+      if (!confirm(`⚠️ ลบ ${ids.length} ไฟล์ ที่เลือกอย่างถาวร?\n\nไม่สามารถย้อนกลับได้!`)) return;
+      const repo = getRepo();
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      for (const id of ids) {
+        const target = allFiles.find(f => f.id === id);
+        try {
+          if (target && window.MultiCloudUploader) {
+            await window.MultiCloudUploader.deleteFile(target);
+          } else {
+            await repo.permanentDeleteFileMeta(id);
+          }
+        } catch(e) {}
+      }
+      selectedFileIds.clear();
+      updateBatchActionBar();
+      updateQuotaDisplay();
+      updateTrashBadge();
+      renderFilesList();
+      showToast(`🗑️ ลบ ${ids.length} ไฟล์ อย่างถาวรแล้ว`);
+    }
+
+    async function restoreAllFromTrash() {
+      if (!confirm('กู้คืนไฟล์ทั้งหมดจากถังขยะ?')) return;
+      const repo = getRepo();
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
+      const ids = allFiles
+        .filter(f => {
+          const ownerEmail = (f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+          if (userEmailLower && ownerEmail !== userEmailLower) return false;
+          const meta = repo.getFileMeta(f.id);
+          return !!meta.isTrash;
+        })
+        .map(f => f.id);
+      await repo.batchRestoreFromTrash(ids);
+      updateTrashBadge();
+      renderFilesList();
+      showToast(`✅ กู้คืน ${ids.length} ไฟล์ ทั้งหมดสำเร็จ`);
+    }
+
+    async function emptyTrashAll() {
+      if (!confirm('⚠️ ล้างถังขยะ? ไฟล์ทั้งหมดจะถูกลบอย่างถาวร\n\nไม่สามารถย้อนกลับได้!')) return;
+      const repo = getRepo();
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
+      const targets = allFiles.filter(f => {
+        const ownerEmail = (f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+        if (userEmailLower && ownerEmail !== userEmailLower) return false;
+        const meta = repo.getFileMeta(f.id);
+        return !!meta.isTrash;
+      });
+      for (const t of targets) {
+        try {
+          if (window.MultiCloudUploader) {
+            await window.MultiCloudUploader.deleteFile(t);
+          } else {
+            await repo.permanentDeleteFileMeta(t.id);
+          }
+        } catch(e) {}
+      }
+      updateQuotaDisplay();
+      updateTrashBadge();
+      renderFilesList();
+      showToast(`🗑️ ล้างถังขยะแล้ว (${targets.length} ไฟล์)`);
+    }
+
+    function updateTrashBadge(count) {
+      const badge = document.getElementById('trashCountBadge');
+      if (!badge) return;
+
+      // If count not given, compute it
+      if (count === undefined) {
+        const repo = getRepo();
+        const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+        const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
+        count = allFiles.filter(f => {
+          const ownerEmail = (f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+          if (userEmailLower && ownerEmail !== userEmailLower) return false;
+          const meta = repo.getFileMeta(f.id);
+          return !!meta.isTrash;
+        }).length;
+      }
+
+      if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
       }
     }
 
