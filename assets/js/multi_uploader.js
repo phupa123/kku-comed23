@@ -21,9 +21,8 @@
   // Default keys and fallbacks
   const DEFAULT_CONFIG = {
     activeProvider: 'auto', // 'auto' | 'imgbb' | 'cloudinary' | 'freeimage' | 'catbox'
-    // freeimage disabled by default — freeimage.host blocks Cloudflare Worker IPs (Error 103)
-    enabledProviders: ['cloudinary', 'catbox', 'imgbb'],
-    providerPriority: ['cloudinary', 'catbox', 'imgbb', 'freeimage'],
+    enabledProviders: ['catbox', 'imgbb', 'cloudinary'],
+    providerPriority: ['catbox', 'imgbb', 'cloudinary', 'freeimage'],
     
     // Auto compression settings
     autoCompress: true,

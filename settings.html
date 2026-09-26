@@ -595,6 +595,18 @@
                 <span class="text-[10px] text-slate-400">JPG, PNG, GIF, WebP</span>
               </div>
 
+              <!-- Provider Selector for Profile Upload -->
+              <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <i class="bi bi-hdd-network text-sky-400 text-xs"></i>
+                <label for="userAvatarProviderSelect" class="text-xs text-slate-300 font-bold whitespace-nowrap">ผู้ให้บริการคลาวด์:</label>
+                <select id="userAvatarProviderSelect" class="bg-slate-950 text-sky-300 text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-700 focus:border-sky-500 outline-none w-full cursor-pointer">
+                  <option value="catbox" selected>🐱 Catbox.moe (แนะนำ - ฟรี ถาวร เสถียร)</option>
+                  <option value="imgbb">🖼️ ImgBB (โหลดเร็ว ไม่มีหมดอายุ)</option>
+                  <option value="cloudinary">⚡ Cloudinary CDN</option>
+                  <option value="auto">🔄 อัตโนมัติ (ตามนโยบายแอดมิน)</option>
+                </select>
+              </div>
+
               <!-- Doodle Drag & Drop Container -->
               <div class="flex justify-center w-full py-2">
                 <div class="doodle-upload-container group" id="doodleDropZone" onclick="document.getElementById('userProfileFileInput')?.click()">

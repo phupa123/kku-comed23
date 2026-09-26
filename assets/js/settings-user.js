@@ -34,8 +34,8 @@
   let adminUploadConfig = {
     allowUserUpload: true,
     strategy: 'priority',
-    singleTarget: 'cloudinary',
-    priority: ['cloudinary', 'catbox', 'imgbb'],
+    singleTarget: 'catbox',
+    priority: ['catbox', 'imgbb', 'cloudinary'],
     maxSizeMB: 5,
     allowAnimations: true
   };
@@ -613,8 +613,17 @@
           ? window.MultiCloudUploader.getInstance() 
           : window.MultiCloudUploader;
 
-        if (adminUploadConfig.strategy === 'single') {
-          if (uploader.config) uploader.config.activeProvider = adminUploadConfig.singleTarget || 'cloudinary';
+        // Check user selection or admin policy
+        const userSelectedProvider = document.getElementById('userAvatarProviderSelect')?.value || 'auto';
+        let targetProvider = userSelectedProvider;
+        if (targetProvider === 'auto') {
+          targetProvider = adminUploadConfig.strategy === 'single' ? (adminUploadConfig.singleTarget || 'catbox') : 'auto';
+        }
+
+        if (adminUploadConfig.strategy === 'single' && userSelectedProvider === 'auto') {
+          if (uploader.config) uploader.config.activeProvider = adminUploadConfig.singleTarget || 'catbox';
+        } else if (userSelectedProvider !== 'auto') {
+          if (uploader.config) uploader.config.activeProvider = userSelectedProvider;
         } else {
           if (uploader.config) {
             uploader.config.activeProvider = 'auto';
@@ -628,6 +637,7 @@
 
         // Upload with real progress callbacks
         const uploadResult = await uploader.upload(file, {
+          preferredProvider: targetProvider !== 'auto' ? targetProvider : undefined,
           folder: 'comed_user_avatars',
           tags: ['avatar', currentUser.email],
           uploaderId: currentUser.studentId || currentUser.id || 'Member',

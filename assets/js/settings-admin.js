@@ -154,8 +154,8 @@ const PROFILE_UPLOAD_CONFIG_KEY = 'COMED_PROFILE_UPLOAD_CONFIG_V1';
 const DEFAULT_PROFILE_UPLOAD_CONFIG = {
   allowUserUpload: true,
   strategy: 'priority', // 'single' | 'priority'
-  singleTarget: 'cloudinary',
-  priority: ['cloudinary', 'catbox', 'imgbb'],
+  singleTarget: 'catbox',
+  priority: ['catbox', 'imgbb', 'cloudinary'],
   maxSizeMB: 5,
   allowAnimations: true
 };
