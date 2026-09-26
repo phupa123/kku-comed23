@@ -470,7 +470,11 @@ function getEnrichedStudentsList() {
       ...st,
       avatar,
       avatarFrame: frame,
-      avatarAnim: anim
+      avatarAnim: anim,
+      lineId: custom.lineId || custom.line_id || null,
+      instagram: custom.instagram || null,
+      facebookUrl: custom.facebookUrl || custom.facebook_url || null,
+      phone: custom.phone || null
     };
   });
 }
@@ -486,14 +490,18 @@ function renderAdminUsersTable(filterKeyword = '') {
   cachedAdminUsers = allUsers;
 
   const keyword = filterKeyword.toLowerCase().trim();
+  const cleanQ = keyword.replace(/[@\- ]/g, '');
   const filtered = allUsers.filter(u => {
     if (!keyword) return true;
-    return (
-      (u.name && u.name.toLowerCase().includes(keyword)) ||
-      (u.nickname && u.nickname.toLowerCase().includes(keyword)) ||
-      (u.id && u.id.toLowerCase().includes(keyword)) ||
-      (u.email && u.email.toLowerCase().includes(keyword))
-    );
+    const nameMatch = (u.name && u.name.toLowerCase().includes(keyword));
+    const nickMatch = (u.nickname && u.nickname.toLowerCase().includes(keyword));
+    const idMatch = (u.id && u.id.replace(/-/g, '').includes(cleanQ));
+    const emailMatch = (u.email && u.email.toLowerCase().includes(keyword));
+    const lineMatch = (u.lineId && u.lineId.toLowerCase().replace(/[@\- ]/g, '').includes(cleanQ));
+    const igMatch = (u.instagram && u.instagram.toLowerCase().replace(/[@\- ]/g, '').includes(cleanQ));
+    const phoneMatch = (u.phone && cleanQ.match(/^[0-9]+$/) && u.phone.replace(/[^0-9]/g, '').includes(cleanQ));
+
+    return nameMatch || nickMatch || idMatch || emailMatch || lineMatch || igMatch || phoneMatch;
   });
 
   if (badgeTotal) {
@@ -525,9 +533,17 @@ function renderAdminUsersTable(filterKeyword = '') {
         <td class="py-3 px-4">
           <div class="font-bold text-white leading-snug">${u.name}</div>
           <div class="text-[11px] text-cyan-400">น้อง${u.nickname || '-'}</div>
+          ${u.phone ? `<div class="text-[10px] text-slate-500 font-mono flex items-center gap-1 mt-0.5"><i data-lucide="phone" class="w-2.5 h-2.5"></i><span>${u.phone}</span></div>` : ''}
         </td>
         <td class="py-3 px-4 font-mono font-bold text-slate-300">${u.id || '-'}</td>
-        <td class="py-3 px-4 font-mono text-slate-400">${u.email}</td>
+        <td class="py-3 px-4 font-mono text-slate-400">
+          <div>${u.email}</div>
+          <div class="flex items-center gap-1.5 mt-1">
+            ${u.lineId ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-0.5" title="LINE: ${u.lineId}"><i data-lucide="message-circle" class="w-2.5 h-2.5"></i>${u.lineId}</span>` : ''}
+            ${u.instagram ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-pink-500/15 text-pink-400 border border-pink-500/30 flex items-center gap-0.5" title="IG: ${u.instagram}"><i data-lucide="instagram" class="w-2.5 h-2.5"></i>${u.instagram}</span>` : ''}
+            ${u.facebookUrl ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center gap-0.5" title="Facebook"><i data-lucide="facebook" class="w-2.5 h-2.5"></i>FB</span>` : ''}
+          </div>
+        </td>
         <td class="py-3 px-4 space-y-1">
           <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
             u.avatarFrame !== 'none' ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-400'

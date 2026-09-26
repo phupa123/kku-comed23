@@ -1047,13 +1047,25 @@ function filterRoster() {
     renderRoster(allStudents);
     return;
   }
+  const cleanQ = q.replace(/[@\- ]/g, '');
   const filtered = allStudents.filter(st => {
-    const custom = getStudentProfileData(st.email);
-    const nameMatch = (st.name.toLowerCase().includes(q)) || (custom?.name && custom.name.toLowerCase().includes(q));
-    const nickMatch = (st.nickname.toLowerCase().includes(q)) || (custom?.nickname && custom.nickname.toLowerCase().includes(q));
-    const idMatch = st.id.replace(/-/g, '').includes(q.replace(/-/g, ''));
-    const emailMatch = st.email.toLowerCase().includes(q);
-    return nameMatch || nickMatch || idMatch || emailMatch;
+    const custom = getStudentProfileData(st.email, st.id);
+    const nameMatch = (st.name && st.name.toLowerCase().includes(q)) || (custom?.name && custom.name.toLowerCase().includes(q));
+    const nickMatch = (st.nickname && st.nickname.toLowerCase().includes(q)) || (custom?.nickname && custom.nickname.toLowerCase().includes(q));
+    const idMatch = st.id && st.id.replace(/-/g, '').includes(cleanQ);
+    const emailMatch = st.email && st.email.toLowerCase().includes(q);
+
+    // Social Media & Phone search matching
+    const lineVal = (custom?.lineId || custom?.line_id || '').toLowerCase().replace(/[@\- ]/g, '');
+    const lineMatch = lineVal && lineVal.includes(cleanQ);
+
+    const igVal = (custom?.instagram || '').toLowerCase().replace(/[@\- ]/g, '');
+    const igMatch = igVal && igVal.includes(cleanQ);
+
+    const phoneVal = (custom?.phone || '').replace(/[^0-9]/g, '');
+    const phoneMatch = phoneVal && cleanQ.match(/^[0-9]+$/) && phoneVal.includes(cleanQ);
+
+    return nameMatch || nickMatch || idMatch || emailMatch || lineMatch || igMatch || phoneMatch;
   });
   renderRoster(filtered);
 }
