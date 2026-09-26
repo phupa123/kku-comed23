@@ -430,6 +430,51 @@
       return inputHash === meta.passwordHash;
     }
 
+    // ================= 3.1 TAG MANAGEMENT =================
+    getFileTags(fileId) {
+      const meta = this.filesMeta[fileId];
+      return (meta && Array.isArray(meta.tags)) ? [...meta.tags] : [];
+    }
+
+    async setFileTags(fileId, tags = []) {
+      if (!this.filesMeta[fileId]) {
+        this.filesMeta[fileId] = { folderId: null, isLocked: false, passwordHash: null, tags: [] };
+      }
+      const cleanTags = Array.isArray(tags)
+        ? tags.map(t => String(t).trim()).filter(Boolean)
+        : [];
+      this.filesMeta[fileId].tags = [...new Set(cleanTags)];
+      this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+      return this.filesMeta[fileId];
+    }
+
+    async addFileTag(fileId, tag) {
+      if (!tag) return;
+      const current = this.getFileTags(fileId);
+      if (!current.includes(tag.trim())) {
+        current.push(tag.trim());
+        return this.setFileTags(fileId, current);
+      }
+      return this.filesMeta[fileId];
+    }
+
+    async removeFileTag(fileId, tag) {
+      if (!tag) return;
+      const current = this.getFileTags(fileId).filter(t => t !== tag.trim());
+      return this.setFileTags(fileId, current);
+    }
+
+    getAllUserTags() {
+      const tagsSet = new Set();
+      for (const fId in this.filesMeta) {
+        const itemTags = this.filesMeta[fId].tags;
+        if (Array.isArray(itemTags)) {
+          itemTags.forEach(t => tagsSet.add(t));
+        }
+      }
+      return Array.from(tagsSet);
+    }
+
     // ================= 4. ADVANCED SHARING ENGINE =================
     async createShareLink(options = {}) {
       const {

@@ -418,12 +418,17 @@
 
           <!-- Category Filter Dropdown -->
           <select id="driveCategoryFilter" onchange="handleCategoryFilter(this.value)" class="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 font-bold focus:outline-none focus:border-orange-500">
-            <option value="all">📁 ทั้งหมด</option>
+            <option value="all">📁 ทุกหมวดหมู่</option>
             <option value="image">🖼️ รูปภาพ</option>
             <option value="video">🎥 วิดีโอ</option>
             <option value="audio">🎵 เสียง</option>
             <option value="document">📄 เอกสาร</option>
             <option value="other">📦 อื่นๆ / ZIP</option>
+          </select>
+
+          <!-- Tag Filter Dropdown -->
+          <select id="driveTagFilter" onchange="handleTagFilter(this.value)" class="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 font-bold focus:outline-none focus:border-orange-500">
+            <option value="all">🏷️ ทุกแท็ก</option>
           </select>
 
           <!-- View Switcher (Grid / List) -->
@@ -480,6 +485,11 @@
           <button onclick="openBatchMoveModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="folder-symlink" class="w-3.5 h-3.5 text-amber-400"></i>
             <span>ย้ายไปที่โฟลเดอร์</span>
+          </button>
+          <!-- Share multiple files as ZIP link -->
+          <button onclick="handleBatchShareAsZip()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+            <span>แชร์รวมเป็น ZIP</span>
           </button>
           <button onclick="deleteBatchSelectedFiles()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/30 transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
@@ -1078,6 +1088,61 @@
     </div>
   </div>
 
+  <!-- 9. Modal: Manage File Tags -->
+  <div id="modalFileTags" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-2xl relative">
+      <button onclick="closeFileTagsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+          <i data-lucide="tags" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white">จัดการแท็กไฟล์</h3>
+          <p id="modalTagFileName" class="text-xs text-slate-400 truncate max-w-[200px]">ชื่อไฟล์</p>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">เพิ่มแท็กใหม่ (กด Enter เพื่อเพิ่ม)</label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="newTagInput" placeholder="เช่น การบ้าน, งานด่วน, KKU..." onkeydown="handleTagInputKey(event)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+            <button onclick="handleAddTagBtn()" class="px-3 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition cursor-pointer flex-shrink-0">
+              เพิ่ม
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1.5">แท็กปัจจุบันของไฟล์นี้:</label>
+          <div id="currentTagsContainer" class="flex flex-wrap gap-1.5 min-h-[36px] p-2 rounded-xl bg-slate-950/60 border border-slate-800/80">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Quick Suggestions -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">แท็กแนะนำด่วน:</label>
+          <div class="flex flex-wrap gap-1">
+            <button type="button" onclick="quickAddTag('งานด่วน')" class="px-2 py-0.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold hover:bg-rose-500/20">+ งานด่วน</button>
+            <button type="button" onclick="quickAddTag('การบ้าน')" class="px-2 py-0.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-bold hover:bg-sky-500/20">+ การบ้าน</button>
+            <button type="button" onclick="quickAddTag('รูปกิจกรรม')" class="px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-500/20">+ รูปกิจกรรม</button>
+            <button type="button" onclick="quickAddTag('สไลด์')" class="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold hover:bg-amber-500/20">+ สไลด์</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button onclick="closeFileTagsModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition cursor-pointer">
+          เสร็จสิ้น
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="driveToast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 px-4 py-3 rounded-2xl bg-slate-900 border border-slate-700 text-white text-xs font-bold shadow-2xl flex items-center gap-2">
     <span id="driveToastIcon">✨</span>
@@ -1474,6 +1539,7 @@
       renderFoldersList();
       renderFilesList();
       updateUploadFolderDropdown();
+      if (typeof updateTagFilterDropdown === 'function') updateTagFilterDropdown();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -1555,7 +1621,7 @@
         const isShared = !!shareInfo;
 
         return `
-          <div class="group relative p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border ${isShared ? 'border-orange-500/40 bg-orange-950/10' : 'border-slate-800 hover:border-slate-700'} transition flex flex-col justify-between gap-3 cursor-pointer shadow-sm" onclick="handleFolderCardClick('${f.id}')">
+          <div data-folder-id="${f.id}" ondragover="handleFolderDragOver(event)" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event, '${f.id}')" class="group relative p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border ${isShared ? 'border-orange-500/40 bg-orange-950/10' : 'border-slate-800 hover:border-slate-700'} transition-all duration-200 flex flex-col justify-between gap-3 cursor-pointer shadow-sm" onclick="handleFolderCardClick('${f.id}')">
             
             <div class="flex items-start justify-between">
               <div class="w-10 h-10 rounded-xl ${colorClasses} border flex items-center justify-center relative">
@@ -1659,8 +1725,16 @@
           if (driveCategoryFilter === 'video') return type.startsWith('video/') || ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext);
           if (driveCategoryFilter === 'audio') return type.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext);
           if (driveCategoryFilter === 'document') return ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(ext);
-          if (driveCategoryFilter === 'other') return ['zip', 'rar', '7z', 'tar', 'gz'].includes(ext);
           return true;
+        });
+      }
+
+      // 4. Filter by tag
+      if (driveTagFilter && driveTagFilter !== 'all') {
+        const repo = getRepo();
+        files = files.filter(f => {
+          const tags = repo.getFileTags(f.id) || [];
+          return tags.includes(driveTagFilter);
         });
       }
 
@@ -1699,9 +1773,20 @@
             const fileSizeFormatted = formatBytes(f.size);
             const shareInfo = repo.getShareByTarget('file', f.id);
             const isShared = !!shareInfo;
+            const tags = repo.getFileTags(f.id) || [];
+
+            let tagsHtml = '';
+            if (tags.length > 0) {
+              tagsHtml = `
+                <div class="flex items-center gap-1 flex-wrap mt-1">
+                  ${tags.slice(0, 2).map(t => `<span class="px-1.5 py-0.2 rounded-md bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[9px] font-bold">#${escapeHtml(t)}</span>`).join('')}
+                  ${tags.length > 2 ? `<span class="text-[9px] text-slate-500 font-bold">+${tags.length - 2}</span>` : ''}
+                </div>
+              `;
+            }
 
             return `
-              <div data-file-id="${f.id}" class="group relative rounded-2xl bg-slate-900/85 hover:bg-slate-850 border ${isSelected ? 'border-orange-500 ring-2 ring-orange-500/20' : isShared ? 'border-orange-500/40' : 'border-slate-800 hover:border-slate-700'} overflow-hidden transition-all duration-200 flex flex-col justify-between shadow-sm select-none">
+              <div data-file-id="${f.id}" draggable="true" ondragstart="handleFileDragStart(event, '${f.id}')" ondragend="handleFileDragEnd(event)" class="group relative rounded-2xl bg-slate-900/85 hover:bg-slate-850 border ${isSelected ? 'border-orange-500 ring-2 ring-orange-500/20' : isShared ? 'border-orange-500/40' : 'border-slate-800 hover:border-slate-700'} overflow-hidden transition-all duration-200 flex flex-col justify-between shadow-sm select-none cursor-grab active:cursor-grabbing">
                 
                 <!-- Selection Checkbox & Top Overlay -->
                 <div class="absolute top-2 left-2 z-20">
@@ -1724,15 +1809,18 @@
                   }
 
                   <!-- Hover Action Quick Overlay -->
-                  <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 backdrop-blur-[2px] transition-opacity duration-200 flex items-center justify-center gap-2">
-                    <button onclick="event.stopPropagation(); openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl ${isShared ? 'bg-amber-600 hover:bg-amber-500' : 'bg-orange-600 hover:bg-orange-500'} text-white flex items-center justify-center transition shadow-lg" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
-                      <i data-lucide="${isShared ? 'link-2' : 'share-2'}" class="w-4 h-4"></i>
+                  <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 backdrop-blur-[2px] transition-opacity duration-200 flex items-center justify-center gap-1.5">
+                    <button onclick="event.stopPropagation(); openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="w-7 h-7 rounded-lg ${isShared ? 'bg-amber-600 hover:bg-amber-500' : 'bg-orange-600 hover:bg-orange-500'} text-white flex items-center justify-center transition shadow-lg" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
+                      <i data-lucide="${isShared ? 'link-2' : 'share-2'}" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button onclick="event.stopPropagation(); openSingleMoveModal('${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition shadow-lg" title="ย้ายไปโฟลเดอร์">
-                      <i data-lucide="folder-symlink" class="w-4 h-4"></i>
+                    <button onclick="event.stopPropagation(); openFileTagsModal('${f.id}', '${escapeHtml(fileName)}')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 flex items-center justify-center transition shadow-lg" title="จัดการแท็ก">
+                      <i data-lucide="tag" class="w-3.5 h-3.5"></i>
                     </button>
-                    <a href="${f.url}" target="_blank" download onclick="event.stopPropagation()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition shadow-lg" title="ดาวน์โหลด">
-                      <i data-lucide="download" class="w-4 h-4"></i>
+                    <button onclick="event.stopPropagation(); openSingleMoveModal('${f.id}', '${escapeHtml(fileName)}')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition shadow-lg" title="ย้ายไปโฟลเดอร์">
+                      <i data-lucide="folder-symlink" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <a href="${f.url}" target="_blank" download onclick="event.stopPropagation()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition shadow-lg" title="ดาวน์โหลด">
+                      <i data-lucide="download" class="w-3.5 h-3.5"></i>
                     </a>
                   </div>
                 </div>
@@ -1746,6 +1834,7 @@
                     <span>${fileSizeFormatted}</span>
                     <span class="capitalize text-slate-400">${f.provider || 'cloud'}</span>
                   </div>
+                  ${tagsHtml}
                 </div>
 
               </div>
@@ -1767,9 +1856,15 @@
               const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
               const shareInfo = repo.getShareByTarget('file', f.id);
               const isShared = !!shareInfo;
+              const tags = repo.getFileTags(f.id) || [];
+
+              let tagsHtml = '';
+              if (tags.length > 0) {
+                tagsHtml = tags.map(t => `<span class="px-1.5 py-0.2 rounded-md bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-bold">#${escapeHtml(t)}</span>`).join('');
+              }
 
               return `
-                <div data-file-id="${f.id}" class="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-850 transition select-none ${isSelected ? 'bg-orange-950/20' : ''}">
+                <div data-file-id="${f.id}" draggable="true" ondragstart="handleFileDragStart(event, '${f.id}')" ondragend="handleFileDragEnd(event)" class="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-850 transition select-none cursor-grab active:cursor-grabbing ${isSelected ? 'bg-orange-950/20' : ''}">
                   
                   <div class="flex items-center gap-3 overflow-hidden">
                     <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded text-orange-500 bg-slate-950 border-slate-700 focus:ring-0 cursor-pointer flex-shrink-0">
@@ -1782,10 +1877,11 @@
                     </div>
 
                     <div class="space-y-0.5 overflow-hidden cursor-pointer" onclick="handleFilePreviewClick('${f.id}')">
-                      <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-xs font-bold text-white truncate max-w-xs sm:max-w-md block" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>
                         ${isShared ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-orange-500/15 text-orange-400 border border-orange-500/30 font-bold">แชร์อยู่</span>' : ''}
                         ${f.isLocked ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">🔒 LOCKED</span>' : ''}
+                        ${tagsHtml}
                       </div>
                       <div class="flex items-center gap-3 text-[11px] text-slate-400 font-mono">
                         <span>${fileSizeFormatted}</span>
@@ -1802,11 +1898,8 @@
                     <button onclick="openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 ${isShared ? 'text-orange-400' : 'text-slate-400'} hover:text-white transition" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
                       <i data-lucide="${isShared ? 'link-2' : 'share-2'}" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="openLockModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" title="ตั้งรหัสผ่าน">
-                      <i data-lucide="${f.isLocked ? 'unlock' : 'lock'}" class="w-4 h-4"></i>
-                    </button>
-                    <button onclick="openSingleMoveModal('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition" title="ย้ายไปโฟลเดอร์">
-                      <i data-lucide="folder-symlink" class="w-4 h-4"></i>
+                    <button onclick="openFileTagsModal('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" title="จัดการแท็ก">
+                      <i data-lucide="tag" class="w-4 h-4"></i>
                     </button>
                     <button onclick="openLockModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" title="ตั้งรหัสผ่าน">
                       <i data-lucide="${f.isLocked ? 'unlock' : 'lock'}" class="w-4 h-4"></i>
@@ -3151,8 +3244,217 @@
     }
 
     // ----------------------------------------------------
-    // Utilities
+    // Drag & Drop Folder Move Handlers (HTML5 Drag and Drop)
     // ----------------------------------------------------
+    let draggedFileId = null;
+
+    function handleFileDragStart(e, fileId) {
+      draggedFileId = fileId;
+      e.dataTransfer.setData('text/plain', fileId);
+      e.dataTransfer.effectAllowed = 'move';
+      // If file isn't selected, select it
+      if (!selectedFileIds.has(fileId)) {
+        selectedFileIds.add(fileId);
+        updateBatchActionBar();
+      }
+      const el = e.currentTarget;
+      if (el) el.classList.add('opacity-40', 'scale-95');
+    }
+
+    function handleFileDragEnd(e) {
+      draggedFileId = null;
+      const el = e.currentTarget;
+      if (el) el.classList.remove('opacity-40', 'scale-95');
+      // Clear visual drop indications
+      document.querySelectorAll('[data-folder-id]').forEach(fEl => {
+        fEl.classList.remove('ring-4', 'ring-orange-500', 'bg-orange-500/20');
+      });
+    }
+
+    function handleFolderDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const targetFolderEl = e.currentTarget;
+      if (targetFolderEl) {
+        targetFolderEl.classList.add('ring-4', 'ring-orange-500', 'bg-orange-500/20');
+      }
+    }
+
+    function handleFolderDragLeave(e) {
+      const targetFolderEl = e.currentTarget;
+      if (targetFolderEl) {
+        targetFolderEl.classList.remove('ring-4', 'ring-orange-500', 'bg-orange-500/20');
+      }
+    }
+
+    async function handleFolderDrop(e, targetFolderId) {
+      e.preventDefault();
+      const targetFolderEl = e.currentTarget;
+      if (targetFolderEl) {
+        targetFolderEl.classList.remove('ring-4', 'ring-orange-500', 'bg-orange-500/20');
+      }
+
+      const fileId = e.dataTransfer.getData('text/plain') || draggedFileId;
+      if (!fileId && selectedFileIds.size === 0) return;
+
+      const repo = getRepo();
+      const filesToMove = selectedFileIds.size > 0 ? Array.from(selectedFileIds) : [fileId];
+
+      if (filesToMove.length === 1) {
+        await repo.moveFile(filesToMove[0], targetFolderId);
+      } else {
+        await repo.batchMoveFiles(filesToMove, targetFolderId);
+      }
+
+      selectedFileIds.clear();
+      updateBatchActionBar();
+      renderDrive();
+      showToast(`📁 ย้ายไฟล์ ${filesToMove.length} ไฟล์ เข้าสู่โฟลเดอร์เรียบร้อยแล้ว!`);
+    }
+
+    // ----------------------------------------------------
+    // Tag Management & Tag Filtering Functions
+    // ----------------------------------------------------
+    let currentTagTargetFileId = null;
+
+    function openFileTagsModal(fileId, fileName) {
+      currentTagTargetFileId = fileId;
+      document.getElementById('modalTagFileName').textContent = fileName || fileId;
+      document.getElementById('newTagInput').value = '';
+
+      renderCurrentFileTags();
+
+      const modal = document.getElementById('modalFileTags');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('newTagInput').focus(), 50);
+    }
+
+    function closeFileTagsModal() {
+      const modal = document.getElementById('modalFileTags');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      currentTagTargetFileId = null;
+      renderDrive();
+      updateTagFilterDropdown();
+    }
+
+    function renderCurrentFileTags() {
+      const container = document.getElementById('currentTagsContainer');
+      if (!container || !currentTagTargetFileId) return;
+
+      const repo = getRepo();
+      const tags = repo.getFileTags(currentTagTargetFileId);
+
+      if (tags.length === 0) {
+        container.innerHTML = '<span class="text-[11px] text-slate-500 italic">ยังไม่มีแท็ก</span>';
+        return;
+      }
+
+      container.innerHTML = tags.map(tag => `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold">
+          <span>#${escapeHtml(tag)}</span>
+          <button type="button" onclick="removeTagFromFile('${escapeHtml(tag)}')" class="hover:text-white transition ml-0.5">
+            <i data-lucide="x" class="w-3 h-3"></i>
+          </button>
+        </span>
+      `).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    async function handleAddTagBtn() {
+      const input = document.getElementById('newTagInput');
+      const val = input.value.trim();
+      if (!val || !currentTagTargetFileId) return;
+
+      const repo = getRepo();
+      await repo.addFileTag(currentTagTargetFileId, val);
+      input.value = '';
+      renderCurrentFileTags();
+    }
+
+    function handleTagInputKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddTagBtn();
+      }
+    }
+
+    async function quickAddTag(tag) {
+      if (!currentTagTargetFileId || !tag) return;
+      const repo = getRepo();
+      await repo.addFileTag(currentTagTargetFileId, tag);
+      renderCurrentFileTags();
+    }
+
+    async function removeTagFromFile(tag) {
+      if (!currentTagTargetFileId || !tag) return;
+      const repo = getRepo();
+      await repo.removeFileTag(currentTagTargetFileId, tag);
+      renderCurrentFileTags();
+    }
+
+    let driveTagFilter = 'all';
+
+    function handleTagFilter(val) {
+      driveTagFilter = val || 'all';
+      renderFilesList();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function updateTagFilterDropdown() {
+      const select = document.getElementById('driveTagFilter');
+      if (!select) return;
+      const repo = getRepo();
+      const allTags = repo.getAllUserTags();
+
+      const currentVal = select.value || 'all';
+      let html = '<option value="all">🏷️ ทุกแท็ก</option>';
+      allTags.forEach(t => {
+        html += `<option value="${escapeHtml(t)}" ${currentVal === t ? 'selected' : ''}># ${escapeHtml(t)}</option>`;
+      });
+      select.innerHTML = html;
+    }
+
+    // ----------------------------------------------------
+    // Batch Share as ZIP Link
+    // ----------------------------------------------------
+    async function handleBatchShareAsZip() {
+      const files = getSelectedFilesObjects();
+      if (files.length === 0) {
+        showToast('⚠️ กรุณาเลือกไฟล์ที่ต้องการแชร์', 'error');
+        return;
+      }
+
+      showToast(`📦 กำลังสร้างแพ็กเกจแชร์รวม ${files.length} ไฟล์...`);
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+
+      // Create a DriveShare item with category "DriveShareZip"
+      const shareRecord = await repo.createShareLink({
+        targetType: 'file',
+        targetId: 'batch_zip_' + Date.now(),
+        title: `แพ็กเกจไฟล์รวม (${files.length} ไฟล์) - ${new Date().toLocaleDateString('th-TH')}`,
+        accessType: 'public',
+        role: 'viewer',
+        creatorEmail: userEmail,
+        createdBy: currentUser?.name || 'COMED Member'
+      });
+
+      // Attach file IDs into share record metadata
+      shareRecord.batchFiles = files.map(f => ({
+        id: f.id,
+        name: f.originalName || f.id,
+        url: f.url,
+        size: f.size,
+        type: f.type
+      }));
+      repo.saveData('COMED_DRIVE_SHARES_V1', repo.shares);
+
+      openShareModal('file', shareRecord.targetId, shareRecord.title);
+      showToast('🎉 สร้างลิงก์แชร์รวมหลายไฟล์เรียบร้อยแล้ว!');
+    }
     function formatBytes(bytes) {
       if (!bytes || bytes <= 0) return '0 B';
       const k = 1024;
