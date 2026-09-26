@@ -261,6 +261,22 @@
         { at: 90, status: 'ENGAGING SYSTEM FIREWALLS...' },
         { at: 100, status: 'ACCESS UNLOCKED' }
       ]
+    },
+    'maintenance.html': {
+      theme: 'maintenance',
+      icon: 'wrench',
+      badge: 'SYSTEM UPGRADE & MAINTENANCE',
+      titleMain: 'SYSTEM',
+      titleSpan: 'MAINTENANCE',
+      subtitle: 'ระบบอยู่ระหว่างการปิดปรับปรุงเพื่ออัปเกรดประสิทธิภาพการทำงาน',
+      accentColor: '#f59e0b',
+      accentGradient: 'from-amber-500 via-orange-500 to-rose-500',
+      steps: [
+        { at: 25, status: 'APPLYING INFRASTRUCTURE PATCHES...' },
+        { at: 60, status: 'OPTIMIZING DATABASE INDEXES...' },
+        { at: 90, status: 'CHECKING RECOVERY PROTOCOLS...' },
+        { at: 100, status: 'MAINTENANCE NOTICE ACTIVE' }
+      ]
     }
   };
 
