@@ -136,6 +136,16 @@
           }
         }
         this.hasSyncedCloud = true;
+
+        // Backfill: push local shares ที่ยังไม่มีใน Supabase ขึ้นไป (repair shares เก่าที่ยังไม่ถูก sync)
+        const cloudCodes = new Set((data || []).map(r => r.code).filter(Boolean));
+        const localOnly = this.shares.filter(s => s.shareCode && !cloudCodes.has(s.shareCode));
+        if (localOnly.length > 0) {
+          console.log(`[StorageDriveRepo] Backfilling ${localOnly.length} local share(s) to Supabase...`);
+          for (const share of localOnly) {
+            try { await this.syncShareToCloud(share); } catch(e) {}
+          }
+        }
       } catch (e) {
         console.warn("[StorageDriveRepo] Supabase share initSync suppressed:", e);
       }
@@ -498,12 +508,28 @@
         expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString();
       }
 
+      // ดึงข้อมูลไฟล์ตอนสร้าง share record เลย เพื่อให้เก็บลง Supabase ได้ทันทีม
+      let fileUrl = '';
+      let fileName = '';
+      let fileType = '';
+      let fileSize = 0;
+      if (targetType === 'file' && targetId) {
+        const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+        const f = allFiles.find(item => item.id === targetId);
+        if (f) {
+          fileUrl = f.url || '';
+          fileName = f.originalName || f.name || '';
+          fileType = f.type || '';
+          fileSize = f.size || 0;
+        }
+      }
+
       const shareRecord = {
         id: 'shr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
         shareCode: code,
         targetType,
         targetId,
-        title,
+        title: title || fileName || 'แชร์ไฟล์',
         accessType, // public, comed23, specific
         role: role || 'viewer', // viewer, commenter, editor
         allowedEmails: (allowedEmails || []).map(e => e.toLowerCase().trim()),
@@ -512,12 +538,19 @@
         expiresAt,
         createdAt: new Date().toISOString(),
         creatorEmail: finalCreator,
-        clicks: 0
+        clicks: 0,
+        // เก็บข้อมูลไฟล์ไว้ใน record เพื่อให้คนอื่นเข้าลิงก์แล้วดูไฟล์ได้
+        fileUrl,
+        fileName,
+        fileType,
+        fileSize
       };
 
       this.shares.unshift(shareRecord);
       this.saveData(STORAGE_SHARES_KEY, this.shares);
-      this.syncShareToCloud(shareRecord).catch(() => {});
+
+      // await เพื่อให้แน่ใจว่าขึ้น Supabase ก่อน return
+      await this.syncShareToCloud(shareRecord);
       return shareRecord;
     }
 
