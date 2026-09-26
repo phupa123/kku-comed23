@@ -465,8 +465,66 @@
         folderId: null,
         isLocked: false,
         passwordHash: null,
-        tags: []
+        tags: [],
+        isTrash: false,
+        trashedAt: null,
+        originalFolderId: null
       };
+    }
+
+    // ================= 3.0 RECYCLE BIN / TRASH SYSTEM =================
+    async moveToTrash(fileId) {
+      if (!this.filesMeta[fileId]) {
+        this.filesMeta[fileId] = {
+          folderId: null,
+          isLocked: false,
+          passwordHash: null,
+          tags: [],
+          isTrash: false,
+          trashedAt: null,
+          originalFolderId: null
+        };
+      }
+      const meta = this.filesMeta[fileId];
+      meta.originalFolderId = meta.folderId || null;
+      meta.folderId = null; // Unlink from normal folder view
+      meta.isTrash = true;
+      meta.trashedAt = new Date().toISOString();
+      this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+      return meta;
+    }
+
+    async batchMoveToTrash(fileIds = []) {
+      for (const id of fileIds) {
+        await this.moveToTrash(id);
+      }
+      return true;
+    }
+
+    async restoreFromTrash(fileId) {
+      if (!this.filesMeta[fileId]) return null;
+      const meta = this.filesMeta[fileId];
+      meta.isTrash = false;
+      meta.folderId = meta.originalFolderId || null;
+      meta.trashedAt = null;
+      meta.originalFolderId = null;
+      this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+      return meta;
+    }
+
+    async batchRestoreFromTrash(fileIds = []) {
+      for (const id of fileIds) {
+        await this.restoreFromTrash(id);
+      }
+      return true;
+    }
+
+    async permanentDeleteFileMeta(fileId) {
+      if (this.filesMeta[fileId]) {
+        delete this.filesMeta[fileId];
+        this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+      }
+      return true;
     }
 
     async moveFile(fileId, targetFolderId) {
