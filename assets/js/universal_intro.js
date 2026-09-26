@@ -334,8 +334,117 @@
         0% { opacity: 0; transform: translateY(20px); }
         100% { opacity: 1; transform: translateY(0); }
       }
+      /* === PAGE TRANSITION OVERLAY (WARP CURTAIN & LASER BAR) === */
+      #comedTransitionCurtain {
+        position: fixed;
+        inset: 0;
+        z-index: 99998;
+        background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        pointer-events: none;
+        opacity: 0;
+        transform: scale(0.96);
+        transition: opacity 0.35s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #comedTransitionCurtain.curtain-active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+      }
+      #comedLaserBar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #f97316, #38bdf8, #ec4899);
+        box-shadow: 0 0 12px rgba(249, 115, 22, 0.8), 0 0 4px #fff;
+        z-index: 100000;
+        pointer-events: none;
+        transition: width 0.3s ease;
+      }
     `;
     document.head.appendChild(style);
+  }
+
+  /**
+   * Smooth Page Navigation Transition Handler
+   * Intercepts internal links to provide a seamless futuristic transition
+   */
+  function setupPageTransitions() {
+    let curtain = document.getElementById('comedTransitionCurtain');
+    if (!curtain) {
+      curtain = document.createElement('div');
+      curtain.id = 'comedTransitionCurtain';
+      curtain.innerHTML = `
+        <div class="comed-intro-stars">
+          <div class="comed-intro-star-1"></div>
+        </div>
+        <div class="text-center space-y-3 relative z-10 animate-pulse">
+          <div class="w-12 h-12 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center mx-auto text-orange-400 shadow-xl shadow-orange-500/20">
+            <svg class="animate-spin w-6 h-6" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <span class="text-xs font-mono font-bold tracking-widest text-slate-300 uppercase block">WARPING TO PAGE...</span>
+        </div>
+      `;
+      document.body.appendChild(curtain);
+    }
+
+    let laser = document.getElementById('comedLaserBar');
+    if (!laser) {
+      laser = document.createElement('div');
+      laser.id = 'comedLaserBar';
+      document.body.appendChild(laser);
+    }
+
+    // Intercept clicks on standard <a> links
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a');
+      if (!link) return;
+
+      const href = link.getAttribute('href');
+      if (!href) return;
+
+      // Ignore hash links, javascript links, downloads, external tabs or external domains
+      if (href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:') || link.target === '_blank' || link.hasAttribute('download')) {
+        return;
+      }
+
+      // Check if target is internal HTML page
+      const isInternal = !href.startsWith('http://') && !href.startsWith('https://') || href.includes(window.location.hostname);
+      if (!isInternal) return;
+
+      // Don't intercept if navigating to same URL with same hash
+      const targetUrl = new URL(href, window.location.href);
+      if (targetUrl.pathname === window.location.pathname && targetUrl.search === window.location.search && targetUrl.hash === window.location.hash) {
+        return;
+      }
+
+      e.preventDefault();
+
+      // Trigger Laser and Curtain Transition
+      if (laser) laser.style.width = '60%';
+      if (curtain) curtain.classList.add('curtain-active');
+
+      setTimeout(() => {
+        if (laser) laser.style.width = '100%';
+        setTimeout(() => {
+          window.location.href = href;
+        }, 150);
+      }, 150);
+    });
+
+    // Handle back/forward navigation cache restore
+    window.addEventListener('pageshow', (event) => {
+      if (curtain) curtain.classList.remove('curtain-active');
+      if (laser) laser.style.width = '0%';
+    });
   }
 
   function createIntroElement(cfg) {
@@ -427,8 +536,11 @@
   }
 
   function initUniversalIntro() {
+    injectIntroStyles();
+    setupPageTransitions();
+
     const pageName = getCurrentPageName();
-    // storage.html already has its custom inline intro, skip to avoid double loading
+    // storage.html already has its custom inline intro, skip intro overlay to avoid double loading
     if (pageName === 'storage.html') return;
 
     const cfg = PAGE_CONFIGS[pageName];
@@ -446,7 +558,6 @@
     }
 
     sessionStorage.setItem(sessionKey, 'true');
-    injectIntroStyles();
     const introElement = createIntroElement(cfg);
     startIntroAnimation(introElement, cfg);
   }
