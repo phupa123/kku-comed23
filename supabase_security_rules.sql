@@ -298,7 +298,84 @@ TO anon, authenticated
 USING (true)
 WITH CHECK (true);
 
--- เปิด Realtime สำหรับตาราง user_profiles
-ALTER PUBLICATION supabase_realtime ADD TABLE public.user_profiles;
+-- เปิด Realtime สำหรับตาราง user_profiles (ตรวจสอบก่อนเพิ่ม ป้องกัน Error 42710)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+      AND schemaname = 'public' 
+      AND tablename = 'user_profiles'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.user_profiles;
+  END IF;
+END;
+$$;
+
+-- ข้อมูลรายชื่อนักศึกษาเริ่มต้น 60 คน (KKU COMED23)
+INSERT INTO public.user_profiles (email, student_id, name, nickname, avatar, avatar_frame, avatar_anim)
+VALUES
+('kodchakon.sa@kkumail.com', '693050120-5', 'กชกร แสนอินทร์', 'มิวสิค', NULL, 'none', 'none'),
+('kanokporn.kump@kkumail.com', '693050121-3', 'กนกพร คำพิทูล', 'โดนัท', NULL, 'none', 'none'),
+('korakod.b@kkumail.com', '693050122-1', 'กรกต บรรเจิดวัฒนกุล', 'โนว่า', NULL, 'none', 'none'),
+('kanchaniga.n@kkumail.com', '693050123-9', 'กัญชณิกา นันททิพักษ์', 'โบนัส', NULL, 'none', 'none'),
+('kittichai.si@kkumail.com', '693050124-7', 'กิตติชัย สิงเนิน', 'น้ำเต้า', NULL, 'none', 'none'),
+('kruithai.k@kkumail.com', '693050125-5', 'ขลุ่ยไทย เคนมี', 'ขลุ่ย', NULL, 'none', 'none'),
+('jirathip.c@kkumail.com', '693050126-3', 'จิรทีปต์ ชัยศรี', 'บีน', NULL, 'none', 'none'),
+('chaiyaphong.w@kkumail.com', '693050127-1', 'ชัยพงค์ วรรณทวี', 'มาร์ค', NULL, 'none', 'none'),
+('thanchanok.sut@kkumail.com', '693050128-9', 'ธัญชนก สุตะโคตร', 'เค้ก', NULL, 'none', 'none'),
+('thanyanan.su@kkumail.com', '693050129-7', 'ธันยนันท์ สุวัฒนะ', 'วาน', NULL, 'none', 'none'),
+('theeradon.sr@kkumail.com', '693050130-2', 'ธีรดนย์ ศรีโพธิ์ชัย', 'ยูโร', NULL, 'none', 'none'),
+('bunyarat.c@kkumail.com', '693050131-0', 'บุญญรัตน์ ชะนะพาล', 'อันอัน', NULL, 'none', 'none'),
+('papada.ph@kkumail.com', '693050132-8', 'ปภาดา เพิ่มพูล', 'แตงโม', NULL, 'none', 'none'),
+('punnamet.b@kkumail.com', '693050133-6', 'ปุณเมศ บุญสง', 'คิว', NULL, 'none', 'none'),
+('phromphiriya.h@kkumail.com', '693050134-4', 'พรหมพิริยะ หอมจันทร์', 'โอปอน', NULL, 'none', 'none'),
+('phitchaphon.d@kkumail.com', '693050135-2', 'พิชชาพร เดชกุล', 'แพนนี่', NULL, 'none', 'none'),
+('phiraphat.ki@kkumail.com', '693050136-0', 'พีระพัฒน์ เกียมา', 'ต้นกล้า', NULL, 'none', 'none'),
+('panuvich.k@kkumail.com', '693050137-8', 'ภาณุวิชญ์ ขัตติสอน', 'ไกด์', NULL, 'none', 'none'),
+('phuthanet.wo@kkumail.com', '693050138-6', 'ภูธเนศ วงษ์ชาดี', 'ภู', NULL, 'none', 'none'),
+('wacharaphol.i@kkumail.com', '693050139-4', 'วชรพล อินธิกาย', 'เนคไท', NULL, 'none', 'none'),
+('wachirawit.sap@kkumail.com', '693050140-9', 'วชิรวิทย์ ทรัพย์เพิ่ม', 'นิว', NULL, 'none', 'none'),
+('wachirawit.boonk@kkumail.com', '693050141-7', 'วชิรวิทย์ บุญขันธ์', 'คิว', NULL, 'none', 'none'),
+('watcharakon.bu@kkumail.com', '693050142-5', 'วัชรากร บุญโสม', 'ออย', NULL, 'none', 'none'),
+('sukollawat.p@kkumail.com', '693050143-3', 'ศุกลวัฒน์ พาพลงาม', 'เปรม', NULL, 'none', 'none'),
+('athicha.pi@kkumail.com', '693050144-1', 'อธิชา พิมพ์ทอง', 'ไอคิว', NULL, 'none', 'none'),
+('kemmanit.b@kkumail.com', '693050145-9', 'เขมนิจ บุตรชน', 'เขม', NULL, 'none', 'none'),
+('panphitcha.k@kkumail.com', '693050146-7', 'เพ็ญพิชชา โกมลวรรค', 'นานา', NULL, 'none', 'none'),
+('kaenpanom.c@kkumail.com', '693050157-5', 'แก่นพนม เฉลิมวงศ์วิวัฒน', 'ข้าวเหนียว', NULL, 'none', 'none'),
+('sopitra.h@kkumail.com', '693050148-3', 'โสภิตรา หุนสุวงค์', 'เค้ก', NULL, 'none', 'none'),
+('chatrada.k@kkumail.com', '693050383-3', 'ฉัตรรดา กะไรยะ', 'ฟ่าง', NULL, 'none', 'none'),
+('chalakorn.k@kkumail.com', '693050384-1', 'ชลากร กุลสอนนาน', 'ต้น', NULL, 'none', 'none'),
+('thitikan.boo@kkumail.com', '693050385-9', 'ฐิติกานต์ บุญสอน', 'มะปราง', NULL, 'none', 'none'),
+('nattachai.p@kkumail.com', '693050386-7', 'ณัฏฐชัย โพธิ์ทับไทย', 'โอ้', NULL, 'none', 'none'),
+('nichakhun.c@kkumail.com', '693050387-5', 'ณิชคุณ ชำนาญ', 'นาโน', NULL, 'none', 'none'),
+('thanathip.p@kkumail.com', '693050388-3', 'ธนาธิป ภูนาเหนือ', 'ซี', NULL, 'none', 'none'),
+('thitiwut.a@kkumail.com', '693050389-1', 'ธิติวุฒิ อารีเอื้อ', 'ภูผา', NULL, 'none', 'none'),
+('thiraphon.b@kkumail.com', '693050390-6', 'ธีระพล บัวรัตน์', 'แม็กมิน', NULL, 'none', 'none'),
+('prakrit.y@kkumail.com', '693050391-4', 'ประกฤษฎิ์ เหยียดชัยภูมิ', 'ต้นกล้า', NULL, 'none', 'none'),
+('pichamon.sam@kkumail.com', '693050393-0', 'พิชามญธุ์ สามสี', 'หมูหวาน', NULL, 'none', 'none'),
+('phuwakorn.m@kkumail.com', '693050394-8', 'ภูวกร มูลเหลา', 'เฟส', NULL, 'none', 'none'),
+('ratchanon.saen@kkumail.com', '693050395-6', 'รัชชานนท์ แสงสว่าง', 'ภูมิ', NULL, 'none', 'none'),
+('waranya.ar@kkumail.com', '693050396-4', 'วรัญญา อามาตย์', 'อุ้ม', NULL, 'none', 'none'),
+('waritsara.ng@kkumail.com', '693050397-2', 'วริศรา งามประเสริฐ', 'นุ่น', NULL, 'none', 'none'),
+('wimonsiri.w@kkumail.com', '693050398-0', 'วิมลสิริ วงศ์คำชาว', 'แพรวา', NULL, 'none', 'none'),
+('wiraphat.phe@kkumail.com', '693050399-8', 'วีรภัทร เพชรอ้อม', 'ตะวัน', NULL, 'none', 'none'),
+('sirawit.b@kkumail.com', '693050400-9', 'สิรวิชญ์ บุญหล้า', 'อั้ม', NULL, 'none', 'none'),
+('benyapa.mee@kkumail.com', '693050401-7', 'เบญญาภา มีสวัสดิ์', 'บัวชมพู', NULL, 'none', 'none'),
+('kanyarat.chaid@kkumail.com', '693050534-8', 'กัลยรัตน์ ไชยเดช', 'อเล็ก', NULL, 'none', 'none'),
+('kttiphat.pi@kkumail.com', '693050535-6', 'กิตติพัฒน์ เพียรยิ่ง', 'ปอนด์', NULL, 'none', 'none'),
+('thitipha.m@kkumail.com', '693050537-2', 'ทิติภา มาสุข', 'ดีดี้', NULL, 'none', 'none'),
+('pharida.d@kkumail.com', '693050538-0', 'ภริดา เด่นไชยรัตน์', 'ต้นอ้อ', NULL, 'none', 'none'),
+('poommarin.b@kkumail.com', '693050539-8', 'ภูมรินทร์ บุญมี', 'ภูมิ', NULL, 'none', 'none'),
+('ronnachai.sa@kkumail.com', '693050540-3', 'รณชัย สายเนตร์', 'น็อต', NULL, 'none', 'none'),
+('adsadakorn.s@kkumail.com', '693050541-1', 'อัษฎากร ศรีสังข์', 'บาส', NULL, 'none', 'none'),
+('chitsanupong.sae@kkumail.com', '693050562-3', 'ชิษณุพงศ์ แสงสีงาม', 'ไผ่', NULL, 'none', 'none'),
+('tharathip.ka@kkumail.com', '693050563-1', 'ธาราทิพย์ การร้อย', 'บีม', NULL, 'none', 'none'),
+('punyaphat.s@kkumail.com', '693050564-9', 'ปุณยพัฒน์ สินโพธิ์', 'โบนัส', NULL, 'none', 'none'),
+('phiyada.san@kkumail.com', '693050565-7', 'พิยดา สารทอง', 'โซอี้', NULL, 'none', 'none'),
+('suthikan.b@kkumail.com', '693050566-5', 'สุธีกานต์ บัตเลอร์', 'เจสซี่', NULL, 'none', 'none'),
+('apassara.n@kkumail.com', '693050567-3', 'อาภัสรา นากลาง', 'เป้ย', NULL, 'none', 'none')
+ON CONFLICT (email) DO NOTHING;
+
 
 
