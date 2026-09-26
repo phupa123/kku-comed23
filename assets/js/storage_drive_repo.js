@@ -144,21 +144,24 @@
             }
           });
 
+          // Reconcile: ตรวจสอบรายการใน Cloud เป็นหลัก
+          const cloudCodes = new Set((data || []).map(r => r.code).filter(Boolean));
+          // ถ้าบน Supabase ลบไปแล้ว ให้เอาออกจาก local ด้วย เพื่อไม่ให้ผีหลอกฟื้นคืนชีพ
+          const beforeLen = this.shares.length;
+          this.shares = this.shares.filter(s => cloudCodes.has(s.shareCode));
+          if (this.shares.length !== beforeLen) {
+            hasNew = true;
+          }
+
           if (hasNew) {
             this.saveData(STORAGE_SHARES_KEY, this.shares);
           }
+        } else if (!error && Array.isArray(data) && data.length === 0) {
+          // ถ้าบน Cloud ไม่มีแถวใดๆ เลย แสดงว่าถูกลบหมดแล้ว
+          this.shares = [];
+          this.saveData(STORAGE_SHARES_KEY, this.shares);
         }
         this.hasSyncedCloud = true;
-
-        // Backfill: push local shares ที่ยังไม่มีใน Supabase ขึ้นไป (repair shares เก่าที่ยังไม่ถูก sync)
-        const cloudCodes = new Set((data || []).map(r => r.code).filter(Boolean));
-        const localOnly = this.shares.filter(s => s.shareCode && !cloudCodes.has(s.shareCode));
-        if (localOnly.length > 0) {
-          console.log(`[StorageDriveRepo] Backfilling ${localOnly.length} local share(s) to Supabase...`);
-          for (const share of localOnly) {
-            try { await this.syncShareToCloud(share); } catch(e) {}
-          }
-        }
       } catch (e) {
         console.warn("[StorageDriveRepo] Supabase share initSync suppressed:", e);
       }
@@ -269,9 +272,16 @@
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb || !shareCode) return;
-        await sb.from('shortlinks').delete().eq('code', shareCode).catch(() => {});
+        const cleanCode = String(shareCode).trim();
+        const { data, error } = await sb.from('shortlinks').delete().eq('code', cleanCode).select();
+        if (error) {
+          console.error("[StorageDriveRepo] ❌ Error deleting share link from Supabase:", error);
+          throw error;
+        }
+        console.log("[StorageDriveRepo] 🗑️ Deleted share link from Supabase:", cleanCode, data);
       } catch (err) {
-        console.warn("[StorageDriveRepo] Cloud share delete error:", err);
+        console.error("[StorageDriveRepo] Cloud share delete error:", err);
+        throw err;
       }
     }
 
@@ -569,6 +579,22 @@
         createdBy = ''
       } = options;
       const finalCreator = (creatorEmail || createdBy || '').toLowerCase().trim();
+
+      // ตรวจสอบว่าไฟล์หรือโฟลเดอร์นี้มีลิงก์เดิมอยู่แล้วหรือไม่ ถ้ามีให้ใช้รหัสเดิมเพื่อไม่ให้ต้องส่งลิงก์ใหม่
+      const existing = this.getShareByTarget(targetType, targetId);
+      if (existing) {
+        const updateData = {
+          accessType,
+          role,
+          allowedEmails,
+          expiresInHours
+        };
+        if (password) {
+          updateData.password = password;
+        }
+        return await this.updateShare(existing.id, updateData);
+      }
+
       const code = 's_' + Math.random().toString(36).substring(2, 8);
       const passHash = password ? await this.hashPassword(password) : null;
 
@@ -577,7 +603,7 @@
         expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString();
       }
 
-      // ดึงข้อมูลไฟล์ตอนสร้าง share record เลย เพื่อให้เก็บลง Supabase ได้ทันทีม
+      // ดึงข้อมูลไฟล์ตอนสร้าง share record เลย เพื่อให้เก็บลง Supabase ได้ทันที
       let fileUrl = '';
       let fileName = '';
       let fileType = '';
@@ -728,23 +754,33 @@
       return true;
     }
 
-    deleteShare(shareId) {
+    async deleteShare(shareId) {
       const target = this.shares.find(s => s.id === shareId);
       this.shares = this.shares.filter(s => s.id !== shareId);
       this.saveData(STORAGE_SHARES_KEY, this.shares);
       if (target && target.shareCode) {
-        this.deleteShareFromCloud(target.shareCode).catch(() => {});
+        try {
+          await this.deleteShareFromCloud(target.shareCode);
+        } catch (err) {
+          console.warn("[StorageDriveRepo] Delete share cloud sync error:", err);
+        }
       }
       return true;
     }
 
-    revokeShareForTarget(targetType, targetId) {
+    async revokeShareForTarget(targetType, targetId) {
       const targets = this.shares.filter(s => s.targetType === targetType && s.targetId === targetId);
       this.shares = this.shares.filter(s => !(s.targetType === targetType && s.targetId === targetId));
       this.saveData(STORAGE_SHARES_KEY, this.shares);
-      targets.forEach(t => {
-        if (t.shareCode) this.deleteShareFromCloud(t.shareCode).catch(() => {});
-      });
+      for (const t of targets) {
+        if (t.shareCode) {
+          try {
+            await this.deleteShareFromCloud(t.shareCode);
+          } catch (err) {
+            console.warn("[StorageDriveRepo] Revoke share cloud sync error:", err);
+          }
+        }
+      }
       return true;
     }
 

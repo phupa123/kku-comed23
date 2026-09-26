@@ -2688,20 +2688,25 @@
       renderDrive();
     }
 
-    function handleRevokeShare() {
+    async function handleRevokeShare() {
       if (!targetItemForAction) return;
       const name = targetItemForAction.name || 'รายการนี้';
-      if (!confirm(`คุณต้องการหยุดแชร์ "${name}" และเปลี่ยนกลับเป็น "ส่วนตัว (Private)" ใช่หรือไม่?\n\nเมื่อหยุดแชร์ ลิงก์ที่เคยส่งไปจะไม่สามารถเปิดได้อีกต่อไป`)) {
+      if (!confirm(`คุณต้องการหยุดแชร์ "${name}" และเปลี่ยนกลับเป็น "ส่วนตัว (Private)" ใช่หรือไม่?\n\nเมื่อหยุดแชร์ ลิงก์นี้จะถูกลบออกจากระบบและ Supabase ทันที ไม่สามารถเปิดได้อีกต่อไป`)) {
         return;
       }
 
       const repo = getRepo();
-      repo.revokeShareForTarget(targetItemForAction.type, targetItemForAction.id);
+      try {
+        await repo.revokeShareForTarget(targetItemForAction.type, targetItemForAction.id);
+        showToast(`🔒 หยุดแชร์ "${name}" และลบลิงก์ออกจาก Supabase เรียบร้อยแล้ว`);
+      } catch (err) {
+        console.error('[storage.html] Revoke share error:', err);
+        showToast(`🔒 หยุดแชร์แล้ว (คำเตือน: ซิงค์ลบจาก Supabase อาจติดขัด)`);
+      }
       currentEditingShare = null;
 
       closeShareModal();
       renderDrive();
-      showToast(`🔒 หยุดแชร์ "${name}" กลับเป็นส่วนตัวเรียบร้อยแล้ว`);
     }
 
     function copyShareLinkToClipboard() {
