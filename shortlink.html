@@ -801,6 +801,9 @@
                 <button onclick="openQrModal('${item.id}')" title="ดู QR Code" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer">
                   <i data-lucide="qr-code" class="w-4 h-4"></i>
                 </button>
+                <button onclick="handleDeleteShortlink('${item.id}')" title="ลบลิงก์นี้" class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition cursor-pointer">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
               </div>
 
               <a href="shortlink.html?go=${item.code}" target="_blank" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs transition flex items-center gap-1.5 shadow-md flex-shrink-0 cursor-pointer">
@@ -900,6 +903,22 @@
       const fullUrl = `${window.location.origin}/s/${code}`;
       navigator.clipboard.writeText(fullUrl);
       alert(`📋 คัดลอกลิงก์ย่อ "${fullUrl}" เรียบร้อยแล้ว!`);
+    }
+
+    async function handleDeleteShortlink(id) {
+      const link = window.ShortlinkRepo.getById(id);
+      if (!link) return;
+
+      if (!confirm(`คุณต้องการลบลิงก์ย่อ "/s/${link.code}" (${link.title}) หรือไม่?\n\nเมื่อลบแล้วจะไม่สามารถเข้าใช้งานหรือซิงค์ผ่านลิงก์ย่อนี้ได้อีก`)) {
+        return;
+      }
+
+      try {
+        await window.ShortlinkRepo.deleteLink(id);
+        renderLinksDirectory();
+      } catch (err) {
+        alert("⚠️ ลบไม่สำเร็จ: " + err.message);
+      }
     }
 
     // 5. QR Code Modal View with Logo & Color Customization

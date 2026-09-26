@@ -165,7 +165,11 @@
 
       this.links.unshift(newLink);
       this.saveLocalLinks(this.links);
-      this.syncToSupabase(newLink).catch(() => {});
+      try {
+        await this.syncToSupabase(newLink);
+      } catch (err) {
+        console.warn("[ShortlinkRepo] Warning: Initial cloud sync deferred:", err);
+      }
       return newLink;
     }
 
@@ -354,6 +358,12 @@
           if (hasNew) {
             this.saveLocalLinks(this.links);
           }
+        } else if (!error && Array.isArray(data) && data.length === 0) {
+          // ตารางใน Supabase ยังว่างเปล่า -> ทำการ Seed ลิงก์เริ่มต้นขึ้น Supabase ทันที
+          console.log("[ShortlinkRepo] Supabase shortlinks table is empty. Seeding defaults...");
+          for (const item of this.links) {
+            await this.syncToSupabase(item);
+          }
         }
         this.hasSyncedCloud = true;
       } catch (e) {
@@ -366,7 +376,7 @@
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb || !link || !link.code) return;
 
-        await sb.from('shortlinks').upsert({
+        const { data, error } = await sb.from('shortlinks').upsert({
           id: link.id || ('lnk_' + link.code),
           code: link.code,
           title: link.title || ('ลิงก์ย่อ ' + link.code),
@@ -381,9 +391,15 @@
           notes: link.notes || '',
           created_by: link.createdBy || '',
           updated_at: new Date().toISOString()
-        }, { onConflict: 'code' }).catch(() => {});
+        }, { onConflict: 'code' });
+
+        if (error) {
+          console.error("[ShortlinkRepo] Error upserting to Supabase:", error);
+          throw error;
+        }
       } catch (e) {
         console.warn("[ShortlinkRepo] Cloud sync error:", e);
+        throw e;
       }
     }
 
@@ -391,9 +407,14 @@
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
         if (!sb || !link) return;
-        await sb.from('shortlinks').delete().eq('code', link.code).catch(() => {});
+        const { error } = await sb.from('shortlinks').delete().eq('code', link.code);
+        if (error) {
+          console.error("[ShortlinkRepo] Error deleting from Supabase:", error);
+          throw error;
+        }
       } catch (e) {
         console.warn("[ShortlinkRepo] Cloud delete error:", e);
+        throw e;
       }
     }
   }
