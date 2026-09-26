@@ -134,6 +134,115 @@
     .animate-float-reverse {
       animation: floatOrb 13s ease-in-out infinite reverse;
     }
+
+    /* === UIVERSE.IO MODERN UI COMPONENTS === */
+    /* 1. Uiverse Animated Gradient Glow Button */
+    .uiverse-btn-glow {
+      position: relative;
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #f59e0b 100%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 20px -3px rgba(249, 115, 22, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+    .uiverse-btn-glow::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+      transform: rotate(30deg) translateY(-100%);
+      transition: transform 0.6s ease;
+      pointer-events: none;
+    }
+    .uiverse-btn-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 28px 2px rgba(249, 115, 22, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .uiverse-btn-glow:hover::before {
+      transform: rotate(30deg) translateY(100%);
+    }
+
+    /* 2. Uiverse Glass Cyber Card & Border */
+    .uiverse-glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+    }
+    .uiverse-glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.5), rgba(56, 189, 248, 0.5), transparent);
+      border-top-left-radius: inherit;
+      border-top-right-radius: inherit;
+    }
+
+    /* 3. Uiverse Rainbow Animated Border Card (for dropzone / featured) */
+    .uiverse-border-glow {
+      position: relative;
+      z-index: 1;
+    }
+    .uiverse-border-glow::before {
+      content: '';
+      position: absolute;
+      inset: -1.5px;
+      border-radius: inherit;
+      padding: 1.5px;
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.7), rgba(56, 189, 248, 0.4), rgba(245, 158, 11, 0.6));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      opacity: 0.6;
+    }
+    .uiverse-border-glow:hover::before {
+      opacity: 1;
+    }
+
+    /* 4. Uiverse Cloud Pulsing Loader */
+    .uiverse-cloud-loader {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .uiverse-cloud-loader .loader-dot {
+      width: 6px;
+      height: 6px;
+      margin: 0 2px;
+      border-radius: 50%;
+      background: #f97316;
+      animation: uiverseBounce 1.4s infinite ease-in-out both;
+    }
+    .uiverse-cloud-loader .loader-dot:nth-child(1) { animation-delay: -0.32s; }
+    .uiverse-cloud-loader .loader-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes uiverseBounce {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* 5. Uiverse Modern Glass Input with Light Sweep */
+    .uiverse-search-box {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+    .uiverse-search-box:focus-within {
+      border-color: rgba(249, 115, 22, 0.6);
+      box-shadow: 0 0 16px -2px rgba(249, 115, 22, 0.35), inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
@@ -213,7 +322,7 @@
 
         <!-- Guest State (Not Logged In) -->
         <div id="headerGuestArea" class="flex items-center gap-2">
-          <button onclick="openAuthModal()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs shadow-lg shadow-orange-500/25 transition flex items-center gap-2 cursor-pointer active:scale-95">
+          <button onclick="openAuthModal()" class="uiverse-btn-glow px-4 py-2 rounded-2xl text-white font-black text-xs transition flex items-center gap-2 cursor-pointer active:scale-95">
             <i data-lucide="log-in" class="w-4 h-4"></i>
             <span>เข้าสู่ระบบไดรฟ์</span>
           </button>
@@ -281,15 +390,15 @@
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3 flex-wrap relative z-10">
-          <button onclick="openCreateFolderModal()" class="px-4 py-2 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-white font-bold text-xs border border-slate-700/80 hover:border-slate-600 transition flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm">
+          <button onclick="openCreateFolderModal()" class="px-4 py-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-white font-bold text-xs border border-slate-750 hover:border-slate-600 transition flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm hover:shadow-orange-500/10">
             <i data-lucide="folder-plus" class="w-4 h-4 text-amber-400"></i>
             <span>สร้างโฟลเดอร์ใหม่</span>
             <span class="kbd-badge ml-1 hidden lg:inline">N</span>
           </button>
-          <button onclick="triggerUploadModalOrZone()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs shadow-lg shadow-orange-500/25 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
-            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+          <button onclick="triggerUploadModalOrZone()" class="uiverse-btn-glow px-5 py-2.5 rounded-2xl text-white font-black text-xs transition flex items-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="upload-cloud" class="w-4 h-4 text-white"></i>
             <span>อัปโหลดไฟล์ขึ้นไดรฟ์</span>
-            <span class="kbd-badge ml-1 hidden lg:inline bg-orange-700 text-white border-orange-500">U</span>
+            <span class="kbd-badge ml-1 hidden lg:inline bg-orange-950/70 text-orange-200 border-orange-400/40">U</span>
           </button>
         </div>
       </div>
@@ -365,30 +474,30 @@
           </div>
         </div>
 
-        <!-- Drag & Drop Area -->
-        <div id="dropArea" class="border-2 border-dashed border-slate-700 hover:border-orange-500/70 rounded-3xl p-8 sm:p-12 text-center transition-all duration-200 cursor-pointer bg-slate-900/40 hover:bg-orange-500/5 group relative overflow-hidden" onclick="document.getElementById('fileInput').click()">
+        <!-- Drag & Drop Area with Uiverse Glow Border -->
+        <div id="dropArea" class="uiverse-border-glow border-2 border-dashed border-slate-700/80 hover:border-orange-500/80 rounded-3xl p-8 sm:p-12 text-center transition-all duration-300 cursor-pointer bg-slate-900/50 hover:bg-orange-500/5 group relative overflow-hidden shadow-2xl" onclick="document.getElementById('fileInput').click()">
           <input type="file" id="fileInput" class="hidden" multiple onchange="handleFilesSelected(event)">
           <input type="file" id="addMoreFileInput" class="hidden" multiple onchange="handleAddMoreFiles(event)">
 
-          <div class="space-y-3">
-            <div class="w-16 h-16 rounded-3xl bg-slate-900 group-hover:scale-110 group-hover:bg-orange-500/10 border border-slate-800 group-hover:border-orange-500/30 flex items-center justify-center mx-auto text-slate-400 group-hover:text-orange-400 transition-all duration-300 shadow-xl">
+          <div class="space-y-3.5 relative z-10">
+            <div class="w-16 h-16 rounded-3xl bg-slate-900/90 group-hover:scale-110 group-hover:bg-orange-500/15 border border-slate-800 group-hover:border-orange-500/40 flex items-center justify-center mx-auto text-slate-400 group-hover:text-orange-400 transition-all duration-300 shadow-xl group-hover:shadow-orange-500/20">
               <i data-lucide="cloud-upload" class="w-8 h-8"></i>
             </div>
             <div>
-              <h4 class="text-base sm:text-lg font-black text-white">ลากและวางไฟล์ลงที่นี่ หรือคลิกเพื่อเลือกไฟล์</h4>
+              <h4 class="text-base sm:text-lg font-black text-white group-hover:text-orange-200 transition-colors">ลากและวางไฟล์ลงที่นี่ หรือคลิกเพื่อเลือกไฟล์</h4>
               <p class="text-xs text-slate-400 mt-1">เลือกได้ทีละไฟล์ หรือเลือกหลายไฟล์พร้อมกัน (Multi-File Queue)</p>
             </div>
             <div class="flex items-center justify-center gap-2 pt-1 flex-wrap">
-              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">รูปภาพ JPG/PNG/WebP</span>
-              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">วิดีโอ MP4/MOV</span>
-              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">เอกสาร PDF/DOCX</span>
-              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">ไฟล์บีบอัด ZIP/RAR</span>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/80">รูปภาพ JPG/PNG/WebP</span>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/80">วิดีโอ MP4/MOV</span>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/80">เอกสาร PDF/DOCX</span>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/80">ไฟล์บีบอัด ZIP/RAR</span>
             </div>
           </div>
         </div>
 
         <!-- File Staging Card (Selected Files Preview Before Upload) -->
-        <div id="fileStagingCard" class="hidden rounded-3xl bg-slate-900/90 border border-slate-800 p-5 space-y-4">
+        <div id="fileStagingCard" class="hidden rounded-3xl bg-slate-900/90 border border-slate-800 p-5 space-y-4 shadow-xl">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <div class="flex items-center gap-2.5">
               <span class="text-xs font-black text-white">คิวไฟล์ที่เตรียมอัปโหลด</span>
@@ -415,7 +524,7 @@
 
           <!-- Upload Action Button -->
           <div class="pt-2 flex items-center justify-end gap-3">
-            <button id="btnConfirmUpload" onclick="executeUpload()" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:pointer-events-none text-white font-black text-sm shadow-xl shadow-orange-500/25 transition flex items-center justify-center gap-2 cursor-pointer">
+            <button id="btnConfirmUpload" onclick="executeUpload()" class="uiverse-btn-glow w-full sm:w-auto px-7 py-3 rounded-2xl disabled:opacity-50 disabled:pointer-events-none text-white font-black text-sm transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
               <i data-lucide="cloud-upload" class="w-4 h-4"></i>
               <span id="btnUploadText">เริ่มอัปโหลดไฟล์เข้าไดรฟ์</span>
             </button>
@@ -465,10 +574,10 @@
         <!-- Right: Search, Filter, View Switcher & Selection Tools -->
         <div class="flex items-center gap-2 flex-wrap">
           
-          <!-- Search Input -->
-          <div class="relative flex-grow sm:flex-grow-0 sm:w-56">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input type="text" id="driveSearchInput" placeholder="ค้นหาไฟล์หรือโฟลเดอร์..." oninput="handleDriveSearch(this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+          <!-- Search Input with Uiverse Modern Glass Effect -->
+          <div class="relative flex-grow sm:flex-grow-0 sm:w-60 uiverse-search-box rounded-2xl transition-all">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="driveSearchInput" placeholder="ค้นหาไฟล์หรือโฟลเดอร์..." oninput="handleDriveSearch(this.value)" class="w-full bg-transparent border-0 rounded-2xl pl-10 pr-9 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-0">
             <span class="kbd-badge absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] hidden sm:inline">/</span>
           </div>
 
@@ -598,23 +707,23 @@
   <!-- ==================== MODALS ==================== -->
 
   <!-- 1. Modal: User Auth (Google Sign-In or Student Roster) -->
-  <div id="modalUserAuth" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl relative">
-      <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+  <div id="modalUserAuth" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center p-4">
+    <div class="w-full max-w-md uiverse-glass-card rounded-3xl p-6 sm:p-7 space-y-6 shadow-2xl relative">
+      <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
       <div class="text-center space-y-2">
-        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center mx-auto border border-orange-500/20">
-          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-500/10 text-orange-400 flex items-center justify-center mx-auto border border-orange-500/30 shadow-lg shadow-orange-500/10">
+          <i data-lucide="cloud-lightning" class="w-7 h-7"></i>
         </div>
-        <h3 class="text-lg font-black text-white">เข้าสู่ระบบ COMED Cloud Drive</h3>
-        <p class="text-xs text-slate-400">กรุณาเลือกวิธีการยืนยันตัวตนเพื่อเข้าถึงพื้นที่ 5GB</p>
+        <h3 class="text-xl font-black text-white cloud-gradient-text">เข้าสู่ระบบ COMED Cloud Drive</h3>
+        <p class="text-xs text-slate-400">เข้าถึงพื้นที่จัดเก็บคลาวด์ 5GB พร้อมระบบแชร์ไฟล์และโฟลเดอร์</p>
       </div>
 
       <div class="space-y-4">
         <!-- Option 1: Google Sign-In -->
-        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3 text-center">
+        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-3 text-center shadow-inner">
           <span class="text-xs font-bold text-slate-300 block">วิธีที่ 1: ลงชื่อเข้าใช้ด้วย Google (@kkumail.com หรือ Gmail)</span>
           <div id="googleBtnContainer" class="flex justify-center"></div>
         </div>
@@ -626,12 +735,12 @@
         </div>
 
         <!-- Option 2: Student Roster Picker -->
-        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-3 shadow-inner">
           <span class="text-xs font-bold text-slate-300 block">วิธีที่ 2: เลือกจากทำเนียบรุ่น COMED KKU (60 คน)</span>
-          <select id="authStudentSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+          <select id="authStudentSelect" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
             <option value="">-- กรุณาเลือกรายชื่อของคุณ --</option>
           </select>
-          <button onclick="confirmStudentPickerAuth()" class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition cursor-pointer">
+          <button onclick="confirmStudentPickerAuth()" class="uiverse-btn-glow w-full py-2.5 rounded-xl text-white font-bold text-xs transition cursor-pointer active:scale-95">
             เข้าสู่ระบบด้วยรายชื่อนี้
           </button>
         </div>
@@ -640,14 +749,14 @@
   </div>
 
   <!-- 2. Modal: Create / Edit Folder -->
-  <div id="modalFolder" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative">
-      <button onclick="closeFolderModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+  <div id="modalFolder" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center p-4">
+    <div class="w-full max-w-md uiverse-glass-card rounded-3xl p-6 space-y-5 shadow-2xl relative">
+      <button onclick="closeFolderModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+        <div class="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center shadow-sm">
           <i data-lucide="folder-plus" class="w-5 h-5"></i>
         </div>
         <div>
@@ -713,10 +822,10 @@
         </div>
 
         <div class="pt-3 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeFolderModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition">
+          <button type="button" onclick="closeFolderModal()" class="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-750 text-xs font-bold text-slate-300 transition cursor-pointer">
             ยกเลิก
           </button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-black shadow-md transition">
+          <button type="submit" class="uiverse-btn-glow px-5 py-2.5 rounded-xl text-white text-xs font-black transition cursor-pointer active:scale-95">
             บันทึกโฟลเดอร์
           </button>
         </div>
@@ -725,14 +834,14 @@
   </div>
 
   <!-- 3. Modal: Move File(s) to Folder -->
-  <div id="modalMoveFile" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative">
-      <button onclick="closeMoveModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+  <div id="modalMoveFile" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center p-4">
+    <div class="w-full max-w-md uiverse-glass-card rounded-3xl p-6 space-y-5 shadow-2xl relative">
+      <button onclick="closeMoveModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+        <div class="w-11 h-11 rounded-2xl bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center justify-center shadow-sm">
           <i data-lucide="folder-symlink" class="w-5 h-5"></i>
         </div>
         <div>
@@ -966,8 +1075,8 @@
 
         <!-- Generate / Save Button -->
         <div class="pt-2 flex items-center gap-2">
-          <button id="btnSaveShareSettings" onclick="handleGenerateShareLink()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
-            <i data-lucide="link" class="w-4 h-4"></i>
+          <button id="btnSaveShareSettings" onclick="handleGenerateShareLink()" class="uiverse-btn-glow w-full py-3 rounded-2xl text-white font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="link" class="w-4 h-4 text-white"></i>
             <span id="btnSaveShareText">สร้างลิงก์แชร์และคัดลอก (Generate Link)</span>
           </button>
         </div>
@@ -1005,9 +1114,9 @@
   </div>
 
   <!-- 7. Modal: Keyboard Shortcuts Cheat Sheet -->
-  <div id="modalShortcuts" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-2xl relative">
-      <button onclick="closeShortcutsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+  <div id="modalShortcuts" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center p-4">
+    <div class="w-full max-w-md uiverse-glass-card rounded-3xl p-6 space-y-4 shadow-2xl relative">
+      <button onclick="closeShortcutsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -1830,16 +1939,21 @@
 
       if (files.length === 0) {
         container.innerHTML = `
-          <div class="glass-card p-12 rounded-3xl border border-slate-800 text-center space-y-3">
-            <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 text-slate-500 flex items-center justify-center mx-auto">
-              <i data-lucide="folder-open" class="w-7 h-7"></i>
+          <div class="uiverse-glass-card p-12 rounded-3xl text-center space-y-4 shadow-2xl relative overflow-hidden">
+            <div class="w-16 h-16 rounded-3xl bg-slate-900/90 border border-slate-700/60 text-orange-400 flex items-center justify-center mx-auto shadow-inner">
+              <i data-lucide="cloud-off" class="w-8 h-8"></i>
             </div>
             <div>
-              <h4 class="text-sm font-bold text-white">ไม่มีไฟล์ในโฟลเดอร์นี้</h4>
-              <p class="text-xs text-slate-500 mt-0.5">คุณสามารถลากไฟล์มาวางที่กล่องอัปโหลดด้านบน หรือกดย้ายไฟล์จากโฟลเดอร์อื่นมาไว้ที่นี่</p>
+              <h4 class="text-base font-black text-white">ยังไม่มีไฟล์ในส่วนนี้</h4>
+              <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">ลากไฟล์ลงในกล่องอัปโหลดด้านบน หรือคลิกปุ่ม <strong>"อัปโหลดไฟล์ขึ้นไดรฟ์"</strong> เพื่อเริ่มจัดเก็บไฟล์ของคุณ</p>
             </div>
+            <button onclick="triggerUploadModalOrZone()" class="uiverse-btn-glow px-4 py-2 rounded-2xl text-white text-xs font-black inline-flex items-center gap-1.5 cursor-pointer active:scale-95">
+              <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+              <span>อัปโหลดไฟล์ทันที</span>
+            </button>
           </div>
         `;
+        if (window.lucide) lucide.createIcons();
         return;
       }
 
