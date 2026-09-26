@@ -56,8 +56,8 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* === WALKING CHARACTER ANIMATION === */
-    .maint-walker-scene {
+    /* From Uiverse.io by AatreyuShau */ 
+    .loader {
       scale: 0.75;
       position: relative;
       width: 200px;
@@ -65,65 +65,109 @@
       translate: 10px -20px;
       margin: 0 auto;
     }
-    .maint-walker-scene svg {
+    .loader svg {
       position: absolute;
       top: 0;
       left: 0;
     }
-    .maint-head {
+    .head {
       translate: 27px -30px;
       z-index: 3;
-      animation: maintBob 1s infinite ease-in;
+      animation: bob 1s infinite ease-in;
     }
-    .maint-bod {
+    .bod {
       translate: 0px 30px;
       z-index: 3;
-      animation: maintBob 1s infinite ease-in-out;
+      animation: bob 1s infinite ease-in-out;
     }
-    .maint-legr {
+    .legr {
       translate: 75px 135px;
       z-index: 0;
-      animation: maintRstep 1s infinite ease-in;
+      animation: rstep 1s infinite ease-in;
       animation-delay: 0.45s;
     }
-    .maint-legl {
+
+    .legl {
       translate: 30px 155px;
       z-index: 3;
-      animation: maintLstep 1s infinite ease-in;
+      animation: lstep 1s infinite ease-in;
     }
-    #maint-gnd {
+
+    @keyframes bob {
+      0% {
+        transform: translateY(0) rotate(3deg);
+      }
+      5% {
+        transform: translateY(0) rotate(3deg);
+      }
+      25% {
+        transform: translateY(5px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(0px) rotate(-3deg);
+      }
+      70% {
+        transform: translateY(5px) rotate(0deg);
+      }
+      100% {
+        transform: translateY(0) rotate(3deg);
+      }
+    }
+
+    @keyframes lstep {
+      0% {
+        transform: translateY(0) rotate(-5deg);
+      }
+      33% {
+        transform: translateY(-15px) translate(32px) rotate(35deg);
+      }
+      66% {
+        transform: translateY(0) translate(25px) rotate(-25deg);
+      }
+      100% {
+        transform: translateY(0) rotate(-5deg);
+      }
+    }
+
+    @keyframes rstep {
+      0% {
+        transform: translateY(0) translate(0px) rotate(-5deg);
+      }
+      33% {
+        transform: translateY(-10px) translate(30px) rotate(35deg);
+      }
+      66% {
+        transform: translateY(0) translate(20px) rotate(-25deg);
+      }
+      100% {
+        transform: translateY(0) translate(0px) rotate(-5deg);
+      }
+    }
+
+    #gnd {
       translate: -140px 0;
       rotate: 10deg;
       z-index: -1;
       filter: blur(0.5px) drop-shadow(1px 3px 5px #000000);
       opacity: 0.25;
-      animation: maintScroll 5s infinite linear;
+      animation: scroll 5s infinite linear;
     }
-    @keyframes maintBob {
-      0%   { transform: translateY(0) rotate(3deg); }
-      5%   { transform: translateY(0) rotate(3deg); }
-      25%  { transform: translateY(5px) rotate(0deg); }
-      50%  { transform: translateY(0px) rotate(-3deg); }
-      70%  { transform: translateY(5px) rotate(0deg); }
-      100% { transform: translateY(0) rotate(3deg); }
-    }
-    @keyframes maintLstep {
-      0%   { transform: translateY(0) rotate(-5deg); }
-      33%  { transform: translateY(-15px) translate(32px) rotate(35deg); }
-      66%  { transform: translateY(0) translate(25px) rotate(-25deg); }
-      100% { transform: translateY(0) rotate(-5deg); }
-    }
-    @keyframes maintRstep {
-      0%   { transform: translateY(0) translate(0px) rotate(-5deg); }
-      33%  { transform: translateY(-10px) translate(30px) rotate(35deg); }
-      66%  { transform: translateY(0) translate(20px) rotate(-25deg); }
-      100% { transform: translateY(0) translate(0px) rotate(-5deg); }
-    }
-    @keyframes maintScroll {
-      0%  { transform: translateY(25px) translate(50px); opacity: 0; }
-      33% { opacity: 0.25; }
-      66% { opacity: 0.25; }
-      to  { transform: translateY(-50px) translate(-100px); opacity: 0; }
+
+    @keyframes scroll {
+      0% {
+        transform: translateY(25px) translate(50px);
+        opacity: 0;
+      }
+      33% {
+        opacity: 0.25;
+      }
+      66% {
+        opacity: 0.25;
+      }
+      to {
+        transform: translateY(-50px) translate(-100px);
+        opacity: 0;
+      }
     }
   </style>
 
@@ -164,23 +208,23 @@
         <!-- Walking Character Animation -->
         <div class="relative mx-auto flex items-center justify-center" style="height:160px;">
           <div class="absolute inset-0 rounded-full bg-amber-500/10 blur-2xl animate-pulse"></div>
-          <div class="maint-walker-scene">
+          <div class="loader">
             <!-- Ground shadow -->
-            <svg id="maint-gnd" width="300" height="30" viewBox="0 0 300 30" fill="none">
+            <svg id="gnd" width="300" height="30" viewBox="0 0 300 30" fill="none">
               <ellipse cx="150" cy="15" rx="140" ry="10" fill="#f59e0b" opacity="0.5"/>
             </svg>
             <!-- Left Leg -->
-            <svg class="maint-legl" width="40" height="60" viewBox="0 0 40 60" fill="none">
+            <svg class="legl" width="40" height="60" viewBox="0 0 40 60" fill="none">
               <rect x="10" y="0" width="18" height="45" rx="9" fill="#f59e0b"/>
               <rect x="5" y="38" width="25" height="14" rx="7" fill="#ea580c"/>
             </svg>
             <!-- Right Leg -->
-            <svg class="maint-legr" width="40" height="60" viewBox="0 0 40 60" fill="none">
+            <svg class="legr" width="40" height="60" viewBox="0 0 40 60" fill="none">
               <rect x="10" y="0" width="18" height="45" rx="9" fill="#d97706"/>
               <rect x="5" y="38" width="25" height="14" rx="7" fill="#c2410c"/>
             </svg>
             <!-- Body -->
-            <svg class="maint-bod" width="120" height="100" viewBox="0 0 120 100" fill="none">
+            <svg class="bod" width="120" height="100" viewBox="0 0 120 100" fill="none">
               <rect x="15" y="5" width="90" height="75" rx="30" fill="#f59e0b"/>
               <!-- Wrench tool -->
               <g transform="translate(62,30) rotate(45)">
@@ -192,7 +236,7 @@
               <circle cx="65" cy="55" r="4" fill="#0f172a" opacity="0.4"/>
             </svg>
             <!-- Head -->
-            <svg class="maint-head" width="90" height="90" viewBox="0 0 90 90" fill="none">
+            <svg class="head" width="90" height="90" viewBox="0 0 90 90" fill="none">
               <ellipse cx="45" cy="48" rx="36" ry="35" fill="#fde68a"/>
               <!-- Hard hat -->
               <ellipse cx="45" cy="20" rx="40" ry="10" fill="#f59e0b"/>
