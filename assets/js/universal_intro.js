@@ -445,84 +445,27 @@
         .comed-bubble span:nth-child(5) { inset:10px; border-bottom:10px solid #fff; filter:blur(8px); transform:rotate(330deg); }
 
         /* === ROBOT LOADER CHARACTER === */
-        .comed-tl-robot { position: relative; z-index: 10; }
-        .comed-tl-eye {
-          width: 20px; height: 8px;
-          background-color: rgba(240,220,220,1);
-          border-radius: 0px 0px 20px 20px;
+        .comed-tl-robot-box {
           position: relative;
-          left: 10px; top: 40px;
-          box-shadow: 40px 0px 0px 0px rgba(240,220,220,1);
-        }
-        .comed-tl-head {
-          backface-visibility: hidden;
-          position: relative;
-          margin: -250px auto;
-          width: 80px; height: 80px;
-          background-color: #111;
-          border-radius: 50px;
-          box-shadow: inset -4px 2px 0px 0px rgba(240,220,220,1);
-          animation: comedTlHead 1.5s infinite alternate;
-          animation-timing-function: ease-out;
-        }
-        .comed-tl-body {
-          position: relative;
-          margin: 90px auto;
-          width: 140px; height: 120px;
-          background-color: #111;
-          border-radius: 50px/25px;
-          box-shadow: inset -5px 2px 0px 0px rgba(240,220,220,1);
-          animation: comedTlBody 1.5s infinite alternate;
-          animation-timing-function: ease-out;
-        }
-        @keyframes comedTlHead {
-          0%   { top: 0px; }
-          50%  { top: 10px; }
-          100% { top: 0px; }
-        }
-        @keyframes comedTlBody {
-          0%   { top: -5px; }
-          50%  { top: 10px; }
-          100% { top: -5px; }
-        }
-        .comed-tl-circ {
-          backface-visibility: hidden;
-          margin: 60px auto;
-          width: 180px; height: 180px;
-          border-radius: 0px 0px 50px 50px;
-          position: relative;
-          z-index: -1;
-          left: 0%; top: 20%;
-          overflow: hidden;
-        }
-        .comed-tl-hands {
-          margin-top: 140px;
-          width: 120px; height: 120px;
-          position: absolute;
-          background-color: #111;
-          border-radius: 20px;
-          box-shadow: -1px -4px 0px 0px rgba(240,220,220,1);
-          transform: rotate(45deg);
-          top: 75%; left: 16%;
-          z-index: 1;
-          animation: comedTlBody 1.5s infinite alternate;
-          animation-timing-function: ease-out;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
         }
         .comed-tl-load {
-          position: absolute;
-          width: 7ch; height: 32px;
-          text-align: left;
+          position: relative;
+          width: 7ch;
+          height: 32px;
+          text-align: center;
           line-height: 32px;
           font-family: 'Julius Sans One', 'Prompt', monospace;
-          font-size: 22px;
-          font-weight: 400;
-          color: rgb(200,180,180);
-          left: 50%; top: 6%;
-          transform: translateX(-50%);
-          animation: comedTlFont 3.75s infinite;
-          animation-timing-function: ease-out;
-          word-wrap: break-word;
-          display: block;
+          font-size: 20px;
+          font-weight: 700;
+          color: rgb(220,200,200);
+          letter-spacing: 2px;
+          margin-bottom: 12px;
+          animation: comedTlFont 3.75s infinite ease-out;
           overflow: hidden;
           white-space: nowrap;
         }
@@ -536,24 +479,108 @@
           100% { width: 13ch; }
         }
 
+        .comed-tl-robot {
+          position: relative;
+          width: 180px;
+          height: 190px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+        .comed-tl-head {
+          backface-visibility: hidden;
+          position: relative;
+          width: 76px;
+          height: 76px;
+          background-color: #111;
+          border-radius: 50px;
+          box-shadow: inset -4px 2px 0px 0px rgba(240,220,220,1);
+          animation: comedTlHead 1.5s infinite alternate ease-out;
+          z-index: 4;
+        }
+        .comed-tl-eye {
+          width: 18px;
+          height: 8px;
+          background-color: rgba(240,220,220,1);
+          border-radius: 0px 0px 18px 18px;
+          position: relative;
+          left: 10px;
+          top: 36px;
+          box-shadow: 36px 0px 0px 0px rgba(240,220,220,1);
+        }
+        .comed-tl-circ {
+          position: relative;
+          width: 160px;
+          height: 110px;
+          border-radius: 0px 0px 50px 50px;
+          margin-top: -15px;
+          z-index: 2;
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
+        }
+        .comed-tl-body {
+          position: relative;
+          width: 130px;
+          height: 110px;
+          background-color: #111;
+          border-radius: 50px/25px;
+          box-shadow: inset -5px 2px 0px 0px rgba(240,220,220,1);
+          animation: comedTlBody 1.5s infinite alternate ease-out;
+        }
+        .comed-tl-hands {
+          width: 90px;
+          height: 90px;
+          position: absolute;
+          background-color: #111;
+          border-radius: 18px;
+          box-shadow: -1px -4px 0px 0px rgba(240,220,220,1);
+          transform: rotate(45deg);
+          top: 55%;
+          left: 15%;
+          z-index: 3;
+          animation: comedTlBody 1.5s infinite alternate ease-out;
+        }
+        @keyframes comedTlHead {
+          0%   { transform: translateY(0); }
+          50%  { transform: translateY(8px); }
+          100% { transform: translateY(0); }
+        }
+        @keyframes comedTlBody {
+          0%   { transform: translateY(-4px); }
+          50%  { transform: translateY(6px); }
+          100% { transform: translateY(-4px); }
+        }
+
         /* === LOADING BAR SYSTEM === */
         .comed-tl-bar-wrap {
           position: relative;
-          margin-top: 12px;
+          margin-top: 18px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
         }
         .comed-tl-loader {
           position: relative;
-          background-color: #535353;
-          border-radius: 1em;
-          height: 1em;
-          width: 280px;
+          background-color: rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 999px;
+          height: 14px;
+          width: 260px;
+          padding: 2px;
+          box-sizing: border-box;
+          box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
         }
         .comed-tl-bar {
           position: relative;
-          background-color: rgb(0,205,0);
-          width: 40px; height: 100%;
-          border-radius: 1em;
-          animation: comedTlLoadBar 6s linear infinite;
+          background: linear-gradient(90deg, #10b981, #06b6d4);
+          width: 40px;
+          height: 100%;
+          border-radius: 999px;
+          animation: comedTlLoadBar 4s linear infinite;
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
         }
         @keyframes comedTlLoadBar {
           0%   { width: 0%; }
@@ -564,34 +591,40 @@
         }
         .comed-tl-check-bar {
           position: absolute;
-          left: 0px; top: -4px;
+          left: 0;
+          right: 0;
+          top: -3px;
           z-index: 69;
           display: flex;
           width: 100%;
           justify-content: space-between;
-          height: 0.5em;
+          padding: 0 2px;
+          box-sizing: border-box;
         }
         .comed-tl-check {
-          border-radius: 1em;
-          height: 1.5em; width: 1.5em;
-          padding: 3px;
-          background-color: #535353;
-          transform: scale(0.75);
+          border-radius: 50%;
+          height: 18px;
+          width: 18px;
+          background-color: #334155;
+          border: 2px solid #0f172a;
+          transform: scale(0.8);
+          transition: all 0.2s ease;
         }
-        .comed-tl-check:nth-of-type(2) { animation: comedTlCheck1 6s linear infinite; }
-        .comed-tl-check:nth-of-type(3) { animation: comedTlCheck2 6s linear infinite; }
-        .comed-tl-check:nth-of-type(4) { animation: comedTlCheck3 6s linear infinite; transform-origin: right; }
+        .comed-tl-check:nth-of-type(1) { background-color: #10b981; transform: scale(1); box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
+        .comed-tl-check:nth-of-type(2) { animation: comedTlCheck1 4s linear infinite; }
+        .comed-tl-check:nth-of-type(3) { animation: comedTlCheck2 4s linear infinite; }
+        .comed-tl-check:nth-of-type(4) { animation: comedTlCheck3 4s linear infinite; }
         @keyframes comedTlCheck1 {
-          0%,28%  { transform:scale(0.75); background-color:#535353; }
-          29%,100% { transform:scale(1); background-color:rgb(0,205,0); }
+          0%,28%   { transform:scale(0.8); background-color:#334155; box-shadow:none; }
+          29%,100% { transform:scale(1); background-color:#10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
         }
         @keyframes comedTlCheck2 {
-          0%,58%  { transform:scale(0.75); background-color:#535353; }
-          59%,100% { transform:scale(1); background-color:rgb(0,205,0); }
+          0%,58%   { transform:scale(0.8); background-color:#334155; box-shadow:none; }
+          59%,100% { transform:scale(1); background-color:#10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
         }
         @keyframes comedTlCheck3 {
-          0%,88%  { transform:scale(0.75); background-color:#535353; }
-          89%,100% { transform:scale(1); background-color:rgb(0,205,0); }
+          0%,88%   { transform:scale(0.8); background-color:#334155; box-shadow:none; }
+          89%,100% { transform:scale(1); background-color:#10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
         }
       `;
       document.head.appendChild(ts);
@@ -612,10 +645,11 @@
         <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
         <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
 
-        <!-- Robot Character + Loading Bar -->
-        <div class="text-center relative z-10" style="margin-top: -40px;">
+        <!-- Robot Character + Loading Bar in Perfect Center Stack -->
+        <div class="comed-tl-robot-box">
           <div class="comed-tl-load">LOADING..</div>
-          <div class="comed-tl-robot" style="height:260px;width:200px;margin:0 auto;position:relative;">
+          
+          <div class="comed-tl-robot">
             <div class="comed-tl-head">
               <div class="comed-tl-eye"></div>
             </div>
@@ -625,7 +659,8 @@
               </div>
             </div>
           </div>
-          <div class="comed-tl-bar-wrap" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+
+          <div class="comed-tl-bar-wrap">
             <div class="comed-tl-loader">
               <div class="comed-tl-bar"></div>
               <div class="comed-tl-check-bar">
@@ -635,7 +670,7 @@
                 <div class="comed-tl-check"></div>
               </div>
             </div>
-            <span style="font-size:10px;font-family:monospace;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;">WARPING TO PAGE...</span>
+            <span style="font-size:11px;font-family:monospace;font-weight:700;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;">WARPING TO PAGE...</span>
           </div>
         </div>
       `;
