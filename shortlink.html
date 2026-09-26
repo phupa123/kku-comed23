@@ -52,28 +52,116 @@
 
   <!-- REDIRECTION LOADER OVERLAY (Shown if URL has ?go=code or /s/code) -->
   <div id="redirectOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center">
-    <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-white shadow-2xl shadow-orange-500/40 animate-pulse mb-6">
-      <i data-lucide="external-link" class="w-10 h-10"></i>
-    </div>
-    <span class="px-3 py-1 rounded-full text-xs font-black bg-orange-500/10 text-orange-400 border border-orange-500/30 mb-2">
-      COMED REDIRECT ENGINE
-    </span>
-    <h2 class="text-2xl sm:text-3xl font-black text-white mb-2" id="redirectTitle">กำลังนำท่านไปยังปลายทาง...</h2>
-    <p class="text-sm text-slate-400 max-w-md mb-6" id="redirectTargetDisplay">https://...</p>
-    
-    <div class="w-64 h-2 rounded-full bg-slate-800 overflow-hidden mb-4">
-      <div id="redirectProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-sky-500 transition-all duration-300" style="width: 20%;"></div>
+    <div class="relative mb-6">
+      <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-orange-500 via-amber-500 to-sky-500 flex items-center justify-center text-white shadow-2xl shadow-orange-500/30 animate-pulse">
+        <i data-lucide="external-link" class="w-12 h-12"></i>
+      </div>
+      <div id="redirectCountdownBadge" class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-slate-900 border-2 border-orange-500 text-orange-400 font-mono font-black text-xs flex items-center justify-center shadow-lg">
+        3s
+      </div>
     </div>
 
-    <div class="flex items-center gap-3">
-      <a id="redirectManualBtn" href="#" class="px-5 py-2.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg transition flex items-center gap-2">
-        <span>คลิกที่นี่หากไม่เปลี่ยนหน้าอัตโนมัติ</span>
+    <span class="px-3.5 py-1.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-orange-500/10 text-orange-400 border border-orange-500/30 mb-3 flex items-center gap-1.5 shadow-sm">
+      <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+      <span>COMED SMART REDIRECT ENGINE</span>
+    </span>
+
+    <h2 class="text-2xl sm:text-3xl font-black text-white mb-2 max-w-lg leading-snug" id="redirectTitle">กำลังนำท่านไปยังปลายทาง...</h2>
+    
+    <!-- Destination Preview Card -->
+    <div class="w-full max-w-md p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl text-left mb-5 space-y-2">
+      <div class="flex items-center justify-between text-[11px] text-slate-400">
+        <span class="flex items-center gap-1 font-bold text-slate-300">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>URL ปลายทางที่ได้รับการยืนยัน</span>
+        </span>
+        <span class="text-emerald-400 flex items-center gap-1 font-bold">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>ปลอดภัย</span>
+        </span>
+      </div>
+      <div class="text-xs font-mono text-amber-300/90 bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 truncate select-all" id="redirectTargetDisplay">
+        https://...
+      </div>
+    </div>
+    
+    <div class="w-64 sm:w-80 h-2.5 rounded-full bg-slate-900 border border-slate-800 overflow-hidden mb-6">
+      <div id="redirectProgressBar" class="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-sky-400 transition-all duration-300" style="width: 15%;"></div>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <a id="redirectManualBtn" href="#" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-xl shadow-orange-600/30 transition flex items-center gap-2 active:scale-95">
+        <span>เปิดปลายทางทันที (Open Now)</span>
         <i data-lucide="arrow-right" class="w-4 h-4"></i>
       </a>
-      <a href="shortlink.html" class="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+      <a id="redirectAppBtn" href="#" class="px-4 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-sky-400 font-bold text-xs border border-slate-800 hover:border-sky-500/40 transition flex items-center gap-2">
+        <i data-lucide="smartphone" class="w-4 h-4"></i>
+        <span>เปิดในแอป (Open App)</span>
+      </a>
+      <a href="shortlink.html" class="px-4 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white font-bold text-xs border border-slate-800 transition">
         ยกเลิก
       </a>
     </div>
+  </div>
+
+  <!-- PASSWORD PROTECTED OVERLAY -->
+  <div id="passwordOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center">
+    <div class="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-slate-900 border border-amber-500/40 shadow-2xl space-y-5 text-left relative overflow-hidden">
+      <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center shadow-lg">
+        <i data-lucide="lock" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">
+          PROTECTED LINK
+        </span>
+        <h3 class="text-xl font-black text-white mt-1.5" id="pwLinkTitle">ลิงก์นี้ถูกล็อคด้วยรหัสผ่าน</h3>
+        <p class="text-xs text-slate-400 mt-0.5">กรุณาป้อนรหัสผ่านเพื่อปลดล็อคและเปลี่ยนทางไปยังลิงก์ปลายทาง</p>
+      </div>
+
+      <form id="passwordUnlockForm" onsubmit="handlePasswordUnlock(event)" class="space-y-4">
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-300">รหัสผ่าน (Password) *</label>
+          <div class="relative">
+            <input type="password" id="inputUnlockPassword" required placeholder="ป้อนรหัสผ่านเพื่อเข้าสู่ลิงก์..."
+              class="w-full pl-10 pr-10 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-xs focus:border-amber-500 outline-none font-mono">
+            <i data-lucide="key" class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <button type="button" onclick="togglePasswordView()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+              <i data-lucide="eye" id="pwToggleIcon" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <p id="pwErrorMsg" class="hidden text-[11px] text-rose-400 font-bold mt-1 flex items-center gap-1">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+            <span>รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</span>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <button type="submit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="unlock" class="w-4 h-4"></i>
+            <span>ปลดล็อคและไปต่อ</span>
+          </button>
+          <a href="shortlink.html" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+            ยกเลิก
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EXPIRED OVERLAY -->
+  <div id="expiredOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center">
+    <div class="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-2xl shadow-amber-500/20 mb-6">
+      <i data-lucide="clock-alert" class="w-10 h-10"></i>
+    </div>
+    <span class="px-3 py-1 rounded-full text-xs font-black bg-amber-500/10 text-amber-400 border border-amber-500/30 mb-2">
+      LINK EXPIRED
+    </span>
+    <h2 class="text-2xl sm:text-3xl font-black text-white mb-2">ลิงก์ย่อนี้หมดอายุแล้ว</h2>
+    <p class="text-sm text-slate-400 max-w-md mb-6" id="expiredMsg">ผู้สร้างกำหนดวันหมดอายุของลิงก์นี้ไว้ จึงไม่สามารถเปิดใช้งานต่อได้</p>
+    <a href="shortlink.html" class="px-5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition flex items-center gap-2">
+      <i data-lucide="home" class="w-4 h-4"></i>
+      <span>กลับหน้าหลักลิงก์ย่อ</span>
+    </a>
   </div>
 
   <!-- NOT FOUND OVERLAY -->
@@ -200,6 +288,69 @@
             </label>
             <input type="text" id="inputTitle" placeholder="เช่น สไลด์วิชาคอมพิวเตอร์..."
               class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-xs focus:border-orange-500 outline-none">
+          </div>
+        </div>
+
+        <!-- Advanced Options Toggle Accordion (Password, Expiry, QR Color) -->
+        <div class="pt-1">
+          <button type="button" onclick="toggleAdvancedOptions()" class="text-xs font-bold text-slate-400 hover:text-orange-400 transition flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+            <span>ตัวเลือกความปลอดภัย & ตกแต่ง QR Code (รหัสผ่าน, วันหมดอายุ, ปรับสี)</span>
+            <i data-lucide="chevron-down" id="advChevron" class="w-3.5 h-3.5 transition-transform duration-200"></i>
+          </button>
+
+          <div id="advancedOptionsArea" class="hidden mt-3 p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Password Protection -->
+              <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>ตั้งรหัสผ่านป้องกันลิงก์ (ไม่ระบุก็ได้)</span>
+                </label>
+                <input type="password" id="inputPassword" placeholder="เว้นว่างไว้หากเปิดสาธารณะ"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-600 text-xs focus:border-orange-500 outline-none font-mono">
+              </div>
+
+              <!-- Expiry Date -->
+              <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-sky-400"></i>
+                  <span>วันหมดอายุของลิงก์ (ไม่ระบุก็ได้)</span>
+                </label>
+                <input type="datetime-local" id="inputExpiresAt"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-orange-500 outline-none">
+              </div>
+            </div>
+
+            <!-- QR Color / Style Theme -->
+            <div class="pt-2 border-t border-slate-800/60">
+              <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5 mb-2">
+                <i data-lucide="palette" class="w-3.5 h-3.5 text-orange-400"></i>
+                <span>โทนสี QR Code อัตโนมัติ</span>
+              </label>
+              <div class="flex flex-wrap items-center gap-2">
+                <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs cursor-pointer hover:border-orange-500">
+                  <input type="radio" name="publicQrColor" value="#ea580c" checked class="accent-orange-500">
+                  <span class="w-3 h-3 rounded-full bg-orange-500 inline-block"></span>
+                  <span class="text-slate-300 text-[11px] font-bold">ส้ม COMED</span>
+                </label>
+                <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs cursor-pointer hover:border-sky-500">
+                  <input type="radio" name="publicQrColor" value="#0284c7" class="accent-sky-500">
+                  <span class="w-3 h-3 rounded-full bg-sky-500 inline-block"></span>
+                  <span class="text-slate-300 text-[11px] font-bold">ฟ้า Tech</span>
+                </label>
+                <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs cursor-pointer hover:border-purple-500">
+                  <input type="radio" name="publicQrColor" value="#9333ea" class="accent-purple-500">
+                  <span class="w-3 h-3 rounded-full bg-purple-500 inline-block"></span>
+                  <span class="text-slate-300 text-[11px] font-bold">ม่วง Gradient</span>
+                </label>
+                <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs cursor-pointer hover:border-slate-500">
+                  <input type="radio" name="publicQrColor" value="#0f172a" class="accent-slate-400">
+                  <span class="w-3 h-3 rounded-full bg-slate-900 border border-slate-600 inline-block"></span>
+                  <span class="text-slate-300 text-[11px] font-bold">ดำสนิท Classic</span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -351,11 +502,14 @@
       renderLinksDirectory();
     });
 
+    // State for pending redirection
+    let pendingRedirectLink = null;
+    let redirectTimer = null;
+
     // 2. Perform Redirection Logic
     async function handleIncomingRedirection(code) {
       if (!code) return;
       let cleanCode = String(code).trim();
-      // Remove leading slashes if any
       cleanCode = cleanCode.replace(/^\/+/, '');
 
       const possibleCodes = [cleanCode];
@@ -365,7 +519,7 @@
         possibleCodes.push('s_' + cleanCode);
       }
 
-      // 2.1 Check if this code belongs to COMED Cloud Drive Shares (files/folders)
+      // 2.1 Check COMED Cloud Drive Shares (files/folders)
       if (window.StorageDriveRepo) {
         for (const c of possibleCodes) {
           let driveShare = window.StorageDriveRepo.getShareByCode(c);
@@ -373,7 +527,6 @@
             driveShare = await window.StorageDriveRepo.fetchShareByCodeFromCloud(c);
           }
           if (driveShare) {
-            // Redirect to storage viewer with share query
             window.location.replace(`storage.html?share=${encodeURIComponent(driveShare.shareCode || c)}`);
             return;
           }
@@ -388,84 +541,174 @@
 
       const overlay = document.getElementById('redirectOverlay');
       const notFoundOverlay = document.getElementById('notFoundOverlay');
-      const prog = document.getElementById('redirectProgressBar');
-      const title = document.getElementById('redirectTitle');
-      const targetDisplay = document.getElementById('redirectTargetDisplay');
-      const manualBtn = document.getElementById('redirectManualBtn');
+      const expiredOverlay = document.getElementById('expiredOverlay');
+      const passwordOverlay = document.getElementById('passwordOverlay');
 
-      if (!link) {
-        // Fallback: try querying Supabase shortlinks table directly
-        if (window.getSupabaseClient) {
-          try {
-            const sb = window.getSupabaseClient();
-            if (sb) {
-              for (const c of possibleCodes) {
-                const { data } = await sb
-                  .from('shortlinks')
-                  .select('*')
-                  .eq('code', c)
-                  .maybeSingle();
+      if (!link && window.getSupabaseClient) {
+        try {
+          const sb = window.getSupabaseClient();
+          if (sb) {
+            for (const c of possibleCodes) {
+              const { data } = await sb
+                .from('shortlinks')
+                .select('*')
+                .eq('code', c)
+                .maybeSingle();
 
-                if (data) {
-                  // If it's a DriveShare
-                  if ((data.category || '').includes('DriveShare') || (data.code || '').startsWith('s_') || (data.target_url || '').includes('storage.html?share=')) {
-                    window.location.replace(`storage.html?share=${encodeURIComponent(data.code || c)}`);
-                    return;
-                  }
+              if (data) {
+                if ((data.category || '').includes('DriveShare') || (data.code || '').startsWith('s_') || (data.target_url || '').includes('storage.html?share=')) {
+                  window.location.replace(`storage.html?share=${encodeURIComponent(data.code || c)}`);
+                  return;
+                }
 
-                  if (data.target_url) {
-                    link = {
-                      code: data.code || c,
-                      title: data.title || '',
-                      targetUrl: data.target_url,
-                      isActive: data.is_active !== false,
-                      clicks: Number(data.clicks) || 0
-                    };
-                    break;
-                  }
+                if (data.target_url) {
+                  link = {
+                    id: data.id || ('lnk_' + c),
+                    code: data.code || c,
+                    title: data.title || '',
+                    targetUrl: data.target_url,
+                    category: data.category || 'Shortlink',
+                    isActive: data.is_active !== false,
+                    passwordHash: data.password_hash || null,
+                    expiresAt: data.expires_at || null,
+                    clickStats: data.click_stats || {},
+                    clicks: Number(data.clicks) || 0
+                  };
+                  break;
                 }
               }
             }
-          } catch(e) {
-            console.warn("[Shortlink] Supabase fallback query suppressed:", e);
           }
+        } catch(e) {
+          console.warn("[Shortlink] Supabase fallback query suppressed:", e);
         }
       }
 
       if (!link) {
-        // Not found
         notFoundOverlay.classList.remove('hidden');
         document.getElementById('notFoundMsg').textContent = `ไม่พบรหัสย่อ "/s/${cleanCode}" ในระบบ`;
         if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
       }
 
+      // Check Active Status
       if (!link.isActive) {
         notFoundOverlay.classList.remove('hidden');
-        document.getElementById('notFoundMsg').textContent = `ลิงก์ย่อ "/s/${code}" (${link.title}) ถูกปิดการใช้งานชั่วคราว`;
+        document.getElementById('notFoundMsg').textContent = `ลิงก์ย่อ "/s/${cleanCode}" (${link.title}) ถูกปิดการใช้งานชั่วคราว`;
         if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
       }
 
-      // Record Click Count in background
-      window.ShortlinkRepo.recordClick(code);
+      // Check Expiry
+      if (link.expiresAt && window.ShortlinkRepo.isExpired(link)) {
+        expiredOverlay.classList.remove('hidden');
+        const d = new Date(link.expiresAt).toLocaleString('th-TH');
+        document.getElementById('expiredMsg').textContent = `ลิงก์นี้หมดอายุการใช้งานเมื่อ ${d}`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      // Check Password Protection
+      if (link.passwordHash) {
+        pendingRedirectLink = link;
+        passwordOverlay.classList.remove('hidden');
+        document.getElementById('pwLinkTitle').textContent = `ลิงก์: ${link.title}`;
+        document.getElementById('inputUnlockPassword').focus();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      // Proceed to Redirection Landing Screen
+      startRedirectionLanding(link);
+    }
+
+    function handlePasswordUnlock(e) {
+      e.preventDefault();
+      const inputPw = document.getElementById('inputUnlockPassword').value;
+      const errorMsg = document.getElementById('pwErrorMsg');
+
+      if (!pendingRedirectLink) return;
+
+      const isValid = window.ShortlinkRepo.verifyPassword(pendingRedirectLink, inputPw);
+      if (!isValid) {
+        errorMsg.classList.remove('hidden');
+        return;
+      }
+
+      errorMsg.classList.add('hidden');
+      document.getElementById('passwordOverlay').classList.add('hidden');
+      startRedirectionLanding(pendingRedirectLink);
+    }
+
+    function togglePasswordView() {
+      const input = document.getElementById('inputUnlockPassword');
+      const icon = document.getElementById('pwToggleIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+      } else {
+        input.type = 'password';
+      }
+    }
+
+    function startRedirectionLanding(link) {
+      const overlay = document.getElementById('redirectOverlay');
+      const prog = document.getElementById('redirectProgressBar');
+      const title = document.getElementById('redirectTitle');
+      const targetDisplay = document.getElementById('redirectTargetDisplay');
+      const manualBtn = document.getElementById('redirectManualBtn');
+      const appBtn = document.getElementById('redirectAppBtn');
+      const countdownBadge = document.getElementById('redirectCountdownBadge');
+
+      // Record Click Count & Deep Analytics in background
+      window.ShortlinkRepo.recordClick(link.code);
 
       overlay.classList.remove('hidden');
-      title.textContent = `กำลังนำทางไปที่: ${link.title}`;
+      title.textContent = `กำลังนำท่านไปยัง: ${link.title}`;
       targetDisplay.textContent = link.targetUrl;
       manualBtn.href = link.targetUrl;
+
+      // Smart "Open in App" scheme support (YouTube, Google Drive, Forms, LINE, Maps)
+      let appScheme = link.targetUrl;
+      if (link.targetUrl.includes('youtube.com') || link.targetUrl.includes('youtu.be')) {
+        appScheme = link.targetUrl.replace(/^https?:\/\//, 'vnd.youtube://');
+      } else if (link.targetUrl.includes('line.me')) {
+        appScheme = link.targetUrl.replace(/^https?:\/\/line\.me/, 'line://');
+      }
+      appBtn.href = appScheme;
+
       if (typeof lucide !== 'undefined') lucide.createIcons();
 
-      // Progress animation
-      let p = 20;
-      const interval = setInterval(() => {
-        p += 25;
-        if (prog) prog.style.width = p + '%';
-        if (p >= 100) {
-          clearInterval(interval);
+      // Countdown (3 seconds)
+      let timeLeft = 3;
+      let progressPercent = 20;
+      if (countdownBadge) countdownBadge.textContent = `${timeLeft}s`;
+
+      redirectTimer = setInterval(() => {
+        timeLeft -= 1;
+        progressPercent += 35;
+        if (prog) prog.style.width = Math.min(100, progressPercent) + '%';
+        if (countdownBadge && timeLeft >= 0) countdownBadge.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(redirectTimer);
           window.location.replace(link.targetUrl);
         }
-      }, 100);
+      }, 1000);
+    }
+
+    // Toggle advanced options accordion
+    function toggleAdvancedOptions() {
+      const area = document.getElementById('advancedOptionsArea');
+      const chev = document.getElementById('advChevron');
+      if (!area) return;
+      const isHidden = area.classList.contains('hidden');
+      if (isHidden) {
+        area.classList.remove('hidden');
+        if (chev) chev.style.transform = 'rotate(180deg)';
+      } else {
+        area.classList.add('hidden');
+        if (chev) chev.style.transform = 'rotate(0deg)';
+      }
     }
 
     // 3. Render Directory Cards
@@ -499,14 +742,39 @@
       const origin = window.location.origin;
 
       container.innerHTML = list.map(item => {
-        const fullShortUrl = `${origin}/s/${item.code}`;
+        const isProtected = Boolean(item.passwordHash);
+        const isExp = item.expiresAt ? window.ShortlinkRepo.isExpired(item) : false;
+
+        let badges = `
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-orange-500/10 text-orange-400 border border-orange-500/20">
+            ${item.category || 'ทั่วไป'}
+          </span>
+        `;
+
+        if (isProtected) {
+          badges += `
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+              <i data-lucide="lock" class="w-2.5 h-2.5"></i>
+              <span>ล็อครหัส</span>
+            </span>
+          `;
+        }
+
+        if (isExp) {
+          badges += `
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
+              หมดอายุแล้ว
+            </span>
+          `;
+        }
+
         return `
           <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/40 transition group space-y-4 flex flex-col justify-between shadow-lg">
             <div class="space-y-2.5">
-              <div class="flex items-start justify-between gap-2">
-                <span class="px-2.5 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                  ${item.category || 'ทั่วไป'}
-                </span>
+              <div class="flex flex-wrap items-center justify-between gap-1.5">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${badges}
+                </div>
                 <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
                   <i data-lucide="mouse-pointer" class="w-3 h-3 text-sky-400"></i>
                   <span>${item.clicks || 0} ครั้ง</span>
@@ -558,6 +826,9 @@
       const targetUrl = document.getElementById('inputTargetUrl').value.trim();
       const customCode = document.getElementById('inputCustomCode').value.trim();
       const title = document.getElementById('inputTitle').value.trim();
+      const password = document.getElementById('inputPassword')?.value.trim() || undefined;
+      const expiresAt = document.getElementById('inputExpiresAt')?.value ? new Date(document.getElementById('inputExpiresAt').value).toISOString() : null;
+      const selectedColor = document.querySelector('input[name="publicQrColor"]:checked')?.value || '#ea580c';
       const submitBtn = document.getElementById('btnShortenSubmit');
 
       if (!targetUrl) return;
@@ -571,7 +842,14 @@
           targetUrl: targetUrl,
           code: customCode,
           title: title || undefined,
-          category: 'สร้างทั่วไป'
+          category: 'สร้างทั่วไป',
+          password: password,
+          expiresAt: expiresAt,
+          qrSettings: {
+            colorDark: selectedColor,
+            colorLight: '#ffffff',
+            logoEnabled: true
+          }
         });
 
         const shortUrl = `${window.location.origin}/s/${created.code}`;
@@ -583,24 +861,15 @@
         document.getElementById('resTargetDisplay').textContent = created.targetUrl;
         document.getElementById('resDirectLink').href = `shortlink.html?go=${created.code}`;
 
-        // Generate QR code inside result box
-        const qrContainer = document.getElementById('resultQrContainer');
-        qrContainer.innerHTML = '';
-        if (typeof QRCode !== 'undefined') {
-          new QRCode(qrContainer, {
-            text: shortUrl,
-            width: 120,
-            height: 120,
-            colorDark: "#0f172a",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.M
-          });
-        }
+        // Generate QR code inside result box with selected color
+        generateCustomQr('resultQrContainer', shortUrl, selectedColor, 120);
 
         // Reset form
         document.getElementById('inputTargetUrl').value = '';
         document.getElementById('inputCustomCode').value = '';
         document.getElementById('inputTitle').value = '';
+        if (document.getElementById('inputPassword')) document.getElementById('inputPassword').value = '';
+        if (document.getElementById('inputExpiresAt')) document.getElementById('inputExpiresAt').value = '';
 
         renderLinksDirectory();
 
@@ -633,7 +902,7 @@
       alert(`📋 คัดลอกลิงก์ย่อ "${fullUrl}" เรียบร้อยแล้ว!`);
     }
 
-    // 5. QR Code Modal View
+    // 5. QR Code Modal View with Logo & Color Customization
     let currentQrModalLink = null;
     function openQrModal(linkId) {
       const link = window.ShortlinkRepo.getById(linkId);
@@ -641,26 +910,48 @@
 
       currentQrModalLink = link;
       const fullUrl = `${window.location.origin}/s/${link.code}`;
+      const color = link.qrSettings?.colorDark || '#ea580c';
 
       document.getElementById('qrModalTitle').textContent = link.title;
       document.getElementById('qrModalCode').textContent = `/s/${link.code}`;
       document.getElementById('qrModalUrl').value = fullUrl;
 
-      const container = document.getElementById('qrModalContainer');
-      container.innerHTML = '';
-      if (typeof QRCode !== 'undefined') {
-        new QRCode(container, {
-          text: fullUrl,
-          width: 180,
-          height: 180,
-          colorDark: "#0f172a",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      }
+      generateCustomQr('qrModalContainer', fullUrl, color, 180, true);
 
       document.getElementById('qrModal').classList.remove('hidden');
       if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function generateCustomQr(containerId, text, colorDark = '#0f172a', size = 180, withLogo = true) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+      container.style.position = 'relative';
+
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(container, {
+          text: text,
+          width: size,
+          height: size,
+          colorDark: colorDark,
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // Add KKU COMED Logo Badge in the center
+        if (withLogo) {
+          setTimeout(() => {
+            const badge = document.createElement('div');
+            badge.className = 'absolute inset-0 flex items-center justify-center pointer-events-none';
+            badge.innerHTML = `
+              <div class="w-10 h-10 rounded-xl bg-orange-600 border-2 border-white shadow-md flex items-center justify-center text-white font-black text-[10px]">
+                COMED
+              </div>
+            `;
+            container.appendChild(badge);
+          }, 50);
+        }
+      }
     }
 
     function closeQrModal() {
@@ -679,12 +970,45 @@
     function downloadQrModalImage() {
       const container = document.getElementById('qrModalContainer');
       const img = container.querySelector('img');
-      if (img && img.src) {
-        const a = document.createElement('a');
-        a.href = img.src;
-        a.download = `qrcode_${currentQrModalLink?.code || 'shortlink'}.png`;
-        a.click();
-      }
+      if (!img) return;
+
+      // Draw onto canvas with COMED KKU Center Logo for crisp High-Res Export
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const size = 600; // High-Res
+      canvas.width = size;
+      canvas.height = size;
+
+      // Draw QR image
+      ctx.drawImage(img, 0, 0, size, size);
+
+      // Draw Center Logo badge
+      const logoSize = size * 0.22;
+      const logoPos = (size - logoSize) / 2;
+
+      // Outer badge circle/square
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.roundRect(logoPos - 6, logoPos - 6, logoSize + 12, logoSize + 12, 20);
+      ctx.fill();
+
+      ctx.fillStyle = "#ea580c";
+      ctx.beginPath();
+      ctx.roundRect(logoPos, logoPos, logoSize, logoSize, 16);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 28px Prompt, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("COMED", size / 2, size / 2 - 8);
+      ctx.font = "bold 16px Prompt, sans-serif";
+      ctx.fillText("KKU 69", size / 2, size / 2 + 16);
+
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `qrcode_${currentQrModalLink?.code || 'shortlink'}_highres.png`;
+      a.click();
     }
   </script>
 </body>

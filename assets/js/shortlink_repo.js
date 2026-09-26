@@ -149,6 +149,14 @@
         clicks: 0,
         category: (data.category || 'ทั่วไป').trim(),
         isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
+        passwordHash: data.passwordHash || (data.password ? this.hashPassword(data.password) : null),
+        expiresAt: data.expiresAt || null,
+        clickStats: data.clickStats || { devices: {}, browsers: {}, referrers: {}, daily: {} },
+        qrSettings: data.qrSettings || {
+          colorDark: '#ea580c',
+          colorLight: '#ffffff',
+          logoEnabled: true
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: data.createdBy || 'ผู้ดูแลระบบ',
@@ -159,6 +167,31 @@
       this.saveLocalLinks(this.links);
       this.syncToSupabase(newLink).catch(() => {});
       return newLink;
+    }
+
+    // Password helper (Simple fast hash + salt for frontend obfuscation)
+    hashPassword(pw) {
+      if (!pw) return null;
+      let hash = 0;
+      const str = 'comed69_' + String(pw).trim();
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0;
+      }
+      return 'pw_' + Math.abs(hash).toString(16);
+    }
+
+    verifyPassword(link, inputPw) {
+      if (!link || !link.passwordHash) return true;
+      if (!inputPw) return false;
+      const testHash = this.hashPassword(inputPw);
+      return link.passwordHash === testHash;
+    }
+
+    isExpired(link) {
+      if (!link || !link.expiresAt) return false;
+      return new Date(link.expiresAt) < new Date();
     }
 
     async updateLink(id, updates) {
@@ -184,6 +217,15 @@
         updates.targetUrl = tUrl;
       }
 
+      if (updates.password !== undefined) {
+        if (updates.password === '') {
+          updates.passwordHash = null;
+        } else {
+          updates.passwordHash = this.hashPassword(updates.password);
+        }
+        delete updates.password;
+      }
+
       const updated = {
         ...existing,
         ...updates,
@@ -206,17 +248,57 @@
       return true;
     }
 
-    async recordClick(code) {
+    async recordClick(code, clientMeta = {}) {
       const link = this.getByCode(code);
       if (!link) return false;
 
       link.clicks = (link.clicks || 0) + 1;
       link.lastClickedAt = new Date().toISOString();
+
+      // Deep Analytics Breakdown
+      if (!link.clickStats) {
+        link.clickStats = { devices: {}, browsers: {}, referrers: {}, daily: {} };
+      }
+
+      const device = clientMeta.device || this.detectDevice();
+      const browser = clientMeta.browser || this.detectBrowser();
+      const referrer = clientMeta.referrer || (document.referrer ? new URL(document.referrer).hostname : 'Direct / App');
+      const today = new Date().toISOString().split('T')[0];
+
+      link.clickStats.devices = link.clickStats.devices || {};
+      link.clickStats.devices[device] = (link.clickStats.devices[device] || 0) + 1;
+
+      link.clickStats.browsers = link.clickStats.browsers || {};
+      link.clickStats.browsers[browser] = (link.clickStats.browsers[browser] || 0) + 1;
+
+      link.clickStats.referrers = link.clickStats.referrers || {};
+      link.clickStats.referrers[referrer] = (link.clickStats.referrers[referrer] || 0) + 1;
+
+      link.clickStats.daily = link.clickStats.daily || {};
+      link.clickStats.daily[today] = (link.clickStats.daily[today] || 0) + 1;
+
       this.saveLocalLinks(this.links);
 
       // Background cloud sync
       this.syncToSupabase(link).catch(() => {});
       return link;
+    }
+
+    detectDevice() {
+      const ua = navigator.userAgent || '';
+      if (/tablet|ipad|playbook|silk/i.test(ua)) return 'Tablet';
+      if (/mobile|iphone|ipod|android|blackberry|iemobile|kindle/i.test(ua)) return 'Mobile';
+      return 'Desktop';
+    }
+
+    detectBrowser() {
+      const ua = navigator.userAgent || '';
+      if (ua.includes('Edg/')) return 'Edge';
+      if (ua.includes('Chrome/') && !ua.includes('Edg/')) return 'Chrome';
+      if (ua.includes('Safari/') && !ua.includes('Chrome/')) return 'Safari';
+      if (ua.includes('Firefox/')) return 'Firefox';
+      if (ua.includes('Line/')) return 'LINE in-app';
+      return 'Other';
     }
 
     /**
@@ -246,6 +328,10 @@
               category: linkRow.category || 'Shortlink',
               clicks: Number(linkRow.clicks) || 0,
               isActive: linkRow.is_active !== false,
+              passwordHash: linkRow.password_hash || null,
+              expiresAt: linkRow.expires_at || null,
+              clickStats: linkRow.click_stats || { devices: {}, browsers: {}, referrers: {}, daily: {} },
+              qrSettings: linkRow.qr_settings || { colorDark: '#ea580c', colorLight: '#ffffff', logoEnabled: true },
               createdAt: linkRow.created_at || new Date().toISOString(),
               updatedAt: linkRow.updated_at || new Date().toISOString(),
               createdBy: linkRow.created_by || 'ผู้ดูแลระบบ',
@@ -288,6 +374,10 @@
           category: link.category || 'Shortlink',
           clicks: Number(link.clicks) || 0,
           is_active: link.isActive !== false,
+          password_hash: link.passwordHash || null,
+          expires_at: link.expiresAt || null,
+          click_stats: link.clickStats || { devices: {}, browsers: {}, referrers: {}, daily: {} },
+          qr_settings: link.qrSettings || {},
           notes: link.notes || '',
           created_by: link.createdBy || '',
           updated_at: new Date().toISOString()

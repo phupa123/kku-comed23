@@ -240,6 +240,41 @@
             class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 outline-none focus:border-orange-500">
         </div>
 
+        <!-- Security & Expiration Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80">
+          <div class="space-y-1.5">
+            <label class="font-bold text-amber-400 flex items-center gap-1.5">
+              <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+              <span>รหัสผ่านล็อคลิงก์ (Password)</span>
+            </label>
+            <input type="password" id="formPassword" placeholder="เว้นว่าง = เปิดเสรีไม่มีรหัส"
+              class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-600 outline-none focus:border-amber-500 font-mono">
+            <span class="text-[10px] text-slate-500 block" id="formPwNote">กรอกเพื่อเปลี่ยนรหัสใหม่</span>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="font-bold text-sky-400 flex items-center gap-1.5">
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+              <span>วันหมดอายุ (Expires At)</span>
+            </label>
+            <input type="datetime-local" id="formExpiresAt"
+              class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white outline-none focus:border-sky-500">
+            <span class="text-[10px] text-slate-500 block">หากเลยกำหนดจะไม่สามารถเข้าได้</span>
+          </div>
+        </div>
+
+        <!-- QR Color Picker in Admin Form -->
+        <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-2">
+          <label class="font-bold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="palette" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>สี QR Code ประจำลิงก์นี้</span>
+          </label>
+          <div class="flex items-center gap-4">
+            <input type="color" id="formQrColor" value="#ea580c" class="w-10 h-8 rounded-lg bg-transparent cursor-pointer border border-slate-700">
+            <span class="text-[11px] text-slate-400">เลือกสีโค้ด QR ตามธีมงาน เช่น ส้ม COMED, ฟ้า, ม่วง, ดำ</span>
+          </div>
+        </div>
+
         <!-- Active Switch -->
         <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
           <div>
@@ -262,35 +297,132 @@
     </div>
   </div>
 
-  <!-- QR Code Preview Modal -->
+  <!-- Analytics Breakdown Modal -->
+  <div id="analyticsModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-5 relative">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-black text-white" id="anModalTitle">สถิติการคลิกเชิงลึก (Deep Analytics)</h4>
+            <p class="text-[11px] text-slate-400" id="anModalCode">/s/code</p>
+          </div>
+        </div>
+        <button onclick="closeAnalyticsModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quick Metrics Summary -->
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+          <span class="text-[10px] text-slate-400 block">ยอดคลิกสะสม</span>
+          <span class="text-lg font-black text-sky-400 font-mono" id="anTotalClicks">0</span>
+        </div>
+        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+          <span class="text-[10px] text-slate-400 block">อุปกรณ์ยอดนิยม</span>
+          <span class="text-xs font-black text-white mt-1 block truncate" id="anTopDevice">-</span>
+        </div>
+        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+          <span class="text-[10px] text-slate-400 block">เบราว์เซอร์ยอดนิยม</span>
+          <span class="text-xs font-black text-white mt-1 block truncate" id="anTopBrowser">-</span>
+        </div>
+      </div>
+
+      <!-- Breakdown Grids -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+        <!-- Devices Breakdown -->
+        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <span class="font-bold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="smartphone" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>จำแนกตามประเภทอุปกรณ์ (Devices)</span>
+          </span>
+          <div id="anDevicesList" class="space-y-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Browsers Breakdown -->
+        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <span class="font-bold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>จำแนกตามเบราว์เซอร์ (Browsers)</span>
+          </span>
+          <div id="anBrowsersList" class="space-y-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Referrers / Sources -->
+      <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2 text-xs">
+        <span class="font-bold text-slate-300 flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>แหล่งที่มา / ช่องทางคลิก (Referrers)</span>
+        </span>
+        <div id="anReferrersList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Code Preview & Customization Modal -->
   <div id="adminQrModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl space-y-4 relative">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl space-y-4 relative">
       <button onclick="closeAdminQrModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
       <div class="space-y-1">
         <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
-          QR CODE PREVIEW
+          ADVANCED QR CODE STUDIO
         </span>
         <h4 id="adminQrTitle" class="text-base font-black text-white truncate">ชื่อลิงก์</h4>
         <p id="adminQrCode" class="text-xs text-slate-400 font-mono">/s/code</p>
       </div>
 
-      <div class="p-4 bg-white rounded-2xl inline-block shadow-lg mx-auto">
+      <!-- QR Display Canvas Area -->
+      <div class="p-4 bg-white rounded-3xl inline-block shadow-2xl mx-auto relative">
         <div id="adminQrContainer" class="w-48 h-48 flex items-center justify-center"></div>
       </div>
 
-      <div class="space-y-2 pt-2">
+      <!-- Customization Controls (Color & Logo Toggle) -->
+      <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800/80 text-left space-y-2.5">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="palette" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>เลือกสี QR Code สดใส:</span>
+          </span>
+          <div class="flex items-center gap-2">
+            <button onclick="changeAdminQrColor('#ea580c')" class="w-5 h-5 rounded-full bg-orange-500 ring-2 ring-orange-500/30 cursor-pointer" title="ส้ม COMED"></button>
+            <button onclick="changeAdminQrColor('#0284c7')" class="w-5 h-5 rounded-full bg-sky-500 ring-2 ring-sky-500/30 cursor-pointer" title="ฟ้า Tech"></button>
+            <button onclick="changeAdminQrColor('#9333ea')" class="w-5 h-5 rounded-full bg-purple-600 ring-2 ring-purple-500/30 cursor-pointer" title="ม่วง Modern"></button>
+            <button onclick="changeAdminQrColor('#0f172a')" class="w-5 h-5 rounded-full bg-slate-900 ring-2 ring-slate-700 cursor-pointer" title="ดำ Classic"></button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs pt-1.5 border-t border-slate-800/60">
+          <span class="text-slate-300 font-bold flex items-center gap-1.5">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>ใส่ตราสัญลักษณ์ COMED KKU กลางภาพ</span>
+          </span>
+          <input type="checkbox" id="adminQrLogoToggle" checked onchange="toggleAdminQrLogo()" class="w-4 h-4 accent-orange-500 rounded cursor-pointer">
+        </div>
+      </div>
+
+      <div class="space-y-2 pt-1">
         <input type="text" id="adminQrUrlInput" readonly class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-orange-400 font-mono text-xs text-center">
         <div class="grid grid-cols-2 gap-2">
           <button onclick="copyAdminQrUrl()" class="py-2.5 px-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
             <i data-lucide="copy" class="w-3.5 h-3.5"></i>
             <span>คัดลอกลิงก์</span>
           </button>
-          <button onclick="downloadAdminQr()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <button onclick="downloadAdminQr()" class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-slate-950 font-black text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-orange-500/20 cursor-pointer">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
-            <span>โหลดภาพ QR</span>
+            <span>โหลด PNG คมชัดสูง</span>
           </button>
         </div>
       </div>
@@ -355,6 +487,27 @@
           ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">ONLINE</span>`
           : `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">OFFLINE</span>`;
 
+        const isProtected = Boolean(item.passwordHash);
+        const isExpired = item.expiresAt ? window.ShortlinkRepo.isExpired(item) : false;
+
+        let securityBadges = '';
+        if (isProtected) {
+          securityBadges += `
+            <span class="inline-flex items-center gap-1 text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full mt-1">
+              <i data-lucide="lock" class="w-2.5 h-2.5"></i>
+              <span>มีรหัสผ่าน</span>
+            </span>
+          `;
+        }
+        if (isExpired) {
+          securityBadges += `
+            <span class="inline-flex items-center gap-1 text-[10px] text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-full mt-1">
+              <i data-lucide="clock-alert" class="w-2.5 h-2.5"></i>
+              <span>หมดอายุแล้ว</span>
+            </span>
+          `;
+        }
+
         return `
           <tr class="hover:bg-slate-900/60 transition group">
             <td class="px-4 py-3.5">
@@ -363,6 +516,9 @@
                 <button onclick="copyAdminLinkUrl('${item.code}')" title="คัดลอกลิงก์" class="p-1 text-slate-500 hover:text-slate-300 transition cursor-pointer">
                   <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                 </button>
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                ${securityBadges}
               </div>
             </td>
 
@@ -384,8 +540,13 @@
             </td>
 
             <td class="px-4 py-3.5 text-center">
-              <span class="font-mono font-bold text-sky-400 text-sm">${(item.clicks || 0).toLocaleString()}</span>
-              <span class="block text-[10px] text-slate-500">ครั้ง</span>
+              <button onclick="openAnalyticsModal('${item.id}')" class="group/btn inline-flex flex-col items-center px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 hover:border-sky-500 transition cursor-pointer">
+                <span class="font-mono font-bold text-sky-400 text-sm group-hover/btn:underline">${(item.clicks || 0).toLocaleString()}</span>
+                <span class="text-[9px] text-slate-400 flex items-center gap-0.5 mt-0.5">
+                  <i data-lucide="bar-chart-2" class="w-2.5 h-2.5"></i>
+                  <span>ดูสถิติ</span>
+                </span>
+              </button>
             </td>
 
             <td class="px-4 py-3.5 text-center">
@@ -394,7 +555,7 @@
 
             <td class="px-4 py-3.5 text-right">
               <div class="flex items-center justify-end gap-1.5">
-                <button onclick="openAdminQr('${item.id}')" title="ดู QR Code" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer">
+                <button onclick="openAdminQr('${item.id}')" title="ดู & ออกแบบ QR Code" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer">
                   <i data-lucide="qr-code" class="w-4 h-4"></i>
                 </button>
                 <button onclick="openEditModal('${item.id}')" title="แก้ไข" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 transition cursor-pointer">
@@ -420,9 +581,14 @@
       document.getElementById('formCode').value = window.ShortlinkRepo.generateCode(5);
       document.getElementById('formCategory').value = 'ทั่วไป';
       document.getElementById('formTitle').value = '';
+      document.getElementById('formPassword').value = '';
+      document.getElementById('formPwNote').textContent = 'เว้นว่างไว้หากไม่ต้องการล็อครหัส';
+      document.getElementById('formExpiresAt').value = '';
+      document.getElementById('formQrColor').value = '#ea580c';
       document.getElementById('formIsActive').checked = true;
 
       document.getElementById('linkModal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function openEditModal(linkId) {
@@ -435,9 +601,23 @@
       document.getElementById('formCode').value = link.code;
       document.getElementById('formCategory').value = link.category || 'ทั่วไป';
       document.getElementById('formTitle').value = link.title || '';
+      document.getElementById('formPassword').value = '';
+      document.getElementById('formPwNote').textContent = link.passwordHash ? '🔒 มีรหัสเดิมอยู่แล้ว (กรอกเพื่อเปลี่ยนใหม่)' : 'ยังไม่มีรหัสผ่าน (กรอกเพื่อตั้งรหัส)';
+      
+      if (link.expiresAt) {
+        const dt = new Date(link.expiresAt);
+        // Format to YYYY-MM-DDTHH:MM for input datetime-local
+        const localIso = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        document.getElementById('formExpiresAt').value = localIso;
+      } else {
+        document.getElementById('formExpiresAt').value = '';
+      }
+
+      document.getElementById('formQrColor').value = link.qrSettings?.colorDark || '#ea580c';
       document.getElementById('formIsActive').checked = Boolean(link.isActive);
 
       document.getElementById('linkModal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function closeModal() {
@@ -451,25 +631,35 @@
       const code = document.getElementById('formCode').value.trim();
       const category = document.getElementById('formCategory').value;
       const title = document.getElementById('formTitle').value.trim();
+      const password = document.getElementById('formPassword').value.trim();
+      const expiresAtInput = document.getElementById('formExpiresAt').value;
+      const expiresAt = expiresAtInput ? new Date(expiresAtInput).toISOString() : null;
+      const qrColor = document.getElementById('formQrColor').value;
       const isActive = document.getElementById('formIsActive').checked;
+
+      const payload = {
+        targetUrl,
+        code,
+        category,
+        title: title || undefined,
+        expiresAt,
+        qrSettings: {
+          colorDark: qrColor,
+          colorLight: '#ffffff',
+          logoEnabled: true
+        },
+        isActive
+      };
+
+      if (password) {
+        payload.password = password;
+      }
 
       try {
         if (id) {
-          await window.ShortlinkRepo.updateLink(id, {
-            targetUrl,
-            code,
-            category,
-            title,
-            isActive
-          });
+          await window.ShortlinkRepo.updateLink(id, payload);
         } else {
-          await window.ShortlinkRepo.createLink({
-            targetUrl,
-            code,
-            category,
-            title: title || undefined,
-            isActive
-          });
+          await window.ShortlinkRepo.createLink(payload);
         }
         closeModal();
         refreshData();
@@ -494,34 +684,166 @@
       alert(`📋 คัดลอกลิงก์ย่อ "${fullUrl}" เรียบร้อยแล้ว!`);
     }
 
-    // QR Preview in Admin
+    // Analytics Modal Logic
+    function openAnalyticsModal(linkId) {
+      const link = window.ShortlinkRepo.getById(linkId);
+      if (!link) return;
+
+      document.getElementById('anModalTitle').textContent = `สถิติ: ${link.title}`;
+      document.getElementById('anModalCode').textContent = `/s/${link.code} • ${link.targetUrl}`;
+      document.getElementById('anTotalClicks').textContent = (link.clicks || 0).toLocaleString();
+
+      const stats = link.clickStats || { devices: {}, browsers: {}, referrers: {}, daily: {} };
+
+      // Top Device
+      const devices = Object.entries(stats.devices || {}).sort((a,b) => b[1] - a[1]);
+      document.getElementById('anTopDevice').textContent = devices[0] ? `${devices[0][0]} (${devices[0][1]})` : 'ยังไม่มีสถิติ';
+
+      // Top Browser
+      const browsers = Object.entries(stats.browsers || {}).sort((a,b) => b[1] - a[1]);
+      document.getElementById('anTopBrowser').textContent = browsers[0] ? `${browsers[0][0]} (${browsers[0][1]})` : 'ยังไม่มีสถิติ';
+
+      // Render Devices list
+      const devContainer = document.getElementById('anDevicesList');
+      if (devices.length === 0) {
+        devContainer.innerHTML = '<span class="text-slate-500 text-[11px]">ยังไม่มีข้อมูลอุปกรณ์</span>';
+      } else {
+        devContainer.innerHTML = devices.map(([name, count]) => {
+          const pct = Math.round((count / (link.clicks || 1)) * 100);
+          return `
+            <div class="space-y-1">
+              <div class="flex justify-between text-[11px] text-slate-300">
+                <span>${name}</span>
+                <span class="font-mono text-slate-400">${count} ครั้ง (${pct}%)</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-slate-900 overflow-hidden">
+                <div class="h-full bg-orange-500 rounded-full" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Browsers list
+      const brContainer = document.getElementById('anBrowsersList');
+      if (browsers.length === 0) {
+        brContainer.innerHTML = '<span class="text-slate-500 text-[11px]">ยังไม่มีข้อมูลเบราว์เซอร์</span>';
+      } else {
+        brContainer.innerHTML = browsers.map(([name, count]) => {
+          const pct = Math.round((count / (link.clicks || 1)) * 100);
+          return `
+            <div class="space-y-1">
+              <div class="flex justify-between text-[11px] text-slate-300">
+                <span>${name}</span>
+                <span class="font-mono text-slate-400">${count} ครั้ง (${pct}%)</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-slate-900 overflow-hidden">
+                <div class="h-full bg-sky-500 rounded-full" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Referrers
+      const refContainer = document.getElementById('anReferrersList');
+      const refs = Object.entries(stats.referrers || {}).sort((a,b) => b[1] - a[1]);
+      if (refs.length === 0) {
+        refContainer.innerHTML = '<span class="text-slate-500 text-[11px]">ยังไม่มีข้อมูลแหล่งที่มา</span>';
+      } else {
+        refContainer.innerHTML = refs.map(([source, count]) => `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px]">
+            <span class="font-mono text-slate-300 truncate max-w-xs">${source}</span>
+            <span class="font-mono font-bold text-amber-400">${count} คลิก</span>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('analyticsModal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeAnalyticsModal() {
+      document.getElementById('analyticsModal').classList.add('hidden');
+    }
+
+    // QR Preview & Customization in Admin
     let currentAdminQrLink = null;
+    let currentAdminQrColor = '#ea580c';
+    let currentAdminQrLogo = true;
+
     function openAdminQr(linkId) {
       const link = window.ShortlinkRepo.getById(linkId);
       if (!link) return;
 
       currentAdminQrLink = link;
+      currentAdminQrColor = link.qrSettings?.colorDark || '#ea580c';
+      currentAdminQrLogo = link.qrSettings?.logoEnabled !== false;
+
       const fullUrl = `${window.location.origin}/s/${link.code}`;
 
       document.getElementById('adminQrTitle').textContent = link.title;
       document.getElementById('adminQrCode').textContent = `/s/${link.code}`;
       document.getElementById('adminQrUrlInput').value = fullUrl;
+      document.getElementById('adminQrLogoToggle').checked = currentAdminQrLogo;
 
-      const container = document.getElementById('adminQrContainer');
-      container.innerHTML = '';
-      if (typeof QRCode !== 'undefined') {
-        new QRCode(container, {
-          text: fullUrl,
-          width: 180,
-          height: 180,
-          colorDark: "#0f172a",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      }
+      renderAdminQr();
 
       document.getElementById('adminQrModal').classList.remove('hidden');
       if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function renderAdminQr() {
+      if (!currentAdminQrLink) return;
+      const fullUrl = `${window.location.origin}/s/${currentAdminQrLink.code}`;
+      const container = document.getElementById('adminQrContainer');
+      container.innerHTML = '';
+      container.style.position = 'relative';
+
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(container, {
+          text: fullUrl,
+          width: 190,
+          height: 190,
+          colorDark: currentAdminQrColor,
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+
+        if (currentAdminQrLogo) {
+          setTimeout(() => {
+            const badge = document.createElement('div');
+            badge.className = 'absolute inset-0 flex items-center justify-center pointer-events-none';
+            badge.innerHTML = `
+              <div class="w-11 h-11 rounded-xl bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-white font-black text-[10px]">
+                COMED
+              </div>
+            `;
+            container.appendChild(badge);
+          }, 50);
+        }
+      }
+    }
+
+    function changeAdminQrColor(color) {
+      currentAdminQrColor = color;
+      renderAdminQr();
+      // Auto save preference to link
+      if (currentAdminQrLink) {
+        window.ShortlinkRepo.updateLink(currentAdminQrLink.id, {
+          qrSettings: { colorDark: currentAdminQrColor, colorLight: '#ffffff', logoEnabled: currentAdminQrLogo }
+        });
+      }
+    }
+
+    function toggleAdminQrLogo() {
+      currentAdminQrLogo = document.getElementById('adminQrLogoToggle').checked;
+      renderAdminQr();
+      if (currentAdminQrLink) {
+        window.ShortlinkRepo.updateLink(currentAdminQrLink.id, {
+          qrSettings: { colorDark: currentAdminQrColor, colorLight: '#ffffff', logoEnabled: currentAdminQrLogo }
+        });
+      }
     }
 
     function closeAdminQrModal() {
@@ -540,12 +862,43 @@
     function downloadAdminQr() {
       const container = document.getElementById('adminQrContainer');
       const img = container.querySelector('img');
-      if (img && img.src) {
-        const a = document.createElement('a');
-        a.href = img.src;
-        a.download = `qrcode_${currentAdminQrLink?.code || 'shortlink'}.png`;
-        a.click();
+      if (!img) return;
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const size = 800; // Ultra High-Res
+      canvas.width = size;
+      canvas.height = size;
+
+      ctx.drawImage(img, 0, 0, size, size);
+
+      if (currentAdminQrLogo) {
+        const logoSize = size * 0.22;
+        const logoPos = (size - logoSize) / 2;
+
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.roundRect(logoPos - 8, logoPos - 8, logoSize + 16, logoSize + 16, 26);
+        ctx.fill();
+
+        ctx.fillStyle = currentAdminQrColor || "#ea580c";
+        ctx.beginPath();
+        ctx.roundRect(logoPos, logoPos, logoSize, logoSize, 22);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 38px Prompt, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("COMED", size / 2, size / 2 - 10);
+        ctx.font = "bold 20px Prompt, sans-serif";
+        ctx.fillText("KKU 69", size / 2, size / 2 + 22);
       }
+
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `qrcode_${currentAdminQrLink?.code || 'shortlink'}_kku_highres.png`;
+      a.click();
     }
   </script>
 </body>

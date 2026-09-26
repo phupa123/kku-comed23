@@ -380,5 +380,71 @@ VALUES
 ('apassara.n@kkumail.com', '693050567-3', 'อาภัสรา นากลาง', 'เป้ย', NULL, 'none', 'none')
 ON CONFLICT (email) DO NOTHING;
 
+-- ================= 9. ตาราง SHORTLINKS (ระบบย่อลิงก์ & QR Code พร้อมรหัสผ่านและสถิติคลิก) =================
+CREATE TABLE IF NOT EXISTS public.shortlinks (
+  id TEXT PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,
+  title TEXT NOT NULL,
+  target_url TEXT NOT NULL,
+  category TEXT DEFAULT 'ทั่วไป',
+  clicks INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  password_hash TEXT,
+  expires_at TIMESTAMPTZ,
+  click_stats JSONB DEFAULT '{"devices":{},"browsers":{},"referrers":{},"daily":{}}'::jsonb,
+  qr_settings JSONB DEFAULT '{}'::jsonb,
+  notes TEXT,
+  created_by TEXT DEFAULT 'ผู้ดูแลระบบ',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ปรับเพิ่มคอลัมน์ใหม่หากสร้างไว้ก่อนแล้ว
+ALTER TABLE public.shortlinks ADD COLUMN IF NOT EXISTS password_hash TEXT;
+ALTER TABLE public.shortlinks ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+ALTER TABLE public.shortlinks ADD COLUMN IF NOT EXISTS click_stats JSONB DEFAULT '{"devices":{},"browsers":{},"referrers":{},"daily":{}}'::jsonb;
+ALTER TABLE public.shortlinks ADD COLUMN IF NOT EXISTS qr_settings JSONB DEFAULT '{}'::jsonb;
+
+ALTER TABLE public.shortlinks ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read shortlinks" ON public.shortlinks;
+CREATE POLICY "Allow public read shortlinks" 
+ON public.shortlinks FOR SELECT 
+TO anon, authenticated 
+USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert shortlinks" ON public.shortlinks;
+CREATE POLICY "Allow public insert shortlinks" 
+ON public.shortlinks FOR INSERT 
+TO anon, authenticated 
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public update shortlinks" ON public.shortlinks;
+CREATE POLICY "Allow public update shortlinks" 
+ON public.shortlinks FOR UPDATE 
+TO anon, authenticated 
+USING (true)
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public delete shortlinks" ON public.shortlinks;
+CREATE POLICY "Allow public delete shortlinks" 
+ON public.shortlinks FOR DELETE 
+TO anon, authenticated 
+USING (true);
+
+-- เปิด Realtime สำหรับตาราง shortlinks
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+      AND schemaname = 'public' 
+      AND tablename = 'shortlinks'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.shortlinks;
+  END IF;
+END;
+$$;
+
 
 
