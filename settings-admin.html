@@ -293,62 +293,117 @@
 
     <!-- MODAL: EDIT USER PROFILE & AVATAR DECORATIONS -->
     <div id="modalAdminEditUser" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4">
-      <div class="relative bg-slate-900/95 rounded-3xl max-w-lg w-full p-5 sm:p-7 border border-sky-500/30 shadow-2xl space-y-4 sm:space-y-5 overflow-hidden my-auto">
-        <div class="absolute -top-16 -right-16 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="relative bg-slate-900/95 rounded-3xl max-w-xl w-full p-5 sm:p-7 border border-sky-500/30 shadow-2xl space-y-4 sm:space-y-5 overflow-hidden my-auto">
+        <div class="absolute -top-16 -right-16 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-16 -left-16 w-40 h-40 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
         
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3 relative z-10">
-          <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold shadow-xs">
+        <!-- Header with Prev/Next Navigation Controls -->
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 relative z-10 gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold shadow-xs flex-shrink-0">
               <i data-lucide="user-cog" class="w-5 h-5"></i>
             </div>
-            <div>
-              <h3 class="text-sm font-black text-white">จัดการและตกแต่งโปรไฟล์ผู้ใช้</h3>
-              <p id="admEditUserSub" class="text-[11px] text-slate-400">แก้ไขรูปภาพ กรอบรูป และเอฟเฟกต์แอนิเมชัน</p>
+            <div class="min-w-0">
+              <h3 class="text-sm font-black text-white truncate">จัดการและตกแต่งโปรไฟล์ผู้ใช้</h3>
+              <p id="admEditUserSub" class="text-[11px] text-slate-400 truncate">แก้ไขรูปภาพ กรอบรูป และเอฟเฟกต์แอนิเมชัน</p>
             </div>
           </div>
-          <button type="button" onclick="closeAdminEditUserModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer active:scale-95">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
+          
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <!-- Prev User Button -->
+            <button type="button" onclick="navigateAdminEditUser(-1)" id="btnAdmPrevUser" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 font-bold text-xs flex items-center gap-1 cursor-pointer transition active:scale-95" title="คนก่อนหน้า (คีย์ลัด: ลูกศรซ้าย หรือ A)">
+              <i data-lucide="chevron-left" class="w-4 h-4 text-cyan-400"></i>
+              <span class="hidden sm:inline">ก่อนหน้า</span>
+            </button>
+            <!-- Next User Button -->
+            <button type="button" onclick="navigateAdminEditUser(1)" id="btnAdmNextUser" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 font-bold text-xs flex items-center gap-1 cursor-pointer transition active:scale-95" title="คนถัดไป (คีย์ลัด: ลูกศรขวา หรือ D)">
+              <span class="hidden sm:inline">ถัดไป</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-cyan-400"></i>
+            </button>
+            <!-- Close Modal -->
+            <button type="button" onclick="closeAdminEditUserModal()" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer active:scale-95 ml-1" title="ปิดหน้าต่าง (Esc)">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
         </div>
 
-        <!-- Preview Card -->
-        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center gap-3.5 sm:gap-4 relative z-10 shadow-inner">
-          <div class="relative flex-shrink-0">
-            <div id="admEditAvatarFrame" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-900 p-1 border-2 border-slate-800 flex items-center justify-center overflow-hidden transition-all duration-300">
-              <img id="admEditAvatarImg" src="" alt="Avatar" class="w-full h-full object-cover rounded-xl transition-all duration-300">
+        <!-- Preview Card with Index Counter -->
+        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3.5 sm:gap-4 relative z-10 shadow-inner">
+          <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div class="relative flex-shrink-0">
+              <div id="admEditAvatarFrame" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-900 p-1 border-2 border-slate-800 flex items-center justify-center overflow-hidden transition-all duration-300">
+                <img id="admEditAvatarImg" src="" alt="Avatar" class="w-full h-full object-cover rounded-xl transition-all duration-300">
+              </div>
+            </div>
+            <div class="min-w-0">
+              <h4 id="admEditUserName" class="text-xs sm:text-sm font-black text-white truncate">ชื่อผู้ใช้</h4>
+              <p id="admEditUserEmail" class="text-[11px] sm:text-xs text-sky-400 font-mono truncate">email@kkumail.com</p>
+              <div class="flex items-center gap-1.5 sm:gap-2 mt-1 flex-wrap">
+                <span id="admEditBadgeFrame" class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">กรอบ: ไม่มี</span>
+                <span id="admEditBadgeAnim" class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">แอนิเมชัน: ไม่มี</span>
+              </div>
             </div>
           </div>
-          <div class="min-w-0 flex-grow">
-            <h4 id="admEditUserName" class="text-xs sm:text-sm font-black text-white truncate">ชื่อผู้ใช้</h4>
-            <p id="admEditUserEmail" class="text-[11px] sm:text-xs text-sky-400 font-mono truncate">email@kkumail.com</p>
-            <div class="flex items-center gap-1.5 sm:gap-2 mt-1 flex-wrap">
-              <span id="admEditBadgeFrame" class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">กรอบ: ไม่มี</span>
-              <span id="admEditBadgeAnim" class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">แอนิเมชัน: ไม่มี</span>
-            </div>
+          <!-- Order indicator (e.g. 5/60) -->
+          <div class="flex flex-col items-end flex-shrink-0">
+            <span id="admEditUserIndexBadge" class="px-2.5 py-1 rounded-xl bg-cyan-500/10 text-cyan-400 font-mono text-[11px] font-bold border border-cyan-500/20">
+              1 / 60
+            </span>
+            <span class="text-[9px] text-slate-500 mt-1 hidden sm:inline">กด ← / → สลับคน</span>
           </div>
         </div>
 
         <form id="formAdminEditUser" onsubmit="handleSaveAdminUserEdit(event)" class="space-y-3.5 sm:space-y-4 text-xs relative z-10">
           <input type="hidden" id="admEditUserKey">
 
-          <!-- Upload or Random Picture -->
-          <div class="space-y-2">
-            <label class="font-bold text-slate-300">เปลี่ยนรูปโปรไฟล์ (Avatar URL หรืออัปโหลดตรง)</label>
-            <div class="flex gap-2">
-              <input type="text" id="admEditAvatarUrl" placeholder="https://..." class="flex-grow px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-[11px] outline-none focus:border-cyan-500">
-              <button type="button" onclick="adminRandomizeAvatar()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold transition flex items-center gap-1 cursor-pointer flex-shrink-0 active:scale-95">
+          <!-- Drag and Drop Upload Zone -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="cloud-upload" class="w-4 h-4 text-sky-400"></i>
+                <span>อัปโหลดรูปภาพโปรไฟล์ (ลากไฟล์วาง หรือคลิกเลือก)</span>
+              </label>
+              <span class="text-[10px] text-slate-500">JPG, PNG, WebP, GIF</span>
+            </div>
+
+            <div id="admAvatarDropZone" class="relative group p-4 rounded-2xl border-2 border-dashed border-slate-700/80 hover:border-sky-400/80 bg-slate-950/60 hover:bg-sky-950/20 transition-all duration-200 cursor-pointer text-center flex flex-col items-center justify-center gap-2">
+              <input type="file" id="admUploadAvatarInput" accept="image/*" class="hidden" onchange="handleAdminUploadUserAvatar(event)">
+              
+              <div class="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center transition-transform group-hover:scale-110 shadow-xs">
+                <i data-lucide="image-plus" class="w-5 h-5"></i>
+              </div>
+              <div class="space-y-0.5">
+                <p class="font-bold text-white text-xs">คลิก หรือ ลากไฟล์รูปภาพมาวางที่นี่</p>
+                <p class="text-[10px] text-slate-400">ระบบจะส่งขึ้นคลาวด์และแสดงผลเปอร์เซ็นต์จริง</p>
+              </div>
+            </div>
+
+            <!-- Upload Progress Bar Container (Hidden by default, shown during upload) -->
+            <div id="admUploadProgressBox" class="hidden p-3 rounded-2xl bg-slate-950 border border-sky-500/30 space-y-2">
+              <div class="flex items-center justify-between text-[11px]">
+                <span id="admUploadProgressMsg" class="font-bold text-sky-300 flex items-center gap-1.5">
+                  <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-sky-400"></i>
+                  <span>กำลังอัปโหลดภาพขึ้นคลาวด์...</span>
+                </span>
+                <span id="admUploadProgressPct" class="font-mono font-bold text-white text-xs px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-500/30">
+                  0%
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden relative">
+                <div id="admUploadProgressBar" class="h-full bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-200 ease-out" style="width: 0%"></div>
+              </div>
+              <div class="flex items-center justify-between text-[10px] text-slate-400">
+                <span id="admUploadBytesInfo">0 / 0 MB</span>
+                <span id="admUploadProviderBadge" class="text-sky-400 font-mono">MultiCloud Failover</span>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-2 pt-1">
+              <input type="text" id="admEditAvatarUrl" placeholder="หรือวางลิงก์รูปภาพโดยตรง (https://...)" class="flex-grow px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-[11px] outline-none focus:border-cyan-500">
+              <button type="button" onclick="adminRandomizeAvatar()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold transition flex items-center gap-1 cursor-pointer flex-shrink-0 active:scale-95" title="สุ่มรูป">
                 <i data-lucide="shuffle" class="w-3.5 h-3.5"></i>
                 <span>สุ่ม</span>
               </button>
-            </div>
-            
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 pt-1">
-              <input type="file" id="admUploadAvatarInput" accept="image/*" class="hidden" onchange="handleAdminUploadUserAvatar(event)">
-              <button type="button" onclick="document.getElementById('admUploadAvatarInput').click()" class="w-full sm:w-auto px-3 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
-                <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
-                <span>อัปโหลดรูปให้ผู้ใช้นี้ (ผ่าน Cloud ที่เลือก)</span>
-              </button>
-              <span id="admUploadStatus" class="text-[11px] text-slate-400 hidden">กำลังอัปโหลด...</span>
             </div>
           </div>
 
@@ -378,14 +433,24 @@
             </select>
           </div>
 
-          <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
-            <button type="button" onclick="closeAdminEditUserModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition active:scale-95">
-              ยกเลิก
-            </button>
-            <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white font-bold shadow-md shadow-cyan-600/25 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
-              <i data-lucide="check" class="w-4 h-4"></i>
-              <span>บันทึกโปรไฟล์ผู้ใช้</span>
-            </button>
+          <!-- Footer Actions & Keyboard Shortcuts Hint -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-800">
+            <div class="flex items-center gap-1.5 text-[10px] text-slate-400 order-2 sm:order-1">
+              <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[9px]">←/→</span>
+              <span>เปลี่ยนคน</span>
+              <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[9px] ml-1">Ctrl+S</span>
+              <span>บันทึก</span>
+            </div>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end order-1 sm:order-2">
+              <button type="button" onclick="closeAdminEditUserModal()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition active:scale-95 text-center">
+                ยกเลิก
+              </button>
+              <button type="submit" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white font-bold shadow-md shadow-cyan-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>บันทึกโปรไฟล์</span>
+              </button>
+            </div>
           </div>
         </form>
 

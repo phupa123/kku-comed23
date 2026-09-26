@@ -562,15 +562,33 @@ function filterAdminUserList() {
   renderAdminUsersTable(keyword);
 }
 
-// Edit Modal Functions
+// Edit Modal Navigation & Functions
 let currentEditingUserEmail = null;
+
+function navigateAdminEditUser(delta) {
+  const users = getEnrichedStudentsList();
+  if (!users || users.length === 0) return;
+
+  let currentIndex = users.findIndex(u => u.email.toLowerCase() === (currentEditingUserEmail || '').toLowerCase());
+  if (currentIndex === -1) currentIndex = 0;
+
+  let newIndex = currentIndex + delta;
+  if (newIndex < 0) newIndex = users.length - 1; // loop or clamp (looping is convenient)
+  if (newIndex >= users.length) newIndex = 0;
+
+  const targetUser = users[newIndex];
+  if (targetUser) {
+    openAdminEditUserModal(targetUser.email);
+  }
+}
 
 function openAdminEditUserModal(email) {
   const modal = document.getElementById('modalAdminEditUser');
   if (!modal) return;
 
   const users = getEnrichedStudentsList();
-  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const index = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+  const user = index !== -1 ? users[index] : null;
   if (!user) return;
 
   currentEditingUserEmail = user.email.toLowerCase();
@@ -581,6 +599,7 @@ function openAdminEditUserModal(email) {
   const urlInput = document.getElementById('admEditAvatarUrl');
   const frameSelect = document.getElementById('admEditFrameSelect');
   const animSelect = document.getElementById('admEditAnimSelect');
+  const indexBadge = document.getElementById('admEditUserIndexBadge');
 
   if (keyInput) keyInput.value = user.email;
   if (nameEl) nameEl.textContent = `${user.name} (น้อง${user.nickname || '-'})`;
@@ -588,6 +607,14 @@ function openAdminEditUserModal(email) {
   if (urlInput) urlInput.value = user.avatar || '';
   if (frameSelect) frameSelect.value = user.avatarFrame || 'none';
   if (animSelect) animSelect.value = user.avatarAnim || 'none';
+
+  if (indexBadge) {
+    indexBadge.textContent = `${index + 1} / ${users.length}`;
+  }
+
+  // Reset Progress Box
+  const progressBox = document.getElementById('admUploadProgressBox');
+  if (progressBox) progressBox.classList.add('hidden');
 
   previewAdminUserDecorations();
 
@@ -622,7 +649,7 @@ function previewAdminUserDecorations() {
   }
 
   if (frameEl) {
-    frameEl.className = 'w-16 h-16 rounded-2xl bg-slate-900 p-1 border-2 border-slate-800 flex items-center justify-center overflow-hidden transition-all duration-300';
+    frameEl.className = 'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-900 p-1 border-2 border-slate-800 flex items-center justify-center overflow-hidden transition-all duration-300';
     if (frame !== 'none') {
       frameEl.classList.add(`avatar-frame-${frame}`);
     }
@@ -642,49 +669,86 @@ function adminRandomizeAvatar() {
   }
 }
 
-// Upload Avatar from Admin Modal using Cloud Uploader
-async function handleAdminUploadUserAvatar(e) {
-  const file = e.target.files?.[0];
+// Upload Avatar from Admin Modal using Cloud Uploader with Real Progress
+async function handleAdminUploadUserAvatar(fileOrEvent) {
+  let file = null;
+  if (fileOrEvent instanceof File) {
+    file = fileOrEvent;
+  } else if (fileOrEvent && fileOrEvent.target && fileOrEvent.target.files) {
+    file = fileOrEvent.target.files[0];
+  }
   if (!file) return;
 
-  const statusEl = document.getElementById('admUploadStatus');
   const urlInput = document.getElementById('admEditAvatarUrl');
-  if (statusEl) {
-    statusEl.classList.remove('hidden');
-    statusEl.textContent = '☁️ กำลังส่งภาพขึ้นคลาวด์...';
-  }
+  const progressBox = document.getElementById('admUploadProgressBox');
+  const progressBar = document.getElementById('admUploadProgressBar');
+  const progressPct = document.getElementById('admUploadProgressPct');
+  const progressMsg = document.getElementById('admUploadProgressMsg');
+  const bytesInfo = document.getElementById('admUploadBytesInfo');
+  const providerBadge = document.getElementById('admUploadProviderBadge');
+
+  if (progressBox) progressBox.classList.remove('hidden');
+  if (progressBar) progressBar.style.width = '5%';
+  if (progressPct) progressPct.textContent = '5%';
+  if (progressMsg) progressMsg.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-sky-400"></i><span>เตรียมไฟล์...</span>';
+  
+  const fileSizeStr = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+  if (bytesInfo) bytesInfo.textContent = `0 / ${fileSizeStr}`;
+  if (providerBadge) providerBadge.textContent = 'MultiCloud Engine';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 
   try {
     let uploadedUrl = null;
     let providerName = 'Cloud';
 
     if (window.MultiCloudUploader || window.multiCloudUploader) {
-      let uploader = null;
-      if (typeof window.MultiCloudUploader === 'function') {
-        uploader = new window.MultiCloudUploader();
-      } else if (window.multiCloudUploader) {
-        uploader = window.multiCloudUploader;
-      } else {
-        uploader = window.MultiCloudUploader;
-      }
+      const uploader = typeof window.MultiCloudUploader.getInstance === 'function' 
+        ? window.MultiCloudUploader.getInstance() 
+        : (window.multiCloudUploader || window.MultiCloudUploader);
 
-      if (uploader && typeof (uploader.upload || uploader.uploadFile) === 'function') {
-        const uploadFn = uploader.uploadFile ? uploader.uploadFile.bind(uploader) : uploader.upload.bind(uploader);
-        const res = await uploadFn(file, {
+      if (uploader && typeof uploader.upload === 'function') {
+        const uploadResult = await uploader.upload(file, {
           folder: 'comed_admin_managed_avatars',
-          tags: ['admin_override', currentEditingUserEmail || 'user']
+          tags: ['admin_override', currentEditingUserEmail || 'user'],
+          uploaderName: 'Admin',
+          category: 'รูปโปรไฟล์นักศึกษา',
+          onProgress: (percent, msg, meta) => {
+            const actualPct = Math.min(99, Math.max(5, Math.round(percent || 0)));
+            if (progressBar) progressBar.style.width = `${actualPct}%`;
+            if (progressPct) progressPct.textContent = `${actualPct}%`;
+            if (progressMsg && msg) {
+              progressMsg.innerHTML = `<i data-lucide="cloud-upload" class="w-3.5 h-3.5 animate-bounce text-sky-400"></i><span>${msg}</span>`;
+            }
+            if (meta && meta.loadedBytes && meta.totalBytes && bytesInfo) {
+              const loadedMB = (meta.loadedBytes / (1024 * 1024)).toFixed(2);
+              const totalMB = (meta.totalBytes / (1024 * 1024)).toFixed(2);
+              bytesInfo.textContent = `${loadedMB} / ${totalMB} MB`;
+            }
+            if (meta && meta.provider && providerBadge) {
+              providerBadge.textContent = meta.provider.toUpperCase();
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          }
         });
 
-        if (res && res.url) {
-          uploadedUrl = res.url;
-          providerName = res.provider || 'Cloud';
+        if (uploadResult && uploadResult.url) {
+          uploadedUrl = uploadResult.url;
+          providerName = uploadResult.provider || 'Cloud';
         }
       }
     }
 
     if (!uploadedUrl) {
+      if (progressMsg) progressMsg.innerHTML = '<span>กำลังแปลงข้อมูลภาพท้องถิ่น...</span>';
       uploadedUrl = await new Promise((resolve, reject) => {
         const reader = new FileReader();
+        reader.onprogress = (pe) => {
+          if (pe.lengthComputable) {
+            const pct = Math.round((pe.loaded / pe.total) * 100);
+            if (progressBar) progressBar.style.width = `${pct}%`;
+            if (progressPct) progressPct.textContent = `${pct}%`;
+          }
+        };
         reader.onload = () => resolve(reader.result);
         reader.onerror = reject;
         reader.readAsDataURL(file);
@@ -692,19 +756,105 @@ async function handleAdminUploadUserAvatar(e) {
       providerName = 'Local';
     }
 
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressPct) progressPct.textContent = '100%';
+    if (progressMsg) {
+      progressMsg.innerHTML = `<span class="text-emerald-400 font-bold">✨ อัปโหลดขึ้น ${providerName} สำเร็จ!</span>`;
+    }
+    if (bytesInfo) bytesInfo.textContent = `${fileSizeStr} / ${fileSizeStr}`;
+
     if (urlInput) {
       urlInput.value = uploadedUrl;
       previewAdminUserDecorations();
     }
 
-    if (statusEl) {
-      statusEl.textContent = `✨ อัปโหลดขึ้น ${providerName} สำเร็จ!`;
-      setTimeout(() => statusEl.classList.add('hidden'), 3000);
-    }
+    setTimeout(() => {
+      if (progressBox) progressBox.classList.add('hidden');
+    }, 2500);
+
   } catch (err) {
     console.error("Admin upload failed", err);
-    if (statusEl) statusEl.textContent = '❌ อัปโหลดไม่สำเร็จ กรุณาลองใหม่';
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressMsg) {
+      progressMsg.innerHTML = `<span class="text-rose-400 font-bold">❌ อัปโหลดไม่สำเร็จ: ${err.message || 'โปรดลองใหม่'}</span>`;
+    }
   }
+}
+
+// Drag & Drop Setup for Admin Avatar DropZone
+function initAdminAvatarDropZone() {
+  const dropZone = document.getElementById('admAvatarDropZone');
+  const fileInput = document.getElementById('admUploadAvatarInput');
+  if (!dropZone) return;
+
+  dropZone.addEventListener('click', () => {
+    if (fileInput) fileInput.click();
+  });
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.add('border-sky-400', 'bg-sky-950/40', 'scale-[1.02]');
+    }, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('border-sky-400', 'bg-sky-950/40', 'scale-[1.02]');
+    }, false);
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt?.files;
+    if (files && files.length > 0) {
+      handleAdminUploadUserAvatar(files[0]);
+    }
+  }, false);
+}
+
+// Global Keyboard Shortcuts for modal navigation
+function initAdminModalKeyboardShortcuts() {
+  window.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('modalAdminEditUser');
+    if (!modal || modal.classList.contains('hidden')) return;
+
+    // Check if user is actively typing in a text field
+    const activeEl = document.activeElement;
+    const isTyping = activeEl && (
+      activeEl.tagName === 'INPUT' ||
+      activeEl.tagName === 'TEXTAREA' ||
+      activeEl.isContentEditable
+    );
+
+    // Ctrl+S or Cmd+S to Save
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      handleSaveAdminUserEdit();
+      return;
+    }
+
+    // Escape to close
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeAdminEditUserModal();
+      return;
+    }
+
+    // Navigation hotkeys (ArrowLeft / ArrowRight / A / D) only when NOT typing in input
+    if (!isTyping) {
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        navigateAdminEditUser(-1);
+      } else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        navigateAdminEditUser(1);
+      }
+    }
+  });
 }
 
 function handleSaveAdminUserEdit(e) {
@@ -768,6 +918,9 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAccess();
   renderAdminTable();
   loadProfileStorageConfig();
+  initAdminAvatarDropZone();
+  initAdminModalKeyboardShortcuts();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });
+
 
