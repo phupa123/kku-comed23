@@ -599,6 +599,9 @@ function openAdminEditUserModal(email) {
   const urlInput = document.getElementById('admEditAvatarUrl');
   const frameSelect = document.getElementById('admEditFrameSelect');
   const animSelect = document.getElementById('admEditAnimSelect');
+  const lineInput = document.getElementById('admEditLineId');
+  const igInput = document.getElementById('admEditInstagram');
+  const fbInput = document.getElementById('admEditFacebookUrl');
   const indexBadge = document.getElementById('admEditUserIndexBadge');
 
   if (keyInput) keyInput.value = user.email;
@@ -607,6 +610,9 @@ function openAdminEditUserModal(email) {
   if (urlInput) urlInput.value = user.avatar || '';
   if (frameSelect) frameSelect.value = user.avatarFrame || 'none';
   if (animSelect) animSelect.value = user.avatarAnim || 'none';
+  if (lineInput) lineInput.value = user.lineId || user.line_id || '';
+  if (igInput) igInput.value = user.instagram || '';
+  if (fbInput) fbInput.value = user.facebookUrl || user.facebook_url || '';
 
   if (indexBadge) {
     indexBadge.textContent = `${index + 1} / ${users.length}`;
@@ -864,17 +870,28 @@ function handleSaveAdminUserEdit(e) {
   const urlInput = document.getElementById('admEditAvatarUrl');
   const frameSelect = document.getElementById('admEditFrameSelect');
   const animSelect = document.getElementById('admEditAnimSelect');
+  const lineInput = document.getElementById('admEditLineId');
+  const igInput = document.getElementById('admEditInstagram');
+  const fbInput = document.getElementById('admEditFacebookUrl');
 
   const avatar = urlInput?.value.trim() || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(currentEditingUserEmail)}`;
   const avatarFrame = frameSelect?.value || 'none';
   const avatarAnim = animSelect?.value || 'none';
+  const lineId = lineInput?.value.trim() || null;
+  const instagram = igInput?.value.trim() || null;
+  const facebookUrl = fbInput?.value.trim() || null;
 
   // Update Global Profiles Store
   const profilesMap = getAllStoredUserProfiles();
+  const existing = profilesMap[currentEditingUserEmail] || {};
   profilesMap[currentEditingUserEmail] = {
+    ...existing,
     avatar,
     avatarFrame,
     avatarAnim,
+    lineId,
+    instagram,
+    facebookUrl,
     updatedBy: 'Admin',
     updatedAt: new Date().toISOString()
   };
@@ -889,6 +906,9 @@ function handleSaveAdminUserEdit(e) {
         activeUser.avatar = avatar;
         activeUser.avatarFrame = avatarFrame;
         activeUser.avatarAnim = avatarAnim;
+        activeUser.lineId = lineId;
+        activeUser.instagram = instagram;
+        activeUser.facebookUrl = facebookUrl;
         localStorage.setItem(USER_SESSION_KEY, JSON.stringify(activeUser));
       }
     }
@@ -902,6 +922,9 @@ function handleSaveAdminUserEdit(e) {
       avatar: avatar || null,
       avatar_frame: avatarFrame || 'none',
       avatar_anim: avatarAnim || 'none',
+      line_id: lineId,
+      instagram: instagram,
+      facebook_url: facebookUrl,
       updated_at: new Date().toISOString()
     }, { onConflict: 'email' }).then(({ error }) => {
       if (error) console.warn("[Admin] Supabase user_profiles update error:", error.message);
@@ -911,7 +934,7 @@ function handleSaveAdminUserEdit(e) {
 
   closeAdminEditUserModal();
   renderAdminUsersTable(document.getElementById('adminUserSearchInput')?.value || '');
-  alert("🎉 บันทึกการเปลี่ยนรูปโปรไฟล์และตกแต่งให้ผู้ใช้เรียบร้อยแล้ว!");
+  alert("🎉 บันทึกการเปลี่ยนรูปโปรไฟล์ ข้อมูลโซเชียลมีเดีย และตกแต่งให้ผู้ใช้เรียบร้อยแล้ว!");
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -264,6 +264,9 @@
     const inputName = document.getElementById('prefDisplayName');
     const inputNick = document.getElementById('prefNickname');
     const inputPhone = document.getElementById('prefPhone');
+    const inputLineId = document.getElementById('prefLineId');
+    const inputInstagram = document.getElementById('prefInstagram');
+    const inputFacebookUrl = document.getElementById('prefFacebookUrl');
     const inputBio = document.getElementById('prefBio');
     const inputStudentId = document.getElementById('prefStudentId');
     const inputEmail = document.getElementById('prefEmail');
@@ -271,6 +274,9 @@
     if (inputName) inputName.value = currentUser.name || '';
     if (inputNick) inputNick.value = currentUser.nickname || '';
     if (inputPhone) inputPhone.value = currentUser.phone || '';
+    if (inputLineId) inputLineId.value = currentUser.lineId || currentUser.line_id || '';
+    if (inputInstagram) inputInstagram.value = currentUser.instagram || '';
+    if (inputFacebookUrl) inputFacebookUrl.value = currentUser.facebookUrl || currentUser.facebook_url || '';
     if (inputBio) inputBio.value = currentUser.bio || '';
     if (inputStudentId) inputStudentId.value = currentUser.studentId || '';
     if (inputEmail) inputEmail.value = currentUser.email || '';
@@ -942,6 +948,9 @@
         name: currentUser.name,
         nickname: currentUser.nickname,
         phone: currentUser.phone,
+        lineId: currentUser.lineId || currentUser.line_id || null,
+        instagram: currentUser.instagram || null,
+        facebookUrl: currentUser.facebookUrl || currentUser.facebook_url || null,
         bio: currentUser.bio,
         studentId: currentUser.studentId,
         avatar: currentUser.avatar,
@@ -965,6 +974,9 @@
           name: currentUser.name || null,
           nickname: currentUser.nickname || null,
           phone: currentUser.phone || null,
+          line_id: currentUser.lineId || currentUser.line_id || null,
+          instagram: currentUser.instagram || null,
+          facebook_url: currentUser.facebookUrl || currentUser.facebook_url || null,
           bio: currentUser.bio || null,
           avatar: currentUser.avatar || null,
           avatar_frame: profileData.avatarFrame,
@@ -1026,12 +1038,18 @@
       const inputName = document.getElementById('prefDisplayName');
       const inputNick = document.getElementById('prefNickname');
       const inputPhone = document.getElementById('prefPhone');
+      const inputLineId = document.getElementById('prefLineId');
+      const inputInstagram = document.getElementById('prefInstagram');
+      const inputFacebookUrl = document.getElementById('prefFacebookUrl');
       const inputBio = document.getElementById('prefBio');
       const inputStudentId = document.getElementById('prefStudentId');
 
       if (inputName) currentUser.name = inputName.value.trim();
       if (inputNick) currentUser.nickname = inputNick.value.trim();
       if (inputPhone) currentUser.phone = inputPhone.value.trim();
+      if (inputLineId) currentUser.lineId = inputLineId.value.trim();
+      if (inputInstagram) currentUser.instagram = inputInstagram.value.trim();
+      if (inputFacebookUrl) currentUser.facebookUrl = inputFacebookUrl.value.trim();
       if (inputBio) currentUser.bio = inputBio.value.trim();
       if (inputStudentId) currentUser.studentId = inputStudentId.value.trim();
 
@@ -1067,34 +1085,14 @@
         await new Promise(r => setTimeout(r, 400));
         if (!isProgressActive) return;
 
-        updateProgressModal(65, 'กำลังซิงค์และบันทึกอวาตาร์ & กรอบ...', 'กำลังเขียนข้อมูล...', '2/3');
+        updateProgressModal(65, 'กำลังซิงค์และบันทึกอวาตาร์ & ข้อมูล...', 'กำลังเขียนข้อมูล...', '2/3');
 
         // Persist in LocalStorage
         safeSaveUserSession(currentUser);
         localStorage.setItem(USER_PREFS_KEY, JSON.stringify(userPrefs));
 
-        // Save into COMED_CUSTOM_USERS_PROFILES_V1 for ecosystem sync
-        try {
-          const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
-          const storedProfiles = JSON.parse(localStorage.getItem(profilesKey) || '{}');
-          if (currentUser.email) {
-            storedProfiles[currentUser.email.toLowerCase().trim()] = {
-              name: currentUser.name,
-              nickname: currentUser.nickname,
-              phone: currentUser.phone,
-              bio: currentUser.bio,
-              studentId: currentUser.studentId,
-              avatar: currentUser.avatar,
-              avatarFrame: currentUser.avatarFrame,
-              avatarAnim: currentUser.avatarAnim,
-              avatarTransform: currentUser.avatarTransform,
-              updatedAt: new Date().toISOString()
-            };
-            localStorage.setItem(profilesKey, JSON.stringify(storedProfiles));
-          }
-        } catch (e) {
-          console.warn("Could not sync to custom profiles table", e);
-        }
+        // Save into COMED_CUSTOM_USERS_PROFILES_V1 for ecosystem sync & Supabase
+        await syncCustomProfileToStorage();
 
         await new Promise(r => setTimeout(r, 400));
         if (!isProgressActive) return;
