@@ -1217,7 +1217,12 @@
 
     async function checkIncomingFolderOrShareParam() {
       const urlParams = new URLSearchParams(window.location.search);
-      const shareCode = urlParams.get('share') || urlParams.get('s');
+      // รองรับทั้ง ?share=code, ?s=code และ path /share/{code}
+      let shareCode = urlParams.get('share') || urlParams.get('s');
+      if (!shareCode) {
+        const pathMatch = window.location.pathname.match(/^\/share\/([^/]+)/);
+        if (pathMatch && pathMatch[1]) shareCode = decodeURIComponent(pathMatch[1]);
+      }
       const folderParam = urlParams.get('folder');
 
       if (folderParam) {
@@ -2695,13 +2700,15 @@
       const dlBtn = document.getElementById('shareViewerDownloadBtn');
       const userHint = document.getElementById('shareCommentUserHint');
 
+      // ให้ share.fileUrl (จาก Supabase) เป็น primary source สำหรับผู้ใช้ที่เข้าจากลิงก์
       const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
       const targetFile = allFiles.find(f => f.id === share.targetId);
 
-      const fileName = (targetFile && (targetFile.originalName || targetFile.name)) || share.fileName || share.title || 'ไฟล์ที่แชร์';
-      const fileUrl = (targetFile && targetFile.url) || share.fileUrl || '';
-      const fileSize = (targetFile && targetFile.size) || share.fileSize || 0;
-      const fileType = (targetFile && targetFile.type) || share.fileType || '';
+      // ใช้ข้อมูลจาก Supabase share record เป็นหลัก ถ้าไม่มีค่อย fallback ไปหา local file
+      const fileName = share.fileName || (targetFile && (targetFile.originalName || targetFile.name)) || share.title || 'ไฟล์ที่แชร์';
+      const fileUrl = share.fileUrl || (targetFile && targetFile.url) || '';
+      const fileSize = share.fileSize || (targetFile && targetFile.size) || 0;
+      const fileType = share.fileType || (targetFile && targetFile.type) || '';
 
       if (title) title.textContent = fileName;
       if (sizeEl) sizeEl.textContent = formatBytes(fileSize);

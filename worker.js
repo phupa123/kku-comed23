@@ -166,7 +166,14 @@ export default {
     else if (path === "/eventclass" || path === "/eventclass.html") target = "/eventclass.html";
     else if (path === "/event-admin" || path === "/event-admin.html") target = "/event-admin.html";
     else if (path === "/eventclass-admin" || path === "/eventclass-admin.html") target = "/eventclass-admin.html";
-    else if (path === "/storage" || path === "/storage.html" || path.startsWith("/share/")) target = "/storage.html";
+    else if (path === "/storage" || path === "/storage.html") target = "/storage.html";
+    else if (path.startsWith("/share/")) {
+      // For GitHub fallback, redirect to storage.html?share=code so the param is preserved
+      const shareCode = path.replace("/share/", "").split("/")[0].trim();
+      const redirectTarget = new URL("/storage.html", url.origin);
+      if (shareCode) redirectTarget.searchParams.set("share", shareCode);
+      return Response.redirect(redirectTarget.toString(), 302);
+    }
     else if (path === "/storage-admin" || path === "/storage-admin.html") target = "/storage-admin.html";
     else if (path === "/upload" || path === "/upload.html") target = "/upload.html";
     else if (path === "/upload-admin" || path === "/upload-admin.html") target = "/upload-admin.html";
