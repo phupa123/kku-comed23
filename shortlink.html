@@ -466,6 +466,82 @@
         </div>
       </div>
     </div>
+  <!-- Edit Shortlink Modal -->
+  <div id="modalEditShortlink" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative">
+      <button onclick="closeEditShortlinkModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+          <i data-lucide="edit-3" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h4 class="text-base font-black text-white">แก้ไขข้อมูลลิงก์ย่อ</h4>
+          <p class="text-xs text-slate-400">ปรับปรุงปลายทาง รหัสย่อ หรือความปลอดภัย</p>
+        </div>
+      </div>
+
+      <form id="formEditShortlink" onsubmit="handleSaveEditShortlink(event)" class="space-y-4">
+        <input type="hidden" id="editLinkId">
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">URL ปลายทาง (Destination URL) <span class="text-rose-400">*</span></label>
+          <input type="url" id="editTargetUrl" required placeholder="https://..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">รหัสย่อ (Short Code) <span class="text-rose-400">*</span></label>
+            <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl overflow-hidden focus-within:border-orange-500">
+              <span class="px-2.5 text-xs text-slate-500 font-mono">/s/</span>
+              <input type="text" id="editCode" required class="w-full py-2.5 pr-3 bg-transparent text-amber-400 font-mono text-xs outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">ชื่อเรียก / คำอธิบาย</label>
+            <input type="text" id="editTitle" placeholder="เช่น แบบสอบถาม, เอกสารสัมมนา" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">หมวดหมู่</label>
+            <input type="text" id="editCategory" placeholder="เช่น การเงิน, กิจกรรม, ทั่วไป" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">วันหมดอายุ (Expiry)</label>
+            <input type="datetime-local" id="editExpiresAt" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs outline-none focus:border-orange-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">รหัสผ่านปลดล็อค (Password Protection)</label>
+          <input type="text" id="editPassword" placeholder="เว้นว่างไว้หากไม่ต้องการเปลี่ยน / ปล่อยโล่งเพื่อยกเลิกรหัส" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500">
+          <p id="editPwNote" class="text-[10px] text-slate-500 mt-1">เว้นว่างไว้เพื่อคงรหัสผ่านเดิม</p>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="editIsActive" checked class="w-4 h-4 rounded border-slate-800 bg-slate-950 text-orange-600 focus:ring-0">
+            <span class="text-xs font-bold text-slate-300">เปิดใช้งานลิงก์นี้ (Active)</span>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeEditShortlinkModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition cursor-pointer">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btnSaveEditLink" class="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-600/30 cursor-pointer">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>บันทึกการแก้ไข</span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Footer -->
@@ -509,73 +585,55 @@
     // 2. Perform Redirection Logic
     async function handleIncomingRedirection(code) {
       if (!code) return;
-      let cleanCode = String(code).trim();
-      cleanCode = cleanCode.replace(/^\/+/, '');
+      let cleanCode = String(code).trim().replace(/^\/+/, '');
 
-      const possibleCodes = [cleanCode];
-      if (cleanCode.startsWith('s_')) {
-        possibleCodes.push(cleanCode.substring(2));
-      } else {
-        possibleCodes.push('s_' + cleanCode);
-      }
+      // 1. ตรวจสอบ Shortlink แท้จริงก่อนเป็นอันดับแรก (code ตรงเป๊ะ)
+      let link = window.ShortlinkRepo ? window.ShortlinkRepo.getByCode(cleanCode) : null;
 
-      // 2.1 Check COMED Cloud Drive Shares (files/folders)
-      if (window.StorageDriveRepo) {
-        for (const c of possibleCodes) {
-          let driveShare = window.StorageDriveRepo.getShareByCode(c);
+      // 2. ถ้าไม่พบ และ code ขึ้นต้นด้วย 's_' หรือมีแนวโน้มเป็น Drive Share ให้ตรวจ StorageDriveRepo
+      if (!link && window.StorageDriveRepo) {
+        if (cleanCode.startsWith('s_')) {
+          let driveShare = window.StorageDriveRepo.getShareByCode(cleanCode);
           if (!driveShare && window.StorageDriveRepo.fetchShareByCodeFromCloud) {
-            driveShare = await window.StorageDriveRepo.fetchShareByCodeFromCloud(c);
+            driveShare = await window.StorageDriveRepo.fetchShareByCodeFromCloud(cleanCode);
           }
           if (driveShare) {
-            window.location.replace(`storage.html?share=${encodeURIComponent(driveShare.shareCode || c)}`);
+            window.location.replace(`storage.html?share=${encodeURIComponent(driveShare.shareCode || cleanCode)}`);
             return;
           }
         }
       }
 
-      let link = null;
-      for (const c of possibleCodes) {
-        link = window.ShortlinkRepo.getByCode(c);
-        if (link) break;
-      }
-
-      const overlay = document.getElementById('redirectOverlay');
-      const notFoundOverlay = document.getElementById('notFoundOverlay');
-      const expiredOverlay = document.getElementById('expiredOverlay');
-      const passwordOverlay = document.getElementById('passwordOverlay');
-
+      // 3. Fallback ตรวจสอบจาก Supabase ตาราง shortlinks โดยตรง
       if (!link && window.getSupabaseClient) {
         try {
           const sb = window.getSupabaseClient();
           if (sb) {
-            for (const c of possibleCodes) {
-              const { data } = await sb
-                .from('shortlinks')
-                .select('*')
-                .eq('code', c)
-                .maybeSingle();
+            const { data } = await sb
+              .from('shortlinks')
+              .select('*')
+              .eq('code', cleanCode)
+              .maybeSingle();
 
-              if (data) {
-                if ((data.category || '').includes('DriveShare') || (data.code || '').startsWith('s_') || (data.target_url || '').includes('storage.html?share=')) {
-                  window.location.replace(`storage.html?share=${encodeURIComponent(data.code || c)}`);
-                  return;
-                }
+            if (data) {
+              if ((data.category || '').includes('DriveShare') || (data.target_url || '').includes('storage.html?share=')) {
+                window.location.replace(`storage.html?share=${encodeURIComponent(data.code || cleanCode)}`);
+                return;
+              }
 
-                if (data.target_url) {
-                  link = {
-                    id: data.id || ('lnk_' + c),
-                    code: data.code || c,
-                    title: data.title || '',
-                    targetUrl: data.target_url,
-                    category: data.category || 'Shortlink',
-                    isActive: data.is_active !== false,
-                    passwordHash: data.password_hash || null,
-                    expiresAt: data.expires_at || null,
-                    clickStats: data.click_stats || {},
-                    clicks: Number(data.clicks) || 0
-                  };
-                  break;
-                }
+              if (data.target_url) {
+                link = {
+                  id: data.id || ('lnk_' + cleanCode),
+                  code: data.code || cleanCode,
+                  title: data.title || '',
+                  targetUrl: data.target_url,
+                  category: data.category || 'Shortlink',
+                  isActive: data.is_active !== false,
+                  passwordHash: data.password_hash || null,
+                  expiresAt: data.expires_at || null,
+                  clickStats: data.click_stats || {},
+                  clicks: Number(data.clicks) || 0
+                };
               }
             }
           }
@@ -583,6 +641,13 @@
           console.warn("[Shortlink] Supabase fallback query suppressed:", e);
         }
       }
+
+      const overlay = document.getElementById('redirectOverlay');
+      const notFoundOverlay = document.getElementById('notFoundOverlay');
+      const expiredOverlay = document.getElementById('expiredOverlay');
+      const passwordOverlay = document.getElementById('passwordOverlay');
+
+
 
       if (!link) {
         notFoundOverlay.classList.remove('hidden');
@@ -801,6 +866,9 @@
                 <button onclick="openQrModal('${item.id}')" title="ดู QR Code" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer">
                   <i data-lucide="qr-code" class="w-4 h-4"></i>
                 </button>
+                <button onclick="openEditShortlinkModal('${item.id}')" title="แก้ไขข้อมูลลิงก์" class="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 transition cursor-pointer">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                </button>
                 <button onclick="handleDeleteShortlink('${item.id}')" title="ลบลิงก์นี้" class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition cursor-pointer">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
@@ -918,6 +986,93 @@
         renderLinksDirectory();
       } catch (err) {
         alert("⚠️ ลบไม่สำเร็จ: " + err.message);
+      }
+    }
+
+    // Modal Edit Shortlink Logic
+    function openEditShortlinkModal(id) {
+      const link = window.ShortlinkRepo.getById(id);
+      if (!link) return;
+
+      document.getElementById('editLinkId').value = link.id;
+      document.getElementById('editTargetUrl').value = link.targetUrl || '';
+      document.getElementById('editCode').value = link.code || '';
+      document.getElementById('editTitle').value = link.title || '';
+      document.getElementById('editCategory').value = link.category || 'ทั่วไป';
+      document.getElementById('editPassword').value = '';
+      document.getElementById('editPwNote').textContent = link.passwordHash ? '🔒 ลิงก์นี้มีการตั้งรหัสผ่านไว้ (เว้นว่างไว้เพื่อคงรหัสเดิม / ปล่อยโล่งแล้วกดบันทึกเพื่อยกเลิกรหัส)' : 'เว้นว่างไว้หากไม่ต้องการล็อครหัสผ่าน';
+
+      if (link.expiresAt) {
+        try {
+          const d = new Date(link.expiresAt);
+          d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+          document.getElementById('editExpiresAt').value = d.toISOString().slice(0, 16);
+        } catch (e) {
+          document.getElementById('editExpiresAt').value = '';
+        }
+      } else {
+        document.getElementById('editExpiresAt').value = '';
+      }
+
+      document.getElementById('editIsActive').checked = link.isActive !== false;
+
+      const modal = document.getElementById('modalEditShortlink');
+      if (modal) {
+        modal.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    function closeEditShortlinkModal() {
+      const modal = document.getElementById('modalEditShortlink');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function handleSaveEditShortlink(e) {
+      e.preventDefault();
+      const id = document.getElementById('editLinkId').value;
+      const targetUrl = document.getElementById('editTargetUrl').value.trim();
+      const code = document.getElementById('editCode').value.trim();
+      const title = document.getElementById('editTitle').value.trim();
+      const category = document.getElementById('editCategory').value.trim();
+      const password = document.getElementById('editPassword').value;
+      const expiresAtInput = document.getElementById('editExpiresAt').value;
+      const isActive = document.getElementById('editIsActive').checked;
+      const submitBtn = document.getElementById('btnSaveEditLink');
+
+      if (!targetUrl || !code) {
+        alert("กรุณากรอก URL ปลายทาง และรหัสย่อให้ครบถ้วน");
+        return;
+      }
+
+      const updates = {
+        targetUrl,
+        code,
+        title: title || undefined,
+        category: category || 'ทั่วไป',
+        expiresAt: expiresAtInput ? new Date(expiresAtInput).toISOString() : null,
+        isActive
+      };
+
+      if (password !== '') {
+        updates.password = password;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>กำลังบันทึก...</span>`;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      try {
+        await window.ShortlinkRepo.updateLink(id, updates);
+        closeEditShortlinkModal();
+        renderLinksDirectory();
+        alert("✅ แก้ไขข้อมูลลิงก์ย่อเรียบร้อยแล้ว!");
+      } catch (err) {
+        alert("⚠️ บันทึกไม่สำเร็จ: " + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span>บันทึกการแก้ไข</span>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
       }
     }
 
