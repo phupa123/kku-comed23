@@ -932,7 +932,7 @@
   };
 
   // Sync User Profile for Public Roster & Directory Display
-  function syncCustomProfileToStorage() {
+  async function syncCustomProfileToStorage() {
     if (!currentUser || !currentUser.email) return;
     try {
       const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
@@ -955,6 +955,32 @@
         storedProfiles[currentUser.studentId.trim()] = profileData;
       }
       localStorage.setItem(profilesKey, JSON.stringify(storedProfiles));
+
+      // 🌐 Sync to Supabase Cloud Database (so other devices & roster update immediately)
+      const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+      if (sb) {
+        sb.from('user_profiles').upsert({
+          email: emailKey,
+          student_id: currentUser.studentId || null,
+          name: currentUser.name || null,
+          nickname: currentUser.nickname || null,
+          phone: currentUser.phone || null,
+          bio: currentUser.bio || null,
+          avatar: currentUser.avatar || null,
+          avatar_frame: profileData.avatarFrame,
+          avatar_anim: profileData.avatarAnim,
+          avatar_transform: profileData.avatarTransform,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'email' }).then(({ error }) => {
+          if (error) {
+            console.warn("[CloudSync] Could not sync user profile to Supabase:", error.message);
+          } else {
+            console.log("[CloudSync] Profile synced to Supabase successfully for", emailKey);
+          }
+        }).catch(err => {
+          console.warn("[CloudSync] Profile sync exception:", err);
+        });
+      }
     } catch (e) {
       console.warn("syncCustomProfileToStorage failed", e);
     }

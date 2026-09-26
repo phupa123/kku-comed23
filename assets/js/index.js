@@ -681,6 +681,102 @@ function checkUserSession() {
   } catch(e) {}
 }
 
+// 🌐 Sync all user profiles from Supabase to LocalStorage & Real-time Update
+async function syncCloudProfilesToLocal() {
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (!sb) return;
+
+  try {
+    const { data, error } = await sb
+      .from('user_profiles')
+      .select('*');
+
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
+      let stored = {};
+      try {
+        stored = JSON.parse(localStorage.getItem(profilesKey) || '{}');
+      } catch (_) {}
+
+      data.forEach(p => {
+        if (!p.email) return;
+        const emailKey = p.email.toLowerCase().trim();
+        const profileObj = {
+          name: p.name,
+          nickname: p.nickname,
+          phone: p.phone,
+          bio: p.bio,
+          studentId: p.student_id,
+          avatar: p.avatar,
+          avatarFrame: p.avatar_frame || 'none',
+          avatarAnim: p.avatar_anim || 'none',
+          avatarTransform: p.avatar_transform || { rotate: 0, scale: 1, flipX: false, flipY: false },
+          updatedAt: p.updated_at
+        };
+        stored[emailKey] = profileObj;
+        if (p.student_id) {
+          stored[p.student_id.trim()] = profileObj;
+        }
+      });
+
+      localStorage.setItem(profilesKey, JSON.stringify(stored));
+      console.log(`[CloudSync] Loaded ${data.length} profiles from Supabase cloud.`);
+      
+      // Re-render roster and current active user UI with synced avatars
+      renderRoster(window.STUDENTS_DATA || []);
+      const activeSession = localStorage.getItem('COMED_USER_SESSION');
+      if (activeSession) {
+        try { updateUserUI(JSON.parse(activeSession)); } catch (_) {}
+      }
+    }
+
+    // Subscribe to realtime changes so any user updating profile changes everywhere live
+    if (!window._realtimeProfilesSubscribed) {
+      window._realtimeProfilesSubscribed = true;
+      sb.channel('realtime_user_profiles')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'user_profiles'
+        }, payload => {
+          const p = payload.new;
+          if (p && p.email) {
+            const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
+            let stored = {};
+            try { stored = JSON.parse(localStorage.getItem(profilesKey) || '{}'); } catch (_) {}
+
+            const emailKey = p.email.toLowerCase().trim();
+            const profileObj = {
+              name: p.name,
+              nickname: p.nickname,
+              phone: p.phone,
+              bio: p.bio,
+              studentId: p.student_id,
+              avatar: p.avatar,
+              avatarFrame: p.avatar_frame || 'none',
+              avatarAnim: p.avatar_anim || 'none',
+              avatarTransform: p.avatar_transform || { rotate: 0, scale: 1, flipX: false, flipY: false },
+              updatedAt: p.updated_at
+            };
+            stored[emailKey] = profileObj;
+            if (p.student_id) stored[p.student_id.trim()] = profileObj;
+
+            localStorage.setItem(profilesKey, JSON.stringify(stored));
+            renderRoster(window.STUDENTS_DATA || []);
+
+            const activeSession = localStorage.getItem('COMED_USER_SESSION');
+            if (activeSession) {
+              try { updateUserUI(JSON.parse(activeSession)); } catch (_) {}
+            }
+          }
+        })
+        .subscribe();
+    }
+  } catch (err) {
+    console.warn("[CloudSync] Failed to sync profiles from Supabase:", err);
+  }
+}
+
 // Render Students Roster with Avatar & Frames
 function getStudentProfileData(email, studentId) {
   const cleanEmail = email ? email.toLowerCase().trim() : '';
@@ -1348,6 +1444,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   checkUserSession();
   renderRoster(window.STUDENTS_DATA || []);
+  
+  // Sync profiles (avatars, frames, transforms) from Supabase across all devices
+  if (typeof syncCloudProfilesToLocal === 'function') {
+    syncCloudProfilesToLocal();
+  }
   
   // 2. Render all dynamic campaigns from Cloud/Repository
   renderIndexCampaigns();

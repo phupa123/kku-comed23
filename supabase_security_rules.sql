@@ -262,3 +262,43 @@ BEGIN
 END;
 $$;
 
+-- ================= 8. ตาราง USER_PROFILES (โปรไฟล์ อวาตาร์ และกรอบตกแต่งที่ซิงค์ทุกอุปกรณ์) =================
+CREATE TABLE IF NOT EXISTS public.user_profiles (
+  email TEXT PRIMARY KEY,
+  student_id TEXT,
+  name TEXT,
+  nickname TEXT,
+  phone TEXT,
+  bio TEXT,
+  avatar TEXT,
+  avatar_frame TEXT DEFAULT 'none',
+  avatar_anim TEXT DEFAULT 'none',
+  avatar_transform JSONB DEFAULT '{"rotate": 0, "scale": 1, "flipX": false, "flipY": false}'::jsonb,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public Read User Profiles" ON public.user_profiles;
+CREATE POLICY "Public Read User Profiles" 
+ON public.user_profiles FOR SELECT 
+TO anon, authenticated 
+USING (true);
+
+DROP POLICY IF EXISTS "Allow Upsert User Profiles" ON public.user_profiles;
+CREATE POLICY "Allow Upsert User Profiles" 
+ON public.user_profiles FOR INSERT 
+TO anon, authenticated 
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow Update User Profiles" ON public.user_profiles;
+CREATE POLICY "Allow Update User Profiles" 
+ON public.user_profiles FOR UPDATE 
+TO anon, authenticated 
+USING (true)
+WITH CHECK (true);
+
+-- เปิด Realtime สำหรับตาราง user_profiles
+ALTER PUBLICATION supabase_realtime ADD TABLE public.user_profiles;
+
+
