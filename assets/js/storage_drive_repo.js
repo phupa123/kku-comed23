@@ -119,8 +119,21 @@
               fileName: parsedMeta.fileName || '',
               fileType: parsedMeta.fileType || '',
               fileSize: parsedMeta.fileSize || 0,
+              folderFiles: Array.isArray(parsedMeta.folderFiles) ? parsedMeta.folderFiles : [],
+              folderMeta: parsedMeta.folderMeta || null,
+              comments: Array.isArray(parsedMeta.comments) ? parsedMeta.comments : [],
               updatedAt: linkRow.updated_at || new Date().toISOString()
             };
+
+            // Sync comments back into this.comments cache if needed
+            if (Array.isArray(shareRecord.comments) && shareRecord.comments.length > 0) {
+              shareRecord.comments.forEach(cm => {
+                if (!this.comments.some(c => c.id === cm.id)) {
+                  this.comments.push(cm);
+                }
+              });
+              this.saveData(STORAGE_COMMENTS_KEY, this.comments);
+            }
 
             if (existingIdx >= 0) {
               this.shares[existingIdx] = { ...this.shares[existingIdx], ...shareRecord };
@@ -167,11 +180,44 @@
           const f = allFiles.find(item => item.id === shareRecord.targetId);
           if (f) {
             fileUrl = f.url || '';
-            fileName = f.name || '';
+            fileName = f.originalName || f.name || '';
             fileType = f.type || '';
             fileSize = f.size || 0;
           }
         }
+
+        // Gather folder files and meta if targetType === 'folder'
+        let folderFiles = Array.isArray(shareRecord.folderFiles) ? shareRecord.folderFiles : [];
+        let folderMeta = shareRecord.folderMeta || null;
+        if (shareRecord.targetType === 'folder') {
+          const folderObj = this.folders.find(f => f.id === shareRecord.targetId);
+          if (folderObj) {
+            folderMeta = {
+              id: folderObj.id,
+              name: folderObj.name,
+              color: folderObj.color || 'amber',
+              icon: folderObj.icon || 'folder'
+            };
+          }
+          if (folderFiles.length === 0) {
+            const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+            folderFiles = allFiles.filter(item => {
+              const meta = this.getFileMeta(item.id);
+              return meta && meta.folderId === shareRecord.targetId;
+            }).map(item => ({
+              id: item.id,
+              name: item.originalName || item.name || 'ไฟล์',
+              url: item.url || '',
+              size: item.size || 0,
+              type: item.type || '',
+              provider: item.provider || 'cloud',
+              uploadedAt: item.uploadedAt || ''
+            }));
+          }
+        }
+
+        // Attach comments related to this target
+        const relatedComments = this.getTargetComments(shareRecord.targetType, shareRecord.targetId);
 
         const metaObj = {
           targetType: shareRecord.targetType,
@@ -186,7 +232,10 @@
           fileUrl,
           fileName,
           fileType,
-          fileSize
+          fileSize,
+          folderFiles,
+          folderMeta,
+          comments: relatedComments
         };
 
         const targetUrl = `${window.location.origin}/storage.html?share=${encodeURIComponent(shareRecord.shareCode)}`;
@@ -195,7 +244,7 @@
         await sb.from('shortlinks').upsert({
           id: shareRecord.id || ('shr_' + shareRecord.shareCode),
           code: shareRecord.shareCode,
-          title: `[แชร์ไดรฟ์] ${shareRecord.title || fileName || shareRecord.targetType}`,
+          title: `[แชร์ไดรฟ์] ${shareRecord.title || fileName || (folderMeta && folderMeta.name) || shareRecord.targetType}`,
           target_url: targetUrl,
           category: 'DriveShare',
           clicks: Number(shareRecord.clicks) || 0,
@@ -257,8 +306,21 @@
           fileName: parsedMeta.fileName || '',
           fileType: parsedMeta.fileType || '',
           fileSize: parsedMeta.fileSize || 0,
+          folderFiles: Array.isArray(parsedMeta.folderFiles) ? parsedMeta.folderFiles : [],
+          folderMeta: parsedMeta.folderMeta || null,
+          comments: Array.isArray(parsedMeta.comments) ? parsedMeta.comments : [],
           updatedAt: data.updated_at || new Date().toISOString()
         };
+
+        // Cache comments
+        if (Array.isArray(shareRecord.comments) && shareRecord.comments.length > 0) {
+          shareRecord.comments.forEach(cm => {
+            if (!this.comments.some(c => c.id === cm.id)) {
+              this.comments.push(cm);
+            }
+          });
+          this.saveData(STORAGE_COMMENTS_KEY, this.comments);
+        }
 
         const existingIdx = this.shares.findIndex(s => s.shareCode === shareRecord.shareCode);
         if (existingIdx >= 0) {
@@ -631,12 +693,27 @@
 
       this.comments.unshift(comment);
       this.saveData(STORAGE_COMMENTS_KEY, this.comments);
+
+      // Auto sync to cloud if there is a share record for this target
+      const targetShares = this.shares.filter(s => s.targetType === targetType && s.targetId === targetId);
+      targetShares.forEach(s => {
+        this.syncShareToCloud(s).catch(() => {});
+      });
+
       return comment;
     }
 
     deleteComment(commentId) {
+      const found = this.comments.find(c => c.id === commentId);
       this.comments = this.comments.filter(c => c.id !== commentId);
       this.saveData(STORAGE_COMMENTS_KEY, this.comments);
+
+      if (found) {
+        const targetShares = this.shares.filter(s => s.targetType === found.targetType && s.targetId === found.targetId);
+        targetShares.forEach(s => {
+          this.syncShareToCloud(s).catch(() => {});
+        });
+      }
       return true;
     }
 

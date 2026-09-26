@@ -1164,6 +1164,7 @@
 
     // Active item being locked/shared/moved/challenged
     let targetItemForAction = null; // { type: 'file'|'folder', id, name, ... }
+    let currentSharedFolderContext = null; // Shared folder record from cloud when viewing shared folder link
 
     let dragSelectInstance = null;
 
@@ -1268,8 +1269,9 @@
 
       // If allowed without password:
       if (share.targetType === 'folder') {
+        currentSharedFolderContext = share;
         navigateToFolder(share.targetId);
-        showToast(`📁 เข้าสู่โฟลเดอร์ที่แชร์เรียบร้อยแล้ว`);
+        showToast(`📁 เข้าสู่โฟลเดอร์ที่แชร์เรียบร้อยแล้ว: ${share.folderMeta?.name || share.title || ''}`);
       } else {
         openSharedFileViewerModal(share);
       }
@@ -1563,18 +1565,19 @@
         const repo = getRepo();
         const userEmail = getCurrentUserEmail();
         const folders = repo.getUserFolders(userEmail);
-        const folder = folders.find(f => f.id === currentFolderId);
+        const folder = folders.find(f => f.id === currentFolderId) || (currentSharedFolderContext && currentSharedFolderContext.folderMeta?.id === currentFolderId ? currentSharedFolderContext.folderMeta : null);
 
-        if (folder) {
-          html += `
-            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-600"></i>
-            <span class="text-white flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-800/60 border border-slate-700">
-              <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
-              <span>${escapeHtml(folder.name)}</span>
-              ${folder.isLocked ? '<i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400 ml-0.5"></i>' : ''}
-            </span>
-          `;
-        }
+        const folderName = folder ? (folder.name || 'โฟลเดอร์') : (currentSharedFolderContext?.folderMeta?.name || currentSharedFolderContext?.title || 'โฟลเดอร์ที่แชร์');
+
+        html += `
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-600"></i>
+          <span class="text-white flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-800/60 border border-slate-700">
+            <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
+            <span>${escapeHtml(folderName)}</span>
+            ${folder && folder.isLocked ? '<i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400 ml-0.5"></i>' : ''}
+            ${currentSharedFolderContext ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold border border-orange-500/40">โฟลเดอร์ที่แชร์</span>' : ''}
+          </span>
+        `;
       }
 
       container.innerHTML = html;
@@ -1584,6 +1587,13 @@
       const container = document.getElementById('foldersListContainer');
       const countText = document.getElementById('foldersCountText');
       if (!container) return;
+
+      // If viewing a shared folder from cloud, don't show unrelated local subfolders
+      if (currentSharedFolderContext && currentFolderId === currentSharedFolderContext.targetId) {
+        if (countText) countText.textContent = 0;
+        container.innerHTML = '';
+        return;
+      }
 
       const userEmail = getCurrentUserEmail();
       const repo = getRepo();
@@ -1680,6 +1690,23 @@
     }
 
     function getUserFilesList() {
+      // 1. If currently in a shared folder from cloud, use its folderFiles
+      if (currentSharedFolderContext && currentFolderId === currentSharedFolderContext.targetId) {
+        const sharedFiles = currentSharedFolderContext.folderFiles || [];
+        return sharedFiles.map(sf => ({
+          id: sf.id,
+          originalName: sf.name,
+          name: sf.name,
+          url: sf.url,
+          size: sf.size || 0,
+          type: sf.type || '',
+          provider: sf.provider || 'cloud',
+          folderId: currentFolderId,
+          isLocked: false,
+          passwordHash: null
+        }));
+      }
+
       if (!window.MultiCloudUploader) return [];
       const allFiles = window.MultiCloudUploader.getAllFiles();
       if (!currentUser || !currentUser.email) return [];
