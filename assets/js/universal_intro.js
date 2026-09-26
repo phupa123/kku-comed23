@@ -444,187 +444,161 @@
         .comed-bubble span:nth-child(4) { inset:30px; border-left:15px solid #ff4484; filter:blur(12px); }
         .comed-bubble span:nth-child(5) { inset:10px; border-bottom:10px solid #fff; filter:blur(8px); transform:rotate(330deg); }
 
-        /* === ROBOT LOADER CHARACTER === */
-        .comed-tl-robot-box {
+        /* === ROBOT & PROGRESS CONTAINER === */
+        .comed-tl-box {
           position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           z-index: 10;
-        }
-        .comed-tl-load {
-          position: relative;
-          width: 7ch;
-          height: 32px;
-          text-align: center;
-          line-height: 32px;
-          font-family: 'Julius Sans One', 'Prompt', monospace;
-          font-size: 20px;
-          font-weight: 700;
-          color: rgb(220,200,200);
-          letter-spacing: 2px;
-          margin-bottom: 12px;
-          animation: comedTlFont 3.75s infinite ease-out;
-          overflow: hidden;
-          white-space: nowrap;
-        }
-        @keyframes comedTlFont {
-          0%   { width: 7ch; }
-          16%  { width: 8ch; }
-          32%  { width: 9ch; }
-          48%  { width: 10ch; }
-          64%  { width: 11ch; }
-          80%  { width: 12ch; }
-          100% { width: 13ch; }
+          gap: 20px;
         }
 
+        /* 1. Robot Character (Proper hierarchy, no overlap) */
         .comed-tl-robot {
           position: relative;
-          width: 180px;
-          height: 190px;
+          width: 140px;
+          height: 140px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
         }
         .comed-tl-head {
-          backface-visibility: hidden;
           position: relative;
-          width: 76px;
-          height: 76px;
-          background-color: #111;
-          border-radius: 50px;
-          box-shadow: inset -4px 2px 0px 0px rgba(240,220,220,1);
-          animation: comedTlHead 1.5s infinite alternate ease-out;
-          z-index: 4;
+          width: 64px;
+          height: 64px;
+          background-color: #0f172a;
+          border: 2px solid #38bdf8;
+          border-radius: 50%;
+          box-shadow: 0 0 15px rgba(56, 189, 248, 0.4), inset -3px -3px 0 rgba(255,255,255,0.15);
+          animation: comedTlHead 1.6s ease-in-out infinite alternate;
+          z-index: 3;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
         }
         .comed-tl-eye {
-          width: 18px;
+          width: 8px;
           height: 8px;
-          background-color: rgba(240,220,220,1);
-          border-radius: 0px 0px 18px 18px;
-          position: relative;
-          left: 10px;
-          top: 36px;
-          box-shadow: 36px 0px 0px 0px rgba(240,220,220,1);
+          background: #38bdf8;
+          border-radius: 50%;
+          box-shadow: 0 0 8px #38bdf8;
+          animation: comedTlBlink 3.2s infinite;
         }
         .comed-tl-circ {
           position: relative;
-          width: 160px;
-          height: 110px;
-          border-radius: 0px 0px 50px 50px;
-          margin-top: -15px;
+          width: 110px;
+          height: 70px;
+          margin-top: -12px;
           z-index: 2;
-          overflow: hidden;
           display: flex;
           justify-content: center;
+          align-items: flex-start;
         }
         .comed-tl-body {
           position: relative;
-          width: 130px;
-          height: 110px;
-          background-color: #111;
-          border-radius: 50px/25px;
-          box-shadow: inset -5px 2px 0px 0px rgba(240,220,220,1);
-          animation: comedTlBody 1.5s infinite alternate ease-out;
+          width: 90px;
+          height: 60px;
+          background-color: #0f172a;
+          border: 2px solid #38bdf8;
+          border-radius: 20px 20px 24px 24px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.1);
+          animation: comedTlBody 1.6s ease-in-out infinite alternate;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .comed-tl-body::after {
+          content: '';
+          width: 24px;
+          height: 4px;
+          background: #38bdf8;
+          border-radius: 2px;
+          box-shadow: 0 0 6px #38bdf8;
         }
         .comed-tl-hands {
-          width: 90px;
-          height: 90px;
-          position: absolute;
-          background-color: #111;
-          border-radius: 18px;
-          box-shadow: -1px -4px 0px 0px rgba(240,220,220,1);
-          transform: rotate(45deg);
-          top: 55%;
-          left: 15%;
-          z-index: 3;
-          animation: comedTlBody 1.5s infinite alternate ease-out;
-        }
-        @keyframes comedTlHead {
-          0%   { transform: translateY(0); }
-          50%  { transform: translateY(8px); }
-          100% { transform: translateY(0); }
-        }
-        @keyframes comedTlBody {
-          0%   { transform: translateY(-4px); }
-          50%  { transform: translateY(6px); }
-          100% { transform: translateY(-4px); }
+          display: none;
         }
 
-        /* === LOADING BAR SYSTEM === */
+        @keyframes comedTlHead {
+          0%   { transform: translateY(0); }
+          100% { transform: translateY(6px); }
+        }
+        @keyframes comedTlBody {
+          0%   { transform: translateY(-2px); }
+          100% { transform: translateY(3px); }
+        }
+        @keyframes comedTlBlink {
+          0%, 90%, 100% { transform: scaleY(1); }
+          95% { transform: scaleY(0.1); }
+        }
+
+        /* 2. Loading text */
+        .comed-tl-load-text {
+          font-family: 'JetBrains Mono', 'Courier New', monospace;
+          font-size: 16px;
+          font-weight: 800;
+          color: #f8fafc;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .comed-tl-dots::after {
+          content: '.';
+          animation: comedDots 1.5s steps(4, end) infinite;
+        }
+        @keyframes comedDots {
+          0%, 20%  { content: ''; }
+          40%      { content: '.'; }
+          60%      { content: '..'; }
+          80%, 100%{ content: '...'; }
+        }
+
+        /* 3. Loading Bar System */
         .comed-tl-bar-wrap {
           position: relative;
-          margin-top: 18px;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
         }
         .comed-tl-loader {
           position: relative;
-          background-color: rgba(255, 255, 255, 0.12);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background-color: rgba(15, 23, 42, 0.9);
+          border: 1px solid rgba(255, 255, 255, 0.15);
           border-radius: 999px;
-          height: 14px;
-          width: 260px;
+          height: 12px;
+          width: 280px;
           padding: 2px;
           box-sizing: border-box;
-          box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+          box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 0 15px rgba(56, 189, 248, 0.15);
         }
         .comed-tl-bar {
           position: relative;
-          background: linear-gradient(90deg, #10b981, #06b6d4);
-          width: 40px;
+          background: linear-gradient(90deg, #f97316, #eab308, #10b981);
+          width: 20%;
           height: 100%;
           border-radius: 999px;
-          animation: comedTlLoadBar 4s linear infinite;
-          box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+          animation: comedTlLoadBar 2.5s ease-in-out infinite;
+          box-shadow: 0 0 12px rgba(249, 115, 22, 0.8);
         }
         @keyframes comedTlLoadBar {
-          0%   { width: 0%; }
-          30%  { width: 33%; }
-          60%  { width: 66%; }
-          90%  { width: 100%; }
+          0%   { width: 5%; }
+          50%  { width: 70%; }
           100% { width: 100%; }
         }
-        .comed-tl-check-bar {
-          position: absolute;
-          left: 0;
-          right: 0;
-          top: -3px;
-          z-index: 69;
-          display: flex;
-          width: 100%;
-          justify-content: space-between;
-          padding: 0 2px;
-          box-sizing: border-box;
-        }
-        .comed-tl-check {
-          border-radius: 50%;
-          height: 18px;
-          width: 18px;
-          background-color: #334155;
-          border: 2px solid #0f172a;
-          transform: scale(0.8);
-          transition: all 0.2s ease;
-        }
-        .comed-tl-check:nth-of-type(1) { background-color: #10b981; transform: scale(1); box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
-        .comed-tl-check:nth-of-type(2) { animation: comedTlCheck1 4s linear infinite; }
-        .comed-tl-check:nth-of-type(3) { animation: comedTlCheck2 4s linear infinite; }
-        .comed-tl-check:nth-of-type(4) { animation: comedTlCheck3 4s linear infinite; }
-        @keyframes comedTlCheck1 {
-          0%,28%   { transform:scale(0.8); background-color:#334155; box-shadow:none; }
-          29%,100% { transform:scale(1); background-color:#10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
-        }
-        @keyframes comedTlCheck2 {
-          0%,58%   { transform:scale(0.8); background-color:#334155; box-shadow:none; }
-          59%,100% { transform:scale(1); background-color:#10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
-        }
-        @keyframes comedTlCheck3 {
-          0%,88%   { transform:scale(0.8); background-color:#334155; box-shadow:none; }
-          89%,100% { transform:scale(1); background-color:#10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
+        .comed-tl-status-sub {
+          font-size: 11px;
+          font-family: 'JetBrains Mono', monospace;
+          font-weight: 600;
+          color: #94a3b8;
+          letter-spacing: 2px;
+          text-transform: uppercase;
         }
       `;
       document.head.appendChild(ts);
@@ -645,32 +619,27 @@
         <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
         <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
 
-        <!-- Robot Character + Loading Bar in Perfect Center Stack -->
-        <div class="comed-tl-robot-box">
-          <div class="comed-tl-load">LOADING..</div>
-          
+        <!-- Fully Separated, Non-overlapping Center Stack -->
+        <div class="comed-tl-box">
           <div class="comed-tl-robot">
             <div class="comed-tl-head">
               <div class="comed-tl-eye"></div>
+              <div class="comed-tl-eye"></div>
             </div>
             <div class="comed-tl-circ">
-              <div class="comed-tl-body">
-                <div class="comed-tl-hands"></div>
-              </div>
+              <div class="comed-tl-body"></div>
             </div>
+          </div>
+
+          <div class="comed-tl-load-text">
+            <span>LOADING</span><span class="comed-tl-dots"></span>
           </div>
 
           <div class="comed-tl-bar-wrap">
             <div class="comed-tl-loader">
               <div class="comed-tl-bar"></div>
-              <div class="comed-tl-check-bar">
-                <div class="comed-tl-check"></div>
-                <div class="comed-tl-check"></div>
-                <div class="comed-tl-check"></div>
-                <div class="comed-tl-check"></div>
-              </div>
             </div>
-            <span style="font-size:11px;font-family:monospace;font-weight:700;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;">WARPING TO PAGE...</span>
+            <span class="comed-tl-status-sub">WARPING TO PAGE</span>
           </div>
         </div>
       `;
