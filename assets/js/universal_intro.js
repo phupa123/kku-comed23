@@ -391,6 +391,212 @@
    * Intercepts internal links to provide a seamless futuristic transition
    */
   function setupPageTransitions() {
+    // Inject transition-specific styles
+    if (!document.getElementById('comedTransitionExtraStyles')) {
+      const ts = document.createElement('style');
+      ts.id = 'comedTransitionExtraStyles';
+      ts.textContent = `
+        /* === BUBBLE BACKGROUND === */
+        .comed-bubble {
+          position: absolute;
+          width: 200px;
+          height: 200px;
+          border-radius: 50%;
+          box-shadow: inset 0 0 25px rgba(255,255,255,0.25);
+          animation: comedBubbleFloat 8s ease-in-out infinite;
+          pointer-events: none;
+        }
+        .comed-bubble:nth-child(2) { position: absolute; zoom: 0.45; left: 5%; top: 10%; animation-delay: -4s; }
+        .comed-bubble:nth-child(3) { position: absolute; zoom: 0.45; right: 8%; top: 15%; animation-delay: -6s; }
+        .comed-bubble:nth-child(4) { position: absolute; zoom: 0.35; left: 15%; bottom: 20%; animation-delay: -3s; }
+        .comed-bubble:nth-child(5) { position: absolute; zoom: 0.5; right: 5%; bottom: 25%; animation-delay: -5s; }
+        @keyframes comedBubbleFloat {
+          0%,100% { transform: translateY(-20px); }
+          50%     { transform: translateY(20px); }
+        }
+        .comed-bubble::before {
+          content: '';
+          position: absolute;
+          top: 50px; left: 45px;
+          width: 30px; height: 30px;
+          border-radius: 50%;
+          background: #fff;
+          z-index: 10;
+          filter: blur(2px);
+        }
+        .comed-bubble::after {
+          content: '';
+          position: absolute;
+          top: 80px; left: 80px;
+          width: 20px; height: 20px;
+          border-radius: 50%;
+          background: #fff;
+          z-index: 10;
+          filter: blur(2px);
+        }
+        .comed-bubble span {
+          position: absolute;
+          border-radius: 50%;
+        }
+        .comed-bubble span:nth-child(1) { inset:10px; border-left:15px solid #0fb4ff; filter:blur(8px); }
+        .comed-bubble span:nth-child(2) { inset:10px; border-right:15px solid #ff4484; filter:blur(8px); }
+        .comed-bubble span:nth-child(3) { inset:10px; border-top:15px solid #ffeb3b; filter:blur(8px); }
+        .comed-bubble span:nth-child(4) { inset:30px; border-left:15px solid #ff4484; filter:blur(12px); }
+        .comed-bubble span:nth-child(5) { inset:10px; border-bottom:10px solid #fff; filter:blur(8px); transform:rotate(330deg); }
+
+        /* === ROBOT LOADER CHARACTER === */
+        .comed-tl-robot { position: relative; z-index: 10; }
+        .comed-tl-eye {
+          width: 20px; height: 8px;
+          background-color: rgba(240,220,220,1);
+          border-radius: 0px 0px 20px 20px;
+          position: relative;
+          left: 10px; top: 40px;
+          box-shadow: 40px 0px 0px 0px rgba(240,220,220,1);
+        }
+        .comed-tl-head {
+          backface-visibility: hidden;
+          position: relative;
+          margin: -250px auto;
+          width: 80px; height: 80px;
+          background-color: #111;
+          border-radius: 50px;
+          box-shadow: inset -4px 2px 0px 0px rgba(240,220,220,1);
+          animation: comedTlHead 1.5s infinite alternate;
+          animation-timing-function: ease-out;
+        }
+        .comed-tl-body {
+          position: relative;
+          margin: 90px auto;
+          width: 140px; height: 120px;
+          background-color: #111;
+          border-radius: 50px/25px;
+          box-shadow: inset -5px 2px 0px 0px rgba(240,220,220,1);
+          animation: comedTlBody 1.5s infinite alternate;
+          animation-timing-function: ease-out;
+        }
+        @keyframes comedTlHead {
+          0%   { top: 0px; }
+          50%  { top: 10px; }
+          100% { top: 0px; }
+        }
+        @keyframes comedTlBody {
+          0%   { top: -5px; }
+          50%  { top: 10px; }
+          100% { top: -5px; }
+        }
+        .comed-tl-circ {
+          backface-visibility: hidden;
+          margin: 60px auto;
+          width: 180px; height: 180px;
+          border-radius: 0px 0px 50px 50px;
+          position: relative;
+          z-index: -1;
+          left: 0%; top: 20%;
+          overflow: hidden;
+        }
+        .comed-tl-hands {
+          margin-top: 140px;
+          width: 120px; height: 120px;
+          position: absolute;
+          background-color: #111;
+          border-radius: 20px;
+          box-shadow: -1px -4px 0px 0px rgba(240,220,220,1);
+          transform: rotate(45deg);
+          top: 75%; left: 16%;
+          z-index: 1;
+          animation: comedTlBody 1.5s infinite alternate;
+          animation-timing-function: ease-out;
+        }
+        .comed-tl-load {
+          position: absolute;
+          width: 7ch; height: 32px;
+          text-align: left;
+          line-height: 32px;
+          font-family: 'Julius Sans One', 'Prompt', monospace;
+          font-size: 22px;
+          font-weight: 400;
+          color: rgb(200,180,180);
+          left: 50%; top: 6%;
+          transform: translateX(-50%);
+          animation: comedTlFont 3.75s infinite;
+          animation-timing-function: ease-out;
+          word-wrap: break-word;
+          display: block;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+        @keyframes comedTlFont {
+          0%   { width: 7ch; }
+          16%  { width: 8ch; }
+          32%  { width: 9ch; }
+          48%  { width: 10ch; }
+          64%  { width: 11ch; }
+          80%  { width: 12ch; }
+          100% { width: 13ch; }
+        }
+
+        /* === LOADING BAR SYSTEM === */
+        .comed-tl-bar-wrap {
+          position: relative;
+          margin-top: 12px;
+        }
+        .comed-tl-loader {
+          position: relative;
+          background-color: #535353;
+          border-radius: 1em;
+          height: 1em;
+          width: 280px;
+        }
+        .comed-tl-bar {
+          position: relative;
+          background-color: rgb(0,205,0);
+          width: 40px; height: 100%;
+          border-radius: 1em;
+          animation: comedTlLoadBar 6s linear infinite;
+        }
+        @keyframes comedTlLoadBar {
+          0%   { width: 0%; }
+          30%  { width: 33%; }
+          60%  { width: 66%; }
+          90%  { width: 100%; }
+          100% { width: 100%; }
+        }
+        .comed-tl-check-bar {
+          position: absolute;
+          left: 0px; top: -4px;
+          z-index: 69;
+          display: flex;
+          width: 100%;
+          justify-content: space-between;
+          height: 0.5em;
+        }
+        .comed-tl-check {
+          border-radius: 1em;
+          height: 1.5em; width: 1.5em;
+          padding: 3px;
+          background-color: #535353;
+          transform: scale(0.75);
+        }
+        .comed-tl-check:nth-of-type(2) { animation: comedTlCheck1 6s linear infinite; }
+        .comed-tl-check:nth-of-type(3) { animation: comedTlCheck2 6s linear infinite; }
+        .comed-tl-check:nth-of-type(4) { animation: comedTlCheck3 6s linear infinite; transform-origin: right; }
+        @keyframes comedTlCheck1 {
+          0%,28%  { transform:scale(0.75); background-color:#535353; }
+          29%,100% { transform:scale(1); background-color:rgb(0,205,0); }
+        }
+        @keyframes comedTlCheck2 {
+          0%,58%  { transform:scale(0.75); background-color:#535353; }
+          59%,100% { transform:scale(1); background-color:rgb(0,205,0); }
+        }
+        @keyframes comedTlCheck3 {
+          0%,88%  { transform:scale(0.75); background-color:#535353; }
+          89%,100% { transform:scale(1); background-color:rgb(0,205,0); }
+        }
+      `;
+      document.head.appendChild(ts);
+    }
+
     let curtain = document.getElementById('comedTransitionCurtain');
     if (!curtain) {
       curtain = document.createElement('div');
@@ -399,14 +605,38 @@
         <div class="comed-intro-stars">
           <div class="comed-intro-star-1"></div>
         </div>
-        <div class="text-center space-y-3 relative z-10 animate-pulse">
-          <div class="w-12 h-12 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center mx-auto text-orange-400 shadow-xl shadow-orange-500/20">
-            <svg class="animate-spin w-6 h-6" viewBox="0 0 24 24" fill="none">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
+
+        <!-- Floating Bubble Orbs -->
+        <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
+
+        <!-- Robot Character + Loading Bar -->
+        <div class="text-center relative z-10" style="margin-top: -40px;">
+          <div class="comed-tl-load">LOADING..</div>
+          <div class="comed-tl-robot" style="height:260px;width:200px;margin:0 auto;position:relative;">
+            <div class="comed-tl-head">
+              <div class="comed-tl-eye"></div>
+            </div>
+            <div class="comed-tl-circ">
+              <div class="comed-tl-body">
+                <div class="comed-tl-hands"></div>
+              </div>
+            </div>
           </div>
-          <span class="text-xs font-mono font-bold tracking-widest text-slate-300 uppercase block">WARPING TO PAGE...</span>
+          <div class="comed-tl-bar-wrap" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <div class="comed-tl-loader">
+              <div class="comed-tl-bar"></div>
+              <div class="comed-tl-check-bar">
+                <div class="comed-tl-check"></div>
+                <div class="comed-tl-check"></div>
+                <div class="comed-tl-check"></div>
+                <div class="comed-tl-check"></div>
+              </div>
+            </div>
+            <span style="font-size:10px;font-family:monospace;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;">WARPING TO PAGE...</span>
+          </div>
         </div>
       `;
       document.body.appendChild(curtain);
@@ -462,6 +692,7 @@
       if (laser) laser.style.width = '0%';
     });
   }
+
 
   function createIntroElement(cfg) {
     const introDiv = document.createElement('div');
