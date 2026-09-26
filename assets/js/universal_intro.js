@@ -559,46 +559,37 @@
           80%, 100%{ content: '...'; }
         }
 
-        /* 3. Loading Bar System */
-        .comed-tl-bar-wrap {
-          position: relative;
+        /* 2. Loading text & Status */
+        .comed-tl-load-text {
+          font-family: 'JetBrains Mono', 'Courier New', monospace;
+          font-size: 16px;
+          font-weight: 800;
+          color: #f8fafc;
+          letter-spacing: 4px;
+          text-transform: uppercase;
           display: flex;
-          flex-direction: column;
           align-items: center;
-          gap: 12px;
+          gap: 4px;
         }
-        .comed-tl-loader {
-          position: relative;
-          background-color: rgba(15, 23, 42, 0.9);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 999px;
-          height: 12px;
-          width: 280px;
-          padding: 2px;
-          box-sizing: border-box;
-          box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 0 15px rgba(56, 189, 248, 0.15);
+        .comed-tl-dots::after {
+          content: '.';
+          animation: comedDots 1.5s steps(4, end) infinite;
         }
-        .comed-tl-bar {
-          position: relative;
-          background: linear-gradient(90deg, #f97316, #eab308, #10b981);
-          width: 20%;
-          height: 100%;
-          border-radius: 999px;
-          animation: comedTlLoadBar 2.5s ease-in-out infinite;
-          box-shadow: 0 0 12px rgba(249, 115, 22, 0.8);
-        }
-        @keyframes comedTlLoadBar {
-          0%   { width: 5%; }
-          50%  { width: 70%; }
-          100% { width: 100%; }
+        @keyframes comedDots {
+          0%, 20%  { content: ''; }
+          40%      { content: '.'; }
+          60%      { content: '..'; }
+          80%, 100%{ content: '...'; }
         }
         .comed-tl-status-sub {
           font-size: 11px;
           font-family: 'JetBrains Mono', monospace;
           font-weight: 600;
-          color: #94a3b8;
-          letter-spacing: 2px;
+          color: #38bdf8;
+          letter-spacing: 3px;
           text-transform: uppercase;
+          opacity: 0.85;
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `;
       document.head.appendChild(ts);
@@ -619,7 +610,7 @@
         <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
         <div class="comed-bubble"><span></span><span></span><span></span><span></span><span></span></div>
 
-        <!-- Fully Separated, Non-overlapping Center Stack -->
+        <!-- Minimal & Clean Transition Center Stack (No ProgressBar) -->
         <div class="comed-tl-box">
           <div class="comed-tl-robot">
             <div class="comed-tl-head">
@@ -635,12 +626,7 @@
             <span>LOADING</span><span class="comed-tl-dots"></span>
           </div>
 
-          <div class="comed-tl-bar-wrap">
-            <div class="comed-tl-loader">
-              <div class="comed-tl-bar"></div>
-            </div>
-            <span class="comed-tl-status-sub">WARPING TO PAGE</span>
-          </div>
+          <span class="comed-tl-status-sub">WARPING TO PAGE</span>
         </div>
       `;
       document.body.appendChild(curtain);
