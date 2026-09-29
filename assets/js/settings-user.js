@@ -639,10 +639,23 @@
           }
         }
 
-        updateProgressModal(25, `กำลังเชื่อมต่อระบบ Cloud Multi-Storage...`, 'กำลังส่งไบต์...', fileSizeStr);
+        updateProgressModal(18, 'กำลังปรับขนาดภาพให้เหมาะสมกับเว็บ (Web-Optimized)...', 'ปรับความละเอียด...', fileSizeStr);
+
+        // Pre-compress and optimize image if it's large (Avatar display in roster only needs max 512x512)
+        let fileToUpload = file;
+        if (file.type && file.type.startsWith('image/')) {
+          try {
+            fileToUpload = await compressImageToFile(file, 512, 512, 0.85);
+          } catch (compErr) {
+            console.warn("Avatar auto-compression skipped, using original:", compErr);
+          }
+        }
+
+        const optimizedSizeStr = `${(fileToUpload.size / (1024 * 1024)).toFixed(2)} MB`;
+        updateProgressModal(25, `กำลังเชื่อมต่อระบบ Cloud Multi-Storage...`, 'กำลังส่งไบต์...', optimizedSizeStr);
 
         // Upload with real progress callbacks
-        const uploadResult = await uploader.upload(file, {
+        const uploadResult = await uploader.upload(fileToUpload, {
           preferredProvider: targetProvider !== 'auto' ? targetProvider : undefined,
           folder: 'comed_user_avatars',
           tags: ['avatar', currentUser.email],
@@ -753,6 +766,62 @@
         img.src = e.target.result;
       };
       reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Helper to downscale and compress File object before upload (e.g. 512x512 WebP / JPEG)
+  function compressImageToFile(file, maxWidth = 512, maxHeight = 512, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          // If original image is already small, return original file
+          if (width <= maxWidth && height <= maxHeight && file.size < 200 * 1024) {
+            return resolve(file);
+          }
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Use WebP if supported, fallback to JPEG
+          const mimeType = 'image/webp';
+          canvas.toBlob((blob) => {
+            if (!blob) return resolve(file);
+            const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+            const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || 'avatar';
+            const newFile = new File([blob], `${baseName}_thumb.${ext}`, {
+              type: blob.type,
+              lastModified: Date.now()
+            });
+            resolve(newFile);
+          }, mimeType, quality);
+        };
+        img.onerror = () => resolve(file);
+        img.src = e.target.result;
+      };
+      reader.onerror = () => resolve(file);
       reader.readAsDataURL(file);
     });
   }

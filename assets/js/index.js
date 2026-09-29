@@ -830,7 +830,28 @@ function handleAvatarImageLoaded(imgEl) {
     modalSkeleton.classList.add('loaded');
   }
 }
-window.handleAvatarImageLoaded = handleAvatarImageLoaded;
+// Helper to optimize image URLs for thumbnail/roster view (downscaling heavy images on the fly)
+function getOptimizedAvatarUrl(rawUrl, targetSize = 160) {
+  if (!rawUrl || typeof rawUrl !== 'string') return '';
+
+  // 1. Supabase Storage Image Transformation (width & height resize)
+  if (rawUrl.includes('/storage/v1/object/public/')) {
+    return rawUrl.replace('/storage/v1/object/public/', `/storage/v1/render/image/public/`) + `?width=${targetSize}&height=${targetSize}&resize=cover&quality=80`;
+  }
+
+  // 2. Cloudinary on-the-fly thumbnail downscaling
+  if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/upload/')) {
+    return rawUrl.replace('/upload/', `/upload/c_thumb,w_${targetSize},h_${targetSize},q_auto,f_auto/`);
+  }
+
+  // 3. DiceBear SVG Size
+  if (rawUrl.includes('api.dicebear.com')) {
+    return rawUrl + (rawUrl.includes('?') ? '&' : '?') + `size=${targetSize}`;
+  }
+
+  return rawUrl;
+}
+window.getOptimizedAvatarUrl = getOptimizedAvatarUrl;
 
 function renderRoster(students) {
   const grid = document.getElementById('rosterGrid');
@@ -844,10 +865,11 @@ function renderRoster(students) {
   grid.innerHTML = students.map((st, idx) => {
     const customProfile = getStudentProfileData(st.email, st.id);
     
-    // Determine Avatar URL
-    const avatarUrl = customProfile?.avatar 
+    // Determine Avatar URL & Downscale for Grid Performance
+    const rawAvatarUrl = customProfile?.avatar 
       ? customProfile.avatar 
       : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(st.email || st.name)}`;
+    const avatarUrl = getOptimizedAvatarUrl(rawAvatarUrl, 160);
 
     // Frame & Animation
     const frame = customProfile?.avatarFrame && customProfile.avatarFrame !== 'none' 
@@ -1007,7 +1029,7 @@ function openStudentProfileModal(studentId) {
 
   // Set Avatar, Frame & Animation
   if (avatarImg) {
-    avatarImg.src = avatarUrl;
+    avatarImg.src = getOptimizedAvatarUrl(avatarUrl, 320);
     const tf = customProfile?.avatarTransform || { rotate: 0, scale: 1, flipX: false, flipY: false };
     const scaleX = (tf.flipX ? -1 : 1) * (tf.scale || 1);
     const scaleY = (tf.flipY ? -1 : 1) * (tf.scale || 1);
