@@ -849,6 +849,12 @@ function getOptimizedAvatarUrl(rawUrl, targetSize = 160) {
     return rawUrl + (rawUrl.includes('?') ? '&' : '?') + `size=${targetSize}`;
   }
 
+  // 4. Catbox.moe & other static image hosts (via global fast CDN image cache: images.weserv.nl)
+  // Catbox เป็น direct file host ไม่มี query resize ในตัว แต่ wsrv.nl สามารถดึงรูปมา resize, cache และแปลงเป็น webp ได้ฟรีแบบเรียลไทม์
+  if (rawUrl.includes('catbox.moe') || rawUrl.includes('files.catbox.moe')) {
+    return `https://images.weserv.nl/?url=${encodeURIComponent(rawUrl)}&w=${targetSize}&h=${targetSize}&fit=cover&output=webp&q=80`;
+  }
+
   return rawUrl;
 }
 window.getOptimizedAvatarUrl = getOptimizedAvatarUrl;
