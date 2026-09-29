@@ -814,6 +814,24 @@ function getStudentProfileData(email, studentId) {
   return null;
 }
 
+function handleAvatarImageLoaded(imgEl) {
+  if (!imgEl) return;
+  imgEl.classList.add('is-loaded');
+  // Find adjacent or parent skeleton to dismiss
+  const parent = imgEl.closest('.relative') || imgEl.parentElement;
+  if (parent) {
+    const skeleton = parent.querySelector('.avatar-loading-skeleton') || parent.previousElementSibling;
+    if (skeleton && skeleton.classList.contains('avatar-loading-skeleton')) {
+      skeleton.classList.add('loaded');
+    }
+  }
+  const modalSkeleton = document.getElementById('modalStudentAvatarSkeleton');
+  if (modalSkeleton && imgEl.id === 'modalStudentAvatar') {
+    modalSkeleton.classList.add('loaded');
+  }
+}
+window.handleAvatarImageLoaded = handleAvatarImageLoaded;
+
 function renderRoster(students) {
   const grid = document.getElementById('rosterGrid');
   if (!grid) return;
@@ -852,14 +870,22 @@ function renderRoster(students) {
 
     return `
       <div onclick="openStudentProfileModal('${st.id}')"
-        class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-orange-500/50 hover:bg-slate-900/95 transition-all duration-300 group hover:-translate-y-0.5 shadow-md cursor-pointer relative overflow-hidden"
+        class="roster-card-hover p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-orange-500/50 hover:bg-slate-900/95 transition-all duration-300 group shadow-md cursor-pointer relative overflow-hidden"
         title="คลิกดูโปรไฟล์ของ ${displayName}">
         
         <div class="flex items-center gap-3.5">
-          <!-- Profile Avatar with Frame & Animation Wrapper -->
+          <!-- Profile Avatar with Shimmer Loading & Blur-Up -->
           <div class="w-12 h-12 rounded-2xl bg-slate-950 p-0.5 ${frame} flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden relative shadow-inner">
-            <div class="w-full h-full rounded-xl overflow-hidden flex items-center justify-center ${anim}">
-              <img src="${avatarUrl}" alt="${displayName}" class="w-full h-full object-cover rounded-xl" style="${transformStyle}" loading="lazy">
+            <!-- Skeleton Shimmer Overlay -->
+            <div class="avatar-loading-skeleton"></div>
+            
+            <div class="w-full h-full rounded-xl overflow-hidden flex items-center justify-center relative ${anim}">
+              <img src="${avatarUrl}" alt="${displayName}" 
+                class="w-full h-full object-cover rounded-xl avatar-blur-img" 
+                style="${transformStyle}" 
+                loading="lazy"
+                onload="handleAvatarImageLoaded(this)"
+                onerror="this.classList.add('is-loaded')">
             </div>
           </div>
 
@@ -905,6 +931,11 @@ function openStudentProfileModal(studentId) {
   const avatarImg = document.getElementById('modalStudentAvatar');
   const avatarFrame = document.getElementById('modalStudentAvatarFrame');
   const avatarAnimWrapper = document.getElementById('modalStudentAvatarAnimWrapper');
+  const modalSkeleton = document.getElementById('modalStudentAvatarSkeleton');
+
+  // Reset modal avatar to blurred state and show shimmer skeleton
+  if (modalSkeleton) modalSkeleton.classList.remove('loaded');
+  if (avatarImg) avatarImg.classList.remove('is-loaded');
 
   const avatarUrl = customProfile?.avatar 
     ? customProfile.avatar 
@@ -994,7 +1025,7 @@ function openStudentProfileModal(studentId) {
   }
 
   if (avatarAnimWrapper) {
-    avatarAnimWrapper.className = 'w-full h-full rounded-2xl overflow-hidden flex items-center justify-center';
+    avatarAnimWrapper.className = 'w-full h-full rounded-2xl overflow-hidden flex items-center justify-center relative';
     if (customProfile?.avatarAnim && customProfile.avatarAnim !== 'none') {
       avatarAnimWrapper.classList.add(`avatar-anim-${customProfile.avatarAnim}`);
     }

@@ -209,6 +209,53 @@ html, body {
 }
 
 /* =========================================================================
+   AVATAR SKELETON LOADER & BLUR-UP EFFECT
+   ========================================================================= */
+.avatar-loading-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, #0f172a 20%, #1e293b 40%, #334155 50%, #1e293b 60%, #0f172a 80%);
+  background-size: 200% 100%;
+  animation: avatarShimmer 1.5s infinite linear;
+  border-radius: inherit;
+  z-index: 1;
+  transition: opacity 0.5s ease-out, visibility 0.5s;
+}
+
+@keyframes avatarShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.avatar-loading-skeleton.loaded {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Blur-up image transition */
+.avatar-blur-img {
+  filter: blur(12px) scale(1.08);
+  opacity: 0.15;
+  transition: filter 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease;
+  will-change: filter, opacity, transform;
+}
+
+.avatar-blur-img.is-loaded {
+  filter: blur(0px) scale(1);
+  opacity: 1;
+}
+
+.roster-card-hover {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.roster-card-hover:hover {
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: 0 12px 30px -8px rgba(249, 115, 22, 0.22);
+}
+
+/* =========================================================================
    SCROLL REVERSIBLE ANIMATION SYSTEM (Bidirectional Smooth Spring)
    ========================================================================= */
 .scroll-reveal {
