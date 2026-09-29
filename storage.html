@@ -615,7 +615,7 @@
           <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
             <span>เข้าสู่ระบบเพื่อใช้งานคลาวด์ไดรฟ์และพื้นที่ส่วนตัว 5 GB</span>
           </h3>
-          <p class="text-xs text-slate-300/80 mt-1 leading-relaxed">เข้าสู่ระบบด้วย Google Account หรือเลือกชื่อนักศึกษา COMED KKU เพื่อเปิดใช้งานโฟลเดอร์ การอัปโหลด และการแชร์ไฟล์อย่างเต็มรูปแบบ</p>
+          <p class="text-xs text-slate-300/80 mt-1 leading-relaxed">เข้าสู่ระบบด้วย Google Account (@kkumail.com) เพื่อเปิดใช้งานโฟลเดอร์ การอัปโหลด และการแชร์ไฟล์อย่างเต็มรูปแบบ</p>
         </div>
       </div>
       <button onclick="openAuthModal()" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs shadow-xl shadow-orange-500/30 transition flex items-center justify-center gap-2 cursor-pointer flex-shrink-0 active:scale-95 relative z-10">
@@ -996,44 +996,51 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- 1. Modal: User Auth (Google Sign-In or Student Roster) -->
+  <!-- 1. Modal: User Auth (Google Sign-In with KKU Mail) -->
   <div id="modalUserAuth" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center p-4">
-    <div class="w-full max-w-md uiverse-glass-card rounded-3xl p-6 sm:p-7 space-y-6 shadow-2xl relative">
+    <div class="w-full max-w-md uiverse-glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative border border-slate-700/80">
       <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="text-center space-y-2">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-500/10 text-orange-400 flex items-center justify-center mx-auto border border-orange-500/30 shadow-lg shadow-orange-500/10">
-          <i data-lucide="cloud-lightning" class="w-7 h-7"></i>
+      <div class="text-center space-y-3">
+        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-500/20 via-amber-500/15 to-sky-500/20 text-orange-400 flex items-center justify-center mx-auto border border-orange-500/30 shadow-xl shadow-orange-500/10">
+          <i data-lucide="cloud-lightning" class="w-8 h-8 text-orange-400"></i>
         </div>
-        <h3 class="text-xl font-black text-white cloud-gradient-text">เข้าสู่ระบบ COMED Cloud Drive</h3>
-        <p class="text-xs text-slate-400">เข้าถึงพื้นที่จัดเก็บคลาวด์ 5GB พร้อมระบบแชร์ไฟล์และโฟลเดอร์</p>
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-wider mb-1.5">
+            <i data-lucide="shield-check" class="w-3 h-3 text-orange-500"></i>
+            <span>KKU MAIL AUTHENTICATION</span>
+          </div>
+          <h3 class="text-xl sm:text-2xl font-black text-white cloud-gradient-text">เข้าสู่ระบบ COMED Cloud</h3>
+          <p class="text-xs text-slate-400 mt-1">เข้าถึงพื้นที่จัดเก็บคลาวด์ 5GB ด้วยอีเมลสถาบัน <strong class="text-orange-400">@kkumail.com</strong></p>
+        </div>
       </div>
 
-      <div class="space-y-4">
-        <!-- Option 1: Google Sign-In -->
-        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-3 text-center shadow-inner">
-          <span class="text-xs font-bold text-slate-300 block">วิธีที่ 1: ลงชื่อเข้าใช้ด้วย Google (@kkumail.com หรือ Gmail)</span>
-          <div id="googleBtnContainer" class="flex justify-center"></div>
+      <!-- Google Sign-In Area -->
+      <div class="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-4 text-center shadow-inner">
+        <div class="text-xs text-slate-300 font-bold flex items-center justify-center gap-2">
+          <span>ลงชื่อเข้าใช้ด้วยบัญชี Google ของมหาวิทยาลัย</span>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="flex-grow h-px bg-slate-800"></div>
-          <span class="text-[11px] text-slate-400 font-bold uppercase">หรือ</span>
-          <div class="flex-grow h-px bg-slate-800"></div>
+        <!-- Google Render Button Container -->
+        <div id="googleBtnContainer" class="flex justify-center min-h-[46px] items-center">
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-orange-400"></i>
+            <span>กำลังโหลดปุ่ม Google...</span>
+          </div>
         </div>
 
-        <!-- Option 2: Student Roster Picker -->
-        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-3 shadow-inner">
-          <span class="text-xs font-bold text-slate-300 block">วิธีที่ 2: เลือกจากทำเนียบรุ่น COMED KKU (60 คน)</span>
-          <select id="authStudentSelect" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
-            <option value="">-- กรุณาเลือกรายชื่อของคุณ --</option>
-          </select>
-          <button onclick="confirmStudentPickerAuth()" class="uiverse-btn-glow w-full py-2.5 rounded-xl text-white font-bold text-xs transition cursor-pointer active:scale-95">
-            เข้าสู่ระบบด้วยรายชื่อนี้
-          </button>
-        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          ระบบจะซิงค์ชื่อ, รหัสนักศึกษา และโควตาคลาวด์ 5GB ของท่านโดยอัตโนมัติ
+        </p>
+      </div>
+
+      <div class="text-center pt-1">
+        <p class="text-[10px] text-slate-500 flex items-center justify-center gap-1">
+          <i data-lucide="lock" class="w-3 h-3 text-emerald-400"></i>
+          <span>ระบบปลอดภัย ได้รับการตรวจสอบสิทธิ์ผ่าน Google Identity Services</span>
+        </p>
       </div>
     </div>
   </div>
@@ -1628,7 +1635,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
       runPageIntroOnReload();
       initUserSession();
-      populateStudentDropdown();
       setupGoogleAuth();
       setupKeyboardShortcuts();
       initDragSelection();
@@ -1905,78 +1911,57 @@
       }
     }
 
+    const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
+
     function openAuthModal() {
-      document.getElementById('modalUserAuth')?.classList.remove('hidden');
-      document.getElementById('modalUserAuth')?.classList.add('flex');
+      const modal = document.getElementById('modalUserAuth');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      // Ensure Google button renders whenever modal opens
+      renderGoogleSignInButton();
     }
 
     function closeAuthModal() {
-      document.getElementById('modalUserAuth')?.classList.add('hidden');
-      document.getElementById('modalUserAuth')?.classList.remove('flex');
+      const modal = document.getElementById('modalUserAuth');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
     }
 
-    function populateStudentDropdown() {
-      const sel = document.getElementById('authStudentSelect');
-      if (!sel) return;
-      sel.innerHTML = '<option value="">-- กรุณาเลือกรายชื่อของคุณ (60 คน) --</option>';
+    function renderGoogleSignInButton() {
+      try {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: false
+          });
 
-      (window.STUDENTS_DATA || []).forEach(st => {
-        const opt = document.createElement('option');
-        opt.value = st.id;
-        opt.textContent = `${st.id} - ${st.name} (${st.nickname || ''})`;
-        sel.appendChild(opt);
-      });
-    }
-
-    function confirmStudentPickerAuth() {
-      const sel = document.getElementById('authStudentSelect');
-      const stId = sel.value;
-      if (!stId) {
-        alert('กรุณาเลือกรหัสนักศึกษาของคุณก่อน');
-        return;
+          const btnContainer = document.getElementById("googleBtnContainer");
+          if (btnContainer) {
+            btnContainer.innerHTML = '';
+            google.accounts.id.renderButton(btnContainer, {
+              theme: "outline",
+              size: "large",
+              shape: "pill",
+              text: "signin_with",
+              width: 280,
+              logo_alignment: "left"
+            });
+          }
+          // Optionally trigger one-tap prompt
+          google.accounts.id.prompt();
+        }
+      } catch (e) {
+        console.warn("renderGoogleSignInButton error:", e);
       }
-
-      const st = (window.STUDENTS_DATA || []).find(s => s.id === stId);
-      if (!st) return;
-
-      currentUser = {
-        email: st.email || `${st.id}@kkumail.com`,
-        name: st.name,
-        nickname: st.nickname || '',
-        studentId: st.id,
-        avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${st.id}`,
-        isSpecialTester: false,
-        loggedInAt: new Date().toISOString()
-      };
-
-      localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentUser));
-      closeAuthModal();
-      updateUserUI();
-      renderDrive();
-      showToast(`✨ ยินดีต้อนรับคุณ ${st.name}`);
     }
 
     function setupGoogleAuth() {
-      if (typeof google === 'undefined' || !google.accounts) return;
-      try {
-        google.accounts.id.initialize({
-          client_id: "870717469739-e93oikg549uprbms2c1c3f2r3q766n6s.apps.googleusercontent.com",
-          callback: handleGoogleCredentialResponse,
-          auto_select: false
-        });
-
-        const btnContainer = document.getElementById("googleBtnContainer");
-        if (btnContainer) {
-          google.accounts.id.renderButton(btnContainer, {
-            theme: "filled_blue",
-            size: "large",
-            shape: "pill",
-            text: "signin_with"
-          });
-        }
-      } catch (e) {
-        console.warn("Google Sign-In init error:", e);
-      }
+      renderGoogleSignInButton();
     }
 
     function handleGoogleCredentialResponse(response) {
