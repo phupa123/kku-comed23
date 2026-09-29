@@ -81,6 +81,17 @@
 
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-orange-500 selection:text-white overflow-x-hidden" id="mainBody">
 
+  <!-- ================= TOP SLIM SCROLL PROGRESS BAR ================= -->
+  <div id="topScrollProgressBar"></div>
+
+  <!-- ================= RIGHT SIDE FLOATING PROGRESS BAR & TRACKER ================= -->
+  <aside id="rightScrollTracker" aria-label="แถบแสดงความคืบหน้าการเลื่อนหน้าเว็บ">
+    <div class="scroll-progress-vertical-track" title="ความคืบหน้าการอ่าน">
+      <div id="rightScrollProgressBar" class="scroll-progress-vertical-bar"></div>
+    </div>
+    <button id="rightScrollBadge" onclick="scrollToTopSmooth()" class="scroll-progress-badge" title="คลิกเพื่อกลับขึ้นด้านบนสุด">0%</button>
+  </aside>
+
   <!-- ================= LUXURY WELCOME LOGIN SUCCESS POPUP ================= -->
   <div id="modalLoginSuccess" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4">
     <div id="loginSuccessCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-orange-200/80 text-center space-y-6 overflow-hidden">
@@ -478,7 +489,7 @@
       
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         <!-- Left Hero Content -->
-        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+        <div class="lg:col-span-7 space-y-6 text-center lg:text-left scroll-reveal reveal-left">
           
           <!-- Cloud Ecosystem Badge -->
           <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 border border-sky-400/40 text-sky-200 text-xs font-bold shadow-xl shadow-sky-500/10 backdrop-blur-2xl">
@@ -537,7 +548,7 @@
         </div>
 
         <!-- Right Hero Interactive Bento Card / Cloud Services Hub -->
-        <div class="lg:col-span-5 space-y-4">
+        <div id="quick-services" class="lg:col-span-5 space-y-4 scroll-reveal reveal-right delay-200">
           
           <div class="cloud-dark-card rounded-3xl p-5 sm:p-6 border border-sky-500/20 space-y-4 shadow-2xl relative overflow-hidden backdrop-blur-2xl">
             <!-- Subtle Cloud Top Glow -->
@@ -654,7 +665,7 @@
 
     <div class="relative max-w-7xl mx-auto space-y-6 sm:space-y-8 z-10">
       
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-orange-200/40 pb-5">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-orange-200/40 pb-5 scroll-reveal">
         <div>
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm">
             <i data-lucide="bell-ring" class="w-3.5 h-3.5 animate-bounce"></i>
@@ -677,7 +688,7 @@
       </div>
 
       <!-- Dynamic Payment Campaigns Grid -->
-      <div id="indexCampaignsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      <div id="indexCampaignsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 scroll-reveal delay-100">
         <!-- Rendered dynamically by ComedCampaignManager from Supabase / localStorage -->
         <div class="col-span-full py-12 text-center text-slate-400 text-sm flex items-center justify-center gap-2">
           <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-500"></i>
@@ -691,7 +702,7 @@
   <!-- ================= SECTION 1: ABOUT & PHILOSOPHY ================= -->
   <section id="about" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-16">
     
-    <div class="text-center max-w-3xl mx-auto space-y-4">
+    <div class="text-center max-w-3xl mx-auto space-y-4 scroll-reveal">
       <span class="px-4 py-1.5 rounded-full text-xs font-black bg-orange-100/80 text-orange-700 tracking-wider uppercase border border-orange-200 shadow-xs">
         ABOUT DEPARTMENT
       </span>
@@ -707,7 +718,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       
       <!-- Card 1 -->
-      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-orange-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden">
+      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-orange-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden scroll-reveal delay-100">
         <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-orange-500/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all"></div>
         <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center shadow-lg shadow-orange-500/25 group-hover:scale-110 transition-transform">
           <i data-lucide="cpu" class="w-8 h-8"></i>
@@ -721,7 +732,7 @@
       </div>
 
       <!-- Card 2 -->
-      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-cyan-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden">
+      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-cyan-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden scroll-reveal delay-200">
         <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-cyan-500/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all"></div>
         <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-cyan-500 to-blue-500 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 group-hover:scale-110 transition-transform">
           <i data-lucide="sparkles" class="w-8 h-8"></i>
@@ -735,7 +746,7 @@
       </div>
 
       <!-- Card 3 -->
-      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-emerald-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden">
+      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-emerald-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden scroll-reveal delay-300">
         <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-emerald-500/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all"></div>
         <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:scale-110 transition-transform">
           <i data-lucide="award" class="w-8 h-8"></i>
@@ -756,7 +767,7 @@
   <section id="curriculum" class="py-20 bg-slate-100/80 border-y border-slate-200 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto space-y-12">
       
-      <div class="text-center max-w-3xl mx-auto space-y-4">
+      <div class="text-center max-w-3xl mx-auto space-y-4 scroll-reveal">
         <span class="px-3.5 py-1 rounded-full text-xs font-black bg-slate-900 text-white tracking-wider uppercase">
           CURRICULUM STRUCTURE
         </span>
@@ -771,7 +782,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         <!-- Year 1 -->
-        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-orange-100 hover:border-orange-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
+        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-orange-100 hover:border-orange-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 scroll-reveal delay-100">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-orange-500/30">
             01
           </div>
@@ -788,7 +799,7 @@
         </div>
 
         <!-- Year 2 -->
-        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-cyan-100 hover:border-cyan-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
+        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-cyan-100 hover:border-cyan-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 scroll-reveal delay-200">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-cyan-500/30">
             02
           </div>
@@ -805,7 +816,7 @@
         </div>
 
         <!-- Year 3 -->
-        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-purple-100 hover:border-purple-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
+        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-purple-100 hover:border-purple-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 scroll-reveal delay-300">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-purple-500/30">
             03
           </div>
@@ -822,7 +833,7 @@
         </div>
 
         <!-- Year 4 -->
-        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-emerald-100 hover:border-emerald-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
+        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-emerald-100 hover:border-emerald-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 scroll-reveal delay-400">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-emerald-500/30">
             04
           </div>
@@ -846,7 +857,7 @@
   <!-- ================= SECTION 3: CAREER PATHS ================= -->
   <section id="careers" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-16">
     
-    <div class="text-center max-w-3xl mx-auto space-y-4">
+    <div class="text-center max-w-3xl mx-auto space-y-4 scroll-reveal">
       <span class="px-4 py-1.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 tracking-wider uppercase border border-amber-200 shadow-xs">
         FUTURE CAREERS
       </span>
@@ -860,7 +871,7 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       
-      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-orange-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden">
+      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-orange-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden scroll-reveal delay-100">
         <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors shadow-md shadow-orange-500/10">
           <i data-lucide="school" class="w-7 h-7"></i>
         </div>
@@ -872,7 +883,7 @@
         </div>
       </div>
 
-      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-cyan-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden">
+      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-cyan-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden scroll-reveal delay-200">
         <div class="w-14 h-14 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:bg-cyan-600 group-hover:text-white transition-colors shadow-md shadow-cyan-500/10">
           <i data-lucide="code" class="w-7 h-7"></i>
         </div>
@@ -884,7 +895,7 @@
         </div>
       </div>
 
-      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-purple-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden">
+      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-purple-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden scroll-reveal delay-300">
         <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors shadow-md shadow-purple-500/10">
           <i data-lucide="palette" class="w-7 h-7"></i>
         </div>
@@ -896,7 +907,7 @@
         </div>
       </div>
 
-      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-emerald-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden">
+      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-emerald-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden scroll-reveal delay-400">
         <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors shadow-md shadow-emerald-500/10">
           <i data-lucide="server" class="w-7 h-7"></i>
         </div>
@@ -920,7 +931,7 @@
 
     <div class="relative max-w-7xl mx-auto space-y-10">
       
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-800 pb-6">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-800 pb-6 scroll-reveal">
         <div>
           <div class="flex items-center gap-2 flex-wrap mb-2">
             <span class="px-3.5 py-1 rounded-full text-xs font-black bg-orange-500/20 text-orange-400 uppercase tracking-wider border border-orange-500/30">
@@ -949,11 +960,11 @@
       </div>
 
       <!-- Students Grid Container -->
-      <div id="rosterGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[640px] overflow-y-auto pr-2 custom-scrollbar">
+      <div id="rosterGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[640px] overflow-y-auto pr-2 custom-scrollbar scroll-reveal delay-100">
         <!-- Rendered via JS -->
       </div>
 
-      <div class="pt-6 text-center border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <div class="pt-6 text-center border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-center gap-3 scroll-reveal delay-200">
         <a href="payment.html" class="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs sm:text-sm shadow-xl shadow-orange-600/25 transition transform active:scale-95 cursor-pointer">
           <i data-lucide="credit-card" class="w-4 h-4"></i>
           <span>ไปที่หน้าระบบชำระเงินค่าป้ายเอก ฿190</span>
@@ -1046,7 +1057,7 @@
   </div>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-12 px-4 sm:px-6 lg:px-8 text-xs">
+  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 pt-12 pb-24 xl:pb-12 px-4 sm:px-6 lg:px-8 text-xs">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
       
       <div class="flex items-center gap-3 text-white">

@@ -1501,6 +1501,74 @@ function toggleMobileNavMenu() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
+// ================= REVERSIBLE SCROLL ANIMATION & PROGRESS BAR =================
+function initScrollAnimationsAndProgress() {
+  const vBar = document.getElementById('rightScrollProgressBar');
+  const hBar = document.getElementById('topScrollProgressBar');
+  const badge = document.getElementById('rightScrollBadge');
+  const tracker = document.getElementById('rightScrollTracker');
+
+  // 1. Scroll Progress Function
+  function updateScrollProgress() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const percent = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+    const clamped = Math.max(0, Math.min(100, percent));
+
+    if (vBar) vBar.style.height = `${clamped}%`;
+    if (hBar) hBar.style.width = `${clamped}%`;
+    if (badge) badge.textContent = `${clamped}%`;
+
+    // Hide tracker slightly when at very top (0%)
+    if (tracker) {
+      if (scrollTop < 50) {
+        tracker.style.opacity = '0.55';
+      } else {
+        tracker.style.opacity = '1';
+      }
+    }
+  }
+
+  window.addEventListener('scroll', updateScrollProgress, { passive: true });
+  window.addEventListener('resize', updateScrollProgress, { passive: true });
+  updateScrollProgress();
+
+  // 2. Bidirectional Scroll Animation Observer
+  // เมื่อเลื่อนลงมาเห็น -> ใส่ class is-revealed
+  // เมื่อเลื่อนกลับ (ออกนอกหน้าจอ) -> นำ class is-revealed ออก เพื่อให้เล่น Animation ซ้ำเมื่อเลื่อนกลับมา
+  const animElements = document.querySelectorAll('.scroll-reveal');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+        } else {
+          // Reversible: เมื่อเลื่อนพ้นออกไปแล้ว ให้รีเซ็ตแอนิเมชันกลับ
+          // เช็ค boundingClientRect เพื่อดูว่าเลื่อนขึ้นหรือเลื่อนลง
+          entry.target.classList.remove('is-revealed');
+        }
+      });
+    }, {
+      root: null,
+      threshold: 0.12,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    animElements.forEach(el => observer.observe(el));
+  } else {
+    // Fallback if IntersectionObserver is not supported
+    animElements.forEach(el => el.classList.add('is-revealed'));
+  }
+}
+
+// Global scroll to top helper
+window.scrollToTopSmooth = function() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+};
+
 // Initial render & Google One-Tap Setup
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Page Fade-in Animation
@@ -1512,6 +1580,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize Modern Navbar Scroll Effect
   initNavbarScrollEffect();
+
+  // Initialize Reversible Scroll Animations & Right Progress Bar
+  initScrollAnimationsAndProgress();
 
   checkUserSession();
   renderRoster(window.STUDENTS_DATA || []);
