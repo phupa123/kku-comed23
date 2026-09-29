@@ -84,11 +84,29 @@
   <!-- ================= TOP SLIM SCROLL PROGRESS BAR ================= -->
   <div id="topScrollProgressBar"></div>
 
-  <!-- ================= RIGHT SIDE FLOATING PROGRESS BAR & TRACKER ================= -->
-  <aside id="rightScrollTracker" aria-label="แถบแสดงความคืบหน้าการเลื่อนหน้าเว็บ">
-    <div class="scroll-progress-vertical-track" title="ความคืบหน้าการอ่าน">
-      <div id="rightScrollProgressBar" class="scroll-progress-vertical-bar"></div>
+  <!-- ================= ULTRA-LUXURY RIGHT FLOATING HUD TRACKER ================= -->
+  <aside id="rightScrollTracker" aria-label="แถบสถานะการนำทางและเปอร์เซ็นต์หน้าเว็บ">
+    <!-- Top Back to Top Action button -->
+    <button onclick="scrollToTopSmooth()" class="scroll-hud-action-btn" title="เลื่อนขึ้นบนสุด">
+      <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+    </button>
+
+    <!-- Main Vertical Tube Track with Glowing Core -->
+    <div class="scroll-progress-vertical-track" title="ความคืบหน้าการอ่านหน้าเว็บ">
+      <div id="rightScrollProgressBar" class="scroll-progress-vertical-bar">
+        <span class="scroll-bar-glow-head"></span>
+      </div>
+
+      <!-- Interactive Waypoints / Section Dots -->
+      <a href="#mainNavbar" class="scroll-waypoint top-[5%]" title="ด้านบนสุด (Top)"></a>
+      <a href="#quick-services" class="scroll-waypoint top-[25%]" title="บริการด่วน (Services)"></a>
+      <a href="#payments-list" class="scroll-waypoint top-[45%]" title="รายการต้องชำระ (Dues)"></a>
+      <a href="#about" class="scroll-waypoint top-[62%]" title="เกี่ยวกับสาขา (About)"></a>
+      <a href="#curriculum" class="scroll-waypoint top-[78%]" title="หลักสูตร (Curriculum)"></a>
+      <a href="#students" class="scroll-waypoint top-[95%]" title="ทำเนียบรุ่น (Roster)"></a>
     </div>
+
+    <!-- Futuristic Percentage Badge -->
     <button id="rightScrollBadge" onclick="scrollToTopSmooth()" class="scroll-progress-badge" title="คลิกเพื่อกลับขึ้นด้านบนสุด">0%</button>
   </aside>
 

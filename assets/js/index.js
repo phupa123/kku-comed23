@@ -1508,7 +1508,16 @@ function initScrollAnimationsAndProgress() {
   const badge = document.getElementById('rightScrollBadge');
   const tracker = document.getElementById('rightScrollTracker');
 
-  // 1. Scroll Progress Function
+  // 1. Scroll Progress Function & Section Waypoint Tracker
+  const waypoints = [
+    { id: 'mainNavbar', percent: 0 },
+    { id: 'quick-services', percent: 25 },
+    { id: 'payments-list', percent: 45 },
+    { id: 'about', percent: 62 },
+    { id: 'curriculum', percent: 78 },
+    { id: 'students', percent: 95 }
+  ];
+
   function updateScrollProgress() {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -1519,12 +1528,34 @@ function initScrollAnimationsAndProgress() {
     if (hBar) hBar.style.width = `${clamped}%`;
     if (badge) badge.textContent = `${clamped}%`;
 
+    // Dynamic Waypoint Dot Highlight
+    document.querySelectorAll('.scroll-waypoint').forEach((dot) => {
+      const targetHref = dot.getAttribute('href');
+      if (targetHref && targetHref.startsWith('#')) {
+        const targetEl = document.querySelector(targetHref);
+        if (targetEl) {
+          const rect = targetEl.getBoundingClientRect();
+          if (rect.top <= window.innerHeight * 0.45 && rect.bottom >= window.innerHeight * 0.2) {
+            dot.style.background = '#f97316';
+            dot.style.boxShadow = '0 0 12px #f97316';
+            dot.style.transform = 'translate(-50%, -50%) scale(1.6)';
+          } else {
+            dot.style.background = 'rgba(255, 255, 255, 0.6)';
+            dot.style.boxShadow = 'none';
+            dot.style.transform = 'translate(-50%, -50%) scale(1)';
+          }
+        }
+      }
+    });
+
     // Hide tracker slightly when at very top (0%)
     if (tracker) {
-      if (scrollTop < 50) {
+      if (scrollTop < 40) {
         tracker.style.opacity = '0.55';
+        tracker.style.transform = 'translateY(-50%) translateX(4px)';
       } else {
         tracker.style.opacity = '1';
+        tracker.style.transform = 'translateY(-50%) translateX(0px)';
       }
     }
   }
@@ -1534,8 +1565,6 @@ function initScrollAnimationsAndProgress() {
   updateScrollProgress();
 
   // 2. Bidirectional Scroll Animation Observer
-  // เมื่อเลื่อนลงมาเห็น -> ใส่ class is-revealed
-  // เมื่อเลื่อนกลับ (ออกนอกหน้าจอ) -> นำ class is-revealed ออก เพื่อให้เล่น Animation ซ้ำเมื่อเลื่อนกลับมา
   const animElements = document.querySelectorAll('.scroll-reveal');
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
@@ -1544,7 +1573,6 @@ function initScrollAnimationsAndProgress() {
           entry.target.classList.add('is-revealed');
         } else {
           // Reversible: เมื่อเลื่อนพ้นออกไปแล้ว ให้รีเซ็ตแอนิเมชันกลับ
-          // เช็ค boundingClientRect เพื่อดูว่าเลื่อนขึ้นหรือเลื่อนลง
           entry.target.classList.remove('is-revealed');
         }
       });
@@ -1559,6 +1587,24 @@ function initScrollAnimationsAndProgress() {
     // Fallback if IntersectionObserver is not supported
     animElements.forEach(el => el.classList.add('is-revealed'));
   }
+
+  // 3. Ultra-Smooth 3D Card Interactive Tilt Effect
+  const interactiveCards = document.querySelectorAll('.cloud-dark-card, .cloud-glass-card, #about .bg-white\\/95, #curriculum .bg-white\\/95');
+  interactiveCards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -5;
+      const rotateY = ((x - centerX) / centerX) * 5;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+    });
+  });
 }
 
 // Global scroll to top helper
