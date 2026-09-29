@@ -816,19 +816,23 @@ function getStudentProfileData(email, studentId) {
 
 function handleAvatarImageLoaded(imgEl) {
   if (!imgEl) return;
-  imgEl.classList.add('is-loaded');
-  // Find adjacent or parent skeleton to dismiss
-  const parent = imgEl.closest('.relative') || imgEl.parentElement;
-  if (parent) {
-    const skeleton = parent.querySelector('.avatar-loading-skeleton') || parent.previousElementSibling;
-    if (skeleton && skeleton.classList.contains('avatar-loading-skeleton')) {
-      skeleton.classList.add('loaded');
+  
+  // ให้มี Animation Shimmer & Blur-Up แสดงแป๊บเดียวอย่างนุ่มนวล (แม้รูปจะโหลดเสร็จหรือติด Cache ทันที)
+  setTimeout(() => {
+    imgEl.classList.add('is-loaded');
+    // Find adjacent or parent skeleton to dismiss
+    const parent = imgEl.closest('.relative') || imgEl.parentElement;
+    if (parent) {
+      const skeleton = parent.querySelector('.avatar-loading-skeleton') || parent.previousElementSibling;
+      if (skeleton && skeleton.classList.contains('avatar-loading-skeleton')) {
+        skeleton.classList.add('loaded');
+      }
     }
-  }
-  const modalSkeleton = document.getElementById('modalStudentAvatarSkeleton');
-  if (modalSkeleton && imgEl.id === 'modalStudentAvatar') {
-    modalSkeleton.classList.add('loaded');
-  }
+    const modalSkeleton = document.getElementById('modalStudentAvatarSkeleton');
+    if (modalSkeleton && imgEl.id === 'modalStudentAvatar') {
+      modalSkeleton.classList.add('loaded');
+    }
+  }, 220); // ดีเลย์แป๊บเดียว 220ms ให้ผู้ใช้เห็นแสง Shimmer & Blur ค่อยๆ คลายตัวออกอย่างสวยงาม
 }
 // Helper to optimize image URLs for thumbnail/roster view (downscaling heavy images on the fly)
 function getOptimizedAvatarUrl(rawUrl, targetSize = 160) {
@@ -938,6 +942,16 @@ function renderRoster(students) {
   if (typeof lucide !== 'undefined' && lucide.createIcons) {
     lucide.createIcons();
   }
+
+  // หากเบราว์เซอร์มีแคชภาพไว้แล้ว ให้เรียก Animation แสดงผลอย่างนุ่มนวลแบบมีสเต็ป
+  setTimeout(() => {
+    const avatarImgs = grid.querySelectorAll('.avatar-blur-img');
+    avatarImgs.forEach((img, i) => {
+      if (img.complete && !img.classList.contains('is-loaded')) {
+        setTimeout(() => handleAvatarImageLoaded(img), Math.min(i * 35, 400));
+      }
+    });
+  }, 60);
 }
 
 // Open Friend Profile Modal
