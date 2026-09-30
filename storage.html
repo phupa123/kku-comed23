@@ -2544,8 +2544,11 @@
       const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
 
       const trashedFiles = allFiles.filter(f => {
-        const ownerEmail = (f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
-        if (userEmailLower && ownerEmail !== userEmailLower) return false;
+        const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+        const fId = (f.uploaderId || '').trim();
+        const isBelongToUser = (userEmailLower && fEmail === userEmailLower) || (currentUser && currentUser.studentId && fId === currentUser.studentId);
+        if (!isBelongToUser) return false;
+
         const meta = repo.getFileMeta(f.id);
         return !!meta.isTrash;
       }).map(f => {
@@ -2566,7 +2569,7 @@
             </div>
             <div>
               <h4 class="text-base font-black text-white">ถังขยะว่างเปล่า</h4>
-              <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">ไม่มีไฟล์ในถังขยะ ไฟล์ที่คุณลบจะปรากฏที่นี่ก่อนถูกลบอย่างถาวร</p>
+              <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">ไม่มีไฟล์ในถังขยะ ไฟล์ที่คุณลบจะปรากฏที่นี่ก่อนถูกลบอัตโนมัติภายใน 30 วัน</p>
             </div>
             <button onclick="toggleTrashView()" class="px-4 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black inline-flex items-center gap-1.5 cursor-pointer active:scale-95 border border-slate-700">
               <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -2584,7 +2587,7 @@
           <div class="p-3 bg-rose-900/20 border-b border-rose-500/20 flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-rose-300 text-xs font-bold">
               <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
-              <span>${trashedFiles.length} ไฟล์ในถังขยะ · ไฟล์จะถูกลบถาวรหากกู้คืนไม่ทัน</span>
+              <span>${trashedFiles.length} ไฟล์ในถังขยะ · ระบบจะลบถาวรอัตโนมัติเมื่อครบ 30 วัน</span>
             </div>
             <div class="flex items-center gap-2">
               <button onclick="emptyTrashAll()" class="px-3 py-1.5 rounded-xl bg-red-800/40 hover:bg-red-700/60 text-red-300 text-xs font-bold border border-red-600/30 transition flex items-center gap-1.5 cursor-pointer">
@@ -2605,6 +2608,14 @@
               const fileSizeFormatted = formatBytes(f.size || 0);
               const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
               const trashedDate = f.trashedAt ? new Date(f.trashedAt).toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+              
+              // Calculate remaining days out of 30 days
+              let daysLeft = 30;
+              if (f.trashedAt) {
+                const elapsedMs = Date.now() - new Date(f.trashedAt).getTime();
+                const elapsedDays = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
+                daysLeft = Math.max(0, 30 - elapsedDays);
+              }
 
               return `
                 <div data-file-id="${f.id}" class="p-3.5 flex items-center justify-between gap-3 hover:bg-rose-950/20 transition select-none ${isSelected ? 'bg-rose-950/30' : ''}">
@@ -2620,12 +2631,16 @@
 
                     <div class="space-y-0.5 overflow-hidden">
                       <span class="text-xs font-bold text-slate-400 truncate max-w-xs sm:max-w-md block line-through" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>
-                      <div class="flex items-center gap-3 text-[11px] text-slate-500 font-mono">
+                      <div class="flex items-center gap-2 text-[11px] text-slate-500 font-mono flex-wrap">
                         <span>${fileSizeFormatted}</span>
                         <span>•</span>
                         <span class="capitalize">${f.provider || 'cloud'}</span>
                         <span>•</span>
-                        <span class="text-rose-400/70">🗑️ ลบเมื่อ ${trashedDate}</span>
+                        <span class="text-rose-400/80">🗑️ ลบเมื่อ ${trashedDate}</span>
+                        <span>•</span>
+                        <span class="px-1.5 py-0.5 rounded ${daysLeft <= 3 ? 'bg-red-500/20 text-red-300 font-bold' : 'bg-slate-800 text-amber-300/90'} font-sans text-[10px]">
+                          เหลือ ${daysLeft} วันจะลบถาวร
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -2635,7 +2650,7 @@
                       <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
                       <span>กู้คืน</span>
                     </button>
-                    <button onclick="permanentDeleteSingle('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-red-700/30 text-slate-500 hover:text-red-400 transition" title="ลบถาวร">
+                    <button onclick="permanentDeleteSingle('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-red-700/30 text-slate-500 hover:text-red-400 transition cursor-pointer" title="ลบถาวรทันที">
                       <i data-lucide="x-circle" class="w-4 h-4"></i>
                     </button>
                   </div>
@@ -2739,17 +2754,17 @@
                   }
 
                   <!-- Hover Action Quick Overlay -->
-                  <div class="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 backdrop-blur-[3px] transition-all duration-200 flex items-center justify-center gap-1.5" onclick="event.stopPropagation()">
-                    <button onclick="openFullMediaViewer('${f.id}')" class="w-8 h-8 rounded-xl bg-orange-600 hover:bg-orange-500 text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="เปิดดูเต็มจอ (ดับเบิ้ลคลิก)">
+                  <div class="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 backdrop-blur-[3px] transition-all duration-200 flex items-center justify-center gap-1.5 pointer-events-none">
+                    <button onclick="event.stopPropagation(); openFullMediaViewer('${f.id}')" class="pointer-events-auto w-8 h-8 rounded-xl bg-orange-600 hover:bg-orange-500 text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="เปิดดูเต็มจอ (ดับเบิ้ลคลิก)">
                       <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button onclick="openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl ${isShared ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/30' : 'bg-slate-800/90 hover:bg-slate-700'} text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
+                    <button onclick="event.stopPropagation(); openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="pointer-events-auto w-8 h-8 rounded-xl ${isShared ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/30' : 'bg-slate-800/90 hover:bg-slate-700'} text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
                       <i data-lucide="${isShared ? 'link-2' : 'share-2'}" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button onclick="openFileTagsModal('${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="จัดการแท็ก">
+                    <button onclick="event.stopPropagation(); openFileTagsModal('${f.id}', '${escapeHtml(fileName)}')" class="pointer-events-auto w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="จัดการแท็ก">
                       <i data-lucide="tag" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button onclick="downloadSingleFileDirectly('${f.id}')" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-emerald-600 text-slate-200 hover:text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="ดาวน์โหลดไฟล์ต้นฉบับ">
+                    <button onclick="event.stopPropagation(); downloadSingleFileDirectly('${f.id}')" class="pointer-events-auto w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-emerald-600 text-slate-200 hover:text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="ดาวน์โหลดไฟล์ต้นฉบับ">
                       <i data-lucide="download" class="w-3.5 h-3.5"></i>
                     </button>
                   </div>
@@ -2873,41 +2888,20 @@
       setupLongPressForFiles(container);
     }
 
-    // Single Click = Toggle Select, Double Click = Open Fullscreen Preview
-    let fileClickTimer = null;
-    let lastClickedFileId = null;
-
+    // Single Click = Instant Toggle Select, Double Click = Open Fullscreen Preview
     function handleFileCardClick(e, fileId) {
       if (e.target.closest('button, a, input, [onclick*="openShareModal"], [onclick*="openFileTagsModal"]')) {
         return;
       }
       
-      // Delay single click action briefly to allow double click detection
-      if (fileClickTimer && lastClickedFileId === fileId) {
-        clearTimeout(fileClickTimer);
-        fileClickTimer = null;
-        lastClickedFileId = null;
-        openFullMediaViewer(fileId);
-        return;
-      }
-
-      lastClickedFileId = fileId;
-      fileClickTimer = setTimeout(() => {
-        // Toggle selection on single click
-        const isSelected = selectedFileIds.has(fileId);
-        handleToggleSelectFile(fileId, !isSelected);
-        updateCardSelectionVisual(fileId, !isSelected);
-        fileClickTimer = null;
-        lastClickedFileId = null;
-      }, 230);
+      // Toggle selection instantly on click with zero delay
+      const isSelected = selectedFileIds.has(fileId);
+      handleToggleSelectFile(fileId, !isSelected);
+      updateCardSelectionVisual(fileId, !isSelected);
     }
 
     function handleFileCardDblClick(e, fileId) {
-      if (fileClickTimer) {
-        clearTimeout(fileClickTimer);
-        fileClickTimer = null;
-        lastClickedFileId = null;
-      }
+      e.stopPropagation();
       openFullMediaViewer(fileId);
     }
 
@@ -3217,8 +3211,10 @@
       const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
       const ids = allFiles
         .filter(f => {
-          const ownerEmail = (f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
-          if (userEmailLower && ownerEmail !== userEmailLower) return false;
+          const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+          const fId = (f.uploaderId || '').trim();
+          const isBelongToUser = (userEmailLower && fEmail === userEmailLower) || (currentUser && currentUser.studentId && fId === currentUser.studentId);
+          if (!isBelongToUser) return false;
           const meta = repo.getFileMeta(f.id);
           return !!meta.isTrash;
         })
@@ -3235,8 +3231,10 @@
       const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
       const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
       const targets = allFiles.filter(f => {
-        const ownerEmail = (f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
-        if (userEmailLower && ownerEmail !== userEmailLower) return false;
+        const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+        const fId = (f.uploaderId || '').trim();
+        const isBelongToUser = (userEmailLower && fEmail === userEmailLower) || (currentUser && currentUser.studentId && fId === currentUser.studentId);
+        if (!isBelongToUser) return false;
         const meta = repo.getFileMeta(f.id);
         return !!meta.isTrash;
       });
@@ -3265,8 +3263,10 @@
         const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
         const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
         count = allFiles.filter(f => {
-          const ownerEmail = (f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
-          if (userEmailLower && ownerEmail !== userEmailLower) return false;
+          const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+          const fId = (f.uploaderId || '').trim();
+          const isBelongToUser = (userEmailLower && fEmail === userEmailLower) || (currentUser && currentUser.studentId && fId === currentUser.studentId);
+          if (!isBelongToUser) return false;
           const meta = repo.getFileMeta(f.id);
           return !!meta.isTrash;
         }).length;

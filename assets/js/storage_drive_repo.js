@@ -57,6 +57,39 @@
       this.comments = this.loadData(STORAGE_COMMENTS_KEY, []); // [ { id, targetType, targetId, authorName, authorEmail, content, createdAt } ]
       this.hasSyncedCloud = false;
       this.initSync();
+      this.cleanupExpiredTrash();
+    }
+
+    /**
+     * Auto cleanup trash older than 30 days
+     */
+    cleanupExpiredTrash() {
+      try {
+        const now = Date.now();
+        const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+        let changed = false;
+
+        for (const fileId in this.filesMeta) {
+          const meta = this.filesMeta[fileId];
+          if (meta && meta.isTrash && meta.trashedAt) {
+            const trashedTime = new Date(meta.trashedAt).getTime();
+            if (!isNaN(trashedTime) && (now - trashedTime) > thirtyDaysMs) {
+              // Permanently remove expired file from catalog & metadata
+              if (window.MultiCloudUploader && typeof window.MultiCloudUploader.deleteFromCatalog === 'function') {
+                window.MultiCloudUploader.deleteFromCatalog(fileId);
+              }
+              delete this.filesMeta[fileId];
+              changed = true;
+            }
+          }
+        }
+
+        if (changed) {
+          this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+        }
+      } catch (e) {
+        console.warn('[StorageDriveRepo] cleanupExpiredTrash error:', e);
+      }
     }
 
     loadData(key, fallback) {
