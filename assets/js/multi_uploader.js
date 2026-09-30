@@ -248,6 +248,42 @@
     }
 
     /**
+     * Generate unique filename in format: name(1).ext, name(2).ext if duplicated
+     */
+    deduplicateFileName(desiredName, uploaderIdentifier = '') {
+      let name = (desiredName || '').trim();
+      if (!name) name = 'file_' + Date.now();
+
+      const userLower = (uploaderIdentifier || '').toLowerCase().trim();
+      const existingNames = new Set(
+        this.fileCatalog
+          .filter(f => {
+            if (!userLower) return true;
+            const fEmail = (f.uploaderEmail || '').toLowerCase().trim();
+            const fId = (f.uploaderId || '').trim().toLowerCase();
+            return fEmail === userLower || fId === userLower;
+          })
+          .map(f => (f.name || f.originalName || '').trim().toLowerCase())
+      );
+
+      if (!existingNames.has(name.toLowerCase())) {
+        return name;
+      }
+
+      const dotIdx = name.lastIndexOf('.');
+      const base = dotIdx !== -1 ? name.substring(0, dotIdx) : name;
+      const ext = dotIdx !== -1 ? name.substring(dotIdx) : '';
+
+      let counter = 1;
+      let candidate = `${base}(${counter})${ext}`;
+      while (existingNames.has(candidate.toLowerCase())) {
+        counter++;
+        candidate = `${base}(${counter})${ext}`;
+      }
+      return candidate;
+    }
+
+    /**
      * Upload an image file with multi-provider failover
      * @param {File|Blob|string} fileInput - File object or Base64 DataURL
      * @param {Object} options - { onProgress: function(percent, statusText), preferredProvider: string, customName: string }
@@ -260,15 +296,7 @@
     async upload(fileInput, options = {}) {
       const onProgress = options.onProgress || (() => {});
       const preferred = options.preferredProvider || this.config.activeProvider || 'auto';
-      const fileName = options.customName || (fileInput.name ? fileInput.name : ('file_' + Date.now()));
-
-      let fileObj = fileInput;
-      let base64Clean = '';
-
-      // Convert Base64 DataURL to File if needed
-      if (typeof fileInput === 'string' && fileInput.startsWith('data:')) {
-        fileObj = this.dataURLtoFile(fileInput, 'upload_' + Date.now() + '.png');
-      }
+      const rawName = options.customName || (fileInput && fileInput.name ? fileInput.name : ('file_' + Date.now()));
 
       // Resolve user settings (Quota & Image resolution)
       let storedUser = null;
@@ -277,6 +305,17 @@
       } catch(e) {}
       const userKey = options.uploaderId || (storedUser?.studentId || options.uploaderEmail || storedUser?.email || '');
       const userSettings = this.getUserSettings(userKey);
+
+      // Deduplicate file name: if duplicated, becomes fileName(1).ext
+      const fileName = options.skipDeduplicate ? rawName : this.deduplicateFileName(rawName, userKey);
+
+      let fileObj = fileInput;
+      let base64Clean = '';
+
+      // Convert Base64 DataURL to File if needed
+      if (typeof fileInput === 'string' && fileInput.startsWith('data:')) {
+        fileObj = this.dataURLtoFile(fileInput, fileName);
+      }
 
       // Auto Smart Image Compression (Custom resolution / quality per member or global setting)
       // Can be explicitly bypassed if user turns off compression (skipCompression = true)
@@ -393,6 +432,7 @@
             const fileItem = {
               id: 'FILE_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
               name: fileName,
+              originalName: fileName,
               url: uploadResult.url,
               provider: provider,
               publicId: uploadResult.publicId || '',

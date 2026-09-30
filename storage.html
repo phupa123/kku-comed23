@@ -4571,6 +4571,12 @@
       renderStagedQueue();
     }
 
+    function updateStagedFileName(index, newName) {
+      if (selectedFilesQueue[index]) {
+        selectedFilesQueue[index].customName = (newName || '').trim() || selectedFilesQueue[index].name;
+      }
+    }
+
     function cancelAllStagedFiles() {
       selectedFilesQueue = [];
       renderStagedQueue();
@@ -4605,20 +4611,23 @@
 
         return `
           <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3 overflow-hidden">
+            <div class="flex items-center gap-3 overflow-hidden flex-grow">
               <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
                 ${isImg 
                   ? `<img src="${thumbSrc}" class="w-full h-full object-cover">`
                   : `<span class="font-mono text-[10px] font-bold text-orange-400">${ext}</span>`
                 }
               </div>
-              <div class="space-y-0.5 overflow-hidden">
-                <span class="text-xs font-bold text-white truncate max-w-xs block">${escapeHtml(file.name)}</span>
-                <span class="text-[10px] font-mono text-amber-400">${formatBytes(file.size)}</span>
+              <div class="space-y-0.5 overflow-hidden flex-grow mr-2">
+                <input type="text" value="${escapeHtml(file.customName || file.name)}" onchange="updateStagedFileName(${idx}, this.value)" class="text-xs font-bold text-white bg-transparent border-b border-dashed border-slate-700 hover:border-orange-500 focus:border-orange-500 focus:bg-slate-900 px-1 py-0.5 rounded w-full outline-none transition" title="คลิกเพื่อแก้ไขชื่อไฟล์">
+                <div class="flex items-center gap-2 text-[10px] font-mono text-amber-400">
+                  <span>${formatBytes(file.size)}</span>
+                  ${file.customName && file.customName !== file.name ? '<span class="text-orange-400 font-sans text-[9px]">(เปลี่ยนชื่อ)</span>' : ''}
+                </div>
               </div>
             </div>
 
-            <button onclick="removeStagedFile(${idx})" class="p-2 text-slate-500 hover:text-rose-400 transition" title="ลบไฟล์นี้">
+            <button onclick="removeStagedFile(${idx})" class="p-2 text-slate-500 hover:text-rose-400 transition flex-shrink-0 cursor-pointer" title="ลบไฟล์นี้">
               <i data-lucide="x" class="w-4 h-4"></i>
             </button>
           </div>
@@ -4674,11 +4683,13 @@
         const file = selectedFilesQueue[i];
         const fileNum = i + 1;
 
-        statusText.innerHTML = `<span>กำลังอัปโหลดไฟล์ที่ ${fileNum}/${totalFiles}: <strong>${escapeHtml(file.name)}</strong></span>`;
+        const displayName = file.customName || file.name;
+        statusText.innerHTML = `<span>กำลังอัปโหลดไฟล์ที่ ${fileNum}/${totalFiles}: <strong>${escapeHtml(displayName)}</strong></span>`;
         bytesText.textContent = `ไฟล์ ${fileNum}/${totalFiles} (${formatBytes(file.size)})`;
 
         try {
           const res = await window.MultiCloudUploader.upload(file, {
+            customName: displayName,
             preferredProvider: chosenProvider,
             skipCompression: isUncompressedMode,
             category: 'ไดรฟ์ส่วนตัว',
