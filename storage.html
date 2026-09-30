@@ -1991,6 +1991,15 @@
         userEmail: getCurrentUserEmail()
       });
 
+      // Check Password Requirement first
+      if (verify.requirePassword || verify.requiresPassword || share.hasPassword) {
+        // If not already unlocked in this session
+        if (!sessionUnlockedItems.has(`share_${share.shareCode}`)) {
+          openPasswordChallengeModal(share.targetType, share.targetId, `แชร์ลิงก์: ${share.title || share.shareCode}`, share);
+          return;
+        }
+      }
+
       if (!verify.allowed) {
         if (verify.reason === 'EXPIRED') {
           alert('⚠️ ขออภัย ลิงก์แชร์นี้หมดอายุการใช้งานแล้ว');
@@ -2002,11 +2011,6 @@
         } else {
           alert(`⛔ ${verify.reason || 'ไม่ได้รับสิทธิ์เข้าถึงลิงก์นี้'}`);
         }
-        return;
-      }
-
-      if (verify.requirePassword || verify.requiresPassword) {
-        openPasswordChallengeModal(share.targetType, share.targetId, `แชร์ลิงก์: ${share.shareCode}`, share);
         return;
       }
 
