@@ -95,11 +95,35 @@
         updated_at: new Date().toISOString()
       };
 
-      const { data, error } = await client
+      let { data, error } = await client
         .from('plans')
         .insert([payload])
         .select()
         .single();
+
+      // หากเจอปัญหาคอลัมน์ใหม่ยังไม่ถูก reload ใน Supabase Schema Cache (PGRST204)
+      if (error && error.code === 'PGRST204') {
+        console.warn("[PlansRepo] Schema cache column mismatch detected. Retrying with basic columns...", error);
+        const fallbackPayload = {
+          title: payload.title,
+          description: payload.description,
+          start_date: payload.start_date,
+          end_date: payload.end_date,
+          creator_email: payload.creator_email
+        };
+        const retryResult = await client
+          .from('plans')
+          .insert([fallbackPayload])
+          .select()
+          .single();
+        
+        if (retryResult.error) {
+          console.error("[PlansRepo] Fallback create also failed:", retryResult.error);
+          throw error;
+        }
+        data = retryResult.data;
+        error = null;
+      }
 
       if (error) {
         console.error("[PlansRepo] Create error:", error);

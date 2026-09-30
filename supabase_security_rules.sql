@@ -472,6 +472,29 @@ CREATE TABLE IF NOT EXISTS public.plans (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ปรับเพิ่มคอลัมน์ใหม่อัตโนมัติ (กรณีตาราง plans ถูกสร้างไว้ก่อนแล้ว)
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'activity';
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS scope TEXT DEFAULT 'department';
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'normal';
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS start_date TIMESTAMPTZ;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS end_date TIMESTAMPTZ;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS is_all_day BOOLEAN DEFAULT false;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS location TEXT;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS meet_link TEXT;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS color TEXT DEFAULT '#f97316';
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS creator_email TEXT;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS creator_name TEXT;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS creator_student_id TEXT;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS collaborators JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS attachments JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS is_official BOOLEAN DEFAULT false;
+
+-- สั่ง Reload PostgREST Schema Cache ให้ Supabase มองเห็นคอลัมน์ใหม่ทันที
+NOTIFY pgrst, 'reload schema';
+
 CREATE TABLE IF NOT EXISTS public.plan_collaborators (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   plan_id UUID REFERENCES public.plans(id) ON DELETE CASCADE,
