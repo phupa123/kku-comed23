@@ -360,7 +360,7 @@
 
       // Build Provider Sequence based on Admin Priority & Enabled settings
       let providers = [];
-      const configuredPriority = Array.isArray(this.config.providerPriority) ? this.config.providerPriority : ['cloudinary', 'catbox', 'imgbb', 'freeimage'];
+      const configuredPriority = Array.isArray(this.config.providerPriority) ? this.config.providerPriority : ['catbox', 'imgbb', 'cloudinary', 'freeimage'];
       const enabledList = Array.isArray(this.config.enabledProviders) ? this.config.enabledProviders : configuredPriority;
 
       if (preferred !== 'auto' && enabledList.includes(preferred)) {
@@ -373,9 +373,9 @@
         }
       }
 
-      // If all disabled, fallback to any
+      // If all disabled, fallback to [catbox, imgbb, cloudinary]
       if (providers.length === 0) {
-        providers = ['cloudinary', 'catbox', 'imgbb', 'freeimage'];
+        providers = ['catbox', 'imgbb', 'cloudinary', 'freeimage'];
       }
 
       let lastError = null;

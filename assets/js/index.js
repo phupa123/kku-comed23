@@ -1742,6 +1742,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ================= INDEX PLANS & CALENDAR WIDGET LOGIC =================
 let indexPlansData = [];
 let indexPlansFilter = 'all';
+let currentCalendarMonth = new Date().getMonth();
+let currentCalendarYear = new Date().getFullYear();
 
 async function loadIndexPlans() {
   const container = document.getElementById('indexPlansContainer');
@@ -1758,6 +1760,7 @@ async function loadIndexPlans() {
     } catch (e) {}
 
     indexPlansData = await window.PlansRepo.fetchPlans(userEmail, false);
+    renderIndexCalendarWidget();
     renderIndexPlans();
 
     // Listen for Realtime updates
@@ -1785,7 +1788,136 @@ function setIndexPlansFilter(f) {
     if (f === 'department') bDept.className = 'px-3 py-1.5 rounded-xl bg-orange-500 text-white transition';
     if (f === 'personal') bPersonal.className = 'px-3 py-1.5 rounded-xl bg-orange-500 text-white transition';
   }
+  renderIndexCalendarWidget();
   renderIndexPlans();
+}
+
+// Interactive Month Calendar Widget embedded before plan cards
+function renderIndexCalendarWidget() {
+  let calendarContainer = document.getElementById('indexCalendarInteractiveBox');
+  const gridContainer = document.getElementById('indexPlansContainer');
+  if (!gridContainer) return;
+
+  if (!calendarContainer) {
+    const calHtml = `
+      <div id="indexCalendarInteractiveBox" class="p-5 rounded-3xl bg-slate-900/90 border border-white/10 shadow-2xl backdrop-blur-xl space-y-4 mb-6">
+        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 id="calendarMonthTitle" class="text-sm font-black text-white">ปฏิทินงานสาขา</h3>
+              <p class="text-[11px] text-slate-400">คลิกวันที่เพื่อกรองดูงานในวันนั้น หรือตรวจสอบกำหนดส่งงาน</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-white/10">
+            <button onclick="changeIndexCalMonth(-1)" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition" title="เดือนก่อนหน้า">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <span id="calendarMonthLabel" class="text-xs font-mono font-bold text-orange-400 px-2 min-w-[90px] text-center">--/----</span>
+            <button onclick="changeIndexCalMonth(1)" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition" title="เดือนถัดไป">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Calendar Days Grid -->
+        <div class="grid grid-cols-7 gap-1.5 text-center text-xs">
+          <div class="font-bold text-rose-400 text-[11px] py-1">อา.</div>
+          <div class="font-bold text-slate-400 text-[11px] py-1">จ.</div>
+          <div class="font-bold text-slate-400 text-[11px] py-1">อ.</div>
+          <div class="font-bold text-slate-400 text-[11px] py-1">พ.</div>
+          <div class="font-bold text-slate-400 text-[11px] py-1">พฤ.</div>
+          <div class="font-bold text-slate-400 text-[11px] py-1">ศ.</div>
+          <div class="font-bold text-sky-400 text-[11px] py-1">ส.</div>
+        </div>
+        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1.5 text-center"></div>
+      </div>
+    `;
+    gridContainer.insertAdjacentHTML('beforebegin', calHtml);
+    calendarContainer = document.getElementById('indexCalendarInteractiveBox');
+  }
+
+  // Populate Days in Month
+  const title = document.getElementById('calendarMonthTitle');
+  const label = document.getElementById('calendarMonthLabel');
+  const daysGrid = document.getElementById('calendarDaysGrid');
+  if (!label || !daysGrid) return;
+
+  const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+  label.textContent = `${monthNames[currentCalendarMonth]} ${currentCalendarYear + 543}`;
+  if (title) title.textContent = `ปฏิทินงานประจำเดือน ${monthNames[currentCalendarMonth]}`;
+
+  const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay();
+  const totalDays = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
+
+  daysGrid.innerHTML = '';
+
+  // Blank days before month starts
+  for (let i = 0; i < firstDay; i++) {
+    const blank = document.createElement('div');
+    blank.className = 'h-10 rounded-xl bg-slate-950/30 opacity-20';
+    daysGrid.appendChild(blank);
+  }
+
+  const today = new Date();
+  const isCurrentMonth = today.getMonth() === currentCalendarMonth && today.getFullYear() === currentCalendarYear;
+
+  for (let d = 1; d <= totalDays; d++) {
+    const cellDate = new Date(currentCalendarYear, currentCalendarMonth, d);
+    const dateStr = cellDate.toISOString().slice(0, 10);
+    
+    // Find plans starting or active on this day
+    const matchingPlans = (indexPlansData || []).filter(p => {
+      if (!p.start_date) return false;
+      const pDate = new Date(p.start_date).toISOString().slice(0, 10);
+      return pDate === dateStr;
+    });
+
+    const isToday = isCurrentMonth && (today.getDate() === d);
+    const dayCell = document.createElement('div');
+    dayCell.className = `min-h-[44px] p-1.5 rounded-xl border transition flex flex-col items-center justify-between cursor-pointer ${
+      isToday ? 'bg-orange-500/20 border-orange-500 text-orange-300 font-black' :
+      matchingPlans.length > 0 ? 'bg-slate-900 border-sky-500/40 text-white hover:border-orange-500' :
+      'bg-slate-950/60 border-white/5 text-slate-400 hover:bg-slate-800'
+    }`;
+    
+    dayCell.onclick = () => {
+      window.location.href = `Plans.html?date=${dateStr}`;
+    };
+
+    let dotsHtml = '';
+    if (matchingPlans.length > 0) {
+      dotsHtml = `
+        <div class="flex items-center gap-0.5 mt-0.5">
+          ${matchingPlans.slice(0, 3).map(p => `
+            <span class="w-1.5 h-1.5 rounded-full ${p.scope === 'department' ? 'bg-orange-400' : 'bg-sky-400'}" title="${p.title}"></span>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    dayCell.innerHTML = `
+      <span class="text-xs font-mono">${d}</span>
+      ${dotsHtml}
+    `;
+    daysGrid.appendChild(dayCell);
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function changeIndexCalMonth(delta) {
+  currentCalendarMonth += delta;
+  if (currentCalendarMonth < 0) {
+    currentCalendarMonth = 11;
+    currentCalendarYear -= 1;
+  } else if (currentCalendarMonth > 11) {
+    currentCalendarMonth = 0;
+    currentCalendarYear += 1;
+  }
+  renderIndexCalendarWidget();
 }
 
 function renderIndexPlans() {
@@ -1821,7 +1953,7 @@ function renderIndexPlans() {
     const timeText = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 
     const card = document.createElement('a');
-    card.href = 'Plans.html';
+    card.href = `Plans.html?plan=${p.id}`;
     card.className = 'p-4 rounded-3xl bg-slate-900/90 border border-white/10 hover:border-orange-500/50 transition flex flex-col justify-between space-y-3 group';
 
     const scopeBadge = p.scope === 'department' ? '🏛️ งานสาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
@@ -1857,7 +1989,63 @@ function renderIndexPlans() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
+// ================= DYNAMIC STORAGE QUOTA SYNCHRONIZATION ON INDEX =================
+function syncDynamicQuotaOnIndex() {
+  try {
+    let userEmail = null;
+    try {
+      const s = sessionStorage.getItem('COMED_USER_SESSION') || localStorage.getItem('COMED_USER_SESSION');
+      if (s) {
+        const u = JSON.parse(s);
+        userEmail = u.email;
+      }
+    } catch(e) {}
+
+    let quotaGB = 5;
+    if (window.MultiCloudUploader && typeof window.MultiCloudUploader.getUserSettings === 'function') {
+      const settings = window.MultiCloudUploader.getUserSettings(userEmail);
+      quotaGB = settings.quotaGB || 5;
+    } else {
+      // Direct inspect from memberSettings in LocalStorage
+      try {
+        const raw = localStorage.getItem('COMED_MEMBER_STORAGE_SETTINGS_V1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (userEmail && parsed.userOverrides && parsed.userOverrides[userEmail.toLowerCase()]) {
+            quotaGB = parsed.userOverrides[userEmail.toLowerCase()].quotaGB || 5;
+          } else if (parsed.global && parsed.global.quotaGB) {
+            quotaGB = parsed.global.quotaGB;
+          }
+        }
+      } catch (e) {}
+    }
+
+    const heroBadge = document.getElementById('heroQuotaBadge');
+    const heroLabel = document.getElementById('heroQuotaLabel');
+    const uploadPill = document.getElementById('heroUploadPillText');
+
+    if (heroBadge) {
+      heroBadge.textContent = `${quotaGB} GB`;
+    }
+    if (heroLabel && userEmail) {
+      heroLabel.textContent = `Cloud Quota (${userEmail.split('@')[0]})`;
+    }
+    if (uploadPill) {
+      uploadPill.textContent = `ฝากไฟล์ด่วน ${quotaGB}GB`;
+    }
+  } catch (err) {
+    console.warn("Quota sync on index warning:", err);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadIndexPlans();
+  syncDynamicQuotaOnIndex();
+  // Listen for storage quota change across browser tabs or windows
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'COMED_MEMBER_STORAGE_SETTINGS_V1' || e.key === 'COMED_CUSTOM_QUOTAS_V1') {
+      syncDynamicQuotaOnIndex();
+    }
+  });
 });
 

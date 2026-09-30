@@ -608,9 +608,9 @@
             <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-sky-900/60 text-center backdrop-blur-xl">
               <div class="text-xl sm:text-2xl font-black text-sky-400 font-mono flex items-center justify-center gap-1">
                 <i data-lucide="cloud" class="w-4 h-4 text-sky-400 opacity-80"></i>
-                <span>5 GB</span>
+                <span id="heroQuotaBadge">5 GB</span>
               </div>
-              <div class="text-[10px] sm:text-[11px] text-slate-400 font-bold">Cloud Quota /คน</div>
+              <div class="text-[10px] sm:text-[11px] text-slate-400 font-bold" id="heroQuotaLabel">Cloud Quota /คน</div>
             </div>
             <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-orange-950/60 text-center backdrop-blur-xl">
               <div class="text-xl sm:text-2xl font-black text-orange-400 font-mono">60</div>
@@ -722,7 +722,7 @@
               <div class="grid grid-cols-2 gap-2 pt-1">
                 <a href="upload.html" target="_blank" class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-sky-400/50 transition flex items-center gap-2 text-slate-300 hover:text-white">
                   <i data-lucide="cloud-upload" class="w-4 h-4 text-sky-400 flex-shrink-0"></i>
-                  <span class="text-[11px] font-bold truncate">ฝากไฟล์ด่วน 5GB</span>
+                  <span class="text-[11px] font-bold truncate" id="heroUploadPillText">ฝากไฟล์ด่วน (Cloud)</span>
                 </a>
                 <a href="shortlink.html" class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-amber-400/50 transition flex items-center gap-2 text-slate-300 hover:text-white">
                   <i data-lucide="link-2" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
@@ -1307,6 +1307,11 @@
 
   <!-- Include Students Database Script -->
   <script src="students_data.js"></script>
+  <!-- MultiCloud Uploader & Quota Sync -->
+  <script src="assets/js/multi_uploader.js"></script>
+  <!-- QR Code Generator & Universal QR Suite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
   <!-- Plans Supabase Repository for Index Calendar Widget -->
   <script src="assets/js/plans_repo.js"></script>
   <!-- Main Index Page Logic -->

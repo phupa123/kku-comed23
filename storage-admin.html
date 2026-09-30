@@ -540,6 +540,22 @@
           </select>
         </div>
 
+        <!-- Upload Provider Priority Chain -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-800">
+          <label class="font-bold text-amber-400 block flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              <span>ลำดับความสำคัญของโฮสต์อัปโหลด (Upload Priority Chain):</span>
+            </span>
+          </label>
+          <select id="globalProviderPriorityPreset" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white text-xs outline-none">
+            <option value="catbox_imgbb_cloudinary" selected>🥇 1. Catbox.moe ➡️ 🥈 2. ImgBB ➡️ 🥉 3. Cloudinary (แนะนำ)</option>
+            <option value="cloudinary_imgbb_catbox">🥇 1. Cloudinary ➡️ 🥈 2. ImgBB ➡️ 🥉 3. Catbox</option>
+            <option value="imgbb_catbox_cloudinary">🥇 1. ImgBB ➡️ 🥈 2. Catbox ➡️ 🥉 3. Cloudinary</option>
+          </select>
+          <span class="text-[10px] text-slate-500 block">ระบบจะพยายามส่งไฟล์ไปที่อันดับ 1 ก่อน หากล้มเหลวจะ Failover ไปอันดับ 2 และ 3 โดยอัตโนมัติ</span>
+        </div>
+
         <!-- Auto Compress Toggle -->
         <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
           <div>
@@ -1679,6 +1695,7 @@
       const quotaVal = parseFloat(document.getElementById('globalQuotaInput').value) || 5;
       const preset = document.getElementById('globalResolutionPreset').value;
       const autoCompress = document.getElementById('globalAutoCompressCheck').checked;
+      const priorityPreset = document.getElementById('globalProviderPriorityPreset')?.value || 'catbox_imgbb_cloudinary';
 
       let maxDim = 1600;
       let quality = 0.82;
@@ -1688,19 +1705,31 @@
       else if (preset === '2048_0.90') { maxDim = 2048; quality = 0.90; }
       else if (preset === '4000_1.0') { maxDim = 4000; quality = 1.0; }
 
+      let priorityChain = ['catbox', 'imgbb', 'cloudinary', 'freeimage'];
+      if (priorityPreset === 'cloudinary_imgbb_catbox') {
+        priorityChain = ['cloudinary', 'imgbb', 'catbox', 'freeimage'];
+      } else if (priorityPreset === 'imgbb_catbox_cloudinary') {
+        priorityChain = ['imgbb', 'catbox', 'cloudinary', 'freeimage'];
+      }
+
       if (window.MultiCloudUploader) {
         window.MultiCloudUploader.setGlobalSettings({
           quotaGB: quotaVal,
           maxDimension: maxDim,
           quality: quality,
-          autoCompress: autoCompress
+          autoCompress: autoCompress,
+          providerPriority: priorityChain
         });
+        if (window.MultiCloudUploader.config) {
+          window.MultiCloudUploader.config.providerPriority = priorityChain;
+          window.MultiCloudUploader.saveConfig();
+        }
       }
 
       updateGlobalSettingsLabels();
       renderMembersAuditTable();
       closeGlobalSettingsModal();
-      alert(`✅ บันทึกการตั้งค่าส่วนรวมเรียบร้อยแล้ว!\n- โควตาเริ่มต้น: ${quotaVal} GB ต่อคน\n- ความละเอียดสูงสุด: ${maxDim}px (${Math.round(quality*100)}%)`);
+      alert(`✅ บันทึกการตั้งค่าส่วนรวมเรียบร้อยแล้ว!\n- โควตาเริ่มต้น: ${quotaVal} GB ต่อคน\n- ลำดับความสำคัญ: ${priorityChain.slice(0, 3).join(' ➡️ ')}\n- ความละเอียดสูงสุด: ${maxDim}px (${Math.round(quality*100)}%)`);
     }
 
     // 7. Member Specific Override Logic

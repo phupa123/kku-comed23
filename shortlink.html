@@ -743,24 +743,75 @@
       }
       appBtn.href = appScheme;
 
+      // Dynamic Preview Frame / Card
+      let previewWrap = document.getElementById('redirectPreviewFrameWrap');
+      if (!previewWrap) {
+        const previewHtml = `
+          <div id="redirectPreviewFrameWrap" class="w-full max-w-md rounded-2xl overflow-hidden border border-slate-800 bg-slate-900/60 mb-4 shadow-xl">
+            <div class="px-3 py-1.5 bg-slate-950/80 border-b border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+              <span class="flex items-center gap-1.5 font-bold text-slate-300">
+                <i data-lucide="scan-eye" class="w-3.5 h-3.5 text-orange-400"></i>
+                <span>ตัวอย่างเว็บไซต์ปลายทาง (Live Preview)</span>
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">COMED KKU 69</span>
+            </div>
+            <div class="relative h-28 w-full bg-slate-950 flex items-center justify-center overflow-hidden">
+              <iframe id="redirectPreviewIframe" src="${link.targetUrl}" sandbox="allow-scripts allow-same-origin" class="w-[200%] h-[200%] scale-50 origin-top-left pointer-events-none opacity-80" loading="lazy"></iframe>
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent pointer-events-none"></div>
+            </div>
+          </div>
+        `;
+        const targetCard = document.getElementById('redirectTargetDisplay')?.parentElement;
+        if (targetCard) {
+          targetCard.insertAdjacentHTML('afterend', previewHtml);
+        }
+      } else {
+        const iframe = document.getElementById('redirectPreviewIframe');
+        if (iframe) iframe.src = link.targetUrl;
+      }
+
       if (typeof lucide !== 'undefined') lucide.createIcons();
 
-      // Countdown (3 seconds)
-      let timeLeft = 3;
-      let progressPercent = 20;
-      if (countdownBadge) countdownBadge.textContent = `${timeLeft}s`;
+      // Countdown duration: Admin configurable or default 1.5s
+      const totalSeconds = (link.redirectDelay !== undefined && link.redirectDelay !== null) ? Number(link.redirectDelay) : 1.5;
+      
+      if (totalSeconds <= 0) {
+        // Immediate jump
+        window.location.replace(link.targetUrl);
+        return;
+      }
+
+      let remainingMs = Math.round(totalSeconds * 1000);
+      const stepMs = 100;
+      const initialTotalMs = remainingMs;
+
+      // Initial badge & progress bar
+      if (countdownBadge) countdownBadge.textContent = (remainingMs / 1000).toFixed(1) + 's';
+      if (prog) {
+        prog.style.transition = 'width 100ms linear';
+        prog.style.width = '0%';
+      }
+
+      if (redirectTimer) clearInterval(redirectTimer);
 
       redirectTimer = setInterval(() => {
-        timeLeft -= 1;
-        progressPercent += 35;
-        if (prog) prog.style.width = Math.min(100, progressPercent) + '%';
-        if (countdownBadge && timeLeft >= 0) countdownBadge.textContent = `${timeLeft}s`;
+        remainingMs -= stepMs;
+        const currentSec = Math.max(0, remainingMs / 1000).toFixed(1);
+        const percent = Math.min(100, Math.max(0, ((initialTotalMs - remainingMs) / initialTotalMs) * 100));
 
-        if (timeLeft <= 0) {
+        if (prog) prog.style.width = percent + '%';
+        if (countdownBadge) countdownBadge.textContent = `${currentSec}s`;
+
+        if (remainingMs <= 0) {
           clearInterval(redirectTimer);
-          window.location.replace(link.targetUrl);
+          // Play fade out transition
+          overlay.style.transition = 'opacity 0.25s ease-out';
+          overlay.style.opacity = '0';
+          setTimeout(() => {
+            window.location.replace(link.targetUrl);
+          }, 150);
         }
-      }, 1000);
+      }, stepMs);
     }
 
     // Toggle advanced options accordion

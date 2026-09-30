@@ -51,9 +51,32 @@
               </div>
             </div>
 
+            <!-- QR Code Controls: Color & Size (Customizable) -->
+            <div class="flex items-center justify-between gap-2 px-1 text-xs">
+              <!-- Color Palette -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-bold text-slate-400">สี QR:</span>
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="window.QRSuite.setQrColor('#090d16')" class="w-5 h-5 rounded-full bg-slate-900 border-2 border-white/60 hover:scale-110 transition cursor-pointer" title="สีดำเข้ม"></button>
+                  <button type="button" onclick="window.QRSuite.setQrColor('#ea580c')" class="w-5 h-5 rounded-full bg-orange-600 border border-slate-700 hover:scale-110 transition cursor-pointer" title="สีส้ม COMED"></button>
+                  <button type="button" onclick="window.QRSuite.setQrColor('#0284c7')" class="w-5 h-5 rounded-full bg-sky-600 border border-slate-700 hover:scale-110 transition cursor-pointer" title="สีฟ้าสดใส"></button>
+                  <button type="button" onclick="window.QRSuite.setQrColor('#059669')" class="w-5 h-5 rounded-full bg-emerald-600 border border-slate-700 hover:scale-110 transition cursor-pointer" title="สีเขียวมรกต"></button>
+                  <button type="button" onclick="window.QRSuite.setQrColor('#7c3aed')" class="w-5 h-5 rounded-full bg-purple-600 border border-slate-700 hover:scale-110 transition cursor-pointer" title="สีม่วง"></button>
+                  <input type="color" id="qrSuiteCustomColorInput" value="#090d16" onchange="window.QRSuite.setQrColor(this.value)" class="w-5 h-5 rounded-full bg-transparent border-0 cursor-pointer overflow-hidden" title="เลือกสีเอง">
+                </div>
+              </div>
+
+              <!-- Resize Zoom In/Out -->
+              <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-xl border border-slate-800">
+                <button type="button" onclick="window.QRSuite.adjustQrSize(-24)" class="w-5 h-5 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-800 transition" title="ย่อเล็กลง">-</button>
+                <span id="qrSuiteSizeIndicator" class="text-[10px] font-mono text-slate-300 font-bold px-1">192px</span>
+                <button type="button" onclick="window.QRSuite.adjustQrSize(+24)" class="w-5 h-5 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-800 transition" title="ขยายใหญ่ขึ้น">+</button>
+              </div>
+            </div>
+
             <!-- QR Code Canvas Display -->
-            <div class="p-4 bg-white rounded-2xl inline-block shadow-lg mx-auto border-4 border-white">
-              <div id="qrSuiteShareQrContainer" class="w-48 h-48 flex items-center justify-center overflow-hidden"></div>
+            <div class="p-4 bg-white rounded-2xl inline-block shadow-lg mx-auto border-4 border-white transition-all duration-200" id="qrSuiteCanvasWrapper">
+              <div id="qrSuiteShareQrContainer" class="flex items-center justify-center overflow-hidden transition-all duration-200"></div>
             </div>
 
             <div class="space-y-2 pt-1 text-left">
@@ -234,6 +257,27 @@
       this.renderShareQr();
     },
 
+    currentQrColor: "#090d16",
+    currentQrSize: 192,
+
+    setQrColor(color) {
+      if (!color) return;
+      this.currentQrColor = color;
+      const customInput = document.getElementById('qrSuiteCustomColorInput');
+      if (customInput) customInput.value = color;
+      this.renderShareQr();
+    },
+
+    adjustQrSize(delta) {
+      let newSize = this.currentQrSize + delta;
+      if (newSize < 144) newSize = 144;
+      if (newSize > 288) newSize = 288;
+      this.currentQrSize = newSize;
+      const indicator = document.getElementById('qrSuiteSizeIndicator');
+      if (indicator) indicator.textContent = `${newSize}px`;
+      this.renderShareQr();
+    },
+
     renderShareQr() {
       if (!this.currentShareData) return;
       const data = this.currentShareData;
@@ -247,13 +291,15 @@
 
       const container = document.getElementById('qrSuiteShareQrContainer');
       container.innerHTML = '';
+      container.style.width = `${this.currentQrSize}px`;
+      container.style.height = `${this.currentQrSize}px`;
 
       if (typeof QRCode !== 'undefined') {
         new QRCode(container, {
           text: targetUrl,
-          width: 192,
-          height: 192,
-          colorDark: "#090d16",
+          width: this.currentQrSize,
+          height: this.currentQrSize,
+          colorDark: this.currentQrColor || "#090d16",
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.H
         });
@@ -501,6 +547,33 @@
   // Auto initialize when DOM ready
   document.addEventListener('DOMContentLoaded', () => {
     QRSuite.ensureModalsExist();
+
+    // Universal Floating Quick Access Buttons (Share QR & Scan QR)
+    if (!document.getElementById('qrSuiteFloatingWidget')) {
+      const floatHtml = `
+        <div id="qrSuiteFloatingWidget" class="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 pointer-events-auto">
+          <!-- Expanded Menu -->
+          <div id="qrSuiteFloatMenu" class="hidden flex-col items-end gap-2 mb-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
+            <button onclick="window.QRSuite.openScannerModal(); document.getElementById('qrSuiteFloatMenu').classList.add('hidden');" class="px-3.5 py-2 rounded-2xl bg-slate-900/95 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 text-xs font-bold shadow-xl backdrop-blur-md flex items-center gap-2 cursor-pointer transition transform hover:scale-105 active:scale-95">
+              <i data-lucide="scan-line" class="w-4 h-4"></i>
+              <span>สแกน QR Code</span>
+            </button>
+            <button onclick="window.QRSuite.openPageQrModal(); document.getElementById('qrSuiteFloatMenu').classList.add('hidden');" class="px-3.5 py-2 rounded-2xl bg-slate-900/95 hover:bg-slate-800 text-orange-400 border border-orange-500/30 text-xs font-bold shadow-xl backdrop-blur-md flex items-center gap-2 cursor-pointer transition transform hover:scale-105 active:scale-95">
+              <i data-lucide="qr-code" class="w-4 h-4"></i>
+              <span>แชร์หน้านี้ผ่าน QR</span>
+            </button>
+          </div>
+          <!-- Trigger FAB -->
+          <button onclick="const m = document.getElementById('qrSuiteFloatMenu'); m.classList.toggle('hidden');" class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 via-amber-500 to-sky-500 p-[1.5px] shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer group" title="เปิดเมนู QR Code & สแกนเนอร์">
+            <div class="w-full h-full bg-slate-950/90 rounded-[14px] flex items-center justify-center text-orange-400 group-hover:text-white transition">
+              <i data-lucide="qr-code" class="w-5 h-5"></i>
+            </div>
+          </button>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', floatHtml);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
   });
 
 })(window);

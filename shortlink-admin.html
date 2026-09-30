@@ -277,6 +277,23 @@
           </div>
         </div>
 
+        <!-- Redirect Countdown Delay (Admin Configurable) -->
+        <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
+          <label class="font-bold text-amber-400 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="timer" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>ระยะเวลานับถอยหลังก่อนส่งต่อไปยังปลายทาง (Redirect Delay)</span>
+            </span>
+            <span id="formRedirectDelayVal" class="text-xs font-mono text-orange-400 font-bold">1.5 วินาที</span>
+          </label>
+          <div class="flex items-center gap-3">
+            <input type="range" id="formRedirectDelay" min="0" max="10" step="0.5" value="1.5"
+              oninput="document.getElementById('formRedirectDelayVal').textContent = this.value + ' วินาที'"
+              class="w-full accent-orange-500 cursor-pointer">
+          </div>
+          <span class="text-[10px] text-slate-500 block">ค่ามาตรฐานคือ 1.5 วินาที สำหรับ Admin สามารถตั้งเป็น 0s เพื่อข้ามทันที หรือเพิ่มได้สูงสุด 10s</span>
+        </div>
+
         <!-- Active Switch -->
         <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
           <div>
@@ -587,6 +604,8 @@
       document.getElementById('formPwNote').textContent = 'เว้นว่างไว้หากไม่ต้องการล็อครหัส';
       document.getElementById('formExpiresAt').value = '';
       document.getElementById('formQrColor').value = '#ea580c';
+      document.getElementById('formRedirectDelay').value = '1.5';
+      document.getElementById('formRedirectDelayVal').textContent = '1.5 วินาที';
       document.getElementById('formIsActive').checked = true;
 
       document.getElementById('linkModal').classList.remove('hidden');
@@ -616,6 +635,9 @@
       }
 
       document.getElementById('formQrColor').value = link.qrSettings?.colorDark || '#ea580c';
+      const delay = (link.redirectDelay !== undefined && link.redirectDelay !== null) ? Number(link.redirectDelay) : 1.5;
+      document.getElementById('formRedirectDelay').value = String(delay);
+      document.getElementById('formRedirectDelayVal').textContent = delay + ' วินาที';
       document.getElementById('formIsActive').checked = Boolean(link.isActive);
 
       document.getElementById('linkModal').classList.remove('hidden');
@@ -637,6 +659,7 @@
       const expiresAtInput = document.getElementById('formExpiresAt').value;
       const expiresAt = expiresAtInput ? new Date(expiresAtInput).toISOString() : null;
       const qrColor = document.getElementById('formQrColor').value;
+      const redirectDelay = parseFloat(document.getElementById('formRedirectDelay').value) || 1.5;
       const isActive = document.getElementById('formIsActive').checked;
 
       const payload = {
@@ -645,6 +668,7 @@
         category,
         title: title || undefined,
         expiresAt,
+        redirectDelay,
         qrSettings: {
           colorDark: qrColor,
           colorLight: '#ffffff',

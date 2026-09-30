@@ -1045,12 +1045,58 @@
         </div>
       </div>
 
+      <!-- Folder Quick Switch Tabs & In-Folder Management Toolbar -->
+      <div id="driveFolderTabsContainer" class="glass-card p-3 rounded-2xl border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between gap-2 overflow-x-auto custom-scrollbar pb-1">
+          <div class="flex items-center gap-1.5 flex-nowrap" id="driveFolderTabsList">
+            <!-- Dynamically populated folder tabs: Root + User Folders -->
+          </div>
+          <button onclick="openCreateFolderModal()" class="px-2.5 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-bold transition flex items-center gap-1 flex-shrink-0 cursor-pointer" title="สร้างโฟลเดอร์ใหม่">
+            <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
+            <span>สร้างโฟลเดอร์</span>
+          </button>
+        </div>
+
+        <!-- In-Folder Context Action Toolbar (Visible when currentFolderId is active) -->
+        <div id="insideFolderActionToolbar" class="hidden pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400 font-bold flex items-center gap-1">
+              <i data-lucide="folder-open" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>จัดการโฟลเดอร์ปัจจุบัน:</span>
+            </span>
+            <span id="insideFolderActiveName" class="font-bold text-white px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700">-</span>
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button onclick="handleEditCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold transition flex items-center gap-1 cursor-pointer">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>เปลี่ยนชื่อ / สี</span>
+            </button>
+            <button onclick="handleShareCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 hover:text-orange-300 font-bold transition flex items-center gap-1 cursor-pointer">
+              <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              <span>แชร์โฟลเดอร์นี้</span>
+            </button>
+            <button onclick="handleLockCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 font-bold transition flex items-center gap-1 cursor-pointer">
+              <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>ล็อครหัสผ่าน</span>
+            </button>
+            <button onclick="handleUploadDirectToCurrentFolder()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black shadow-md transition flex items-center gap-1 cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>อัปโหลดลงโฟลเดอร์นี้</span>
+            </button>
+            <button onclick="handleDeleteCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold transition flex items-center gap-1 cursor-pointer" title="ลบโฟลเดอร์">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Section: Folders (Folder Cards) -->
       <div id="foldersSection" class="space-y-3">
         <div class="flex items-center justify-between text-xs text-slate-400 font-bold px-1">
           <span class="flex items-center gap-1.5">
             <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
-            <span>โฟลเดอร์ (<span id="foldersCountText">0</span>)</span>
+            <span>โฟลเดอร์ย่อย (<span id="foldersCountText">0</span>)</span>
           </span>
           <button onclick="openCreateFolderModal()" class="text-orange-400 hover:text-orange-300 flex items-center gap-1 cursor-pointer">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
@@ -2368,12 +2414,109 @@
 
     function renderDrive() {
       renderBreadcrumbs();
+      renderFolderTabs();
       renderFoldersList();
       renderFilesList();
       updateUploadFolderDropdown();
       if (typeof updateTagFilterDropdown === 'function') updateTagFilterDropdown();
       updateTrashBadge();
       if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Dynamic Folder Tabs Switcher & In-Folder Toolbar
+    function renderFolderTabs() {
+      const tabsList = document.getElementById('driveFolderTabsList');
+      const insideToolbar = document.getElementById('insideFolderActionToolbar');
+      const activeNameSpan = document.getElementById('insideFolderActiveName');
+      if (!tabsList) return;
+
+      const userEmail = getCurrentUserEmail();
+      const repo = getRepo();
+      const allFolders = repo.getUserFolders(userEmail);
+
+      // Root Tab
+      let tabsHtml = `
+        <button onclick="navigateToFolder(null)" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
+          currentFolderId === null ? 'bg-orange-500 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+        }">
+          <i data-lucide="hard-drive" class="w-3.5 h-3.5 ${currentFolderId === null ? 'text-white' : 'text-orange-400'}"></i>
+          <span>หน้าแรกไดรฟ์</span>
+        </button>
+      `;
+
+      // Folder Tabs
+      allFolders.forEach(f => {
+        const isCurrent = f.id === currentFolderId;
+        const colorIcon = f.color === 'sky' ? 'text-sky-400' : f.color === 'emerald' ? 'text-emerald-400' : f.color === 'purple' ? 'text-purple-400' : 'text-amber-400';
+        tabsHtml += `
+          <button onclick="navigateToFolder('${f.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
+            isCurrent ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
+          }">
+            <i data-lucide="${f.isLocked ? 'folder-lock' : 'folder'}" class="w-3.5 h-3.5 ${isCurrent ? 'text-white' : colorIcon}"></i>
+            <span>${escapeHtml(f.name)}</span>
+          </button>
+        `;
+      });
+
+      tabsList.innerHTML = tabsHtml;
+
+      // Inside Folder Action Bar
+      if (currentFolderId && insideToolbar) {
+        const currentF = allFolders.find(f => f.id === currentFolderId) || (currentSharedFolderContext && currentSharedFolderContext.folderMeta?.id === currentFolderId ? currentSharedFolderContext.folderMeta : null);
+        if (currentF) {
+          insideToolbar.classList.remove('hidden');
+          if (activeNameSpan) activeNameSpan.textContent = currentF.name;
+        } else {
+          insideToolbar.classList.add('hidden');
+        }
+      } else if (insideToolbar) {
+        insideToolbar.classList.add('hidden');
+      }
+    }
+
+    function handleEditCurrentFolder() {
+      if (!currentFolderId) return;
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const folder = repo.getUserFolders(userEmail).find(f => f.id === currentFolderId);
+      if (!folder) return;
+
+      const newName = prompt("แก้ไขชื่อโฟลเดอร์:", folder.name);
+      if (newName && newName.trim()) {
+        repo.updateFolder(currentFolderId, { name: newName.trim() });
+        renderDrive();
+      }
+    }
+
+    function handleShareCurrentFolder() {
+      if (!currentFolderId) return;
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const folder = repo.getUserFolders(userEmail).find(f => f.id === currentFolderId);
+      if (folder) openShareModal('folder', folder.id, folder.name);
+    }
+
+    function handleLockCurrentFolder() {
+      if (!currentFolderId) return;
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const folder = repo.getUserFolders(userEmail).find(f => f.id === currentFolderId);
+      if (folder) openLockModal('folder', folder.id, folder.name);
+    }
+
+    function handleUploadDirectToCurrentFolder() {
+      const uploadArea = document.getElementById('driveUploadCollapsibleBody');
+      if (uploadArea && uploadArea.classList.contains('hidden')) {
+        toggleUploadAreaVisibility();
+      }
+      const sel = document.getElementById('uploadTargetFolderSelect');
+      if (sel) sel.value = currentFolderId || '';
+      document.getElementById('fileInput').click();
+    }
+
+    function handleDeleteCurrentFolder() {
+      if (!currentFolderId) return;
+      handleDeleteFolder(currentFolderId);
     }
 
     function renderBreadcrumbs() {

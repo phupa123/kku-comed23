@@ -63,6 +63,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
   <script src="students_data.js"></script>
+  <!-- QRCode Generator & Universal QR Suite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
   <!-- Strict No-LocalStorage Plans Repository -->
   <script src="assets/js/plans_repo.js"></script>
 
@@ -584,8 +587,15 @@
       list.forEach(p => {
         const pct = Math.round(p.progress_percentage || 0);
         const card = document.createElement('div');
-        card.className = 'glass-card rounded-3xl p-5 border border-white/10 hover:border-orange-500/50 transition cursor-pointer flex flex-col justify-between space-y-4 group';
-        card.onclick = () => openRoomBoard(p);
+        card.className = 'glass-card rounded-3xl p-5 border border-white/10 hover:border-orange-500/50 transition cursor-pointer flex flex-col justify-between space-y-4 group select-none relative';
+        card.onclick = (e) => {
+          if (longPressTriggered) return;
+          openRoomBoard(p);
+        };
+        // Attach long-press to open action menu
+        attachLongPress(card, (e) => {
+          showPlanContextMenu(e, p);
+        });
 
         const scopeLabel = p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
         const scopeClass = p.scope === 'department' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : p.scope === 'shared' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-slate-500/20 text-slate-300 border-slate-500/30';
@@ -810,6 +820,14 @@
     }
 
     function openCreatePlanModal() {
+      // REQUIRE AUTHENTICATED ACCOUNT TO CREATE NEW ROOM/PLAN
+      if (!appState.user || !appState.user.email) {
+        if (confirm("🔒 คุณต้องเข้าสู่ระบบบัญชี KKU Mail ก่อนจึงจะสามารถสร้างห้องงานใหม่ได้\n\n(บุคคลทั่วไปสามารถเข้าดูห้องงานในลิงก์สาธารณะได้เท่านั้น)\n\nคุณต้องการเข้าสู่ระบบตอนนี้เลยหรือไม่?")) {
+          triggerGoogleLogin();
+        }
+        return;
+      }
+
       document.getElementById('createPlanModal').classList.remove('hidden');
       document.getElementById('createPlanModal').classList.add('flex');
       const now = new Date();
@@ -822,6 +840,119 @@
     function closeCreatePlanModal() {
       document.getElementById('createPlanModal').classList.add('hidden');
       document.getElementById('createPlanModal').classList.remove('flex');
+    }
+
+    // ================= LONG-PRESS CONTEXT MENU (กดค้างเพื่อแก้ไข/จัดการ) =================
+    let longPressTimer = null;
+    let longPressTriggered = false;
+
+    function attachLongPress(element, onLongPressCallback) {
+      const start = (e) => {
+        longPressTriggered = false;
+        longPressTimer = setTimeout(() => {
+          longPressTriggered = true;
+          // Haptic vibration if supported on mobile
+          if (navigator.vibrate) navigator.vibrate(50);
+          onLongPressCallback(e);
+        }, 550);
+      };
+      const cancel = () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      };
+
+      element.addEventListener('pointerdown', start);
+      element.addEventListener('pointerup', cancel);
+      element.addEventListener('pointerleave', cancel);
+      element.addEventListener('pointercancel', cancel);
+      element.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        onLongPressCallback(e);
+      });
+    }
+
+    function showPlanContextMenu(e, plan) {
+      closePlanContextMenu();
+      const menu = document.createElement('div');
+      menu.id = 'planQuickContextMenu';
+      menu.className = 'fixed z-50 bg-slate-900/95 border border-white/20 rounded-2xl p-2 shadow-2xl backdrop-blur-xl space-y-1 text-xs animate-in fade-in zoom-in-95 duration-150 min-w-[200px]';
+      
+      const x = Math.min(window.innerWidth - 220, Math.max(10, e.clientX || 100));
+      const y = Math.min(window.innerHeight - 200, Math.max(10, e.clientY || 100));
+      menu.style.left = `${x}px`;
+      menu.style.top = `${y}px`;
+
+      menu.innerHTML = `
+        <div class="px-2.5 py-1 text-[10px] font-black uppercase text-orange-400 border-b border-white/10 flex items-center gap-1">
+          <i data-lucide="sparkles" class="w-3 h-3"></i>
+          <span>เมนูด่วน (กดค้าง): ${escapeHtml(plan.title).slice(0, 15)}</span>
+        </div>
+        <button onclick="openRoomBoardFromMenu('${plan.id}')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-orange-500/20 hover:text-orange-300 font-bold transition flex items-center gap-2 cursor-pointer">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>เปิดบอร์ดห้องงาน</span>
+        </button>
+        <button onclick="sharePlanQuickLink('${plan.id}')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-white/10 font-bold transition flex items-center gap-2 cursor-pointer">
+          <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span>แชร์ QR Code ห้องนี้</span>
+        </button>
+        <button onclick="quickDeletePlanConfirm('${plan.id}')" class="w-full text-left px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/20 font-bold transition flex items-center gap-2 cursor-pointer">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>ย้ายลงถังขยะ</span>
+        </button>
+      `;
+
+      document.body.appendChild(menu);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      const outsideClick = (evt) => {
+        if (!menu.contains(evt.target)) {
+          closePlanContextMenu();
+          document.removeEventListener('pointerdown', outsideClick);
+        }
+      };
+      setTimeout(() => document.addEventListener('pointerdown', outsideClick), 50);
+    }
+
+    function closePlanContextMenu() {
+      const old = document.getElementById('planQuickContextMenu');
+      if (old) old.remove();
+    }
+
+    function openRoomBoardFromMenu(planId) {
+      closePlanContextMenu();
+      const p = appState.plans.find(x => x.id === planId);
+      if (p) openRoomBoard(p);
+    }
+
+    function sharePlanQuickLink(planId) {
+      closePlanContextMenu();
+      const p = appState.plans.find(x => x.id === planId);
+      const url = `${window.location.origin}${window.location.pathname}?plan=${planId}`;
+      if (window.QRSuite) {
+        window.QRSuite.openPageQrModal({
+          title: `ห้องงาน: ${p ? p.title : 'PlanToDo'}`,
+          subtitle: 'สแกน QR Code เพื่อเปิดดูบอร์ดห้องงานนี้',
+          userUrl: url,
+          adminUrl: url
+        });
+      }
+    }
+
+    async function quickDeletePlanConfirm(planId) {
+      closePlanContextMenu();
+      const p = appState.plans.find(x => x.id === planId);
+      if (!p) return;
+      if (confirm(`ต้องการย้ายห้องงาน "${p.title}" ลงถังขยะหรือไม่?`)) {
+        await window.PlansRepo.deletePlan(planId, 'user');
+        await refreshAllData();
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
 
     function toggleNewRoomCollaborators(val) {
