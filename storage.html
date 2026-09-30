@@ -460,6 +460,66 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(249, 115, 22, 0.7);
     }
+
+    /* === FAST THUMBNAIL SKELETON & BLUR-UP EFFECT (LIKE ROSTER) === */
+    .file-thumb-skeleton {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, #090e1a 20%, #172237 40%, #233554 50%, #172237 60%, #090e1a 80%);
+      background-size: 200% 100%;
+      animation: fileShimmer 1.5s infinite linear;
+      z-index: 5;
+      transition: opacity 0.4s ease-out, visibility 0.4s;
+    }
+    @keyframes fileShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .file-thumb-skeleton.loaded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .file-thumb-img {
+      filter: blur(10px) scale(1.05);
+      opacity: 0.15;
+      transition: filter 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s ease;
+      will-change: filter, opacity, transform;
+    }
+    .file-thumb-img.is-loaded {
+      filter: blur(0px) scale(1);
+      opacity: 1;
+    }
+
+    /* === MODERN CONTEXT MENU & LONG-PRESS SHEET === */
+    #driveContextMenu {
+      position: fixed;
+      z-index: 100;
+      min-width: 220px;
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      transform-origin: top left;
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+    }
+    #driveContextMenu.hidden {
+      display: none;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    /* Fullscreen Modal Nav Buttons Hover */
+    .gallery-nav-btn {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .gallery-nav-btn:hover {
+      transform: scale(1.1);
+      background-color: rgba(249, 115, 22, 0.9);
+      color: white;
+    }
+    .gallery-nav-btn:active {
+      transform: scale(0.92);
+    }
   </style>
   <!-- Universal Themed Intro Loader -->
   <script src="assets/js/universal_intro.js"></script>
@@ -1465,6 +1525,22 @@
           <span class="kbd-badge">Del</span> หรือ <span class="kbd-badge">Backspace</span>
         </div>
         <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">คลิก 1 ครั้ง เพื่อเลือกไฟล์</span>
+          <span class="text-[11px] text-amber-400 font-bold">1 Click (Select)</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">ดับเบิ้ลคลิก เพื่อเปิดดูไฟล์เต็มจอ</span>
+          <span class="text-[11px] text-orange-400 font-bold">Double Click (Preview)</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">คลิกขวา หรือกดค้าง (Long Press)</span>
+          <span class="text-[11px] text-sky-400 font-bold">เปิดเมนูคำสั่งด่วน</span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-slate-300">เลื่อนดูไฟล์ภาพ/วิดีโอถัดไป-ก่อนหน้า</span>
+          <div class="flex gap-1"><span class="kbd-badge">←</span> หรือ <span class="kbd-badge">→</span> / ปัดจอ</div>
+        </div>
+        <div class="flex items-center justify-between py-2">
           <span class="text-slate-300">ปิดหน้าต่าง / ยกเลิกการเลือก</span>
           <span class="kbd-badge">Esc</span>
         </div>
@@ -1603,6 +1679,144 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- 10. Modern Fullscreen Media & File Viewer Modal (Swipe / Arrow Navigation / Fast Preview / Original Download) -->
+  <div id="modalFullMediaViewer" class="fixed inset-0 z-[60] bg-slate-950/95 backdrop-blur-2xl hidden flex-col transition-all duration-300 select-none">
+    
+    <!-- Top Gallery Navigation & Control Bar -->
+    <div class="px-4 py-3.5 border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-xl flex items-center justify-between gap-4 z-20 flex-shrink-0">
+      
+      <!-- File Metadata Info -->
+      <div class="flex items-center gap-3 min-w-0">
+        <div id="galleryTypeIcon" class="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center justify-center flex-shrink-0 shadow-inner">
+          <i data-lucide="image" class="w-5 h-5"></i>
+        </div>
+        <div class="min-w-0">
+          <h3 id="galleryFileName" class="text-sm sm:text-base font-black text-white truncate max-w-xs sm:max-w-md md:max-w-lg">ชื่อไฟล์</h3>
+          <div class="flex items-center gap-2 text-[11px] text-slate-400 font-mono mt-0.5">
+            <span id="galleryFileSize">-</span>
+            <span>•</span>
+            <span id="galleryIndexIndicator" class="px-2 py-0.2 rounded-full bg-slate-800 text-amber-300 font-bold border border-slate-700">1 / 1</span>
+            <span id="galleryProviderBadge" class="hidden sm:inline-block px-1.5 py-0.2 rounded bg-slate-800/80 text-slate-400 text-[10px] capitalize">Cloud</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons: Prev, Next, Download, Close -->
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        
+        <!-- Navigation Buttons -->
+        <button id="galleryBtnPrevTop" onclick="navigateGallery(-1)" class="gallery-nav-btn w-9 h-9 rounded-xl bg-slate-800/90 text-slate-300 hover:text-white flex items-center justify-center border border-slate-700/60 cursor-pointer shadow" title="ย้อนกลับ (ลูกศรซ้าย ←)">
+          <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </button>
+        <button id="galleryBtnNextTop" onclick="navigateGallery(1)" class="gallery-nav-btn w-9 h-9 rounded-xl bg-slate-800/90 text-slate-300 hover:text-white flex items-center justify-center border border-slate-700/60 cursor-pointer shadow" title="ถัดไป (ลูกศรขวา →)">
+          <i data-lucide="chevron-right" class="w-5 h-5"></i>
+        </button>
+
+        <div class="h-6 w-px bg-slate-800 mx-1"></div>
+
+        <!-- Download Original File Button -->
+        <button id="galleryDownloadBtn" onclick="handleGalleryDownloadOriginal()" class="uiverse-btn-glow px-3.5 py-2 rounded-xl text-white font-black text-xs transition flex items-center gap-1.5 cursor-pointer shadow-lg active:scale-95" title="ดาวน์โหลดไฟล์ต้นฉบับ 100%">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">ดาวน์โหลดต้นฉบับ</span>
+        </button>
+
+        <!-- Close Button -->
+        <button onclick="closeFullMediaViewer()" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center border border-slate-700/60 transition cursor-pointer shadow" title="ปิด (Esc)">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Stage (Swipeable / Zoomable / Responsive Preview) -->
+    <div id="galleryStage" class="flex-grow relative flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+      
+      <!-- Floating Side Navigation Arrow Buttons (Desktop) -->
+      <button id="galleryFloatPrev" onclick="navigateGallery(-1)" class="gallery-nav-btn absolute left-4 sm:left-8 z-30 w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-orange-500 text-white flex items-center justify-center backdrop-blur-md border border-white/10 shadow-2xl cursor-pointer" title="รูปก่อนหน้า (ปัดขวา / ←)">
+        <i data-lucide="chevron-left" class="w-7 h-7"></i>
+      </button>
+
+      <button id="galleryFloatNext" onclick="navigateGallery(1)" class="gallery-nav-btn absolute right-4 sm:right-8 z-30 w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-orange-500 text-white flex items-center justify-center backdrop-blur-md border border-white/10 shadow-2xl cursor-pointer" title="รูปถัดไป (ปัดซ้าย / →)">
+        <i data-lucide="chevron-right" class="w-7 h-7"></i>
+      </button>
+
+      <!-- Center Media Canvas Container -->
+      <div id="galleryMediaCanvas" class="w-full h-full flex items-center justify-center relative">
+        <!-- Injected via JavaScript dynamically -->
+      </div>
+    </div>
+
+    <!-- Bottom Thumbnail Strip / Quick Preview Info -->
+    <div class="px-4 py-2 border-t border-slate-800/60 bg-slate-950/70 backdrop-blur-md flex items-center justify-between text-xs text-slate-400 z-20 flex-shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="kbd-badge">←</span>
+        <span class="kbd-badge">→</span>
+        <span class="hidden sm:inline">กดปุ่มลูกศรหรือปัดหน้าจอเพื่อเลื่อนดูไฟล์ถัดไป / ก่อนหน้า</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="handleGalleryOpenShare()" class="text-slate-400 hover:text-orange-400 transition flex items-center gap-1 cursor-pointer">
+          <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+          <span>แชร์ไฟล์นี้</span>
+        </button>
+        <span>•</span>
+        <button onclick="handleGalleryOpenInNewTab()" class="text-slate-400 hover:text-sky-400 transition flex items-center gap-1 cursor-pointer">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>เปิดลิงก์ตรง</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Context Menu & Long-Press Action Sheet -->
+  <div id="driveContextMenu" class="hidden rounded-2xl bg-slate-900/95 border border-slate-700/80 shadow-2xl p-1.5 space-y-0.5 text-xs text-slate-200">
+    <!-- Header with item name -->
+    <div class="px-3 py-2 border-b border-slate-800/80 mb-1">
+      <p id="ctxItemTitle" class="font-bold text-white truncate max-w-[200px]">เมนูคำสั่ง</p>
+      <p id="ctxItemSubtitle" class="text-[10px] text-slate-400 font-mono truncate"></p>
+    </div>
+
+    <button onclick="handleCtxAction('open')" class="w-full px-3 py-2 rounded-xl hover:bg-orange-500/20 hover:text-orange-300 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="eye" class="w-4 h-4 text-orange-400"></i>
+      <span class="font-bold">เปิดดูเต็มจอ (Preview)</span>
+    </button>
+
+    <button onclick="handleCtxAction('select')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="check-square" class="w-4 h-4 text-amber-400"></i>
+      <span id="ctxSelectLabel">เลือกไฟล์นี้ (Select)</span>
+    </button>
+
+    <button onclick="handleCtxAction('download')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
+      <span>ดาวน์โหลดต้นฉบับ</span>
+    </button>
+
+    <button onclick="handleCtxAction('share')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="share-2" class="w-4 h-4 text-sky-400"></i>
+      <span>แชร์ลิงก์ / QR Code</span>
+    </button>
+
+    <button onclick="handleCtxAction('tag')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="tags" class="w-4 h-4 text-purple-400"></i>
+      <span>จัดการแท็กไฟล์</span>
+    </button>
+
+    <button onclick="handleCtxAction('move')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="folder-symlink" class="w-4 h-4 text-indigo-400"></i>
+      <span>ย้ายไปโฟลเดอร์</span>
+    </button>
+
+    <button onclick="handleCtxAction('lock')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i>
+      <span>ตั้งรหัสผ่านล็อค</span>
+    </button>
+
+    <div class="h-px bg-slate-800 my-1"></div>
+
+    <button onclick="handleCtxAction('delete')" class="w-full px-3 py-2 rounded-xl hover:bg-rose-950/40 text-rose-400 hover:text-rose-300 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="trash-2" class="w-4 h-4"></i>
+      <span>ย้ายไปถังขยะ</span>
+    </button>
   </div>
 
   <!-- Toast Notification Container -->
@@ -2427,18 +2641,44 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    // Fast Thumbnail Optimizer for Drive items (matching Roster speed & WebP cache)
+    function getOptimizedDriveThumbUrl(rawUrl, targetSize = 250) {
+      if (!rawUrl || typeof rawUrl !== 'string') return '';
+      if (rawUrl.includes('/storage/v1/object/public/')) {
+        return rawUrl.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + `?width=${targetSize}&height=${targetSize}&resize=cover&quality=80`;
+      }
+      if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/upload/')) {
+        return rawUrl.replace('/upload/', `/upload/c_thumb,w_${targetSize},h_${targetSize},q_auto,f_auto/`);
+      }
+      if (rawUrl.includes('catbox.moe') || rawUrl.includes('files.catbox.moe')) {
+        return `https://images.weserv.nl/?url=${encodeURIComponent(rawUrl)}&w=${targetSize}&h=${targetSize}&fit=cover&output=webp&q=80`;
+      }
+      return rawUrl;
+    }
+
+    function handleDriveImageThumbLoaded(imgEl) {
+      if (!imgEl) return;
+      imgEl.classList.add('is-loaded');
+      const skeleton = imgEl.parentElement?.querySelector('.file-thumb-skeleton') || imgEl.previousElementSibling;
+      if (skeleton && skeleton.classList.contains('file-thumb-skeleton')) {
+        skeleton.classList.add('loaded');
+      }
+    }
+
     function renderFilesGridView(files, container) {
       const repo = getRepo();
       container.innerHTML = `
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           ${files.map(f => {
             const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+            const isVid = (f.type && f.type.startsWith('video/')) || (f.url && f.url.match(/\.(mp4|mov|webm)$/i));
             const isSelected = selectedFileIds.has(f.id);
             const fileName = f.originalName || f.id;
             const fileSizeFormatted = formatBytes(f.size);
             const shareInfo = repo.getShareByTarget('file', f.id);
             const isShared = !!shareInfo;
             const tags = repo.getFileTags(f.id) || [];
+            const thumbUrl = isImg ? getOptimizedDriveThumbUrl(f.url, 280) : '';
 
             let tagsHtml = '';
             if (tags.length > 0) {
@@ -2451,22 +2691,40 @@
             }
 
             return `
-              <div data-file-id="${f.id}" draggable="true" ondragstart="handleFileDragStart(event, '${f.id}')" ondragend="handleFileDragEnd(event)" class="group relative rounded-3xl bg-slate-900/70 hover:bg-slate-850/90 backdrop-blur-md border ${isSelected ? 'border-orange-500 ring-4 ring-orange-500/20 shadow-orange-500/20 shadow-lg' : isShared ? 'border-orange-500/40 bg-gradient-to-b from-orange-950/20 to-slate-900/80 shadow-orange-500/5' : 'border-slate-800/80 hover:border-slate-700/90'} overflow-hidden transition-all duration-300 flex flex-col justify-between hover:shadow-2xl select-none cursor-grab active:cursor-grabbing hover:-translate-y-1">
+              <div data-file-id="${f.id}" draggable="true" ondragstart="handleFileDragStart(event, '${f.id}')" ondragend="handleFileDragEnd(event)"
+                onclick="handleFileCardClick(event, '${f.id}')"
+                ondblclick="handleFileCardDblClick(event, '${f.id}')"
+                oncontextmenu="handleFileContextMenu(event, '${f.id}')"
+                class="file-item-card group relative rounded-3xl bg-slate-900/70 hover:bg-slate-850/90 backdrop-blur-md border ${isSelected ? 'border-orange-500 ring-4 ring-orange-500/20 shadow-orange-500/20 shadow-lg bg-orange-950/20' : isShared ? 'border-orange-500/40 bg-gradient-to-b from-orange-950/20 to-slate-900/80 shadow-orange-500/5' : 'border-slate-800/80 hover:border-slate-700/90'} overflow-hidden transition-all duration-300 flex flex-col justify-between hover:shadow-2xl select-none cursor-pointer hover:-translate-y-1"
+                title="คลิก 1 ครั้งเพื่อเลือก • ดับเบิ้ลคลิกเพื่อเปิดดู • คลิกขวาหรือกดค้างเพื่อดูเมนู">
                 
                 <!-- Selection Checkbox & Top Overlay -->
-                <div class="absolute top-2.5 left-2.5 z-20">
+                <div class="absolute top-2.5 left-2.5 z-20" onclick="event.stopPropagation()">
                   <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded-md text-orange-500 bg-slate-900/90 border-slate-700 focus:ring-0 cursor-pointer shadow">
                 </div>
 
-                <div class="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5">
+                <div class="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5" onclick="event.stopPropagation()">
                   ${isShared ? '<span class="px-2 py-0.5 rounded-lg bg-orange-500/25 border border-orange-500/40 text-orange-300 text-[10px] font-black flex items-center gap-1 shadow-sm backdrop-blur-sm" title="กำลังแชร์อยู่"><i data-lucide="share-2" class="w-2.5 h-2.5"></i> แชร์</span>' : ''}
                   ${f.isLocked ? '<span class="w-6 h-6 rounded-lg bg-amber-500/25 border border-amber-500/40 text-amber-300 flex items-center justify-center text-xs shadow-sm backdrop-blur-sm"><i data-lucide="lock" class="w-3 h-3"></i></span>' : ''}
+                  ${isVid ? '<span class="px-1.5 py-0.5 rounded-md bg-purple-500/30 text-purple-300 border border-purple-500/40 text-[9px] font-mono flex items-center gap-0.5 shadow-sm"><i data-lucide="play" class="w-2.5 h-2.5 fill-current"></i> VDO</span>' : ''}
                 </div>
 
                 <!-- Preview Area -->
-                <div class="h-36 w-full bg-slate-950/80 flex items-center justify-center overflow-hidden relative cursor-pointer" onclick="handleFilePreviewClick('${f.id}')">
+                <div class="h-36 w-full bg-slate-950/80 flex items-center justify-center overflow-hidden relative">
                   ${isImg && !f.isLocked
-                    ? `<img src="${f.url}" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">`
+                    ? `
+                      <div class="file-thumb-skeleton"></div>
+                      <img src="${thumbUrl || f.url}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 file-thumb-img" onload="handleDriveImageThumbLoaded(this)" onerror="this.classList.add('is-loaded')">
+                    `
+                    : isVid && !f.isLocked
+                    ? `
+                      <div class="relative w-full h-full flex items-center justify-center bg-purple-950/20 group-hover:bg-purple-950/40 transition">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 text-purple-300 flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                          <i data-lucide="play" class="w-6 h-6 fill-purple-400"></i>
+                        </div>
+                        <span class="absolute bottom-2 right-2 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-black/60 text-purple-200">VIDEO</span>
+                      </div>
+                    `
                     : `<div class="text-center p-3 text-slate-500 group-hover:text-orange-400 transition duration-300">
                          <i data-lucide="${f.isLocked ? 'file-lock' : getFileIconName(f.type, f.originalName)}" class="w-10 h-10 mx-auto mb-1 opacity-70 group-hover:scale-110 transition-transform duration-300"></i>
                          <span class="text-[10px] font-mono uppercase font-bold tracking-wider">${((fileName.split('.').pop() || '')).slice(0, 5)}</span>
@@ -2474,19 +2732,19 @@
                   }
 
                   <!-- Hover Action Quick Overlay -->
-                  <div class="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 backdrop-blur-[3px] transition-all duration-200 flex items-center justify-center gap-2">
-                    <button onclick="event.stopPropagation(); openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl ${isShared ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/30' : 'bg-orange-600 hover:bg-orange-500 shadow-orange-500/30'} text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
+                  <div class="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 backdrop-blur-[3px] transition-all duration-200 flex items-center justify-center gap-1.5" onclick="event.stopPropagation()">
+                    <button onclick="openFullMediaViewer('${f.id}')" class="w-8 h-8 rounded-xl bg-orange-600 hover:bg-orange-500 text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="เปิดดูเต็มจอ (ดับเบิ้ลคลิก)">
+                      <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button onclick="openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl ${isShared ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/30' : 'bg-slate-800/90 hover:bg-slate-700'} text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
                       <i data-lucide="${isShared ? 'link-2' : 'share-2'}" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button onclick="event.stopPropagation(); openFileTagsModal('${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="จัดการแท็ก">
+                    <button onclick="openFileTagsModal('${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="จัดการแท็ก">
                       <i data-lucide="tag" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button onclick="event.stopPropagation(); openSingleMoveModal('${f.id}', '${escapeHtml(fileName)}')" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="ย้ายไปโฟลเดอร์">
-                      <i data-lucide="folder-symlink" class="w-3.5 h-3.5"></i>
-                    </button>
-                    <a href="${f.url}" target="_blank" download onclick="event.stopPropagation()" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="ดาวน์โหลด">
+                    <button onclick="downloadSingleFileDirectly('${f.id}')" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-emerald-600 text-slate-200 hover:text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="ดาวน์โหลดไฟล์ต้นฉบับ">
                       <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                    </a>
+                    </button>
                   </div>
                 </div>
 
@@ -2507,6 +2765,7 @@
           }).join('')}
         </div>
       `;
+      setupLongPressForFiles(container);
     }
 
     function renderFilesListView(files, container) {
@@ -2519,9 +2778,11 @@
               const fileName = f.originalName || f.id;
               const fileSizeFormatted = formatBytes(f.size);
               const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+              const isVid = (f.type && f.type.startsWith('video/')) || (f.url && f.url.match(/\.(mp4|mov|webm)$/i));
               const shareInfo = repo.getShareByTarget('file', f.id);
               const isShared = !!shareInfo;
               const tags = repo.getFileTags(f.id) || [];
+              const thumbUrl = isImg ? getOptimizedDriveThumbUrl(f.url, 120) : '';
 
               let tagsHtml = '';
               if (tags.length > 0) {
@@ -2529,23 +2790,36 @@
               }
 
               return `
-                <div data-file-id="${f.id}" draggable="true" ondragstart="handleFileDragStart(event, '${f.id}')" ondragend="handleFileDragEnd(event)" class="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-850 transition select-none cursor-grab active:cursor-grabbing ${isSelected ? 'bg-orange-950/20' : ''}">
+                <div data-file-id="${f.id}" draggable="true" ondragstart="handleFileDragStart(event, '${f.id}')" ondragend="handleFileDragEnd(event)"
+                  onclick="handleFileCardClick(event, '${f.id}')"
+                  ondblclick="handleFileCardDblClick(event, '${f.id}')"
+                  oncontextmenu="handleFileContextMenu(event, '${f.id}')"
+                  class="file-item-card p-3.5 flex items-center justify-between gap-3 hover:bg-slate-850 transition select-none cursor-pointer ${isSelected ? 'bg-orange-950/20' : ''}"
+                  title="คลิก 1 ครั้งเพื่อเลือก • ดับเบิ้ลคลิกเพื่อเปิดดู • คลิกขวาหรือกดค้างเพื่อดูเมนู">
                   
                   <div class="flex items-center gap-3 overflow-hidden">
-                    <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded text-orange-500 bg-slate-950 border-slate-700 focus:ring-0 cursor-pointer flex-shrink-0">
+                    <div onclick="event.stopPropagation()">
+                      <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded text-orange-500 bg-slate-950 border-slate-700 focus:ring-0 cursor-pointer flex-shrink-0">
+                    </div>
                     
-                    <div class="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer" onclick="handleFilePreviewClick('${f.id}')">
+                    <div class="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
                       ${isImg && !f.isLocked
-                        ? `<img src="${f.url}" class="w-full h-full object-cover">`
+                        ? `
+                          <div class="file-thumb-skeleton"></div>
+                          <img src="${thumbUrl || f.url}" class="w-full h-full object-cover file-thumb-img" onload="handleDriveImageThumbLoaded(this)" onerror="this.classList.add('is-loaded')">
+                        `
+                        : isVid && !f.isLocked
+                        ? `<i data-lucide="play" class="w-4 h-4 text-purple-400 fill-purple-400"></i>`
                         : `<i data-lucide="${f.isLocked ? 'file-lock' : getFileIconName(f.type, f.originalName)}" class="w-5 h-5 text-orange-400"></i>`
                       }
                     </div>
 
-                    <div class="space-y-0.5 overflow-hidden cursor-pointer" onclick="handleFilePreviewClick('${f.id}')">
+                    <div class="space-y-0.5 overflow-hidden">
                       <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-xs font-bold text-white truncate max-w-xs sm:max-w-md block" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>
                         ${isShared ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-orange-500/15 text-orange-400 border border-orange-500/30 font-bold">แชร์อยู่</span>' : ''}
                         ${f.isLocked ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">🔒 LOCKED</span>' : ''}
+                        ${isVid ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">VIDEO</span>' : ''}
                         ${tagsHtml}
                       </div>
                       <div class="flex items-center gap-3 text-[11px] text-slate-400 font-mono">
@@ -2559,7 +2833,10 @@
                   </div>
 
                   <!-- Actions -->
-                  <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <div class="flex items-center gap-1.5 flex-shrink-0" onclick="event.stopPropagation()">
+                    <button onclick="openFullMediaViewer('${f.id}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-orange-400 transition" title="เปิดดูเต็มจอ (ดับเบิ้ลคลิก)">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
                     <button onclick="openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 ${isShared ? 'text-orange-400' : 'text-slate-400'} hover:text-white transition" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
                       <i data-lucide="${isShared ? 'link-2' : 'share-2'}" class="w-4 h-4"></i>
                     </button>
@@ -2572,9 +2849,9 @@
                     <button onclick="openSingleMoveModal('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition" title="ย้ายไปโฟลเดอร์">
                       <i data-lucide="folder-symlink" class="w-4 h-4"></i>
                     </button>
-                    <a href="${f.url}" target="_blank" download class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition" title="ดาวน์โหลด">
+                    <button onclick="downloadSingleFileDirectly('${f.id}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-emerald-400 transition" title="ดาวน์โหลดไฟล์ต้นฉบับ">
                       <i data-lucide="download" class="w-4 h-4"></i>
-                    </a>
+                    </button>
                     <button onclick="handleDeleteSingleFile('${f.id}')" class="p-2 rounded-xl hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition" title="ลบไฟล์">
                       <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
@@ -2586,20 +2863,63 @@
           </div>
         </div>
       `;
+      setupLongPressForFiles(container);
     }
 
-    function handleFilePreviewClick(fileId) {
-      const files = getUserFilesList();
-      const target = files.find(f => f.id === fileId);
-      if (!target) return;
+    // Single Click = Toggle Select, Double Click = Open Fullscreen Preview
+    let fileClickTimer = null;
+    let lastClickedFileId = null;
 
-      if (target.isLocked) {
-        openPasswordChallengeModal('file', target.id, target.originalName || target.id);
+    function handleFileCardClick(e, fileId) {
+      if (e.target.closest('button, a, input, [onclick*="openShareModal"], [onclick*="openFileTagsModal"]')) {
+        return;
+      }
+      
+      // Delay single click action briefly to allow double click detection
+      if (fileClickTimer && lastClickedFileId === fileId) {
+        clearTimeout(fileClickTimer);
+        fileClickTimer = null;
+        lastClickedFileId = null;
+        openFullMediaViewer(fileId);
         return;
       }
 
-      // Open directly in new window
-      window.open(target.url, '_blank');
+      lastClickedFileId = fileId;
+      fileClickTimer = setTimeout(() => {
+        // Toggle selection on single click
+        const isSelected = selectedFileIds.has(fileId);
+        handleToggleSelectFile(fileId, !isSelected);
+        updateCardSelectionVisual(fileId, !isSelected);
+        fileClickTimer = null;
+        lastClickedFileId = null;
+      }, 230);
+    }
+
+    function handleFileCardDblClick(e, fileId) {
+      if (fileClickTimer) {
+        clearTimeout(fileClickTimer);
+        fileClickTimer = null;
+        lastClickedFileId = null;
+      }
+      openFullMediaViewer(fileId);
+    }
+
+    function updateCardSelectionVisual(fileId, isSelected) {
+      const card = document.querySelector(`[data-file-id="${fileId}"]`);
+      if (!card) return;
+      const chk = card.querySelector('input[type="checkbox"]');
+      if (chk) chk.checked = isSelected;
+
+      if (isSelected) {
+        card.classList.add('border-orange-500', 'ring-4', 'ring-orange-500/20', 'bg-orange-950/20');
+      } else {
+        card.classList.remove('border-orange-500', 'ring-4', 'ring-orange-500/20', 'bg-orange-950/20');
+      }
+    }
+
+    // Fallback direct alias
+    function handleFilePreviewClick(fileId) {
+      openFullMediaViewer(fileId);
     }
 
     function getFileIconName(type = '', name = '') {
@@ -3674,24 +3994,397 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    function handleSendShareComment(e) {
+    // ----------------------------------------------------
+    // 8.2 Fullscreen Media & File Viewer Controller (Gallery with Left/Right Navigation & Swiping)
+    // ----------------------------------------------------
+    let currentGalleryIndex = 0;
+    let currentGalleryFiles = [];
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let activeContextMenuFileId = null;
+
+    function openFullMediaViewer(fileId) {
+      const files = getUserFilesList().filter(f => (f.folderId || null) === currentFolderId);
+      const target = files.find(f => f.id === fileId);
+      if (!target) return;
+
+      if (target.isLocked) {
+        openPasswordChallengeModal('file', target.id, target.originalName || target.id);
+        return;
+      }
+
+      currentGalleryFiles = files;
+      const index = currentGalleryFiles.findIndex(f => f.id === fileId);
+      currentGalleryIndex = index >= 0 ? index : 0;
+
+      const modal = document.getElementById('modalFullMediaViewer');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+      }
+
+      renderGalleryCurrentItem();
+      setupGalleryTouchGestures();
+    }
+
+    function closeFullMediaViewer() {
+      const modal = document.getElementById('modalFullMediaViewer');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+      }
+      const canvas = document.getElementById('galleryMediaCanvas');
+      if (canvas) canvas.innerHTML = '';
+    }
+
+    function navigateGallery(direction) {
+      if (!currentGalleryFiles || currentGalleryFiles.length === 0) return;
+      currentGalleryIndex += direction;
+      if (currentGalleryIndex < 0) {
+        currentGalleryIndex = currentGalleryFiles.length - 1;
+      } else if (currentGalleryIndex >= currentGalleryFiles.length) {
+        currentGalleryIndex = 0;
+      }
+      renderGalleryCurrentItem();
+    }
+
+    function renderGalleryCurrentItem() {
+      const file = currentGalleryFiles[currentGalleryIndex];
+      if (!file) return;
+
+      const fileName = file.originalName || file.id;
+      const fileNameEl = document.getElementById('galleryFileName');
+      const fileSizeEl = document.getElementById('galleryFileSize');
+      const indexEl = document.getElementById('galleryIndexIndicator');
+      const providerEl = document.getElementById('galleryProviderBadge');
+      const canvas = document.getElementById('galleryMediaCanvas');
+      const typeIcon = document.getElementById('galleryTypeIcon');
+
+      if (fileNameEl) fileNameEl.textContent = fileName;
+      if (fileSizeEl) fileSizeEl.textContent = formatBytes(file.size);
+      if (indexEl) indexEl.textContent = `${currentGalleryIndex + 1} / ${currentGalleryFiles.length}`;
+      if (providerEl) providerEl.textContent = file.provider || 'Cloud';
+
+      const type = (file.type || '').toLowerCase();
+      const ext = ((fileName || '').split('.').pop() || '').toLowerCase();
+      const isImg = type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
+      const isVid = type.startsWith('video/') || ['mp4', 'mov', 'webm'].includes(ext);
+      const isAud = type.startsWith('audio/') || ['mp3', 'wav', 'ogg'].includes(ext);
+      const isPdf = type === 'application/pdf' || ext === 'pdf';
+
+      if (typeIcon) {
+        let iconName = 'file';
+        if (isImg) iconName = 'image';
+        else if (isVid) iconName = 'video';
+        else if (isAud) iconName = 'music';
+        else if (isPdf) iconName = 'file-text';
+        typeIcon.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i>`;
+      }
+
+      if (!canvas) return;
+
+      // Animate entry with subtle zoom
+      canvas.style.opacity = '0';
+      canvas.style.transform = 'scale(0.96)';
+
+      if (isImg) {
+        // Fast Preview with optimized thumbnail placeholder + original crisp display
+        const fastThumb = getOptimizedDriveThumbUrl(file.url, 480);
+        canvas.innerHTML = `
+          <div class="relative max-h-[82vh] max-w-full flex items-center justify-center overflow-hidden rounded-2xl shadow-2xl">
+            <div class="file-thumb-skeleton"></div>
+            <img src="${fastThumb || file.url}" 
+              data-orig="${file.url}"
+              alt="${escapeHtml(fileName)}" 
+              class="max-h-[82vh] max-w-full object-contain rounded-2xl shadow-2xl transition duration-500 file-thumb-img"
+              onload="handleDriveImageThumbLoaded(this); upgradeGalleryToOriginal(this);" 
+              onerror="this.classList.add('is-loaded')">
+          </div>
+        `;
+      } else if (isVid) {
+        canvas.innerHTML = `
+          <div class="relative max-h-[82vh] max-w-full w-full max-w-4xl bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800 flex items-center justify-center">
+            <video controls autoplay playsinline class="max-h-[82vh] w-full object-contain">
+              <source src="${file.url}" type="${file.type || 'video/mp4'}">
+              เบราว์เซอร์ไม่รองรับการเล่นวิดีโอนี้
+            </video>
+          </div>
+        `;
+      } else if (isAud) {
+        canvas.innerHTML = `
+          <div class="p-8 sm:p-12 rounded-3xl bg-slate-900/90 border border-slate-800 text-center space-y-6 max-w-md w-full shadow-2xl backdrop-blur-xl">
+            <div class="w-20 h-20 rounded-3xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center mx-auto shadow-inner">
+              <i data-lucide="music" class="w-10 h-10"></i>
+            </div>
+            <div>
+              <h4 class="font-black text-white text-base truncate">${escapeHtml(fileName)}</h4>
+              <p class="text-xs text-slate-400 mt-1">${formatBytes(file.size)}</p>
+            </div>
+            <audio controls autoplay class="w-full">
+              <source src="${file.url}" type="${file.type || 'audio/mp3'}">
+            </audio>
+          </div>
+        `;
+      } else if (isPdf) {
+        canvas.innerHTML = `
+          <div class="w-full max-w-5xl h-[82vh] rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-white">
+            <iframe src="${file.url}#toolbar=1" class="w-full h-full border-none"></iframe>
+          </div>
+        `;
+      } else {
+        canvas.innerHTML = `
+          <div class="p-8 sm:p-12 rounded-3xl bg-slate-900/90 border border-slate-800 text-center space-y-5 max-w-md w-full shadow-2xl backdrop-blur-xl">
+            <div class="w-20 h-20 rounded-3xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center mx-auto shadow-inner">
+              <i data-lucide="${getFileIconName(file.type, file.originalName)}" class="w-10 h-10"></i>
+            </div>
+            <div>
+              <h4 class="font-black text-white text-base truncate">${escapeHtml(fileName)}</h4>
+              <p class="text-xs text-slate-400 mt-1">${formatBytes(file.size)} • ${((ext || 'FILE')).toUpperCase()}</p>
+            </div>
+            <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button onclick="handleGalleryDownloadOriginal()" class="uiverse-btn-glow px-6 py-3 rounded-2xl text-white font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto shadow-lg">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>ดาวน์โหลดไฟล์ต้นฉบับ</span>
+              </button>
+              <button onclick="handleGalleryOpenInNewTab()" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer w-full sm:w-auto border border-slate-700">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+                <span>เปิดแท็บใหม่</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      setTimeout(() => {
+        canvas.style.transition = 'opacity 0.25s ease-out, transform 0.25s ease-out';
+        canvas.style.opacity = '1';
+        canvas.style.transform = 'scale(1)';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }, 30);
+    }
+
+    // High quality upgrade: swap preview with full resolution original image once loaded in background
+    function upgradeGalleryToOriginal(imgEl) {
+      if (!imgEl) return;
+      const orig = imgEl.getAttribute('data-orig');
+      if (!orig || imgEl.src === orig) return;
+      const fullImg = new Image();
+      fullImg.onload = () => {
+        imgEl.src = orig;
+      };
+      fullImg.src = orig;
+    }
+
+    // Touch gesture swipe support (Mobile left/right swipe)
+    function setupGalleryTouchGestures() {
+      const stage = document.getElementById('galleryStage');
+      if (!stage || stage._hasSwipe) return;
+      stage._hasSwipe = true;
+
+      stage.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      stage.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length === 1) {
+          const deltaX = e.changedTouches[0].clientX - touchStartX;
+          const deltaY = e.changedTouches[0].clientY - touchStartY;
+          // Horizontal swipe threshold: 50px, vertical tolerance: < 80px
+          if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 80) {
+            if (deltaX > 0) {
+              navigateGallery(-1); // Swipe Right -> Prev
+            } else {
+              navigateGallery(1);  // Swipe Left -> Next
+            }
+          }
+        }
+      }, { passive: true });
+    }
+
+    // Download original file from gallery
+    async function handleGalleryDownloadOriginal() {
+      const file = currentGalleryFiles[currentGalleryIndex];
+      if (!file) return;
+      await downloadSingleFileDirectly(file.id);
+    }
+
+    function handleGalleryOpenShare() {
+      const file = currentGalleryFiles[currentGalleryIndex];
+      if (!file) return;
+      openShareModal('file', file.id, file.originalName || file.id);
+    }
+
+    function handleGalleryOpenInNewTab() {
+      const file = currentGalleryFiles[currentGalleryIndex];
+      if (!file || !file.url) return;
+      window.open(file.url, '_blank');
+    }
+
+    // Single File Original Downloader with fallback
+    async function downloadSingleFileDirectly(fileId) {
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      const file = allFiles.find(f => f.id === fileId) || getUserFilesList().find(f => f.id === fileId);
+      if (!file || !file.url) return;
+
+      const fileName = file.originalName || file.name || file.id;
+      showToast(`📥 กำลังเริ่มดาวน์โหลด: ${fileName}`);
+
+      if (window.MultiDownloader && typeof window.MultiDownloader.downloadSingleFile === 'function') {
+        try {
+          await window.MultiDownloader.downloadSingleFile(file.url, fileName);
+          showToast(`✨ ดาวน์โหลดสำเร็จ: ${fileName}`);
+          return;
+        } catch (e) {
+          console.warn('[Storage] MultiDownloader fallback:', e);
+        }
+      }
+
+      // Standard anchor fallback
+      const a = document.createElement('a');
+      a.href = file.url;
+      a.download = fileName;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // ----------------------------------------------------
+    // 8.3 Context Menu & Long-Press Implementation
+    // ----------------------------------------------------
+    function handleFileContextMenu(e, fileId) {
       e.preventDefault();
-      if (!activeViewingShare) return;
-      const inp = document.getElementById('shareCommentInput');
-      const val = inp?.value.trim();
-      if (!val) return;
+      e.stopPropagation();
+      openContextMenu(e.clientX, e.clientY, fileId);
+    }
 
-      const repo = getRepo();
-      repo.addComment(
-        activeViewingShare.targetType,
-        activeViewingShare.targetId,
-        currentUser || { name: 'ผู้เยี่ยมชม (Guest)' },
-        val
-      );
+    function openContextMenu(x, y, fileId) {
+      activeContextMenuFileId = fileId;
+      const allFiles = getUserFilesList();
+      const file = allFiles.find(f => f.id === fileId);
+      if (!file) return;
 
-      inp.value = '';
-      renderViewerComments();
-      showToast('💬 ส่งความคิดเห็นเรียบร้อยแล้ว');
+      const menu = document.getElementById('driveContextMenu');
+      const title = document.getElementById('ctxItemTitle');
+      const subtitle = document.getElementById('ctxItemSubtitle');
+      const selectLabel = document.getElementById('ctxSelectLabel');
+
+      if (title) title.textContent = file.originalName || file.id;
+      if (subtitle) subtitle.textContent = `${formatBytes(file.size)} • ${file.provider || 'Cloud'}`;
+      if (selectLabel) {
+        selectLabel.textContent = selectedFileIds.has(fileId) ? 'ยกเลิกการเลือกไฟล์นี้' : 'เลือกไฟล์นี้ (Select)';
+      }
+
+      if (menu) {
+        menu.classList.remove('hidden');
+        menu.style.display = 'block';
+
+        // Adjust position so it doesn't overflow viewport
+        const menuWidth = menu.offsetWidth || 230;
+        const menuHeight = menu.offsetHeight || 320;
+        const posX = (x + menuWidth > window.innerWidth) ? (window.innerWidth - menuWidth - 12) : x;
+        const posY = (y + menuHeight > window.innerHeight) ? (window.innerHeight - menuHeight - 12) : y;
+
+        menu.style.left = `${Math.max(10, posX)}px`;
+        menu.style.top = `${Math.max(10, posY)}px`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    function closeContextMenu() {
+      const menu = document.getElementById('driveContextMenu');
+      if (menu) {
+        menu.classList.add('hidden');
+        menu.style.display = 'none';
+      }
+      activeContextMenuFileId = null;
+    }
+
+    // Close context menu on outside click or scroll
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#driveContextMenu')) {
+        closeContextMenu();
+      }
+    });
+    window.addEventListener('scroll', closeContextMenu, { passive: true });
+
+    function handleCtxAction(action) {
+      const fileId = activeContextMenuFileId;
+      closeContextMenu();
+      if (!fileId) return;
+
+      const allFiles = getUserFilesList();
+      const file = allFiles.find(f => f.id === fileId);
+      if (!file) return;
+
+      const fileName = file.originalName || file.id;
+
+      if (action === 'open') {
+        openFullMediaViewer(fileId);
+      } else if (action === 'select') {
+        const isSelected = selectedFileIds.has(fileId);
+        handleToggleSelectFile(fileId, !isSelected);
+        updateCardSelectionVisual(fileId, !isSelected);
+      } else if (action === 'download') {
+        downloadSingleFileDirectly(fileId);
+      } else if (action === 'share') {
+        openShareModal('file', fileId, fileName);
+      } else if (action === 'tag') {
+        openFileTagsModal(fileId, fileName);
+      } else if (action === 'move') {
+        openSingleMoveModal(fileId, fileName);
+      } else if (action === 'lock') {
+        openLockModal('file', fileId, fileName);
+      } else if (action === 'delete') {
+        handleDeleteSingleFile(fileId);
+      }
+    }
+
+    // Long press detector for touch devices / mouse hold
+    function setupLongPressForFiles(container) {
+      if (!container) return;
+      const cards = container.querySelectorAll('.file-item-card');
+
+      cards.forEach(card => {
+        let pressTimer = null;
+        let isLongPress = false;
+        const fileId = card.getAttribute('data-file-id');
+        if (!fileId) return;
+
+        const startPress = (e) => {
+          isLongPress = false;
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+          pressTimer = setTimeout(() => {
+            isLongPress = true;
+            // Vibrate if mobile device supports it
+            if (navigator.vibrate) navigator.vibrate(40);
+            openContextMenu(clientX, clientY, fileId);
+          }, 550); // 550ms hold triggers context menu
+        };
+
+        const cancelPress = () => {
+          if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+          }
+        };
+
+        card.addEventListener('touchstart', startPress, { passive: true });
+        card.addEventListener('touchend', cancelPress, { passive: true });
+        card.addEventListener('touchmove', cancelPress, { passive: true });
+        card.addEventListener('mousedown', (e) => {
+          if (e.button === 0) startPress(e);
+        });
+        card.addEventListener('mouseup', cancelPress);
+        card.addEventListener('mouseleave', cancelPress);
+      });
     }
 
     // ----------------------------------------------------
@@ -4000,6 +4693,8 @@
 
         // Esc : Close all modals / cancel selection
         if (e.key === 'Escape') {
+          closeFullMediaViewer();
+          closeContextMenu();
           closeShortcutsModal();
           closeFolderModal();
           closeMoveModal();
@@ -4012,6 +4707,21 @@
           updateBatchActionBar();
           renderFilesList();
           return;
+        }
+
+        // Left / Right Arrow keys for Media Viewer Gallery
+        const galleryModal = document.getElementById('modalFullMediaViewer');
+        if (galleryModal && !galleryModal.classList.contains('hidden')) {
+          if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            navigateGallery(-1);
+            return;
+          }
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            navigateGallery(1);
+            return;
+          }
         }
 
         // Ctrl + A : Select all
