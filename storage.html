@@ -2064,7 +2064,16 @@
         guestArea.classList.remove('hidden');
         userArea.classList.add('hidden');
         userArea.classList.remove('flex');
-        banner.classList.remove('hidden');
+        
+        // หากกำลังเปิดดูโฟลเดอร์ที่แชร์หรือลิงก์แชร์ ไม่ต้องแสดง Banner บังคับล็อกอิน ให้ดูได้ตามปกติ
+        const urlParams = new URLSearchParams(window.location.search);
+        const isViewingShare = currentSharedFolderContext || urlParams.get('share') || urlParams.get('s');
+        if (isViewingShare) {
+          banner.classList.add('hidden');
+        } else {
+          banner.classList.remove('hidden');
+        }
+
         quotaCard.classList.add('hidden');
       }
 
@@ -4058,6 +4067,35 @@
       `).join('');
 
       if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    async function handleSendShareComment(e) {
+      e.preventDefault();
+      if (!activeViewingShare) return;
+
+      const input = document.getElementById('shareCommentInput');
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+
+      // ตรวจสอบสิทธิ์: หากต้องการแสดงความคิดเห็นหรือแก้ไข จะต้องเข้าสู่ระบบ
+      if (!currentUser || !currentUser.email) {
+        alert('🔒 คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถแสดงความคิดเห็น หรือแก้ไขจัดการเนื้อหาตามสิทธิ์ที่เจ้าของอนุญาตได้');
+        openAuthModal();
+        return;
+      }
+
+      // ตรวจสอบสิทธิ์ของลิงก์แชร์
+      const allowedRoles = ['commenter', 'editor'];
+      if (!allowedRoles.includes(activeViewingShare.role || 'viewer') && activeViewingShare.creatorEmail !== currentUser.email) {
+        alert('⚠️ ลิงก์นี้ให้สิทธิ์ "อ่านอย่างเดียว (Viewer)" เท่านั้น ไม่สามารถส่งความคิดเห็นได้');
+        return;
+      }
+
+      const repo = getRepo();
+      repo.addComment(activeViewingShare.targetType, activeViewingShare.targetId, currentUser, text);
+      input.value = '';
+      renderViewerComments();
+      showToast('💬 ส่งความคิดเห็นเรียบร้อยแล้ว');
     }
 
     // ----------------------------------------------------

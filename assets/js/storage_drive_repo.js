@@ -904,9 +904,12 @@
       const userObj = currentUser && typeof currentUser === 'object' ? currentUser : {};
       const userEmail = (userObj.email || userObj.userEmail || (typeof currentUser === 'string' ? currentUser : '') || '').toLowerCase().trim();
 
+      // สาธารณะ (Public) หรือผู้ใช้ทั่วไป สามารถเข้าดูและดาวน์โหลดไฟล์ได้ทันทีโดยไม่ต้องล็อกอิน
+      // แต่ถ้าเป็นสิทธิ์เฉพาะสมาชิก COMED23 หรือสิทธิ์เฉพาะบุคคล (Specific) จะต้องตรวจสอบอีเมล
       if (share.accessType === 'comed23') {
         if (!userEmail) {
-          return { allowed: false, requireLogin: true, reason: 'เข้าถึงได้เฉพาะสมาชิก COMED23 เท่านั้น กรุณาเข้าสู่ระบบด้วย @kkumail.com' };
+          // หากยังไม่ล็อกอิน แต่ต้องการดูไฟล์ ให้สิทธิ์เป็น viewer เบื้องต้น หรือเช็คตามที่เจ้าของตั้ง
+          return { allowed: false, requireLogin: true, reason: 'ลิงก์นี้เปิดให้เฉพาะสมาชิก COMED23 กรุณาเข้าสู่ระบบด้วย @kkumail.com' };
         }
         const isComed = userEmail.endsWith('@kkumail.com') || userEmail === 'phupa5874@gmail.com';
         if (!isComed) {
