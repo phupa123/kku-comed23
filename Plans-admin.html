@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="th" class="dark scroll-smooth">
+
+<head>
+  <!-- Core Admin Security Guard Engine -->
+  <script src="config/admin_guard.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการปฏิทิน & แผนงานสาขา (สำหรับผู้ดูแลระบบ) | COMED KKU</title>
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+            mono: ['Plus Jakarta Sans', 'monospace']
+          },
+          colors: {
+            brand: {
+              500: '#f97316',
+              600: '#ea580c',
+              kku: '#A73B24'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS Client & Configs -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <script src="students_data.js"></script>
+  <script src="assets/js/plans_repo.js"></script>
+
+  <style>
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(249, 115, 22, 0.4);
+      border-radius: 999px;
+    }
+  </style>
+</head>
+
+<body class="bg-[#090D16] text-slate-100 min-h-screen flex flex-col font-sans relative">
+
+  <!-- Top Admin Nav -->
+  <header class="sticky top-0 z-40 bg-[#090D16]/90 backdrop-blur-2xl border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      
+      <div class="flex items-center gap-3">
+        <a href="admin.html" class="flex items-center gap-2.5 group">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-orange-500 p-0.5 shadow-lg shadow-orange-500/20">
+            <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+              <i data-lucide="shield-alert" class="w-5 h-5 text-orange-400"></i>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-black text-white group-hover:text-orange-400 transition">
+                Plans Master Admin
+              </h1>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                Official Hub
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">จัดการปฏิทินงานทางการและกิจกรรมสาขา</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="Plans.html" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5">
+          <i data-lucide="eye" class="w-4 h-4 text-orange-400"></i>
+          <span>ดูมุมมองนักศึกษา</span>
+        </a>
+        <a href="admin.html" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white transition" title="กลับหน้า Admin Hub">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-6">
+    
+    <!-- Top Action Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="glass-card rounded-3xl p-5 border-l-4 border-l-orange-500">
+        <span class="text-xs font-bold text-slate-400">แผนงานสาขาทั้งหมด</span>
+        <div class="flex items-baseline justify-between mt-2">
+          <h3 id="statTotalPlans" class="text-3xl font-black text-white">0</h3>
+          <span class="text-xs text-orange-400 font-bold">กิจกรรม</span>
+        </div>
+      </div>
+      <div class="glass-card rounded-3xl p-5 border-l-4 border-l-emerald-500">
+        <span class="text-xs font-bold text-slate-400">แผนงานที่เป็นทางการ</span>
+        <div class="flex items-baseline justify-between mt-2">
+          <h3 id="statOfficialPlans" class="text-3xl font-black text-emerald-400">0</h3>
+          <span class="text-xs text-emerald-400 font-bold">ประกาศแล้ว</span>
+        </div>
+      </div>
+      <div class="glass-card rounded-3xl p-5 border-l-4 border-l-sky-500 flex flex-col justify-between">
+        <span class="text-xs font-bold text-slate-400">การส่งออกข้อมูล</span>
+        <div class="flex items-center gap-2 mt-2">
+          <button onclick="exportPlansCSV()" class="w-full py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-xs font-bold border border-sky-500/30 flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Export CSV</span>
+          </button>
+          <button onclick="openPublishModal()" class="w-full py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>เพิ่มงานทางการ</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Master Table -->
+    <div class="glass-card rounded-3xl p-6 overflow-hidden">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+        <div>
+          <h3 class="text-base font-black text-white">ตารางแผนงานและกิจกรรมทั้งหมด (Master Registry)</h3>
+          <p class="text-xs text-slate-400">จัดการ แก้ไข หรืออนุมัติให้เป็นงานทางการของสาขา</p>
+        </div>
+        <button onclick="loadAdminPlans()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition" title="รีเฟรชข้อมูล">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Table Wrapper -->
+      <div class="overflow-x-auto custom-scroll">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-white/10 text-slate-400 uppercase font-black tracking-wider">
+              <th class="py-3 px-4">วันที่ & เวลา</th>
+              <th class="py-3 px-4">ชื่องาน / กิจกรรม</th>
+              <th class="py-3 px-4">ขอบเขต & หมวด</th>
+              <th class="py-3 px-4">ผู้จัดทำ</th>
+              <th class="py-3 px-4">สถานะทางการ</th>
+              <th class="py-3 px-4 text-right">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="adminPlansTableBody">
+            <tr>
+              <td colspan="6" class="text-center py-8 text-slate-500">กำลังโหลดข้อมูลแผนงานจาก Supabase...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let adminPlansList = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      await loadAdminPlans();
+    });
+
+    async function loadAdminPlans() {
+      if (!window.PlansRepo) return;
+      adminPlansList = await window.PlansRepo.fetchPlans();
+      renderAdminPlansTable();
+    }
+
+    function renderAdminPlansTable() {
+      const tbody = document.getElementById('adminPlansTableBody');
+      tbody.innerHTML = '';
+
+      document.getElementById('statTotalPlans').textContent = adminPlansList.length;
+      document.getElementById('statOfficialPlans').textContent = adminPlansList.filter(p => p.is_official).length;
+
+      if (adminPlansList.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-8 text-slate-500">ยังไม่มีแผนงานในระบบ</td>
+          </tr>
+        `;
+        return;
+      }
+
+      adminPlansList.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-white/5 hover:bg-white/[0.02] transition';
+
+        const d = new Date(p.start_date);
+        const dateStr = d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) + ' ' + d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 font-mono text-slate-300">${dateStr}</td>
+          <td class="py-3.5 px-4 font-bold text-white">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${p.color}"></span>
+              <span>${p.title}</span>
+            </div>
+            ${p.location ? `<span class="text-[10px] text-slate-400 block">${p.location}</span>` : ''}
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              p.scope === 'department' ? 'bg-orange-500/20 text-orange-300' : 'bg-sky-500/20 text-sky-300'
+            }">
+              ${p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว'}
+            </span>
+          </td>
+          <td class="py-3.5 px-4 text-slate-300">
+            ${p.creator_name || 'สมาชิก'}
+            <span class="text-[10px] text-slate-500 block">${p.creator_email || '-'}</span>
+          </td>
+          <td class="py-3.5 px-4">
+            <button onclick="toggleOfficialStatus('${p.id}', ${!p.is_official})" class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase transition ${
+              p.is_official ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-white/5 text-slate-400 hover:text-white'
+            }">
+              ${p.is_official ? '✓ ทางการ' : 'ไม่เป็นทางการ'}
+            </button>
+          </td>
+          <td class="py-3.5 px-4 text-right">
+            <button onclick="deletePlanAdmin('${p.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition" title="ลบแผนงานนี้">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      lucide.createIcons();
+    }
+
+    async function toggleOfficialStatus(id, newStatus) {
+      try {
+        await window.PlansRepo.updatePlan(id, { is_official: newStatus, scope: newStatus ? 'department' : 'shared' });
+        await loadAdminPlans();
+      } catch (e) {
+        alert("อัปเดตไม่สำเร็จ: " + e.message);
+      }
+    }
+
+    async function deletePlanAdmin(id) {
+      if (!confirm("คุณต้องการลบแผนงานนี้ออกจากระบบ Supabase หรือไม่?")) return;
+      try {
+        await window.PlansRepo.deletePlan(id);
+        await loadAdminPlans();
+      } catch (e) {
+        alert("ลบไม่สำเร็จ: " + e.message);
+      }
+    }
+
+    function exportPlansCSV() {
+      if (adminPlansList.length === 0) return alert("ไม่มีข้อมูลแผนงานสำหรับ Export");
+      let csv = "\uFEFFลำดับ,ชื่องาน,ขอบเขต,หมวดหมู่,วันเวลาเริ่ม,สถานที่,ผู้สร้าง,สถานะทางการ\n";
+      adminPlansList.forEach((p, idx) => {
+        csv += `"${idx+1}","${p.title}","${p.scope}","${p.category}","${p.start_date}","${p.location || '-'}","${p.creator_name || '-'}","${p.is_official ? 'ทางการ' : 'ทั่วไป'}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `comed_plans_export_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+    }
+
+    function openPublishModal() {
+      window.location.href = 'Plans.html';
+    }
+  </script>
+
+</body>
+</html>

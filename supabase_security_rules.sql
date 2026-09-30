@@ -446,5 +446,115 @@ BEGIN
 END;
 $$;
 
+-- ================= 9. ตาราง PLANS & PLAN COLLABORATORS (ระบบแผนงาน ปฏิทินสาขา & งานกลุ่ม) =================
+CREATE TABLE IF NOT EXISTS public.plans (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT DEFAULT 'activity', -- academic, activity, meeting, urgent, personal
+  scope TEXT DEFAULT 'department', -- department (สาขาทางการ), shared (แชร์กับเพื่อน), personal (ส่วนบุคคล)
+  status TEXT DEFAULT 'pending', -- pending, in_progress, completed, cancelled
+  priority TEXT DEFAULT 'normal', -- low, normal, high, urgent
+  start_date TIMESTAMPTZ NOT NULL,
+  end_date TIMESTAMPTZ,
+  is_all_day BOOLEAN DEFAULT false,
+  location TEXT,
+  meet_link TEXT,
+  color TEXT DEFAULT '#f97316',
+  creator_email TEXT NOT NULL,
+  creator_name TEXT,
+  creator_student_id TEXT,
+  collaborators JSONB DEFAULT '[]'::jsonb, -- Array of emails/student IDs: [{"email": "...", "name": "...", "role": "editor"}]
+  tags TEXT[] DEFAULT ARRAY[]::TEXT[],
+  attachments JSONB DEFAULT '[]'::jsonb,
+  is_official BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
+CREATE TABLE IF NOT EXISTS public.plan_collaborators (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  plan_id UUID REFERENCES public.plans(id) ON DELETE CASCADE,
+  user_email TEXT NOT NULL,
+  user_name TEXT,
+  student_id TEXT,
+  role TEXT DEFAULT 'editor', -- viewer, editor, admin
+  invited_at TIMESTAMPTZ DEFAULT NOW(),
+  accepted_at TIMESTAMPTZ
+);
 
+-- เพิ่ม Indexes เพื่อความรวดเร็วในการ Query ปฏิทิน
+CREATE INDEX IF NOT EXISTS idx_plans_dates ON public.plans (start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_plans_creator ON public.plans (creator_email);
+CREATE INDEX IF NOT EXISTS idx_plans_scope ON public.plans (scope);
+CREATE INDEX IF NOT EXISTS idx_plans_status ON public.plans (status);
+
+-- เปิด RLS
+ALTER TABLE public.plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.plan_collaborators ENABLE ROW LEVEL SECURITY;
+
+-- นโยบาย RLS สำหรับ plans
+DROP POLICY IF EXISTS "Allow public read plans" ON public.plans;
+CREATE POLICY "Allow public read plans" 
+ON public.plans FOR SELECT 
+TO anon, authenticated 
+USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert plans" ON public.plans;
+CREATE POLICY "Allow public insert plans" 
+ON public.plans FOR INSERT 
+TO anon, authenticated 
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public update plans" ON public.plans;
+CREATE POLICY "Allow public update plans" 
+ON public.plans FOR UPDATE 
+TO anon, authenticated 
+USING (true)
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public delete plans" ON public.plans;
+CREATE POLICY "Allow public delete plans" 
+ON public.plans FOR DELETE 
+TO anon, authenticated 
+USING (true);
+
+-- นโยบาย RLS สำหรับ plan_collaborators
+DROP POLICY IF EXISTS "Allow public read plan_collaborators" ON public.plan_collaborators;
+CREATE POLICY "Allow public read plan_collaborators" 
+ON public.plan_collaborators FOR SELECT 
+TO anon, authenticated 
+USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert plan_collaborators" ON public.plan_collaborators;
+CREATE POLICY "Allow public insert plan_collaborators" 
+ON public.plan_collaborators FOR INSERT 
+TO anon, authenticated 
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public update plan_collaborators" ON public.plan_collaborators;
+CREATE POLICY "Allow public update plan_collaborators" 
+ON public.plan_collaborators FOR UPDATE 
+TO anon, authenticated 
+USING (true)
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public delete plan_collaborators" ON public.plan_collaborators;
+CREATE POLICY "Allow public delete plan_collaborators" 
+ON public.plan_collaborators FOR DELETE 
+TO anon, authenticated 
+USING (true);
+
+-- เปิด Realtime สำหรับตาราง plans
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+      AND schemaname = 'public' 
+      AND tablename = 'plans'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.plans;
+  END IF;
+END;
+$$;

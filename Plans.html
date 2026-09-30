@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="th" class="dark scroll-smooth">
+
+<head>
+  <!-- Site Maintenance & Access Guard -->
+  <script src="assets/js/maintenance-guard.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบแผนงาน & ปฏิทินกิจกรรมสาขา | Plans COMED23 KKU63</title>
+  <meta name="description" content="ระบบวางแผนกิจกรรม ปฏิทินงานสาขา และการวางแผนงานร่วมกับเพื่อน สาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+            mono: ['Plus Jakarta Sans', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              kku: '#A73B24'
+            }
+          },
+          backgroundImage: {
+            'mesh-dark': 'radial-gradient(at 10% 20%, rgba(249, 115, 22, 0.15) 0px, transparent 50%), radial-gradient(at 90% 10%, rgba(59, 130, 246, 0.15) 0px, transparent 50%), radial-gradient(at 50% 90%, rgba(234, 88, 12, 0.1) 0px, transparent 50%)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP Animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Supabase JS Client & Configs -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <script src="students_data.js"></script>
+  <!-- Strict No-LocalStorage Plans Repository -->
+  <script src="assets/js/plans_repo.js"></script>
+
+  <style>
+    .glass-card {
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(249, 115, 22, 0.3);
+      border-radius: 999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(249, 115, 22, 0.6);
+    }
+    .calendar-cell:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .calendar-today {
+      background: rgba(249, 115, 22, 0.08);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+    }
+  </style>
+</head>
+
+<body class="bg-[#090D16] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-orange-500 selection:text-white relative overflow-x-hidden">
+
+  <!-- Ambient Light Effects -->
+  <div class="fixed inset-0 bg-mesh-dark pointer-events-none z-0"></div>
+  <div class="fixed -top-40 -left-40 w-96 h-96 bg-orange-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+  <div class="fixed top-1/3 -right-40 w-96 h-96 bg-sky-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-40 bg-[#090D16]/80 backdrop-blur-2xl border-b border-white/10 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3.5">
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 p-0.5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition">
+            <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+              <i data-lucide="calendar-range" class="w-5 h-5 text-orange-400 group-hover:rotate-6 transition"></i>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-black tracking-tight text-white group-hover:text-orange-400 transition">
+                COMED Plans
+              </h1>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                Live Cloud
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">ปฏิทินงานสาขา & วางแผนกิจกรรม</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Center Nav Links -->
+      <nav class="hidden md:flex items-center gap-1.5 p-1 bg-white/5 border border-white/10 rounded-2xl">
+        <button id="viewBtnCalendar" onclick="switchMainView('calendar')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-md">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+          <span>มุมมองปฏิทิน</span>
+        </button>
+        <button id="viewBtnTimeline" onclick="switchMainView('timeline')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
+          <i data-lucide="list-todo" class="w-3.5 h-3.5"></i>
+          <span>กำหนดการเรียงวัน</span>
+        </button>
+        <button id="viewBtnKanban" onclick="switchMainView('kanban')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
+          <i data-lucide="kanban" class="w-3.5 h-3.5"></i>
+          <span>บอร์ดสถานะงาน</span>
+        </button>
+      </nav>
+
+      <!-- Right Action & User Profile -->
+      <div class="flex items-center gap-2.5">
+        <!-- New Plan Button -->
+        <button onclick="openCreatePlanModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-xs shadow-lg shadow-orange-500/20 flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">สร้างแผนงานใหม่</span>
+          <span class="sm:hidden">สร้าง</span>
+        </button>
+
+        <!-- User Authentication Widget -->
+        <div id="userAuthContainer" class="flex items-center">
+          <button id="authBtnLogin" onclick="triggerGoogleLogin()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs transition cursor-pointer">
+            <i data-lucide="log-in" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>เข้าสู่ระบบ KKU</span>
+          </button>
+          
+          <div id="authUserInfo" class="hidden items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10">
+            <img id="authUserAvatar" src="assets/images/default_avatar.png" alt="User" class="w-6 h-6 rounded-lg object-cover border border-orange-400/40">
+            <span id="authUserName" class="text-xs font-bold text-slate-200 max-w-[100px] truncate">ชื่อผู้ใช้</span>
+            <button onclick="logoutUser()" title="ออกจากระบบ" class="text-slate-400 hover:text-rose-400 transition ml-1">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <a href="index.html" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition" title="กลับหน้าแรก">
+          <i data-lucide="home" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= SUB HEADER / FILTER CONTROLS ================= -->
+  <section class="relative z-10 border-b border-white/5 bg-[#0d1424]/60 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Calendar Month Navigator -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center bg-slate-900/90 border border-white/10 rounded-xl p-1">
+          <button onclick="prevMonth()" class="p-1.5 hover:bg-white/10 rounded-lg text-slate-300 hover:text-white transition">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <button onclick="goToToday()" class="px-2.5 py-1 text-xs font-black text-orange-400 hover:text-orange-300 transition">
+            วันนี้
+          </button>
+          <button onclick="nextMonth()" class="p-1.5 hover:bg-white/10 rounded-lg text-slate-300 hover:text-white transition">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <h2 id="calendarMonthTitle" class="text-base sm:text-lg font-black text-white tracking-wide">
+          ตุลาคม 2569
+        </h2>
+      </div>
+
+      <!-- Scope & Category Filter Tabs -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center bg-slate-900/90 border border-white/10 rounded-xl p-1 text-xs font-bold">
+          <button onclick="setFilterScope('all')" class="filter-scope-btn px-2.5 py-1 rounded-lg bg-orange-500 text-white transition" data-scope="all">
+            ทั้งหมด
+          </button>
+          <button onclick="setFilterScope('department')" class="filter-scope-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition" data-scope="department">
+            🏛️ งานสาขา
+          </button>
+          <button onclick="setFilterScope('shared')" class="filter-scope-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition" data-scope="shared">
+            👥 งานกลุ่มเพื่อน
+          </button>
+          <button onclick="setFilterScope('personal')" class="filter-scope-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition" data-scope="personal">
+            🔒 ส่วนตัว
+          </button>
+        </div>
+
+        <!-- Quick Search -->
+        <div class="relative">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input type="text" id="planSearchInput" oninput="handlePlanSearch(this.value)" placeholder="ค้นหาแผนงาน / กิจกรรม..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-44 sm:w-56 transition">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= MAIN CONTENT WRAPPER ================= -->
+  <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Loading Skeleton Shimmer -->
+    <div id="plansLoadingSkeleton" class="space-y-4">
+      <div class="h-10 bg-slate-800/50 rounded-2xl animate-pulse"></div>
+      <div class="grid grid-cols-7 gap-2">
+        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
+        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
+        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
+        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
+        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
+        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
+        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
+      </div>
+    </div>
+
+    <!-- 1. CALENDAR VIEW -->
+    <div id="viewCalendarContainer" class="hidden">
+      <div class="glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
+        <!-- Day Names Header -->
+        <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-black uppercase text-slate-400 tracking-wider">
+          <span class="text-rose-400">อาทิตย์</span>
+          <span>จันทร์</span>
+          <span>อังคาร</span>
+          <span>พุธ</span>
+          <span>พฤหัสบดี</span>
+          <span>ศุกร์</span>
+          <span class="text-sky-400">เสาร์</span>
+        </div>
+        <!-- Calendar Days Grid -->
+        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2 min-h-[500px]">
+          <!-- Injected dynamically via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. TIMELINE / AGENDA VIEW -->
+    <div id="viewTimelineContainer" class="hidden">
+      <div class="glass-card rounded-3xl p-5 sm:p-7 max-w-4xl mx-auto">
+        <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+          <div>
+            <h3 class="text-base font-black text-white flex items-center gap-2">
+              <i data-lucide="calendar-check" class="w-5 h-5 text-orange-400"></i>
+              <span>ลำดับกำหนดการและกิจกรรมที่กำลังจะมาถึง</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">เรียงลำดับตามวันและเวลา Realtime จากฐานข้อมูล</p>
+          </div>
+          <span id="timelineCountBadge" class="px-3 py-1 rounded-full text-xs font-black bg-orange-500/20 text-orange-300 border border-orange-500/30">
+            0 รายการ
+          </span>
+        </div>
+
+        <div id="timelineListContainer" class="space-y-4">
+          <!-- Injected dynamically via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. KANBAN BOARD VIEW -->
+    <div id="viewKanbanContainer" class="hidden">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Column 1: รอเริ่ม (Pending) -->
+        <div class="glass-card rounded-3xl p-4 flex flex-col">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <h4 class="text-xs font-black uppercase text-slate-200 tracking-wider">รอดำเนินการ / นัดหมาย</h4>
+            </div>
+            <span id="kanbanCountPending" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-slate-400">0</span>
+          </div>
+          <div id="kanbanColumnPending" class="space-y-3 flex-1 min-h-[300px]">
+            <!-- Injected -->
+          </div>
+        </div>
+
+        <!-- Column 2: กำลังดำเนินการ (In Progress) -->
+        <div class="glass-card rounded-3xl p-4 flex flex-col">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-sky-400 animate-pulse"></span>
+              <h4 class="text-xs font-black uppercase text-slate-200 tracking-wider">กำลังเตรียมงาน / ลุยงาน</h4>
+            </div>
+            <span id="kanbanCountInProgress" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-slate-400">0</span>
+          </div>
+          <div id="kanbanColumnInProgress" class="space-y-3 flex-1 min-h-[300px]">
+            <!-- Injected -->
+          </div>
+        </div>
+
+        <!-- Column 3: สำเร็จแล้ว (Completed) -->
+        <div class="glass-card rounded-3xl p-4 flex flex-col">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+              <h4 class="text-xs font-black uppercase text-slate-200 tracking-wider">เสร็จสิ้นแล้ว</h4>
+            </div>
+            <span id="kanbanCountCompleted" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-slate-400">0</span>
+          </div>
+          <div id="kanbanColumnCompleted" class="space-y-3 flex-1 min-h-[300px]">
+            <!-- Injected -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= MODAL: CREATE / EDIT PLAN ================= -->
+  <div id="planModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-6 shadow-2xl relative overflow-hidden max-h-[90vh] flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="planModalTitle" class="text-base font-black text-white">ลงตาราง / สร้างแผนงาน</h3>
+            <p class="text-[11px] text-slate-400">บันทึกลงระบบคลาวด์สาขา Realtime ทันที</p>
+          </div>
+        </div>
+        <button onclick="closePlanModal()" class="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <form id="planForm" onsubmit="handlePlanFormSubmit(event)" class="custom-scroll overflow-y-auto py-4 space-y-4 flex-1">
+        <input type="hidden" id="formPlanId" value="">
+
+        <!-- Title -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">ชื่องาน / กิจกรรม <span class="text-rose-400">*</span></label>
+          <input type="text" id="formPlanTitle" required placeholder="เช่น ประชุมเตรียมซุ้มบัณฑิต, ส่งโครงร่างโปรเจกต์" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500">
+        </div>
+
+        <!-- Scope & Category -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">ขอบเขต (Scope)</label>
+            <select id="formPlanScope" onchange="toggleCollaboratorsSection(this.value)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-hidden focus:border-orange-500">
+              <option value="department">🏛️ แผนงานสาขา (ทุกคนเห็น)</option>
+              <option value="shared">👥 งานกลุ่ม (แชร์กับเพื่อน)</option>
+              <option value="personal">🔒 ส่วนตัว (เฉพาะฉัน)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">หมวดหมู่</label>
+            <select id="formPlanCategory" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-hidden focus:border-orange-500">
+              <option value="activity">🎉 กิจกรรมสาขา / ชมรม</option>
+              <option value="academic">📚 วิชาการ / การเรียน / ส่งงาน</option>
+              <option value="meeting">🗣️ นัดประชุม / ระดมไอเดีย</option>
+              <option value="urgent">🚨 ด่วน / วันสำคัญ</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Date & Time -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">วันและเวลาเริ่ม <span class="text-rose-400">*</span></label>
+            <input type="datetime-local" id="formPlanStartDate" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-hidden focus:border-orange-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">สิ้นสุด (ไม่บังคับ)</label>
+            <input type="datetime-local" id="formPlanEndDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-hidden focus:border-orange-500">
+          </div>
+        </div>
+
+        <!-- Location & Meet Link -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">สถานที่ / ห้องเรียน</label>
+            <input type="text" id="formPlanLocation" placeholder="เช่น ED2401, อาคาร 50 ปี" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">ลิงก์ Google Meet / ซูม</label>
+            <input type="url" id="formPlanMeetLink" placeholder="https://meet.google.com/..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500">
+          </div>
+        </div>
+
+        <!-- Collaborators Autocomplete (When Shared) -->
+        <div id="collaboratorsSection" class="hidden space-y-2 p-3 rounded-2xl bg-white/5 border border-white/10">
+          <label class="block text-xs font-bold text-amber-300 flex items-center gap-1.5">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+            <span>เพิ่มเพื่อนร่วมทีม (จาก 60 คนในสาขา)</span>
+          </label>
+          <div class="relative">
+            <input type="text" id="collaboratorSearchInput" oninput="searchCollaboratorStudent(this.value)" placeholder="พิมพ์ชื่อ, ชื่อเล่น หรือรหัสนักศึกษา..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-amber-400">
+            <!-- Autocomplete Dropdown -->
+            <div id="collaboratorSuggestions" class="hidden absolute top-full left-0 right-0 z-20 mt-1 max-h-40 overflow-y-auto bg-slate-900 border border-white/20 rounded-xl shadow-xl p-1 space-y-1">
+              <!-- Rendered items -->
+            </div>
+          </div>
+          <!-- Selected Collaborator Badges -->
+          <div id="selectedCollaboratorsList" class="flex flex-wrap gap-1.5 pt-1">
+            <!-- Rendered tags -->
+          </div>
+        </div>
+
+        <!-- Color Tag Picker -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">สีธีมของกิจกรรม</label>
+          <div class="flex items-center gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="planColor" value="#f97316" checked class="peer sr-only">
+              <span class="block w-6 h-6 rounded-full bg-orange-500 peer-checked:ring-2 peer-checked:ring-white"></span>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="planColor" value="#38bdf8" class="peer sr-only">
+              <span class="block w-6 h-6 rounded-full bg-sky-400 peer-checked:ring-2 peer-checked:ring-white"></span>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="planColor" value="#a855f7" class="peer sr-only">
+              <span class="block w-6 h-6 rounded-full bg-purple-500 peer-checked:ring-2 peer-checked:ring-white"></span>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="planColor" value="#10b981" class="peer sr-only">
+              <span class="block w-6 h-6 rounded-full bg-emerald-500 peer-checked:ring-2 peer-checked:ring-white"></span>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="planColor" value="#f43f5e" class="peer sr-only">
+              <span class="block w-6 h-6 rounded-full bg-rose-500 peer-checked:ring-2 peer-checked:ring-white"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">รายละเอียด / สิ่งที่ต้องเตรียม</label>
+          <textarea id="formPlanDesc" rows="3" placeholder="ระบุสิ่งที่สมาชิกต้องเตรียมตัว หรือหัวข้อการประชุม..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500"></textarea>
+        </div>
+
+        <!-- Submit & Actions -->
+        <div class="pt-2 flex items-center justify-between border-t border-white/10">
+          <button type="button" id="btnDeletePlan" onclick="confirmDeletePlan()" class="hidden px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white text-xs font-bold transition">
+            ลบรายการนี้
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" onclick="closePlanModal()" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition">
+              ยกเลิก
+            </button>
+            <button type="submit" id="btnSavePlan" class="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-xs shadow-lg shadow-orange-500/25 transition">
+              บันทึกแผนงาน
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ================= DETAIL MODAL ================= -->
+  <div id="planDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
+      <div id="planDetailContent" class="space-y-4">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="pt-4 mt-4 border-t border-white/10 flex items-center justify-between">
+        <button id="btnEditFromDetail" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span>แก้ไข</span>
+        </button>
+        <button onclick="closeDetailModal()" class="px-4 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-xs font-extrabold transition">
+          ปิด
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LOGIC SCRIPT (STRICT NO LOCALSTORAGE) ================= -->
+  <script>
+    // State management in runtime memory only
+    let appState = {
+      user: null, // { email, name, avatar, student_id }
+      plans: [],
+      currentMonth: new Date().getMonth(),
+      currentYear: new Date().getFullYear(),
+      activeView: 'calendar', // 'calendar' | 'timeline' | 'kanban'
+      filterScope: 'all',
+      searchQuery: '',
+      selectedCollaborators: []
+    };
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      checkSessionUser();
+      renderMonthTitle();
+      switchMainView('calendar');
+      
+      // Fetch initial plans from Supabase
+      await refreshPlans();
+
+      // Subscribe to Realtime
+      if (window.PlansRepo) {
+        window.PlansRepo.subscribeToChanges((payload) => {
+          console.log("[Realtime Sync Triggered]");
+          refreshPlans();
+        });
+      }
+    });
+
+    // Check user from sessionStorage or google session (NO LocalStorage)
+    function checkSessionUser() {
+      try {
+        const sessionData = sessionStorage.getItem('COMED_USER_SESSION');
+        if (sessionData) {
+          appState.user = JSON.parse(sessionData);
+        }
+      } catch (e) {}
+
+      updateAuthUI();
+    }
+
+    function updateAuthUI() {
+      const loginBtn = document.getElementById('authBtnLogin');
+      const userInfo = document.getElementById('authUserInfo');
+      const userName = document.getElementById('authUserName');
+      const userAvatar = document.getElementById('authUserAvatar');
+
+      if (appState.user) {
+        loginBtn.classList.add('hidden');
+        userInfo.classList.remove('hidden');
+        userInfo.classList.add('flex');
+        userName.textContent = appState.user.name || 'สมาชิกสาขา';
+        userAvatar.src = appState.user.avatar || 'assets/images/default_avatar.png';
+      } else {
+        loginBtn.classList.remove('hidden');
+        userInfo.classList.add('hidden');
+        userInfo.classList.remove('flex');
+      }
+    }
+
+    function triggerGoogleLogin() {
+      // Prompt sign in with Google or redirect
+      window.location.href = 'index.html?action=login';
+    }
+
+    function logoutUser() {
+      sessionStorage.removeItem('COMED_USER_SESSION');
+      appState.user = null;
+      updateAuthUI();
+      refreshPlans();
+    }
+
+    // Refresh and fetch plans
+    async function refreshPlans() {
+      const skeleton = document.getElementById('plansLoadingSkeleton');
+      if (skeleton) skeleton.classList.remove('hidden');
+
+      const userEmail = appState.user ? appState.user.email : null;
+      if (window.PlansRepo) {
+        appState.plans = await window.PlansRepo.fetchPlans(userEmail);
+      }
+
+      if (skeleton) skeleton.classList.add('hidden');
+      renderCurrentView();
+    }
+
+    // Render views based on active tab
+    function renderCurrentView() {
+      if (appState.activeView === 'calendar') {
+        renderCalendar();
+      } else if (appState.activeView === 'timeline') {
+        renderTimeline();
+      } else if (appState.activeView === 'kanban') {
+        renderKanban();
+      }
+    }
+
+    function switchMainView(viewName) {
+      appState.activeView = viewName;
+      
+      const vCal = document.getElementById('viewCalendarContainer');
+      const vTime = document.getElementById('viewTimelineContainer');
+      const vKan = document.getElementById('viewKanbanContainer');
+
+      const bCal = document.getElementById('viewBtnCalendar');
+      const bTime = document.getElementById('viewBtnTimeline');
+      const bKan = document.getElementById('viewBtnKanban');
+
+      [vCal, vTime, vKan].forEach(el => el.classList.add('hidden'));
+      [bCal, bTime, bKan].forEach(b => {
+        b.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5';
+      });
+
+      const activeBtnClass = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-md';
+
+      if (viewName === 'calendar') {
+        vCal.classList.remove('hidden');
+        bCal.className = activeBtnClass;
+      } else if (viewName === 'timeline') {
+        vTime.classList.remove('hidden');
+        bTime.className = activeBtnClass;
+      } else if (viewName === 'kanban') {
+        vKan.classList.remove('hidden');
+        bKan.className = activeBtnClass;
+      }
+
+      renderCurrentView();
+      lucide.createIcons();
+    }
+
+    // Filter logic
+    function getFilteredPlans() {
+      let list = appState.plans || [];
+      if (appState.filterScope !== 'all') {
+        list = list.filter(p => p.scope === appState.filterScope);
+      }
+      if (appState.searchQuery) {
+        const q = appState.searchQuery.toLowerCase();
+        list = list.filter(p => 
+          (p.title && p.title.toLowerCase().includes(q)) ||
+          (p.description && p.description.toLowerCase().includes(q)) ||
+          (p.location && p.location.toLowerCase().includes(q))
+        );
+      }
+      return list;
+    }
+
+    function setFilterScope(scope) {
+      appState.filterScope = scope;
+      document.querySelectorAll('.filter-scope-btn').forEach(btn => {
+        if (btn.dataset.scope === scope) {
+          btn.className = 'filter-scope-btn px-2.5 py-1 rounded-lg bg-orange-500 text-white transition';
+        } else {
+          btn.className = 'filter-scope-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
+        }
+      });
+      renderCurrentView();
+    }
+
+    function handlePlanSearch(val) {
+      appState.searchQuery = val.trim();
+      renderCurrentView();
+    }
+
+    // Month Navigation
+    const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+
+    function renderMonthTitle() {
+      const yearBE = appState.currentYear + 543;
+      document.getElementById('calendarMonthTitle').textContent = `${THAI_MONTHS[appState.currentMonth]} ${yearBE}`;
+    }
+
+    function prevMonth() {
+      appState.currentMonth--;
+      if (appState.currentMonth < 0) {
+        appState.currentMonth = 11;
+        appState.currentYear--;
+      }
+      renderMonthTitle();
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      appState.currentMonth++;
+      if (appState.currentMonth > 11) {
+        appState.currentMonth = 0;
+        appState.currentYear++;
+      }
+      renderMonthTitle();
+      renderCalendar();
+    }
+
+    function goToToday() {
+      const now = new Date();
+      appState.currentMonth = now.getMonth();
+      appState.currentYear = now.getFullYear();
+      renderMonthTitle();
+      renderCalendar();
+    }
+
+    // 1. RENDER CALENDAR
+    function renderCalendar() {
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
+
+      const firstDayOfMonth = new Date(appState.currentYear, appState.currentMonth, 1).getDay();
+      const daysInMonth = new Date(appState.currentYear, appState.currentMonth + 1, 0).getDate();
+
+      const today = new Date();
+      const isCurrentMonth = today.getMonth() === appState.currentMonth && today.getFullYear() === appState.currentYear;
+      const todayDate = today.getDate();
+
+      const filteredPlans = getFilteredPlans();
+
+      // Empty lead cells
+      for (let i = 0; i < firstDayOfMonth; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'p-2 rounded-2xl bg-white/[0.01] border border-white/5 opacity-40 min-h-[90px]';
+        grid.appendChild(emptyCell);
+      }
+
+      // Days
+      for (let day = 1; day <= daysInMonth; day++) {
+        const isToday = isCurrentMonth && day === todayDate;
+        const cell = document.createElement('div');
+        cell.className = `calendar-cell p-2 rounded-2xl border transition flex flex-col justify-between min-h-[100px] cursor-pointer ${
+          isToday ? 'calendar-today' : 'bg-white/[0.02] border-white/5'
+        }`;
+        cell.onclick = () => openCreatePlanModalForDay(day);
+
+        // Header of Cell
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between mb-1';
+        header.innerHTML = `
+          <span class="text-xs font-black ${isToday ? 'text-orange-400 bg-orange-500/20 px-2 py-0.5 rounded-full' : 'text-slate-300'}">${day}</span>
+        `;
+        cell.appendChild(header);
+
+        // Plans for this day
+        const plansContainer = document.createElement('div');
+        plansContainer.className = 'space-y-1 overflow-y-auto max-h-[75px] custom-scroll';
+
+        const dayPlans = filteredPlans.filter(p => {
+          if (!p.start_date) return false;
+          const pDate = new Date(p.start_date);
+          return pDate.getDate() === day && pDate.getMonth() === appState.currentMonth && pDate.getFullYear() === appState.currentYear;
+        });
+
+        dayPlans.forEach(p => {
+          const pill = document.createElement('div');
+          pill.className = 'px-1.5 py-1 rounded-lg text-[10px] font-bold truncate flex items-center gap-1 shadow-xs transition hover:brightness-125';
+          pill.style.backgroundColor = (p.color || '#f97316') + '25';
+          pill.style.borderLeft = `3px solid ${p.color || '#f97316'}`;
+          pill.style.color = '#ffffff';
+          pill.title = p.title;
+          pill.onclick = (e) => {
+            e.stopPropagation();
+            showPlanDetail(p);
+          };
+
+          pill.innerHTML = `
+            <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${p.color || '#f97316'}"></span>
+            <span class="truncate">${p.title}</span>
+          `;
+          plansContainer.appendChild(pill);
+        });
+
+        cell.appendChild(plansContainer);
+        grid.appendChild(cell);
+      }
+
+      lucide.createIcons();
+    }
+
+    // 2. RENDER TIMELINE
+    function renderTimeline() {
+      const container = document.getElementById('timelineListContainer');
+      const badge = document.getElementById('timelineCountBadge');
+      const filtered = getFilteredPlans().sort((a,b) => new Date(a.start_date) - new Date(b.start_date));
+
+      badge.textContent = `${filtered.length} รายการ`;
+      container.innerHTML = '';
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-slate-500">
+            <i data-lucide="calendar-x" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
+            <p class="text-xs">ไม่มีแผนงานหรือกิจกรรมในช่วงนี้</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-orange-500/40 transition flex items-start justify-between gap-4 cursor-pointer group';
+        item.onclick = () => showPlanDetail(p);
+
+        const startDate = new Date(p.start_date);
+        const dateStr = startDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+        const timeStr = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+        item.innerHTML = `
+          <div class="flex items-start gap-3.5">
+            <div class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center text-center p-1 border" style="background-color: ${p.color}15; border-color: ${p.color}40; color: ${p.color};">
+              <span class="text-[9px] font-black uppercase">${startDate.toLocaleDateString('th-TH', { weekday: 'short' })}</span>
+              <span class="text-base font-black leading-none">${startDate.getDate()}</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase" style="background-color: ${p.color}20; color: ${p.color}">
+                  ${p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว'}
+                </span>
+                <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3 h-3"></i> ${timeStr} น.
+                </span>
+              </div>
+              <h4 class="text-sm font-bold text-white group-hover:text-orange-300 transition">${p.title}</h4>
+              <p class="text-xs text-slate-400 line-clamp-1 mt-0.5">${p.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+              ${p.location ? `<span class="inline-flex items-center gap-1 text-[11px] text-slate-400 mt-1"><i data-lucide="map-pin" class="w-3 h-3 text-orange-400"></i> ${p.location}</span>` : ''}
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500 group-hover:text-white transition group-hover:translate-x-1"></i>
+        `;
+        container.appendChild(item);
+      });
+
+      lucide.createIcons();
+    }
+
+    // 3. RENDER KANBAN
+    function renderKanban() {
+      const colPending = document.getElementById('kanbanColumnPending');
+      const colInProg = document.getElementById('kanbanColumnInProgress');
+      const colComp = document.getElementById('kanbanColumnCompleted');
+
+      const countPending = document.getElementById('kanbanCountPending');
+      const countInProg = document.getElementById('kanbanCountInProgress');
+      const countComp = document.getElementById('kanbanCountCompleted');
+
+      colPending.innerHTML = '';
+      colInProg.innerHTML = '';
+      colComp.innerHTML = '';
+
+      const filtered = getFilteredPlans();
+      const pPending = filtered.filter(p => p.status === 'pending' || !p.status);
+      const pInProg = filtered.filter(p => p.status === 'in_progress');
+      const pComp = filtered.filter(p => p.status === 'completed');
+
+      countPending.textContent = pPending.length;
+      countInProg.textContent = pInProg.length;
+      countComp.textContent = pComp.length;
+
+      const renderCard = (p, targetCol) => {
+        const card = document.createElement('div');
+        card.className = 'p-3.5 rounded-2xl bg-slate-900/90 border border-white/10 hover:border-orange-500/40 transition shadow-md cursor-pointer group';
+        card.onclick = () => showPlanDetail(p);
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="w-2 h-2 rounded-full" style="background-color: ${p.color}"></span>
+            <span class="text-[10px] text-slate-400 font-mono">${new Date(p.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}</span>
+          </div>
+          <h5 class="text-xs font-bold text-white group-hover:text-orange-300 transition line-clamp-2">${p.title}</h5>
+          ${p.location ? `<p class="text-[10px] text-slate-400 mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-2.5 h-2.5"></i> ${p.location}</p>` : ''}
+        `;
+        targetCol.appendChild(card);
+      };
+
+      pPending.forEach(p => renderCard(p, colPending));
+      pInProg.forEach(p => renderCard(p, colInProg));
+      pComp.forEach(p => renderCard(p, colComp));
+
+      lucide.createIcons();
+    }
+
+    // Modal Control
+    function openCreatePlanModal() {
+      document.getElementById('planModalTitle').textContent = 'สร้างแผนงาน / ปฏิทินใหม่';
+      document.getElementById('formPlanId').value = '';
+      document.getElementById('planForm').reset();
+      document.getElementById('btnDeletePlan').classList.add('hidden');
+      appState.selectedCollaborators = [];
+      renderCollaboratorBadges();
+      toggleCollaboratorsSection('department');
+
+      // Set default start date to now + 1 hour formatted
+      const now = new Date();
+      now.setMinutes(0);
+      now.setHours(now.getHours() + 1);
+      const iso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+      document.getElementById('formPlanStartDate').value = iso;
+
+      document.getElementById('planModal').classList.remove('hidden');
+      document.getElementById('planModal').classList.add('flex');
+    }
+
+    function openCreatePlanModalForDay(day) {
+      openCreatePlanModal();
+      const targetDate = new Date(appState.currentYear, appState.currentMonth, day, 9, 0);
+      const iso = new Date(targetDate.getTime() - (targetDate.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+      document.getElementById('formPlanStartDate').value = iso;
+    }
+
+    function closePlanModal() {
+      document.getElementById('planModal').classList.add('hidden');
+      document.getElementById('planModal').classList.remove('flex');
+    }
+
+    function toggleCollaboratorsSection(scope) {
+      const sec = document.getElementById('collaboratorsSection');
+      if (scope === 'shared') {
+        sec.classList.remove('hidden');
+      } else {
+        sec.classList.add('hidden');
+      }
+    }
+
+    // Collaborator search
+    function searchCollaboratorStudent(q) {
+      const dropdown = document.getElementById('collaboratorSuggestions');
+      if (!window.PlansRepo) return;
+      const results = window.PlansRepo.getStudentOptions(q);
+      
+      if (!q.trim() || results.length === 0) {
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      dropdown.innerHTML = '';
+      results.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'p-2 hover:bg-white/10 rounded-lg cursor-pointer flex items-center justify-between text-xs';
+        item.onclick = () => addCollaborator(s);
+        item.innerHTML = `
+          <div>
+            <span class="font-bold text-white">${s.name} (${s.nickname || '-'})</span>
+            <span class="text-[10px] text-slate-400 block">${s.id}</span>
+          </div>
+          <i data-lucide="plus" class="w-3.5 h-3.5 text-orange-400"></i>
+        `;
+        dropdown.appendChild(item);
+      });
+      dropdown.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function addCollaborator(student) {
+      if (!appState.selectedCollaborators.some(c => c.email === student.email)) {
+        appState.selectedCollaborators.push({
+          email: student.email,
+          name: student.name,
+          student_id: student.id,
+          role: 'editor'
+        });
+        renderCollaboratorBadges();
+      }
+      document.getElementById('collaboratorSuggestions').classList.add('hidden');
+      document.getElementById('collaboratorSearchInput').value = '';
+    }
+
+    function removeCollaborator(email) {
+      appState.selectedCollaborators = appState.selectedCollaborators.filter(c => c.email !== email);
+      renderCollaboratorBadges();
+    }
+
+    function renderCollaboratorBadges() {
+      const container = document.getElementById('selectedCollaboratorsList');
+      container.innerHTML = '';
+      appState.selectedCollaborators.forEach(c => {
+        const tag = document.createElement('span');
+        tag.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        tag.innerHTML = `
+          <span>${c.name}</span>
+          <button type="button" onclick="removeCollaborator('${c.email}')" class="hover:text-white">&times;</button>
+        `;
+        container.appendChild(tag);
+      });
+    }
+
+    // Submit Plan Form
+    async function handlePlanFormSubmit(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('btnSavePlan');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'กำลังบันทึก...';
+
+      const planId = document.getElementById('formPlanId').value;
+      const title = document.getElementById('formPlanTitle').value;
+      const scope = document.getElementById('formPlanScope').value;
+      const category = document.getElementById('formPlanCategory').value;
+      const startDate = document.getElementById('formPlanStartDate').value;
+      const endDate = document.getElementById('formPlanEndDate').value;
+      const location = document.getElementById('formPlanLocation').value;
+      const meetLink = document.getElementById('formPlanMeetLink').value;
+      const description = document.getElementById('formPlanDesc').value;
+      const color = document.querySelector('input[name="planColor"]:checked')?.value || '#f97316';
+
+      const payload = {
+        title,
+        description,
+        scope,
+        category,
+        start_date: new Date(startDate).toISOString(),
+        end_date: endDate ? new Date(endDate).toISOString() : null,
+        location,
+        meet_link: meetLink,
+        color,
+        creator_email: appState.user ? appState.user.email : 'guest@kkumail.com',
+        creator_name: appState.user ? appState.user.name : 'สมาชิกสาขา',
+        collaborators: appState.selectedCollaborators
+      };
+
+      try {
+        if (planId) {
+          await window.PlansRepo.updatePlan(planId, payload);
+        } else {
+          await window.PlansRepo.createPlan(payload);
+        }
+        closePlanModal();
+        await refreshPlans();
+      } catch (err) {
+        alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'บันทึกแผนงาน';
+      }
+    }
+
+    // Detail Modal
+    function showPlanDetail(plan) {
+      const container = document.getElementById('planDetailContent');
+      const startDate = new Date(plan.start_date);
+      const dateText = startDate.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const timeText = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+      container.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full" style="background-color: ${plan.color}"></span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase" style="background-color: ${plan.color}20; color: ${plan.color}">
+            ${plan.scope === 'department' ? '🏛️ งานสาขา' : plan.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว'}
+          </span>
+          <span class="text-xs text-slate-400 font-mono ml-auto">${timeText} น.</span>
+        </div>
+        <h3 class="text-lg font-black text-white">${plan.title}</h3>
+        <p class="text-xs text-slate-300 font-mono flex items-center gap-1.5">
+          <i data-lucide="calendar" class="w-3.5 h-3.5 text-orange-400"></i> ${dateText}
+        </p>
+        ${plan.location ? `<p class="text-xs text-slate-300 flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-400"></i> ${plan.location}</p>` : ''}
+        ${plan.meet_link ? `<a href="${plan.meet_link}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-500/20 text-sky-300 hover:bg-sky-500 hover:text-white transition text-xs font-bold"><i data-lucide="video" class="w-3.5 h-3.5"></i> เข้า Google Meet</a>` : ''}
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-slate-300">
+          ${plan.description || 'ไม่มีคำอธิบายเพิ่มเติม'}
+        </div>
+        <div class="text-[10px] text-slate-500">
+          ผู้สร้าง: ${plan.creator_name || 'สมาชิก'} (${plan.creator_email || '-'})
+        </div>
+      `;
+
+      document.getElementById('btnEditFromDetail').onclick = () => {
+        closeDetailModal();
+        editPlan(plan);
+      };
+
+      document.getElementById('planDetailModal').classList.remove('hidden');
+      document.getElementById('planDetailModal').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeDetailModal() {
+      document.getElementById('planDetailModal').classList.add('hidden');
+      document.getElementById('planDetailModal').classList.remove('flex');
+    }
+
+    function editPlan(plan) {
+      openCreatePlanModal();
+      document.getElementById('planModalTitle').textContent = 'แก้ไขแผนงาน';
+      document.getElementById('formPlanId').value = plan.id;
+      document.getElementById('formPlanTitle').value = plan.title || '';
+      document.getElementById('formPlanScope').value = plan.scope || 'department';
+      document.getElementById('formPlanCategory').value = plan.category || 'activity';
+      document.getElementById('formPlanLocation').value = plan.location || '';
+      document.getElementById('formPlanMeetLink').value = plan.meet_link || '';
+      document.getElementById('formPlanDesc').value = plan.description || '';
+
+      if (plan.start_date) {
+        const d = new Date(plan.start_date);
+        const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('formPlanStartDate').value = iso;
+      }
+
+      appState.selectedCollaborators = Array.isArray(plan.collaborators) ? plan.collaborators : [];
+      renderCollaboratorBadges();
+      toggleCollaboratorsSection(plan.scope);
+
+      document.getElementById('btnDeletePlan').classList.remove('hidden');
+    }
+
+    async function confirmDeletePlan() {
+      const planId = document.getElementById('formPlanId').value;
+      if (!planId) return;
+
+      if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบแผนงานนี้? ข้อมูลใน Supabase จะถูกลบทันที")) return;
+
+      try {
+        await window.PlansRepo.deletePlan(planId);
+        closePlanModal();
+        await refreshPlans();
+      } catch (err) {
+        alert("ลบไม่สำเร็จ: " + err.message);
+      }
+    }
+  </script>
+
+</body>
+</html>
