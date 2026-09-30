@@ -47,6 +47,8 @@
 
   <!-- Custom Master Admin & Cloud Theme CSS -->
   <link rel="stylesheet" href="assets/css/master-admin.css">
+  <!-- Global Theme Manager Engine -->
+  <script src="assets/js/theme-manager.js"></script>
   <!-- Supabase JS Client & Config -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
@@ -175,6 +177,10 @@
           <i data-lucide="user" class="w-4 h-4"></i>
           <span>ข้อมูลโปรไฟล์</span>
         </button>
+        <button data-user-tab="themes" class="px-4 sm:px-5 py-2.5 rounded-2xl text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 font-bold text-xs sm:text-sm transition flex items-center gap-2 flex-shrink-0 cursor-pointer">
+          <i data-lucide="palette" class="w-4 h-4"></i>
+          <span>ธีม & การแสดงผล</span>
+        </button>
         <button data-user-tab="notifications" class="px-4 sm:px-5 py-2.5 rounded-2xl text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 font-bold text-xs sm:text-sm transition flex items-center gap-2 flex-shrink-0 cursor-pointer">
           <i data-lucide="bell" class="w-4 h-4"></i>
           <span>การแจ้งเตือน & ปลอดภัย</span>
@@ -286,6 +292,200 @@
             </button>
           </div>
         </form>
+      </div>
+
+      <!-- ================= TAB: THEMES & APPEARANCE (NEW) ================= -->
+      <div id="tabPane-themes" class="user-tab-pane hidden hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-black text-white flex items-center gap-2">
+              <i data-lucide="palette" class="w-5 h-5 text-sky-400"></i>
+              <span>ระบบธีม & การแสดงผล (Themes Ecosystem)</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">
+              เลือกธีมเอกลักษณ์ที่คุณชอบเพื่อปรับแต่งบรรยากาศและสีสันทั่วทั้งเว็บไซต์ (Global Theme)
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-mono font-bold px-2.5 py-1 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/30 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>6 Signature Themes</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 6 Themes Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+          <!-- Theme 1: Midnight Cyber -->
+          <div data-theme-id="midnight" onclick="window.setSystemTheme('midnight')" class="theme-card-option group relative p-5 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-sky-500 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/30">
+                  <i data-lucide="moon" class="w-5 h-5"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="theme-status-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">เลือกใช้</span>
+                  <div class="theme-check-icon hidden w-5 h-5 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-sky-300 transition">Midnight Cyber</h4>
+                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">ครามดำลึก แสงไฟนีออนฟ้าไซเบอร์ ล้ำสมัยและคมชัด</p>
+              </div>
+            </div>
+            <!-- Palette preview dots -->
+            <div class="flex items-center gap-1.5 pt-4 mt-4 border-t border-slate-800/80">
+              <div class="w-4 h-4 rounded-full bg-[#030712] border border-slate-700" title="Dark Background"></div>
+              <div class="w-4 h-4 rounded-full bg-[#38bdf8]" title="Sky Accent"></div>
+              <div class="w-4 h-4 rounded-full bg-[#0ea5e9]" title="Cyan Glow"></div>
+              <div class="w-4 h-4 rounded-full bg-[#1e293b]" title="Slate Glass"></div>
+            </div>
+          </div>
+
+          <!-- Theme 2: COMED Brand Neon -->
+          <div data-theme-id="comed" onclick="window.setSystemTheme('comed')" class="theme-card-option group relative p-5 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-orange-500 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
+                  <i data-lucide="flame" class="w-5 h-5"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="theme-status-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">เลือกใช้</span>
+                  <div class="theme-check-icon hidden w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-orange-400 transition">COMED Brand Neon</h4>
+                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">ส้มเพลิงเอกลักษณ์สาขา KKU Amber Glow สดใส ทรงพลัง</p>
+              </div>
+            </div>
+            <!-- Palette preview dots -->
+            <div class="flex items-center gap-1.5 pt-4 mt-4 border-t border-slate-800/80">
+              <div class="w-4 h-4 rounded-full bg-[#0b0604] border border-orange-950" title="Dark Background"></div>
+              <div class="w-4 h-4 rounded-full bg-[#f97316]" title="Brand Orange"></div>
+              <div class="w-4 h-4 rounded-full bg-[#ea580c]" title="Deep Orange"></div>
+              <div class="w-4 h-4 rounded-full bg-[#fbbf24]" title="Amber Highlight"></div>
+            </div>
+          </div>
+
+          <!-- Theme 3: Emerald Matrix -->
+          <div data-theme-id="emerald" onclick="window.setSystemTheme('emerald')" class="theme-card-option group relative p-5 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-emerald-500 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+                  <i data-lucide="terminal" class="w-5 h-5"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="theme-status-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">เลือกใช้</span>
+                  <div class="theme-check-icon hidden w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-emerald-400 transition">Emerald Matrix</h4>
+                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">เขียวมรกต Forest Dark สบายตา สไตล์โปรแกรมเมอร์และแฮกเกอร์</p>
+              </div>
+            </div>
+            <!-- Palette preview dots -->
+            <div class="flex items-center gap-1.5 pt-4 mt-4 border-t border-slate-800/80">
+              <div class="w-4 h-4 rounded-full bg-[#02120d] border border-emerald-950" title="Dark Background"></div>
+              <div class="w-4 h-4 rounded-full bg-[#10b981]" title="Emerald Green"></div>
+              <div class="w-4 h-4 rounded-full bg-[#059669]" title="Teal Matrix"></div>
+              <div class="w-4 h-4 rounded-full bg-[#34d399]" title="Mint Neon"></div>
+            </div>
+          </div>
+
+          <!-- Theme 4: Royal Gold -->
+          <div data-theme-id="gold" onclick="window.setSystemTheme('gold')" class="theme-card-option group relative p-5 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-amber-500 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/30">
+                  <i data-lucide="crown" class="w-5 h-5"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="theme-status-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">เลือกใช้</span>
+                  <div class="theme-check-icon hidden w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-amber-400 transition">Royal Gold</h4>
+                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">ดำทองคำหรูหราสง่างาม Imperial Luxury เกรดพรีเมียมอันทรงเกียรติ</p>
+              </div>
+            </div>
+            <!-- Palette preview dots -->
+            <div class="flex items-center gap-1.5 pt-4 mt-4 border-t border-slate-800/80">
+              <div class="w-4 h-4 rounded-full bg-[#0e0a02] border border-amber-950" title="Dark Background"></div>
+              <div class="w-4 h-4 rounded-full bg-[#f59e0b]" title="Royal Gold"></div>
+              <div class="w-4 h-4 rounded-full bg-[#d97706]" title="Deep Amber"></div>
+              <div class="w-4 h-4 rounded-full bg-[#fde047]" title="Gold Spark"></div>
+            </div>
+          </div>
+
+          <!-- Theme 5: Galaxy Nebula -->
+          <div data-theme-id="nebula" onclick="window.setSystemTheme('nebula')" class="theme-card-option group relative p-5 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-purple-500 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500 to-pink-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/30">
+                  <i data-lucide="orbit" class="w-5 h-5"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="theme-status-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">เลือกใช้</span>
+                  <div class="theme-check-icon hidden w-5 h-5 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-purple-400 transition">Galaxy Nebula</h4>
+                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">ม่วง-ชมพูคอสมิค Cosmic Violet เสน่ห์แห่งกาแล็กซีและอวกาศล้ำยุค</p>
+              </div>
+            </div>
+            <!-- Palette preview dots -->
+            <div class="flex items-center gap-1.5 pt-4 mt-4 border-t border-slate-800/80">
+              <div class="w-4 h-4 rounded-full bg-[#0b0314] border border-purple-950" title="Dark Background"></div>
+              <div class="w-4 h-4 rounded-full bg-[#a855f7]" title="Purple Accent"></div>
+              <div class="w-4 h-4 rounded-full bg-[#ec4899]" title="Pink Nebula"></div>
+              <div class="w-4 h-4 rounded-full bg-[#c084fc]" title="Lavender Spark"></div>
+            </div>
+          </div>
+
+          <!-- Theme 6: Clean Platinum -->
+          <div data-theme-id="platinum" onclick="window.setSystemTheme('platinum')" class="theme-card-option group relative p-5 rounded-3xl bg-slate-900/90 border border-slate-800 hover:border-sky-400 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-slate-200 to-sky-200 flex items-center justify-center text-slate-800 shadow-lg shadow-white/10">
+                  <i data-lucide="sun" class="w-5 h-5"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="theme-status-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">เลือกใช้</span>
+                  <div class="theme-check-icon hidden w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-sky-300 transition">Clean Platinum</h4>
+                <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">สไตล์กระจกฝ้าสว่าง เรียบหรู Minimal Glass Light สบายตา</p>
+              </div>
+            </div>
+            <!-- Palette preview dots -->
+            <div class="flex items-center gap-1.5 pt-4 mt-4 border-t border-slate-800/80">
+              <div class="w-4 h-4 rounded-full bg-[#f8fafc] border border-slate-300" title="Light Background"></div>
+              <div class="w-4 h-4 rounded-full bg-[#0284c7]" title="Sky Blue"></div>
+              <div class="w-4 h-4 rounded-full bg-[#e2e8f0]" title="Glass Gray"></div>
+              <div class="w-4 h-4 rounded-full bg-[#38bdf8]" title="Ice Accent"></div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       <!-- ================= TAB 2: NOTIFICATIONS & PREFERENCES ================= -->
