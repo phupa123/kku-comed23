@@ -6,8 +6,8 @@
   <script src="assets/js/maintenance-guard.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบแผนงาน & ปฏิทินกิจกรรมสาขา | Plans COMED23 KKU63</title>
-  <meta name="description" content="ระบบวางแผนกิจกรรม ปฏิทินงานสาขา และการวางแผนงานร่วมกับเพื่อน สาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น">
+  <title>ห้องแผนงาน & PlanToDo ระบบจัดการงานสาขา | COMED23 KKU63</title>
+  <meta name="description" content="ระบบห้องงานหลักและงานย่อย PlanToDo กำหนด Progress % แชร์งานกลุ่มและงานสาขา พร้อมถังขยะกู้คืน">
   <link rel="icon" type="image/png" href="logo.png">
 
   <!-- Google Fonts -->
@@ -47,10 +47,10 @@
     }
   </script>
 
-  <!-- Bootstrap 5 CSS & Bootstrap Icons CDN (User Requested: นำ Bootstrap มาร่วมด้วย) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Bootstrap 5 CSS & Bootstrap Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -68,7 +68,7 @@
 
   <style>
     .glass-card {
-      background: rgba(15, 23, 42, 0.82);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(24px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
@@ -77,22 +77,21 @@
       width: 6px;
       height: 6px;
     }
-    .custom-scroll::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.5);
-    }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(249, 115, 22, 0.3);
+      background: rgba(249, 115, 22, 0.35);
       border-radius: 999px;
     }
-    .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(249, 115, 22, 0.6);
+    .kanban-task-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(249, 115, 22, 0.5);
     }
-    .calendar-cell:hover {
-      background: rgba(255, 255, 255, 0.04);
+    .dragging-card {
+      opacity: 0.5;
+      transform: scale(0.98);
     }
-    .calendar-today {
-      background: rgba(249, 115, 22, 0.08);
-      border: 1px solid rgba(249, 115, 22, 0.35);
+    .drag-over-col {
+      background: rgba(249, 115, 22, 0.1) !important;
+      border: 2px dashed rgba(249, 115, 22, 0.6) !important;
     }
   </style>
 </head>
@@ -101,57 +100,51 @@
 
   <!-- Ambient Light Effects -->
   <div class="fixed inset-0 bg-mesh-dark pointer-events-none z-0"></div>
-  <div class="fixed -top-40 -left-40 w-96 h-96 bg-orange-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-  <div class="fixed top-1/3 -right-40 w-96 h-96 bg-sky-500/10 rounded-full blur-[140px] pointer-events-none"></div>
 
   <!-- ================= TOP NAVIGATION BAR ================= -->
-  <header class="sticky top-0 z-40 bg-[#090D16]/80 backdrop-blur-2xl border-b border-white/10 transition-all">
+  <header class="sticky top-0 z-40 bg-[#090D16]/85 backdrop-blur-2xl border-b border-white/10 transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
       
-      <!-- Brand & Title -->
-      <div class="flex items-center gap-3.5">
+      <!-- Brand & Back Button -->
+      <div class="flex items-center gap-3">
         <a href="index.html" class="flex items-center gap-3 group">
           <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 p-0.5 shadow-lg shadow-orange-500/25 group-hover:scale-105 transition">
             <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
-              <i data-lucide="calendar-range" class="w-5 h-5 text-orange-400 group-hover:rotate-6 transition"></i>
+              <i data-lucide="check-square" class="w-5 h-5 text-orange-400"></i>
             </div>
           </div>
           <div>
             <div class="flex items-center gap-2">
               <h1 class="text-base sm:text-lg font-black tracking-tight text-white group-hover:text-orange-400 transition">
-                COMED Plans
+                PlanToDo Hub
               </h1>
               <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                Live Cloud
+                ห้องงาน & สถิติ %
               </span>
             </div>
-            <p class="text-xs text-slate-400">ปฏิทินงานสาขา & วางแผนกิจกรรม</p>
+            <p class="text-xs text-slate-400">วางแผนงานหลัก & การ์ดย่อย ติดตามความสำเร็จ Realtime</p>
           </div>
         </a>
       </div>
 
-      <!-- Center Nav Links -->
+      <!-- Center Switcher: Rooms vs Trash -->
       <nav class="hidden md:flex items-center gap-1.5 p-1 bg-white/5 border border-white/10 rounded-2xl">
-        <button id="viewBtnCalendar" onclick="switchMainView('calendar')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-md">
-          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-          <span>มุมมองปฏิทิน</span>
+        <button id="navTabRooms" onclick="switchNavSection('rooms')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-md">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+          <span>ห้องงานทั้งหมด</span>
         </button>
-        <button id="viewBtnTimeline" onclick="switchMainView('timeline')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
-          <i data-lucide="list-todo" class="w-3.5 h-3.5"></i>
-          <span>กำหนดการเรียงวัน</span>
-        </button>
-        <button id="viewBtnKanban" onclick="switchMainView('kanban')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
-          <i data-lucide="kanban" class="w-3.5 h-3.5"></i>
-          <span>บอร์ดสถานะงาน</span>
+        <button id="navTabTrash" onclick="switchNavSection('trash')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span>ถังขยะกู้คืน</span>
+          <span id="trashCountBadge" class="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-500/30 text-rose-300 font-bold">0</span>
         </button>
       </nav>
 
       <!-- Right Action & User Profile -->
       <div class="flex items-center gap-2.5">
-        <!-- New Plan Button -->
         <button onclick="openCreatePlanModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-xs shadow-lg shadow-orange-500/20 flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">สร้างแผนงานใหม่</span>
+          <span class="hidden sm:inline">สร้างห้องงานใหม่</span>
           <span class="sm:hidden">สร้าง</span>
         </button>
 
@@ -179,370 +172,314 @@
     </div>
   </header>
 
-  <!-- ================= SUB HEADER / FILTER CONTROLS ================= -->
-  <section class="relative z-10 border-b border-white/5 bg-[#0d1424]/60 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
-      
-      <!-- Calendar Month Navigator -->
-      <div class="flex items-center gap-3">
-        <div class="flex items-center bg-slate-900/90 border border-white/10 rounded-xl p-1">
-          <button onclick="prevMonth()" class="p-1.5 hover:bg-white/10 rounded-lg text-slate-300 hover:text-white transition">
-            <i data-lucide="chevron-left" class="w-4 h-4"></i>
-          </button>
-          <button onclick="goToToday()" class="px-2.5 py-1 text-xs font-black text-orange-400 hover:text-orange-300 transition">
-            วันนี้
-          </button>
-          <button onclick="nextMonth()" class="p-1.5 hover:bg-white/10 rounded-lg text-slate-300 hover:text-white transition">
-            <i data-lucide="chevron-right" class="w-4 h-4"></i>
-          </button>
-        </div>
-        <h2 id="calendarMonthTitle" class="text-base sm:text-lg font-black text-white tracking-wide">
-          ตุลาคม 2569
-        </h2>
-      </div>
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
 
-      <!-- Scope & Category Filter Tabs -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <div class="flex items-center bg-slate-900/90 border border-white/10 rounded-xl p-1 text-xs font-bold">
-          <button onclick="setFilterScope('all')" class="filter-scope-btn px-2.5 py-1 rounded-lg bg-orange-500 text-white transition" data-scope="all">
-            ทั้งหมด
+    <!-- VIEW 1: ROOMS LIST VIEW -->
+    <div id="sectionRooms" class="space-y-6">
+      
+      <!-- Filter Bar -->
+      <div class="glass-card rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 flex-wrap text-xs font-bold">
+          <button onclick="setRoomFilter('all')" class="room-filter-btn px-3 py-1.5 rounded-xl bg-orange-500 text-white transition" data-filter="all">
+            ห้องงานทั้งหมด
           </button>
-          <button onclick="setFilterScope('department')" class="filter-scope-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition" data-scope="department">
-            🏛️ งานสาขา
+          <button onclick="setRoomFilter('department')" class="room-filter-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition" data-filter="department">
+            🏛️ งานสาขา (ทุกคน)
           </button>
-          <button onclick="setFilterScope('shared')" class="filter-scope-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition" data-scope="shared">
-            👥 งานกลุ่มเพื่อน
+          <button onclick="setRoomFilter('shared')" class="room-filter-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition" data-filter="shared">
+            👥 แชร์กลุ่มเพื่อน
           </button>
-          <button onclick="setFilterScope('personal')" class="filter-scope-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition" data-scope="personal">
+          <button onclick="setRoomFilter('personal')" class="room-filter-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition" data-filter="personal">
             🔒 ส่วนตัว
           </button>
         </div>
 
-        <!-- Quick Search -->
         <div class="relative">
           <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-          <input type="text" id="planSearchInput" oninput="handlePlanSearch(this.value)" placeholder="ค้นหาแผนงาน / กิจกรรม..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-44 sm:w-56 transition">
+          <input type="text" id="roomSearchInput" oninput="handleRoomSearch(this.value)" placeholder="ค้นหาห้องงาน / โปรเจกต์..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-56">
+        </div>
+      </div>
+
+      <!-- Rooms Grid -->
+      <div id="roomsGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered dynamically -->
+        <div class="col-span-full py-16 text-center text-slate-500">
+          <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-orange-500 mb-2"></i>
+          <p class="text-xs">กำลังโหลดห้องงานจาก Supabase...</p>
         </div>
       </div>
 
     </div>
-  </section>
 
-  <!-- ================= MAIN CONTENT WRAPPER ================= -->
-  <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- VIEW 2: INSIDE ROOM (PLANTODO BOARD) -->
+    <div id="sectionInsideRoom" class="hidden space-y-5">
+      
+      <!-- Room Header Banner -->
+      <div class="glass-card rounded-3xl p-5 sm:p-6 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <button onclick="backToRoomsList()" class="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-slate-300 hover:text-white flex items-center gap-1 transition">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+              <span>กลับรายการห้อง</span>
+            </button>
+            <span id="activeRoomScopeBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-300">🏛️ สาขา</span>
+            <span id="activeRoomDateText" class="text-xs text-slate-400 font-mono">--/--/----</span>
+          </div>
 
-    <!-- Loading Skeleton Shimmer -->
-    <div id="plansLoadingSkeleton" class="space-y-4">
-      <div class="h-10 bg-slate-800/50 rounded-2xl animate-pulse"></div>
-      <div class="grid grid-cols-7 gap-2">
-        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
-        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
-        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
-        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
-        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
-        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
-        <div class="h-28 bg-slate-800/40 rounded-2xl animate-pulse"></div>
+          <h2 id="activeRoomTitle" class="text-xl sm:text-2xl font-black text-white">ชื่องานหลัก</h2>
+          <p id="activeRoomDesc" class="text-xs text-slate-300 max-w-2xl leading-relaxed">รายละเอียดงาน</p>
+
+          <!-- Creator Profile Pill -->
+          <div class="flex items-center gap-2 pt-1 text-xs text-slate-400">
+            <span>ผู้สร้างห้อง:</span>
+            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+              <img id="activeRoomCreatorAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" class="w-4 h-4 rounded-full">
+              <span id="activeRoomCreatorName" class="font-bold text-slate-200">สมาชิก</span>
+              <span id="activeRoomCreatorEmail" class="text-[10px] text-slate-400 font-mono">(email@kkumail.com)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Room Progress Indicator & Actions -->
+        <div class="flex flex-col items-end gap-3 min-w-[200px]">
+          <div class="w-full text-right">
+            <div class="flex justify-between items-baseline mb-1">
+              <span class="text-xs text-slate-400 font-bold">ความคืบหน้ารวม</span>
+              <span id="activeRoomProgressNumber" class="text-2xl font-black text-orange-400 font-mono">0%</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-white/10">
+              <div id="activeRoomProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-emerald-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openAddTaskModal()" class="px-3.5 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>เพิ่มงานย่อย</span>
+            </button>
+            <button onclick="openRoomTrashModal()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition" title="ถังขยะของห้องนี้">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span>ถังขยะห้อง (<span id="roomTrashCount">0</span>)</span>
+            </button>
+            <button id="btnDeleteRoom" onclick="handleDeleteCurrentRoom()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white text-xs font-bold transition" title="ลบห้องงานหลักลงถังขยะ">
+              <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
       </div>
+
+      <!-- PlanToDo Dynamic Columns Board (Drag & Drop) -->
+      <div id="kanbanColumnsContainer" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-x-auto pb-4 custom-scroll">
+        <!-- Rendered dynamically according to room custom_columns -->
+      </div>
+
     </div>
 
-    <!-- 1. CALENDAR VIEW -->
-    <div id="viewCalendarContainer" class="hidden">
-      <div class="glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
-        <!-- Day Names Header -->
-        <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-black uppercase text-slate-400 tracking-wider">
-          <span class="text-rose-400">อาทิตย์</span>
-          <span>จันทร์</span>
-          <span>อังคาร</span>
-          <span>พุธ</span>
-          <span>พฤหัสบดี</span>
-          <span>ศุกร์</span>
-          <span class="text-sky-400">เสาร์</span>
-        </div>
-        <!-- Calendar Days Grid -->
-        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2 min-h-[500px]">
-          <!-- Injected dynamically via JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. TIMELINE / AGENDA VIEW -->
-    <div id="viewTimelineContainer" class="hidden">
-      <div class="glass-card rounded-3xl p-5 sm:p-7 max-w-4xl mx-auto">
-        <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+    <!-- VIEW 3: TRASH & RECYCLE BIN VIEW -->
+    <div id="sectionTrash" class="hidden space-y-6">
+      
+      <div class="glass-card rounded-3xl p-6 border border-rose-500/20">
+        <div class="flex items-center justify-between pb-4 border-b border-white/10">
           <div>
             <h3 class="text-base font-black text-white flex items-center gap-2">
-              <i data-lucide="calendar-check" class="w-5 h-5 text-orange-400"></i>
-              <span>ลำดับกำหนดการและกิจกรรมที่กำลังจะมาถึง</span>
+              <i data-lucide="trash-2" class="w-5 h-5 text-rose-400"></i>
+              <span>ถังขยะกู้คืนข้อมูล (Multi-Tier Recycle Bin)</span>
             </h3>
-            <p class="text-xs text-slate-400 mt-0.5">เรียงลำดับตามวันและเวลา Realtime จากฐานข้อมูล</p>
+            <p class="text-xs text-slate-400 mt-0.5">กู้คืนห้องงานหลัก และงานย่อย หรือลบถาวร (เฉพาะเจ้าของงาน/แอดมิน)</p>
           </div>
-          <span id="timelineCountBadge" class="px-3 py-1 rounded-full text-xs font-black bg-orange-500/20 text-orange-300 border border-orange-500/30">
-            0 รายการ
-          </span>
+          <button onclick="refreshTrashList()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
         </div>
 
-        <div id="timelineListContainer" class="space-y-4">
-          <!-- Injected dynamically via JS -->
+        <div id="trashItemsList" class="divide-y divide-white/5 mt-4 space-y-3">
+          <!-- Rendered dynamically -->
         </div>
       </div>
-    </div>
 
-    <!-- 3. KANBAN BOARD VIEW -->
-    <div id="viewKanbanContainer" class="hidden">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <!-- Column 1: รอเริ่ม (Pending) -->
-        <div class="glass-card rounded-3xl p-4 flex flex-col">
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
-              <h4 class="text-xs font-black uppercase text-slate-200 tracking-wider">รอดำเนินการ / นัดหมาย</h4>
-            </div>
-            <span id="kanbanCountPending" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-slate-400">0</span>
-          </div>
-          <div id="kanbanColumnPending" class="space-y-3 flex-1 min-h-[300px]">
-            <!-- Injected -->
-          </div>
-        </div>
-
-        <!-- Column 2: กำลังดำเนินการ (In Progress) -->
-        <div class="glass-card rounded-3xl p-4 flex flex-col">
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-sky-400 animate-pulse"></span>
-              <h4 class="text-xs font-black uppercase text-slate-200 tracking-wider">กำลังเตรียมงาน / ลุยงาน</h4>
-            </div>
-            <span id="kanbanCountInProgress" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-slate-400">0</span>
-          </div>
-          <div id="kanbanColumnInProgress" class="space-y-3 flex-1 min-h-[300px]">
-            <!-- Injected -->
-          </div>
-        </div>
-
-        <!-- Column 3: สำเร็จแล้ว (Completed) -->
-        <div class="glass-card rounded-3xl p-4 flex flex-col">
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-              <h4 class="text-xs font-black uppercase text-slate-200 tracking-wider">เสร็จสิ้นแล้ว</h4>
-            </div>
-            <span id="kanbanCountCompleted" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-slate-400">0</span>
-          </div>
-          <div id="kanbanColumnCompleted" class="space-y-3 flex-1 min-h-[300px]">
-            <!-- Injected -->
-          </div>
-        </div>
-      </div>
     </div>
 
   </main>
 
-  <!-- ================= MODAL: CREATE / EDIT PLAN ================= -->
-  <div id="planModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-6 shadow-2xl relative overflow-hidden max-h-[90vh] flex flex-col">
+  <!-- ================= MODAL: CREATE MASTER ROOM ================= -->
+  <div id="createPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
       
-      <!-- Modal Header -->
       <div class="flex items-center justify-between pb-4 border-b border-white/10">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
-            <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 id="planModalTitle" class="text-base font-black text-white">ลงตาราง / สร้างแผนงาน</h3>
-            <p class="text-[11px] text-slate-400">บันทึกลงระบบคลาวด์สาขา Realtime ทันที</p>
-          </div>
-        </div>
-        <button onclick="closePlanModal()" class="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <h3 class="text-base font-black text-white">สร้างห้องงานใหม่ (Master Room)</h3>
+        <button onclick="closeCreatePlanModal()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <!-- Modal Body (Scrollable) -->
-      <form id="planForm" onsubmit="handlePlanFormSubmit(event)" class="custom-scroll overflow-y-auto py-4 space-y-4 flex-1">
-        <input type="hidden" id="formPlanId" value="">
-
-        <!-- Title -->
+      <form onsubmit="handleCreatePlanSubmit(event)" class="space-y-4 pt-4 text-xs">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">ชื่องาน / กิจกรรม <span class="text-rose-400">*</span></label>
-          <input type="text" id="formPlanTitle" required placeholder="เช่น ประชุมเตรียมซุ้มบัณฑิต, ส่งโครงร่างโปรเจกต์" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500">
+          <label class="block font-bold text-slate-300 mb-1">ชื่องานหลัก <span class="text-rose-400">*</span></label>
+          <input type="text" id="newRoomTitle" required placeholder="เช่น ซุ้มบัณฑิต 2569, จัดค่ายพี่ติวน้อง" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
         </div>
 
-        <!-- Scope & Category -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">ขอบเขต (Scope)</label>
-            <select id="formPlanScope" onchange="toggleCollaboratorsSection(this.value)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-hidden focus:border-orange-500">
-              <option value="department">🏛️ แผนงานสาขา (ทุกคนเห็น)</option>
-              <option value="shared">👥 งานกลุ่ม (แชร์กับเพื่อน)</option>
-              <option value="personal">🔒 ส่วนตัว (เฉพาะฉัน)</option>
+            <label class="block font-bold text-slate-300 mb-1">การแชร์ & ขอบเขต</label>
+            <select id="newRoomScope" onchange="toggleNewRoomCollaborators(this.value)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
+              <option value="department">🏛️ แชร์ลงสาขา (ทุกคนเห็น)</option>
+              <option value="shared">👥 แชร์เพื่อนในสาขาที่กำหนด</option>
+              <option value="personal">🔒 สร้างเป็นส่วนตัว (ฉันคนเดียว)</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">หมวดหมู่</label>
-            <select id="formPlanCategory" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-hidden focus:border-orange-500">
-              <option value="activity">🎉 กิจกรรมสาขา / ชมรม</option>
-              <option value="academic">📚 วิชาการ / การเรียน / ส่งงาน</option>
-              <option value="meeting">🗣️ นัดประชุม / ระดมไอเดีย</option>
-              <option value="urgent">🚨 ด่วน / วันสำคัญ</option>
+            <label class="block font-bold text-slate-300 mb-1">กำหนดขั้นตอนคอลัมน์ (Progress)</label>
+            <select id="newRoomColumnsPreset" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
+              <option value="default">สิ่งที่ต้องทำ • กำลังทำ • เสร็จสิ้น</option>
+              <option value="idea">ความคิด • เริ่มทำ • กำลังดำเนิน • เสร็จสิ้น</option>
+              <option value="kanban">To Do • In Progress • Review • Done</option>
             </select>
           </div>
         </div>
 
-        <!-- Date & Time -->
+        <div id="newRoomCollaboratorsSection" class="hidden p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+          <label class="block font-bold text-amber-300">เลือกเพื่อนในสาขา (60 คน):</label>
+          <input type="text" id="newRoomCollabSearch" oninput="searchCollabForRoom(this.value)" placeholder="พิมพ์ชื่อ, ชื่อเล่น หรือรหัสนักศึกษา..." class="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white">
+          <div id="newRoomCollabDropdown" class="hidden max-h-36 overflow-y-auto bg-slate-900 border border-white/10 rounded-xl p-1 space-y-1"></div>
+          <div id="newRoomSelectedCollabs" class="flex flex-wrap gap-1.5 pt-1"></div>
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">วันและเวลาเริ่ม <span class="text-rose-400">*</span></label>
-            <input type="datetime-local" id="formPlanStartDate" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-hidden focus:border-orange-500">
+            <label class="block font-bold text-slate-300 mb-1">วันเริ่มงาน</label>
+            <input type="datetime-local" id="newRoomStartDate" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">สิ้นสุด (ไม่บังคับ)</label>
-            <input type="datetime-local" id="formPlanEndDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-hidden focus:border-orange-500">
+            <label class="block font-bold text-slate-300 mb-1">กำหนดเสร็จ (ถ้ามี)</label>
+            <input type="datetime-local" id="newRoomEndDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
           </div>
         </div>
 
-        <!-- Location & Meet Link -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">รายละเอียดงาน</label>
+          <textarea id="newRoomDesc" rows="3" placeholder="ระบุเป้าหมาย สมาชิก หรือโน้ตสำคัญ..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+          <button type="button" onclick="closeCreatePlanModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold hover:bg-white/10 transition">ยกเลิก</button>
+          <button type="submit" id="btnSubmitNewRoom" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-black shadow-lg shadow-orange-500/30 transition">สร้างห้องงาน</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADD / EDIT SUBTASK (PLANTODO ITEM) ================= -->
+  <div id="taskModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h3 id="taskModalTitle" class="text-base font-black text-white">เพิ่มงานย่อย</h3>
+        <button onclick="closeTaskModal()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form onsubmit="handleTaskSubmit(event)" class="space-y-3.5 pt-3 text-xs">
+        <input type="hidden" id="taskFormId" value="">
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">หัวข้องานย่อย <span class="text-rose-400">*</span></label>
+          <input type="text" id="taskFormTitle" required placeholder="เช่น ซื้อผ้าดิบทำซุ้ม, ออกแบบโลโก้" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">สถานที่ / ห้องเรียน</label>
-            <input type="text" id="formPlanLocation" placeholder="เช่น ED2401, อาคาร 50 ปี" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500">
+            <label class="block font-bold text-slate-300 mb-1">ขั้นตอน / คอลัมน์</label>
+            <select id="taskFormColumn" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">ลิงก์ Google Meet / ซูม</label>
-            <input type="url" id="formPlanMeetLink" placeholder="https://meet.google.com/..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500">
+            <label class="block font-bold text-slate-300 mb-1">ความสำคัญ (Priority)</label>
+            <select id="taskFormPriority" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+              <option value="urgent">🚨 ด่วนที่สุด (Urgent)</option>
+              <option value="high">🔴 สำคัญสูง (High)</option>
+              <option value="normal" selected>🟡 ปานกลาง (Normal)</option>
+              <option value="low">🟢 ทั่วไป (Low)</option>
+            </select>
           </div>
         </div>
 
-        <!-- Collaborators Autocomplete (When Shared) -->
-        <div id="collaboratorsSection" class="hidden space-y-2 p-3 rounded-2xl bg-white/5 border border-white/10">
-          <label class="block text-xs font-bold text-amber-300 flex items-center gap-1.5">
-            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-            <span>เพิ่มเพื่อนร่วมทีม (จาก 60 คนในสาขา)</span>
+        <!-- File / Image / Video URL Attachment -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span>แนบไฟล์ / ภาพ / วิดีโอ (URL หรือลิงก์ไดรฟ์)</span>
+            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-orange-400"></i>
           </label>
-          <div class="relative">
-            <input type="text" id="collaboratorSearchInput" oninput="searchCollaboratorStudent(this.value)" placeholder="พิมพ์ชื่อ, ชื่อเล่น หรือรหัสนักศึกษา..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-amber-400">
-            <!-- Autocomplete Dropdown -->
-            <div id="collaboratorSuggestions" class="hidden absolute top-full left-0 right-0 z-20 mt-1 max-h-40 overflow-y-auto bg-slate-900 border border-white/20 rounded-xl shadow-xl p-1 space-y-1">
-              <!-- Rendered items -->
-            </div>
-          </div>
-          <!-- Selected Collaborator Badges -->
-          <div id="selectedCollaboratorsList" class="flex flex-wrap gap-1.5 pt-1">
-            <!-- Rendered tags -->
-          </div>
+          <input type="url" id="taskFormAttachmentUrl" placeholder="https://drive.google.com/... หรือ ลิงก์รูปภาพ" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
         </div>
 
-        <!-- Color Tag Picker -->
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">สีธีมของกิจกรรม</label>
-          <div class="flex items-center gap-2">
-            <label class="cursor-pointer">
-              <input type="radio" name="planColor" value="#f97316" checked class="peer sr-only">
-              <span class="block w-6 h-6 rounded-full bg-orange-500 peer-checked:ring-2 peer-checked:ring-white"></span>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="planColor" value="#38bdf8" class="peer sr-only">
-              <span class="block w-6 h-6 rounded-full bg-sky-400 peer-checked:ring-2 peer-checked:ring-white"></span>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="planColor" value="#a855f7" class="peer sr-only">
-              <span class="block w-6 h-6 rounded-full bg-purple-500 peer-checked:ring-2 peer-checked:ring-white"></span>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="planColor" value="#10b981" class="peer sr-only">
-              <span class="block w-6 h-6 rounded-full bg-emerald-500 peer-checked:ring-2 peer-checked:ring-white"></span>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="planColor" value="#f43f5e" class="peer sr-only">
-              <span class="block w-6 h-6 rounded-full bg-rose-500 peer-checked:ring-2 peer-checked:ring-white"></span>
-            </label>
-          </div>
+          <label class="block font-bold text-slate-300 mb-1">รายละเอียดเพิ่มเติม</label>
+          <textarea id="taskFormDesc" rows="3" placeholder="ระบุสิ่งที่ต้องทำ ลำดับขั้นตอน..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
         </div>
 
-        <!-- Description -->
-        <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">รายละเอียด / สิ่งที่ต้องเตรียม</label>
-          <textarea id="formPlanDesc" rows="3" placeholder="ระบุสิ่งที่สมาชิกต้องเตรียมตัว หรือหัวข้อการประชุม..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500"></textarea>
-        </div>
-
-        <!-- Submit & Actions -->
-        <div class="pt-2 flex items-center justify-between border-t border-white/10">
-          <button type="button" id="btnDeletePlan" onclick="confirmDeletePlan()" class="hidden px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white text-xs font-bold transition">
-            ลบรายการนี้
+        <div class="flex items-center justify-between pt-3 border-t border-white/10">
+          <button type="button" id="btnDeleteTaskInsideModal" onclick="handleDeleteTaskFromModal()" class="hidden px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white transition font-bold">
+            ทิ้งลงถังขยะห้อง
           </button>
           <div class="flex items-center gap-2 ml-auto">
-            <button type="button" onclick="closePlanModal()" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition">
-              ยกเลิก
-            </button>
-            <button type="submit" id="btnSavePlan" class="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-xs shadow-lg shadow-orange-500/25 transition">
-              บันทึกแผนงาน
-            </button>
+            <button type="button" onclick="closeTaskModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold">ยกเลิก</button>
+            <button type="submit" id="btnSaveTask" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-black shadow-md transition">บันทึก</button>
           </div>
         </div>
-
       </form>
-
     </div>
   </div>
 
-  <!-- ================= DETAIL MODAL ================= -->
-  <div id="planDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-    <div class="glass-card rounded-3xl border border-white/15 max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
-      <div id="planDetailContent" class="space-y-4">
-        <!-- Rendered dynamically -->
+  <!-- ================= MODAL: ROOM TRASH RECYCLE BIN ================= -->
+  <div id="roomTrashModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="trash-2" class="w-4 h-4 text-rose-400"></i>
+          <span>ถังขยะของห้องนี้ (งานย่อยที่ถูกลบ)</span>
+        </h3>
+        <button onclick="closeRoomTrashModal()" class="p-1 text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <div class="pt-4 mt-4 border-t border-white/10 flex items-center justify-between">
-        <button id="btnEditFromDetail" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition">
-          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-orange-400"></i>
-          <span>แก้ไข</span>
-        </button>
-        <button onclick="closeDetailModal()" class="px-4 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-xs font-extrabold transition">
-          ปิด
-        </button>
+
+      <div id="roomTrashItemsList" class="py-4 space-y-2.5 max-h-80 overflow-y-auto custom-scroll text-xs">
+        <!-- Rendered items -->
       </div>
     </div>
   </div>
 
-  <!-- ================= LOGIC SCRIPT (STRICT NO LOCALSTORAGE) ================= -->
+  <!-- ================= SCRIPT LOGIC ================= -->
   <script>
-    // State management in runtime memory only
     let appState = {
-      user: null, // { email, name, avatar, student_id }
+      user: null,
       plans: [],
-      currentMonth: new Date().getMonth(),
-      currentYear: new Date().getFullYear(),
-      activeView: 'calendar', // 'calendar' | 'timeline' | 'kanban'
-      filterScope: 'all',
+      activeRoom: null,
+      activeTasks: [],
+      selectedRoomCollabs: [],
+      activeNavTab: 'rooms', // 'rooms' | 'trash'
+      roomFilter: 'all',
       searchQuery: '',
-      selectedCollaborators: []
+      roomTrashTasks: [],
+      allTrashPlans: []
     };
 
-    // Initialize on load
     document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
       checkSessionUser();
-      renderMonthTitle();
-      switchMainView('calendar');
-      
-      // Fetch initial plans from Supabase
-      await refreshPlans();
+      await refreshAllData();
 
-      // Subscribe to Realtime
+      // Subscribe to Realtime (plans & plan_tasks)
       if (window.PlansRepo) {
-        window.PlansRepo.subscribeToChanges((payload) => {
-          console.log("[Realtime Sync Triggered]");
-          refreshPlans();
+        window.PlansRepo.subscribeToChanges(async (table, payload) => {
+          console.log("[Realtime Sync]", table, payload);
+          if (appState.activeRoom) {
+            await loadActiveRoomTasks(appState.activeRoom.id);
+          }
+          await refreshAllData();
         });
       }
     });
 
-    // Check user from sessionStorage or google session (NO LocalStorage)
     function checkSessionUser() {
       try {
-        const sessionData = sessionStorage.getItem('COMED_USER_SESSION');
-        if (sessionData) {
-          appState.user = JSON.parse(sessionData);
-        }
+        const s = sessionStorage.getItem('COMED_USER_SESSION');
+        if (s) appState.user = JSON.parse(s);
       } catch (e) {}
-
       updateAuthUI();
     }
 
@@ -556,7 +493,7 @@
         loginBtn.classList.add('hidden');
         userInfo.classList.remove('hidden');
         userInfo.classList.add('flex');
-        userName.textContent = appState.user.name || 'สมาชิกสาขา';
+        userName.textContent = appState.user.name || 'สมาชิก';
         userAvatar.src = appState.user.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>";
       } else {
         loginBtn.classList.remove('hidden');
@@ -566,7 +503,6 @@
     }
 
     function triggerGoogleLogin() {
-      // Prompt sign in with Google or redirect
       window.location.href = 'index.html?action=login';
     }
 
@@ -574,547 +510,579 @@
       sessionStorage.removeItem('COMED_USER_SESSION');
       appState.user = null;
       updateAuthUI();
-      refreshPlans();
+      refreshAllData();
     }
 
-    // Refresh and fetch plans
-    async function refreshPlans() {
-      const skeleton = document.getElementById('plansLoadingSkeleton');
-      if (skeleton) skeleton.classList.remove('hidden');
-
-      const userEmail = appState.user ? appState.user.email : null;
+    // Refresh All Data
+    async function refreshAllData() {
+      const email = appState.user ? appState.user.email : null;
       if (window.PlansRepo) {
-        appState.plans = await window.PlansRepo.fetchPlans(userEmail);
+        appState.plans = await window.PlansRepo.fetchPlans(email, false);
+        appState.allTrashPlans = await window.PlansRepo.fetchPlans(email, true);
+        document.getElementById('trashCountBadge').textContent = appState.allTrashPlans.length;
       }
-
-      if (skeleton) skeleton.classList.add('hidden');
-      renderCurrentView();
-    }
-
-    // Render views based on active tab
-    function renderCurrentView() {
-      if (appState.activeView === 'calendar') {
-        renderCalendar();
-      } else if (appState.activeView === 'timeline') {
-        renderTimeline();
-      } else if (appState.activeView === 'kanban') {
-        renderKanban();
+      renderRoomsGrid();
+      if (appState.activeNavTab === 'trash') {
+        renderTrashList();
       }
     }
 
-    function switchMainView(viewName) {
-      appState.activeView = viewName;
-      
-      const vCal = document.getElementById('viewCalendarContainer');
-      const vTime = document.getElementById('viewTimelineContainer');
-      const vKan = document.getElementById('viewKanbanContainer');
+    // Switch Navigation Tabs (Rooms vs Trash)
+    function switchNavSection(tab) {
+      appState.activeNavTab = tab;
+      const bRooms = document.getElementById('navTabRooms');
+      const bTrash = document.getElementById('navTabTrash');
+      const secRooms = document.getElementById('sectionRooms');
+      const secInside = document.getElementById('sectionInsideRoom');
+      const secTrash = document.getElementById('sectionTrash');
 
-      const bCal = document.getElementById('viewBtnCalendar');
-      const bTime = document.getElementById('viewBtnTimeline');
-      const bKan = document.getElementById('viewBtnKanban');
-
-      [vCal, vTime, vKan].forEach(el => el.classList.add('hidden'));
-      [bCal, bTime, bKan].forEach(b => {
-        b.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5';
-      });
-
-      const activeBtnClass = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-md';
-
-      if (viewName === 'calendar') {
-        vCal.classList.remove('hidden');
-        bCal.className = activeBtnClass;
-      } else if (viewName === 'timeline') {
-        vTime.classList.remove('hidden');
-        bTime.className = activeBtnClass;
-      } else if (viewName === 'kanban') {
-        vKan.classList.remove('hidden');
-        bKan.className = activeBtnClass;
+      secInside.classList.add('hidden');
+      if (tab === 'rooms') {
+        secRooms.classList.remove('hidden');
+        secTrash.classList.add('hidden');
+        bRooms.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-md';
+        bTrash.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5';
+        renderRoomsGrid();
+      } else {
+        secRooms.classList.add('hidden');
+        secTrash.classList.remove('hidden');
+        bTrash.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-rose-500 text-white shadow-md';
+        bRooms.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5';
+        renderTrashList();
       }
-
-      renderCurrentView();
       lucide.createIcons();
     }
 
-    // Filter logic
-    function getFilteredPlans() {
+    // Render Rooms Grid
+    function renderRoomsGrid() {
+      const container = document.getElementById('roomsGridContainer');
       let list = appState.plans || [];
-      if (appState.filterScope !== 'all') {
-        list = list.filter(p => p.scope === appState.filterScope);
+
+      if (appState.roomFilter !== 'all') {
+        list = list.filter(p => p.scope === appState.roomFilter);
       }
       if (appState.searchQuery) {
         const q = appState.searchQuery.toLowerCase();
-        list = list.filter(p => 
-          (p.title && p.title.toLowerCase().includes(q)) ||
-          (p.description && p.description.toLowerCase().includes(q)) ||
-          (p.location && p.location.toLowerCase().includes(q))
-        );
-      }
-      return list;
-    }
-
-    function setFilterScope(scope) {
-      appState.filterScope = scope;
-      document.querySelectorAll('.filter-scope-btn').forEach(btn => {
-        if (btn.dataset.scope === scope) {
-          btn.className = 'filter-scope-btn px-2.5 py-1 rounded-lg bg-orange-500 text-white transition';
-        } else {
-          btn.className = 'filter-scope-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
-        }
-      });
-      renderCurrentView();
-    }
-
-    function handlePlanSearch(val) {
-      appState.searchQuery = val.trim();
-      renderCurrentView();
-    }
-
-    // Month Navigation
-    const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-
-    function renderMonthTitle() {
-      const yearBE = appState.currentYear + 543;
-      document.getElementById('calendarMonthTitle').textContent = `${THAI_MONTHS[appState.currentMonth]} ${yearBE}`;
-    }
-
-    function prevMonth() {
-      appState.currentMonth--;
-      if (appState.currentMonth < 0) {
-        appState.currentMonth = 11;
-        appState.currentYear--;
-      }
-      renderMonthTitle();
-      renderCalendar();
-    }
-
-    function nextMonth() {
-      appState.currentMonth++;
-      if (appState.currentMonth > 11) {
-        appState.currentMonth = 0;
-        appState.currentYear++;
-      }
-      renderMonthTitle();
-      renderCalendar();
-    }
-
-    function goToToday() {
-      const now = new Date();
-      appState.currentMonth = now.getMonth();
-      appState.currentYear = now.getFullYear();
-      renderMonthTitle();
-      renderCalendar();
-    }
-
-    // 1. RENDER CALENDAR
-    function renderCalendar() {
-      const grid = document.getElementById('calendarDaysGrid');
-      grid.innerHTML = '';
-
-      const firstDayOfMonth = new Date(appState.currentYear, appState.currentMonth, 1).getDay();
-      const daysInMonth = new Date(appState.currentYear, appState.currentMonth + 1, 0).getDate();
-
-      const today = new Date();
-      const isCurrentMonth = today.getMonth() === appState.currentMonth && today.getFullYear() === appState.currentYear;
-      const todayDate = today.getDate();
-
-      const filteredPlans = getFilteredPlans();
-
-      // Empty lead cells
-      for (let i = 0; i < firstDayOfMonth; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'p-2 rounded-2xl bg-white/[0.01] border border-white/5 opacity-40 min-h-[90px]';
-        grid.appendChild(emptyCell);
+        list = list.filter(p => (p.title && p.title.toLowerCase().includes(q)) || (p.description && p.description.toLowerCase().includes(q)));
       }
 
-      // Days
-      for (let day = 1; day <= daysInMonth; day++) {
-        const isToday = isCurrentMonth && day === todayDate;
-        const cell = document.createElement('div');
-        cell.className = `calendar-cell p-2 rounded-2xl border transition flex flex-col justify-between min-h-[100px] cursor-pointer ${
-          isToday ? 'calendar-today' : 'bg-white/[0.02] border-white/5'
-        }`;
-        cell.onclick = () => openCreatePlanModalForDay(day);
-
-        // Header of Cell
-        const header = document.createElement('div');
-        header.className = 'flex items-center justify-between mb-1';
-        header.innerHTML = `
-          <span class="text-xs font-black ${isToday ? 'text-orange-400 bg-orange-500/20 px-2 py-0.5 rounded-full' : 'text-slate-300'}">${day}</span>
-        `;
-        cell.appendChild(header);
-
-        // Plans for this day
-        const plansContainer = document.createElement('div');
-        plansContainer.className = 'space-y-1 overflow-y-auto max-h-[75px] custom-scroll';
-
-        const dayPlans = filteredPlans.filter(p => {
-          if (!p.start_date) return false;
-          const pDate = new Date(p.start_date);
-          return pDate.getDate() === day && pDate.getMonth() === appState.currentMonth && pDate.getFullYear() === appState.currentYear;
-        });
-
-        dayPlans.forEach(p => {
-          const pill = document.createElement('div');
-          pill.className = 'px-1.5 py-1 rounded-lg text-[10px] font-bold truncate flex items-center gap-1 shadow-xs transition hover:brightness-125';
-          pill.style.backgroundColor = (p.color || '#f97316') + '25';
-          pill.style.borderLeft = `3px solid ${p.color || '#f97316'}`;
-          pill.style.color = '#ffffff';
-          pill.title = p.title;
-          pill.onclick = (e) => {
-            e.stopPropagation();
-            showPlanDetail(p);
-          };
-
-          pill.innerHTML = `
-            <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${p.color || '#f97316'}"></span>
-            <span class="truncate">${p.title}</span>
-          `;
-          plansContainer.appendChild(pill);
-        });
-
-        cell.appendChild(plansContainer);
-        grid.appendChild(cell);
-      }
-
-      lucide.createIcons();
-    }
-
-    // 2. RENDER TIMELINE
-    function renderTimeline() {
-      const container = document.getElementById('timelineListContainer');
-      const badge = document.getElementById('timelineCountBadge');
-      const filtered = getFilteredPlans().sort((a,b) => new Date(a.start_date) - new Date(b.start_date));
-
-      badge.textContent = `${filtered.length} รายการ`;
       container.innerHTML = '';
-
-      if (filtered.length === 0) {
+      if (list.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-12 text-slate-500">
-            <i data-lucide="calendar-x" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
-            <p class="text-xs">ไม่มีแผนงานหรือกิจกรรมในช่วงนี้</p>
+          <div class="col-span-full py-16 text-center text-slate-500">
+            <i data-lucide="folder-x" class="w-10 h-10 mx-auto opacity-50 mb-2"></i>
+            <p class="text-xs">ไม่พบห้องงานในหมวดหมู่นี้</p>
+            <button onclick="openCreatePlanModal()" class="mt-3 px-4 py-2 rounded-xl bg-orange-500/20 text-orange-300 hover:bg-orange-500 hover:text-white text-xs font-bold transition">
+              + สร้างห้องงานแรกเลย
+            </button>
           </div>
         `;
         lucide.createIcons();
         return;
       }
 
-      filtered.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-orange-500/40 transition flex items-start justify-between gap-4 cursor-pointer group';
-        item.onclick = () => showPlanDetail(p);
-
-        const startDate = new Date(p.start_date);
-        const dateStr = startDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
-        const timeStr = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-
-        item.innerHTML = `
-          <div class="flex items-start gap-3.5">
-            <div class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center text-center p-1 border" style="background-color: ${p.color}15; border-color: ${p.color}40; color: ${p.color};">
-              <span class="text-[9px] font-black uppercase">${startDate.toLocaleDateString('th-TH', { weekday: 'short' })}</span>
-              <span class="text-base font-black leading-none">${startDate.getDate()}</span>
-            </div>
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase" style="background-color: ${p.color}20; color: ${p.color}">
-                  ${p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว'}
-                </span>
-                <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
-                  <i data-lucide="clock" class="w-3 h-3"></i> ${timeStr} น.
-                </span>
-              </div>
-              <h4 class="text-sm font-bold text-white group-hover:text-orange-300 transition">${p.title}</h4>
-              <p class="text-xs text-slate-400 line-clamp-1 mt-0.5">${p.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
-              ${p.location ? `<span class="inline-flex items-center gap-1 text-[11px] text-slate-400 mt-1"><i data-lucide="map-pin" class="w-3 h-3 text-orange-400"></i> ${p.location}</span>` : ''}
-            </div>
-          </div>
-          <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500 group-hover:text-white transition group-hover:translate-x-1"></i>
-        `;
-        container.appendChild(item);
-      });
-
-      lucide.createIcons();
-    }
-
-    // 3. RENDER KANBAN
-    function renderKanban() {
-      const colPending = document.getElementById('kanbanColumnPending');
-      const colInProg = document.getElementById('kanbanColumnInProgress');
-      const colComp = document.getElementById('kanbanColumnCompleted');
-
-      const countPending = document.getElementById('kanbanCountPending');
-      const countInProg = document.getElementById('kanbanCountInProgress');
-      const countComp = document.getElementById('kanbanCountCompleted');
-
-      colPending.innerHTML = '';
-      colInProg.innerHTML = '';
-      colComp.innerHTML = '';
-
-      const filtered = getFilteredPlans();
-      const pPending = filtered.filter(p => p.status === 'pending' || !p.status);
-      const pInProg = filtered.filter(p => p.status === 'in_progress');
-      const pComp = filtered.filter(p => p.status === 'completed');
-
-      countPending.textContent = pPending.length;
-      countInProg.textContent = pInProg.length;
-      countComp.textContent = pComp.length;
-
-      const renderCard = (p, targetCol) => {
+      list.forEach(p => {
+        const pct = Math.round(p.progress_percentage || 0);
         const card = document.createElement('div');
-        card.className = 'p-3.5 rounded-2xl bg-slate-900/90 border border-white/10 hover:border-orange-500/40 transition shadow-md cursor-pointer group';
-        card.onclick = () => showPlanDetail(p);
+        card.className = 'glass-card rounded-3xl p-5 border border-white/10 hover:border-orange-500/50 transition cursor-pointer flex flex-col justify-between space-y-4 group';
+        card.onclick = () => openRoomBoard(p);
+
+        const scopeLabel = p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
+        const scopeClass = p.scope === 'department' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : p.scope === 'shared' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-slate-500/20 text-slate-300 border-slate-500/30';
 
         card.innerHTML = `
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="w-2 h-2 rounded-full" style="background-color: ${p.color}"></span>
-            <span class="text-[10px] text-slate-400 font-mono">${new Date(p.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}</span>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${scopeClass}">
+                ${scopeLabel}
+              </span>
+              <span class="text-sm font-black font-mono ${pct === 100 ? 'text-emerald-400' : 'text-orange-400'}">${pct}%</span>
+            </div>
+
+            <div>
+              <h3 class="text-base font-black text-white group-hover:text-orange-400 transition line-clamp-1">${p.title}</h3>
+              <p class="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">${p.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+              <div class="h-full rounded-full transition-all duration-500 ${pct === 100 ? 'bg-emerald-400' : 'bg-orange-500'}" style="width: ${pct}%"></div>
+            </div>
           </div>
-          <h5 class="text-xs font-bold text-white group-hover:text-orange-300 transition line-clamp-2">${p.title}</h5>
-          ${p.location ? `<p class="text-[10px] text-slate-400 mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-2.5 h-2.5"></i> ${p.location}</p>` : ''}
+
+          <!-- Footer with Creator Profile -->
+          <div class="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+            <div class="flex items-center gap-1.5 truncate max-w-[170px]">
+              <img src="${p.creator_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>"}" class="w-4 h-4 rounded-full flex-shrink-0">
+              <span class="truncate font-bold text-slate-300">${p.creator_name || 'สมาชิก'}</span>
+            </div>
+            <span class="text-[10px] font-mono text-slate-500">${new Date(p.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}</span>
+          </div>
         `;
-        targetCol.appendChild(card);
-      };
-
-      pPending.forEach(p => renderCard(p, colPending));
-      pInProg.forEach(p => renderCard(p, colInProg));
-      pComp.forEach(p => renderCard(p, colComp));
-
+        container.appendChild(card);
+      });
       lucide.createIcons();
     }
 
-    // Modal Control
-    function openCreatePlanModal() {
-      document.getElementById('planModalTitle').textContent = 'สร้างแผนงาน / ปฏิทินใหม่';
-      document.getElementById('formPlanId').value = '';
-      document.getElementById('planForm').reset();
-      document.getElementById('btnDeletePlan').classList.add('hidden');
-      appState.selectedCollaborators = [];
-      renderCollaboratorBadges();
-      toggleCollaboratorsSection('department');
-
-      // Set default start date to now + 1 hour formatted
-      const now = new Date();
-      now.setMinutes(0);
-      now.setHours(now.getHours() + 1);
-      const iso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-      document.getElementById('formPlanStartDate').value = iso;
-
-      document.getElementById('planModal').classList.remove('hidden');
-      document.getElementById('planModal').classList.add('flex');
+    function setRoomFilter(f) {
+      appState.roomFilter = f;
+      document.querySelectorAll('.room-filter-btn').forEach(b => {
+        if (b.dataset.filter === f) {
+          b.className = 'room-filter-btn px-3 py-1.5 rounded-xl bg-orange-500 text-white transition';
+        } else {
+          b.className = 'room-filter-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition';
+        }
+      });
+      renderRoomsGrid();
     }
 
-    function openCreatePlanModalForDay(day) {
-      openCreatePlanModal();
-      const targetDate = new Date(appState.currentYear, appState.currentMonth, day, 9, 0);
-      const iso = new Date(targetDate.getTime() - (targetDate.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-      document.getElementById('formPlanStartDate').value = iso;
+    function handleRoomSearch(val) {
+      appState.searchQuery = val.trim();
+      renderRoomsGrid();
     }
 
-    function closePlanModal() {
-      document.getElementById('planModal').classList.add('hidden');
-      document.getElementById('planModal').classList.remove('flex');
+    // Open Inside Room Board
+    async function openRoomBoard(plan) {
+      appState.activeRoom = plan;
+      document.getElementById('sectionRooms').classList.add('hidden');
+      document.getElementById('sectionTrash').classList.add('hidden');
+      document.getElementById('sectionInsideRoom').classList.remove('hidden');
+
+      document.getElementById('activeRoomTitle').textContent = plan.title;
+      document.getElementById('activeRoomDesc').textContent = plan.description || 'ไม่มีรายละเอียดเพิ่มเติม';
+      document.getElementById('activeRoomDateText').textContent = new Date(plan.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+      document.getElementById('activeRoomCreatorName').textContent = plan.creator_name || 'สมาชิก';
+      document.getElementById('activeRoomCreatorEmail').textContent = `(${plan.creator_email || '-'})`;
+      document.getElementById('activeRoomCreatorAvatar').src = plan.creator_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>";
+
+      const scopeBadge = document.getElementById('activeRoomScopeBadge');
+      scopeBadge.textContent = plan.scope === 'department' ? '🏛️ งานสาขา' : plan.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
+
+      await loadActiveRoomTasks(plan.id);
+      lucide.createIcons();
     }
 
-    function toggleCollaboratorsSection(scope) {
-      const sec = document.getElementById('collaboratorsSection');
-      if (scope === 'shared') {
-        sec.classList.remove('hidden');
-      } else {
-        sec.classList.add('hidden');
-      }
+    function backToRoomsList() {
+      appState.activeRoom = null;
+      document.getElementById('sectionInsideRoom').classList.add('hidden');
+      document.getElementById('sectionRooms').classList.remove('hidden');
+      refreshAllData();
     }
 
-    // Collaborator search
-    function searchCollaboratorStudent(q) {
-      const dropdown = document.getElementById('collaboratorSuggestions');
+    // Load Tasks & Render Kanban
+    async function loadActiveRoomTasks(planId) {
       if (!window.PlansRepo) return;
-      const results = window.PlansRepo.getStudentOptions(q);
-      
-      if (!q.trim() || results.length === 0) {
-        dropdown.classList.add('hidden');
-        return;
-      }
+      appState.activeTasks = await window.PlansRepo.fetchTasksForPlan(planId, false);
+      appState.roomTrashTasks = await window.PlansRepo.fetchTasksForPlan(planId, true);
+      document.getElementById('roomTrashCount').textContent = appState.roomTrashTasks.length;
 
-      dropdown.innerHTML = '';
-      results.forEach(s => {
-        const item = document.createElement('div');
-        item.className = 'p-2 hover:bg-white/10 rounded-lg cursor-pointer flex items-center justify-between text-xs';
-        item.onclick = () => addCollaborator(s);
-        item.innerHTML = `
-          <div>
-            <span class="font-bold text-white">${s.name} (${s.nickname || '-'})</span>
-            <span class="text-[10px] text-slate-400 block">${s.id}</span>
+      // Update progress header
+      const pct = await window.PlansRepo.recalculatePlanProgress(planId) || 0;
+      document.getElementById('activeRoomProgressNumber').textContent = `${pct}%`;
+      document.getElementById('activeRoomProgressBar').style.width = `${pct}%`;
+
+      renderKanbanColumns();
+    }
+
+    // Render Dynamic Columns & Task Cards
+    function renderKanbanColumns() {
+      const container = document.getElementById('kanbanColumnsContainer');
+      const cols = appState.activeRoom.custom_columns || ["สิ่งที่ต้องทำ", "กำลังทำ", "เสร็จสิ้น"];
+      container.innerHTML = '';
+
+      cols.forEach(colName => {
+        const colTasks = appState.activeTasks.filter(t => t.column_name === colName);
+        const colDiv = document.createElement('div');
+        colDiv.className = 'glass-card rounded-2xl p-3.5 flex flex-col min-w-[270px] bg-slate-900/60 border border-white/10';
+        colDiv.dataset.column = colName;
+
+        // Drag over handlers
+        colDiv.ondragover = (e) => { e.preventDefault(); colDiv.classList.add('drag-over-col'); };
+        colDiv.ondragleave = () => { colDiv.classList.remove('drag-over-col'); };
+        colDiv.ondrop = async (e) => {
+          e.preventDefault();
+          colDiv.classList.remove('drag-over-col');
+          const taskId = e.dataTransfer.getData('text/plain');
+          if (taskId) {
+            await moveTaskToColumn(taskId, colName);
+          }
+        };
+
+        colDiv.innerHTML = `
+          <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-white/10">
+            <span class="text-xs font-black uppercase text-slate-200">${colName}</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-slate-400">${colTasks.length}</span>
           </div>
-          <i data-lucide="plus" class="w-3.5 h-3.5 text-orange-400"></i>
+          <div class="tasks-dropzone space-y-2.5 flex-1 min-h-[220px]"></div>
+          <button onclick="openAddTaskModalForColumn('${colName}')" class="mt-3 w-full py-1.5 rounded-xl border border-dashed border-white/10 hover:border-orange-500/50 text-slate-400 hover:text-orange-400 text-xs font-bold transition flex items-center justify-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>เพิ่มงานย่อย</span>
+          </button>
         `;
-        dropdown.appendChild(item);
+
+        const dropzone = colDiv.querySelector('.tasks-dropzone');
+        colTasks.forEach(task => {
+          const card = document.createElement('div');
+          card.className = 'kanban-task-card p-3 rounded-2xl bg-slate-950/80 border border-white/10 text-xs shadow-md transition cursor-grab active:cursor-grabbing space-y-2';
+          card.draggable = true;
+          card.ondragstart = (e) => {
+            card.classList.add('dragging-card');
+            e.dataTransfer.setData('text/plain', task.id);
+          };
+          card.ondragend = () => card.classList.remove('dragging-card');
+          card.onclick = () => openEditTaskModal(task);
+
+          const priorityBadge = task.priority === 'urgent' ? '<span class="text-[9px] px-1.5 py-0.2 rounded-md bg-rose-500/20 text-rose-300 font-black">ด่วนสุด</span>' :
+                                task.priority === 'high' ? '<span class="text-[9px] px-1.5 py-0.2 rounded-md bg-orange-500/20 text-orange-300 font-bold">สำคัญ</span>' : '';
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between gap-1">
+              ${priorityBadge}
+              <!-- Last Mover Profile -->
+              <div class="flex items-center gap-1 text-[10px] text-slate-400 ml-auto" title="ย้ายล่าสุดโดย: ${task.last_moved_by_name || '-'}">
+                <img src="${task.last_moved_by_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>"}" class="w-3.5 h-3.5 rounded-full">
+                <span class="truncate max-w-[80px]">${task.last_moved_by_name || 'สมาชิก'}</span>
+              </div>
+            </div>
+            <h4 class="font-bold text-white text-xs line-clamp-2">${task.title}</h4>
+            ${task.attachments && task.attachments.length > 0 ? `<div class="text-[10px] text-sky-400 flex items-center gap-1"><i data-lucide="paperclip" class="w-3 h-3"></i> มีไฟล์แนบ</div>` : ''}
+          `;
+          dropzone.appendChild(card);
+        });
+
+        container.appendChild(colDiv);
       });
-      dropdown.classList.remove('hidden');
       lucide.createIcons();
     }
 
-    function addCollaborator(student) {
-      if (!appState.selectedCollaborators.some(c => c.email === student.email)) {
-        appState.selectedCollaborators.push({
-          email: student.email,
-          name: student.name,
-          student_id: student.id,
-          role: 'editor'
-        });
-        renderCollaboratorBadges();
-      }
-      document.getElementById('collaboratorSuggestions').classList.add('hidden');
-      document.getElementById('collaboratorSearchInput').value = '';
+    // Move task to column via drag & drop
+    async function moveTaskToColumn(taskId, targetColumn) {
+      if (!window.PlansRepo) return;
+      const moverUser = appState.user ? {
+        email: appState.user.email,
+        name: appState.user.name,
+        avatar: appState.user.avatar || ''
+      } : { email: 'guest@kkumail.com', name: 'สมาชิก' };
+
+      const isCompleted = targetColumn.includes('เสร็จ');
+      await window.PlansRepo.updateTask(taskId, {
+        column_name: targetColumn,
+        is_completed: isCompleted
+      }, moverUser);
+
+      await loadActiveRoomTasks(appState.activeRoom.id);
     }
 
-    function removeCollaborator(email) {
-      appState.selectedCollaborators = appState.selectedCollaborators.filter(c => c.email !== email);
-      renderCollaboratorBadges();
-    }
-
-    function renderCollaboratorBadges() {
-      const container = document.getElementById('selectedCollaboratorsList');
-      container.innerHTML = '';
-      appState.selectedCollaborators.forEach(c => {
-        const tag = document.createElement('span');
-        tag.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
-        tag.innerHTML = `
-          <span>${c.name}</span>
-          <button type="button" onclick="removeCollaborator('${c.email}')" class="hover:text-white">&times;</button>
-        `;
-        container.appendChild(tag);
-      });
-    }
-
-    // Submit Plan Form
-    async function handlePlanFormSubmit(e) {
+    // Create Room Submit
+    async function handleCreatePlanSubmit(e) {
       e.preventDefault();
-      const saveBtn = document.getElementById('btnSavePlan');
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'กำลังบันทึก...';
+      const title = document.getElementById('newRoomTitle').value;
+      const scope = document.getElementById('newRoomScope').value;
+      const preset = document.getElementById('newRoomColumnsPreset').value;
+      const startDate = document.getElementById('newRoomStartDate').value;
+      const endDate = document.getElementById('newRoomEndDate').value;
+      const desc = document.getElementById('newRoomDesc').value;
 
-      const planId = document.getElementById('formPlanId').value;
-      const title = document.getElementById('formPlanTitle').value;
-      const scope = document.getElementById('formPlanScope').value;
-      const category = document.getElementById('formPlanCategory').value;
-      const startDate = document.getElementById('formPlanStartDate').value;
-      const endDate = document.getElementById('formPlanEndDate').value;
-      const location = document.getElementById('formPlanLocation').value;
-      const meetLink = document.getElementById('formPlanMeetLink').value;
-      const description = document.getElementById('formPlanDesc').value;
-      const color = document.querySelector('input[name="planColor"]:checked')?.value || '#f97316';
+      let cols = ["สิ่งที่ต้องทำ", "กำลังทำ", "เสร็จสิ้น"];
+      if (preset === 'idea') cols = ["ความคิด", "เริ่มทำ", "กำลังดำเนิน", "เสร็จสิ้น"];
+      if (preset === 'kanban') cols = ["To Do", "In Progress", "Review", "Done"];
 
       const payload = {
         title,
-        description,
+        description: desc,
         scope,
-        category,
+        custom_columns: cols,
         start_date: new Date(startDate).toISOString(),
         end_date: endDate ? new Date(endDate).toISOString() : null,
-        location,
-        meet_link: meetLink,
-        color,
         creator_email: appState.user ? appState.user.email : 'guest@kkumail.com',
         creator_name: appState.user ? appState.user.name : 'สมาชิกสาขา',
-        collaborators: appState.selectedCollaborators
+        creator_avatar: appState.user ? appState.user.avatar : '',
+        collaborators: appState.selectedRoomCollabs
       };
 
       try {
-        if (planId) {
-          await window.PlansRepo.updatePlan(planId, payload);
-        } else {
-          await window.PlansRepo.createPlan(payload);
-        }
-        closePlanModal();
-        await refreshPlans();
+        await window.PlansRepo.createPlan(payload);
+        closeCreatePlanModal();
+        await refreshAllData();
       } catch (err) {
-        alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message);
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'บันทึกแผนงาน';
+        alert("สร้างห้องงานไม่สำเร็จ: " + err.message);
       }
     }
 
-    // Detail Modal
-    function showPlanDetail(plan) {
-      const container = document.getElementById('planDetailContent');
-      const startDate = new Date(plan.start_date);
-      const dateText = startDate.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-      const timeText = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    function openCreatePlanModal() {
+      document.getElementById('createPlanModal').classList.remove('hidden');
+      document.getElementById('createPlanModal').classList.add('flex');
+      const now = new Date();
+      now.setMinutes(0); now.setHours(now.getHours() + 1);
+      const iso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+      document.getElementById('newRoomStartDate').value = iso;
+      appState.selectedRoomCollabs = [];
+      renderNewRoomCollabs();
+    }
+    function closeCreatePlanModal() {
+      document.getElementById('createPlanModal').classList.add('hidden');
+      document.getElementById('createPlanModal').classList.remove('flex');
+    }
 
-      container.innerHTML = `
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full" style="background-color: ${plan.color}"></span>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase" style="background-color: ${plan.color}20; color: ${plan.color}">
-            ${plan.scope === 'department' ? '🏛️ งานสาขา' : plan.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว'}
-          </span>
-          <span class="text-xs text-slate-400 font-mono ml-auto">${timeText} น.</span>
-        </div>
-        <h3 class="text-lg font-black text-white">${plan.title}</h3>
-        <p class="text-xs text-slate-300 font-mono flex items-center gap-1.5">
-          <i data-lucide="calendar" class="w-3.5 h-3.5 text-orange-400"></i> ${dateText}
-        </p>
-        ${plan.location ? `<p class="text-xs text-slate-300 flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-400"></i> ${plan.location}</p>` : ''}
-        ${plan.meet_link ? `<a href="${plan.meet_link}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-500/20 text-sky-300 hover:bg-sky-500 hover:text-white transition text-xs font-bold"><i data-lucide="video" class="w-3.5 h-3.5"></i> เข้า Google Meet</a>` : ''}
-        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-slate-300">
-          ${plan.description || 'ไม่มีคำอธิบายเพิ่มเติม'}
-        </div>
-        <div class="text-[10px] text-slate-500">
-          ผู้สร้าง: ${plan.creator_name || 'สมาชิก'} (${plan.creator_email || '-'})
-        </div>
-      `;
+    function toggleNewRoomCollaborators(val) {
+      const sec = document.getElementById('newRoomCollaboratorsSection');
+      if (val === 'shared') sec.classList.remove('hidden');
+      else sec.classList.add('hidden');
+    }
 
-      document.getElementById('btnEditFromDetail').onclick = () => {
-        closeDetailModal();
-        editPlan(plan);
-      };
+    function searchCollabForRoom(q) {
+      const drop = document.getElementById('newRoomCollabDropdown');
+      const results = window.PlansRepo.getStudentOptions(q);
+      if (!q.trim() || results.length === 0) { drop.classList.add('hidden'); return; }
+      drop.innerHTML = '';
+      results.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'p-2 hover:bg-white/10 rounded-lg cursor-pointer flex items-center justify-between text-xs';
+        item.onclick = () => {
+          if (!appState.selectedRoomCollabs.some(c => c.email === s.email)) {
+            appState.selectedRoomCollabs.push(s);
+            renderNewRoomCollabs();
+          }
+          drop.classList.add('hidden');
+        };
+        item.innerHTML = `<span class="font-bold text-white">${s.name} (${s.nickname || '-'})</span><span class="text-slate-400 text-[10px]">${s.id}</span>`;
+        drop.appendChild(item);
+      });
+      drop.classList.remove('hidden');
+    }
 
-      document.getElementById('planDetailModal').classList.remove('hidden');
-      document.getElementById('planDetailModal').classList.add('flex');
+    function renderNewRoomCollabs() {
+      const c = document.getElementById('newRoomSelectedCollabs');
+      c.innerHTML = '';
+      appState.selectedRoomCollabs.forEach(s => {
+        const tag = document.createElement('span');
+        tag.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        tag.innerHTML = `${s.name} <button type="button" onclick="removeRoomCollab('${s.email}')">&times;</button>`;
+        c.appendChild(tag);
+      });
+    }
+    function removeRoomCollab(email) {
+      appState.selectedRoomCollabs = appState.selectedRoomCollabs.filter(c => c.email !== email);
+      renderNewRoomCollabs();
+    }
+
+    // Task Modal (Add / Edit)
+    function openAddTaskModal() {
+      if (!appState.activeRoom) return;
+      openAddTaskModalForColumn(appState.activeRoom.custom_columns[0] || 'สิ่งที่ต้องทำ');
+    }
+
+    function openAddTaskModalForColumn(colName) {
+      document.getElementById('taskModalTitle').textContent = 'เพิ่มงานย่อย';
+      document.getElementById('taskFormId').value = '';
+      document.getElementById('taskFormTitle').value = '';
+      document.getElementById('taskFormAttachmentUrl').value = '';
+      document.getElementById('taskFormDesc').value = '';
+      document.getElementById('btnDeleteTaskInsideModal').classList.add('hidden');
+
+      const colSelect = document.getElementById('taskFormColumn');
+      colSelect.innerHTML = '';
+      (appState.activeRoom.custom_columns || []).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        if (c === colName) opt.selected = true;
+        colSelect.appendChild(opt);
+      });
+
+      document.getElementById('taskModal').classList.remove('hidden');
+      document.getElementById('taskModal').classList.add('flex');
+    }
+
+    function openEditTaskModal(task) {
+      document.getElementById('taskModalTitle').textContent = 'แก้ไขงานย่อย';
+      document.getElementById('taskFormId').value = task.id;
+      document.getElementById('taskFormTitle').value = task.title;
+      document.getElementById('taskFormDesc').value = task.description || '';
+      document.getElementById('taskFormPriority').value = task.priority || 'normal';
+      document.getElementById('taskFormAttachmentUrl').value = (task.attachments && task.attachments[0]) ? task.attachments[0].url : '';
+      document.getElementById('btnDeleteTaskInsideModal').classList.remove('hidden');
+
+      const colSelect = document.getElementById('taskFormColumn');
+      colSelect.innerHTML = '';
+      (appState.activeRoom.custom_columns || []).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        if (c === task.column_name) opt.selected = true;
+        colSelect.appendChild(opt);
+      });
+
+      document.getElementById('taskModal').classList.remove('hidden');
+      document.getElementById('taskModal').classList.add('flex');
+    }
+
+    function closeTaskModal() {
+      document.getElementById('taskModal').classList.add('hidden');
+      document.getElementById('taskModal').classList.remove('flex');
+    }
+
+    async function handleTaskSubmit(e) {
+      e.preventDefault();
+      const taskId = document.getElementById('taskFormId').value;
+      const title = document.getElementById('taskFormTitle').value;
+      const col = document.getElementById('taskFormColumn').value;
+      const priority = document.getElementById('taskFormPriority').value;
+      const attachUrl = document.getElementById('taskFormAttachmentUrl').value.trim();
+      const desc = document.getElementById('taskFormDesc').value;
+
+      const attachments = attachUrl ? [{ url: attachUrl, name: 'ไฟล์แนบ' }] : [];
+      const moverUser = appState.user ? {
+        email: appState.user.email,
+        name: appState.user.name,
+        avatar: appState.user.avatar || ''
+      } : { email: 'guest@kkumail.com', name: 'สมาชิก' };
+
+      try {
+        if (taskId) {
+          await window.PlansRepo.updateTask(taskId, {
+            title,
+            description: desc,
+            column_name: col,
+            priority,
+            attachments,
+            is_completed: col.includes('เสร็จ')
+          }, moverUser);
+        } else {
+          await window.PlansRepo.createTask({
+            plan_id: appState.activeRoom.id,
+            title,
+            description: desc,
+            column_name: col,
+            priority,
+            attachments,
+            creator_email: moverUser.email,
+            creator_name: moverUser.name,
+            creator_avatar: moverUser.avatar,
+            is_completed: col.includes('เสร็จ')
+          });
+        }
+        closeTaskModal();
+        await loadActiveRoomTasks(appState.activeRoom.id);
+      } catch (err) {
+        alert("บันทึกงานย่อยไม่สำเร็จ: " + err.message);
+      }
+    }
+
+    // Delete Task to Room Trash
+    async function handleDeleteTaskFromModal() {
+      const taskId = document.getElementById('taskFormId').value;
+      if (!taskId) return;
+      if (!confirm("คุณต้องการย้ายงานย่อยนี้ไปยังถังขยะของห้องใช่หรือไม่?")) return;
+
+      const email = appState.user ? appState.user.email : 'guest@kkumail.com';
+      await window.PlansRepo.moveToTrashTask(taskId, email);
+      closeTaskModal();
+      await loadActiveRoomTasks(appState.activeRoom.id);
+    }
+
+    // Room Trash Modal
+    function openRoomTrashModal() {
+      const list = document.getElementById('roomTrashItemsList');
+      list.innerHTML = '';
+      if (appState.roomTrashTasks.length === 0) {
+        list.innerHTML = '<p class="text-center py-6 text-slate-500">ไม่มีงานย่อยในถังขยะห้อง</p>';
+      } else {
+        appState.roomTrashTasks.forEach(t => {
+          const item = document.createElement('div');
+          item.className = 'p-3 rounded-2xl bg-slate-900 border border-white/5 flex items-center justify-between gap-3';
+          item.innerHTML = `
+            <div>
+              <h5 class="font-bold text-white text-xs">${t.title}</h5>
+              <span class="text-[10px] text-slate-400">ลบโดย: ${t.deleted_by_email || '-'}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="restoreRoomTask('${t.id}')" class="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold hover:bg-emerald-500 hover:text-white transition">กู้คืน</button>
+              <button onclick="permanentlyDeleteRoomTask('${t.id}')" class="px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 text-xs font-bold hover:bg-rose-500 hover:text-white transition">ลบถาวร</button>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      }
+      document.getElementById('roomTrashModal').classList.remove('hidden');
+      document.getElementById('roomTrashModal').classList.add('flex');
+    }
+    function closeRoomTrashModal() {
+      document.getElementById('roomTrashModal').classList.add('hidden');
+      document.getElementById('roomTrashModal').classList.remove('flex');
+    }
+
+    async function restoreRoomTask(taskId) {
+      await window.PlansRepo.restoreTask(taskId);
+      await loadActiveRoomTasks(appState.activeRoom.id);
+      openRoomTrashModal();
+    }
+
+    async function permanentlyDeleteRoomTask(taskId) {
+      if (!confirm("คุณแน่ใจว่าต้องการลบงานย่อยนี้ถาวร? ข้อมูลจะไม่สามารถกู้คืนได้")) return;
+      const email = appState.user ? appState.user.email : '';
+      try {
+        await window.PlansRepo.permanentlyDeleteTask(taskId, email, false);
+        await loadActiveRoomTasks(appState.activeRoom.id);
+        openRoomTrashModal();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    // Delete Current Room
+    async function handleDeleteCurrentRoom() {
+      if (!appState.activeRoom) return;
+      if (!confirm("คุณต้องการย้ายห้องงานนี้ไปยังถังขยะใช่หรือไม่? (งานย่อยทั้งหมดจะถูกเก็บไว้ เมื่อกู้คืนจะกลับมาด้วย)")) return;
+
+      const email = appState.user ? appState.user.email : 'guest@kkumail.com';
+      await window.PlansRepo.moveToTrashPlan(appState.activeRoom.id, email, 'owner');
+      backToRoomsList();
+    }
+
+    // Render Global Trash List
+    function renderTrashList() {
+      const container = document.getElementById('trashItemsList');
+      container.innerHTML = '';
+      if (appState.allTrashPlans.length === 0) {
+        container.innerHTML = '<p class="text-center py-8 text-slate-500 text-xs">ถังขยะว่างเปล่า ไม่มีห้องงานที่ถูกลบ</p>';
+        return;
+      }
+
+      appState.allTrashPlans.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between gap-4';
+        item.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-500/20 text-rose-300">ลบแล้ว</span>
+              <h4 class="font-bold text-white text-sm">${p.title}</h4>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">ลบโดย: ${p.deleted_by_email || '-'} (${p.deleted_by_type === 'admin' ? 'ถังขยะหลังบ้าน' : 'ถังขยะส่วนตัว'})</p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button onclick="restorePlan('${p.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold hover:bg-emerald-500 hover:text-white transition">กู้คืนห้อง & งานย่อย</button>
+            <button onclick="permanentlyDeletePlan('${p.id}')" class="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 text-xs font-bold hover:bg-rose-500 hover:text-white transition">ลบถาวร</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
       lucide.createIcons();
     }
 
-    function closeDetailModal() {
-      document.getElementById('planDetailModal').classList.add('hidden');
-      document.getElementById('planDetailModal').classList.remove('flex');
+    async function restorePlan(planId) {
+      await window.PlansRepo.restorePlan(planId);
+      await refreshAllData();
+      renderTrashList();
     }
 
-    function editPlan(plan) {
-      openCreatePlanModal();
-      document.getElementById('planModalTitle').textContent = 'แก้ไขแผนงาน';
-      document.getElementById('formPlanId').value = plan.id;
-      document.getElementById('formPlanTitle').value = plan.title || '';
-      document.getElementById('formPlanScope').value = plan.scope || 'department';
-      document.getElementById('formPlanCategory').value = plan.category || 'activity';
-      document.getElementById('formPlanLocation').value = plan.location || '';
-      document.getElementById('formPlanMeetLink').value = plan.meet_link || '';
-      document.getElementById('formPlanDesc').value = plan.description || '';
-
-      if (plan.start_date) {
-        const d = new Date(plan.start_date);
-        const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-        document.getElementById('formPlanStartDate').value = iso;
-      }
-
-      appState.selectedCollaborators = Array.isArray(plan.collaborators) ? plan.collaborators : [];
-      renderCollaboratorBadges();
-      toggleCollaboratorsSection(plan.scope);
-
-      document.getElementById('btnDeletePlan').classList.remove('hidden');
-    }
-
-    async function confirmDeletePlan() {
-      const planId = document.getElementById('formPlanId').value;
-      if (!planId) return;
-
-      if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบแผนงานนี้? ข้อมูลใน Supabase จะถูกลบทันที")) return;
-
+    async function permanentlyDeletePlan(planId) {
+      if (!confirm("คุณแน่ใจว่าต้องการลบห้องงานนี้ถาวร? งานย่อยทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้")) return;
+      const email = appState.user ? appState.user.email : '';
       try {
-        await window.PlansRepo.deletePlan(planId);
-        closePlanModal();
-        await refreshPlans();
-      } catch (err) {
-        alert("ลบไม่สำเร็จ: " + err.message);
+        await window.PlansRepo.permanentlyDeletePlan(planId, email, false);
+        await refreshAllData();
+        renderTrashList();
+      } catch (e) {
+        alert(e.message);
       }
     }
   </script>

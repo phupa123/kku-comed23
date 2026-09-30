@@ -751,6 +751,61 @@
     </div>
   </section>
 
+  <!-- ================= SECTION: PLANS & ACTIVITY CALENDAR (LIVE SUPABASE SYNC) ================= -->
+  <section id="comed-plans-widget" class="relative bg-gradient-to-b from-[#090D16] via-[#0d1424] to-slate-900 text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8 border-b border-sky-900/40 overflow-hidden">
+    <!-- Ambient Light Glows -->
+    <div class="absolute -top-10 left-1/3 w-96 h-96 bg-orange-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-0 right-10 w-80 h-80 bg-sky-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto space-y-8 relative z-10">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-5">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-md shadow-orange-500/20">
+            <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
+            <span>ปฏิทินงานสาขา & ติดตามความสำเร็จ Realtime</span>
+          </div>
+          <h2 class="text-xl sm:text-3xl font-black text-white tracking-tight mt-2.5">
+            ตารางกิจกรรม & แผนงานสาขาคอมพิวเตอร์ศึกษา
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+            ติดตามงานกิจกรรมสาขา แผนงานส่วนตัว และงานกลุ่มที่เพื่อนแชร์มา พร้อมแถบเปอร์เซ็นต์ความสำเร็จ %
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-shrink-0">
+          <!-- Filter Tabs for Index Calendar -->
+          <div class="flex items-center bg-slate-950/80 border border-white/10 rounded-2xl p-1 text-xs font-bold">
+            <button onclick="setIndexPlansFilter('all')" id="idxTabAll" class="px-3 py-1.5 rounded-xl bg-orange-500 text-white transition">
+              ทั้งหมด
+            </button>
+            <button onclick="setIndexPlansFilter('department')" id="idxTabDept" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition">
+              🏛️ งานสาขา
+            </button>
+            <button onclick="setIndexPlansFilter('personal')" id="idxTabPersonal" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition">
+              🔒 ส่วนตัว
+            </button>
+          </div>
+
+          <a href="Plans.html" class="inline-flex items-center gap-2 text-xs font-black text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 px-4 py-2.5 rounded-xl shadow-lg shadow-orange-500/25 transition transform active:scale-95">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>เปิดระบบ Plans เต็มรูปแบบ</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Plans Mini Grid for Index -->
+      <div id="indexPlansContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="col-span-full py-12 text-center text-slate-400 text-xs flex items-center justify-center gap-2">
+          <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
+          <span>กำลังเชื่อมต่อปฏิทินงานล่าสุดจาก Supabase...</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ================= SECTION 0: ACTIVE PAYMENTS (CLOUD SKY THEME) ================= -->
   <section id="payments-list" class="relative bg-gradient-to-b from-sky-50/60 via-amber-50/30 to-slate-50 pt-10 sm:pt-14 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 border-b border-sky-100 overflow-hidden">
     <!-- Subtle Ambient Cloud Glows -->
@@ -1252,6 +1307,8 @@
 
   <!-- Include Students Database Script -->
   <script src="students_data.js"></script>
+  <!-- Plans Supabase Repository for Index Calendar Widget -->
+  <script src="assets/js/plans_repo.js"></script>
   <!-- Main Index Page Logic -->
   <script src="assets/js/index.js"></script>
 </body>

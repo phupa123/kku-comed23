@@ -582,3 +582,63 @@ BEGIN
   END IF;
 END;
 $$;
+
+-- ================= 10. ตาราง PLAN_TASKS (งานย่อย / PlanToDo Items & ถังขยะกู้คืน) =================
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS progress_percentage NUMERIC(5,2) DEFAULT 0;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS custom_columns JSONB DEFAULT '["สิ่งที่ต้องทำ","กำลังทำ","เสร็จสิ้น"]'::jsonb;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT false;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS deleted_by_type TEXT; -- 'owner' หรือ 'admin'
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS deleted_by_email TEXT;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS creator_avatar TEXT;
+
+CREATE TABLE IF NOT EXISTS public.plan_tasks (
+  id TEXT PRIMARY KEY,
+  plan_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  column_name TEXT DEFAULT 'สิ่งที่ต้องทำ',
+  priority TEXT DEFAULT 'normal', -- low, normal, high, urgent
+  order_index INTEGER DEFAULT 0,
+  creator_email TEXT NOT NULL,
+  creator_name TEXT,
+  creator_avatar TEXT,
+  last_moved_by_email TEXT,
+  last_moved_by_name TEXT,
+  last_moved_by_avatar TEXT,
+  assignees JSONB DEFAULT '[]'::jsonb,
+  attachments JSONB DEFAULT '[]'::jsonb,
+  is_completed BOOLEAN DEFAULT false,
+  is_deleted BOOLEAN DEFAULT false,
+  deleted_at TIMESTAMPTZ,
+  deleted_by_email TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.plan_tasks ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read plan_tasks" ON public.plan_tasks;
+CREATE POLICY "Allow public read plan_tasks" ON public.plan_tasks FOR SELECT TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert plan_tasks" ON public.plan_tasks;
+CREATE POLICY "Allow public insert plan_tasks" ON public.plan_tasks FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public update plan_tasks" ON public.plan_tasks;
+CREATE POLICY "Allow public update plan_tasks" ON public.plan_tasks FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public delete plan_tasks" ON public.plan_tasks;
+CREATE POLICY "Allow public delete plan_tasks" ON public.plan_tasks FOR DELETE TO anon, authenticated USING (true);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+      AND schemaname = 'public' 
+      AND tablename = 'plan_tasks'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.plan_tasks;
+  END IF;
+END;
+$$;

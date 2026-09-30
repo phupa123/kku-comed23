@@ -1738,3 +1738,126 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 800);
   }
 });
+
+// ================= INDEX PLANS & CALENDAR WIDGET LOGIC =================
+let indexPlansData = [];
+let indexPlansFilter = 'all';
+
+async function loadIndexPlans() {
+  const container = document.getElementById('indexPlansContainer');
+  if (!container || !window.PlansRepo) return;
+
+  try {
+    let userEmail = null;
+    try {
+      const s = sessionStorage.getItem('COMED_USER_SESSION') || localStorage.getItem('COMED_USER_SESSION');
+      if (s) {
+        const u = JSON.parse(s);
+        userEmail = u.email;
+      }
+    } catch (e) {}
+
+    indexPlansData = await window.PlansRepo.fetchPlans(userEmail, false);
+    renderIndexPlans();
+
+    // Listen for Realtime updates
+    window.PlansRepo.subscribeToChanges((table, payload) => {
+      if (table === 'plans' || table === 'plan_tasks') {
+        loadIndexPlans();
+      }
+    });
+  } catch (err) {
+    console.warn("Index plans load suppressed:", err);
+  }
+}
+
+function setIndexPlansFilter(f) {
+  indexPlansFilter = f;
+  const bAll = document.getElementById('idxTabAll');
+  const bDept = document.getElementById('idxTabDept');
+  const bPersonal = document.getElementById('idxTabPersonal');
+
+  if (bAll && bDept && bPersonal) {
+    [bAll, bDept, bPersonal].forEach(b => {
+      b.className = 'px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition';
+    });
+    if (f === 'all') bAll.className = 'px-3 py-1.5 rounded-xl bg-orange-500 text-white transition';
+    if (f === 'department') bDept.className = 'px-3 py-1.5 rounded-xl bg-orange-500 text-white transition';
+    if (f === 'personal') bPersonal.className = 'px-3 py-1.5 rounded-xl bg-orange-500 text-white transition';
+  }
+  renderIndexPlans();
+}
+
+function renderIndexPlans() {
+  const container = document.getElementById('indexPlansContainer');
+  if (!container) return;
+
+  let list = indexPlansData || [];
+  if (indexPlansFilter === 'department') {
+    list = list.filter(p => p.scope === 'department' || p.is_official);
+  } else if (indexPlansFilter === 'personal') {
+    list = list.filter(p => p.scope === 'personal');
+  }
+
+  container.innerHTML = '';
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-slate-500">
+        <i data-lucide="calendar-x" class="w-8 h-8 mx-auto opacity-50 mb-2"></i>
+        <p class="text-xs">ไม่มีแผนงานในหมวดหมู่นี้</p>
+        <a href="Plans.html" class="inline-block mt-3 px-3.5 py-1.5 rounded-xl bg-orange-500/20 text-orange-300 hover:bg-orange-500 hover:text-white text-xs font-bold transition">
+          + สร้างแผนงานที่ Plans.html
+        </a>
+      </div>
+    `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+
+  list.slice(0, 6).forEach(p => {
+    const pct = Math.round(p.progress_percentage || 0);
+    const startDate = new Date(p.start_date);
+    const dateText = startDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+    const timeText = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+    const card = document.createElement('a');
+    card.href = 'Plans.html';
+    card.className = 'p-4 rounded-3xl bg-slate-900/90 border border-white/10 hover:border-orange-500/50 transition flex flex-col justify-between space-y-3 group';
+
+    const scopeBadge = p.scope === 'department' ? '🏛️ งานสาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
+    const scopeColor = p.scope === 'department' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+
+    card.innerHTML = `
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${scopeColor}">${scopeBadge}</span>
+          <span class="text-xs font-black font-mono ${pct === 100 ? 'text-emerald-400' : 'text-orange-400'}">${pct}% สำเร็จ</span>
+        </div>
+        <div>
+          <h4 class="font-bold text-white text-sm group-hover:text-orange-400 transition line-clamp-1">${p.title}</h4>
+          <p class="text-xs text-slate-400 line-clamp-2 mt-0.5">${p.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/5">
+          <div class="h-full rounded-full transition-all duration-500 ${pct === 100 ? 'bg-emerald-400' : 'bg-orange-500'}" style="width: ${pct}%"></div>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+        <div class="flex items-center gap-1.5 truncate max-w-[150px]">
+          <img src="${p.creator_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>"}" class="w-3.5 h-3.5 rounded-full flex-shrink-0">
+          <span class="truncate">${p.creator_name || 'สมาชิก'}</span>
+        </div>
+        <span class="font-mono text-[10px] text-slate-500">${dateText} ${timeText}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadIndexPlans();
+});
+

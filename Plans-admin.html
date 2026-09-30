@@ -264,12 +264,13 @@
     }
 
     async function deletePlanAdmin(id) {
-      if (!confirm("คุณต้องการลบแผนงานนี้ออกจากระบบ Supabase หรือไม่?")) return;
+      if (!confirm("คุณต้องการย้ายแผนงานนี้ไปยังถังขยะหลังบ้านของแอดมินหรือไม่?")) return;
       try {
-        await window.PlansRepo.deletePlan(id);
+        const adminEmail = (window.AdminSecurityGuard && window.AdminSecurityGuard.getCurrentAdminEmail()) || 'admin@comed.kku';
+        await window.PlansRepo.moveToTrashPlan(id, adminEmail, 'admin');
         await loadAdminPlans();
       } catch (e) {
-        alert("ลบไม่สำเร็จ: " + e.message);
+        alert("ย้ายลงถังขยะไม่สำเร็จ: " + e.message);
       }
     }
 
