@@ -67,12 +67,26 @@
       }
     },
 
+    // Helper function to generate RFC4122 v4 UUID client-side
+    generateUUID() {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    },
+
     // 2. สร้างแผนงานใหม่
     async createPlan(planPayload) {
       const client = getClient();
       if (!client) throw new Error("Supabase client is not available.");
 
+      const newId = planPayload.id || this.generateUUID();
+
       const payload = {
+        id: newId,
         title: planPayload.title,
         description: planPayload.description || '',
         category: planPayload.category || 'activity',
@@ -103,8 +117,9 @@
 
       // หากเจอปัญหาคอลัมน์ใหม่ยังไม่ถูก reload ใน Supabase Schema Cache (PGRST204)
       if (error && error.code === 'PGRST204') {
-        console.warn("[PlansRepo] Schema cache column mismatch detected. Retrying with basic columns...", error);
+        console.warn("[PlansRepo] Schema cache column mismatch detected. Retrying with basic columns & client UUID...", error);
         const fallbackPayload = {
+          id: newId,
           title: payload.title,
           description: payload.description,
           start_date: payload.start_date,
@@ -119,7 +134,7 @@
         
         if (retryResult.error) {
           console.error("[PlansRepo] Fallback create also failed:", retryResult.error);
-          throw error;
+          throw retryResult.error;
         }
         data = retryResult.data;
         error = null;

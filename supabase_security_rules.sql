@@ -473,6 +473,7 @@ CREATE TABLE IF NOT EXISTS public.plans (
 );
 
 -- ปรับเพิ่มคอลัมน์ใหม่อัตโนมัติ (กรณีตาราง plans ถูกสร้างไว้ก่อนแล้ว)
+ALTER TABLE public.plans ALTER COLUMN id SET DEFAULT gen_random_uuid();
 ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'activity';
 ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS scope TEXT DEFAULT 'department';
