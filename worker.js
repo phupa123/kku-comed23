@@ -9,6 +9,64 @@ export default {
     const path = url.pathname.toLowerCase();
 
     // 0. Dedicated Cloud Storage Upload Proxy with complete CORS support (Streams directly to upstream)
+    if (path === "/api/download-proxy") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+            "Access-Control-Allow-Headers": "*"
+          }
+        });
+      }
+
+      if (request.method === "GET" || request.method === "HEAD") {
+        const targetUrl = url.searchParams.get("url");
+        const filename = url.searchParams.get("filename") || "download";
+        if (!targetUrl) {
+          return new Response("Missing target url parameter", { status: 400, headers: { "Access-Control-Allow-Origin": "*" } });
+        }
+
+        try {
+          const upstreamRes = await fetch(targetUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) KKU-Comed-Downloader/1.0"
+            }
+          });
+
+          if (!upstreamRes.ok) {
+            return new Response(`Upstream fetch failed: ${upstreamRes.status}`, {
+              status: upstreamRes.status,
+              headers: { "Access-Control-Allow-Origin": "*" }
+            });
+          }
+
+          const responseHeaders = new Headers();
+          responseHeaders.set("Access-Control-Allow-Origin", "*");
+          responseHeaders.set("Access-Control-Expose-Headers", "Content-Disposition, Content-Length, Content-Type");
+          
+          const upstreamContentType = upstreamRes.headers.get("content-type");
+          if (upstreamContentType) responseHeaders.set("Content-Type", upstreamContentType);
+
+          const upstreamContentLength = upstreamRes.headers.get("content-length");
+          if (upstreamContentLength) responseHeaders.set("Content-Length", upstreamContentLength);
+
+          const safeFilename = encodeURIComponent(filename);
+          responseHeaders.set("Content-Disposition", `attachment; filename="${safeFilename}"; filename*=UTF-8''${safeFilename}`);
+
+          return new Response(upstreamRes.body, {
+            status: upstreamRes.status,
+            headers: responseHeaders
+          });
+        } catch (err) {
+          return new Response("Download proxy error: " + err.message, {
+            status: 500,
+            headers: { "Access-Control-Allow-Origin": "*" }
+          });
+        }
+      }
+    }
+
     if (path === "/api/catbox-proxy") {
       if (request.method === "OPTIONS") {
         return new Response(null, {

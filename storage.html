@@ -2448,17 +2448,8 @@
       });
     }
 
-    function renderFilesList() {
-      const container = document.getElementById('filesDisplayContainer');
-      const countText = document.getElementById('filesCountText');
-      if (!container) return;
-
-      // === TRASH VIEW MODE ===
-      if (isTrashView) {
-        renderTrashView(container, countText);
-        return;
-      }
-
+    // Returns the exact list of files currently visible to the active user based on active folder & filters
+    function getCurrentlyDisplayedFiles() {
       let files = getUserFilesList();
       const repo = getRepo();
 
@@ -2468,7 +2459,7 @@
         return !meta.isTrash;
       });
 
-      // 1. Filter by current folder
+      // 1. Filter by current folder strictly
       files = files.filter(f => (f.folderId || null) === currentFolderId);
 
       // 2. Filter by search query
@@ -2498,6 +2489,22 @@
           return tags.includes(driveTagFilter);
         });
       }
+
+      return files;
+    }
+
+    function renderFilesList() {
+      const container = document.getElementById('filesDisplayContainer');
+      const countText = document.getElementById('filesCountText');
+      if (!container) return;
+
+      // === TRASH VIEW MODE ===
+      if (isTrashView) {
+        renderTrashView(container, countText);
+        return;
+      }
+
+      const files = getCurrentlyDisplayedFiles();
 
       if (countText) countText.textContent = files.length;
 
@@ -4004,7 +4011,8 @@
     let activeContextMenuFileId = null;
 
     function openFullMediaViewer(fileId) {
-      const files = getUserFilesList().filter(f => (f.folderId || null) === currentFolderId);
+      // Use the exact files currently active in the user's view (filtered by user, folder, category, tag, search query, non-trash)
+      const files = getCurrentlyDisplayedFiles();
       const target = files.find(f => f.id === fileId);
       if (!target) return;
 
@@ -4232,7 +4240,7 @@
       if (!file || !file.url) return;
 
       const fileName = file.originalName || file.name || file.id;
-      showToast(`📥 กำลังเริ่มดาวน์โหลด: ${fileName}`);
+      showToast(`📥 กำลังเตรียมดาวน์โหลดไฟล์ต้นฉบับ: ${fileName}`);
 
       if (window.MultiDownloader && typeof window.MultiDownloader.downloadSingleFile === 'function') {
         try {
@@ -4240,18 +4248,21 @@
           showToast(`✨ ดาวน์โหลดสำเร็จ: ${fileName}`);
           return;
         } catch (e) {
-          console.warn('[Storage] MultiDownloader fallback:', e);
+          console.warn('[Storage] MultiDownloader error:', e);
         }
       }
 
-      // Standard anchor fallback
+      // Safe Stream Proxy Fallback - forces real file download with Content-Disposition
+      const proxyDownloadUrl = `/api/download-proxy?url=${encodeURIComponent(file.url)}&filename=${encodeURIComponent(fileName)}`;
       const a = document.createElement('a');
-      a.href = file.url;
+      a.href = proxyDownloadUrl;
       a.download = fileName;
-      a.target = '_blank';
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      setTimeout(() => {
+        document.body.removeChild(a);
+        showToast(`✨ เริ่มดาวน์โหลด: ${fileName}`);
+      }, 1000);
     }
 
     // ----------------------------------------------------

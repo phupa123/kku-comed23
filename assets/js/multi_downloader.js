@@ -16,24 +16,64 @@
     }
 
     /**
+     * ดึง Blob ของไฟล์โดยมีระบบ Fallback ไปยัง Worker / CORS Proxy หากโดน Cross-Origin บล็อค
+     */
+    async fetchFileBlob(fileUrl, fileName = 'download') {
+      // 1. Direct fetch with CORS mode
+      try {
+        const response = await fetch(fileUrl, { mode: 'cors' });
+        if (response.ok) {
+          return await response.blob();
+        }
+      } catch (e) {
+        // Continue to fallback proxies
+      }
+
+      // 2. Fallback via Local/Cloudflare Worker download proxy
+      try {
+        const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(fileName)}`;
+        const pRes = await fetch(proxyUrl);
+        if (pRes.ok) {
+          return await pRes.blob();
+        }
+      } catch (e) {
+        // Continue
+      }
+
+      // 3. Fallback via public images/files proxy for image files
+      if (fileUrl.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) || fileUrl.includes('catbox.moe')) {
+        try {
+          const imgProxy = `https://images.weserv.nl/?url=${encodeURIComponent(fileUrl)}&default=${encodeURIComponent(fileUrl)}`;
+          const imgRes = await fetch(imgProxy);
+          if (imgRes.ok) {
+            return await imgRes.blob();
+          }
+        } catch (e) {
+          // Continue
+        }
+      }
+
+      throw new Error(`Unable to fetch blob for ${fileUrl}`);
+    }
+
+    /**
      * ดาวน์โหลดไฟล์เดี่ยวลงเครื่องโดยตรง
      */
     async downloadSingleFile(fileUrl, fileName = 'download') {
       try {
-        const response = await fetch(fileUrl, { mode: 'cors' });
-        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-        const blob = await response.blob();
+        const blob = await this.fetchFileBlob(fileUrl, fileName);
         this.saveBlob(blob, fileName);
         return true;
       } catch (err) {
-        // Fallback using direct anchor click
+        console.warn('[MultiDownloader] Blob fetch failed, falling back to direct stream link:', err);
+        // Fallback using proxy download link or direct link
+        const directProxyUrl = `/api/download-proxy?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(fileName)}`;
         const a = document.createElement('a');
-        a.href = fileUrl;
+        a.href = directProxyUrl;
         a.download = fileName;
-        a.target = '_blank';
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+        setTimeout(() => document.body.removeChild(a), 1500);
         return true;
       }
     }
@@ -84,9 +124,7 @@
         }
 
         try {
-          const res = await fetch(item.url, { mode: 'cors' });
-          if (!res.ok) throw new Error('Fetch failed');
-          const blob = await res.blob();
+          const blob = await this.fetchFileBlob(item.url, item.name);
           // Ensure unique filename inside zip
           const safeName = this.makeSafeFileName(zip, item.name);
           zip.file(safeName, blob);
