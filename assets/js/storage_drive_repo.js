@@ -14,6 +14,7 @@
   const STORAGE_FILES_META_KEY = 'COMED_DRIVE_FILES_META_V1';
   const STORAGE_SHARES_KEY = 'COMED_DRIVE_SHARES_V1';
   const STORAGE_COMMENTS_KEY = 'COMED_DRIVE_COMMENTS_V1';
+  const STORAGE_ACTIVITIES_KEY = 'COMED_DRIVE_ACTIVITIES_V1';
 
   // Default Folders for each new user
   const DEFAULT_USER_FOLDERS = [
@@ -55,6 +56,7 @@
       this.filesMeta = this.loadData(STORAGE_FILES_META_KEY, {}); // { fileId: { folderId, isLocked, passwordHash, ... } }
       this.shares = this.loadData(STORAGE_SHARES_KEY, []); // [ { id, shareCode, targetType: 'file'|'folder', targetId, accessType: 'public'|'comed23'|'specific', allowedEmails: [], passwordHash, expiresAt, role: 'viewer'|'commenter'|'editor', ... } ]
       this.comments = this.loadData(STORAGE_COMMENTS_KEY, []); // [ { id, targetType, targetId, authorName, authorEmail, content, createdAt } ]
+      this.activities = this.loadData(STORAGE_ACTIVITIES_KEY, []); // [ { id, action, title, detail, userEmail, userName, targetId, folderId, createdAt } ]
       this.hasSyncedCloud = false;
       this.initSync();
       this.cleanupExpiredTrash();
@@ -506,7 +508,7 @@
     }
 
     // ================= 3.0 RECYCLE BIN / TRASH SYSTEM =================
-    async moveToTrash(fileId) {
+    async moveToTrash(fileId, deletedBy = null) {
       if (!this.filesMeta[fileId]) {
         this.filesMeta[fileId] = {
           folderId: null,
@@ -523,13 +525,17 @@
       meta.folderId = null; // Unlink from normal folder view
       meta.isTrash = true;
       meta.trashedAt = new Date().toISOString();
+      if (deletedBy) {
+        meta.trashedByEmail = (deletedBy.email || deletedBy.userEmail || (typeof deletedBy === 'string' ? deletedBy : '') || '').toLowerCase().trim();
+        meta.trashedByName = deletedBy.name || deletedBy.displayName || 'ผู้ใช้งาน';
+      }
       this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
       return meta;
     }
 
-    async batchMoveToTrash(fileIds = []) {
+    async batchMoveToTrash(fileIds = [], deletedBy = null) {
       for (const id of fileIds) {
-        await this.moveToTrash(id);
+        await this.moveToTrash(id, deletedBy);
       }
       return true;
     }
@@ -931,6 +937,86 @@
       this.syncShareToCloud(share).catch(() => {});
 
       return { allowed: true, share };
+    }
+
+    // ================= 5. ACTIVITY LOG ENGINE =================
+    /**
+     * Record an action (upload, delete, undo, rename, move, lock) into local & Supabase log
+     * @param {Object} options - { action, title, detail, user, targetId, folderId, targetType }
+     */
+    async logActivity(options = {}) {
+      const {
+        action = 'action',
+        title = 'กิจกรรมในไดรฟ์',
+        detail = '',
+        user = null,
+        targetId = null,
+        folderId = null,
+        targetType = 'file'
+      } = options;
+
+      const userEmail = (user && (user.email || user.userEmail || (typeof user === 'string' ? user : ''))) || 'anonymous';
+      const userName = (user && (user.name || user.displayName || user.nickname)) || userEmail;
+
+      const actItem = {
+        id: 'act_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        action,
+        title,
+        detail,
+        userEmail,
+        userName,
+        targetId,
+        folderId,
+        targetType,
+        createdAt: new Date().toISOString()
+      };
+
+      this.activities.unshift(actItem);
+      // Keep latest 250 activities locally
+      if (this.activities.length > 250) {
+        this.activities = this.activities.slice(0, 250);
+      }
+      this.saveData(STORAGE_ACTIVITIES_KEY, this.activities);
+
+      // Async sync to Supabase admin_logs table
+      this.syncActivityToCloud(actItem).catch(() => {});
+      return actItem;
+    }
+
+    async syncActivityToCloud(actItem) {
+      try {
+        const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!sb || !actItem) return;
+        await sb.from('admin_logs').insert([{
+          admin_email: actItem.userEmail,
+          action: `DRIVE_${actItem.action.toUpperCase()}`,
+          detail: JSON.stringify({
+            title: actItem.title,
+            detail: actItem.detail,
+            userName: actItem.userName,
+            targetId: actItem.targetId,
+            folderId: actItem.folderId,
+            targetType: actItem.targetType,
+            timestamp: actItem.createdAt
+          })
+        }]);
+      } catch (e) {
+        // Silently handle if network offline
+      }
+    }
+
+    getActivities(filter = {}) {
+      let list = [...this.activities];
+      if (filter.folderId !== undefined) {
+        list = list.filter(a => (a.folderId || null) === filter.folderId);
+      }
+      if (filter.targetId) {
+        list = list.filter(a => a.targetId === filter.targetId);
+      }
+      if (filter.action) {
+        list = list.filter(a => a.action === filter.action);
+      }
+      return list;
     }
   }
 

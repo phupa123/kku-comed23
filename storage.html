@@ -948,6 +948,11 @@
             <span id="trashCountBadge" class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center"></span>
           </button>
 
+          <!-- Activity Log Button -->
+          <button onclick="toggleActivityDrawer()" id="btnActivityDrawer" class="p-2 rounded-xl bg-slate-900 hover:bg-orange-500/20 text-slate-400 hover:text-orange-400 border border-slate-800 hover:border-orange-500/40 transition cursor-pointer relative" title="ประวัติกิจกรรม (Activity Log)">
+            <i data-lucide="history" class="w-4 h-4"></i>
+          </button>
+
           <!-- Refresh Button -->
           <button onclick="refreshDriveContents()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition cursor-pointer" title="รีเฟรชไดรฟ์">
             <i data-lucide="rotate-cw" id="driveRefreshIcon" class="w-4 h-4"></i>
@@ -1821,11 +1826,72 @@
     </button>
   </div>
 
-  <!-- Toast Notification Container -->
+  <!-- Interactive Undo Toast Container (5-second countdown with Undo button) -->
+  <div id="driveUndoToast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 pointer-events-none transition-all duration-300 px-4 py-3 rounded-2xl bg-slate-900/95 border border-rose-500/50 text-white text-xs font-bold shadow-2xl flex items-center gap-3 backdrop-blur-md">
+    <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-mono font-black text-sm" id="driveUndoCountdown">5</div>
+    <div class="space-y-0.5">
+      <div id="driveUndoTitle" class="text-white text-xs font-bold">ย้ายไฟล์ไปถังขยะแล้ว</div>
+      <div id="driveUndoDesc" class="text-[11px] text-slate-400">จะดำเนินการถาวรใน 5 วินาที</div>
+    </div>
+    <button onclick="handleTriggerUndo()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-slate-950 font-black text-xs transition active:scale-95 shadow-md flex items-center gap-1.5 cursor-pointer ml-2">
+      <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+      <span>ยกเลิก (Undo)</span>
+    </button>
+    <button onclick="dismissUndoToastImmediately()" class="p-1 text-slate-400 hover:text-white transition cursor-pointer">
+      <i data-lucide="x" class="w-3.5 h-3.5"></i>
+    </button>
+  </div>
+
+  <!-- Regular Toast Notification Container -->
   <div id="driveToast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 px-4 py-3 rounded-2xl bg-slate-900 border border-slate-700 text-white text-xs font-bold shadow-2xl flex items-center gap-2">
     <span id="driveToastIcon">✨</span>
     <span id="driveToastText">ดำเนินการสำเร็จ</span>
   </div>
+
+  <!-- Activity Log Side Drawer (Google Drive style slide-out right panel) -->
+  <div id="activityDrawerBackdrop" onclick="closeActivityDrawer()" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 transition-opacity duration-300"></div>
+  <aside id="activityDrawer" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-slate-900/95 border-l border-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col backdrop-blur-xl">
+    <!-- Header -->
+    <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+          <i data-lucide="history" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-black text-white">ประวัติกิจกรรมไดรฟ์</h3>
+          <p class="text-[10px] text-slate-400">Activity Log & Audit Trail</p>
+        </div>
+      </div>
+      <button onclick="closeActivityDrawer()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Filter Buttons (All / Uploads / Deletions) -->
+    <div class="p-3 border-b border-slate-800/80 bg-slate-950/40 flex items-center gap-1.5 text-xs">
+      <button onclick="setActivityFilter('all')" id="btnActFilterAll" class="px-2.5 py-1 rounded-xl bg-orange-500/20 text-orange-400 font-bold border border-orange-500/30">ทั้งหมด</button>
+      <button onclick="setActivityFilter('upload')" id="btnActFilterUpload" class="px-2.5 py-1 rounded-xl text-slate-400 hover:text-white font-medium">อัปโหลด</button>
+      <button onclick="setActivityFilter('trash')" id="btnActFilterTrash" class="px-2.5 py-1 rounded-xl text-slate-400 hover:text-white font-medium">ลบ/ถังขยะ</button>
+      <button onclick="setActivityFilter('undo')" id="btnActFilterUndo" class="px-2.5 py-1 rounded-xl text-slate-400 hover:text-white font-medium">กู้คืน</button>
+    </div>
+
+    <!-- Activity Items List Container -->
+    <div id="activityDrawerList" class="flex-grow overflow-y-auto p-4 space-y-3 divide-y divide-slate-800/50">
+      <div class="text-center py-12 text-slate-500 text-xs">
+        <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2 text-slate-600"></i>
+        <span>ยังไม่มีบันทึกกิจกรรมล่าสุด</span>
+      </div>
+    </div>
+
+    <!-- Footer info -->
+    <div class="p-3 border-t border-slate-800 bg-slate-950/60 text-[10px] text-slate-500 flex items-center justify-between">
+      <span>ซิงค์อัตโนมัติกับ Supabase</span>
+      <button onclick="refreshActivitiesList()" class="hover:text-orange-400 flex items-center gap-1 cursor-pointer">
+        <i data-lucide="rotate-cw" class="w-3 h-3"></i>
+        <span>รีเฟรช</span>
+      </button>
+    </div>
+  </aside>
 
   <!-- Main JavaScript Logic for storage.html -->
   <script>
@@ -2303,15 +2369,27 @@
         const folders = repo.getUserFolders(userEmail);
         const folder = folders.find(f => f.id === currentFolderId) || (currentSharedFolderContext && currentSharedFolderContext.folderMeta?.id === currentFolderId ? currentSharedFolderContext.folderMeta : null);
 
-        const folderName = folder ? (folder.name || 'โฟลเดอร์') : (currentSharedFolderContext?.folderMeta?.name || currentSharedFolderContext?.title || 'โฟลเดอร์ที่แชร์');
+        const isLockedFolder = folder && folder.isLocked && !sessionUnlockedItems.has(folder.id);
+        const isEditor = currentSharedFolderContext ? (currentSharedFolderContext.role === 'editor') : true;
 
         html += `
           <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-600"></i>
-          <span class="text-white flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-800/60 border border-slate-700">
+          <span class="text-white flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800/80 border border-slate-700">
             <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
-            <span>${escapeHtml(folderName)}</span>
-            ${folder && folder.isLocked ? '<i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400 ml-0.5"></i>' : ''}
-            ${currentSharedFolderContext ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold border border-orange-500/40">โฟลเดอร์ที่แชร์</span>' : ''}
+            <span class="font-bold">${escapeHtml(folderName)}</span>
+            ${folder && folder.isLocked ? `<i data-lucide="${isLockedFolder ? 'lock' : 'unlock'}" class="w-3.5 h-3.5 ${isLockedFolder ? 'text-amber-400' : 'text-emerald-400'} ml-0.5" title="${isLockedFolder ? 'โฟลเดอร์ถูกล็อค' : 'ปลดล็อคแล้ว'}"></i>` : ''}
+            ${currentSharedFolderContext ? `
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold border border-orange-500/40">โฟลเดอร์ที่แชร์</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded ${isEditor ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-700/60 text-slate-300 border border-slate-600'} font-bold">
+                ${isEditor ? '✏️ สิทธิ์ผู้แก้ไข (Editor)' : '👁️ สิทธิ์ดูเท่านั้น (Viewer)'}
+              </span>
+            ` : ''}
+            ${isLockedFolder ? `
+              <button onclick="openPasswordChallengeModal('folder', '${folder.id}', '${escapeHtml(folderName)}')" class="text-[9px] px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 font-bold flex items-center gap-1 cursor-pointer">
+                <i data-lucide="key" class="w-2.5 h-2.5"></i>
+                <span>กรุณาปลดล็อค</span>
+              </button>
+            ` : ''}
           </span>
         `;
       }
@@ -2428,19 +2506,26 @@
     function getUserFilesList() {
       // 1. If currently in a shared folder from cloud, use its folderFiles
       if (currentSharedFolderContext && currentFolderId === currentSharedFolderContext.targetId) {
+        const repo = getRepo();
         const sharedFiles = currentSharedFolderContext.folderFiles || [];
-        return sharedFiles.map(sf => ({
-          id: sf.id,
-          originalName: sf.name,
-          name: sf.name,
-          url: sf.url,
-          size: sf.size || 0,
-          type: sf.type || '',
-          provider: sf.provider || 'cloud',
-          folderId: currentFolderId,
-          isLocked: false,
-          passwordHash: null
-        }));
+        return sharedFiles.map(sf => {
+          const meta = repo.getFileMeta(sf.id);
+          return {
+            id: sf.id,
+            originalName: sf.name || sf.originalName,
+            name: sf.name || sf.originalName,
+            url: sf.url,
+            size: sf.size || 0,
+            type: sf.type || '',
+            provider: sf.provider || 'cloud',
+            uploaderEmail: sf.uploaderEmail || currentSharedFolderContext.creatorEmail || '',
+            uploaderName: sf.uploaderName || '',
+            uploaderId: sf.uploaderId || '',
+            folderId: currentFolderId,
+            isLocked: !!meta.isLocked,
+            passwordHash: meta.passwordHash || null
+          };
+        });
       }
 
       if (!window.MultiCloudUploader) return [];
@@ -2472,8 +2557,9 @@
       let files = getUserFilesList();
       const repo = getRepo();
 
-      // 0. Exclude trashed files from normal view
+      // 0. Exclude trashed files and files currently in pending deletion (5-second undo)
       files = files.filter(f => {
+        if (pendingDeletion && pendingDeletion.fileIds.includes(f.id)) return false;
         const meta = repo.getFileMeta(f.id);
         return !meta.isTrash;
       });
@@ -3088,40 +3174,210 @@
       }
     }
 
+    // ----------------------------------------------------
+    // 5-SECOND COUNTDOWN & UNDO DELETION SYSTEM
+    // ----------------------------------------------------
+    let pendingDeletion = null; // { timerId, intervalId, remainingSec: 5, fileIds: [], isBatch: false, originalFiles: [] }
+
+    function dismissUndoToastImmediately() {
+      if (pendingDeletion) {
+        // Finalize immediately
+        finalizePendingDeletion();
+      } else {
+        const toast = document.getElementById('driveUndoToast');
+        if (toast) {
+          toast.classList.remove('translate-y-0', 'opacity-100');
+          toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+        }
+      }
+    }
+
+    async function finalizePendingDeletion() {
+      if (!pendingDeletion) return;
+      const { timerId, intervalId, fileIds, originalFiles } = pendingDeletion;
+      clearTimeout(timerId);
+      clearInterval(intervalId);
+
+      const toast = document.getElementById('driveUndoToast');
+      if (toast) {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      }
+
+      const repo = getRepo();
+      const currentU = currentUser || { email: 'guest', name: 'บุคคลทั่วไป' };
+
+      // Finalize move to trash in repo with deletedBy attribution
+      await repo.batchMoveToTrash(fileIds, currentU);
+
+      // If inside shared folder, sync the folder deletion
+      if (currentSharedFolderContext && currentFolderId === currentSharedFolderContext.targetId) {
+        const remainingFolderFiles = (currentSharedFolderContext.folderFiles || []).filter(sf => !fileIds.includes(sf.id));
+        currentSharedFolderContext.folderFiles = remainingFolderFiles;
+        repo.syncShareToCloud(currentSharedFolderContext).catch(() => {});
+      }
+
+      // Log activity for each file
+      for (const f of originalFiles) {
+        await repo.logActivity({
+          action: 'trash',
+          title: `ย้ายไฟล์ไปยังถังขยะ`,
+          detail: `ไฟล์ "${f.originalName || f.name || f.id}" (${formatBytes(f.size || 0)}) ถูกย้ายไปถังขยะ`,
+          user: currentU,
+          targetId: f.id,
+          folderId: currentFolderId,
+          targetType: 'file'
+        });
+      }
+
+      pendingDeletion = null;
+      updateQuotaDisplay();
+      updateTrashBadge();
+      renderFilesList();
+    }
+
+    function handleTriggerUndo() {
+      if (!pendingDeletion) return;
+      const { timerId, intervalId, fileIds, originalFiles } = pendingDeletion;
+      clearTimeout(timerId);
+      clearInterval(intervalId);
+
+      const toast = document.getElementById('driveUndoToast');
+      if (toast) {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      }
+
+      const repo = getRepo();
+      const currentU = currentUser || { email: 'guest', name: 'บุคคลทั่วไป' };
+
+      // Log undo activity
+      for (const f of originalFiles) {
+        repo.logActivity({
+          action: 'undo',
+          title: `ยกเลิกการลบไฟล์ (Undo)`,
+          detail: `กู้คืนไฟล์ "${f.originalName || f.name || f.id}" กลับคืนตำแหน่งเดิมทันที`,
+          user: currentU,
+          targetId: f.id,
+          folderId: currentFolderId,
+          targetType: 'file'
+        });
+      }
+
+      pendingDeletion = null;
+      renderFilesList();
+      showToast('↩️ ยกเลิกการลบแล้ว — ไฟล์ยังคงอยู่ในโฟลเดอร์เดิม');
+    }
+
     async function deleteBatchSelectedFiles() {
       const count = selectedFileIds.size;
       if (count === 0) return;
 
-      if (!confirm(`⚠️ ย้ายไฟล์ที่เลือก ${count} ไฟล์ ไปยังถังขยะ?\n\nคุณสามารถกู้คืนได้จากถังขยะในภายหลัง`)) {
-        return;
+      // If there's an existing pending deletion, finalize it first
+      if (pendingDeletion) {
+        await finalizePendingDeletion();
       }
 
-      const repo = getRepo();
       const ids = Array.from(selectedFileIds);
-      await repo.batchMoveToTrash(ids);
+      const allFiles = getUserFilesList();
+      const targetFiles = allFiles.filter(f => ids.includes(f.id));
 
       selectedFileIds.clear();
       updateBatchActionBar();
-      updateQuotaDisplay();
-      updateTrashBadge();
+
+      // Start 5-second countdown with interactive Toast
+      const toast = document.getElementById('driveUndoToast');
+      const countBadge = document.getElementById('driveUndoCountdown');
+      const titleEl = document.getElementById('driveUndoTitle');
+      const descEl = document.getElementById('driveUndoDesc');
+
+      let remainingSec = 5;
+      if (countBadge) countBadge.textContent = remainingSec;
+      if (titleEl) titleEl.textContent = `ย้าย ${count} ไฟล์ ไปยังถังขยะ`;
+      if (descEl) descEl.textContent = `จะดำเนินการใน ${remainingSec} วินาที (คลิกยกเลิกได้)`;
+
+      if (toast) {
+        toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+        toast.classList.add('translate-y-0', 'opacity-100');
+      }
+
+      const intervalId = setInterval(() => {
+        remainingSec--;
+        if (countBadge) countBadge.textContent = remainingSec;
+        if (descEl) descEl.textContent = `จะดำเนินการใน ${remainingSec} วินาที (คลิกยกเลิกได้)`;
+        if (remainingSec <= 0) {
+          clearInterval(intervalId);
+        }
+      }, 1000);
+
+      const timerId = setTimeout(() => {
+        finalizePendingDeletion();
+      }, 5000);
+
+      pendingDeletion = {
+        timerId,
+        intervalId,
+        remainingSec: 5,
+        fileIds: ids,
+        isBatch: true,
+        originalFiles: targetFiles
+      };
+
+      // Temporarily hide from active view immediately for responsive feel
       renderFilesList();
-      showToast(`🗑️ ย้าย ${count} ไฟล์ ไปยังถังขยะแล้ว`);
     }
 
     async function handleDeleteSingleFile(fileId) {
-      if (!confirm('ย้ายไฟล์นี้ไปยังถังขยะ?\n\nคุณสามารถกู้คืนได้จากถังขยะในภายหลัง')) return;
-      const repo = getRepo();
-      try {
-        await repo.moveToTrash(fileId);
-        selectedFileIds.delete(fileId);
-        updateBatchActionBar();
-        updateQuotaDisplay();
-        updateTrashBadge();
-        renderFilesList();
-        showToast('🗑️ ย้ายไฟล์ไปถังขยะแล้ว — กู้คืนได้จากถังขยะ');
-      } catch(e) {
-        alert('เกิดข้อผิดพลาด: ' + e.message);
+      if (pendingDeletion) {
+        await finalizePendingDeletion();
       }
+
+      const allFiles = getUserFilesList();
+      const target = allFiles.find(f => f.id === fileId);
+      const fileName = target ? (target.originalName || target.name || fileId) : 'ไฟล์';
+
+      selectedFileIds.delete(fileId);
+      updateBatchActionBar();
+
+      // Show Undo Toast with 5s countdown
+      const toast = document.getElementById('driveUndoToast');
+      const countBadge = document.getElementById('driveUndoCountdown');
+      const titleEl = document.getElementById('driveUndoTitle');
+      const descEl = document.getElementById('driveUndoDesc');
+
+      let remainingSec = 5;
+      if (countBadge) countBadge.textContent = remainingSec;
+      if (titleEl) titleEl.textContent = `ย้าย "${fileName.length > 20 ? fileName.slice(0, 18) + '...' : fileName}" ไปถังขยะ`;
+      if (descEl) descEl.textContent = `จะดำเนินการใน ${remainingSec} วินาที (คลิกยกเลิกได้)`;
+
+      if (toast) {
+        toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+        toast.classList.add('translate-y-0', 'opacity-100');
+      }
+
+      const intervalId = setInterval(() => {
+        remainingSec--;
+        if (countBadge) countBadge.textContent = remainingSec;
+        if (descEl) descEl.textContent = `จะดำเนินการใน ${remainingSec} วินาที (คลิกยกเลิกได้)`;
+        if (remainingSec <= 0) {
+          clearInterval(intervalId);
+        }
+      }, 1000);
+
+      const timerId = setTimeout(() => {
+        finalizePendingDeletion();
+      }, 5000);
+
+      pendingDeletion = {
+        timerId,
+        intervalId,
+        remainingSec: 5,
+        fileIds: [fileId],
+        isBatch: false,
+        originalFiles: target ? [target] : [{ id: fileId, name: fileName, size: 0 }]
+      };
+
+      renderFilesList();
     }
 
     // ============================================================
@@ -3164,6 +3420,18 @@
       updateBatchActionBar();
       updateTrashBadge();
       renderFilesList();
+
+      const currentU = currentUser || { email: 'guest', name: 'บุคคลทั่วไป' };
+      repo.logActivity({
+        action: 'undo',
+        title: 'กู้คืนไฟล์จากถังขยะ',
+        detail: `กู้คืนไฟล์รหัส ${fileId} กลับมายังไดรฟ์สำเร็จ`,
+        user: currentU,
+        targetId: fileId,
+        folderId: currentFolderId,
+        targetType: 'file'
+      });
+
       showToast('✅ กู้คืนไฟล์สำเร็จ — ไฟล์กลับมาในไดรฟ์แล้ว');
     }
 
@@ -3183,6 +3451,18 @@
         updateQuotaDisplay();
         updateTrashBadge();
         renderFilesList();
+
+        const currentU = currentUser || { email: 'guest', name: 'บุคคลทั่วไป' };
+        repo.logActivity({
+          action: 'trash',
+          title: 'ลบไฟล์ถาวร',
+          detail: `ลบไฟล์ "${fileName}" ออกจากระบบอย่างถาวร`,
+          user: currentU,
+          targetId: fileId,
+          folderId: currentFolderId,
+          targetType: 'file'
+        });
+
         showToast('🗑️ ลบไฟล์ถาวรแล้ว');
       } catch(e) {
         alert('เกิดข้อผิดพลาด: ' + e.message);
@@ -3198,6 +3478,17 @@
       updateBatchActionBar();
       updateTrashBadge();
       renderFilesList();
+
+      const currentU = currentUser || { email: 'guest', name: 'บุคคลทั่วไป' };
+      repo.logActivity({
+        action: 'undo',
+        title: `กู้คืนไฟล์จำนวน ${ids.length} ไฟล์`,
+        detail: `กู้คืนไฟล์ ${ids.length} รายการจากถังขยะกลับคืนไดรฟ์`,
+        user: currentU,
+        folderId: currentFolderId,
+        targetType: 'file'
+      });
+
       showToast(`✅ กู้คืน ${ids.length} ไฟล์ สำเร็จ`);
     }
 
@@ -4550,8 +4841,13 @@
       const folders = repo.getUserFolders(userEmail);
 
       let html = '<option value="">📁 หน้าแรก (Root)</option>';
+      if (currentSharedFolderContext && currentSharedFolderContext.targetId) {
+        const sfName = currentSharedFolderContext.folderMeta?.name || currentSharedFolderContext.title || 'โฟลเดอร์ที่แชร์';
+        html += `<option value="${currentSharedFolderContext.targetId}" selected>📁 ${escapeHtml(sfName)} (โฟลเดอร์ที่แชร์)</option>`;
+      }
+
       folders.forEach(f => {
-        const isSelected = f.id === currentFolderId;
+        const isSelected = f.id === currentFolderId && (!currentSharedFolderContext || currentFolderId !== currentSharedFolderContext.targetId);
         html += `<option value="${f.id}" ${isSelected ? 'selected' : ''}>📁 ${escapeHtml(f.name)}</option>`;
       });
       sel.innerHTML = html;
@@ -4700,8 +4996,22 @@
         return;
       }
 
-      const totalFiles = selectedFilesQueue.length;
+      const repo = getRepo();
       const targetFolderId = document.getElementById('uploadTargetFolderSelect')?.value || currentFolderId || null;
+
+      // Check if target folder is locked and not yet unlocked in this session
+      if (targetFolderId) {
+        const userEmail = getCurrentUserEmail();
+        const folders = repo.getUserFolders(userEmail);
+        const fObj = folders.find(f => f.id === targetFolderId) || (currentSharedFolderContext && currentSharedFolderContext.folderMeta?.id === targetFolderId ? currentSharedFolderContext.folderMeta : null);
+        if (fObj && fObj.isLocked && !sessionUnlockedItems.has(fObj.id)) {
+          alert('🔒 โฟลเดอร์นี้ถูกล็อครหัสผ่านไว้ กรุณาปลดล็อคโฟลเดอร์ก่อนทำการอัปโหลดไฟล์');
+          openPasswordChallengeModal('folder', fObj.id, fObj.name);
+          return;
+        }
+      }
+
+      const totalFiles = selectedFilesQueue.length;
       const chosenProvider = document.getElementById('userPreferredProvider')?.value || 'cloudinary';
 
       const stagingCard = document.getElementById('fileStagingCard');
@@ -4714,8 +5024,8 @@
       stagingCard.classList.add('hidden');
       progressBox.classList.remove('hidden');
 
-      const repo = getRepo();
       let completedCount = 0;
+      const newlyUploadedFiles = [];
 
       for (let i = 0; i < totalFiles; i++) {
         const file = selectedFilesQueue[i];
@@ -4747,14 +5057,48 @@
           if (res && res.url) {
             // Bind newly uploaded file to target folder
             if (targetFolderId && uploadedFileId) {
-              repo.moveFile(uploadedFileId, targetFolderId);
+              await repo.moveFile(uploadedFileId, targetFolderId);
             }
+
+            const fileRecord = {
+              id: uploadedFileId || ('FILE_' + Date.now()),
+              name: displayName,
+              url: res.url,
+              size: file.size || 0,
+              type: file.type || '',
+              provider: chosenProvider,
+              uploaderEmail: currentUser.email,
+              uploaderName: currentUser.name,
+              uploadedAt: new Date().toISOString()
+            };
+            newlyUploadedFiles.push(fileRecord);
+
+            // Log upload activity
+            repo.logActivity({
+              action: 'upload',
+              title: 'อัปโหลดไฟล์ใหม่',
+              detail: `อัปโหลด "${displayName}" (${formatBytes(file.size)}) สำเร็จ`,
+              user: currentUser,
+              targetId: fileRecord.id,
+              folderId: targetFolderId,
+              targetType: 'file'
+            });
+
             completedCount++;
           }
         } catch (err) {
           console.error('File upload error:', err);
           showToast(`⚠️ อัปโหลด "${file.name}" ไม่สำเร็จ: ${err.message || 'เกิดข้อผิดพลาด'}`, 'error');
         }
+      }
+
+      // If we are uploading inside a shared folder from cloud, append files to cloud share record
+      if (currentSharedFolderContext && targetFolderId === currentSharedFolderContext.targetId && newlyUploadedFiles.length > 0) {
+        if (!Array.isArray(currentSharedFolderContext.folderFiles)) {
+          currentSharedFolderContext.folderFiles = [];
+        }
+        currentSharedFolderContext.folderFiles.push(...newlyUploadedFiles);
+        await repo.syncShareToCloud(currentSharedFolderContext);
       }
 
       progressBar.style.width = '100%';
@@ -5140,6 +5484,141 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+    // ============================================================
+    // ACTIVITY LOG DRAWER CONTROLLER
+    // ============================================================
+    let currentActivityFilter = 'all';
+
+    function toggleActivityDrawer() {
+      const drawer = document.getElementById('activityDrawer');
+      const backdrop = document.getElementById('activityDrawerBackdrop');
+      if (!drawer) return;
+
+      const isOpen = !drawer.classList.contains('translate-x-full');
+      if (isOpen) {
+        closeActivityDrawer();
+      } else {
+        openActivityDrawer();
+      }
+    }
+
+    function openActivityDrawer() {
+      const drawer = document.getElementById('activityDrawer');
+      const backdrop = document.getElementById('activityDrawerBackdrop');
+      if (!drawer) return;
+
+      renderActivityDrawer();
+      backdrop.classList.remove('hidden');
+      drawer.classList.remove('translate-x-full');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeActivityDrawer() {
+      const drawer = document.getElementById('activityDrawer');
+      const backdrop = document.getElementById('activityDrawerBackdrop');
+      if (!drawer) return;
+
+      drawer.classList.add('translate-x-full');
+      setTimeout(() => {
+        backdrop.classList.add('hidden');
+      }, 300);
+    }
+
+    function setActivityFilter(filter) {
+      currentActivityFilter = filter;
+      const btns = {
+        all: document.getElementById('btnActFilterAll'),
+        upload: document.getElementById('btnActFilterUpload'),
+        trash: document.getElementById('btnActFilterTrash'),
+        undo: document.getElementById('btnActFilterUndo')
+      };
+
+      for (const k in btns) {
+        if (!btns[k]) continue;
+        if (k === filter) {
+          btns[k].className = 'px-2.5 py-1 rounded-xl bg-orange-500/20 text-orange-400 font-bold border border-orange-500/30';
+        } else {
+          btns[k].className = 'px-2.5 py-1 rounded-xl text-slate-400 hover:text-white font-medium';
+        }
+      }
+      renderActivityDrawer();
+    }
+
+    function refreshActivitiesList() {
+      renderActivityDrawer();
+      showToast('🔄 รีเฟรชประวัติกิจกรรมเรียบร้อยแล้ว');
+    }
+
+    function renderActivityDrawer() {
+      const container = document.getElementById('activityDrawerList');
+      if (!container) return;
+
+      const repo = getRepo();
+      let activities = repo.getActivities();
+
+      if (currentActivityFilter !== 'all') {
+        activities = activities.filter(a => a.action === currentActivityFilter);
+      }
+
+      if (activities.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-500 text-xs space-y-2">
+            <i data-lucide="clock" class="w-8 h-8 mx-auto text-slate-600"></i>
+            <p>ยังไม่มีบันทึกกิจกรรม${currentActivityFilter !== 'all' ? 'ในหมวดนี้' : ''}</p>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      const actionIcons = {
+        upload: { icon: 'upload-cloud', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+        trash: { icon: 'trash-2', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
+        undo: { icon: 'undo-2', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+        share: { icon: 'share-2', color: 'text-sky-400 bg-sky-500/10 border-sky-500/20' },
+        lock: { icon: 'lock', color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20' }
+      };
+
+      container.innerHTML = activities.map(act => {
+        const style = actionIcons[act.action] || { icon: 'activity', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20' };
+        const timeAgo = formatTimeAgo(act.createdAt);
+        const userAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(act.userEmail || 'user')}`;
+
+        return `
+          <div class="pt-3 pb-3 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-xl border flex items-center justify-center flex-shrink-0 ${style.color}">
+              <i data-lucide="${style.icon}" class="w-4 h-4"></i>
+            </div>
+            <div class="space-y-1 flex-grow overflow-hidden">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-bold text-white truncate">${escapeHtml(act.title)}</span>
+                <span class="text-[10px] text-slate-500 font-mono flex-shrink-0">${timeAgo}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-snug break-words">${escapeHtml(act.detail)}</p>
+              <div class="flex items-center gap-1.5 pt-1">
+                <img src="${userAvatar}" class="w-4 h-4 rounded-full border border-slate-700 bg-slate-800">
+                <span class="text-[10px] text-slate-400 font-medium">${escapeHtml(act.userName || act.userEmail)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function formatTimeAgo(isoString) {
+      if (!isoString) return '';
+      const diffSec = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000);
+      if (diffSec < 60) return 'เมื่อสักครู่';
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin} นาทีก่อน`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${diffHr} ชม.ก่อน`;
+      const diffDays = Math.floor(diffHr / 24);
+      return `${diffDays} วันก่อน`;
     }
 
     function showToast(msg, type = 'success') {
