@@ -371,6 +371,200 @@
       }
     }
 
+    /**
+     * Report, Suspension, and Appeal Core Engine
+     */
+    getReportsStorageKey() {
+      return 'COMED_SHORTLINK_REPORTS_V1';
+    }
+
+    getAppealsStorageKey() {
+      return 'COMED_SHORTLINK_APPEALS_V1';
+    }
+
+    getAllReports() {
+      try {
+        const raw = localStorage.getItem(this.getReportsStorageKey());
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    async submitReport(code, reportData = {}) {
+      const link = this.getByCode(code);
+      const reports = this.getAllReports();
+      const newReport = {
+        id: 'rep_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        code: code,
+        linkId: link ? link.id : null,
+        title: link ? link.title : 'ลิงก์ /s/' + code,
+        targetUrl: link ? link.targetUrl : '',
+        topic: reportData.topic || 'เนื้อหาไม่ปลอดภัย / หลอกลวง (Phishing/Scam)',
+        details: reportData.details || '',
+        reporterEmail: reportData.reporterEmail || 'guest',
+        reporterContact: reportData.reporterContact || '',
+        status: 'pending', // pending, reviewed, actioned, dismissed
+        createdAt: new Date().toISOString()
+      };
+      reports.unshift(newReport);
+      localStorage.setItem(this.getReportsStorageKey(), JSON.stringify(reports));
+
+      // Attempt sync to Supabase table 'shortlink_reports' if available
+      try {
+        const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (sb) {
+          await sb.from('shortlink_reports').insert({
+            id: newReport.id,
+            code: newReport.code,
+            topic: newReport.topic,
+            details: newReport.details,
+            reporter_contact: newReport.reporterContact,
+            status: newReport.status,
+            created_at: newReport.createdAt
+          });
+        }
+      } catch (e) {
+        console.warn("[ShortlinkRepo] Supabase report insert fallback:", e);
+      }
+      return newReport;
+    }
+
+    async updateReportStatus(reportId, status, resolution = '') {
+      const reports = this.getAllReports();
+      const idx = reports.findIndex(r => r.id === reportId);
+      if (idx !== -1) {
+        reports[idx].status = status;
+        reports[idx].resolution = resolution;
+        reports[idx].resolvedAt = new Date().toISOString();
+        localStorage.setItem(this.getReportsStorageKey(), JSON.stringify(reports));
+      }
+      return true;
+    }
+
+    getAllAppeals() {
+      try {
+        const raw = localStorage.getItem(this.getAppealsStorageKey());
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    async submitAppeal(data = {}) {
+      const appeals = this.getAllAppeals();
+      const newAppeal = {
+        id: 'apl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        code: data.code || '',
+        targetUrl: data.targetUrl || '',
+        userEmail: data.userEmail || '',
+        applicantName: data.applicantName || 'ผู้ขอปลดระงับ',
+        applicantContact: data.applicantContact || '',
+        reason: data.reason || '',
+        status: 'pending', // pending, approved, rejected
+        createdAt: new Date().toISOString()
+      };
+      appeals.unshift(newAppeal);
+      localStorage.setItem(this.getAppealsStorageKey(), JSON.stringify(appeals));
+
+      // Try Supabase if table exists
+      try {
+        const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (sb) {
+          await sb.from('shortlink_appeals').insert({
+            id: newAppeal.id,
+            code: newAppeal.code,
+            user_email: newAppeal.userEmail,
+            applicant_name: newAppeal.applicantName,
+            applicant_contact: newAppeal.applicantContact,
+            reason: newAppeal.reason,
+            status: newAppeal.status,
+            created_at: newAppeal.createdAt
+          });
+        }
+      } catch (e) {
+        console.warn("[ShortlinkRepo] Supabase appeal insert fallback:", e);
+      }
+      return newAppeal;
+    }
+
+    async updateAppealStatus(appealId, status, note = '') {
+      const appeals = this.getAllAppeals();
+      const idx = appeals.findIndex(a => a.id === appealId);
+      if (idx !== -1) {
+        appeals[idx].status = status;
+        appeals[idx].adminNote = note;
+        appeals[idx].reviewedAt = new Date().toISOString();
+        localStorage.setItem(this.getAppealsStorageKey(), JSON.stringify(appeals));
+
+        // If approved, lift suspension on corresponding link
+        if (status === 'approved' && appeals[idx].code) {
+          const link = this.getByCode(appeals[idx].code);
+          if (link) {
+            await this.updateLink(link.id, {
+              isSuspended: false,
+              suspendReason: null,
+              suspendedUntil: null
+            });
+          }
+        }
+      }
+      return true;
+    }
+
+    // Check if link or domain is suspended
+    checkSuspension(link) {
+      if (!link) return { suspended: false };
+
+      if (link.isSuspended) {
+        // Check if temporary ban has expired
+        if (link.suspendedUntil) {
+          const expiry = new Date(link.suspendedUntil);
+          if (new Date() > expiry) {
+            // Auto unban
+            link.isSuspended = false;
+            this.saveLocalLinks(this.links);
+            return { suspended: false };
+          }
+        }
+        return {
+          suspended: true,
+          reason: link.suspendReason || 'ลิงก์นี้ถูกระงับการใช้งานเนื่องจากละเมิดนโยบายความปลอดภัย',
+          until: link.suspendedUntil || null,
+          scope: link.suspendScope || 'link',
+          code: link.code,
+          createdBy: link.createdBy
+        };
+      }
+      return { suspended: false };
+    }
+
+    // Claim guest links when a user logs in
+    claimGuestLinks(userEmail, userName = '') {
+      if (!userEmail) return 0;
+      let count = 0;
+      try {
+        const guestIdsRaw = localStorage.getItem('COMED_GUEST_SHORTLINK_IDS');
+        let guestIds = guestIdsRaw ? JSON.parse(guestIdsRaw) : [];
+        if (Array.isArray(guestIds) && guestIds.length > 0) {
+          this.links.forEach(l => {
+            if (guestIds.includes(l.id) && (!l.createdBy || l.createdBy === 'ผู้ดูแลระบบ' || l.createdBy === 'guest' || l.createdBy.includes('ทั่วไป'))) {
+              l.createdBy = userEmail;
+              l.creatorName = userName || userEmail;
+              count++;
+            }
+          });
+          if (count > 0) {
+            this.saveLocalLinks(this.links);
+            localStorage.removeItem('COMED_GUEST_SHORTLINK_IDS');
+          }
+        }
+      } catch (e) {
+        console.warn("[ShortlinkRepo] Error claiming guest links:", e);
+      }
+      return count;
+    }
+
     async syncToSupabase(link) {
       try {
         const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
