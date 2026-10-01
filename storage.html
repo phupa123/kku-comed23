@@ -2113,7 +2113,19 @@
         currentFolderId = folderParam;
       }
 
-      if (!shareCode) return;
+      if (!shareCode) {
+        try {
+          const cachedShared = sessionStorage.getItem('COMED_ACTIVE_SHARED_FOLDER');
+          if (cachedShared) {
+            const parsed = JSON.parse(cachedShared);
+            if (parsed && parsed.targetType === 'folder' && (!folderParam || folderParam === parsed.targetId)) {
+              currentSharedFolderContext = parsed;
+              if (!folderParam) currentFolderId = parsed.targetId;
+            }
+          }
+        } catch (e) {}
+        return;
+      }
 
       const repo = getRepo();
       let share = repo.getShareByCode(shareCode);
@@ -2157,6 +2169,9 @@
       // If allowed without password:
       if (share.targetType === 'folder') {
         currentSharedFolderContext = share;
+        try {
+          sessionStorage.setItem('COMED_ACTIVE_SHARED_FOLDER', JSON.stringify(share));
+        } catch (e) {}
         navigateToFolder(share.targetId);
         showToast(`📁 เข้าสู่โฟลเดอร์ที่แชร์เรียบร้อยแล้ว: ${share.folderMeta?.name || share.title || ''}`);
       } else {
@@ -2409,9 +2424,17 @@
         } else {
           url.searchParams.delete('folder');
         }
-        // Clean up one-time share param when navigating inside drive
-        url.searchParams.delete('share');
-        url.searchParams.delete('s');
+        // Retain share param if still viewing shared folder
+        if (currentSharedFolderContext && folderId === currentSharedFolderContext.targetId && currentSharedFolderContext.shareCode) {
+          url.searchParams.set('share', currentSharedFolderContext.shareCode);
+        } else {
+          url.searchParams.delete('share');
+          url.searchParams.delete('s');
+          if (!folderId) {
+            currentSharedFolderContext = null;
+            try { sessionStorage.removeItem('COMED_ACTIVE_SHARED_FOLDER'); } catch (e) {}
+          }
+        }
         window.history.pushState({ folderId: folderId }, '', url.toString());
       } catch (e) {}
     }
@@ -2676,17 +2699,38 @@
     }
 
     function getUserFilesList() {
+      const repo = getRepo();
+
       // 1. If currently in a shared folder from cloud, use its folderFiles
       if (currentSharedFolderContext && currentFolderId === currentSharedFolderContext.targetId) {
-        const repo = getRepo();
-        const sharedFiles = currentSharedFolderContext.folderFiles || [];
+        let sharedFiles = Array.isArray(currentSharedFolderContext.folderFiles) ? [...currentSharedFolderContext.folderFiles] : [];
+        
+        // Also merge any local MultiCloud files that are tagged with this folder
+        if (window.MultiCloudUploader) {
+          const allLocal = window.MultiCloudUploader.getAllFiles() || [];
+          allLocal.forEach(lf => {
+            const meta = repo.getFileMeta(lf.id);
+            if (meta && meta.folderId === currentFolderId && !sharedFiles.some(sf => sf.id === lf.id)) {
+              sharedFiles.push({
+                id: lf.id,
+                name: lf.originalName || lf.name,
+                url: lf.url,
+                size: lf.size,
+                type: lf.type,
+                provider: lf.provider,
+                uploaderEmail: lf.uploaderEmail || lf.ownerEmail || ''
+              });
+            }
+          });
+        }
+
         return sharedFiles.map(sf => {
           const meta = repo.getFileMeta(sf.id);
           return {
             id: sf.id,
-            originalName: sf.name || sf.originalName,
-            name: sf.name || sf.originalName,
-            url: sf.url,
+            originalName: sf.name || sf.originalName || 'ไฟล์',
+            name: sf.name || sf.originalName || 'ไฟล์',
+            url: sf.url || '',
             size: sf.size || 0,
             type: sf.type || '',
             provider: sf.provider || 'cloud',

@@ -237,21 +237,22 @@
               icon: folderObj.icon || 'folder'
             };
           }
-          if (folderFiles.length === 0) {
-            const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
-            folderFiles = allFiles.filter(item => {
-              const meta = this.getFileMeta(item.id);
-              return meta && meta.folderId === shareRecord.targetId;
-            }).map(item => ({
-              id: item.id,
-              name: item.originalName || item.name || 'ไฟล์',
-              url: item.url || '',
-              size: item.size || 0,
-              type: item.type || '',
-              provider: item.provider || 'cloud',
-              uploadedAt: item.uploadedAt || ''
-            }));
-          }
+          // Gather latest files belonging to this folder from local fileCatalog
+          const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+          folderFiles = allFiles.filter(item => {
+            const meta = this.getFileMeta(item.id);
+            return meta && meta.folderId === shareRecord.targetId;
+          }).map(item => ({
+            id: item.id,
+            name: item.originalName || item.name || 'ไฟล์',
+            url: item.url || '',
+            size: item.size || 0,
+            type: item.type || '',
+            provider: item.provider || 'cloud',
+            uploadedAt: item.uploadedAt || ''
+          }));
+          shareRecord.folderFiles = folderFiles;
+          shareRecord.folderMeta = folderMeta;
         }
 
         // Attach comments related to this target
@@ -567,23 +568,43 @@
     }
 
     async moveFile(fileId, targetFolderId) {
+      const prevFolderId = this.filesMeta[fileId]?.folderId || null;
       if (!this.filesMeta[fileId]) {
         this.filesMeta[fileId] = { folderId: null, isLocked: false, passwordHash: null, tags: [] };
       }
       this.filesMeta[fileId].folderId = targetFolderId || null;
       this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+
+      // Auto re-sync cloud shares if targetFolder or prevFolder is shared
+      this.resyncFolderShares([targetFolderId, prevFolderId]);
       return this.filesMeta[fileId];
     }
 
     async batchMoveFiles(fileIds, targetFolderId) {
+      const prevFolderIds = new Set();
       fileIds.forEach(id => {
+        if (this.filesMeta[id]?.folderId) prevFolderIds.add(this.filesMeta[id].folderId);
         if (!this.filesMeta[id]) {
           this.filesMeta[id] = { folderId: null, isLocked: false, passwordHash: null, tags: [] };
         }
         this.filesMeta[id].folderId = targetFolderId || null;
       });
       this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+
+      prevFolderIds.add(targetFolderId);
+      this.resyncFolderShares(Array.from(prevFolderIds));
       return true;
+    }
+
+    resyncFolderShares(folderIds = []) {
+      try {
+        folderIds.filter(Boolean).forEach(fldId => {
+          const share = this.getShareByTarget('folder', fldId);
+          if (share) {
+            this.syncShareToCloud(share).catch(e => console.warn('[StorageDriveRepo] Folder share resync suppressed:', e));
+          }
+        });
+      } catch (e) {}
     }
 
     async setFileLock(fileId, arg1, arg2) {
