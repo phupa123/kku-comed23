@@ -998,6 +998,32 @@
       }
       appBtn.href = appScheme;
 
+      // Smart Document & File Preview Resolution (PDF, Word, Excel, PPT, etc.)
+      const rawTargetUrl = link.targetUrl || '';
+      const urlWithoutParams = rawTargetUrl.split('?')[0].split('#')[0].toLowerCase();
+      const targetExt = urlWithoutParams.split('.').pop();
+      const isTargetPdf = targetExt === 'pdf';
+      const isTargetDoc = ['doc', 'docx'].includes(targetExt);
+      const isTargetXls = ['xls', 'xlsx', 'csv'].includes(targetExt);
+      const isTargetPpt = ['ppt', 'pptx'].includes(targetExt);
+      const isTargetOffice = isTargetDoc || isTargetXls || isTargetPpt;
+
+      let effectivePreviewSrc = rawTargetUrl;
+      let previewTypeBadge = 'Live Web Preview';
+      let previewIcon = 'scan-eye';
+
+      if (isTargetPdf) {
+        effectivePreviewSrc = `${rawTargetUrl}#toolbar=1`;
+        previewTypeBadge = 'PDF Document Preview';
+        previewIcon = 'file-text';
+      } else if (isTargetOffice) {
+        effectivePreviewSrc = rawTargetUrl.startsWith('http')
+          ? `https://docs.google.com/viewer?url=${encodeURIComponent(rawTargetUrl)}&embedded=true`
+          : rawTargetUrl;
+        previewTypeBadge = isTargetXls ? 'Excel Spreadsheet Preview' : (isTargetDoc ? 'Word Document Preview' : 'PowerPoint Presentation Preview');
+        previewIcon = isTargetXls ? 'table' : (isTargetDoc ? 'file-text' : 'presentation');
+      }
+
       // Dynamic Preview Frame / Card (Large Viewport per User Request)
       let previewWrap = document.getElementById('redirectPreviewFrameWrap');
       if (!previewWrap) {
@@ -1005,13 +1031,13 @@
           <div id="redirectPreviewFrameWrap" class="w-full max-w-2xl rounded-3xl overflow-hidden border border-slate-700/80 bg-slate-900/90 mb-5 shadow-2xl transition">
             <div class="px-4 py-2 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400">
               <span class="flex items-center gap-2 font-bold text-slate-200">
-                <i data-lucide="scan-eye" class="w-4 h-4 text-orange-400"></i>
-                <span>ตัวอย่างเว็บไซต์ปลายทางแบบเต็มหน้า (Live Web Preview)</span>
+                <i id="redirectPreviewTypeIcon" data-lucide="${previewIcon}" class="w-4 h-4 text-orange-400"></i>
+                <span id="redirectPreviewTypeBadge">ตัวอย่างไฟล์: ${previewTypeBadge}</span>
               </span>
               <span class="text-[11px] text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">COMED KKU 69</span>
             </div>
-            <div class="relative w-full h-80 sm:h-96 bg-slate-950 flex items-center justify-center overflow-hidden">
-              <iframe id="redirectPreviewIframe" src="${link.targetUrl}" sandbox="allow-scripts allow-same-origin" class="w-full h-full border-0" loading="eager"></iframe>
+            <div class="relative w-full h-80 sm:h-96 bg-white flex items-center justify-center overflow-hidden">
+              <iframe id="redirectPreviewIframe" src="${effectivePreviewSrc}" class="w-full h-full border-0 bg-white" loading="eager"></iframe>
             </div>
           </div>
         `;
@@ -1021,7 +1047,9 @@
         }
       } else {
         const iframe = document.getElementById('redirectPreviewIframe');
-        if (iframe) iframe.src = link.targetUrl;
+        if (iframe) iframe.src = effectivePreviewSrc;
+        const typeBadge = document.getElementById('redirectPreviewTypeBadge');
+        if (typeBadge) typeBadge.textContent = `ตัวอย่างไฟล์: ${previewTypeBadge}`;
       }
 
       if (typeof lucide !== 'undefined') lucide.createIcons();

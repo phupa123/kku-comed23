@@ -4448,6 +4448,10 @@
         const isVid = fileType.startsWith('video/') || ['mp4', 'webm', 'mov'].includes(ext);
         const isAud = fileType.startsWith('audio/') || ['mp3', 'wav', 'ogg'].includes(ext);
         const isPdf = fileType === 'application/pdf' || ext === 'pdf';
+        const isDoc = ['doc', 'docx'].includes(ext) || fileType.includes('word') || fileType.includes('officedocument.wordprocessingml');
+        const isXls = ['xls', 'xlsx', 'csv'].includes(ext) || fileType.includes('excel') || fileType.includes('spreadsheetml');
+        const isPpt = ['ppt', 'pptx'].includes(ext) || fileType.includes('presentationml');
+        const isOfficeDoc = isDoc || isXls || isPpt;
 
         if (isImg && fileUrl) {
           canvas.innerHTML = `<img src="${fileUrl}" alt="${escapeHtml(fileName)}" class="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl transition transform hover:scale-[1.02]">`;
@@ -4464,7 +4468,27 @@
             </div>
           `;
         } else if (isPdf && fileUrl) {
-          canvas.innerHTML = `<iframe src="${fileUrl}#toolbar=1" class="w-full h-full rounded-2xl border border-slate-800 shadow-xl bg-white"></iframe>`;
+          canvas.innerHTML = `<iframe src="${fileUrl}#toolbar=1" class="w-full h-full min-h-[75vh] rounded-2xl border border-slate-800 shadow-xl bg-white"></iframe>`;
+        } else if (isOfficeDoc && fileUrl) {
+          // ใช้ Google Docs & Office Viewer สำหรับ Word, Excel, PPT
+          const officeViewerUrl = fileUrl.startsWith('http') 
+            ? `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true` 
+            : fileUrl;
+          canvas.innerHTML = `
+            <div class="w-full h-full min-h-[75vh] flex flex-col rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl">
+              <div class="px-4 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
+                <span class="flex items-center gap-2 font-bold">
+                  <i data-lucide="${isXls ? 'table' : (isDoc ? 'file-text' : 'presentation')}" class="w-4 h-4 text-emerald-400"></i>
+                  <span>พรีวิวเอกสาร (${(ext || 'DOC').toUpperCase()})</span>
+                </span>
+                <a href="${fileUrl}" target="_blank" download class="text-[11px] text-orange-400 hover:underline flex items-center gap-1 font-bold">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>ดาวน์โหลดไฟล์</span>
+                </a>
+              </div>
+              <iframe src="${officeViewerUrl}" class="w-full flex-1 min-h-[70vh] border-none bg-white" loading="lazy"></iframe>
+            </div>
+          `;
         } else {
           canvas.innerHTML = `
             <div class="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-4 max-w-sm w-full shadow-2xl">
@@ -4652,6 +4676,10 @@
       const isVid = type.startsWith('video/') || ['mp4', 'mov', 'webm'].includes(ext);
       const isAud = type.startsWith('audio/') || ['mp3', 'wav', 'ogg'].includes(ext);
       const isPdf = type === 'application/pdf' || ext === 'pdf';
+      const isDoc = ['doc', 'docx'].includes(ext) || type.includes('word') || type.includes('officedocument.wordprocessingml');
+      const isXls = ['xls', 'xlsx', 'csv'].includes(ext) || type.includes('excel') || type.includes('spreadsheetml');
+      const isPpt = ['ppt', 'pptx'].includes(ext) || type.includes('presentationml');
+      const isOfficeDoc = isDoc || isXls || isPpt;
 
       if (typeIcon) {
         let iconName = 'file';
@@ -4659,6 +4687,9 @@
         else if (isVid) iconName = 'video';
         else if (isAud) iconName = 'music';
         else if (isPdf) iconName = 'file-text';
+        else if (isXls) iconName = 'table';
+        else if (isDoc) iconName = 'file-text';
+        else if (isPpt) iconName = 'presentation';
         typeIcon.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i>`;
       }
 
@@ -4710,6 +4741,27 @@
         canvas.innerHTML = `
           <div class="w-full max-w-5xl h-[82vh] rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-white">
             <iframe src="${file.url}#toolbar=1" class="w-full h-full border-none"></iframe>
+          </div>
+        `;
+      } else if (isOfficeDoc) {
+        const officeViewerUrl = file.url && file.url.startsWith('http') 
+          ? `https://docs.google.com/viewer?url=${encodeURIComponent(file.url)}&embedded=true` 
+          : file.url;
+        canvas.innerHTML = `
+          <div class="w-full max-w-5xl h-[82vh] flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950">
+            <div class="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
+              <span class="flex items-center gap-2 font-bold">
+                <i data-lucide="${isXls ? 'table' : (isDoc ? 'file-text' : 'presentation')}" class="w-4 h-4 text-emerald-400"></i>
+                <span>พรีวิวเอกสาร (${(ext || 'DOC').toUpperCase()})</span>
+              </span>
+              <div class="flex items-center gap-2">
+                <button onclick="handleGalleryDownloadOriginal()" class="text-xs text-orange-400 hover:text-orange-300 font-bold flex items-center gap-1 cursor-pointer">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>ดาวน์โหลดไฟล์</span>
+                </button>
+              </div>
+            </div>
+            <iframe src="${officeViewerUrl}" class="w-full flex-1 border-none bg-white" loading="lazy"></iframe>
           </div>
         `;
       } else {
