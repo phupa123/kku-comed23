@@ -442,7 +442,7 @@
         uKey = options.userEmail || options.userKey || 'guest';
       }
 
-      const { name = 'โฟลเดอร์ใหม่', color = 'amber', icon = 'folder', parentId = null, password = '' } = options;
+      const { name = 'โฟลเดอร์ใหม่', color = 'amber', icon = 'folder', bgImage = '', bgGradient = '', parentId = null, password = '' } = options;
       uKey = (uKey || 'guest').toLowerCase().trim();
       const passHash = password ? await this.hashPassword(password) : null;
       
@@ -451,10 +451,14 @@
         name: (name || 'โฟลเดอร์ใหม่').trim(),
         userKey: uKey,
         color: color,
-        icon: icon,
+        icon: icon || 'folder',
+        bgImage: bgImage || '',
+        bgGradient: bgGradient || '',
         parentId: parentId || null,
         passwordHash: passHash,
         isLocked: !!passHash,
+        isTrash: false,
+        trashedAt: null,
         createdAt: new Date().toISOString()
       };
 
@@ -467,11 +471,14 @@
       const fld = this.folders.find(f => f.id === folderId);
       if (!fld) throw new Error('ไม่พบโฟลเดอร์');
 
-      const { name, color, icon, password, removePassword, isLocked } = options;
+      const { name, color, icon, bgImage, bgGradient, parentId, password, removePassword, isLocked } = options;
 
       if (name !== undefined && name !== null) fld.name = String(name).trim();
       if (color !== undefined) fld.color = color;
       if (icon !== undefined) fld.icon = icon;
+      if (bgImage !== undefined) fld.bgImage = bgImage;
+      if (bgGradient !== undefined) fld.bgGradient = bgGradient;
+      if (parentId !== undefined) fld.parentId = parentId || null;
 
       if (removePassword || isLocked === false) {
         fld.passwordHash = null;
@@ -481,22 +488,99 @@
         fld.isLocked = true;
       }
 
+      fld.updatedAt = new Date().toISOString();
       this.saveData(STORAGE_FOLDERS_KEY, this.folders);
       return fld;
     }
 
-    deleteFolder(folderId) {
-      // Find all files in this folder and unassign them (move to root)
+    async moveFolder(folderId, targetParentId, userEmail = null) {
+      const fld = this.folders.find(f => f.id === folderId);
+      if (!fld) throw new Error('ไม่พบโฟลเดอร์');
+      if (folderId === targetParentId) throw new Error('ไม่สามารถย้ายโฟลเดอร์เข้าไปในตัวเองได้');
+      
+      fld.parentId = targetParentId || null;
+      fld.updatedAt = new Date().toISOString();
+      this.saveData(STORAGE_FOLDERS_KEY, this.folders);
+
+      const email = userEmail || fld.userKey || (window.currentUser && window.currentUser.email);
+      if (email) this.syncDriveDataToCloud(email).catch(() => {});
+      return fld;
+    }
+
+    async moveFolderToTrash(folderId, userEmail = null) {
+      const fld = this.folders.find(f => f.id === folderId);
+      if (!fld) return false;
+      const trashedTime = new Date().toISOString();
+      fld.isTrash = true;
+      fld.trashedAt = trashedTime;
+
+      // ทำเครื่องหมายไฟล์ทุกไฟล์ในโฟลเดอร์นี้ว่าอยู่ในถังขยะ โดยยังคงรักษา folderId ไว้!
       for (const fId in this.filesMeta) {
         if (this.filesMeta[fId].folderId === folderId) {
-          this.filesMeta[fId].folderId = null;
+          this.filesMeta[fId].isTrash = true;
+          this.filesMeta[fId].trashedAt = trashedTime;
+          this.filesMeta[fId].trashedWithFolder = folderId;
+        }
+      }
+
+      this.saveData(STORAGE_FOLDERS_KEY, this.folders);
+      this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+
+      const email = userEmail || fld.userKey || (window.currentUser && window.currentUser.email);
+      if (email) this.syncDriveDataToCloud(email).catch(() => {});
+      return true;
+    }
+
+    async restoreFolderFromTrash(folderId, userEmail = null) {
+      const fld = this.folders.find(f => f.id === folderId);
+      if (!fld) return false;
+      fld.isTrash = false;
+      fld.trashedAt = null;
+
+      // กู้คืนไฟล์ทั้งหมดที่ถูกย้ายไปพร้อมกับโฟลเดอร์นี้
+      for (const fId in this.filesMeta) {
+        if (this.filesMeta[fId].folderId === folderId || this.filesMeta[fId].trashedWithFolder === folderId) {
+          this.filesMeta[fId].isTrash = false;
+          this.filesMeta[fId].trashedAt = null;
+          delete this.filesMeta[fId].trashedWithFolder;
+        }
+      }
+
+      this.saveData(STORAGE_FOLDERS_KEY, this.folders);
+      this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+
+      const email = userEmail || fld.userKey || (window.currentUser && window.currentUser.email);
+      if (email) this.syncDriveDataToCloud(email).catch(() => {});
+      return true;
+    }
+
+    async permanentDeleteFolder(folderId, userEmail = null) {
+      const fld = this.folders.find(f => f.id === folderId);
+      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      
+      // ลบไฟล์ที่อยู่ในโฟลเดอร์นี้อย่างถาวร
+      for (const fId in this.filesMeta) {
+        if (this.filesMeta[fId].folderId === folderId || this.filesMeta[fId].trashedWithFolder === folderId) {
+          const fileObj = allFiles.find(x => x.id === fId);
+          if (fileObj && window.MultiCloudUploader) {
+            try { await window.MultiCloudUploader.deleteFile(fileObj); } catch (_) {}
+          }
+          delete this.filesMeta[fId];
         }
       }
       this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
 
       this.folders = this.folders.filter(f => f.id !== folderId);
       this.saveData(STORAGE_FOLDERS_KEY, this.folders);
+
+      const email = userEmail || (fld && fld.userKey) || (window.currentUser && window.currentUser.email);
+      if (email) this.syncDriveDataToCloud(email).catch(() => {});
       return true;
+    }
+
+    deleteFolder(folderId) {
+      // Legacy fallback: redirects to moveFolderToTrash
+      return this.moveFolderToTrash(folderId);
     }
 
     async checkFolderPassword(folderId, inputPassword) {
@@ -578,7 +662,7 @@
       return true;
     }
 
-    async moveFile(fileId, targetFolderId) {
+    async moveFile(fileId, targetFolderId, userEmail = null) {
       const prevFolderId = this.filesMeta[fileId]?.folderId || null;
       if (!this.filesMeta[fileId]) {
         this.filesMeta[fileId] = { folderId: null, isLocked: false, passwordHash: null, tags: [] };
@@ -588,10 +672,13 @@
 
       // Auto re-sync cloud shares if targetFolder or prevFolder is shared
       this.resyncFolderShares([targetFolderId, prevFolderId]);
+
+      const email = userEmail || (window.currentUser && window.currentUser.email);
+      if (email) this.syncDriveDataToCloud(email).catch(() => {});
       return this.filesMeta[fileId];
     }
 
-    async batchMoveFiles(fileIds, targetFolderId) {
+    async batchMoveFiles(fileIds, targetFolderId, userEmail = null) {
       const prevFolderIds = new Set();
       fileIds.forEach(id => {
         if (this.filesMeta[id]?.folderId) prevFolderIds.add(this.filesMeta[id].folderId);
@@ -604,6 +691,9 @@
 
       prevFolderIds.add(targetFolderId);
       this.resyncFolderShares(Array.from(prevFolderIds));
+
+      const email = userEmail || (window.currentUser && window.currentUser.email);
+      if (email) this.syncDriveDataToCloud(email).catch(() => {});
       return true;
     }
 
@@ -1088,6 +1178,7 @@
           usedBytes: totalUsedBytes,
           syncedAt: new Date().toISOString()
         };
+        this._lastLoadedSyncedAt = driveData.syncedAt;
 
         const { error } = await sb.from('user_profiles')
           .update({ drive_data: driveData, updated_at: new Date().toISOString() })
@@ -1130,6 +1221,14 @@
         if (error || !data || !data.drive_data) return false;
 
         const driveData = data.drive_data;
+
+        // ตรวจสอบว่าข้อมูลตรงกับที่เราเพิ่งซิงก์หรือโหลดไปแล้วหรือไม่
+        // ถ้าเป็นข้อมูลชุดเดิม ให้คืน false ทันทีเพื่อไม่ให้หน้าเว็บกระตุกหรือขึ้น Animation โหลดซ้ำ
+        if (this._lastLoadedSyncedAt && driveData.syncedAt && this._lastLoadedSyncedAt === driveData.syncedAt) {
+          return false;
+        }
+        this._lastLoadedSyncedAt = driveData.syncedAt;
+
         let anyChanged = false;
 
         // ---- Sync Folders ----

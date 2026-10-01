@@ -1225,7 +1225,7 @@
 
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1">สีของโฟลเดอร์</label>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <label class="cursor-pointer">
               <input type="radio" name="folderColor" value="amber" checked class="peer hidden">
               <span class="w-8 h-8 rounded-xl bg-amber-500/20 border-2 border-transparent peer-checked:border-amber-400 flex items-center justify-center text-amber-400">
@@ -1257,6 +1257,84 @@
               </span>
             </label>
           </div>
+        </div>
+
+        <!-- Folder Icon Picker -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+            <span>ไอคอนโฟลเดอร์ (Icon)</span>
+            <span class="text-[10px] text-slate-400">เลือกไอคอนหรือใส่ลิงก์รูปภาพ</span>
+          </label>
+          <div class="grid grid-cols-6 gap-1.5 mb-2" id="folderIconPresetGrid">
+            <button type="button" onclick="selectFolderIconPreset('folder')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border-2 border-orange-500 text-orange-400 flex items-center justify-center hover:bg-slate-800 transition cursor-pointer" data-icon="folder" title="แฟ้ม">
+              <i data-lucide="folder" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('graduation-cap')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="graduation-cap" title="การเรียน/ศึกษา">
+              <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('briefcase')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="briefcase" title="งาน/อาชีพ">
+              <i data-lucide="briefcase" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('camera')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="camera" title="ภาพถ่าย">
+              <i data-lucide="camera" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('film')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="film" title="วิดีโอ">
+              <i data-lucide="film" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('file-text')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="file-text" title="เอกสาร">
+              <i data-lucide="file-text" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('palette')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="palette" title="งานออกแบบ">
+              <i data-lucide="palette" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('music')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="music" title="เสียงเพลง">
+              <i data-lucide="music" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('star')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="star" title="สำคัญ/ดาว">
+              <i data-lucide="star" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('heart')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="heart" title="ชื่นชอบ">
+              <i data-lucide="heart" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('rocket')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="rocket" title="โปรเจกต์">
+              <i data-lucide="rocket" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('archive')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="archive" title="คลังเก็บข้อมูล">
+              <i data-lucide="archive" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <input type="hidden" id="folderSelectedIcon" value="folder">
+          <input type="text" id="folderCustomIconInput" oninput="handleFolderCustomIconInput(this.value)" placeholder="หรือวางลิงก์รูปภาพไอคอน (URL รูปภาพ / SVG / WebP)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+        </div>
+
+        <!-- Folder Background Cover / Theme -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+            <span>ภาพพื้นหลังหน้าปกโฟลเดอร์ (Background / Cover)</span>
+            <span class="text-[10px] text-slate-400">เลือกธีมหรือใส่ลิงก์รูปภาพ</span>
+          </label>
+          <div class="grid grid-cols-3 gap-1.5 mb-2" id="folderBgPresetGrid">
+            <button type="button" onclick="selectFolderBgPreset('')" class="folder-bg-choice p-2 rounded-xl bg-slate-950 border-2 border-orange-500 text-slate-300 text-[11px] font-bold text-center hover:bg-slate-900 transition cursor-pointer" data-bg="">
+              ✨ ปกติ (Glass)
+            </button>
+            <button type="button" onclick="selectFolderBgPreset('cosmic')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-indigo-950 to-purple-950 border border-indigo-500/40 text-indigo-300 text-[11px] font-bold text-center hover:border-indigo-400 transition cursor-pointer" data-bg="cosmic">
+              🌌 กาแล็กซี
+            </button>
+            <button type="button" onclick="selectFolderBgPreset('sunset')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-amber-950 to-rose-950 border border-amber-500/40 text-amber-300 text-[11px] font-bold text-center hover:border-amber-400 transition cursor-pointer" data-bg="sunset">
+              🌅 Sunset Glow
+            </button>
+            <button type="button" onclick="selectFolderBgPreset('emerald')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-emerald-950 to-teal-950 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold text-center hover:border-emerald-400 transition cursor-pointer" data-bg="emerald">
+              🌿 Aurora มรกต
+            </button>
+            <button type="button" onclick="selectFolderBgPreset('ocean')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-sky-950 to-blue-950 border border-sky-500/40 text-sky-300 text-[11px] font-bold text-center hover:border-sky-400 transition cursor-pointer" data-bg="ocean">
+              🌊 มหาสมุทร
+            </button>
+            <button type="button" onclick="selectFolderBgPreset('cyber')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-purple-950 to-pink-950 border border-purple-500/40 text-purple-300 text-[11px] font-bold text-center hover:border-purple-400 transition cursor-pointer" data-bg="cyber">
+              🔮 ไซเบอร์นีออน
+            </button>
+          </div>
+          <input type="hidden" id="folderSelectedBgGradient" value="">
+          <input type="text" id="folderCustomBgInput" placeholder="หรือวางลิงก์รูปภาพพื้นหลังโฟลเดอร์ (URL ภาพหน้าปก)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
         </div>
 
         <!-- Optional Folder Lock Password -->
@@ -1295,7 +1373,7 @@
           <i data-lucide="folder-symlink" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 class="text-base font-black text-white">ย้ายไฟล์ไปที่โฟลเดอร์</h3>
+          <h3 id="moveModalTitle" class="text-base font-black text-white">ย้ายไฟล์หรือโฟลเดอร์</h3>
           <p id="moveModalSubtext" class="text-xs text-slate-400">เลือกโฟลเดอร์ปลายทางที่ต้องการย้ายไป</p>
         </div>
       </div>
@@ -1305,11 +1383,11 @@
       </div>
 
       <div class="pt-3 flex items-center justify-end gap-2">
-        <button type="button" onclick="closeMoveModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition">
+        <button type="button" onclick="closeMoveModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition cursor-pointer">
           ยกเลิก
         </button>
-        <button type="button" onclick="confirmMoveFiles()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs font-black shadow-md transition">
-          ย้ายไฟล์ทันที
+        <button id="moveModalConfirmBtn" type="button" onclick="confirmMoveFiles()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs font-black shadow-md transition cursor-pointer">
+          ย้ายทันที
         </button>
       </div>
     </div>
@@ -2111,19 +2189,6 @@
         document.addEventListener('visibilitychange', syncOnActive);
         window.addEventListener('focus', syncOnActive);
       }
-
-      // 3. Periodic Background Sync (every 10s fallback for mobile background/throttling)
-      if (_drivePollTimer) clearInterval(_drivePollTimer);
-      _drivePollTimer = setInterval(async () => {
-        if (currentUser && currentUser.email && document.visibilityState === 'visible' && !_isSyncingRealtime) {
-          const repo = getRepo();
-          const changed = await repo.loadDriveDataFromCloud(currentUser.email);
-          if (changed) {
-            renderDrive();
-            updateQuotaDisplay();
-          }
-        }
-      }, 10000);
     }
 
     function stopDriveRealtime() {
@@ -2142,63 +2207,13 @@
 
 
     /**
-     * Run Intro Animation specifically on Page Reload/Refresh
-     * (Mimicking Blackboard Games style with cosmic cloud theme)
+     * Disable page intro reload overlay to prevent intrusive loading animations on refresh
      */
     function runPageIntroOnReload() {
       const introOverlay = document.getElementById('pageIntroOverlay');
-      if (!introOverlay) return;
-
-      // Check if navigation type is reload or regular first load
-      const navEntries = performance.getEntriesByType('navigation');
-      const isReload = (navEntries.length > 0 && navEntries[0].type === 'reload') || (performance.navigation && performance.navigation.type === 1);
-      
-      // Also show on first entrance in this session
-      const hasSeenIntro = sessionStorage.getItem('comed_storage_intro_seen');
-
-      if (!isReload && hasSeenIntro) {
-        // Skip intro if simply navigating internally and not a reload
+      if (introOverlay) {
         introOverlay.style.display = 'none';
-        return;
       }
-
-      sessionStorage.setItem('comed_storage_intro_seen', 'true');
-      introOverlay.style.display = 'flex';
-
-      const pBar = document.getElementById('introProgressBar');
-      const pPercent = document.getElementById('introPercentText');
-      const pStatus = document.getElementById('introStatusText');
-
-      let progress = 0;
-      const steps = [
-        { at: 20, status: 'MOUNTING CLOUD ENGINE...' },
-        { at: 55, status: 'SYNCING SUPABASE DATA...' },
-        { at: 85, status: 'OPTIMIZING WORKSPACE...' },
-        { at: 100, status: 'READY TO EXPLORE!' }
-      ];
-
-      const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 8) + 5;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-        }
-
-        if (pBar) pBar.style.width = progress + '%';
-        if (pPercent) pPercent.textContent = progress + '%';
-
-        const curStep = steps.find(s => progress <= s.at);
-        if (curStep && pStatus) pStatus.textContent = curStep.status;
-
-        if (progress === 100) {
-          setTimeout(() => {
-            introOverlay.classList.add('intro-hide');
-            setTimeout(() => {
-              introOverlay.style.display = 'none';
-            }, 800);
-          }, 350);
-        }
-      }, 50);
     }
 
     function initDragSelection() {
@@ -2796,8 +2811,8 @@
       const repo = getRepo();
       const allUserFolders = repo.getUserFolders(userEmail);
 
-      // Filter by current parent
-      let folders = allUserFolders.filter(f => (f.parentId || null) === currentFolderId);
+      // Filter by current parent and ensure not in trash
+      let folders = allUserFolders.filter(f => !f.isTrash && (f.parentId || null) === currentFolderId);
 
       // Search query filter
       if (driveSearchQuery) {
@@ -2820,36 +2835,64 @@
         return;
       }
 
+      const bgGradientStyles = {
+        cosmic: 'background: linear-gradient(135deg, rgba(30,27,75,0.92), rgba(59,7,100,0.88)); border-color: rgba(99,102,241,0.4);',
+        sunset: 'background: linear-gradient(135deg, rgba(69,26,3,0.92), rgba(76,5,25,0.88)); border-color: rgba(245,158,11,0.4);',
+        emerald: 'background: linear-gradient(135deg, rgba(2,44,34,0.92), rgba(19,78,74,0.88)); border-color: rgba(16,185,129,0.4);',
+        ocean: 'background: linear-gradient(135deg, rgba(8,47,73,0.92), rgba(23,37,84,0.88)); border-color: rgba(14,165,233,0.4);',
+        cyber: 'background: linear-gradient(135deg, rgba(59,7,100,0.92), rgba(80,7,36,0.88)); border-color: rgba(236,72,153,0.4);'
+      };
+
       container.innerHTML = folders.map(f => {
         const colorClasses = {
-          amber: 'text-amber-400 bg-gradient-to-br from-amber-500/20 to-orange-500/10 border-amber-500/30 shadow-amber-500/10',
-          sky: 'text-sky-400 bg-gradient-to-br from-sky-500/20 to-blue-500/10 border-sky-500/30 shadow-sky-500/10',
-          emerald: 'text-emerald-400 bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border-emerald-500/30 shadow-emerald-500/10',
-          purple: 'text-purple-400 bg-gradient-to-br from-purple-500/20 to-indigo-500/10 border-purple-500/30 shadow-purple-500/10',
-          rose: 'text-rose-400 bg-gradient-to-br from-rose-500/20 to-pink-500/10 border-rose-500/30 shadow-rose-500/10'
+          amber: 'text-amber-400 bg-amber-500/20 border-amber-500/30 shadow-amber-500/10',
+          sky: 'text-sky-400 bg-sky-500/20 border-sky-500/30 shadow-sky-500/10',
+          emerald: 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30 shadow-emerald-500/10',
+          purple: 'text-purple-400 bg-purple-500/20 border-purple-500/30 shadow-purple-500/10',
+          rose: 'text-rose-400 bg-rose-500/20 border-rose-500/30 shadow-rose-500/10'
         }[f.color || 'amber'] || 'text-amber-400 bg-amber-500/20 border-amber-500/30 shadow-amber-500/10';
 
         const shareInfo = repo.getShareByTarget('folder', f.id);
         const isShared = !!shareInfo;
 
+        // Custom background style
+        let customCardStyle = '';
+        if (f.bgImage) {
+          customCardStyle = `background: linear-gradient(to bottom, rgba(15,23,42,0.72), rgba(15,23,42,0.95)), url('${escapeHtml(f.bgImage)}') center/cover no-repeat;`;
+        } else if (f.bgGradient && bgGradientStyles[f.bgGradient]) {
+          customCardStyle = bgGradientStyles[f.bgGradient];
+        }
+
+        // Custom icon (image url vs lucide icon)
+        const isCustomImageIcon = f.icon && (f.icon.startsWith('http://') || f.icon.startsWith('https://') || f.icon.startsWith('data:'));
+        const iconHtml = isCustomImageIcon
+          ? `<img src="${escapeHtml(f.icon)}" class="w-6 h-6 object-contain rounded-lg" onerror="this.classList.add('hidden');">`
+          : `<i data-lucide="${escapeHtml(f.icon || (f.isLocked ? 'folder-lock' : 'folder'))}" class="w-5 h-5"></i>`;
+
         return `
-          <div data-folder-id="${f.id}" ondragover="handleFolderDragOver(event)" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event, '${f.id}')" class="group relative p-4 rounded-3xl bg-slate-900/70 hover:bg-slate-850/90 backdrop-blur-md border ${isShared ? 'border-orange-500/50 bg-gradient-to-b from-orange-950/20 to-slate-900/80 shadow-orange-500/5' : 'border-slate-800/80 hover:border-slate-700/90'} hover:shadow-xl transition-all duration-300 flex flex-col justify-between gap-3.5 cursor-pointer shadow-sm active:scale-[0.98]" onclick="handleFolderCardClick('${f.id}')">
+          <div data-folder-id="${f.id}" ondragover="handleFolderDragOver(event)" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event, '${f.id}')" style="${customCardStyle}" class="group relative p-4 rounded-3xl bg-slate-900/70 hover:bg-slate-850/90 backdrop-blur-md border ${isShared ? 'border-orange-500/50 shadow-orange-500/5' : 'border-slate-800/80 hover:border-slate-700/90'} hover:shadow-xl transition-all duration-300 flex flex-col justify-between gap-3.5 cursor-pointer shadow-sm active:scale-[0.98]" onclick="handleFolderCardClick('${f.id}')">
             
             <div class="flex items-start justify-between">
-              <div class="w-11 h-11 rounded-2xl ${colorClasses} border flex items-center justify-center relative shadow-sm group-hover:scale-105 transition-transform duration-200">
-                <i data-lucide="${f.isLocked ? 'folder-lock' : 'folder'}" class="w-5 h-5"></i>
+              <div class="w-11 h-11 rounded-2xl ${colorClasses} border flex items-center justify-center relative shadow-sm group-hover:scale-105 transition-transform duration-200 overflow-hidden">
+                ${iconHtml}
                 ${isShared ? '<span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-orange-500 border-2 border-slate-900 shadow-sm" title="กำลังแชร์อยู่"></span>' : ''}
               </div>
 
               <!-- Folder Actions Menu -->
-              <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition duration-200" onclick="event.stopPropagation()">
-                <button onclick="openShareModal('folder', '${f.id}', '${escapeHtml(f.name)}')" class="p-1.5 rounded-xl hover:bg-slate-800 ${isShared ? 'text-orange-400 bg-orange-500/10' : 'text-slate-400'} hover:text-white transition" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์โฟลเดอร์'}">
+              <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition duration-200 bg-slate-950/70 backdrop-blur-sm p-1 rounded-2xl border border-slate-800/70 shadow-lg" onclick="event.stopPropagation()">
+                <button onclick="openShareModal('folder', '${f.id}', '${escapeHtml(f.name)}')" class="p-1.5 rounded-xl hover:bg-slate-800 ${isShared ? 'text-orange-400 bg-orange-500/10' : 'text-slate-400'} hover:text-white transition cursor-pointer" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์โฟลเดอร์'}">
                   <i data-lucide="${isShared ? 'link-2' : 'share-2'}" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="openLockModal('folder', '${f.id}', '${escapeHtml(f.name)}')" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" title="ตั้งรหัสผ่านล็อค">
+                <button onclick="openEditFolderModal('${f.id}')" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer" title="แก้ไขโฟลเดอร์ (ไอคอน/หน้าปก/ชื่อ)">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="openMoveFolderModal('${f.id}', '${escapeHtml(f.name)}')" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition cursor-pointer" title="ย้ายโฟลเดอร์">
+                  <i data-lucide="folder-symlink" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="openLockModal('folder', '${f.id}', '${escapeHtml(f.name)}')" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition cursor-pointer" title="ตั้งรหัสผ่านล็อค">
                   <i data-lucide="${f.isLocked ? 'unlock' : 'lock'}" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="handleDeleteFolder('${f.id}')" class="p-1.5 rounded-xl hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition" title="ลบโฟลเดอร์">
+                <button onclick="handleDeleteFolder('${f.id}')" class="p-1.5 rounded-xl hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition cursor-pointer" title="ย้ายโฟลเดอร์และไฟล์ไปถังขยะ">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
@@ -3043,14 +3086,56 @@
     }
 
     // ============================================================
-    // TRASH VIEW RENDERER
+    // TRASH VIEW RENDERER (Supports Folders & Files inside Folders)
     // ============================================================
+    let currentTrashFolderId = null;
+
+    function navigateTrashFolder(folderId) {
+      currentTrashFolderId = folderId;
+      renderFilesList();
+    }
+
+    async function handleRestoreTrashFolder(folderId) {
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const folder = repo.getUserFolders(userEmail).find(f => f.id === folderId);
+      const folderName = folder ? folder.name : 'โฟลเดอร์';
+
+      await repo.restoreFolderFromTrash(folderId, userEmail);
+      if (currentTrashFolderId === folderId) {
+        currentTrashFolderId = null;
+      }
+      updateTrashBadge();
+      renderDrive();
+      showToast(`🔄 กู้คืนโฟลเดอร์ "${folderName}" และไฟล์ทั้งหมดกลับสู่ไดรฟ์เรียบร้อยแล้ว`);
+    }
+
+    async function handlePermanentDeleteFolder(folderId, folderName) {
+      if (!confirm(`⚠️ คุณแน่ใจหรือไม่ว่าต้องการลบโฟลเดอร์ "${folderName}" และไฟล์ทั้งหมดข้างในอย่างถาวร?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้!`)) {
+        return;
+      }
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      await repo.permanentDeleteFolder(folderId, userEmail);
+      if (currentTrashFolderId === folderId) {
+        currentTrashFolderId = null;
+      }
+      updateTrashBadge();
+      renderDrive();
+      showToast(`🗑️ ลบโฟลเดอร์ "${folderName}" ถาวรเรียบร้อยแล้ว`);
+    }
+
     function renderTrashView(container, countText) {
       const repo = getRepo();
       const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
       const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
 
-      const trashedFiles = allFiles.filter(f => {
+      // Get all folders belonging to user
+      const allUserFolders = repo.getUserFolders(userEmailLower);
+      const trashedFolders = allUserFolders.filter(f => !!f.isTrash);
+
+      // Get all trashed files
+      const allTrashedFiles = allFiles.filter(f => {
         const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
         const fId = (f.uploaderId || '').trim();
         const isBelongToUser = (userEmailLower && fEmail === userEmailLower) || (currentUser && currentUser.studentId && fId === currentUser.studentId);
@@ -3060,15 +3145,131 @@
         return !!meta.isTrash;
       }).map(f => {
         const meta = repo.getFileMeta(f.id);
-        return { ...f, folderId: meta.folderId, isTrash: true, trashedAt: meta.trashedAt, originalFolderId: meta.originalFolderId };
+        return {
+          ...f,
+          folderId: meta.folderId,
+          isTrash: true,
+          trashedAt: meta.trashedAt,
+          trashedWithFolder: meta.trashedWithFolder,
+          originalFolderId: meta.originalFolderId
+        };
       });
 
-      // Update trash count badge
-      updateTrashBadge(trashedFiles.length);
+      // Total items in trash
+      const totalTrashCount = trashedFolders.length + allTrashedFiles.length;
+      updateTrashBadge(totalTrashCount);
+      if (countText) countText.textContent = totalTrashCount;
 
-      if (countText) countText.textContent = trashedFiles.length;
+      // -------------------------------------------------------------
+      // Case A: Inside a specific trashed folder
+      // -------------------------------------------------------------
+      if (currentTrashFolderId) {
+        const currentFolder = trashedFolders.find(f => f.id === currentTrashFolderId) || allUserFolders.find(f => f.id === currentTrashFolderId);
+        if (!currentFolder) {
+          currentTrashFolderId = null;
+          return renderTrashView(container, countText);
+        }
 
-      if (trashedFiles.length === 0) {
+        const folderFiles = allTrashedFiles.filter(f => f.folderId === currentTrashFolderId || f.trashedWithFolder === currentTrashFolderId);
+
+        let folderDaysLeft = 30;
+        if (currentFolder.trashedAt) {
+          const elapsedMs = Date.now() - new Date(currentFolder.trashedAt).getTime();
+          folderDaysLeft = Math.max(0, 30 - Math.floor(elapsedMs / (1000 * 60 * 60 * 24)));
+        }
+
+        container.innerHTML = `
+          <div class="rounded-3xl bg-slate-900/90 border border-rose-500/20 overflow-hidden shadow-2xl space-y-0">
+            <!-- Header bar with Breadcrumb -->
+            <div class="p-4 bg-rose-950/40 border-b border-rose-500/20 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="navigateTrashFolder(null)" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                  <span>ถังขยะ</span>
+                </button>
+                <span class="text-slate-500">/</span>
+                <div class="flex items-center gap-2 text-white font-black text-sm">
+                  <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
+                  <span>${escapeHtml(currentFolder.name)}</span>
+                </div>
+                <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
+                  ${folderFiles.length} ไฟล์ในโฟลเดอร์นี้
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-amber-300 font-mono">
+                  เหลือ ${folderDaysLeft} วันจะลบถาวร
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button onclick="handleRestoreTrashFolder('${currentFolder.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-800/40 hover:bg-emerald-700/60 text-emerald-300 text-xs font-bold border border-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+                  <span>กู้คืนทั้งโฟลเดอร์นี้</span>
+                </button>
+                <button onclick="handlePermanentDeleteFolder('${currentFolder.id}', '${escapeHtml(currentFolder.name)}')" class="px-3 py-1.5 rounded-xl bg-red-800/40 hover:bg-red-700/60 text-red-300 text-xs font-bold border border-red-600/30 transition flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                  <span>ลบถาวรทั้งโฟลเดอร์</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Folder Files Content -->
+            ${folderFiles.length === 0 ? `
+              <div class="p-12 text-center text-slate-500 text-xs">
+                ไม่มีไฟล์ในโฟลเดอร์นี้
+              </div>
+            ` : `
+              <div class="divide-y divide-slate-800/80">
+                ${folderFiles.map(f => {
+                  const fileName = f.originalName || f.id;
+                  const fileSizeFormatted = formatBytes(f.size || 0);
+                  const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+
+                  return `
+                    <div data-file-id="${f.id}" class="p-3.5 flex items-center justify-between gap-3 hover:bg-rose-950/20 transition select-none">
+                      <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+                          ${isImg
+                            ? `<img src="${f.url}" class="w-full h-full object-cover grayscale opacity-75">`
+                            : `<i data-lucide="${getFileIconName(f.type, f.originalName)}" class="w-5 h-5 text-rose-400"></i>`
+                          }
+                        </div>
+                        <div class="space-y-0.5 overflow-hidden">
+                          <span class="text-xs font-bold text-slate-300 truncate max-w-xs sm:max-w-md block" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>
+                          <div class="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
+                            <span>${fileSizeFormatted}</span>
+                            <span>•</span>
+                            <span class="capitalize">${f.provider || 'cloud'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <button onclick="restoreSingleFromTrash('${f.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center gap-1 cursor-pointer" title="กู้คืนไฟล์นี้">
+                          <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+                          <span>กู้คืน</span>
+                        </button>
+                        <button onclick="permanentDeleteSingle('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-red-700/30 text-slate-500 hover:text-red-400 transition cursor-pointer" title="ลบถาวร">
+                          <i data-lucide="x-circle" class="w-4 h-4"></i>
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // Case B: Root Trash View
+      // -------------------------------------------------------------
+      const activeTrashFolderIds = new Set(trashedFolders.map(f => f.id));
+      const standaloneTrashedFiles = allTrashedFiles.filter(f => !f.trashedWithFolder || !activeTrashFolderIds.has(f.trashedWithFolder));
+
+      if (trashedFolders.length === 0 && standaloneTrashedFiles.length === 0) {
         container.innerHTML = `
           <div class="uiverse-glass-card p-12 rounded-3xl text-center space-y-4 shadow-2xl relative overflow-hidden border-rose-500/10">
             <div class="w-20 h-20 rounded-3xl bg-rose-900/20 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto shadow-inner">
@@ -3076,7 +3277,7 @@
             </div>
             <div>
               <h4 class="text-base font-black text-white">ถังขยะว่างเปล่า</h4>
-              <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">ไม่มีไฟล์ในถังขยะ ไฟล์ที่คุณลบจะปรากฏที่นี่ก่อนถูกลบอัตโนมัติภายใน 30 วัน</p>
+              <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">ไม่มีโฟลเดอร์หรือไฟล์ในถังขยะ รายการที่คุณลบจะปรากฏที่นี่ก่อนถูกลบอัตโนมัติภายใน 30 วัน</p>
             </div>
             <button onclick="toggleTrashView()" class="px-4 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black inline-flex items-center gap-1.5 cursor-pointer active:scale-95 border border-slate-700">
               <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -3088,86 +3289,163 @@
         return;
       }
 
+      const bgGradientStyles = {
+        cosmic: 'background: linear-gradient(135deg, rgba(30,27,75,0.92), rgba(59,7,100,0.88)); border-color: rgba(99,102,241,0.4);',
+        sunset: 'background: linear-gradient(135deg, rgba(69,26,3,0.92), rgba(76,5,25,0.88)); border-color: rgba(245,158,11,0.4);',
+        emerald: 'background: linear-gradient(135deg, rgba(2,44,34,0.92), rgba(19,78,74,0.88)); border-color: rgba(16,185,129,0.4);',
+        ocean: 'background: linear-gradient(135deg, rgba(8,47,73,0.92), rgba(23,37,84,0.88)); border-color: rgba(14,165,233,0.4);',
+        cyber: 'background: linear-gradient(135deg, rgba(59,7,100,0.92), rgba(80,7,36,0.88)); border-color: rgba(236,72,153,0.4);'
+      };
+
       container.innerHTML = `
-        <div class="rounded-2xl bg-slate-900/90 border border-rose-500/20 overflow-hidden shadow-sm">
+        <div class="rounded-3xl bg-slate-900/90 border border-rose-500/20 overflow-hidden shadow-2xl space-y-4 p-4 sm:p-5">
           <!-- Trash header bar -->
-          <div class="p-3 bg-rose-900/20 border-b border-rose-500/20 flex items-center justify-between gap-3">
+          <div class="p-3.5 bg-rose-950/40 rounded-2xl border border-rose-500/20 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-rose-300 text-xs font-bold">
-              <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
-              <span>${trashedFiles.length} ไฟล์ในถังขยะ · ระบบจะลบถาวรอัตโนมัติเมื่อครบ 30 วัน</span>
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
+              <span>${totalTrashCount} รายการในถังขยะ · ระบบจะลบถาวรอัตโนมัติเมื่อครบ 30 วัน</span>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="emptyTrashAll()" class="px-3 py-1.5 rounded-xl bg-red-800/40 hover:bg-red-700/60 text-red-300 text-xs font-bold border border-red-600/30 transition flex items-center gap-1.5 cursor-pointer">
+              <button onclick="emptyTrashAll()" class="px-3.5 py-1.5 rounded-xl bg-red-800/40 hover:bg-red-700/60 text-red-300 text-xs font-bold border border-red-600/30 transition flex items-center gap-1.5 cursor-pointer">
                 <i data-lucide="trash" class="w-3.5 h-3.5"></i>
                 <span>ล้างถังขยะทั้งหมด</span>
               </button>
-              <button onclick="restoreAllFromTrash()" class="px-3 py-1.5 rounded-xl bg-emerald-800/40 hover:bg-emerald-700/60 text-emerald-300 text-xs font-bold border border-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer">
+              <button onclick="restoreAllFromTrash()" class="px-3.5 py-1.5 rounded-xl bg-emerald-800/40 hover:bg-emerald-700/60 text-emerald-300 text-xs font-bold border border-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer">
                 <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
                 <span>กู้คืนทั้งหมด</span>
               </button>
             </div>
           </div>
 
-          <div class="divide-y divide-slate-800/80">
-            ${trashedFiles.map(f => {
-              const isSelected = selectedFileIds.has(f.id);
-              const fileName = f.originalName || f.id;
-              const fileSizeFormatted = formatBytes(f.size || 0);
-              const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
-              const trashedDate = f.trashedAt ? new Date(f.trashedAt).toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
-              
-              // Calculate remaining days out of 30 days
-              let daysLeft = 30;
-              if (f.trashedAt) {
-                const elapsedMs = Date.now() - new Date(f.trashedAt).getTime();
-                const elapsedDays = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
-                daysLeft = Math.max(0, 30 - elapsedDays);
-              }
+          <!-- Section 1: Trashed Folders (if any) -->
+          ${trashedFolders.length > 0 ? `
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-black text-rose-300 flex items-center gap-1.5">
+                  <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
+                  <span>โฟลเดอร์ในถังขยะ (${trashedFolders.length})</span>
+                </h4>
+                <span class="text-[10px] text-slate-400">คลิกที่โฟลเดอร์เพื่อเปิดดูไฟล์ข้างใน</span>
+              </div>
 
-              return `
-                <div data-file-id="${f.id}" class="p-3.5 flex items-center justify-between gap-3 hover:bg-rose-950/20 transition select-none ${isSelected ? 'bg-rose-950/30' : ''}">
-                  <div class="flex items-center gap-3 overflow-hidden">
-                    <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded text-rose-500 bg-slate-950 border-slate-700 focus:ring-0 cursor-pointer flex-shrink-0">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                ${trashedFolders.map(f => {
+                  let fDaysLeft = 30;
+                  if (f.trashedAt) {
+                    const elapsedMs = Date.now() - new Date(f.trashedAt).getTime();
+                    fDaysLeft = Math.max(0, 30 - Math.floor(elapsedMs / (1000 * 60 * 60 * 24)));
+                  }
+                  const filesInsideCount = allTrashedFiles.filter(item => item.folderId === f.id || item.trashedWithFolder === f.id).length;
 
-                    <div class="w-10 h-10 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
-                      ${isImg
-                        ? `
-                          <div class="file-thumb-skeleton"></div>
-                          <img src="${f.url}" class="w-full h-full object-cover grayscale opacity-70 file-thumb-img" onload="handleDriveImageThumbLoaded(this)" onerror="this.classList.add('is-loaded')">
-                        `
-                        : `<i data-lucide="${getFileIconName(f.type, f.originalName)}" class="w-5 h-5 text-rose-400"></i>`
-                      }
-                    </div>
+                  let customCardStyle = '';
+                  if (f.bgImage) {
+                    customCardStyle = `background: linear-gradient(to bottom, rgba(15,23,42,0.72), rgba(15,23,42,0.95)), url('${escapeHtml(f.bgImage)}') center/cover no-repeat;`;
+                  } else if (f.bgGradient && bgGradientStyles[f.bgGradient]) {
+                    customCardStyle = bgGradientStyles[f.bgGradient];
+                  }
 
-                    <div class="space-y-0.5 overflow-hidden">
-                      <span class="text-xs font-bold text-slate-400 truncate max-w-xs sm:max-w-md block line-through" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>
-                      <div class="flex items-center gap-2 text-[11px] text-slate-500 font-mono flex-wrap">
-                        <span>${fileSizeFormatted}</span>
-                        <span>•</span>
-                        <span class="capitalize">${f.provider || 'cloud'}</span>
-                        <span>•</span>
-                        <span class="text-rose-400/80">🗑️ ลบเมื่อ ${trashedDate}</span>
-                        <span>•</span>
-                        <span class="px-1.5 py-0.5 rounded ${daysLeft <= 3 ? 'bg-red-500/20 text-red-300 font-bold' : 'bg-slate-800 text-amber-300/90'} font-sans text-[10px]">
-                          เหลือ ${daysLeft} วันจะลบถาวร
-                        </span>
+                  const isCustomImageIcon = f.icon && (f.icon.startsWith('http://') || f.icon.startsWith('https://') || f.icon.startsWith('data:'));
+                  const iconHtml = isCustomImageIcon
+                    ? `<img src="${escapeHtml(f.icon)}" class="w-6 h-6 object-contain rounded-lg">`
+                    : `<i data-lucide="${escapeHtml(f.icon || 'folder')}" class="w-5 h-5 text-amber-400"></i>`;
+
+                  return `
+                    <div style="${customCardStyle}" onclick="navigateTrashFolder('${f.id}')" class="group relative p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-850 border border-rose-500/20 hover:border-rose-500/40 shadow-sm transition-all flex flex-col justify-between gap-3 cursor-pointer">
+                      <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center">
+                          ${iconHtml}
+                        </div>
+                        <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+                          <button onclick="handleRestoreTrashFolder('${f.id}')" class="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 text-xs transition cursor-pointer" title="กู้คืนโฟลเดอร์นี้">
+                            <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+                          </button>
+                          <button onclick="handlePermanentDeleteFolder('${f.id}', '${escapeHtml(f.name)}')" class="p-1.5 rounded-lg hover:bg-red-700/30 text-slate-400 hover:text-red-400 text-xs transition cursor-pointer" title="ลบถาวร">
+                            <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h5 class="text-xs font-black text-white truncate line-through opacity-85" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</h5>
+                        <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono mt-1">
+                          <span class="text-rose-300 font-bold">${filesInsideCount} ไฟล์ข้างใน</span>
+                          <span class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300/90 font-sans">
+                            เหลือ ${fDaysLeft} วัน
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
 
-                  <div class="flex items-center gap-1.5 flex-shrink-0">
-                    <button onclick="restoreSingleFromTrash('${f.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center gap-1 cursor-pointer" title="กู้คืนไฟล์">
-                      <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
-                      <span>กู้คืน</span>
-                    </button>
-                    <button onclick="permanentDeleteSingle('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-red-700/30 text-slate-500 hover:text-red-400 transition cursor-pointer" title="ลบถาวรทันที">
-                      <i data-lucide="x-circle" class="w-4 h-4"></i>
-                    </button>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
+          <!-- Section 2: Standalone Trashed Files (if any) -->
+          ${standaloneTrashedFiles.length > 0 ? `
+            <div class="space-y-2.5 pt-2">
+              <h4 class="text-xs font-black text-rose-300 flex items-center gap-1.5">
+                <i data-lucide="file" class="w-4 h-4 text-sky-400"></i>
+                <span>ไฟล์เดี่ยวในถังขยะ (${standaloneTrashedFiles.length})</span>
+              </h4>
+
+              <div class="divide-y divide-slate-800/80 border border-slate-800/80 rounded-2xl overflow-hidden bg-slate-950/40">
+                ${standaloneTrashedFiles.map(f => {
+                  const isSelected = selectedFileIds.has(f.id);
+                  const fileName = f.originalName || f.id;
+                  const fileSizeFormatted = formatBytes(f.size || 0);
+                  const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+                  const trashedDate = f.trashedAt ? new Date(f.trashedAt).toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+                  
+                  let daysLeft = 30;
+                  if (f.trashedAt) {
+                    const elapsedMs = Date.now() - new Date(f.trashedAt).getTime();
+                    daysLeft = Math.max(0, 30 - Math.floor(elapsedMs / (1000 * 60 * 60 * 24)));
+                  }
+
+                  return `
+                    <div data-file-id="${f.id}" class="p-3.5 flex items-center justify-between gap-3 hover:bg-rose-950/20 transition select-none ${isSelected ? 'bg-rose-950/30' : ''}">
+                      <div class="flex items-center gap-3 overflow-hidden">
+                        <input type="checkbox" onchange="handleToggleSelectFile('${f.id}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded text-rose-500 bg-slate-950 border-slate-700 focus:ring-0 cursor-pointer flex-shrink-0">
+
+                        <div class="w-10 h-10 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+                          ${isImg
+                            ? `<img src="${f.url}" class="w-full h-full object-cover grayscale opacity-75">`
+                            : `<i data-lucide="${getFileIconName(f.type, f.originalName)}" class="w-5 h-5 text-rose-400"></i>`
+                          }
+                        </div>
+
+                        <div class="space-y-0.5 overflow-hidden">
+                          <span class="text-xs font-bold text-slate-400 truncate max-w-xs sm:max-w-md block line-through" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</span>
+                          <div class="flex items-center gap-2 text-[11px] text-slate-500 font-mono flex-wrap">
+                            <span>${fileSizeFormatted}</span>
+                            <span>•</span>
+                            <span class="capitalize">${f.provider || 'cloud'}</span>
+                            <span>•</span>
+                            <span class="text-rose-400/80">🗑️ ลบเมื่อ ${trashedDate}</span>
+                            <span>•</span>
+                            <span class="px-1.5 py-0.5 rounded ${daysLeft <= 3 ? 'bg-red-500/20 text-red-300 font-bold' : 'bg-slate-800 text-amber-300/90'} font-sans text-[10px]">
+                              เหลือ ${daysLeft} วันจะลบถาวร
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <button onclick="restoreSingleFromTrash('${f.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center gap-1 cursor-pointer" title="กู้คืนไฟล์">
+                          <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+                          <span>กู้คืน</span>
+                        </button>
+                        <button onclick="permanentDeleteSingle('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-red-700/30 text-slate-500 hover:text-red-400 transition cursor-pointer" title="ลบถาวรทันที">
+                          <i data-lucide="x-circle" class="w-4 h-4"></i>
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
         </div>
       `;
       if (window.lucide) lucide.createIcons();
@@ -3799,16 +4077,17 @@
     }
 
     // ============================================================
+    // ============================================================
     // RECYCLE BIN ACTIONS
     // ============================================================
     function toggleTrashView() {
       isTrashView = !isTrashView;
+      currentTrashFolderId = null;
       selectedFileIds.clear();
       updateBatchActionBar();
 
       const btn = document.getElementById('btnTrashView');
       const foldersSection = document.getElementById('foldersSection');
-      const filesHeader = document.querySelector('#filesSection > div:first-child');
       const batchMoveToTrashBtn = document.getElementById('batchMoveToTrashBtn');
       const batchRestoreBtn = document.getElementById('batchRestoreBtn');
       const batchPermDeleteBtn = document.getElementById('batchPermDeleteBtn');
@@ -3947,32 +4226,44 @@
     }
 
     async function restoreAllFromTrash() {
-      if (!confirm('กู้คืนไฟล์ทั้งหมดจากถังขยะ?')) return;
       const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const trashedFolders = repo.getUserFolders(userEmail).filter(f => !!f.isTrash);
       const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
       const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
-      const ids = allFiles
-        .filter(f => {
-          const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
-          const fId = (f.uploaderId || '').trim();
-          const isBelongToUser = (userEmailLower && fEmail === userEmailLower) || (currentUser && currentUser.studentId && fId === currentUser.studentId);
-          if (!isBelongToUser) return false;
-          const meta = repo.getFileMeta(f.id);
-          return !!meta.isTrash;
-        })
-        .map(f => f.id);
-      await repo.batchRestoreFromTrash(ids);
-      updateTrashBadge();
-      renderFilesList();
-      if (currentUser && currentUser.email) {
-        repo.syncDriveDataToCloud(currentUser.email).catch(() => {});
+      const trashedFiles = allFiles.filter(f => {
+        const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+        const fId = (f.uploaderId || '').trim();
+        const isBelongToUser = (userEmailLower && fEmail === userEmailLower) || (currentUser && currentUser.studentId && fId === currentUser.studentId);
+        if (!isBelongToUser) return false;
+        return !!repo.getFileMeta(f.id).isTrash;
+      });
+
+      const totalCount = trashedFolders.length + trashedFiles.length;
+      if (totalCount === 0) return;
+
+      if (!confirm(`กู้คืนรายการทั้งหมดจากถังขยะ (${totalCount} รายการ)?`)) return;
+
+      for (const fld of trashedFolders) {
+        await repo.restoreFolderFromTrash(fld.id, userEmail);
       }
-      showToast(`✅ กู้คืน ${ids.length} ไฟล์ ทั้งหมดสำเร็จ`);
+      for (const f of trashedFiles) {
+        await repo.restoreFromTrash(f.id);
+      }
+
+      currentTrashFolderId = null;
+      updateTrashBadge();
+      renderDrive();
+      if (userEmail) {
+        repo.syncDriveDataToCloud(userEmail).catch(() => {});
+      }
+      showToast(`✅ กู้คืนทั้งหมด (${totalCount} รายการ) สำเร็จ`);
     }
 
     async function emptyTrashAll() {
-      if (!confirm('⚠️ ล้างถังขยะ? ไฟล์ทั้งหมดจะถูกลบอย่างถาวร\n\nไม่สามารถย้อนกลับได้!')) return;
       const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const trashedFolders = repo.getUserFolders(userEmail).filter(f => !!f.isTrash);
       const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
       const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
       const targets = allFiles.filter(f => {
@@ -3980,9 +4271,18 @@
         const fId = (f.uploaderId || '').trim();
         const isBelongToUser = (userEmailLower && fEmail === userEmailLower) || (currentUser && currentUser.studentId && fId === currentUser.studentId);
         if (!isBelongToUser) return false;
-        const meta = repo.getFileMeta(f.id);
-        return !!meta.isTrash;
+        return !!repo.getFileMeta(f.id).isTrash;
       });
+
+      const totalCount = trashedFolders.length + targets.length;
+      if (totalCount === 0) return;
+
+      if (!confirm(`⚠️ ล้างถังขยะทั้งหมด (${totalCount} รายการ)? ไฟล์และโฟลเดอร์จะถูกลบอย่างถาวร\n\nไม่สามารถย้อนกลับได้!`)) return;
+
+      for (const fld of trashedFolders) {
+        await repo.permanentDeleteFolder(fld.id, userEmail);
+      }
+
       for (const t of targets) {
         try {
           if (window.MultiCloudUploader) {
@@ -3992,32 +4292,34 @@
           }
         } catch(e) {}
       }
+
+      currentTrashFolderId = null;
       updateQuotaDisplay();
       updateTrashBadge();
-      renderFilesList();
-      if (currentUser && currentUser.email) {
-        repo.syncDriveDataToCloud(currentUser.email).catch(() => {});
+      renderDrive();
+      if (userEmail) {
+        repo.syncDriveDataToCloud(userEmail).catch(() => {});
       }
-      showToast(`🗑️ ล้างถังขยะแล้ว (${targets.length} ไฟล์)`);
+      showToast(`🗑️ ล้างถังขยะเรียบร้อยแล้ว (${totalCount} รายการ)`);
     }
 
     function updateTrashBadge(count) {
       const badge = document.getElementById('trashCountBadge');
       if (!badge) return;
 
-      // If count not given, compute it
       if (count === undefined) {
         const repo = getRepo();
         const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
         const userEmailLower = currentUser ? currentUser.email.toLowerCase().trim() : '';
-        count = allFiles.filter(f => {
+        const filesCount = allFiles.filter(f => {
           const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
           const fId = (f.uploaderId || '').trim();
           const isBelongToUser = (userEmailLower && fEmail === userEmailLower) || (currentUser && currentUser.studentId && fId === currentUser.studentId);
           if (!isBelongToUser) return false;
-          const meta = repo.getFileMeta(f.id);
-          return !!meta.isTrash;
+          return !!repo.getFileMeta(f.id).isTrash;
         }).length;
+        const foldersCount = repo.getUserFolders(userEmailLower).filter(f => !!f.isTrash).length;
+        count = filesCount + foldersCount;
       }
 
       if (count > 0) {
@@ -4029,8 +4331,55 @@
     }
 
     // ----------------------------------------------------
-    // 4. Folder Operations (Create / Edit / Delete)
+    // 4. Folder Operations (Create / Edit / Delete / Custom Icon & Cover)
     // ----------------------------------------------------
+    function selectFolderIconPreset(iconName) {
+      const hiddenInput = document.getElementById('folderSelectedIcon');
+      if (hiddenInput) hiddenInput.value = iconName;
+      const customInput = document.getElementById('folderCustomIconInput');
+      if (customInput) customInput.value = '';
+
+      document.querySelectorAll('#folderIconPresetGrid .folder-icon-choice').forEach(btn => {
+        if (btn.getAttribute('data-icon') === iconName) {
+          btn.classList.add('border-orange-500', 'text-orange-400');
+          btn.classList.remove('border-slate-800', 'text-slate-400');
+        } else {
+          btn.classList.remove('border-orange-500', 'text-orange-400');
+          btn.classList.add('border-slate-800', 'text-slate-400');
+        }
+      });
+    }
+
+    function handleFolderCustomIconInput(val) {
+      const cleanVal = (val || '').trim();
+      const hiddenInput = document.getElementById('folderSelectedIcon');
+      if (cleanVal) {
+        if (hiddenInput) hiddenInput.value = cleanVal;
+        document.querySelectorAll('#folderIconPresetGrid .folder-icon-choice').forEach(btn => {
+          btn.classList.remove('border-orange-500', 'text-orange-400');
+          btn.classList.add('border-slate-800', 'text-slate-400');
+        });
+      } else {
+        selectFolderIconPreset('folder');
+      }
+    }
+
+    function selectFolderBgPreset(bgName) {
+      const hiddenInput = document.getElementById('folderSelectedBgGradient');
+      if (hiddenInput) hiddenInput.value = bgName;
+      const customBgInput = document.getElementById('folderCustomBgInput');
+      if (customBgInput) customBgInput.value = '';
+
+      document.querySelectorAll('#folderBgPresetGrid .folder-bg-choice').forEach(btn => {
+        if (btn.getAttribute('data-bg') === bgName) {
+          btn.classList.add('border-orange-500');
+          btn.classList.remove('border-indigo-500/40', 'border-amber-500/40', 'border-emerald-500/40', 'border-sky-500/40', 'border-purple-500/40');
+        } else {
+          btn.classList.remove('border-orange-500');
+        }
+      });
+    }
+
     function openCreateFolderModal() {
       if (!currentUser) {
         openAuthModal();
@@ -4042,6 +4391,77 @@
       document.getElementById('folderLockCheckbox').checked = false;
       document.getElementById('folderPasswordBox').classList.add('hidden');
       document.getElementById('folderPasswordInput').value = '';
+      document.getElementById('folderPasswordInput').placeholder = 'กำหนดรหัสผ่าน (อย่างน้อย 4 หลัก)';
+
+      const amberRadio = document.querySelector('input[name="folderColor"][value="amber"]');
+      if (amberRadio) amberRadio.checked = true;
+
+      selectFolderIconPreset('folder');
+      selectFolderBgPreset('');
+      const customIconInput = document.getElementById('folderCustomIconInput');
+      if (customIconInput) customIconInput.value = '';
+      const customBgInput = document.getElementById('folderCustomBgInput');
+      if (customBgInput) customBgInput.value = '';
+
+      const modal = document.getElementById('modalFolder');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('folderNameInput').focus(), 50);
+    }
+
+    function openEditFolderModal(folderId) {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const folders = repo.getUserFolders(userEmail);
+      const target = folders.find(f => f.id === folderId);
+      if (!target) return;
+
+      document.getElementById('folderModalTitle').textContent = `แก้ไขโฟลเดอร์ "${target.name}"`;
+      document.getElementById('folderEditId').value = target.id;
+      document.getElementById('folderNameInput').value = target.name || '';
+
+      const colorRadio = document.querySelector(`input[name="folderColor"][value="${target.color || 'amber'}"]`);
+      if (colorRadio) colorRadio.checked = true;
+
+      const customIconInput = document.getElementById('folderCustomIconInput');
+      if (target.icon && (target.icon.startsWith('http://') || target.icon.startsWith('https://') || target.icon.startsWith('data:'))) {
+        if (customIconInput) customIconInput.value = target.icon;
+        const hiddenIconInput = document.getElementById('folderSelectedIcon');
+        if (hiddenIconInput) hiddenIconInput.value = target.icon;
+        document.querySelectorAll('#folderIconPresetGrid .folder-icon-choice').forEach(btn => {
+          btn.classList.remove('border-orange-500', 'text-orange-400');
+          btn.classList.add('border-slate-800', 'text-slate-400');
+        });
+      } else {
+        selectFolderIconPreset(target.icon || 'folder');
+        if (customIconInput) customIconInput.value = '';
+      }
+
+      const customBgInput = document.getElementById('folderCustomBgInput');
+      if (target.bgImage) {
+        if (customBgInput) customBgInput.value = target.bgImage;
+        selectFolderBgPreset('');
+      } else {
+        selectFolderBgPreset(target.bgGradient || '');
+        if (customBgInput) customBgInput.value = '';
+      }
+
+      const lockCheckbox = document.getElementById('folderLockCheckbox');
+      const passBox = document.getElementById('folderPasswordBox');
+      const passInput = document.getElementById('folderPasswordInput');
+      lockCheckbox.checked = !!target.isLocked;
+      passInput.value = '';
+      if (target.isLocked) {
+        passBox.classList.remove('hidden');
+        passInput.placeholder = 'กรอกรหัสผ่านใหม่ (หากต้องการเปลี่ยนรหัส)';
+      } else {
+        passBox.classList.add('hidden');
+        passInput.placeholder = 'กำหนดรหัสผ่าน (อย่างน้อย 4 หลัก)';
+      }
 
       const modal = document.getElementById('modalFolder');
       modal.classList.remove('hidden');
@@ -4065,6 +4485,13 @@
       const colorElem = document.querySelector('input[name="folderColor"]:checked');
       const color = colorElem ? colorElem.value : 'amber';
 
+      const customIconVal = (document.getElementById('folderCustomIconInput')?.value || '').trim();
+      const selectedIconVal = document.getElementById('folderSelectedIcon')?.value || 'folder';
+      const finalIcon = customIconVal || selectedIconVal || 'folder';
+
+      const customBgVal = (document.getElementById('folderCustomBgInput')?.value || '').trim();
+      const selectedBgVal = document.getElementById('folderSelectedBgGradient')?.value || '';
+
       if (!name) return;
       if (isLocked && !pass && !editId) {
         alert('กรุณากรอกรหัสผ่านสำหรับล็อคโฟลเดอร์');
@@ -4078,6 +4505,9 @@
         await repo.createFolder({
           name: name,
           color: color,
+          icon: finalIcon,
+          bgImage: customBgVal,
+          bgGradient: selectedBgVal,
           userEmail: userEmail,
           parentId: currentFolderId,
           password: isLocked ? pass : null
@@ -4087,15 +4517,18 @@
         await repo.updateFolder(editId, {
           name: name,
           color: color,
+          icon: finalIcon,
+          bgImage: customBgVal,
+          bgGradient: selectedBgVal,
           isLocked: isLocked,
-          password: pass || null
+          password: pass || undefined,
+          removePassword: !isLocked
         });
         showToast(`📁 แก้ไขโฟลเดอร์ "${name}" สำเร็จ`);
       }
 
-      // Sync drive data to cloud after folder create/update
       if (userEmail) {
-        repo.syncDriveDataToCloud(userEmail).catch(() => {});
+        await repo.syncDriveDataToCloud(userEmail).catch(() => {});
       }
 
       closeFolderModal();
@@ -4103,80 +4536,115 @@
       updateUploadFolderDropdown();
     }
 
-    function handleDeleteFolder(folderId) {
+    async function handleDeleteFolder(folderId) {
       const repo = getRepo();
       const userEmail = getCurrentUserEmail();
       const folders = repo.getUserFolders(userEmail);
       const target = folders.find(f => f.id === folderId);
       if (!target) return;
 
-      if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบโฟลเดอร์ "${target.name}"? (ไฟล์ข้างในจะถูกย้ายกลับมาที่หน้าแรกไดรฟ์)`)) {
-        repo.deleteFolder(folderId);
+      if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการย้ายโฟลเดอร์ "${target.name}" ไปยังถังขยะ?\n\n(ไฟล์ทั้งหมดในโฟลเดอร์นี้จะถูกย้ายไปถังขยะด้วย และสามารถเปิดดูไฟล์หรือกู้คืนได้ตลอดเวลา)`)) {
+        await repo.moveFolderToTrash(folderId, userEmail);
         if (currentFolderId === folderId) {
           currentFolderId = null;
         }
-        // Sync drive data to cloud after folder delete
         if (userEmail) {
-          repo.syncDriveDataToCloud(userEmail).catch(() => {});
+          await repo.syncDriveDataToCloud(userEmail).catch(() => {});
         }
+        updateTrashBadge();
         renderDrive();
-        showToast('🗑️ ลบโฟลเดอร์เรียบร้อยแล้ว');
+        showToast(`🗑️ ย้ายโฟลเดอร์ "${target.name}" และไฟล์ทั้งหมดไปยังถังขยะเรียบร้อยแล้ว`);
       }
     }
 
     // ----------------------------------------------------
-    // 5. Move Files Modal & Operations
+    // 5. Move Items (Files / Folders) Modal & Operations
     // ----------------------------------------------------
-    let filesPendingMove = []; // Array of file IDs
+    let pendingMoveItem = null;
 
     function openSingleMoveModal(fileId, fileName) {
-      filesPendingMove = [fileId];
+      pendingMoveItem = { type: 'file', ids: [fileId], name: fileName };
       renderMoveModalDestinations(`ไฟล์: ${fileName}`);
     }
 
     function openBatchMoveModal() {
       const count = selectedFileIds.size;
       if (count === 0) return;
-      filesPendingMove = Array.from(selectedFileIds);
+      pendingMoveItem = { type: 'file', ids: Array.from(selectedFileIds), name: `${count} ไฟล์` };
       renderMoveModalDestinations(`ไฟล์ที่เลือกทั้งหมด ${count} ไฟล์`);
+    }
+
+    function openMoveFolderModal(folderId, folderName) {
+      pendingMoveItem = { type: 'folder', id: folderId, name: folderName };
+      renderMoveModalDestinations(`โฟลเดอร์: ${folderName}`);
     }
 
     function renderMoveModalDestinations(subtext) {
       const modal = document.getElementById('modalMoveFile');
+      const title = document.getElementById('moveModalTitle');
       const sub = document.getElementById('moveModalSubtext');
+      const confirmBtn = document.getElementById('moveModalConfirmBtn');
       const container = document.getElementById('moveDestinationsList');
 
       if (sub) sub.textContent = subtext;
 
+      const isMovingFolder = pendingMoveItem && pendingMoveItem.type === 'folder';
+      if (title) title.textContent = isMovingFolder ? 'ย้ายโฟลเดอร์' : 'ย้ายไฟล์ไปที่โฟลเดอร์';
+      if (confirmBtn) confirmBtn.textContent = isMovingFolder ? 'ย้ายโฟลเดอร์ทันที' : 'ย้ายไฟล์ทันที';
+
       const repo = getRepo();
       const userEmail = getCurrentUserEmail();
-      const folders = repo.getUserFolders(userEmail);
+      const folders = repo.getUserFolders(userEmail).filter(f => !f.isTrash);
+
+      let currentLocParent = null;
+      if (isMovingFolder) {
+        const thisFolder = folders.find(f => f.id === pendingMoveItem.id);
+        currentLocParent = thisFolder ? (thisFolder.parentId || null) : null;
+      } else {
+        currentLocParent = currentFolderId;
+      }
+
+      const isAlreadyAtRoot = currentLocParent === null;
 
       let html = `
-        <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-700 transition">
+        <label class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-700 hover:bg-slate-900/60 transition ${isAlreadyAtRoot ? 'opacity-60' : ''}">
           <div class="flex items-center gap-3">
-            <input type="radio" name="destFolderRadio" value="" ${currentFolderId === null ? 'disabled' : 'checked'} class="text-sky-500">
-            <div class="flex items-center gap-2">
-              <i data-lucide="hard-drive" class="w-4 h-4 text-orange-400"></i>
-              <span class="text-xs font-bold text-white">หน้าแรกไดรฟ์ (Root)</span>
+            <input type="radio" name="destFolderRadio" value="" ${isAlreadyAtRoot ? 'disabled' : 'checked'} class="w-4 h-4 text-sky-500 focus:ring-0">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
+                <i data-lucide="hard-drive" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="text-xs font-black text-white block">หน้าแรกไดรฟ์ (Root)</span>
+                <span class="text-[10px] text-slate-400">ตำแหน่งสูงสุดของไดรฟ์</span>
+              </div>
             </div>
           </div>
-          ${currentFolderId === null ? '<span class="text-[10px] text-slate-500 font-mono">อยู่ที่นี่แล้ว</span>' : ''}
+          ${isAlreadyAtRoot ? '<span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 font-mono">อยู่ที่นี่แล้ว</span>' : ''}
         </label>
       `;
 
       folders.forEach(f => {
-        const isCurrent = f.id === currentFolderId;
+        // If moving folder: cannot move into itself or its direct children
+        if (isMovingFolder && f.id === pendingMoveItem.id) return;
+        if (isMovingFolder && f.parentId === pendingMoveItem.id) return;
+
+        const isCurrentLocation = f.id === currentLocParent;
         html += `
-          <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-700 transition ${isCurrent ? 'opacity-50' : ''}">
+          <label class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-700 hover:bg-slate-900/60 transition ${isCurrentLocation ? 'opacity-60' : ''}">
             <div class="flex items-center gap-3">
-              <input type="radio" name="destFolderRadio" value="${f.id}" ${isCurrent ? 'disabled' : ''} class="text-sky-500">
-              <div class="flex items-center gap-2">
-                <i data-lucide="folder" class="w-4 h-4 text-amber-400"></i>
-                <span class="text-xs font-bold text-white">${escapeHtml(f.name)}</span>
+              <input type="radio" name="destFolderRadio" value="${f.id}" ${isCurrentLocation ? 'disabled' : (!isAlreadyAtRoot && !html.includes('checked') ? 'checked' : '')} class="w-4 h-4 text-sky-500 focus:ring-0">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <i data-lucide="${f.icon || 'folder'}" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <span class="text-xs font-bold text-white block">${escapeHtml(f.name)}</span>
+                  <span class="text-[10px] text-slate-400">โฟลเดอร์ไดรฟ์</span>
+                </div>
               </div>
             </div>
-            ${isCurrent ? '<span class="text-[10px] text-slate-500 font-mono">อยู่ที่นี่แล้ว</span>' : ''}
+            ${isCurrentLocation ? '<span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 font-mono">อยู่ที่นี่แล้ว</span>' : ''}
           </label>
         `;
       });
@@ -4191,9 +4659,10 @@
       const modal = document.getElementById('modalMoveFile');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+      pendingMoveItem = null;
     }
 
-    function confirmMoveFiles() {
+    async function confirmMoveFiles() {
       const checkedRadio = document.querySelector('input[name="destFolderRadio"]:checked');
       if (!checkedRadio) {
         alert('กรุณาเลือกโฟลเดอร์ปลายทาง');
@@ -4202,18 +4671,32 @@
 
       const targetFolderId = checkedRadio.value || null;
       const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
 
-      if (filesPendingMove.length === 1) {
-        repo.moveFile(filesPendingMove[0], targetFolderId);
+      if (pendingMoveItem && pendingMoveItem.type === 'folder') {
+        await repo.moveFolder(pendingMoveItem.id, targetFolderId, userEmail);
+        closeMoveModal();
+        renderDrive();
+        showToast(`📁 ย้ายโฟลเดอร์ "${pendingMoveItem.name}" เรียบร้อยแล้ว`);
+      } else if (pendingMoveItem && pendingMoveItem.type === 'file') {
+        const fileIds = pendingMoveItem.ids || [];
+        if (fileIds.length === 1) {
+          await repo.moveFile(fileIds[0], targetFolderId, userEmail);
+        } else {
+          await repo.batchMoveFiles(fileIds, targetFolderId, userEmail);
+        }
+        closeMoveModal();
+        selectedFileIds.clear();
+        updateBatchActionBar();
+        renderDrive();
+        showToast(`📦 ย้ายไฟล์จำนวน ${fileIds.length} ไฟล์ เรียบร้อยแล้ว`);
       } else {
-        repo.batchMoveFiles(filesPendingMove, targetFolderId);
+        closeMoveModal();
       }
 
-      closeMoveModal();
-      selectedFileIds.clear();
-      updateBatchActionBar();
-      renderFilesList();
-      showToast(`📦 ย้ายไฟล์จำนวน ${filesPendingMove.length} ไฟล์ เรียบร้อยแล้ว`);
+      if (userEmail) {
+        await repo.syncDriveDataToCloud(userEmail).catch(() => {});
+      }
     }
 
     // ----------------------------------------------------
