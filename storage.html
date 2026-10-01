@@ -522,9 +522,9 @@
     }
 
     /* === MODERN CONTEXT MENU & LONG-PRESS SHEET === */
-    #driveContextMenu {
+    #driveContextMenu, #folderContextMenu, #tabContextMenu, #newTabDropdown {
       position: fixed;
-      z-index: 100;
+      z-index: 1000;
       min-width: 220px;
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
@@ -532,10 +532,19 @@
       transform-origin: top left;
       transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
     }
-    #driveContextMenu.hidden {
-      display: none;
+    #driveContextMenu.hidden, #folderContextMenu.hidden, #tabContextMenu.hidden, #newTabDropdown.hidden {
+      display: none !important;
       opacity: 0;
       transform: scale(0.95);
+      pointer-events: none;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
 
     /* Fullscreen Modal Nav Buttons Hover */
@@ -1061,16 +1070,42 @@
         </div>
       </div>
 
-      <!-- Folder Quick Switch Tabs & In-Folder Management Toolbar -->
-      <div id="driveFolderTabsContainer" class="glass-card p-3 rounded-2xl border border-slate-800 space-y-2">
-        <div class="flex items-center justify-between gap-2 overflow-x-auto custom-scrollbar pb-1">
-          <div class="flex items-center gap-1.5 flex-nowrap" id="driveFolderTabsList">
-            <!-- Dynamically populated folder tabs: Root + User Folders -->
+      <!-- Modern Browser-Style Drive Tabs & Quick Actions Bar -->
+      <div id="driveFolderTabsContainer" class="glass-card p-2 sm:p-2.5 rounded-3xl border border-slate-800/90 shadow-xl space-y-2 relative">
+        <div class="flex items-center justify-between gap-2">
+          
+          <!-- Left: Scroll Controls & Scrollable Tab List -->
+          <div class="flex items-center gap-1 min-w-0 flex-1 overflow-hidden relative">
+            <!-- Scroll Left Arrow -->
+            <button type="button" onclick="scrollDriveTabs('left')" class="p-1 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-white transition flex-shrink-0 cursor-pointer hidden sm:flex border border-slate-800" title="เลื่อนแท็บไปทางซ้าย">
+              <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+            </button>
+
+            <!-- Scrollable Tabs List -->
+            <div id="driveFolderTabsList" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5 flex-1 pr-1">
+              <!-- Dynamically populated browser tabs: Root, Folders, Trash, etc. -->
+            </div>
+
+            <!-- Scroll Right Arrow -->
+            <button type="button" onclick="scrollDriveTabs('right')" class="p-1 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-white transition flex-shrink-0 cursor-pointer hidden sm:flex border border-slate-800" title="เลื่อนแท็บไปทางขวา">
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
           </div>
-          <button onclick="openCreateFolderModal()" class="px-2.5 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-bold transition flex items-center gap-1 flex-shrink-0 cursor-pointer" title="สร้างโฟลเดอร์ใหม่">
-            <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
-            <span>สร้างโฟลเดอร์</span>
-          </button>
+
+          <!-- Right: Dedicated Non-Overlapping Action Buttons -->
+          <div class="flex items-center gap-1.5 flex-shrink-0 pl-2 border-l border-slate-800/80 relative">
+            <!-- Button: Open New Tab -->
+            <button id="btnNewDriveTab" type="button" onclick="toggleNewTabDropdown(event)" class="px-2.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 text-xs font-bold transition flex items-center gap-1 cursor-pointer" title="เปิดแท็บใหม่ (คลิกเพื่อเลือกโฟลเดอร์หรือมุมมอง)">
+              <i data-lucide="plus" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span class="hidden sm:inline">แท็บใหม่</span>
+            </button>
+
+            <!-- Button: Create New Folder -->
+            <button type="button" onclick="openCreateFolderModal()" class="px-3 py-1.5 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 border border-orange-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 flex-shrink-0" title="สร้างโฟลเดอร์ใหม่">
+              <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
+              <span>สร้างโฟลเดอร์</span>
+            </button>
+          </div>
         </div>
 
         <!-- In-Folder Context Action Toolbar (Visible when currentFolderId is active) -->
@@ -1990,6 +2025,100 @@
     </button>
   </div>
 
+  <!-- 11.1 Folder Context Menu & Long-Press Action Sheet -->
+  <div id="folderContextMenu" class="hidden rounded-2xl bg-slate-900/95 border border-slate-700/80 shadow-2xl p-1.5 space-y-0.5 text-xs text-slate-200">
+    <div class="px-3 py-2 border-b border-slate-800/80 mb-1 flex items-center gap-2.5">
+      <div id="ctxFolderIconWrap" class="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="folder" class="w-4 h-4"></i>
+      </div>
+      <div class="overflow-hidden">
+        <p id="ctxFolderTitle" class="font-bold text-white truncate max-w-[190px]">โฟลเดอร์</p>
+        <p id="ctxFolderSubtitle" class="text-[10px] text-slate-400 truncate">จัดการโฟลเดอร์</p>
+      </div>
+    </div>
+
+    <button onclick="handleFolderCtxAction('open')" class="w-full px-3 py-2 rounded-xl hover:bg-orange-500/20 hover:text-orange-300 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="folder-open" class="w-4 h-4 text-amber-400"></i>
+      <span class="font-bold">เปิดโฟลเดอร์นี้</span>
+    </button>
+
+    <button onclick="handleFolderCtxAction('open-new-tab')" class="w-full px-3 py-2 rounded-xl hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="external-link" class="w-4 h-4 text-sky-400"></i>
+      <span class="font-bold">เปิดในแท็บใหม่ (New Tab)</span>
+    </button>
+
+    <button onclick="handleFolderCtxAction('edit')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="edit-3" class="w-4 h-4 text-orange-400"></i>
+      <span>แก้ไข (ไอคอน / หน้าปก / ชื่อ)</span>
+    </button>
+
+    <button onclick="handleFolderCtxAction('move')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="folder-symlink" class="w-4 h-4 text-indigo-400"></i>
+      <span>ย้ายตำแหน่งโฟลเดอร์</span>
+    </button>
+
+    <button onclick="handleFolderCtxAction('share')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="share-2" class="w-4 h-4 text-emerald-400"></i>
+      <span>แชร์โฟลเดอร์</span>
+    </button>
+
+    <button onclick="handleFolderCtxAction('lock')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i>
+      <span>ตั้งรหัสผ่านล็อค</span>
+    </button>
+
+    <div class="h-px bg-slate-800 my-1"></div>
+
+    <button onclick="handleFolderCtxAction('delete')" class="w-full px-3 py-2 rounded-xl hover:bg-rose-950/40 text-rose-400 hover:text-rose-300 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="trash-2" class="w-4 h-4"></i>
+      <span>ย้ายไปถังขยะ</span>
+    </button>
+  </div>
+
+  <!-- 11.2 Tab Context Menu -->
+  <div id="tabContextMenu" class="hidden rounded-2xl bg-slate-900/95 border border-slate-700/80 shadow-2xl p-1.5 space-y-0.5 text-xs text-slate-200">
+    <div class="px-3 py-1.5 border-b border-slate-800/80 mb-1">
+      <p id="ctxTabTitle" class="font-bold text-white truncate max-w-[190px]">จัดการแท็บ</p>
+    </div>
+
+    <button onclick="handleTabCtxAction('pin')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="pin" class="w-4 h-4 text-amber-400"></i>
+      <span id="ctxTabPinLabel">ปักหมุดแท็บนี้ (Pin)</span>
+    </button>
+
+    <button onclick="handleTabCtxAction('duplicate')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="copy" class="w-4 h-4 text-sky-400"></i>
+      <span>ทำซ้ำแท็บ (Duplicate)</span>
+    </button>
+
+    <div class="h-px bg-slate-800 my-1"></div>
+
+    <button onclick="handleTabCtxAction('close')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
+      <span>ปิดแท็บนี้</span>
+    </button>
+
+    <button onclick="handleTabCtxAction('close-others')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="x-circle" class="w-4 h-4 text-slate-400"></i>
+      <span>ปิดแท็บอื่นทั้งหมด</span>
+    </button>
+
+    <button onclick="handleTabCtxAction('close-right')" class="w-full px-3 py-2 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer">
+      <i data-lucide="arrow-right-circle" class="w-4 h-4 text-slate-400"></i>
+      <span>ปิดแท็บทางขวามือ</span>
+    </button>
+  </div>
+
+  <!-- 11.3 New Tab Picker Dropdown -->
+  <div id="newTabDropdown" class="hidden rounded-2xl bg-slate-900/95 border border-slate-700/80 shadow-2xl p-2 space-y-1 text-xs text-slate-200 max-h-72 overflow-y-auto custom-scrollbar w-60">
+    <div class="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+      เลือกโฟลเดอร์ที่จะเปิดในแท็บใหม่
+    </div>
+    <div id="newTabOptionsList" class="space-y-0.5">
+      <!-- Dynamically populated options -->
+    </div>
+  </div>
+
   <!-- Interactive Undo Toast Container (5-second countdown with Undo button) -->
   <div id="driveUndoToast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 pointer-events-none transition-all duration-300 px-4 py-3 rounded-2xl bg-slate-900/95 border border-rose-500/50 text-white text-xs font-bold shadow-2xl flex items-center gap-3 backdrop-blur-md">
     <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-mono font-black text-sm" id="driveUndoCountdown">5</div>
@@ -2089,6 +2218,7 @@
       setupKeyboardShortcuts();
       initDragSelection();
       await checkIncomingFolderOrShareParam();
+      loadSavedDriveTabs();
       // โหลดข้อมูลไดรฟ์จาก Supabase (ถ้า user login ไว้แล้ว) เพื่อ sync ข้ามอุปกรณ์
       if (currentUser && currentUser.email) {
         const repo = getRepo();
@@ -2449,6 +2579,7 @@
         selectedFileIds.clear();
         stopDriveRealtime();
         updateUserUI();
+        loadSavedDriveTabs();
         renderDrive();
         showToast('👋 ออกจากระบบเรียบร้อยแล้ว');
       }
@@ -2551,6 +2682,7 @@
       if (currentUser && currentUser.email) {
         initDriveRealtime(currentUser.email);
       }
+      loadSavedDriveTabs();
       renderDrive();
       if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
       showToast(`✨ เข้าสู่ระบบสำเร็จ: ${currentUser.name}`);
@@ -2578,10 +2710,118 @@
       return currentUser && currentUser.email ? currentUser.email.toLowerCase().trim() : '';
     }
 
-    function navigateToFolder(folderId) {
+    // ----------------------------------------------------
+    // 2. Drive Navigation, Browser Tabs & Explorer Engine
+    // ----------------------------------------------------
+    let driveTabs = [];
+    let activeDriveTabId = null;
+
+    function getDriveTabsStorageKey() {
+      const email = getCurrentUserEmail() || 'guest';
+      return 'comed_drive_tabs_' + email;
+    }
+
+    function loadSavedDriveTabs() {
+      try {
+        const stored = localStorage.getItem(getDriveTabsStorageKey());
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            driveTabs = parsed;
+          }
+        }
+      } catch (e) {}
+
+      // Ensure root tab always exists and is pinned
+      if (!driveTabs || driveTabs.length === 0) {
+        driveTabs = [
+          {
+            id: 'tab_root',
+            type: 'root',
+            folderId: null,
+            title: 'หน้าแรกไดรฟ์',
+            icon: 'hard-drive',
+            pinned: true
+          }
+        ];
+        activeDriveTabId = 'tab_root';
+      }
+
+      // If activeDriveTabId is invalid, default to first tab
+      if (!activeDriveTabId || !driveTabs.some(t => t.id === activeDriveTabId)) {
+        activeDriveTabId = driveTabs[0].id;
+      }
+
+      // If currentFolderId is already set (e.g. from URL ?folder=xxx), sync tab
+      if (currentFolderId) {
+        const match = driveTabs.find(t => t.folderId === currentFolderId);
+        if (match) {
+          activeDriveTabId = match.id;
+        } else {
+          const repo = getRepo();
+          const folder = repo ? repo.getUserFolders(getCurrentUserEmail()).find(f => f.id === currentFolderId) : null;
+          const newTab = {
+            id: 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            type: 'folder',
+            folderId: currentFolderId,
+            title: folder ? folder.name : 'โฟลเดอร์',
+            icon: (folder && folder.icon) || 'folder',
+            pinned: false
+          };
+          driveTabs.push(newTab);
+          activeDriveTabId = newTab.id;
+        }
+      }
+    }
+
+    function saveDriveTabs() {
+      try {
+        localStorage.setItem(getDriveTabsStorageKey(), JSON.stringify(driveTabs));
+      } catch (e) {}
+    }
+
+    function navigateToFolder(folderId, options = {}) {
       currentFolderId = folderId;
       selectedFileIds.clear();
       updateBatchActionBar();
+
+      if (!driveTabs || driveTabs.length === 0) loadSavedDriveTabs();
+
+      // Sync active tab unless navigation came from switchDriveTab
+      if (!options.fromTabSwitch) {
+        let activeTab = driveTabs.find(t => t.id === activeDriveTabId);
+        const repo = getRepo();
+        const userEmail = getCurrentUserEmail();
+        const allFolders = repo ? repo.getUserFolders(userEmail) : [];
+        const targetFolder = folderId ? allFolders.find(f => f.id === folderId) : null;
+        const targetTitle = folderId ? (targetFolder ? targetFolder.name : 'โฟลเดอร์') : 'หน้าแรกไดรฟ์';
+        const targetIcon = folderId ? ((targetFolder && targetFolder.icon) || 'folder') : 'hard-drive';
+
+        if (activeTab && !activeTab.pinned && activeTab.id !== 'tab_root') {
+          activeTab.folderId = folderId;
+          activeTab.type = folderId ? 'folder' : 'root';
+          activeTab.title = targetTitle;
+          activeTab.icon = targetIcon;
+        } else {
+          const existing = driveTabs.find(t => t.folderId === folderId);
+          if (existing) {
+            activeDriveTabId = existing.id;
+          } else {
+            const newTab = {
+              id: 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+              type: folderId ? 'folder' : 'root',
+              folderId: folderId,
+              title: targetTitle,
+              icon: targetIcon,
+              pinned: false
+            };
+            driveTabs.push(newTab);
+            activeDriveTabId = newTab.id;
+          }
+        }
+        saveDriveTabs();
+      }
+
       renderDrive();
 
       // Update Browser URL Address Bar without reload
@@ -2618,42 +2858,73 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // Dynamic Folder Tabs Switcher & In-Folder Toolbar
+    // Dynamic Multi-Tab Browser Bar & In-Folder Toolbar
     function renderFolderTabs() {
       const tabsList = document.getElementById('driveFolderTabsList');
       const insideToolbar = document.getElementById('insideFolderActionToolbar');
       const activeNameSpan = document.getElementById('insideFolderActiveName');
       if (!tabsList) return;
 
+      if (!driveTabs || driveTabs.length === 0) loadSavedDriveTabs();
+
       const userEmail = getCurrentUserEmail();
       const repo = getRepo();
-      const allFolders = repo.getUserFolders(userEmail);
+      const allFolders = repo ? repo.getUserFolders(userEmail) : [];
 
-      // Root Tab
-      let tabsHtml = `
-        <button onclick="navigateToFolder(null)" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
-          currentFolderId === null ? 'bg-orange-500 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-        }">
-          <i data-lucide="hard-drive" class="w-3.5 h-3.5 ${currentFolderId === null ? 'text-white' : 'text-orange-400'}"></i>
-          <span>หน้าแรกไดรฟ์</span>
-        </button>
-      `;
+      let html = '';
+      driveTabs.forEach(tab => {
+        const isActive = tab.id === activeDriveTabId;
+        const isPinned = !!tab.pinned;
 
-      // Folder Tabs
-      allFolders.forEach(f => {
-        const isCurrent = f.id === currentFolderId;
-        const colorIcon = f.color === 'sky' ? 'text-sky-400' : f.color === 'emerald' ? 'text-emerald-400' : f.color === 'purple' ? 'text-purple-400' : 'text-amber-400';
-        tabsHtml += `
-          <button onclick="navigateToFolder('${f.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
-            isCurrent ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
-          }">
-            <i data-lucide="${f.isLocked ? 'folder-lock' : 'folder'}" class="w-3.5 h-3.5 ${isCurrent ? 'text-white' : colorIcon}"></i>
-            <span>${escapeHtml(f.name)}</span>
-          </button>
+        let folderMeta = null;
+        if (tab.type === 'folder' && tab.folderId) {
+          folderMeta = allFolders.find(f => f.id === tab.folderId) || (currentSharedFolderContext && currentSharedFolderContext.folderMeta?.id === tab.folderId ? currentSharedFolderContext.folderMeta : null);
+        }
+
+        const iconSrc = folderMeta?.icon || tab.icon || (tab.type === 'root' ? 'hard-drive' : tab.type === 'trash' ? 'trash-2' : 'folder');
+        const isCustomImg = iconSrc && (iconSrc.startsWith('http://') || iconSrc.startsWith('https://') || iconSrc.startsWith('data:'));
+
+        const activeStyles = 'bg-gradient-to-r from-orange-600 to-amber-600 text-white font-black shadow-md shadow-orange-600/30 border border-orange-400/50 ring-1 ring-orange-400/40';
+        const inactiveStyles = 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 shadow-sm';
+
+        html += `
+          <div id="driveTabItem_${tab.id}" 
+               onclick="switchDriveTab('${tab.id}')"
+               oncontextmenu="handleTabContextMenu(event, '${tab.id}')"
+               onauxclick="handleTabAuxClick(event, '${tab.id}')"
+               title="${escapeHtml(tab.title)}${isPinned ? ' (ปักหมุดแล้ว)' : ''} [คลิกขวาเพื่อจัดการแท็บ]"
+               class="group relative px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 flex-shrink-0 cursor-pointer select-none max-w-[125px] sm:max-w-[185px] ${isActive ? activeStyles : inactiveStyles}">
+            
+            ${isPinned ? `<i data-lucide="pin" class="w-2.5 h-2.5 ${isActive ? 'text-amber-200' : 'text-amber-400'} flex-shrink-0"></i>` : ''}
+
+            ${isCustomImg 
+              ? `<img src="${escapeHtml(iconSrc)}" class="w-3.5 h-3.5 object-contain rounded flex-shrink-0" onerror="this.classList.add('hidden')">`
+              : `<i data-lucide="${escapeHtml(iconSrc)}" class="w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-white' : 'text-amber-400'}"></i>`
+            }
+
+            <span class="truncate min-w-0 text-[11px] sm:text-xs">${escapeHtml(tab.title)}</span>
+
+            ${!isPinned ? `
+              <button type="button" 
+                      onclick="closeDriveTab(event, '${tab.id}')" 
+                      class="w-4 h-4 ml-0.5 rounded-md hover:bg-black/25 ${isActive ? 'text-white/80 hover:text-white' : 'text-slate-500 hover:text-slate-200'} flex items-center justify-center transition-colors cursor-pointer flex-shrink-0"
+                      title="ปิดแท็บนี้ (หรือคลิกกลาง)">
+                <i data-lucide="x" class="w-3 h-3"></i>
+              </button>
+            ` : ''}
+          </div>
         `;
       });
 
-      tabsList.innerHTML = tabsHtml;
+      tabsList.innerHTML = html;
+
+      // Auto scroll active tab into view smoothly
+      setTimeout(() => {
+        const activeEl = document.getElementById('driveTabItem_' + activeDriveTabId);
+        if (activeEl) {
+          activeEl.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+        }
+      }, 50);
 
       // Inside Folder Action Bar & Upload Section visibility based on role
       const uploadSection = document.getElementById('driveUploadSection');
@@ -2663,7 +2934,6 @@
           insideToolbar.classList.remove('hidden');
           if (activeNameSpan) activeNameSpan.textContent = currentF.name;
 
-          // Check permissions if this is a shared folder from cloud
           const isViewingShared = currentSharedFolderContext && currentFolderId === currentSharedFolderContext.targetId;
           const isEditor = isViewingShared ? (currentSharedFolderContext.role === 'editor') : true;
 
@@ -2674,7 +2944,6 @@
           const btnDelete = document.getElementById('btnFolderDelete');
 
           if (isViewingShared && !isEditor) {
-            // Read-only / Viewer mode: strictly hide folder management & upload controls
             if (btnEdit) btnEdit.classList.add('hidden');
             if (btnShare) btnShare.classList.add('hidden');
             if (btnLock) btnLock.classList.add('hidden');
@@ -2682,7 +2951,6 @@
             if (btnDelete) btnDelete.classList.add('hidden');
             if (uploadSection) uploadSection.classList.add('hidden');
           } else {
-            // Normal or Editor mode: restore buttons
             if (btnEdit) btnEdit.classList.remove('hidden');
             if (btnShare) btnShare.classList.remove('hidden');
             if (btnLock) btnLock.classList.remove('hidden');
@@ -2698,6 +2966,470 @@
         if (uploadSection && currentUser && currentUser.email) {
           uploadSection.classList.remove('hidden');
         }
+      }
+    }
+
+    function switchDriveTab(tabId) {
+      const tab = driveTabs.find(t => t.id === tabId);
+      if (!tab) return;
+      activeDriveTabId = tabId;
+      saveDriveTabs();
+
+      if (tab.type === 'trash') {
+        if (!isTrashView) toggleTrashView();
+        renderFolderTabs();
+        return;
+      }
+
+      if (isTrashView) {
+        toggleTrashView();
+      }
+
+      navigateToFolder(tab.folderId, { fromTabSwitch: true });
+    }
+
+    function openFolderInNewTab(folderId) {
+      if (!driveTabs || driveTabs.length === 0) loadSavedDriveTabs();
+
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const allFolders = repo ? repo.getUserFolders(userEmail) : [];
+      const folder = folderId ? allFolders.find(f => f.id === folderId) : null;
+      const title = folderId ? (folder ? folder.name : 'โฟลเดอร์') : 'หน้าแรกไดรฟ์';
+      const icon = folderId ? ((folder && folder.icon) || 'folder') : 'hard-drive';
+
+      const newTab = {
+        id: 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: folderId ? 'folder' : 'root',
+        folderId: folderId,
+        title: title,
+        icon: icon,
+        pinned: false
+      };
+
+      driveTabs.push(newTab);
+      activeDriveTabId = newTab.id;
+      saveDriveTabs();
+
+      if (isTrashView) toggleTrashView();
+      navigateToFolder(folderId, { fromTabSwitch: true });
+      showToast('✨ เปิดในแท็บใหม่แล้ว');
+    }
+
+    function closeDriveTab(e, tabId) {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      const tabIdx = driveTabs.findIndex(t => t.id === tabId);
+      if (tabIdx === -1) return;
+
+      const tab = driveTabs[tabIdx];
+      if (tab.pinned) {
+        showToast('📌 ไม่สามารถปิดแท็บที่ปักหมุดไว้ได้', 'error');
+        return;
+      }
+
+      driveTabs.splice(tabIdx, 1);
+
+      if (activeDriveTabId === tabId) {
+        const nextActive = driveTabs[tabIdx] || driveTabs[tabIdx - 1] || driveTabs[0];
+        if (nextActive) {
+          activeDriveTabId = nextActive.id;
+          saveDriveTabs();
+          switchDriveTab(nextActive.id);
+        } else {
+          driveTabs = [{
+            id: 'tab_root',
+            type: 'root',
+            folderId: null,
+            title: 'หน้าแรกไดรฟ์',
+            icon: 'hard-drive',
+            pinned: true
+          }];
+          activeDriveTabId = 'tab_root';
+          saveDriveTabs();
+          switchDriveTab('tab_root');
+        }
+      } else {
+        saveDriveTabs();
+        renderFolderTabs();
+      }
+    }
+
+    function togglePinDriveTab(tabId) {
+      const tab = driveTabs.find(t => t.id === tabId);
+      if (!tab) return;
+      tab.pinned = !tab.pinned;
+
+      driveTabs.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+      saveDriveTabs();
+      renderFolderTabs();
+      showToast(tab.pinned ? '📌 ปักหมุดแท็บแล้ว' : '📍 ยกเลิกการปักหมุดแท็บแล้ว');
+    }
+
+    function duplicateDriveTab(tabId) {
+      const tab = driveTabs.find(t => t.id === tabId);
+      if (!tab) return;
+      const newTab = {
+        ...tab,
+        id: 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        pinned: false,
+        title: tab.title + ' (คัดลอก)'
+      };
+      const idx = driveTabs.findIndex(t => t.id === tabId);
+      driveTabs.splice(idx + 1, 0, newTab);
+      activeDriveTabId = newTab.id;
+      saveDriveTabs();
+      switchDriveTab(newTab.id);
+      showToast('📑 ทำซ้ำแท็บแล้ว');
+    }
+
+    function closeOtherDriveTabs(tabId) {
+      driveTabs = driveTabs.filter(t => t.id === tabId || t.pinned);
+      saveDriveTabs();
+      renderFolderTabs();
+      showToast('✕ ปิดแท็บอื่นเรียบร้อย');
+    }
+
+    function closeTabsToRight(tabId) {
+      const idx = driveTabs.findIndex(t => t.id === tabId);
+      if (idx === -1) return;
+      driveTabs = driveTabs.filter((t, i) => i <= idx || t.pinned);
+      saveDriveTabs();
+      renderFolderTabs();
+      showToast('✕ ปิดแท็บทางขวามือเรียบร้อย');
+    }
+
+    function scrollDriveTabs(direction) {
+      const list = document.getElementById('driveFolderTabsList');
+      if (!list) return;
+      const scrollAmount = direction === 'left' ? -220 : 220;
+      list.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+
+    // New Tab Dropdown Picker
+    function toggleNewTabDropdown(e) {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      const dd = document.getElementById('newTabDropdown');
+      if (!dd) return;
+
+      if (!dd.classList.contains('hidden')) {
+        closeNewTabDropdown();
+        return;
+      }
+
+      populateNewTabOptions();
+
+      const btn = document.getElementById('btnNewDriveTab');
+      if (btn) {
+        const rect = btn.getBoundingClientRect();
+        dd.style.position = 'fixed';
+        const posX = Math.min(rect.left, window.innerWidth - 250);
+        dd.style.left = Math.max(10, posX) + 'px';
+        dd.style.top = (rect.bottom + 6) + 'px';
+        dd.style.zIndex = '60';
+      }
+
+      dd.classList.remove('hidden');
+      dd.style.display = 'block';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeNewTabDropdown() {
+      const dd = document.getElementById('newTabDropdown');
+      if (dd) {
+        dd.classList.add('hidden');
+        dd.style.display = 'none';
+      }
+    }
+
+    function populateNewTabOptions() {
+      const list = document.getElementById('newTabOptionsList');
+      if (!list) return;
+
+      const userEmail = getCurrentUserEmail();
+      const repo = getRepo();
+      const allFolders = repo ? repo.getUserFolders(userEmail).filter(f => !f.isTrash) : [];
+
+      let html = `
+        <button type="button" onclick="openCustomNewTab('root')" class="w-full px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer text-slate-200">
+          <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span class="font-bold">หน้าแรกไดรฟ์ (Root)</span>
+        </button>
+        <button type="button" onclick="openCustomNewTab('trash')" class="w-full px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer text-slate-200">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span class="font-bold">ถังขยะ (Trash)</span>
+        </button>
+        <div class="h-px bg-slate-800 my-1"></div>
+        <div class="px-2 py-0.5 text-[10px] font-bold text-slate-500 uppercase">โฟลเดอร์ของคุณ (${allFolders.length})</div>
+      `;
+
+      if (allFolders.length === 0) {
+        html += `<div class="px-2 py-1.5 text-[11px] text-slate-500 italic">ยังไม่มีโฟลเดอร์</div>`;
+      } else {
+        allFolders.forEach(f => {
+          const colorIcon = f.color === 'sky' ? 'text-sky-400' : f.color === 'emerald' ? 'text-emerald-400' : f.color === 'purple' ? 'text-purple-400' : 'text-amber-400';
+          html += `
+            <button type="button" onclick="openCustomNewTab('folder', '${f.id}')" class="w-full px-2.5 py-1.5 rounded-xl hover:bg-slate-800 text-left flex items-center gap-2 transition cursor-pointer text-slate-300 hover:text-white">
+              <i data-lucide="${f.isLocked ? 'folder-lock' : 'folder'}" class="w-3.5 h-3.5 ${colorIcon} flex-shrink-0"></i>
+              <span class="truncate">${escapeHtml(f.name)}</span>
+            </button>
+          `;
+        });
+      }
+
+      list.innerHTML = html;
+    }
+
+    function openCustomNewTab(type, folderId = null) {
+      closeNewTabDropdown();
+      if (type === 'root') {
+        openFolderInNewTab(null);
+      } else if (type === 'trash') {
+        const newTab = {
+          id: 'tab_trash_' + Date.now(),
+          type: 'trash',
+          folderId: null,
+          title: 'ถังขยะ',
+          icon: 'trash-2',
+          pinned: false
+        };
+        driveTabs.push(newTab);
+        activeDriveTabId = newTab.id;
+        saveDriveTabs();
+        if (!isTrashView) toggleTrashView();
+        renderFolderTabs();
+        showToast('🗑️ เปิดแท็บถังขยะแล้ว');
+      } else if (type === 'folder' && folderId) {
+        openFolderInNewTab(folderId);
+      }
+    }
+
+    // Tab Context Menu
+    let activeContextMenuTabId = null;
+
+    function handleTabContextMenu(e, tabId) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      activeContextMenuTabId = tabId;
+      const tab = driveTabs.find(t => t.id === tabId);
+      if (!tab) return;
+
+      const menu = document.getElementById('tabContextMenu');
+      const title = document.getElementById('ctxTabTitle');
+      const pinLabel = document.getElementById('ctxTabPinLabel');
+
+      if (title) title.textContent = tab.title;
+      if (pinLabel) pinLabel.textContent = tab.pinned ? 'ยกเลิกการปักหมุด (Unpin)' : 'ปักหมุดแท็บนี้ (Pin)';
+
+      if (menu) {
+        menu.classList.remove('hidden');
+        menu.style.display = 'block';
+
+        const menuWidth = menu.offsetWidth || 210;
+        const menuHeight = menu.offsetHeight || 220;
+        const posX = (e.clientX + menuWidth > window.innerWidth) ? (window.innerWidth - menuWidth - 12) : e.clientX;
+        const posY = (e.clientY + menuHeight > window.innerHeight) ? (window.innerHeight - menuHeight - 12) : e.clientY;
+
+        menu.style.position = 'fixed';
+        menu.style.left = `${Math.max(10, posX)}px`;
+        menu.style.top = `${Math.max(10, posY)}px`;
+        menu.style.zIndex = '60';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    function closeTabContextMenu() {
+      const menu = document.getElementById('tabContextMenu');
+      if (menu) {
+        menu.classList.add('hidden');
+        menu.style.display = 'none';
+      }
+      activeContextMenuTabId = null;
+    }
+
+    function handleTabAuxClick(e, tabId) {
+      if (e.button === 1) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeDriveTab(e, tabId);
+      }
+    }
+
+    function handleTabCtxAction(action) {
+      const tabId = activeContextMenuTabId;
+      closeTabContextMenu();
+      if (!tabId) return;
+
+      if (action === 'pin') {
+        togglePinDriveTab(tabId);
+      } else if (action === 'duplicate') {
+        duplicateDriveTab(tabId);
+      } else if (action === 'close') {
+        closeDriveTab(null, tabId);
+      } else if (action === 'close-others') {
+        closeOtherDriveTabs(tabId);
+      } else if (action === 'close-right') {
+        closeTabsToRight(tabId);
+      }
+    }
+
+    // Folder Context Menu & Mobile Long-Press Engine
+    let activeContextMenuFolderId = null;
+    let _folderTouchTimer = null;
+    let _folderTouchStartPos = { x: 0, y: 0 };
+    let _folderTouchTriggered = false;
+
+    function handleFolderContextMenu(e, folderId) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      openFolderContextMenu(e.clientX, e.clientY, folderId);
+    }
+
+    function openFolderContextMenu(x, y, folderId) {
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const allFolders = repo ? repo.getUserFolders(userEmail) : [];
+      const folder = allFolders.find(f => f.id === folderId);
+      if (!folder) return;
+
+      activeContextMenuFolderId = folderId;
+
+      const menu = document.getElementById('folderContextMenu');
+      const title = document.getElementById('ctxFolderTitle');
+      const subtitle = document.getElementById('ctxFolderSubtitle');
+      const iconWrap = document.getElementById('ctxFolderIconWrap');
+
+      if (title) title.textContent = folder.name;
+      if (subtitle) {
+        const fileCount = (repo.getUserFiles(userEmail) || []).filter(file => file.folderId === folderId && !file.isTrash).length;
+        subtitle.textContent = `${fileCount} รายการ • ${folder.isLocked ? '🔒 ล็อคแล้ว' : 'ปกติ'}`;
+      }
+
+      if (iconWrap) {
+        const isCustomImg = folder.icon && (folder.icon.startsWith('http://') || folder.icon.startsWith('https://') || folder.icon.startsWith('data:'));
+        if (isCustomImg) {
+          iconWrap.innerHTML = `<img src="${escapeHtml(folder.icon)}" class="w-4 h-4 object-contain rounded">`;
+        } else {
+          iconWrap.innerHTML = `<i data-lucide="${escapeHtml(folder.icon || (folder.isLocked ? 'folder-lock' : 'folder'))}" class="w-4 h-4"></i>`;
+        }
+      }
+
+      if (menu) {
+        menu.classList.remove('hidden');
+        menu.style.display = 'block';
+
+        const menuWidth = menu.offsetWidth || 230;
+        const menuHeight = menu.offsetHeight || 290;
+        const posX = (x + menuWidth > window.innerWidth) ? (window.innerWidth - menuWidth - 12) : x;
+        const posY = (y + menuHeight > window.innerHeight) ? (window.innerHeight - menuHeight - 12) : y;
+
+        menu.style.position = 'fixed';
+        menu.style.left = `${Math.max(10, posX)}px`;
+        menu.style.top = `${Math.max(10, posY)}px`;
+        menu.style.zIndex = '60';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    function closeFolderContextMenu() {
+      const menu = document.getElementById('folderContextMenu');
+      if (menu) {
+        menu.classList.add('hidden');
+        menu.style.display = 'none';
+      }
+      activeContextMenuFolderId = null;
+    }
+
+    function handleFolderTouchStart(e, folderId) {
+      if (!e.touches || e.touches.length !== 1) return;
+      _folderTouchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      _folderTouchTriggered = false;
+
+      if (_folderTouchTimer) clearTimeout(_folderTouchTimer);
+
+      _folderTouchTimer = setTimeout(() => {
+        _folderTouchTriggered = true;
+        if (navigator.vibrate) {
+          try { navigator.vibrate(45); } catch (_) {}
+        }
+        openFolderContextMenu(_folderTouchStartPos.x, _folderTouchStartPos.y, folderId);
+      }, 450);
+    }
+
+    function handleFolderTouchMove(e) {
+      if (!_folderTouchTimer) return;
+      if (!e.touches || e.touches.length !== 1) return;
+      const dx = Math.abs(e.touches[0].clientX - _folderTouchStartPos.x);
+      const dy = Math.abs(e.touches[0].clientY - _folderTouchStartPos.y);
+      if (dx > 12 || dy > 12) {
+        clearTimeout(_folderTouchTimer);
+        _folderTouchTimer = null;
+      }
+    }
+
+    function handleFolderTouchEnd(e) {
+      if (_folderTouchTimer) {
+        clearTimeout(_folderTouchTimer);
+        _folderTouchTimer = null;
+      }
+      if (_folderTouchTriggered) {
+        if (e && e.cancelable) e.preventDefault();
+        setTimeout(() => {
+          _folderTouchTriggered = false;
+        }, 350);
+      }
+    }
+
+    function handleFolderTouchCancel(e) {
+      if (_folderTouchTimer) {
+        clearTimeout(_folderTouchTimer);
+        _folderTouchTimer = null;
+      }
+      _folderTouchTriggered = false;
+    }
+
+    function handleFolderAuxClick(e, folderId) {
+      if (e.button === 1) {
+        e.preventDefault();
+        e.stopPropagation();
+        openFolderInNewTab(folderId);
+      }
+    }
+
+    function handleFolderCtxAction(action) {
+      const folderId = activeContextMenuFolderId;
+      closeFolderContextMenu();
+      if (!folderId) return;
+
+      const repo = getRepo();
+      const userEmail = getCurrentUserEmail();
+      const allFolders = repo ? repo.getUserFolders(userEmail) : [];
+      const folder = allFolders.find(f => f.id === folderId);
+      if (!folder) return;
+
+      if (action === 'open') {
+        handleFolderCardClick(folderId);
+      } else if (action === 'open-new-tab') {
+        openFolderInNewTab(folderId);
+      } else if (action === 'edit') {
+        openEditFolderModal(folderId);
+      } else if (action === 'move') {
+        openMoveFolderModal(folderId, folder.name);
+      } else if (action === 'share') {
+        openShareModal('folder', folderId, folder.name);
+      } else if (action === 'lock') {
+        openLockModal('folder', folderId, folder.name);
+      } else if (action === 'delete') {
+        handleDeleteFolder(folderId);
       }
     }
 
@@ -2870,7 +3602,19 @@
           : `<i data-lucide="${escapeHtml(f.icon || (f.isLocked ? 'folder-lock' : 'folder'))}" class="w-5 h-5"></i>`;
 
         return `
-          <div data-folder-id="${f.id}" ondragover="handleFolderDragOver(event)" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event, '${f.id}')" style="${customCardStyle}" class="group relative p-4 rounded-3xl bg-slate-900/70 hover:bg-slate-850/90 backdrop-blur-md border ${isShared ? 'border-orange-500/50 shadow-orange-500/5' : 'border-slate-800/80 hover:border-slate-700/90'} hover:shadow-xl transition-all duration-300 flex flex-col justify-between gap-3.5 cursor-pointer shadow-sm active:scale-[0.98]" onclick="handleFolderCardClick('${f.id}')">
+          <div data-folder-id="${f.id}" 
+               ondragover="handleFolderDragOver(event)" 
+               ondragleave="handleFolderDragLeave(event)" 
+               ondrop="handleFolderDrop(event, '${f.id}')" 
+               oncontextmenu="handleFolderContextMenu(event, '${f.id}')"
+               ontouchstart="handleFolderTouchStart(event, '${f.id}')"
+               ontouchmove="handleFolderTouchMove(event)"
+               ontouchend="handleFolderTouchEnd(event)"
+               ontouchcancel="handleFolderTouchCancel(event)"
+               onauxclick="handleFolderAuxClick(event, '${f.id}')"
+               style="${customCardStyle}" 
+               class="group relative p-4 rounded-3xl bg-slate-900/70 hover:bg-slate-850/90 backdrop-blur-md border ${isShared ? 'border-orange-500/50 shadow-orange-500/5' : 'border-slate-800/80 hover:border-slate-700/90'} hover:shadow-xl transition-all duration-300 flex flex-col justify-between gap-3.5 cursor-pointer shadow-sm active:scale-[0.98]" 
+               onclick="handleFolderCardClick('${f.id}')">
             
             <div class="flex items-start justify-between">
               <div class="w-11 h-11 rounded-2xl ${colorClasses} border flex items-center justify-center relative shadow-sm group-hover:scale-105 transition-transform duration-200 overflow-hidden">
@@ -2915,6 +3659,7 @@
     }
 
     async function handleFolderCardClick(folderId) {
+      if (_folderTouchTriggered) return;
       const repo = getRepo();
       const userEmail = getCurrentUserEmail();
       const folders = repo.getUserFolders(userEmail);
@@ -4548,6 +5293,13 @@
         if (currentFolderId === folderId) {
           currentFolderId = null;
         }
+        if (Array.isArray(driveTabs)) {
+          driveTabs = driveTabs.filter(t => t.folderId !== folderId);
+          if (!driveTabs.some(t => t.id === activeDriveTabId)) {
+            activeDriveTabId = driveTabs[0]?.id || 'tab_root';
+          }
+          saveDriveTabs();
+        }
         if (userEmail) {
           await repo.syncDriveDataToCloud(userEmail).catch(() => {});
         }
@@ -5687,13 +6439,27 @@
       activeContextMenuFileId = null;
     }
 
-    // Close context menu on outside click or scroll
+    // Close context menu and dropdowns on outside click or scroll
     document.addEventListener('click', (e) => {
       if (!e.target.closest('#driveContextMenu')) {
         closeContextMenu();
       }
+      if (!e.target.closest('#folderContextMenu')) {
+        closeFolderContextMenu();
+      }
+      if (!e.target.closest('#tabContextMenu')) {
+        closeTabContextMenu();
+      }
+      if (!e.target.closest('#newTabDropdown') && !e.target.closest('#btnNewDriveTab')) {
+        closeNewTabDropdown();
+      }
     });
-    window.addEventListener('scroll', closeContextMenu, { passive: true });
+    window.addEventListener('scroll', () => {
+      closeContextMenu();
+      closeFolderContextMenu();
+      closeTabContextMenu();
+      closeNewTabDropdown();
+    }, { passive: true });
 
     function handleCtxAction(action) {
       const fileId = activeContextMenuFileId;
