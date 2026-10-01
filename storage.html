@@ -1072,23 +1072,23 @@
           </div>
 
           <div class="flex items-center gap-1.5 flex-wrap">
-            <button onclick="handleEditCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold transition flex items-center gap-1 cursor-pointer">
+            <button id="btnFolderEdit" onclick="handleEditCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold transition flex items-center gap-1 cursor-pointer">
               <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
               <span>เปลี่ยนชื่อ / สี</span>
             </button>
-            <button onclick="handleShareCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 hover:text-orange-300 font-bold transition flex items-center gap-1 cursor-pointer">
+            <button id="btnFolderShare" onclick="handleShareCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 hover:text-orange-300 font-bold transition flex items-center gap-1 cursor-pointer">
               <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
               <span>แชร์โฟลเดอร์นี้</span>
             </button>
-            <button onclick="handleLockCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 font-bold transition flex items-center gap-1 cursor-pointer">
+            <button id="btnFolderLock" onclick="handleLockCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 font-bold transition flex items-center gap-1 cursor-pointer">
               <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
               <span>ล็อครหัสผ่าน</span>
             </button>
-            <button onclick="handleUploadDirectToCurrentFolder()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black shadow-md transition flex items-center gap-1 cursor-pointer">
+            <button id="btnFolderUpload" onclick="handleUploadDirectToCurrentFolder()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black shadow-md transition flex items-center gap-1 cursor-pointer">
               <i data-lucide="upload" class="w-3.5 h-3.5"></i>
               <span>อัปโหลดลงโฟลเดอร์นี้</span>
             </button>
-            <button onclick="handleDeleteCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold transition flex items-center gap-1 cursor-pointer" title="ลบโฟลเดอร์">
+            <button id="btnFolderDelete" onclick="handleDeleteCurrentFolder()" class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold transition flex items-center gap-1 cursor-pointer" title="ลบโฟลเดอร์">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -2487,17 +2487,49 @@
 
       tabsList.innerHTML = tabsHtml;
 
-      // Inside Folder Action Bar
+      // Inside Folder Action Bar & Upload Section visibility based on role
+      const uploadSection = document.getElementById('driveUploadSection');
       if (currentFolderId && insideToolbar) {
         const currentF = allFolders.find(f => f.id === currentFolderId) || (currentSharedFolderContext && currentSharedFolderContext.folderMeta?.id === currentFolderId ? currentSharedFolderContext.folderMeta : null);
         if (currentF) {
           insideToolbar.classList.remove('hidden');
           if (activeNameSpan) activeNameSpan.textContent = currentF.name;
+
+          // Check permissions if this is a shared folder from cloud
+          const isViewingShared = currentSharedFolderContext && currentFolderId === currentSharedFolderContext.targetId;
+          const isEditor = isViewingShared ? (currentSharedFolderContext.role === 'editor') : true;
+
+          const btnEdit = document.getElementById('btnFolderEdit');
+          const btnShare = document.getElementById('btnFolderShare');
+          const btnLock = document.getElementById('btnFolderLock');
+          const btnUpload = document.getElementById('btnFolderUpload');
+          const btnDelete = document.getElementById('btnFolderDelete');
+
+          if (isViewingShared && !isEditor) {
+            // Read-only / Viewer mode: strictly hide folder management & upload controls
+            if (btnEdit) btnEdit.classList.add('hidden');
+            if (btnShare) btnShare.classList.add('hidden');
+            if (btnLock) btnLock.classList.add('hidden');
+            if (btnUpload) btnUpload.classList.add('hidden');
+            if (btnDelete) btnDelete.classList.add('hidden');
+            if (uploadSection) uploadSection.classList.add('hidden');
+          } else {
+            // Normal or Editor mode: restore buttons
+            if (btnEdit) btnEdit.classList.remove('hidden');
+            if (btnShare) btnShare.classList.remove('hidden');
+            if (btnLock) btnLock.classList.remove('hidden');
+            if (btnUpload) btnUpload.classList.remove('hidden');
+            if (btnDelete) btnDelete.classList.remove('hidden');
+            if (uploadSection && currentUser && currentUser.email) uploadSection.classList.remove('hidden');
+          }
         } else {
           insideToolbar.classList.add('hidden');
         }
       } else if (insideToolbar) {
         insideToolbar.classList.add('hidden');
+        if (uploadSection && currentUser && currentUser.email) {
+          uploadSection.classList.remove('hidden');
+        }
       }
     }
 
@@ -4386,6 +4418,11 @@
 
           renderShareLinkResult(shareRecord, true);
           showToast('✨ บันทึกลง Supabase และสร้างลิงก์แชร์สำเร็จแล้ว!');
+        }
+
+        // Always re-sync cloud shares if sharing a folder to guarantee latest folder files are on Supabase
+        if (shareRecord && shareRecord.targetType === 'folder') {
+          await repo.syncShareToCloud(shareRecord);
         }
       } catch (err) {
         console.error('[storage.html] Error in handleGenerateShareLink:', err);

@@ -239,9 +239,9 @@
           }
           // Gather latest files belonging to this folder from local fileCatalog
           const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
-          folderFiles = allFiles.filter(item => {
+          const localFolderFiles = allFiles.filter(item => {
             const meta = this.getFileMeta(item.id);
-            return meta && meta.folderId === shareRecord.targetId;
+            return (meta && meta.folderId === shareRecord.targetId) || item.folderId === shareRecord.targetId;
           }).map(item => ({
             id: item.id,
             name: item.originalName || item.name || 'ไฟล์',
@@ -249,8 +249,19 @@
             size: item.size || 0,
             type: item.type || '',
             provider: item.provider || 'cloud',
+            uploaderEmail: item.uploaderEmail || item.ownerEmail || item.uploadedBy || '',
+            uploaderName: item.uploaderName || '',
             uploadedAt: item.uploadedAt || ''
           }));
+
+          // Merge: prioritize latest local files, but retain any existing folderFiles if local fileCatalog is missing them
+          const mergedMap = new Map();
+          if (Array.isArray(folderFiles)) {
+            folderFiles.forEach(f => { if (f && f.id) mergedMap.set(f.id, f); });
+          }
+          localFolderFiles.forEach(f => { if (f && f.id) mergedMap.set(f.id, f); });
+          folderFiles = Array.from(mergedMap.values());
+
           shareRecord.folderFiles = folderFiles;
           shareRecord.folderMeta = folderMeta;
         }
