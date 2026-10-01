@@ -38,6 +38,10 @@
   <script src="config/supabase_config.js"></script>
   <script src="assets/js/shortlink_repo.js"></script>
   <script src="assets/js/storage_drive_repo.js"></script>
+  <!-- SheetJS & Mammoth.js for In-Browser Document Previews -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="assets/js/doc_preview_engine.js"></script>
 
   <style>
     .bg-mesh-glow {
@@ -1006,22 +1010,22 @@
       const isTargetDoc = ['doc', 'docx'].includes(targetExt);
       const isTargetXls = ['xls', 'xlsx', 'csv'].includes(targetExt);
       const isTargetPpt = ['ppt', 'pptx'].includes(targetExt);
-      const isTargetOffice = isTargetDoc || isTargetXls || isTargetPpt;
 
-      let effectivePreviewSrc = rawTargetUrl;
       let previewTypeBadge = 'Live Web Preview';
       let previewIcon = 'scan-eye';
 
       if (isTargetPdf) {
-        effectivePreviewSrc = `${rawTargetUrl}#toolbar=1`;
         previewTypeBadge = 'PDF Document Preview';
         previewIcon = 'file-text';
-      } else if (isTargetOffice) {
-        effectivePreviewSrc = rawTargetUrl.startsWith('http')
-          ? `https://docs.google.com/viewer?url=${encodeURIComponent(rawTargetUrl)}&embedded=true`
-          : rawTargetUrl;
-        previewTypeBadge = isTargetXls ? 'Excel Spreadsheet Preview' : (isTargetDoc ? 'Word Document Preview' : 'PowerPoint Presentation Preview');
-        previewIcon = isTargetXls ? 'table' : (isTargetDoc ? 'file-text' : 'presentation');
+      } else if (isTargetXls) {
+        previewTypeBadge = 'Excel Spreadsheet (In-Browser)';
+        previewIcon = 'table';
+      } else if (isTargetDoc) {
+        previewTypeBadge = 'Word Document (In-Browser)';
+        previewIcon = 'file-text';
+      } else if (isTargetPpt) {
+        previewTypeBadge = 'Presentation File';
+        previewIcon = 'presentation';
       }
 
       // Dynamic Preview Frame / Card (Large Viewport per User Request)
@@ -1036,8 +1040,7 @@
               </span>
               <span class="text-[11px] text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">COMED KKU 69</span>
             </div>
-            <div class="relative w-full h-80 sm:h-96 bg-white flex items-center justify-center overflow-hidden">
-              <iframe id="redirectPreviewIframe" src="${effectivePreviewSrc}" class="w-full h-full border-0 bg-white" loading="eager"></iframe>
+            <div id="redirectPreviewCanvas" class="relative w-full min-h-[320px] max-h-[460px] bg-slate-950 flex items-center justify-center overflow-auto">
             </div>
           </div>
         `;
@@ -1046,10 +1049,23 @@
           targetCard.insertAdjacentHTML('afterend', previewHtml);
         }
       } else {
-        const iframe = document.getElementById('redirectPreviewIframe');
-        if (iframe) iframe.src = effectivePreviewSrc;
         const typeBadge = document.getElementById('redirectPreviewTypeBadge');
         if (typeBadge) typeBadge.textContent = `ตัวอย่างไฟล์: ${previewTypeBadge}`;
+      }
+
+      const previewCanvas = document.getElementById('redirectPreviewCanvas');
+      if (previewCanvas) {
+        const docFileName = link.title || rawTargetUrl.split('/').pop().split('?')[0] || 'document';
+        if (isTargetXls && window.DocPreviewEngine) {
+          window.DocPreviewEngine.renderExcel(previewCanvas, rawTargetUrl, docFileName, { heightClass: 'min-h-[320px] max-h-[460px] h-[360px]' });
+        } else if (isTargetDoc && window.DocPreviewEngine) {
+          window.DocPreviewEngine.renderWord(previewCanvas, rawTargetUrl, docFileName, { heightClass: 'min-h-[320px] max-h-[460px] h-[360px]' });
+        } else if (isTargetPdf) {
+          previewCanvas.innerHTML = `<iframe src="${rawTargetUrl}#toolbar=1" class="w-full h-80 sm:h-96 border-0 bg-white" loading="eager"></iframe>`;
+        } else {
+          // Standard web url preview
+          previewCanvas.innerHTML = `<iframe src="${rawTargetUrl}" class="w-full h-80 sm:h-96 border-0 bg-white" loading="eager" sandbox="allow-scripts allow-same-origin"></iframe>`;
+        }
       }
 
       if (typeof lucide !== 'undefined') lucide.createIcons();

@@ -53,6 +53,10 @@
 
   <!-- JSZip for Folder / Multi-File Downloads -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- SheetJS & Mammoth.js for Client-Side Excel & Word Previews (Zero External Cloud Server Dependencies) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="assets/js/doc_preview_engine.js"></script>
   <!-- Multi-Downloader Core -->
   <script src="assets/js/multi_downloader.js"></script>
   <!-- Drag to Select Mouse Engine -->
@@ -4468,27 +4472,26 @@
             </div>
           `;
         } else if (isPdf && fileUrl) {
-          canvas.innerHTML = `<iframe src="${fileUrl}#toolbar=1" class="w-full h-full min-h-[75vh] rounded-2xl border border-slate-800 shadow-xl bg-white"></iframe>`;
-        } else if (isOfficeDoc && fileUrl) {
-          // ใช้ Google Docs & Office Viewer สำหรับ Word, Excel, PPT
-          const officeViewerUrl = fileUrl.startsWith('http') 
-            ? `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true` 
-            : fileUrl;
-          canvas.innerHTML = `
-            <div class="w-full h-full min-h-[75vh] flex flex-col rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl">
-              <div class="px-4 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
-                <span class="flex items-center gap-2 font-bold">
-                  <i data-lucide="${isXls ? 'table' : (isDoc ? 'file-text' : 'presentation')}" class="w-4 h-4 text-emerald-400"></i>
-                  <span>พรีวิวเอกสาร (${(ext || 'DOC').toUpperCase()})</span>
-                </span>
-                <a href="${fileUrl}" target="_blank" download class="text-[11px] text-orange-400 hover:underline flex items-center gap-1 font-bold">
-                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                  <span>ดาวน์โหลดไฟล์</span>
-                </a>
-              </div>
-              <iframe src="${officeViewerUrl}" class="w-full flex-1 min-h-[70vh] border-none bg-white" loading="lazy"></iframe>
-            </div>
-          `;
+          if (window.DocPreviewEngine) {
+            window.DocPreviewEngine.renderPdf(canvas, fileUrl, fileName, { heightClass: 'min-h-[75vh] h-[80vh]' });
+          } else {
+            canvas.innerHTML = `<iframe src="${fileUrl}#toolbar=1" class="w-full h-full min-h-[75vh] rounded-2xl border border-slate-800 shadow-xl bg-white"></iframe>`;
+          }
+        } else if (isXls && fileUrl) {
+          // Client-side Excel Preview via SheetJS (ไม่ใช้ Google Docs Viewer)
+          if (window.DocPreviewEngine) {
+            window.DocPreviewEngine.renderExcel(canvas, fileUrl, fileName, { heightClass: 'min-h-[75vh] h-[80vh]' });
+          }
+        } else if (isDoc && fileUrl) {
+          // Client-side Word Preview via Mammoth.js (ไม่ใช้ Google Docs Viewer)
+          if (window.DocPreviewEngine) {
+            window.DocPreviewEngine.renderWord(canvas, fileUrl, fileName, { heightClass: 'min-h-[75vh] h-[80vh]' });
+          }
+        } else if (isPpt && fileUrl) {
+          // สำหรับ PPT แสดงหน้าบัตรดาวน์โหลดและเปิดดู
+          if (window.DocPreviewEngine) {
+            window.DocPreviewEngine.renderFallback(canvas, fileUrl, fileName, 'PowerPoint Presentation');
+          }
         } else {
           canvas.innerHTML = `
             <div class="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-4 max-w-sm w-full shadow-2xl">
@@ -4738,32 +4741,29 @@
           </div>
         `;
       } else if (isPdf) {
-        canvas.innerHTML = `
-          <div class="w-full max-w-5xl h-[82vh] rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-white">
-            <iframe src="${file.url}#toolbar=1" class="w-full h-full border-none"></iframe>
-          </div>
-        `;
-      } else if (isOfficeDoc) {
-        const officeViewerUrl = file.url && file.url.startsWith('http') 
-          ? `https://docs.google.com/viewer?url=${encodeURIComponent(file.url)}&embedded=true` 
-          : file.url;
-        canvas.innerHTML = `
-          <div class="w-full max-w-5xl h-[82vh] flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950">
-            <div class="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
-              <span class="flex items-center gap-2 font-bold">
-                <i data-lucide="${isXls ? 'table' : (isDoc ? 'file-text' : 'presentation')}" class="w-4 h-4 text-emerald-400"></i>
-                <span>พรีวิวเอกสาร (${(ext || 'DOC').toUpperCase()})</span>
-              </span>
-              <div class="flex items-center gap-2">
-                <button onclick="handleGalleryDownloadOriginal()" class="text-xs text-orange-400 hover:text-orange-300 font-bold flex items-center gap-1 cursor-pointer">
-                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                  <span>ดาวน์โหลดไฟล์</span>
-                </button>
-              </div>
+        if (window.DocPreviewEngine) {
+          window.DocPreviewEngine.renderPdf(canvas, file.url, fileName, { heightClass: 'max-w-5xl h-[82vh]' });
+        } else {
+          canvas.innerHTML = `
+            <div class="w-full max-w-5xl h-[82vh] rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-white">
+              <iframe src="${file.url}#toolbar=1" class="w-full h-full border-none"></iframe>
             </div>
-            <iframe src="${officeViewerUrl}" class="w-full flex-1 border-none bg-white" loading="lazy"></iframe>
-          </div>
-        `;
+          `;
+        }
+      } else if (isXls) {
+        // Client-side Excel Spreadsheet Preview via SheetJS (Pure client-side)
+        if (window.DocPreviewEngine) {
+          window.DocPreviewEngine.renderExcel(canvas, file.url, fileName, { heightClass: 'max-w-5xl h-[82vh]' });
+        }
+      } else if (isDoc) {
+        // Client-side Word Document Preview via Mammoth.js (Pure client-side)
+        if (window.DocPreviewEngine) {
+          window.DocPreviewEngine.renderWord(canvas, file.url, fileName, { heightClass: 'max-w-5xl h-[82vh]' });
+        }
+      } else if (isPpt) {
+        if (window.DocPreviewEngine) {
+          window.DocPreviewEngine.renderFallback(canvas, file.url, fileName, 'PowerPoint Presentation');
+        }
       } else {
         canvas.innerHTML = `
           <div class="p-8 sm:p-12 rounded-3xl bg-slate-900/90 border border-slate-800 text-center space-y-5 max-w-md w-full shadow-2xl backdrop-blur-xl">
