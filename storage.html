@@ -795,10 +795,11 @@
               <i data-lucide="server" class="w-3.5 h-3.5 text-orange-400"></i>
               <span>ผู้ให้บริการคลาวด์:</span>
             </label>
-            <select id="userPreferredProvider" class="bg-slate-950 border border-slate-700 text-white text-xs font-medium rounded-xl px-3 py-1.5 focus:outline-none focus:border-orange-500">
-              <option value="cloudinary" selected>☁️ Cloudinary (แนะนำ - เร็ว เสถียร CDN สูงสุด 100MB)</option>
-              <option value="catbox">📦 Catbox.moe (ไฟล์ทั่วไป เอกสาร ZIP วิดีโอ สูงสุด 200MB)</option>
-              <option value="imgbb">🖼️ ImgBB (เฉพาะรูปภาพ สูงสุด 32MB)</option>
+            <select id="userPreferredProvider" class="bg-slate-950 border border-slate-700 text-white text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500">
+              <option value="catbox" selected>📦 Catbox.moe (อันดับ 1 - ไฟล์ทั่วไป เอกสาร ZIP วิดีโอ สูงสุด 200MB)</option>
+              <option value="imgbb">🖼️ ImgBB (อันดับ 2 - รูปภาพ โหลดเร็ว สูงสุด 32MB)</option>
+              <option value="cloudinary">☁️ Cloudinary (อันดับ 3 - CDN เสถียรสูง สูงสุด 100MB)</option>
+              <option value="auto">🔄 อัตโนมัติ (ตามลำดับ: Catbox ➔ ImgBB ➔ Cloudinary)</option>
             </select>
           </div>
 
@@ -811,10 +812,10 @@
               </select>
             </div>
 
-            <!-- Compress Toggle -->
-            <button onclick="toggleCompressionMode()" id="btnCompressMode" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 hover:border-slate-600 text-xs font-bold text-slate-300 flex items-center gap-1.5 transition cursor-pointer">
-              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span id="compressModeText">⚡ บีบอัดอัตโนมัติ</span>
+            <!-- Compress Toggle with High Contrast & Visual Prominence -->
+            <button onclick="toggleCompressionMode()" id="btnCompressMode" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 border-2 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-500/20 text-xs font-black flex items-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-95" title="คลิกเพื่อสลับระหว่างโหมดบีบอัดไฟล์ กับโหมดต้นฉบับคมชัดเต็ม">
+              <span id="compressModeIcon" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="compressModeText">⚡ โหมดบีบอัดภาพ (ประหยัดพื้นที่ 75%)</span>
             </button>
           </div>
         </div>
@@ -859,6 +860,17 @@
                 ยกเลิกทั้งหมด
               </button>
             </div>
+          </div>
+
+          <!-- Staging Mode Notice: High visibility indicator of compression status -->
+          <div id="stagingModeNotice" class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs gap-2">
+            <div class="flex items-center gap-2">
+              <span id="stagingModeDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span id="stagingModeTitle" class="font-extrabold text-emerald-300">⚡ โหมดอัปโหลด: บีบอัดอัตโนมัติ (ประหยัดพื้นที่ 75%)</span>
+            </div>
+            <button onclick="toggleCompressionMode()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold border border-slate-700 transition cursor-pointer flex-shrink-0">
+              คลิกเพื่อสลับโหมด
+            </button>
           </div>
 
           <!-- Staged Files List Container -->
@@ -2003,6 +2015,7 @@
       if (currentUser && currentUser.email) {
         const repo = getRepo();
         await repo.loadDriveDataFromCloud(currentUser.email);
+        initDriveRealtime(currentUser.email);
         // หลังโหลดข้อมูล ให้ resync folder shares เพื่ออัปเดต folderFiles ใน Supabase
         // ทำแบบ delay เล็กน้อยเพื่อรอ initSync() โหลด shares จาก Supabase ก่อน
         setTimeout(() => {
@@ -2016,6 +2029,116 @@
       }
       renderDrive();
     });
+
+    // ----------------------------------------------------
+    // Realtime Cross-Device Sync Engine (Supabase + Focus + Polling)
+    // ----------------------------------------------------
+    let _driveRealtimeChannel = null;
+    let _drivePollTimer = null;
+    let _isSyncingRealtime = false;
+
+    function initDriveRealtime(userEmail) {
+      if (!userEmail) return;
+      const email = userEmail.toLowerCase().trim();
+      const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+
+      // 1. WebSocket Realtime Channel
+      if (sb) {
+        if (_driveRealtimeChannel) {
+          try { sb.removeChannel(_driveRealtimeChannel); } catch (_) {}
+          _driveRealtimeChannel = null;
+        }
+
+        try {
+          const chanName = 'drive_rt_' + email.replace(/[^a-z0-9]/g, '_');
+          _driveRealtimeChannel = sb.channel(chanName)
+            .on('postgres_changes', {
+              event: '*',
+              schema: 'public',
+              table: 'user_profiles',
+              filter: `email=eq.${email}`
+            }, async (payload) => {
+              console.log('[DriveRealtime] ⚡ Cloud update received for:', email);
+              if (_isSyncingRealtime) return;
+              _isSyncingRealtime = true;
+              try {
+                const repo = getRepo();
+                const changed = await repo.loadDriveDataFromCloud(email);
+                if (changed) {
+                  renderDrive();
+                  updateQuotaDisplay();
+                  showToast('⚡ ไดรฟ์อัปเดตไฟล์จากอีกเครื่องเรียบร้อยแล้ว');
+                }
+              } finally {
+                _isSyncingRealtime = false;
+              }
+            })
+            .on('postgres_changes', {
+              event: '*',
+              schema: 'public',
+              table: 'shortlinks',
+              filter: `category=eq.DriveShare`
+            }, async () => {
+              console.log('[DriveRealtime] 📁 Shared folder update received');
+              const repo = getRepo();
+              await repo.initSync();
+              if (currentSharedFolderContext) {
+                await checkIncomingFolderOrShareParam();
+              }
+              renderDrive();
+            })
+            .subscribe((status) => {
+              console.log('[DriveRealtime] Subscription status:', status);
+            });
+        } catch (err) {
+          console.warn('[DriveRealtime] Subscription setup error:', err);
+        }
+      }
+
+      // 2. Tab focus & visibility change auto-sync (Immediate sync when returning to tab)
+      if (!window._driveTabFocusAttached) {
+        window._driveTabFocusAttached = true;
+        const syncOnActive = async () => {
+          if (document.visibilityState === 'visible' && currentUser && currentUser.email) {
+            const repo = getRepo();
+            const changed = await repo.loadDriveDataFromCloud(currentUser.email);
+            if (changed) {
+              renderDrive();
+              updateQuotaDisplay();
+            }
+          }
+        };
+        document.addEventListener('visibilitychange', syncOnActive);
+        window.addEventListener('focus', syncOnActive);
+      }
+
+      // 3. Periodic Background Sync (every 10s fallback for mobile background/throttling)
+      if (_drivePollTimer) clearInterval(_drivePollTimer);
+      _drivePollTimer = setInterval(async () => {
+        if (currentUser && currentUser.email && document.visibilityState === 'visible' && !_isSyncingRealtime) {
+          const repo = getRepo();
+          const changed = await repo.loadDriveDataFromCloud(currentUser.email);
+          if (changed) {
+            renderDrive();
+            updateQuotaDisplay();
+          }
+        }
+      }, 10000);
+    }
+
+    function stopDriveRealtime() {
+      if (_driveRealtimeChannel && window.getSupabaseClient) {
+        try {
+          const sb = window.getSupabaseClient();
+          if (sb) sb.removeChannel(_driveRealtimeChannel);
+        } catch (_) {}
+        _driveRealtimeChannel = null;
+      }
+      if (_drivePollTimer) {
+        clearInterval(_drivePollTimer);
+        _drivePollTimer = null;
+      }
+    }
 
 
     /**
@@ -2309,6 +2432,7 @@
         localStorage.removeItem('COMED_USER_SESSION');
         currentUser = null;
         selectedFileIds.clear();
+        stopDriveRealtime();
         updateUserUI();
         renderDrive();
         showToast('👋 ออกจากระบบเรียบร้อยแล้ว');
@@ -2409,6 +2533,9 @@
           console.log('[Storage] Cloud drive data loaded after login');
         }
       } catch (_) {}
+      if (currentUser && currentUser.email) {
+        initDriveRealtime(currentUser.email);
+      }
       renderDrive();
       if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
       showToast(`✨ เข้าสู่ระบบสำเร็จ: ${currentUser.name}`);
@@ -3519,6 +3646,9 @@
       }
 
       pendingDeletion = null;
+      if (currentUser && currentUser.email) {
+        repo.syncDriveDataToCloud(currentUser.email).catch(() => {});
+      }
       updateQuotaDisplay();
       updateTrashBadge();
       renderFilesList();
@@ -3720,6 +3850,9 @@
         targetType: 'file'
       });
 
+      if (currentUser && currentUser.email) {
+        repo.syncDriveDataToCloud(currentUser.email).catch(() => {});
+      }
       showToast('✅ กู้คืนไฟล์สำเร็จ — ไฟล์กลับมาในไดรฟ์แล้ว');
     }
 
@@ -3751,6 +3884,9 @@
           targetType: 'file'
         });
 
+        if (currentUser && currentUser.email) {
+          repo.syncDriveDataToCloud(currentUser.email).catch(() => {});
+        }
         showToast('🗑️ ลบไฟล์ถาวรแล้ว');
       } catch(e) {
         alert('เกิดข้อผิดพลาด: ' + e.message);
@@ -3777,6 +3913,9 @@
         targetType: 'file'
       });
 
+      if (currentUser && currentUser.email) {
+        repo.syncDriveDataToCloud(currentUser.email).catch(() => {});
+      }
       showToast(`✅ กู้คืน ${ids.length} ไฟล์ สำเร็จ`);
     }
 
@@ -3801,6 +3940,9 @@
       updateQuotaDisplay();
       updateTrashBadge();
       renderFilesList();
+      if (currentUser && currentUser.email) {
+        repo.syncDriveDataToCloud(currentUser.email).catch(() => {});
+      }
       showToast(`🗑️ ลบ ${ids.length} ไฟล์ อย่างถาวรแล้ว`);
     }
 
@@ -3822,6 +3964,9 @@
       await repo.batchRestoreFromTrash(ids);
       updateTrashBadge();
       renderFilesList();
+      if (currentUser && currentUser.email) {
+        repo.syncDriveDataToCloud(currentUser.email).catch(() => {});
+      }
       showToast(`✅ กู้คืน ${ids.length} ไฟล์ ทั้งหมดสำเร็จ`);
     }
 
@@ -3850,6 +3995,9 @@
       updateQuotaDisplay();
       updateTrashBadge();
       renderFilesList();
+      if (currentUser && currentUser.email) {
+        repo.syncDriveDataToCloud(currentUser.email).catch(() => {});
+      }
       showToast(`🗑️ ล้างถังขยะแล้ว (${targets.length} ไฟล์)`);
     }
 
@@ -5173,13 +5321,50 @@
 
     function toggleCompressionMode() {
       isUncompressedMode = !isUncompressedMode;
-      const text = document.getElementById('compressModeText');
+      updateCompressionUI();
       if (isUncompressedMode) {
-        text.innerHTML = '💎 ต้นฉบับ 100% (ไม่บีบอัด)';
-        text.parentElement.classList.add('border-orange-500', 'text-orange-400');
+        showToast('💎 สลับเป็น: โหมดต้นฉบับ 100% (ไฟล์ไม่ถูกบีบอัด คมชัดเต็ม)');
       } else {
-        text.innerHTML = '⚡ บีบอัดอัตโนมัติ';
-        text.parentElement.classList.remove('border-orange-500', 'text-orange-400');
+        showToast('⚡ สลับเป็น: โหมดบีบอัดภาพอัตโนมัติ (ประหยัดพื้นที่จัดเก็บ)');
+      }
+    }
+
+    function updateCompressionUI() {
+      const btn = document.getElementById('btnCompressMode');
+      const text = document.getElementById('compressModeText');
+      const icon = document.getElementById('compressModeIcon');
+      const stagingNotice = document.getElementById('stagingModeNotice');
+      const stagingDot = document.getElementById('stagingModeDot');
+      const stagingTitle = document.getElementById('stagingModeTitle');
+
+      if (isUncompressedMode) {
+        if (text) text.textContent = '💎 โหมดต้นฉบับ 100% (ไม่บีบอัด - คมชัดเต็ม)';
+        if (icon) icon.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+        if (btn) {
+          btn.className = 'px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-purple-500/20 border-2 border-amber-400 text-amber-200 ring-2 ring-amber-400/30 shadow-lg shadow-amber-500/25 text-xs font-black flex items-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-95';
+        }
+        if (stagingNotice) {
+          stagingNotice.className = 'p-3 rounded-2xl bg-amber-500/10 border-2 border-amber-400/50 flex items-center justify-between text-xs gap-2';
+        }
+        if (stagingDot) stagingDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+        if (stagingTitle) {
+          stagingTitle.className = 'font-extrabold text-amber-200';
+          stagingTitle.textContent = '💎 กำลังใช้โหมดต้นฉบับ 100% (ไม่ลดทอนคุณภาพ - ไฟล์ขนาดเต็ม)';
+        }
+      } else {
+        if (text) text.textContent = '⚡ โหมดบีบอัดภาพ (ประหยัดพื้นที่ 75%)';
+        if (icon) icon.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping';
+        if (btn) {
+          btn.className = 'px-3.5 py-1.5 rounded-xl bg-emerald-500/15 border-2 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-500/20 text-xs font-black flex items-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-95';
+        }
+        if (stagingNotice) {
+          stagingNotice.className = 'p-3 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/40 flex items-center justify-between text-xs gap-2';
+        }
+        if (stagingDot) stagingDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+        if (stagingTitle) {
+          stagingTitle.className = 'font-extrabold text-emerald-300';
+          stagingTitle.textContent = '⚡ กำลังใช้โหมดบีบอัดภาพ (ประหยัดพื้นที่ 75% - โหลดเร็วขึ้น)';
+        }
       }
     }
 
@@ -5283,6 +5468,7 @@
 
       stagingCard.classList.remove('hidden');
       dropBox.classList.add('hidden');
+      updateCompressionUI();
 
       const totalBytes = selectedFilesQueue.reduce((acc, f) => acc + f.size, 0);
       countBadge.textContent = `${selectedFilesQueue.length} ไฟล์`;
@@ -5362,7 +5548,7 @@
       }
 
       const totalFiles = selectedFilesQueue.length;
-      const chosenProvider = document.getElementById('userPreferredProvider')?.value || 'cloudinary';
+      const chosenProvider = document.getElementById('userPreferredProvider')?.value || 'catbox';
 
       const stagingCard = document.getElementById('fileStagingCard');
       const progressBox = document.getElementById('uploadProgressBox');

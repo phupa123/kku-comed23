@@ -1067,20 +1067,25 @@
         // เก็บเฉพาะโฟลเดอร์ของ user นี้
         const userFolders = this.folders.filter(f => (f.userKey || '').toLowerCase() === email);
 
-        // เก็บไฟล์ที่ user นี้อัปโหลด (กรองจาก fileCatalog)
+        // เก็บไฟล์ที่ user นี้อัปโหลด (กรองจาก fileCatalog ทั้ง email และ studentId)
         let userFileCatalog = [];
+        const studentId = (window.currentUser && window.currentUser.studentId ? String(window.currentUser.studentId).trim() : '');
         if (window.MultiCloudUploader) {
           const allFiles = window.MultiCloudUploader.getAllFiles();
           userFileCatalog = allFiles.filter(f => {
-            const fEmail = (f.uploaderEmail || '').toLowerCase().trim();
-            return fEmail === email;
+            const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+            const fId = (f.uploaderId || '').trim();
+            return (fEmail && fEmail === email) || (studentId && fId === studentId);
           });
         }
+
+        const totalUsedBytes = userFileCatalog.reduce((acc, f) => acc + (Number(f.size) || 0), 0);
 
         const driveData = {
           folders: userFolders,
           filesMeta: this.filesMeta,
           fileCatalog: userFileCatalog,
+          usedBytes: totalUsedBytes,
           syncedAt: new Date().toISOString()
         };
 
@@ -1095,11 +1100,11 @@
           if (upsertErr) {
             console.warn('[StorageDriveRepo] syncDriveDataToCloud upsert error:', upsertErr);
           } else {
-            console.log('[StorageDriveRepo] ✅ Drive data upserted to cloud for', email);
+            console.log('[StorageDriveRepo] ✅ Drive data upserted to cloud for', email, '| usedBytes:', totalUsedBytes);
           }
         } else {
           console.log('[StorageDriveRepo] ✅ Drive data synced to cloud for', email,
-            '| folders:', userFolders.length, '| files:', userFileCatalog.length);
+            '| folders:', userFolders.length, '| files:', userFileCatalog.length, '| usedBytes:', totalUsedBytes);
         }
       } catch (e) {
         console.warn('[StorageDriveRepo] syncDriveDataToCloud failed:', e);
@@ -1107,9 +1112,8 @@
     }
 
     /**
-     * โหลดข้อมูลไดรฟ์จาก Supabase แล้ว merge เข้า local state
-     * เรียกตอนผู้ใช้ login หรือโหลดหน้าครั้งแรก
-     * คืนค่า true ถ้าโหลดและ merge ข้อมูลสำเร็จ
+     * โหลดข้อมูลไดรฟ์จาก Supabase แล้ว sync เข้า local state
+     * เพื่อให้ทุกอุปกรณ์เห็นไฟล์และขนาดพื้นที่ตรงกัน 100%
      */
     async loadDriveDataFromCloud(userEmail) {
       try {
@@ -1128,56 +1132,45 @@
         const driveData = data.drive_data;
         let anyChanged = false;
 
-        // ---- Merge Folders ----
-        if (Array.isArray(driveData.folders) && driveData.folders.length > 0) {
-          driveData.folders.forEach(cloudFolder => {
-            if (!cloudFolder || !cloudFolder.id) return;
-            const localIdx = this.folders.findIndex(f => f.id === cloudFolder.id);
-            if (localIdx < 0) {
-              // โฟลเดอร์จากคลาวด์ที่ไม่มีใน local → เพิ่มเข้า
-              this.folders.push(cloudFolder);
-              anyChanged = true;
-            }
-            // ถ้ามีอยู่แล้วใน local ให้ local ชนะ (ข้อมูลล่าสุด)
-          });
-          if (anyChanged) this.saveData(STORAGE_FOLDERS_KEY, this.folders);
+        // ---- Sync Folders ----
+        if (Array.isArray(driveData.folders)) {
+          // แทนที่โฟลเดอร์ของ user นี้ด้วยโฟลเดอร์จาก Cloud เพื่อให้ตรงกันทุกเครื่อง
+          const otherUsersFolders = this.folders.filter(f => (f.userKey || '').toLowerCase() !== email);
+          this.folders = [...otherUsersFolders, ...driveData.folders];
+          this.saveData(STORAGE_FOLDERS_KEY, this.folders);
+          anyChanged = true;
         }
 
-        // ---- Merge FilesMeta ----
+        // ---- Sync FilesMeta ----
         if (driveData.filesMeta && typeof driveData.filesMeta === 'object') {
-          let metaChanged = false;
-          for (const fileId in driveData.filesMeta) {
-            if (!this.filesMeta[fileId]) {
-              // filesMeta ที่มีอยู่ใน cloud แต่ไม่มีใน local → เพิ่มเข้า
-              this.filesMeta[fileId] = driveData.filesMeta[fileId];
-              metaChanged = true;
-            }
-            // ถ้ามีอยู่แล้วใน local ให้ local ชนะ
-          }
-          if (metaChanged) {
-            this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
-            anyChanged = true;
-          }
+          this.filesMeta = Object.assign({}, this.filesMeta, driveData.filesMeta);
+          this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+          anyChanged = true;
         }
 
-        // ---- Merge FileCatalog ----
-        if (Array.isArray(driveData.fileCatalog) && driveData.fileCatalog.length > 0 && window.MultiCloudUploader) {
+        // ---- Sync FileCatalog ให้ตรงกันเป๊ะทุกเครื่อง ----
+        if (Array.isArray(driveData.fileCatalog) && window.MultiCloudUploader) {
           const existingCatalog = window.MultiCloudUploader.getAllFiles();
-          const existingIds = new Set(existingCatalog.map(f => f.id));
-          const newItems = driveData.fileCatalog.filter(f => f && f.id && !existingIds.has(f.id));
-          if (newItems.length > 0) {
-            // เพิ่มไฟล์จากคลาวด์ที่ยังไม่มีใน local catalog
-            const updatedCatalog = [...existingCatalog, ...newItems];
-            window.MultiCloudUploader.fileCatalog = updatedCatalog;
-            window.MultiCloudUploader.saveFileCatalog();
-            anyChanged = true;
-          }
+          const studentId = (window.currentUser && window.currentUser.studentId ? String(window.currentUser.studentId).trim() : '');
+          
+          // เก็บไฟล์ของผู้ใช้อื่นไว้ (ถ้ามี) แต่ไฟล์ของ user ปัจจุบันให้ใช้จาก Cloud เป็น Single Source of Truth
+          const otherUsersFiles = existingCatalog.filter(f => {
+            const fEmail = (f.uploaderEmail || f.ownerEmail || f.uploadedBy || '').toLowerCase().trim();
+            const fId = (f.uploaderId || '').trim();
+            const isThisUser = (fEmail && fEmail === email) || (studentId && fId === studentId);
+            return !isThisUser;
+          });
+
+          const updatedCatalog = [...otherUsersFiles, ...driveData.fileCatalog];
+          window.MultiCloudUploader.fileCatalog = updatedCatalog;
+          window.MultiCloudUploader.saveFileCatalog();
+          anyChanged = true;
         }
 
-        console.log('[StorageDriveRepo] ✅ Drive data loaded from cloud for', email,
-          '| cloud folders:', (driveData.folders || []).length,
-          '| cloud files:', (driveData.fileCatalog || []).length,
-          '| hadChanges:', anyChanged);
+        console.log('[StorageDriveRepo] ✅ Drive data synced symmetrically from cloud for', email,
+          '| folders:', (driveData.folders || []).length,
+          '| files:', (driveData.fileCatalog || []).length,
+          '| cloudUsedBytes:', driveData.usedBytes);
         return anyChanged;
       } catch (e) {
         console.warn('[StorageDriveRepo] loadDriveDataFromCloud failed:', e);
