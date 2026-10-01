@@ -1050,18 +1050,149 @@
       }
       return list;
     }
+
+    // ================= DRIVE DATA CLOUD SYNC (Cross-Device Support) =================
+
+    /**
+     * บันทึกข้อมูลไดรฟ์ของผู้ใช้ (โฟลเดอร์, filesMeta, fileCatalog) ลง Supabase user_profiles.drive_data
+     * เพื่อให้ sync ข้ามอุปกรณ์ได้
+     */
+    async syncDriveDataToCloud(userEmail) {
+      try {
+        const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!sb || !userEmail) return;
+        const email = (userEmail || '').toLowerCase().trim();
+        if (!email) return;
+
+        // เก็บเฉพาะโฟลเดอร์ของ user นี้
+        const userFolders = this.folders.filter(f => (f.userKey || '').toLowerCase() === email);
+
+        // เก็บไฟล์ที่ user นี้อัปโหลด (กรองจาก fileCatalog)
+        let userFileCatalog = [];
+        if (window.MultiCloudUploader) {
+          const allFiles = window.MultiCloudUploader.getAllFiles();
+          userFileCatalog = allFiles.filter(f => {
+            const fEmail = (f.uploaderEmail || '').toLowerCase().trim();
+            return fEmail === email;
+          });
+        }
+
+        const driveData = {
+          folders: userFolders,
+          filesMeta: this.filesMeta,
+          fileCatalog: userFileCatalog,
+          syncedAt: new Date().toISOString()
+        };
+
+        const { error } = await sb.from('user_profiles')
+          .update({ drive_data: driveData, updated_at: new Date().toISOString() })
+          .eq('email', email);
+
+        if (error) {
+          // ถ้า update ไม่ได้ (row ยังไม่มี) ให้ upsert
+          const { error: upsertErr } = await sb.from('user_profiles')
+            .upsert({ email, drive_data: driveData }, { onConflict: 'email' });
+          if (upsertErr) {
+            console.warn('[StorageDriveRepo] syncDriveDataToCloud upsert error:', upsertErr);
+          } else {
+            console.log('[StorageDriveRepo] ✅ Drive data upserted to cloud for', email);
+          }
+        } else {
+          console.log('[StorageDriveRepo] ✅ Drive data synced to cloud for', email,
+            '| folders:', userFolders.length, '| files:', userFileCatalog.length);
+        }
+      } catch (e) {
+        console.warn('[StorageDriveRepo] syncDriveDataToCloud failed:', e);
+      }
+    }
+
+    /**
+     * โหลดข้อมูลไดรฟ์จาก Supabase แล้ว merge เข้า local state
+     * เรียกตอนผู้ใช้ login หรือโหลดหน้าครั้งแรก
+     * คืนค่า true ถ้าโหลดและ merge ข้อมูลสำเร็จ
+     */
+    async loadDriveDataFromCloud(userEmail) {
+      try {
+        const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!sb || !userEmail) return false;
+        const email = (userEmail || '').toLowerCase().trim();
+        if (!email) return false;
+
+        const { data, error } = await sb.from('user_profiles')
+          .select('drive_data')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (error || !data || !data.drive_data) return false;
+
+        const driveData = data.drive_data;
+        let anyChanged = false;
+
+        // ---- Merge Folders ----
+        if (Array.isArray(driveData.folders) && driveData.folders.length > 0) {
+          driveData.folders.forEach(cloudFolder => {
+            if (!cloudFolder || !cloudFolder.id) return;
+            const localIdx = this.folders.findIndex(f => f.id === cloudFolder.id);
+            if (localIdx < 0) {
+              // โฟลเดอร์จากคลาวด์ที่ไม่มีใน local → เพิ่มเข้า
+              this.folders.push(cloudFolder);
+              anyChanged = true;
+            }
+            // ถ้ามีอยู่แล้วใน local ให้ local ชนะ (ข้อมูลล่าสุด)
+          });
+          if (anyChanged) this.saveData(STORAGE_FOLDERS_KEY, this.folders);
+        }
+
+        // ---- Merge FilesMeta ----
+        if (driveData.filesMeta && typeof driveData.filesMeta === 'object') {
+          let metaChanged = false;
+          for (const fileId in driveData.filesMeta) {
+            if (!this.filesMeta[fileId]) {
+              // filesMeta ที่มีอยู่ใน cloud แต่ไม่มีใน local → เพิ่มเข้า
+              this.filesMeta[fileId] = driveData.filesMeta[fileId];
+              metaChanged = true;
+            }
+            // ถ้ามีอยู่แล้วใน local ให้ local ชนะ
+          }
+          if (metaChanged) {
+            this.saveData(STORAGE_FILES_META_KEY, this.filesMeta);
+            anyChanged = true;
+          }
+        }
+
+        // ---- Merge FileCatalog ----
+        if (Array.isArray(driveData.fileCatalog) && driveData.fileCatalog.length > 0 && window.MultiCloudUploader) {
+          const existingCatalog = window.MultiCloudUploader.getAllFiles();
+          const existingIds = new Set(existingCatalog.map(f => f.id));
+          const newItems = driveData.fileCatalog.filter(f => f && f.id && !existingIds.has(f.id));
+          if (newItems.length > 0) {
+            // เพิ่มไฟล์จากคลาวด์ที่ยังไม่มีใน local catalog
+            const updatedCatalog = [...existingCatalog, ...newItems];
+            window.MultiCloudUploader.fileCatalog = updatedCatalog;
+            window.MultiCloudUploader.saveFileCatalog();
+            anyChanged = true;
+          }
+        }
+
+        console.log('[StorageDriveRepo] ✅ Drive data loaded from cloud for', email,
+          '| cloud folders:', (driveData.folders || []).length,
+          '| cloud files:', (driveData.fileCatalog || []).length,
+          '| hadChanges:', anyChanged);
+        return anyChanged;
+      } catch (e) {
+        console.warn('[StorageDriveRepo] loadDriveDataFromCloud failed:', e);
+        return false;
+      }
+    }
   }
 
   // Export to Global
   const repoInstance = new StorageDriveRepo();
   window.StorageDriveRepo = repoInstance;
 
-  // Ensure initSync is triggered once DOM and Supabase library are fully ready
+  // Ensure initSync is triggered once Supabase library is fully ready
   if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
-      repoInstance.initSync();
-    });
-    window.addEventListener('load', () => {
       repoInstance.initSync();
     });
   }

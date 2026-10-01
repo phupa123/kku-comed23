@@ -1999,8 +1999,24 @@
       setupKeyboardShortcuts();
       initDragSelection();
       await checkIncomingFolderOrShareParam();
+      // โหลดข้อมูลไดรฟ์จาก Supabase (ถ้า user login ไว้แล้ว) เพื่อ sync ข้ามอุปกรณ์
+      if (currentUser && currentUser.email) {
+        const repo = getRepo();
+        await repo.loadDriveDataFromCloud(currentUser.email);
+        // หลังโหลดข้อมูล ให้ resync folder shares เพื่ออัปเดต folderFiles ใน Supabase
+        // ทำแบบ delay เล็กน้อยเพื่อรอ initSync() โหลด shares จาก Supabase ก่อน
+        setTimeout(() => {
+          try {
+            const userFolderIds = repo.getUserFolders(currentUser.email).map(f => f.id);
+            if (userFolderIds.length > 0) {
+              repo.resyncFolderShares(userFolderIds);
+            }
+          } catch (_) {}
+        }, 2000);
+      }
       renderDrive();
     });
+
 
     /**
      * Run Intro Animation specifically on Page Reload/Refresh
@@ -2340,8 +2356,10 @@
               logo_alignment: "left"
             });
           }
-          // Optionally trigger one-tap prompt
-          google.accounts.id.prompt();
+          // Optionally trigger one-tap prompt only if user is not already logged in
+          if (!currentUser || !currentUser.email) {
+            google.accounts.id.prompt();
+          }
         }
       } catch (e) {
         console.warn("renderGoogleSignInButton error:", e);
@@ -2383,6 +2401,14 @@
       localStorage.setItem('COMED_USER_SESSION', JSON.stringify(currentUser));
       closeAuthModal();
       updateUserUI();
+      // โหลดข้อมูลไดรฟ์จาก Supabase หลัง login สำเร็จ
+      try {
+        const repo = getRepo();
+        const hadCloudData = await repo.loadDriveDataFromCloud(currentUser.email);
+        if (hadCloudData) {
+          console.log('[Storage] Cloud drive data loaded after login');
+        }
+      } catch (_) {}
       renderDrive();
       if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
       showToast(`✨ เข้าสู่ระบบสำเร็จ: ${currentUser.name}`);
@@ -2543,9 +2569,12 @@
       const newName = prompt("แก้ไขชื่อโฟลเดอร์:", folder.name);
       if (newName && newName.trim()) {
         repo.updateFolder(currentFolderId, { name: newName.trim() });
+        // Sync drive data to cloud after rename
+        if (userEmail) repo.syncDriveDataToCloud(userEmail).catch(() => {});
         renderDrive();
       }
     }
+
 
     function handleShareCurrentFolder() {
       if (!currentFolderId) return;
@@ -3916,6 +3945,11 @@
         showToast(`📁 แก้ไขโฟลเดอร์ "${name}" สำเร็จ`);
       }
 
+      // Sync drive data to cloud after folder create/update
+      if (userEmail) {
+        repo.syncDriveDataToCloud(userEmail).catch(() => {});
+      }
+
       closeFolderModal();
       renderFoldersList();
       updateUploadFolderDropdown();
@@ -3932,6 +3966,10 @@
         repo.deleteFolder(folderId);
         if (currentFolderId === folderId) {
           currentFolderId = null;
+        }
+        // Sync drive data to cloud after folder delete
+        if (userEmail) {
+          repo.syncDriveDataToCloud(userEmail).catch(() => {});
         }
         renderDrive();
         showToast('🗑️ ลบโฟลเดอร์เรียบร้อยแล้ว');
@@ -5404,13 +5442,42 @@
         }
       }
 
-      // If we are uploading inside a shared folder from cloud, append files to cloud share record
-      if (currentSharedFolderContext && targetFolderId === currentSharedFolderContext.targetId && newlyUploadedFiles.length > 0) {
-        if (!Array.isArray(currentSharedFolderContext.folderFiles)) {
-          currentSharedFolderContext.folderFiles = [];
+      // === CLOUD SYNC หลังอัปโหลด ===
+      if (newlyUploadedFiles.length > 0 && targetFolderId) {
+        // 1. ถ้ากำลังดูโฟลเดอร์ผ่าน share link → เพิ่มไฟล์ใหม่เข้า folderFiles แล้ว sync
+        if (currentSharedFolderContext && targetFolderId === currentSharedFolderContext.targetId) {
+          if (!Array.isArray(currentSharedFolderContext.folderFiles)) {
+            currentSharedFolderContext.folderFiles = [];
+          }
+          currentSharedFolderContext.folderFiles.push(...newlyUploadedFiles);
+          await repo.syncShareToCloud(currentSharedFolderContext);
         }
-        currentSharedFolderContext.folderFiles.push(...newlyUploadedFiles);
-        await repo.syncShareToCloud(currentSharedFolderContext);
+        // 2. ตรวจสอบว่าโฟลเดอร์นี้มี share link ไหม ถ้ามีให้ sync ด้วย (เจ้าของอัปจาก drive ปกติ)
+        const folderShare = repo.getShareByTarget('folder', targetFolderId);
+        if (folderShare && !currentSharedFolderContext) {
+          try {
+            await repo.syncShareToCloud(folderShare);
+            console.log('[Storage] Folder share synced after upload to folder:', targetFolderId);
+          } catch (e) {
+            console.warn('[Storage] Folder share sync after upload failed:', e);
+          }
+        }
+      } else if (newlyUploadedFiles.length > 0 && !targetFolderId) {
+        // กรณีอัปโหลดไปยัง shared context โดยไม่ระบุ folderId
+        if (currentSharedFolderContext) {
+          if (!Array.isArray(currentSharedFolderContext.folderFiles)) {
+            currentSharedFolderContext.folderFiles = [];
+          }
+          currentSharedFolderContext.folderFiles.push(...newlyUploadedFiles);
+          await repo.syncShareToCloud(currentSharedFolderContext);
+        }
+      }
+
+      // 3. Sync drive data (โฟลเดอร์ + file catalog) ขึ้น Supabase เพื่อ cross-device access
+      if (completedCount > 0 && currentUser && currentUser.email) {
+        repo.syncDriveDataToCloud(currentUser.email).catch(e =>
+          console.warn('[Storage] Drive data sync after upload failed:', e)
+        );
       }
 
       progressBar.style.width = '100%';
@@ -5433,6 +5500,7 @@
         }
       }, 700);
     }
+
 
     // ----------------------------------------------------
     // 10. Keyboard Shortcuts Engine
