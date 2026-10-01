@@ -2370,7 +2370,7 @@
       renderGoogleSignInButton();
     }
 
-    function handleGoogleCredentialResponse(response) {
+    async function handleGoogleCredentialResponse(response) {
       if (!response.credential) return;
       const data = parseJwt(response.credential);
       if (!data || !data.email) return;
