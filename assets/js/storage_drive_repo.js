@@ -430,6 +430,17 @@
       return userFlds;
     }
 
+    getUserFiles(userKey) {
+      if (typeof window !== 'undefined' && typeof window.getUserFilesList === 'function') {
+        return window.getUserFilesList();
+      }
+      if (typeof window !== 'undefined' && window.MultiCloudUploader && typeof window.MultiCloudUploader.getAllFiles === 'function') {
+        const uKey = (userKey || 'guest').toLowerCase().trim();
+        return window.MultiCloudUploader.getAllFiles().filter(f => !uKey || uKey === 'guest' || (f.uploaderEmail || f.ownerEmail || '').toLowerCase() === uKey);
+      }
+      return [];
+    }
+
     async createFolder(arg1, arg2 = {}) {
       let uKey = 'guest';
       let options = {};

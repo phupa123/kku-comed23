@@ -2242,12 +2242,17 @@
     // Realtime Cross-Device Sync Engine (Supabase + Focus + Polling)
     // ----------------------------------------------------
     let _driveRealtimeChannel = null;
+    let _currentRealtimeEmail = null;
     let _drivePollTimer = null;
     let _isSyncingRealtime = false;
 
     function initDriveRealtime(userEmail) {
       if (!userEmail) return;
       const email = userEmail.toLowerCase().trim();
+      if (_driveRealtimeChannel && _currentRealtimeEmail === email) {
+        return;
+      }
+      _currentRealtimeEmail = email;
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
 
       // 1. WebSocket Realtime Channel
@@ -2322,6 +2327,7 @@
     }
 
     function stopDriveRealtime() {
+      _currentRealtimeEmail = null;
       if (_driveRealtimeChannel && window.getSupabaseClient) {
         try {
           const sb = window.getSupabaseClient();
@@ -3310,7 +3316,8 @@
 
       if (title) title.textContent = folder.name;
       if (subtitle) {
-        const fileCount = (repo.getUserFiles(userEmail) || []).filter(file => file.folderId === folderId && !file.isTrash).length;
+        const allFiles = (typeof getUserFilesList === 'function') ? getUserFilesList() : [];
+        const fileCount = allFiles.filter(file => file.folderId === folderId && !file.isTrash).length;
         subtitle.textContent = `${fileCount} รายการ • ${folder.isLocked ? '🔒 ล็อคแล้ว' : 'ปกติ'}`;
       }
 
