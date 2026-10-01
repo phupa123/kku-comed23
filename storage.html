@@ -2755,8 +2755,6 @@
         return (fEmail && fEmail === userEmailLower) || (currentUser.studentId && fId === currentUser.studentId);
       });
 
-      const repo = getRepo();
-
       return userFiles.map(f => {
         const meta = repo.getFileMeta(f.id);
         return {
