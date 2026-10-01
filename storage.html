@@ -1234,9 +1234,9 @@
   </div>
 
   <!-- 2. Modal: Create / Edit Folder -->
-  <div id="modalFolder" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center p-4">
-    <div class="w-full max-w-md uiverse-glass-card rounded-3xl p-6 space-y-5 shadow-2xl relative">
-      <button onclick="closeFolderModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
+  <div id="modalFolder" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center p-3 sm:p-4">
+    <div class="w-full max-w-lg uiverse-glass-card rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl relative max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <button type="button" onclick="closeFolderModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition cursor-pointer">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -1250,58 +1250,122 @@
         </div>
       </div>
 
+      <!-- Live Preview Card -->
+      <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+        <div class="text-[10px] font-bold text-slate-400 flex items-center justify-between">
+          <span>ตัวอย่างโฟลเดอร์ (Live Preview)</span>
+          <span id="folderPreviewBadge" class="text-[9px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">สี: เหลืองอำพัน</span>
+        </div>
+        <div id="folderModalLivePreviewCard" class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex items-center gap-3 transition-all duration-300">
+          <div id="folderPreviewIconBox" class="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center relative shadow-sm overflow-hidden flex-shrink-0">
+            <i id="folderPreviewLucideIcon" data-lucide="folder" class="w-5 h-5"></i>
+            <img id="folderPreviewImgIcon" src="" class="w-6 h-6 object-contain rounded hidden">
+          </div>
+          <div class="overflow-hidden min-w-0 flex-1">
+            <p id="folderPreviewTitle" class="text-xs font-black text-white truncate">ชื่อโฟลเดอร์</p>
+            <p id="folderPreviewSubtitle" class="text-[10px] text-slate-400">โฟลเดอร์ไดรฟ์</p>
+          </div>
+        </div>
+      </div>
+
       <form onsubmit="handleSaveFolderForm(event)" class="space-y-4">
         <input type="hidden" id="folderEditId" value="">
 
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1">ชื่อโฟลเดอร์ <span class="text-rose-400">*</span></label>
-          <input type="text" id="folderNameInput" required placeholder="เช่น เอกสารวิชาชีพครู, ภาพงานสัมมนา" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+          <input type="text" id="folderNameInput" required oninput="updateFolderModalLivePreview()" placeholder="เช่น เอกสารวิชาชีพครู, ภาพงานสัมมนา" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
         </div>
 
+        <!-- Folder Color Variety + Custom Color Picker -->
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">สีของโฟลเดอร์</label>
-          <div class="flex items-center gap-2 flex-wrap">
-            <label class="cursor-pointer">
-              <input type="radio" name="folderColor" value="amber" checked class="peer hidden">
-              <span class="w-8 h-8 rounded-xl bg-amber-500/20 border-2 border-transparent peer-checked:border-amber-400 flex items-center justify-center text-amber-400">
-                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
-              </span>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="folderColor" value="sky" class="peer hidden">
-              <span class="w-8 h-8 rounded-xl bg-sky-500/20 border-2 border-transparent peer-checked:border-sky-400 flex items-center justify-center text-sky-400">
-                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
-              </span>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="folderColor" value="emerald" class="peer hidden">
-              <span class="w-8 h-8 rounded-xl bg-emerald-500/20 border-2 border-transparent peer-checked:border-emerald-400 flex items-center justify-center text-emerald-400">
-                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
-              </span>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="folderColor" value="purple" class="peer hidden">
-              <span class="w-8 h-8 rounded-xl bg-purple-500/20 border-2 border-transparent peer-checked:border-purple-400 flex items-center justify-center text-purple-400">
-                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
-              </span>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="folderColor" value="rose" class="peer hidden">
-              <span class="w-8 h-8 rounded-xl bg-rose-500/20 border-2 border-transparent peer-checked:border-rose-400 flex items-center justify-center text-rose-400">
-                <i data-lucide="check" class="w-4 h-4 hidden peer-checked:block"></i>
-              </span>
-            </label>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold text-slate-300">สีของโฟลเดอร์ (เลือกสี หรือกำหนดเอง)</label>
+            <span id="folderColorNameBadge" class="text-[10px] text-amber-400 font-bold px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20">สี: เหลืองอำพัน</span>
+          </div>
+          <input type="hidden" id="folderSelectedColor" value="amber">
+
+          <div class="flex items-center gap-1.5 flex-wrap" id="folderColorPaletteGrid">
+            <!-- 17 Color presets -->
+            <button type="button" onclick="selectFolderColor('amber')" data-color="amber" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/30 border-2 border-amber-400 text-amber-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm ring-2 ring-orange-400 ring-offset-2 ring-offset-slate-950 scale-110" title="สีเหลืองอำพัน (Amber)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('orange')" data-color="orange" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-orange-500/30 border-2 border-orange-400 text-orange-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีส้มสดใส (Orange)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('rose')" data-color="rose" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-500/30 border-2 border-rose-400 text-rose-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีกุหลาบ (Rose)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('red')" data-color="red" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-red-500/30 border-2 border-red-400 text-red-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีแดงเพลิง (Red)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('pink')" data-color="pink" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-pink-500/30 border-2 border-pink-400 text-pink-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีชมพู (Pink)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('fuchsia')" data-color="fuchsia" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-fuchsia-500/30 border-2 border-fuchsia-400 text-fuchsia-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีบานเย็น (Fuchsia)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('purple')" data-color="purple" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-500/30 border-2 border-purple-400 text-purple-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีม่วงเข้ม (Purple)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('violet')" data-color="violet" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-violet-500/30 border-2 border-violet-400 text-violet-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีม่วงคราม (Violet)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('indigo')" data-color="indigo" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-indigo-500/30 border-2 border-indigo-400 text-indigo-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีคราม (Indigo)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('blue')" data-color="blue" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-500/30 border-2 border-blue-400 text-blue-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีน้ำเงิน (Blue)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('sky')" data-color="sky" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-sky-500/30 border-2 border-sky-400 text-sky-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีฟ้าสดใส (Sky)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('cyan')" data-color="cyan" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-cyan-500/30 border-2 border-cyan-400 text-cyan-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีฟ้าอมเขียว (Cyan)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('teal')" data-color="teal" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-teal-500/30 border-2 border-teal-400 text-teal-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีเขียวหัวเป็ด (Teal)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('emerald')" data-color="emerald" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/30 border-2 border-emerald-400 text-emerald-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีเขียวมรกต (Emerald)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('green')" data-color="green" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-green-500/30 border-2 border-green-400 text-green-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีเขียวสด (Green)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('lime')" data-color="lime" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-lime-500/30 border-2 border-lime-400 text-lime-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีเขียวมะนาว (Lime)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+            <button type="button" onclick="selectFolderColor('slate')" data-color="slate" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-500/30 border-2 border-slate-400 text-slate-300 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm" title="สีเทาโมเดิร์น (Slate)">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+            </button>
+
+            <!-- Custom Color Picker with Pipette -->
+            <div class="relative group cursor-pointer" title="เลือกสีเองตามใจชอบ (Custom Color / Hex)">
+              <input type="color" id="folderCustomColorPicker" value="#f59e0b" oninput="handleFolderCustomColorPick(this.value)" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10">
+              <div id="folderCustomColorBtn" class="folder-color-btn relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl border-2 border-dashed border-slate-600 bg-slate-900 hover:border-orange-400 text-slate-400 hover:text-white flex items-center justify-center transition-all duration-200 shadow-sm" title="กำหนดสีเอง (Custom Color)">
+                <i id="folderCustomColorIcon" data-lucide="pipette" class="w-3.5 h-3.5"></i>
+                <i data-lucide="check" class="w-3.5 h-3.5 text-white drop-shadow checkmark-icon hidden"></i>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Folder Icon Picker -->
+        <!-- Folder Icon Picker + Image Upload -->
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
-            <span>ไอคอนโฟลเดอร์ (Icon)</span>
-            <span class="text-[10px] text-slate-400">เลือกไอคอนหรือใส่ลิงก์รูปภาพ</span>
-          </label>
+          <div class="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+            <div>
+              <span class="block text-xs font-bold text-slate-300">ไอคอนโฟลเดอร์ (Icon)</span>
+              <span class="text-[10px] text-slate-400">เลือกไอคอน หรืออัปโหลดรูปภาพของคุณเอง</span>
+            </div>
+            <label class="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-orange-500/60 text-[11px] font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 flex-shrink-0" title="อัปโหลดรูปภาพไอคอนจากเครื่องของคุณ">
+              <i data-lucide="upload" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>อัปโหลดรูปไอคอน</span>
+              <input type="file" id="folderIconFileInput" accept="image/*" class="hidden" onchange="handleFolderIconFileUpload(event)">
+            </label>
+          </div>
+
+          <!-- Icon Preset Grid (18 icons) -->
           <div class="grid grid-cols-6 gap-1.5 mb-2" id="folderIconPresetGrid">
-            <button type="button" onclick="selectFolderIconPreset('folder')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border-2 border-orange-500 text-orange-400 flex items-center justify-center hover:bg-slate-800 transition cursor-pointer" data-icon="folder" title="แฟ้ม">
+            <button type="button" onclick="selectFolderIconPreset('folder')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border-2 border-orange-500 text-orange-400 ring-2 ring-orange-500/40 flex items-center justify-center hover:bg-slate-800 transition cursor-pointer" data-icon="folder" title="แฟ้ม">
               <i data-lucide="folder" class="w-4 h-4"></i>
             </button>
             <button type="button" onclick="selectFolderIconPreset('graduation-cap')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="graduation-cap" title="การเรียน/ศึกษา">
@@ -1337,39 +1401,109 @@
             <button type="button" onclick="selectFolderIconPreset('archive')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="archive" title="คลังเก็บข้อมูล">
               <i data-lucide="archive" class="w-4 h-4"></i>
             </button>
+            <button type="button" onclick="selectFolderIconPreset('bookmark')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="bookmark" title="บุ๊กมาร์ก">
+              <i data-lucide="bookmark" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('coffee')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="coffee" title="คาเฟ่/ส่วนตัว">
+              <i data-lucide="coffee" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('code')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="code" title="โค้ด/โปรแกรม">
+              <i data-lucide="code" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('gift')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="gift" title="ของขวัญ">
+              <i data-lucide="gift" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('globe')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="globe" title="เว็บไซต์/สากล">
+              <i data-lucide="globe" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="selectFolderIconPreset('shield')" class="folder-icon-choice p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-800 hover:text-white transition cursor-pointer" data-icon="shield" title="ความปลอดภัย">
+              <i data-lucide="shield" class="w-4 h-4"></i>
+            </button>
           </div>
           <input type="hidden" id="folderSelectedIcon" value="folder">
+
+          <!-- Custom Icon Preview Thumbnail Box -->
+          <div id="folderCustomIconPreviewBox" class="hidden p-2 rounded-xl bg-slate-950/80 border border-orange-500/40 flex items-center justify-between gap-2 mb-1.5 shadow-sm">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <img id="folderCustomIconThumb" src="" class="w-8 h-8 object-contain rounded-lg border border-slate-700 bg-slate-900">
+              <div>
+                <p class="text-[11px] font-bold text-white truncate">ใช้รูปไอคอนที่กำหนดเอง</p>
+                <p class="text-[9px] text-emerald-400">✓ เลือกรูปนี้เรียบร้อยแล้ว</p>
+              </div>
+            </div>
+            <button type="button" onclick="clearFolderCustomIcon()" class="px-2 py-1 rounded-lg bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 text-[10px] font-bold transition cursor-pointer flex items-center gap-1">
+              <i data-lucide="trash-2" class="w-3 h-3"></i>
+              <span>ลบรูป</span>
+            </button>
+          </div>
           <input type="text" id="folderCustomIconInput" oninput="handleFolderCustomIconInput(this.value)" placeholder="หรือวางลิงก์รูปภาพไอคอน (URL รูปภาพ / SVG / WebP)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
         </div>
 
-        <!-- Folder Background Cover / Theme -->
+        <!-- Folder Background Cover / Theme + Image Upload -->
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
-            <span>ภาพพื้นหลังหน้าปกโฟลเดอร์ (Background / Cover)</span>
-            <span class="text-[10px] text-slate-400">เลือกธีมหรือใส่ลิงก์รูปภาพ</span>
-          </label>
-          <div class="grid grid-cols-3 gap-1.5 mb-2" id="folderBgPresetGrid">
-            <button type="button" onclick="selectFolderBgPreset('')" class="folder-bg-choice p-2 rounded-xl bg-slate-950 border-2 border-orange-500 text-slate-300 text-[11px] font-bold text-center hover:bg-slate-900 transition cursor-pointer" data-bg="">
-              ✨ ปกติ (Glass)
+          <div class="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+            <div>
+              <span class="block text-xs font-bold text-slate-300">ภาพพื้นหลังหน้าปกโฟลเดอร์ (Background / Cover)</span>
+              <span class="text-[10px] text-slate-400">เลือกธีม หรืออัปโหลดภาพหน้าปกของคุณ</span>
+            </div>
+            <label class="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-orange-500/60 text-[11px] font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 flex-shrink-0" title="อัปโหลดภาพหน้าปกจากเครื่องของคุณ">
+              <i data-lucide="image-plus" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>อัปโหลดภาพหน้าปก</span>
+              <input type="file" id="folderBgFileInput" accept="image/*" class="hidden" onchange="handleFolderBgFileUpload(event)">
+            </label>
+          </div>
+
+          <div class="grid grid-cols-4 gap-1.5 mb-2" id="folderBgPresetGrid">
+            <button type="button" onclick="selectFolderBgPreset('')" class="folder-bg-choice relative p-2 rounded-xl bg-slate-950 border-2 border-orange-500 text-slate-200 text-[11px] font-bold text-center hover:bg-slate-900 transition cursor-pointer shadow-sm ring-2 ring-orange-500/40" data-bg="">
+              <span>✨ ปกติ</span>
+              <span class="bg-check-mark absolute top-1 right-1 text-orange-400 text-[10px]">✓</span>
             </button>
-            <button type="button" onclick="selectFolderBgPreset('cosmic')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-indigo-950 to-purple-950 border border-indigo-500/40 text-indigo-300 text-[11px] font-bold text-center hover:border-indigo-400 transition cursor-pointer" data-bg="cosmic">
-              🌌 กาแล็กซี
+            <button type="button" onclick="selectFolderBgPreset('cosmic')" class="folder-bg-choice relative p-2 rounded-xl bg-gradient-to-r from-indigo-950 to-purple-950 border border-indigo-500/40 text-indigo-300 text-[11px] font-bold text-center hover:border-indigo-400 transition cursor-pointer" data-bg="cosmic">
+              <span>🌌 Cosmic</span>
+              <span class="bg-check-mark absolute top-1 right-1 text-orange-400 text-[10px] hidden">✓</span>
             </button>
-            <button type="button" onclick="selectFolderBgPreset('sunset')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-amber-950 to-rose-950 border border-amber-500/40 text-amber-300 text-[11px] font-bold text-center hover:border-amber-400 transition cursor-pointer" data-bg="sunset">
-              🌅 Sunset Glow
+            <button type="button" onclick="selectFolderBgPreset('sunset')" class="folder-bg-choice relative p-2 rounded-xl bg-gradient-to-r from-amber-950 to-rose-950 border border-amber-500/40 text-amber-300 text-[11px] font-bold text-center hover:border-amber-400 transition cursor-pointer" data-bg="sunset">
+              <span>🌅 Sunset</span>
+              <span class="bg-check-mark absolute top-1 right-1 text-orange-400 text-[10px] hidden">✓</span>
             </button>
-            <button type="button" onclick="selectFolderBgPreset('emerald')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-emerald-950 to-teal-950 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold text-center hover:border-emerald-400 transition cursor-pointer" data-bg="emerald">
-              🌿 Aurora มรกต
+            <button type="button" onclick="selectFolderBgPreset('emerald')" class="folder-bg-choice relative p-2 rounded-xl bg-gradient-to-r from-emerald-950 to-teal-950 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold text-center hover:border-emerald-400 transition cursor-pointer" data-bg="emerald">
+              <span>🌿 Aurora</span>
+              <span class="bg-check-mark absolute top-1 right-1 text-orange-400 text-[10px] hidden">✓</span>
             </button>
-            <button type="button" onclick="selectFolderBgPreset('ocean')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-sky-950 to-blue-950 border border-sky-500/40 text-sky-300 text-[11px] font-bold text-center hover:border-sky-400 transition cursor-pointer" data-bg="ocean">
-              🌊 มหาสมุทร
+            <button type="button" onclick="selectFolderBgPreset('ocean')" class="folder-bg-choice relative p-2 rounded-xl bg-gradient-to-r from-sky-950 to-blue-950 border border-sky-500/40 text-sky-300 text-[11px] font-bold text-center hover:border-sky-400 transition cursor-pointer" data-bg="ocean">
+              <span>🌊 Ocean</span>
+              <span class="bg-check-mark absolute top-1 right-1 text-orange-400 text-[10px] hidden">✓</span>
             </button>
-            <button type="button" onclick="selectFolderBgPreset('cyber')" class="folder-bg-choice p-2 rounded-xl bg-gradient-to-r from-purple-950 to-pink-950 border border-purple-500/40 text-purple-300 text-[11px] font-bold text-center hover:border-purple-400 transition cursor-pointer" data-bg="cyber">
-              🔮 ไซเบอร์นีออน
+            <button type="button" onclick="selectFolderBgPreset('cyber')" class="folder-bg-choice relative p-2 rounded-xl bg-gradient-to-r from-purple-950 to-pink-950 border border-purple-500/40 text-purple-300 text-[11px] font-bold text-center hover:border-purple-400 transition cursor-pointer" data-bg="cyber">
+              <span>🔮 Cyber</span>
+              <span class="bg-check-mark absolute top-1 right-1 text-orange-400 text-[10px] hidden">✓</span>
+            </button>
+            <button type="button" onclick="selectFolderBgPreset('midnight')" class="folder-bg-choice relative p-2 rounded-xl bg-gradient-to-r from-slate-950 to-slate-900 border border-slate-700/60 text-slate-300 text-[11px] font-bold text-center hover:border-slate-500 transition cursor-pointer" data-bg="midnight">
+              <span>🌑 Midnight</span>
+              <span class="bg-check-mark absolute top-1 right-1 text-orange-400 text-[10px] hidden">✓</span>
+            </button>
+            <button type="button" onclick="selectFolderBgPreset('fire')" class="folder-bg-choice relative p-2 rounded-xl bg-gradient-to-r from-orange-950 to-red-950 border border-orange-500/40 text-orange-300 text-[11px] font-bold text-center hover:border-orange-400 transition cursor-pointer" data-bg="fire">
+              <span>🔥 Fire</span>
+              <span class="bg-check-mark absolute top-1 right-1 text-orange-400 text-[10px] hidden">✓</span>
             </button>
           </div>
           <input type="hidden" id="folderSelectedBgGradient" value="">
-          <input type="text" id="folderCustomBgInput" placeholder="หรือวางลิงก์รูปภาพพื้นหลังโฟลเดอร์ (URL ภาพหน้าปก)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+
+          <!-- Custom Background Preview Banner Box -->
+          <div id="folderCustomBgPreviewBox" class="hidden p-2 rounded-xl bg-slate-950/80 border border-orange-500/40 flex items-center justify-between gap-2 mb-1.5 shadow-sm">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <img id="folderCustomBgThumb" src="" class="w-14 h-8 object-cover rounded-lg border border-slate-700 bg-slate-900">
+              <div>
+                <p class="text-[11px] font-bold text-white truncate">ใช้ภาพหน้าปกที่กำหนดเอง</p>
+                <p class="text-[9px] text-emerald-400">✓ เลือกภาพนี้เรียบร้อยแล้ว</p>
+              </div>
+            </div>
+            <button type="button" onclick="clearFolderCustomBg()" class="px-2 py-1 rounded-lg bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 text-[10px] font-bold transition cursor-pointer flex items-center gap-1">
+              <i data-lucide="trash-2" class="w-3 h-3"></i>
+              <span>ลบภาพพื้นหลัง</span>
+            </button>
+          </div>
+          <input type="text" id="folderCustomBgInput" oninput="handleFolderCustomBgInput(this.value)" placeholder="หรือวางลิงก์รูปภาพพื้นหลังโฟลเดอร์ (URL ภาพหน้าปก)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
         </div>
 
         <!-- Optional Folder Lock Password -->
@@ -3579,18 +3713,13 @@
         sunset: 'background: linear-gradient(135deg, rgba(69,26,3,0.92), rgba(76,5,25,0.88)); border-color: rgba(245,158,11,0.4);',
         emerald: 'background: linear-gradient(135deg, rgba(2,44,34,0.92), rgba(19,78,74,0.88)); border-color: rgba(16,185,129,0.4);',
         ocean: 'background: linear-gradient(135deg, rgba(8,47,73,0.92), rgba(23,37,84,0.88)); border-color: rgba(14,165,233,0.4);',
-        cyber: 'background: linear-gradient(135deg, rgba(59,7,100,0.92), rgba(80,7,36,0.88)); border-color: rgba(236,72,153,0.4);'
+        cyber: 'background: linear-gradient(135deg, rgba(59,7,100,0.92), rgba(80,7,36,0.88)); border-color: rgba(236,72,153,0.4);',
+        midnight: 'background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9)); border-color: rgba(148,163,184,0.3);',
+        fire: 'background: linear-gradient(135deg, rgba(67,20,7,0.92), rgba(124,45,18,0.88)); border-color: rgba(249,115,22,0.4);'
       };
 
       container.innerHTML = folders.map(f => {
-        const colorClasses = {
-          amber: 'text-amber-400 bg-amber-500/20 border-amber-500/30 shadow-amber-500/10',
-          sky: 'text-sky-400 bg-sky-500/20 border-sky-500/30 shadow-sky-500/10',
-          emerald: 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30 shadow-emerald-500/10',
-          purple: 'text-purple-400 bg-purple-500/20 border-purple-500/30 shadow-purple-500/10',
-          rose: 'text-rose-400 bg-rose-500/20 border-rose-500/30 shadow-rose-500/10'
-        }[f.color || 'amber'] || 'text-amber-400 bg-amber-500/20 border-amber-500/30 shadow-amber-500/10';
-
+        const colorInfo = getFolderColorInfo(f.color || 'amber');
         const shareInfo = repo.getShareByTarget('folder', f.id);
         const isShared = !!shareInfo;
 
@@ -3624,7 +3753,7 @@
                onclick="handleFolderCardClick('${f.id}')">
             
             <div class="flex items-start justify-between">
-              <div class="w-11 h-11 rounded-2xl ${colorClasses} border flex items-center justify-center relative shadow-sm group-hover:scale-105 transition-transform duration-200 overflow-hidden">
+              <div class="w-11 h-11 rounded-2xl ${colorInfo.classes} border flex items-center justify-center relative shadow-sm group-hover:scale-105 transition-transform duration-200 overflow-hidden" style="${colorInfo.inlineStyle}">
                 ${iconHtml}
                 ${isShared ? '<span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-orange-500 border-2 border-slate-900 shadow-sm" title="กำลังแชร์อยู่"></span>' : ''}
               </div>
@@ -5083,37 +5212,199 @@
     }
 
     // ----------------------------------------------------
-    // 4. Folder Operations (Create / Edit / Delete / Custom Icon & Cover)
+    // 4. Folder Operations (Create / Edit / Delete / Custom Color, Icon & Cover)
     // ----------------------------------------------------
+    function getFolderColorInfo(colorVal) {
+      const colorMap = {
+        amber: { name: 'เหลืองอำพัน', text: 'text-amber-400', bg: 'bg-amber-500/20', border: 'border-amber-500/30', shadow: 'shadow-amber-500/10', hex: '#f59e0b' },
+        orange: { name: 'ส้มสดใส', text: 'text-orange-400', bg: 'bg-orange-500/20', border: 'border-orange-500/30', shadow: 'shadow-orange-500/10', hex: '#f97316' },
+        rose: { name: 'กุหลาบ', text: 'text-rose-400', bg: 'bg-rose-500/20', border: 'border-rose-500/30', shadow: 'shadow-rose-500/10', hex: '#f43f5e' },
+        red: { name: 'แดงเพลิง', text: 'text-red-400', bg: 'bg-red-500/20', border: 'border-red-500/30', shadow: 'shadow-red-500/10', hex: '#ef4444' },
+        pink: { name: 'ชมพู', text: 'text-pink-400', bg: 'bg-pink-500/20', border: 'border-pink-500/30', shadow: 'shadow-pink-500/10', hex: '#ec4899' },
+        fuchsia: { name: 'บานเย็น', text: 'text-fuchsia-400', bg: 'bg-fuchsia-500/20', border: 'border-fuchsia-500/30', shadow: 'shadow-fuchsia-500/10', hex: '#d946ef' },
+        purple: { name: 'ม่วงเข้ม', text: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/30', shadow: 'shadow-purple-500/10', hex: '#a855f7' },
+        violet: { name: 'ม่วงคราม', text: 'text-violet-400', bg: 'bg-violet-500/20', border: 'border-violet-500/30', shadow: 'shadow-violet-500/10', hex: '#8b5cf6' },
+        indigo: { name: 'คราม', text: 'text-indigo-400', bg: 'bg-indigo-500/20', border: 'border-indigo-500/30', shadow: 'shadow-indigo-500/10', hex: '#6366f1' },
+        blue: { name: 'น้ำเงิน', text: 'text-blue-400', bg: 'bg-blue-500/20', border: 'border-blue-500/30', shadow: 'shadow-blue-500/10', hex: '#3b82f6' },
+        sky: { name: 'ฟ้าสดใส', text: 'text-sky-400', bg: 'bg-sky-500/20', border: 'border-sky-500/30', shadow: 'shadow-sky-500/10', hex: '#0ea5e9' },
+        cyan: { name: 'ฟ้าอมเขียว', text: 'text-cyan-400', bg: 'bg-cyan-500/20', border: 'border-cyan-500/30', shadow: 'shadow-cyan-500/10', hex: '#06b6d4' },
+        teal: { name: 'เขียวหัวเป็ด', text: 'text-teal-400', bg: 'bg-teal-500/20', border: 'border-teal-500/30', shadow: 'shadow-teal-500/10', hex: '#14b8a6' },
+        emerald: { name: 'เขียวมรกต', text: 'text-emerald-400', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', shadow: 'shadow-emerald-500/10', hex: '#10b981' },
+        green: { name: 'เขียวสด', text: 'text-green-400', bg: 'bg-green-500/20', border: 'border-green-500/30', shadow: 'shadow-green-500/10', hex: '#22c55e' },
+        lime: { name: 'เขียวมะนาว', text: 'text-lime-400', bg: 'bg-lime-500/20', border: 'border-lime-500/30', shadow: 'shadow-lime-500/10', hex: '#84cc16' },
+        slate: { name: 'เทาโมเดิร์น', text: 'text-slate-300', bg: 'bg-slate-500/20', border: 'border-slate-500/30', shadow: 'shadow-slate-500/10', hex: '#64748b' }
+      };
+
+      const raw = (colorVal || 'amber').trim();
+      const val = raw.replace(/^custom:/i, '').toLowerCase();
+
+      if (colorMap[val]) {
+        return {
+          name: colorMap[val].name,
+          classes: `${colorMap[val].text} ${colorMap[val].bg} ${colorMap[val].border} ${colorMap[val].shadow}`,
+          inlineStyle: '',
+          hex: colorMap[val].hex,
+          isCustom: false
+        };
+      }
+
+      if (val.startsWith('#') || val.startsWith('rgb')) {
+        const hex = val.startsWith('#') ? val : '#f59e0b';
+        return {
+          name: 'กำหนดเอง (' + hex + ')',
+          classes: '',
+          inlineStyle: `color: ${hex}; background-color: ${hex}26; border-color: ${hex}59; box-shadow: 0 4px 15px ${hex}26;`,
+          hex: hex,
+          isCustom: true
+        };
+      }
+
+      return {
+        name: 'เหลืองอำพัน',
+        classes: 'text-amber-400 bg-amber-500/20 border-amber-500/30 shadow-amber-500/10',
+        inlineStyle: '',
+        hex: '#f59e0b',
+        isCustom: false
+      };
+    }
+
+    function selectFolderColor(colorVal, isCustom = false) {
+      const hiddenInput = document.getElementById('folderSelectedColor');
+      if (hiddenInput) hiddenInput.value = colorVal;
+
+      const colorInfo = getFolderColorInfo(colorVal);
+      const nameBadge = document.getElementById('folderColorNameBadge');
+      if (nameBadge) {
+        nameBadge.textContent = 'สี: ' + colorInfo.name;
+        nameBadge.style.color = colorInfo.hex;
+      }
+
+      const customBtn = document.getElementById('folderCustomColorBtn');
+      const customIcon = document.getElementById('folderCustomColorIcon');
+      const customCheck = customBtn?.querySelector('.checkmark-icon');
+
+      document.querySelectorAll('#folderColorPaletteGrid .folder-color-btn').forEach(btn => {
+        const cAttr = btn.getAttribute('data-color');
+        const check = btn.querySelector('.checkmark-icon');
+
+        if (!isCustom && cAttr === colorVal) {
+          btn.classList.add('ring-2', 'ring-orange-400', 'ring-offset-2', 'ring-offset-slate-950', 'scale-110', 'shadow-lg');
+          if (check) check.classList.remove('hidden');
+        } else if (btn !== customBtn) {
+          btn.classList.remove('ring-2', 'ring-orange-400', 'ring-offset-2', 'ring-offset-slate-950', 'scale-110', 'shadow-lg');
+          if (check) check.classList.add('hidden');
+        }
+      });
+
+      if (isCustom && customBtn) {
+        customBtn.classList.add('ring-2', 'ring-orange-400', 'ring-offset-2', 'ring-offset-slate-950', 'scale-110', 'shadow-lg');
+        customBtn.style.backgroundColor = colorVal + '33';
+        customBtn.style.borderColor = colorVal;
+        if (customIcon) customIcon.classList.add('hidden');
+        if (customCheck) customCheck.classList.remove('hidden');
+      } else if (customBtn) {
+        customBtn.classList.remove('ring-2', 'ring-orange-400', 'ring-offset-2', 'ring-offset-slate-950', 'scale-110', 'shadow-lg');
+        customBtn.style.backgroundColor = '';
+        customBtn.style.borderColor = '';
+        if (customIcon) customIcon.classList.remove('hidden');
+        if (customCheck) customCheck.classList.add('hidden');
+      }
+
+      updateFolderModalLivePreview();
+    }
+
+    function handleFolderCustomColorPick(hexVal) {
+      if (!hexVal) return;
+      selectFolderColor(hexVal, true);
+    }
+
     function selectFolderIconPreset(iconName) {
       const hiddenInput = document.getElementById('folderSelectedIcon');
       if (hiddenInput) hiddenInput.value = iconName;
       const customInput = document.getElementById('folderCustomIconInput');
       if (customInput) customInput.value = '';
+      const previewBox = document.getElementById('folderCustomIconPreviewBox');
+      if (previewBox) previewBox.classList.add('hidden');
 
       document.querySelectorAll('#folderIconPresetGrid .folder-icon-choice').forEach(btn => {
         if (btn.getAttribute('data-icon') === iconName) {
-          btn.classList.add('border-orange-500', 'text-orange-400');
+          btn.classList.add('border-2', 'border-orange-500', 'text-orange-400', 'ring-2', 'ring-orange-500/40', 'scale-105');
           btn.classList.remove('border-slate-800', 'text-slate-400');
         } else {
-          btn.classList.remove('border-orange-500', 'text-orange-400');
+          btn.classList.remove('border-2', 'border-orange-500', 'text-orange-400', 'ring-2', 'ring-orange-500/40', 'scale-105');
           btn.classList.add('border-slate-800', 'text-slate-400');
         }
       });
+
+      updateFolderModalLivePreview();
     }
 
     function handleFolderCustomIconInput(val) {
       const cleanVal = (val || '').trim();
       const hiddenInput = document.getElementById('folderSelectedIcon');
+      const previewBox = document.getElementById('folderCustomIconPreviewBox');
+      const thumb = document.getElementById('folderCustomIconThumb');
+
       if (cleanVal) {
         if (hiddenInput) hiddenInput.value = cleanVal;
+        if (previewBox) previewBox.classList.remove('hidden');
+        if (thumb) thumb.src = cleanVal;
+
         document.querySelectorAll('#folderIconPresetGrid .folder-icon-choice').forEach(btn => {
-          btn.classList.remove('border-orange-500', 'text-orange-400');
+          btn.classList.remove('border-2', 'border-orange-500', 'text-orange-400', 'ring-2', 'ring-orange-500/40', 'scale-105');
           btn.classList.add('border-slate-800', 'text-slate-400');
         });
       } else {
+        if (previewBox) previewBox.classList.add('hidden');
         selectFolderIconPreset('folder');
       }
+
+      updateFolderModalLivePreview();
+    }
+
+    async function handleFolderIconFileUpload(event) {
+      const file = event.target?.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showToast('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
+        return;
+      }
+      showToast('⏳ กำลังประมวลผลรูปไอคอน...');
+
+      let finalUrl = '';
+      if (window.MultiCloudUploader && typeof window.MultiCloudUploader.upload === 'function') {
+        try {
+          const res = await window.MultiCloudUploader.upload(file, { uncompressed: true });
+          if (res && res.url) finalUrl = res.url;
+        } catch (_) {}
+      }
+
+      if (!finalUrl) {
+        finalUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (finalUrl) {
+        const customInput = document.getElementById('folderCustomIconInput');
+        if (customInput) customInput.value = finalUrl;
+        handleFolderCustomIconInput(finalUrl);
+        showToast('✨ อัปโหลดรูปไอคอนเรียบร้อย');
+      } else {
+        showToast('ไม่สามารถโหลดรูปภาพได้', 'error');
+      }
+      event.target.value = '';
+    }
+
+    function clearFolderCustomIcon() {
+      const customInput = document.getElementById('folderCustomIconInput');
+      if (customInput) customInput.value = '';
+      const previewBox = document.getElementById('folderCustomIconPreviewBox');
+      if (previewBox) previewBox.classList.add('hidden');
+      selectFolderIconPreset('folder');
     }
 
     function selectFolderBgPreset(bgName) {
@@ -5121,15 +5412,154 @@
       if (hiddenInput) hiddenInput.value = bgName;
       const customBgInput = document.getElementById('folderCustomBgInput');
       if (customBgInput) customBgInput.value = '';
+      const previewBox = document.getElementById('folderCustomBgPreviewBox');
+      if (previewBox) previewBox.classList.add('hidden');
 
       document.querySelectorAll('#folderBgPresetGrid .folder-bg-choice').forEach(btn => {
+        const check = btn.querySelector('.bg-check-mark');
         if (btn.getAttribute('data-bg') === bgName) {
-          btn.classList.add('border-orange-500');
-          btn.classList.remove('border-indigo-500/40', 'border-amber-500/40', 'border-emerald-500/40', 'border-sky-500/40', 'border-purple-500/40');
+          btn.classList.add('border-2', 'border-orange-500', 'ring-2', 'ring-orange-500/40', 'scale-[1.03]');
+          if (check) check.classList.remove('hidden');
         } else {
-          btn.classList.remove('border-orange-500');
+          btn.classList.remove('border-2', 'border-orange-500', 'ring-2', 'ring-orange-500/40', 'scale-[1.03]');
+          if (check) check.classList.add('hidden');
         }
       });
+
+      updateFolderModalLivePreview();
+    }
+
+    function handleFolderCustomBgInput(val) {
+      const cleanVal = (val || '').trim();
+      const hiddenInput = document.getElementById('folderSelectedBgGradient');
+      const previewBox = document.getElementById('folderCustomBgPreviewBox');
+      const thumb = document.getElementById('folderCustomBgThumb');
+
+      if (cleanVal) {
+        if (hiddenInput) hiddenInput.value = '';
+        if (previewBox) previewBox.classList.remove('hidden');
+        if (thumb) thumb.src = cleanVal;
+
+        document.querySelectorAll('#folderBgPresetGrid .folder-bg-choice').forEach(btn => {
+          btn.classList.remove('border-2', 'border-orange-500', 'ring-2', 'ring-orange-500/40', 'scale-[1.03]');
+          const check = btn.querySelector('.bg-check-mark');
+          if (check) check.classList.add('hidden');
+        });
+      } else {
+        if (previewBox) previewBox.classList.add('hidden');
+        selectFolderBgPreset('');
+      }
+
+      updateFolderModalLivePreview();
+    }
+
+    async function handleFolderBgFileUpload(event) {
+      const file = event.target?.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showToast('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
+        return;
+      }
+      showToast('⏳ กำลังประมวลผลภาพหน้าปก...');
+
+      let finalUrl = '';
+      if (window.MultiCloudUploader && typeof window.MultiCloudUploader.upload === 'function') {
+        try {
+          const res = await window.MultiCloudUploader.upload(file, { uncompressed: true });
+          if (res && res.url) finalUrl = res.url;
+        } catch (_) {}
+      }
+
+      if (!finalUrl) {
+        finalUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (finalUrl) {
+        const customBgInput = document.getElementById('folderCustomBgInput');
+        if (customBgInput) customBgInput.value = finalUrl;
+        handleFolderCustomBgInput(finalUrl);
+        showToast('✨ อัปโหลดภาพหน้าปกเรียบร้อย');
+      } else {
+        showToast('ไม่สามารถโหลดรูปภาพได้', 'error');
+      }
+      event.target.value = '';
+    }
+
+    function clearFolderCustomBg() {
+      const customBgInput = document.getElementById('folderCustomBgInput');
+      if (customBgInput) customBgInput.value = '';
+      const previewBox = document.getElementById('folderCustomBgPreviewBox');
+      if (previewBox) previewBox.classList.add('hidden');
+      selectFolderBgPreset('');
+    }
+
+    function updateFolderModalLivePreview() {
+      const card = document.getElementById('folderModalLivePreviewCard');
+      const title = document.getElementById('folderPreviewTitle');
+      const iconBox = document.getElementById('folderPreviewIconBox');
+      const lucideIcon = document.getElementById('folderPreviewLucideIcon');
+      const imgIcon = document.getElementById('folderPreviewImgIcon');
+      const badge = document.getElementById('folderPreviewBadge');
+      if (!card || !title || !iconBox) return;
+
+      const nameVal = (document.getElementById('folderNameInput')?.value || '').trim();
+      title.textContent = nameVal || 'ชื่อโฟลเดอร์';
+
+      const colorVal = document.getElementById('folderSelectedColor')?.value || 'amber';
+      const colorInfo = getFolderColorInfo(colorVal);
+
+      if (badge) {
+        badge.textContent = 'สี: ' + colorInfo.name;
+        badge.style.color = colorInfo.hex;
+      }
+
+      // Icon
+      const customIconVal = (document.getElementById('folderCustomIconInput')?.value || '').trim();
+      const presetIconVal = document.getElementById('folderSelectedIcon')?.value || 'folder';
+      const isCustomImg = customIconVal && (customIconVal.startsWith('http://') || customIconVal.startsWith('https://') || customIconVal.startsWith('data:'));
+
+      if (isCustomImg && imgIcon && lucideIcon) {
+        imgIcon.src = customIconVal;
+        imgIcon.classList.remove('hidden');
+        lucideIcon.classList.add('hidden');
+      } else if (lucideIcon && imgIcon) {
+        imgIcon.classList.add('hidden');
+        lucideIcon.classList.remove('hidden');
+        lucideIcon.setAttribute('data-lucide', presetIconVal);
+      }
+
+      // Background
+      const customBgVal = (document.getElementById('folderCustomBgInput')?.value || '').trim();
+      const presetBgVal = document.getElementById('folderSelectedBgGradient')?.value || '';
+
+      const bgGradientStyles = {
+        cosmic: 'background: linear-gradient(135deg, rgba(30,27,75,0.92), rgba(59,7,100,0.88)); border-color: rgba(99,102,241,0.4);',
+        sunset: 'background: linear-gradient(135deg, rgba(69,26,3,0.92), rgba(76,5,25,0.88)); border-color: rgba(245,158,11,0.4);',
+        emerald: 'background: linear-gradient(135deg, rgba(2,44,34,0.92), rgba(19,78,74,0.88)); border-color: rgba(16,185,129,0.4);',
+        ocean: 'background: linear-gradient(135deg, rgba(8,47,73,0.92), rgba(23,37,84,0.88)); border-color: rgba(14,165,233,0.4);',
+        cyber: 'background: linear-gradient(135deg, rgba(59,7,100,0.92), rgba(80,7,36,0.88)); border-color: rgba(236,72,153,0.4);',
+        midnight: 'background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9)); border-color: rgba(148,163,184,0.3);',
+        fire: 'background: linear-gradient(135deg, rgba(67,20,7,0.92), rgba(124,45,18,0.88)); border-color: rgba(249,115,22,0.4);'
+      };
+
+      if (customBgVal) {
+        card.style.cssText = `background: linear-gradient(to bottom, rgba(15,23,42,0.72), rgba(15,23,42,0.95)), url('${escapeHtml(customBgVal)}') center/cover no-repeat;`;
+      } else if (presetBgVal && bgGradientStyles[presetBgVal]) {
+        card.style.cssText = bgGradientStyles[presetBgVal];
+      } else {
+        card.style.cssText = '';
+      }
+
+      // Apply color to iconBox
+      iconBox.className = `w-11 h-11 rounded-2xl ${colorInfo.classes} border flex items-center justify-center relative shadow-sm overflow-hidden flex-shrink-0`;
+      iconBox.style.cssText = colorInfo.inlineStyle;
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function openCreateFolderModal() {
@@ -5145,19 +5575,26 @@
       document.getElementById('folderPasswordInput').value = '';
       document.getElementById('folderPasswordInput').placeholder = 'กำหนดรหัสผ่าน (อย่างน้อย 4 หลัก)';
 
-      const amberRadio = document.querySelector('input[name="folderColor"][value="amber"]');
-      if (amberRadio) amberRadio.checked = true;
-
+      selectFolderColor('amber');
       selectFolderIconPreset('folder');
       selectFolderBgPreset('');
+
       const customIconInput = document.getElementById('folderCustomIconInput');
       if (customIconInput) customIconInput.value = '';
+      const iconPreviewBox = document.getElementById('folderCustomIconPreviewBox');
+      if (iconPreviewBox) iconPreviewBox.classList.add('hidden');
+
       const customBgInput = document.getElementById('folderCustomBgInput');
       if (customBgInput) customBgInput.value = '';
+      const bgPreviewBox = document.getElementById('folderCustomBgPreviewBox');
+      if (bgPreviewBox) bgPreviewBox.classList.add('hidden');
+
+      updateFolderModalLivePreview();
 
       const modal = document.getElementById('modalFolder');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
       setTimeout(() => document.getElementById('folderNameInput').focus(), 50);
     }
 
@@ -5176,30 +5613,30 @@
       document.getElementById('folderEditId').value = target.id;
       document.getElementById('folderNameInput').value = target.name || '';
 
-      const colorRadio = document.querySelector(`input[name="folderColor"][value="${target.color || 'amber'}"]`);
-      if (colorRadio) colorRadio.checked = true;
+      const targetColor = target.color || 'amber';
+      const isCustomColor = targetColor.startsWith('#') || targetColor.startsWith('custom:');
+      selectFolderColor(targetColor.replace(/^custom:/i, ''), isCustomColor);
 
       const customIconInput = document.getElementById('folderCustomIconInput');
       if (target.icon && (target.icon.startsWith('http://') || target.icon.startsWith('https://') || target.icon.startsWith('data:'))) {
         if (customIconInput) customIconInput.value = target.icon;
-        const hiddenIconInput = document.getElementById('folderSelectedIcon');
-        if (hiddenIconInput) hiddenIconInput.value = target.icon;
-        document.querySelectorAll('#folderIconPresetGrid .folder-icon-choice').forEach(btn => {
-          btn.classList.remove('border-orange-500', 'text-orange-400');
-          btn.classList.add('border-slate-800', 'text-slate-400');
-        });
+        handleFolderCustomIconInput(target.icon);
       } else {
         selectFolderIconPreset(target.icon || 'folder');
         if (customIconInput) customIconInput.value = '';
+        const iconPreviewBox = document.getElementById('folderCustomIconPreviewBox');
+        if (iconPreviewBox) iconPreviewBox.classList.add('hidden');
       }
 
       const customBgInput = document.getElementById('folderCustomBgInput');
       if (target.bgImage) {
         if (customBgInput) customBgInput.value = target.bgImage;
-        selectFolderBgPreset('');
+        handleFolderCustomBgInput(target.bgImage);
       } else {
         selectFolderBgPreset(target.bgGradient || '');
         if (customBgInput) customBgInput.value = '';
+        const bgPreviewBox = document.getElementById('folderCustomBgPreviewBox');
+        if (bgPreviewBox) bgPreviewBox.classList.add('hidden');
       }
 
       const lockCheckbox = document.getElementById('folderLockCheckbox');
@@ -5215,16 +5652,21 @@
         passInput.placeholder = 'กำหนดรหัสผ่าน (อย่างน้อย 4 หลัก)';
       }
 
+      updateFolderModalLivePreview();
+
       const modal = document.getElementById('modalFolder');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
       setTimeout(() => document.getElementById('folderNameInput').focus(), 50);
     }
 
     function closeFolderModal() {
       const modal = document.getElementById('modalFolder');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
     }
 
     async function handleSaveFolderForm(e) {
@@ -5234,8 +5676,7 @@
       const isLocked = document.getElementById('folderLockCheckbox').checked;
       const pass = document.getElementById('folderPasswordInput').value.trim();
 
-      const colorElem = document.querySelector('input[name="folderColor"]:checked');
-      const color = colorElem ? colorElem.value : 'amber';
+      const color = document.getElementById('folderSelectedColor')?.value || 'amber';
 
       const customIconVal = (document.getElementById('folderCustomIconInput')?.value || '').trim();
       const selectedIconVal = document.getElementById('folderSelectedIcon')?.value || 'folder';
@@ -5284,8 +5725,7 @@
       }
 
       closeFolderModal();
-      renderFoldersList();
-      updateUploadFolderDropdown();
+      renderDrive();
     }
 
     async function handleDeleteFolder(folderId) {
