@@ -208,7 +208,7 @@ export default {
     try {
       const response = await env.ASSETS.fetch(new Request(fetchUrl, request));
       if (response && response.status !== 404) {
-        return response;
+        return withSecurityHeaders(response);
       }
     } catch(e) {}
 
@@ -249,13 +249,13 @@ export default {
       try {
         const ghRes = await fetch(GITHUB_RAW + target);
         if (ghRes.ok) {
-          return new Response(ghRes.body, {
+          return withSecurityHeaders(new Response(ghRes.body, {
             status: 200,
             headers: {
               "Content-Type": getContentType(target),
               "Cache-Control": "public, max-age=60"
             }
-          });
+          }));
         }
       } catch (err) {}
     }
@@ -264,21 +264,34 @@ export default {
     try {
       const notFoundRes = await fetch(GITHUB_RAW + "/404.html");
       if (notFoundRes.ok) {
-        return new Response(notFoundRes.body, {
+        return withSecurityHeaders(new Response(notFoundRes.body, {
           status: 404,
           headers: {
             "Content-Type": "text/html; charset=utf-8"
           }
-        });
+        }));
       }
     } catch(err404) {}
 
-    return new Response("<h1>404 Not Found</h1>", {
+    return withSecurityHeaders(new Response("<h1>404 Not Found</h1>", {
       status: 404,
       headers: { "Content-Type": "text/html; charset=utf-8" }
-    });
+    }));
   }
 };
+
+function withSecurityHeaders(response) {
+  if (!response) return response;
+  const newHeaders = new Headers(response.headers);
+  newHeaders.set("X-Content-Type-Options", "nosniff");
+  newHeaders.set("X-Frame-Options", "SAMEORIGIN");
+  newHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders
+  });
+}
 
 function getContentType(filePath) {
   if (filePath.endsWith(".html")) return "text/html; charset=utf-8";

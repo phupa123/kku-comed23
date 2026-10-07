@@ -100,10 +100,20 @@ TO anon, authenticated
 USING (true)
 WITH CHECK (true);
 
-CREATE POLICY "Allow Delete Campaigns" 
+-- ป้องกันไม่ให้บุคคลภายนอกสั่งลบแคมเปญในระบบทิ้ง
+DROP POLICY IF EXISTS "Allow Delete Campaigns" ON campaigns;
+DROP POLICY IF EXISTS "Deny Public Delete Campaigns" ON campaigns;
+CREATE POLICY "Deny Public Delete Campaigns" 
 ON campaigns FOR DELETE 
-TO anon, authenticated 
-USING (true);
+TO anon 
+USING (false);
+
+-- ป้องกันไม่ให้บุคคลภายนอกแก้ไขสลิปหรือยอดเงินที่ส่งไปแล้ว
+DROP POLICY IF EXISTS "Deny Public Update Payments" ON payments;
+CREATE POLICY "Deny Public Update Payments" 
+ON payments FOR UPDATE 
+TO anon 
+USING (false);
 
 -- ================= 6. ตาราง ADMIN LOGS (ประวัติการกระทำ) =================
 CREATE POLICY "Allow Insert Admin Logs" 
@@ -111,8 +121,17 @@ ON admin_logs FOR INSERT
 TO anon, authenticated 
 WITH CHECK (true);
 
+-- บันทึก Log ต้องไม่สามารถลบหรือดัดแปลงย้อนหลังได้ (Immutable Log)
+DROP POLICY IF EXISTS "Deny Update Admin Logs" ON admin_logs;
+CREATE POLICY "Deny Update Admin Logs" 
+ON admin_logs FOR UPDATE 
+TO anon 
+USING (false);
+
 CREATE POLICY "Deny Delete Admin Logs" 
 ON admin_logs FOR DELETE 
+TO anon 
+USING (false);
 TO anon 
 USING (false);
 
@@ -426,11 +445,15 @@ TO anon, authenticated
 USING (true)
 WITH CHECK (true);
 
+-- ป้องกันการล้างข้อมูล Shortlinks แบบลบทั้งหมด (Bulk Delete)
 DROP POLICY IF EXISTS "Allow public delete shortlinks" ON public.shortlinks;
-CREATE POLICY "Allow public delete shortlinks" 
+DROP POLICY IF EXISTS "Allow safe delete shortlinks" ON public.shortlinks;
+CREATE POLICY "Allow safe delete shortlinks" 
 ON public.shortlinks FOR DELETE 
 TO anon, authenticated 
-USING (true);
+USING (
+  code IS NOT NULL AND length(code) >= 3
+);
 
 -- เปิด Realtime สำหรับตาราง shortlinks
 DO $$
@@ -537,11 +560,17 @@ TO anon, authenticated
 USING (true)
 WITH CHECK (true);
 
+-- ป้องกันการแอบลบแผนของผู้อื่น หรือแอบลบแผนกิจกรรมทางการของสาขา
 DROP POLICY IF EXISTS "Allow public delete plans" ON public.plans;
-CREATE POLICY "Allow public delete plans" 
+DROP POLICY IF EXISTS "Allow safe delete plans" ON public.plans;
+CREATE POLICY "Allow safe delete plans" 
 ON public.plans FOR DELETE 
 TO anon, authenticated 
-USING (true);
+USING (
+  -- แผนทางการของสาขา (is_official) จะลบได้เฉพาะแอดมินเท่านั้น
+  (is_official IS NOT TRUE)
+  OR (creator_email = 'phupa5874@gmail.com')
+);
 
 -- นโยบาย RLS สำหรับ plan_collaborators
 DROP POLICY IF EXISTS "Allow public read plan_collaborators" ON public.plan_collaborators;

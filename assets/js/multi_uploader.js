@@ -33,11 +33,11 @@
     // 1. ImgBB API Key
     imgbbApiKey: localStorage.getItem('COMED_IMGBB_KEY') || '9977cfe63fa98c01f79336c5497b975e',
 
-    // 2. Cloudinary Config (From .env)
+    // 2. Cloudinary Config (From .env / Unsigned Upload)
     cloudinaryCloudName: localStorage.getItem('COMED_CLOUDINARY_NAME') || 'deykwl5q3',
     cloudinaryUploadPreset: localStorage.getItem('COMED_CLOUDINARY_PRESET') || 'KKUComed23',
     cloudinaryApiKey: localStorage.getItem('COMED_CLOUDINARY_API_KEY') || '181817825627181',
-    cloudinaryApiSecret: localStorage.getItem('COMED_CLOUDINARY_API_SECRET') || '_2O_SpzP8bqbLaBwYt-k21duqDs',
+    cloudinaryApiSecret: localStorage.getItem('COMED_CLOUDINARY_API_SECRET') || '',
 
     // 3. FreeImage API Key
     freeimageApiKey: localStorage.getItem('COMED_FREEIMAGE_KEY') || '6d207e02198a847aa98d0a2a901485a5',
