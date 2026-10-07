@@ -132,8 +132,6 @@ CREATE POLICY "Deny Delete Admin Logs"
 ON admin_logs FOR DELETE 
 TO anon 
 USING (false);
-TO anon 
-USING (false);
 
 -- ================= 7. ตาราง EVENTS & EVENT_REGISTRATIONS (กิจกรรมและการเลือกฝ่าย) =================
 CREATE TABLE IF NOT EXISTS events (
