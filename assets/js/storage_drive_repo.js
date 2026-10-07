@@ -264,6 +264,7 @@
 
           shareRecord.folderFiles = folderFiles;
           shareRecord.folderMeta = folderMeta;
+          this.saveData(STORAGE_SHARES_KEY, this.shares);
         }
 
         // Attach comments related to this target
@@ -375,6 +376,61 @@
           comments: Array.isArray(parsedMeta.comments) ? parsedMeta.comments : [],
           updatedAt: data.updated_at || new Date().toISOString()
         };
+
+        // Fallback: If shared folder has empty folderFiles, recover files directly from creator's cloud drive_data
+        if (shareRecord.targetType === 'folder' && shareRecord.targetId && shareRecord.creatorEmail) {
+          if (!Array.isArray(shareRecord.folderFiles) || shareRecord.folderFiles.length === 0) {
+            try {
+              const { data: profData } = await sb
+                .from('user_profiles')
+                .select('drive_data')
+                .eq('email', shareRecord.creatorEmail.toLowerCase().trim())
+                .maybeSingle();
+
+              if (profData && profData.drive_data) {
+                const cDrive = profData.drive_data;
+                const cFilesMeta = cDrive.filesMeta || {};
+                const cCatalog = Array.isArray(cDrive.fileCatalog) ? cDrive.fileCatalog : [];
+
+                if (!shareRecord.folderMeta && Array.isArray(cDrive.folders)) {
+                  const fObj = cDrive.folders.find(f => f.id === shareRecord.targetId);
+                  if (fObj) {
+                    shareRecord.folderMeta = {
+                      id: fObj.id,
+                      name: fObj.name,
+                      color: fObj.color || 'amber',
+                      icon: fObj.icon || 'folder'
+                    };
+                  }
+                }
+
+                const cloudFiles = cCatalog.filter(f => {
+                  const m = cFilesMeta[f.id];
+                  return (m && m.folderId === shareRecord.targetId) || f.folderId === shareRecord.targetId;
+                }).map(item => ({
+                  id: item.id,
+                  name: item.originalName || item.name || 'ไฟล์',
+                  url: item.url || '',
+                  size: item.size || 0,
+                  type: item.type || '',
+                  provider: item.provider || 'cloud',
+                  uploaderEmail: item.uploaderEmail || item.ownerEmail || item.uploadedBy || shareRecord.creatorEmail,
+                  uploaderName: item.uploaderName || '',
+                  uploadedAt: item.uploadedAt || ''
+                }));
+
+                if (cloudFiles.length > 0) {
+                  shareRecord.folderFiles = cloudFiles;
+                  console.log(`[StorageDriveRepo] 📁 Recovered ${cloudFiles.length} files from creator's cloud drive for folder:`, shareRecord.targetId);
+                  // Resync silently so subsequent visitors get files instantly from shortlinks
+                  this.syncShareToCloud(shareRecord).catch(() => {});
+                }
+              }
+            } catch (pErr) {
+              console.warn('[StorageDriveRepo] Creator drive_data lookup fallback suppressed:', pErr);
+            }
+          }
+        }
 
         // Cache comments
         if (Array.isArray(shareRecord.comments) && shareRecord.comments.length > 0) {
@@ -833,11 +889,14 @@
         expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString();
       }
 
-      // ดึงข้อมูลไฟล์ตอนสร้าง share record เลย เพื่อให้เก็บลง Supabase ได้ทันที
+      // ดึงข้อมูลไฟล์หรือโฟลเดอร์ตอนสร้าง share record เลย เพื่อให้เก็บลง Supabase ได้ทันที
       let fileUrl = '';
       let fileName = '';
       let fileType = '';
       let fileSize = 0;
+      let folderFiles = [];
+      let folderMeta = null;
+
       if (targetType === 'file' && targetId) {
         const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
         const f = allFiles.find(item => item.id === targetId);
@@ -847,6 +906,31 @@
           fileType = f.type || '';
           fileSize = f.size || 0;
         }
+      } else if (targetType === 'folder' && targetId) {
+        const folderObj = this.folders.find(f => f.id === targetId);
+        if (folderObj) {
+          folderMeta = {
+            id: folderObj.id,
+            name: folderObj.name,
+            color: folderObj.color || 'amber',
+            icon: folderObj.icon || 'folder'
+          };
+        }
+        const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+        folderFiles = allFiles.filter(item => {
+          const meta = this.getFileMeta(item.id);
+          return (meta && meta.folderId === targetId) || item.folderId === targetId;
+        }).map(item => ({
+          id: item.id,
+          name: item.originalName || item.name || 'ไฟล์',
+          url: item.url || '',
+          size: item.size || 0,
+          type: item.type || '',
+          provider: item.provider || 'cloud',
+          uploaderEmail: item.uploaderEmail || item.ownerEmail || item.uploadedBy || '',
+          uploaderName: item.uploaderName || '',
+          uploadedAt: item.uploadedAt || ''
+        }));
       }
 
       const shareRecord = {
@@ -854,7 +938,7 @@
         shareCode: code,
         targetType,
         targetId,
-        title: title || fileName || 'แชร์ไฟล์',
+        title: title || fileName || (folderMeta && folderMeta.name) || (targetType === 'folder' ? 'แชร์โฟลเดอร์' : 'แชร์ไฟล์'),
         accessType, // public, comed23, specific
         role: role || 'viewer', // viewer, commenter, editor
         allowedEmails: (allowedEmails || []).map(e => e.toLowerCase().trim()),
@@ -864,11 +948,13 @@
         createdAt: new Date().toISOString(),
         creatorEmail: finalCreator,
         clicks: 0,
-        // เก็บข้อมูลไฟล์ไว้ใน record เพื่อให้คนอื่นเข้าลิงก์แล้วดูไฟล์ได้
+        // เก็บข้อมูลไฟล์และโฟลเดอร์ไว้ใน record เพื่อให้คนอื่นเข้าลิงก์แล้วดูไฟล์ได้
         fileUrl,
         fileName,
         fileType,
-        fileSize
+        fileSize,
+        folderFiles,
+        folderMeta
       };
 
       this.shares.unshift(shareRecord);

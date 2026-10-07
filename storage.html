@@ -2596,6 +2596,57 @@
         try {
           sessionStorage.setItem('COMED_ACTIVE_SHARED_FOLDER', JSON.stringify(share));
         } catch (e) {}
+
+        // Fallback: If folderFiles is empty, recover files directly from creator's cloud drive_data
+        if ((!Array.isArray(share.folderFiles) || share.folderFiles.length === 0) && share.creatorEmail && window.getSupabaseClient) {
+          try {
+            const sb = window.getSupabaseClient();
+            if (sb) {
+              const { data: pData } = await sb
+                .from('user_profiles')
+                .select('drive_data')
+                .eq('email', share.creatorEmail.toLowerCase().trim())
+                .maybeSingle();
+
+              if (pData?.drive_data) {
+                const cDrive = pData.drive_data;
+                const cMeta = cDrive.filesMeta || {};
+                const cCat = Array.isArray(cDrive.fileCatalog) ? cDrive.fileCatalog : [];
+
+                if (!share.folderMeta && Array.isArray(cDrive.folders)) {
+                  const fObj = cDrive.folders.find(f => f.id === share.targetId);
+                  if (fObj) {
+                    share.folderMeta = { id: fObj.id, name: fObj.name, color: fObj.color || 'amber', icon: fObj.icon || 'folder' };
+                  }
+                }
+
+                const recovered = cCat.filter(f => (cMeta[f.id]?.folderId === share.targetId) || f.folderId === share.targetId)
+                  .map(item => ({
+                    id: item.id,
+                    name: item.originalName || item.name || 'ไฟล์',
+                    url: item.url || '',
+                    size: item.size || 0,
+                    type: item.type || '',
+                    provider: item.provider || 'cloud',
+                    uploaderEmail: item.uploaderEmail || item.ownerEmail || item.uploadedBy || share.creatorEmail,
+                    uploaderName: item.uploaderName || '',
+                    uploadedAt: item.uploadedAt || ''
+                  }));
+
+                if (recovered.length > 0) {
+                  share.folderFiles = recovered;
+                  currentSharedFolderContext.folderFiles = recovered;
+                  try { sessionStorage.setItem('COMED_ACTIVE_SHARED_FOLDER', JSON.stringify(currentSharedFolderContext)); } catch (_) {}
+                  console.log(`[Storage] 📁 Recovered ${recovered.length} files from creator cloud drive for shared folder:`, share.targetId);
+                  repo.syncShareToCloud(share).catch(() => {});
+                }
+              }
+            }
+          } catch (recErr) {
+            console.warn('[Storage] Folder files cloud recovery suppressed:', recErr);
+          }
+        }
+
         navigateToFolder(share.targetId);
         showToast(`📁 เข้าสู่โฟลเดอร์ที่แชร์เรียบร้อยแล้ว: ${share.folderMeta?.name || share.title || ''}`);
       } else {
@@ -2900,12 +2951,15 @@
         } else {
           const repo = getRepo();
           const folder = repo ? repo.getUserFolders(getCurrentUserEmail()).find(f => f.id === currentFolderId) : null;
+          const isSharedContext = currentSharedFolderContext && (currentSharedFolderContext.targetId === currentFolderId || currentSharedFolderContext.folderMeta?.id === currentFolderId);
+          const tabTitle = folder ? folder.name : (isSharedContext ? (currentSharedFolderContext.folderMeta?.name || currentSharedFolderContext.title || 'โฟลเดอร์ที่แชร์') : 'โฟลเดอร์');
+          const tabIcon = (folder && folder.icon) || (isSharedContext ? (currentSharedFolderContext.folderMeta?.icon || 'folder') : 'folder');
           const newTab = {
             id: 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
             type: 'folder',
             folderId: currentFolderId,
-            title: folder ? folder.name : 'โฟลเดอร์',
-            icon: (folder && folder.icon) || 'folder',
+            title: tabTitle,
+            icon: tabIcon,
             pinned: false
           };
           driveTabs.push(newTab);
@@ -3069,12 +3123,12 @@
       // Inside Folder Action Bar & Upload Section visibility based on role
       const uploadSection = document.getElementById('driveUploadSection');
       if (currentFolderId && insideToolbar) {
-        const currentF = allFolders.find(f => f.id === currentFolderId) || (currentSharedFolderContext && currentSharedFolderContext.folderMeta?.id === currentFolderId ? currentSharedFolderContext.folderMeta : null);
+        const isViewingShared = currentSharedFolderContext && (currentFolderId === currentSharedFolderContext.targetId || currentSharedFolderContext.folderMeta?.id === currentFolderId);
+        const currentF = allFolders.find(f => f.id === currentFolderId) || (isViewingShared ? (currentSharedFolderContext.folderMeta || { id: currentFolderId, name: currentSharedFolderContext.title || 'โฟลเดอร์ที่แชร์' }) : null);
         if (currentF) {
           insideToolbar.classList.remove('hidden');
           if (activeNameSpan) activeNameSpan.textContent = currentF.name;
 
-          const isViewingShared = currentSharedFolderContext && currentFolderId === currentSharedFolderContext.targetId;
           const isEditor = isViewingShared ? (currentSharedFolderContext.role === 'editor') : true;
 
           const btnEdit = document.getElementById('btnFolderEdit');
@@ -3637,8 +3691,9 @@
         const repo = getRepo();
         const userEmail = getCurrentUserEmail();
         const folders = repo.getUserFolders(userEmail);
-        const folder = folders.find(f => f.id === currentFolderId) || (currentSharedFolderContext && currentSharedFolderContext.folderMeta?.id === currentFolderId ? currentSharedFolderContext.folderMeta : null);
-        const folderName = folder?.name || 'โฟลเดอร์';
+        const isViewingShared = currentSharedFolderContext && (currentFolderId === currentSharedFolderContext.targetId || currentSharedFolderContext.folderMeta?.id === currentFolderId);
+        const folder = folders.find(f => f.id === currentFolderId) || (isViewingShared ? (currentSharedFolderContext.folderMeta || { id: currentFolderId, name: currentSharedFolderContext.title || 'โฟลเดอร์ที่แชร์' }) : null);
+        const folderName = folder?.name || (isViewingShared ? (currentSharedFolderContext.folderMeta?.name || currentSharedFolderContext.title) : '') || 'โฟลเดอร์';
 
         const isLockedFolder = folder && folder.isLocked && !sessionUnlockedItems.has(folder.id);
         const isEditor = currentSharedFolderContext ? (currentSharedFolderContext.role === 'editor') : true;
@@ -3814,7 +3869,8 @@
       const repo = getRepo();
 
       // 1. If currently in a shared folder from cloud, use its folderFiles
-      if (currentSharedFolderContext && currentFolderId === currentSharedFolderContext.targetId) {
+      if (currentSharedFolderContext && (currentFolderId === currentSharedFolderContext.targetId || !currentFolderId)) {
+        if (!currentFolderId) currentFolderId = currentSharedFolderContext.targetId;
         let sharedFiles = Array.isArray(currentSharedFolderContext.folderFiles) ? [...currentSharedFolderContext.folderFiles] : [];
         
         // Also merge any local MultiCloud files that are tagged with this folder
@@ -4694,7 +4750,7 @@
     });
 
     function getSelectedFilesObjects() {
-      const allFiles = window.MultiCloudUploader ? window.MultiCloudUploader.getAllFiles() : [];
+      const allFiles = getUserFilesList();
       const ids = Array.from(selectedFileIds);
       return ids.map(id => allFiles.find(f => f.id === id)).filter(Boolean);
     }
