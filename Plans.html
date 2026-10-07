@@ -446,6 +446,55 @@
     </div>
   </div>
 
+  <!-- ================= MODAL: GOOGLE AUTHENTICATION ================= -->
+  <div id="modalUserAuth" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center p-4">
+    <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative border border-slate-700/80 max-w-md w-full">
+      <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition cursor-pointer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-3">
+        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-500/20 via-amber-500/15 to-sky-500/20 text-orange-400 flex items-center justify-center mx-auto border border-orange-500/30 shadow-xl shadow-orange-500/10">
+          <i data-lucide="calendar-check" class="w-8 h-8 text-orange-400"></i>
+        </div>
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-wider mb-1.5">
+            <i data-lucide="shield-check" class="w-3 h-3 text-orange-500"></i>
+            <span>KKU MAIL AUTHENTICATION</span>
+          </div>
+          <h3 class="text-xl sm:text-2xl font-black text-white">เข้าสู่ระบบห้องแผนงาน</h3>
+          <p class="text-xs text-slate-400 mt-1">เข้าสู่ระบบด้วยอีเมลสถาบัน <strong class="text-orange-400">@kkumail.com</strong> เพื่อสร้างและจัดการแผนงาน</p>
+        </div>
+      </div>
+
+      <!-- Google Sign-In Area -->
+      <div class="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-4 text-center shadow-inner">
+        <div class="text-xs text-slate-300 font-bold flex items-center justify-center gap-2">
+          <span>ลงชื่อเข้าใช้ด้วยบัญชี Google ของมหาวิทยาลัยขอนแก่น</span>
+        </div>
+
+        <!-- Google Render Button Container -->
+        <div id="googleBtnContainer" class="flex justify-center min-h-[46px] items-center">
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-orange-400"></i>
+            <span>กำลังโหลดปุ่ม Google...</span>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          ระบบจะเชื่อมต่อข้อมูลชื่อและรหัสนักศึกษา เพื่อให้สิทธิ์สร้างและจัดการงานย่อย
+        </p>
+      </div>
+
+      <div class="text-center pt-1">
+        <p class="text-[10px] text-slate-500 flex items-center justify-center gap-1">
+          <i data-lucide="lock" class="w-3 h-3 text-emerald-400"></i>
+          <span>ระบบปลอดภัย ได้รับการตรวจสอบสิทธิ์ผ่าน Google Identity Services</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= SCRIPT LOGIC ================= -->
   <script>
     let appState = {
@@ -461,10 +510,126 @@
       allTrashPlans: []
     };
 
+    const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setupGoogleAuth() {
+      try {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: false
+          });
+
+          const btnContainer = document.getElementById("googleBtnContainer");
+          if (btnContainer) {
+            btnContainer.innerHTML = '';
+            google.accounts.id.renderButton(btnContainer, {
+              theme: "outline",
+              size: "large",
+              shape: "pill",
+              text: "signin_with",
+              width: 280,
+              logo_alignment: "left"
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("setupGoogleAuth error:", e);
+      }
+    }
+
+    function openAuthModal() {
+      const modal = document.getElementById('modalUserAuth');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setupGoogleAuth();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+      if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+        google.accounts.id.prompt();
+      }
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('modalUserAuth');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function triggerGoogleLogin() {
+      openAuthModal();
+    }
+
+    async function handleGoogleCredentialResponse(response) {
+      if (!response.credential) return;
+      const data = parseJwt(response.credential);
+      if (!data || !data.email) return;
+
+      const emailLower = data.email.toLowerCase().trim();
+      const isSuperTester = emailLower === 'phupa5874@gmail.com';
+      const isKKUMail = emailLower.endsWith('@kkumail.com');
+
+      if (!isSuperTester && !isKKUMail) {
+        alert("⚠️ ขออภัย ระบบอนุญาตเฉพาะบัญชีอีเมล @kkumail.com ของมหาวิทยาลัยขอนแก่น หรือผู้ดูแลระบบเท่านั้น");
+        return;
+      }
+
+      const studentIdMatch = emailLower.match(/([a-z0-9._-]+)@kkumail\.com/);
+      const possibleId = studentIdMatch ? studentIdMatch[1] : '';
+      const student = (window.STUDENTS_DATA || []).find(s => s.id === possibleId || (s.email && s.email.toLowerCase() === emailLower));
+
+      const isUserAdmin = isSuperTester || (window.PlansRepo && window.PlansRepo.isAdminUser(emailLower));
+
+      const userSession = {
+        email: emailLower,
+        name: student ? student.name : (isSuperTester ? 'ภูผา (Super Admin)' : data.name),
+        nickname: student ? student.nickname : (isSuperTester ? 'ภูผา' : ''),
+        studentId: student ? student.id : (isSuperTester ? 'ADMIN-TESTER' : ''),
+        avatar: data.picture || `https://api.dicebear.com/7.x/bottts/svg?seed=${emailLower}`,
+        isSpecialTester: isSuperTester,
+        isAdmin: isUserAdmin,
+        loggedInAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('COMED_USER_SESSION', JSON.stringify(userSession));
+      sessionStorage.setItem('COMED_USER_SESSION', JSON.stringify(userSession));
+      appState.user = userSession;
+
+      closeAuthModal();
+      updateAuthUI();
+      await refreshAllData();
+      alert(`🎉 ยินดีต้อนรับคุณ ${userSession.name} เข้าสู่ระบบเรียบร้อยแล้ว`);
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
       checkSessionUser();
+      setupGoogleAuth();
       await refreshAllData();
+
+      // Listen for session login changes across tabs
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'COMED_USER_SESSION') {
+          checkSessionUser();
+          refreshAllData();
+        }
+      });
 
       // Subscribe to Realtime (plans & plan_tasks)
       if (window.PlansRepo) {
@@ -480,9 +645,39 @@
 
     function checkSessionUser() {
       try {
-        const s = sessionStorage.getItem('COMED_USER_SESSION');
-        if (s) appState.user = JSON.parse(s);
-      } catch (e) {}
+        let stored = localStorage.getItem('COMED_USER_SESSION');
+        if (!stored) {
+          stored = sessionStorage.getItem('COMED_USER_SESSION');
+        }
+        if (stored) {
+          appState.user = JSON.parse(stored);
+          if (appState.user && appState.user.email) {
+            appState.user.email = appState.user.email.toLowerCase().trim();
+            if (window.PlansRepo && window.PlansRepo.isAdminUser(appState.user.email)) {
+              appState.user.isAdmin = true;
+            }
+          }
+          // Sync to both storages
+          localStorage.setItem('COMED_USER_SESSION', JSON.stringify(appState.user));
+          sessionStorage.setItem('COMED_USER_SESSION', JSON.stringify(appState.user));
+        } else {
+          // Check admin login session from admin.html
+          const adminEmail = sessionStorage.getItem('COMED_KKU69_ADMIN_LOGGED_USER');
+          if (adminEmail) {
+            const clean = adminEmail.toLowerCase().trim();
+            appState.user = {
+              email: clean,
+              name: 'ผู้ดูแลระบบ (' + clean + ')',
+              avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${clean}`,
+              isAdmin: true
+            };
+          } else {
+            appState.user = null;
+          }
+        }
+      } catch (e) {
+        console.warn('checkSessionUser error:', e);
+      }
       updateAuthUI();
     }
 
@@ -496,7 +691,7 @@
         loginBtn.classList.add('hidden');
         userInfo.classList.remove('hidden');
         userInfo.classList.add('flex');
-        userName.textContent = appState.user.name || 'สมาชิก';
+        userName.textContent = appState.user.nickname ? `${appState.user.name} (${appState.user.nickname})` : (appState.user.name || 'สมาชิก');
         userAvatar.src = appState.user.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>";
       } else {
         loginBtn.classList.remove('hidden');
@@ -505,20 +700,56 @@
       }
     }
 
-    function triggerGoogleLogin() {
-      window.location.href = 'index.html?action=login';
-    }
-
     function logoutUser() {
+      localStorage.removeItem('COMED_USER_SESSION');
       sessionStorage.removeItem('COMED_USER_SESSION');
       appState.user = null;
       updateAuthUI();
       refreshAllData();
+      alert("ออกจากระบบเรียบร้อยแล้ว");
+    }
+
+    // Permission Checkers
+    function getCurrentUserEmail() {
+      return (appState.user && appState.user.email) ? appState.user.email.toLowerCase().trim() : '';
+    }
+
+    function isCurrentUserAdmin() {
+      if (!appState.user) return false;
+      if (appState.user.isAdmin || appState.user.isSpecialTester) return true;
+      const email = getCurrentUserEmail();
+      if (window.PlansRepo && typeof window.PlansRepo.isAdminUser === 'function') {
+        return window.PlansRepo.isAdminUser(email);
+      }
+      return false;
+    }
+
+    function canManagePlan(plan) {
+      if (!plan) return false;
+      if (isCurrentUserAdmin()) return true;
+      const userEmail = getCurrentUserEmail();
+      if (!userEmail) return false;
+      const creatorEmail = (plan.creator_email || '').toLowerCase().trim();
+      return creatorEmail === userEmail;
+    }
+
+    function canManageTask(task, plan) {
+      if (!task) return false;
+      if (isCurrentUserAdmin()) return true;
+      const userEmail = getCurrentUserEmail();
+      if (!userEmail) return false;
+      const taskCreator = (task.creator_email || '').toLowerCase().trim();
+      if (taskCreator === userEmail) return true;
+      if (plan) {
+        const planCreator = (plan.creator_email || '').toLowerCase().trim();
+        if (planCreator === userEmail) return true;
+      }
+      return false;
     }
 
     // Refresh All Data
     async function refreshAllData() {
-      const email = appState.user ? appState.user.email : null;
+      const email = getCurrentUserEmail() || null;
       if (window.PlansRepo) {
         appState.plans = await window.PlansRepo.fetchPlans(email, false);
         appState.allTrashPlans = await window.PlansRepo.fetchPlans(email, true);
@@ -668,6 +899,16 @@
       const scopeBadge = document.getElementById('activeRoomScopeBadge');
       scopeBadge.textContent = plan.scope === 'department' ? '🏛️ งานสาขา' : plan.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
 
+      // ตรวจสอบสิทธิ์การลบห้อง: แสดงปุ่มลบเฉพาะผู้สร้างห้องหรือแอดมินเท่านั้น
+      const btnDeleteRoom = document.getElementById('btnDeleteRoom');
+      if (btnDeleteRoom) {
+        if (canManagePlan(plan)) {
+          btnDeleteRoom.classList.remove('hidden');
+        } else {
+          btnDeleteRoom.classList.add('hidden');
+        }
+      }
+
       await loadActiveRoomTasks(plan.id);
       lucide.createIcons();
     }
@@ -768,11 +1009,15 @@
     // Move task to column via drag & drop
     async function moveTaskToColumn(taskId, targetColumn) {
       if (!window.PlansRepo) return;
-      const moverUser = appState.user ? {
+      if (!appState.user || !appState.user.email) {
+        alert("🔒 คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถย้ายหรืออัปเดตสถานะงานได้");
+        return;
+      }
+      const moverUser = {
         email: appState.user.email,
         name: appState.user.name,
         avatar: appState.user.avatar || ''
-      } : { email: 'guest@kkumail.com', name: 'สมาชิก' };
+      };
 
       const isCompleted = targetColumn.includes('เสร็จ');
       await window.PlansRepo.updateTask(taskId, {
@@ -786,6 +1031,12 @@
     // Create Room Submit
     async function handleCreatePlanSubmit(e) {
       e.preventDefault();
+      if (!appState.user || !appState.user.email) {
+        alert("🔒 คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถสร้างห้องงานได้");
+        triggerGoogleLogin();
+        return;
+      }
+
       const title = document.getElementById('newRoomTitle').value;
       const scope = document.getElementById('newRoomScope').value;
       const preset = document.getElementById('newRoomColumnsPreset').value;
@@ -804,9 +1055,10 @@
         custom_columns: cols,
         start_date: new Date(startDate).toISOString(),
         end_date: endDate ? new Date(endDate).toISOString() : null,
-        creator_email: appState.user ? appState.user.email : 'guest@kkumail.com',
-        creator_name: appState.user ? appState.user.name : 'สมาชิกสาขา',
-        creator_avatar: appState.user ? appState.user.avatar : '',
+        creator_email: appState.user.email,
+        creator_name: appState.user.name || 'สมาชิกสาขา',
+        creator_avatar: appState.user.avatar || '',
+        creator_student_id: appState.user.studentId || '',
         collaborators: appState.selectedRoomCollabs
       };
 
@@ -884,10 +1136,12 @@
       menu.style.left = `${x}px`;
       menu.style.top = `${y}px`;
 
+      const hasDeletePermission = canManagePlan(plan);
+
       menu.innerHTML = `
         <div class="px-2.5 py-1 text-[10px] font-black uppercase text-orange-400 border-b border-white/10 flex items-center gap-1">
           <i data-lucide="sparkles" class="w-3 h-3"></i>
-          <span>เมนูด่วน (กดค้าง): ${escapeHtml(plan.title).slice(0, 15)}</span>
+          <span>เมนูด่วน: ${escapeHtml(plan.title).slice(0, 15)}</span>
         </div>
         <button onclick="openRoomBoardFromMenu('${plan.id}')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-orange-500/20 hover:text-orange-300 font-bold transition flex items-center gap-2 cursor-pointer">
           <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
@@ -897,10 +1151,17 @@
           <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
           <span>แชร์ QR Code ห้องนี้</span>
         </button>
+        ${hasDeletePermission ? `
         <button onclick="quickDeletePlanConfirm('${plan.id}')" class="w-full text-left px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/20 font-bold transition flex items-center gap-2 cursor-pointer">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           <span>ย้ายลงถังขยะ</span>
         </button>
+        ` : `
+        <div class="px-3 py-1.5 text-[10px] text-slate-500 flex items-center gap-1.5 select-none">
+          <i data-lucide="lock" class="w-3 h-3 text-slate-600"></i>
+          <span>ลบได้เฉพาะผู้สร้าง</span>
+        </div>
+        `}
       `;
 
       document.body.appendChild(menu);
@@ -944,9 +1205,18 @@
       closePlanContextMenu();
       const p = appState.plans.find(x => x.id === planId);
       if (!p) return;
+      if (!canManagePlan(p)) {
+        alert("🔒 คุณไม่มีสิทธิ์ลบห้องงานนี้\n(เฉพาะผู้สร้างห้องงานหรือผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ลบ)");
+        return;
+      }
       if (confirm(`ต้องการย้ายห้องงาน "${p.title}" ลงถังขยะหรือไม่?`)) {
-        await window.PlansRepo.deletePlan(planId, 'user');
-        await refreshAllData();
+        try {
+          const email = getCurrentUserEmail();
+          await window.PlansRepo.moveToTrashPlan(planId, email, isCurrentUserAdmin() ? 'admin' : 'owner');
+          await refreshAllData();
+        } catch (err) {
+          alert("ไม่สามารถย้ายลงถังขยะได้: " + err.message);
+        }
       }
     }
 
@@ -1004,6 +1274,13 @@
     }
 
     function openAddTaskModalForColumn(colName) {
+      if (!appState.user || !appState.user.email) {
+        if (confirm("🔒 คุณต้องเข้าสู่ระบบบัญชี KKU Mail ก่อนจึงจะสามารถเพิ่มงานย่อยได้\n\nคุณต้องการเข้าสู่ระบบตอนนี้เลยหรือไม่?")) {
+          triggerGoogleLogin();
+        }
+        return;
+      }
+
       document.getElementById('taskModalTitle').textContent = 'เพิ่มงานย่อย';
       document.getElementById('taskFormId').value = '';
       document.getElementById('taskFormTitle').value = '';
@@ -1031,7 +1308,16 @@
       document.getElementById('taskFormDesc').value = task.description || '';
       document.getElementById('taskFormPriority').value = task.priority || 'normal';
       document.getElementById('taskFormAttachmentUrl').value = (task.attachments && task.attachments[0]) ? task.attachments[0].url : '';
-      document.getElementById('btnDeleteTaskInsideModal').classList.remove('hidden');
+      
+      // สิทธิ์การลบงานย่อย: แสดงปุ่มลบเฉพาะผู้สร้างงานย่อย, ผู้สร้างห้องงาน หรือแอดมินเท่านั้น
+      const btnDeleteTask = document.getElementById('btnDeleteTaskInsideModal');
+      if (btnDeleteTask) {
+        if (canManageTask(task, appState.activeRoom)) {
+          btnDeleteTask.classList.remove('hidden');
+        } else {
+          btnDeleteTask.classList.add('hidden');
+        }
+      }
 
       const colSelect = document.getElementById('taskFormColumn');
       colSelect.innerHTML = '';
@@ -1053,6 +1339,12 @@
 
     async function handleTaskSubmit(e) {
       e.preventDefault();
+      if (!appState.user || !appState.user.email) {
+        alert("🔒 คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถสร้างหรือแก้ไขงานย่อยได้");
+        triggerGoogleLogin();
+        return;
+      }
+
       const taskId = document.getElementById('taskFormId').value;
       const title = document.getElementById('taskFormTitle').value;
       const col = document.getElementById('taskFormColumn').value;
@@ -1061,11 +1353,11 @@
       const desc = document.getElementById('taskFormDesc').value;
 
       const attachments = attachUrl ? [{ url: attachUrl, name: 'ไฟล์แนบ' }] : [];
-      const moverUser = appState.user ? {
+      const moverUser = {
         email: appState.user.email,
         name: appState.user.name,
         avatar: appState.user.avatar || ''
-      } : { email: 'guest@kkumail.com', name: 'สมาชิก' };
+      };
 
       try {
         if (taskId) {
@@ -1102,12 +1394,21 @@
     async function handleDeleteTaskFromModal() {
       const taskId = document.getElementById('taskFormId').value;
       if (!taskId) return;
+      const task = appState.activeTasks.find(t => t.id === taskId);
+      if (!canManageTask(task, appState.activeRoom)) {
+        alert("🔒 คุณไม่มีสิทธิ์ลบงานย่อยนี้ (เฉพาะผู้สร้างงานย่อย หรือผู้สร้างห้องงานเท่านั้น)");
+        return;
+      }
       if (!confirm("คุณต้องการย้ายงานย่อยนี้ไปยังถังขยะของห้องใช่หรือไม่?")) return;
 
-      const email = appState.user ? appState.user.email : 'guest@kkumail.com';
-      await window.PlansRepo.moveToTrashTask(taskId, email);
-      closeTaskModal();
-      await loadActiveRoomTasks(appState.activeRoom.id);
+      try {
+        const email = getCurrentUserEmail();
+        await window.PlansRepo.moveToTrashTask(taskId, email);
+        closeTaskModal();
+        await loadActiveRoomTasks(appState.activeRoom.id);
+      } catch (err) {
+        alert("ไม่สามารถลบงานย่อยได้: " + err.message);
+      }
     }
 
     // Room Trash Modal
@@ -1120,14 +1421,19 @@
         appState.roomTrashTasks.forEach(t => {
           const item = document.createElement('div');
           item.className = 'p-3 rounded-2xl bg-slate-900 border border-white/5 flex items-center justify-between gap-3';
+          const canManage = canManageTask(t, appState.activeRoom);
           item.innerHTML = `
             <div>
-              <h5 class="font-bold text-white text-xs">${t.title}</h5>
-              <span class="text-[10px] text-slate-400">ลบโดย: ${t.deleted_by_email || '-'}</span>
+              <h5 class="font-bold text-white text-xs">${escapeHtml(t.title)}</h5>
+              <span class="text-[10px] text-slate-400">ลบโดย: ${escapeHtml(t.deleted_by_email || '-')}</span>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="restoreRoomTask('${t.id}')" class="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold hover:bg-emerald-500 hover:text-white transition">กู้คืน</button>
-              <button onclick="permanentlyDeleteRoomTask('${t.id}')" class="px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 text-xs font-bold hover:bg-rose-500 hover:text-white transition">ลบถาวร</button>
+              ${canManage ? `
+                <button onclick="restoreRoomTask('${t.id}')" class="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold hover:bg-emerald-500 hover:text-white transition">กู้คืน</button>
+                <button onclick="permanentlyDeleteRoomTask('${t.id}')" class="px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 text-xs font-bold hover:bg-rose-500 hover:text-white transition">ลบถาวร</button>
+              ` : `
+                <span class="text-[10px] text-slate-500 flex items-center gap-1"><i data-lucide="lock" class="w-3 h-3 text-slate-600"></i> ลบได้เฉพาะผู้สร้าง</span>
+              `}
             </div>
           `;
           list.appendChild(item);
@@ -1135,6 +1441,7 @@
       }
       document.getElementById('roomTrashModal').classList.remove('hidden');
       document.getElementById('roomTrashModal').classList.add('flex');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     function closeRoomTrashModal() {
       document.getElementById('roomTrashModal').classList.add('hidden');
@@ -1142,16 +1449,31 @@
     }
 
     async function restoreRoomTask(taskId) {
-      await window.PlansRepo.restoreTask(taskId);
-      await loadActiveRoomTasks(appState.activeRoom.id);
-      openRoomTrashModal();
+      const task = appState.roomTrashTasks.find(t => t.id === taskId);
+      if (!canManageTask(task, appState.activeRoom)) {
+        alert("🔒 คุณไม่มีสิทธิ์กู้คืนงานย่อยนี้");
+        return;
+      }
+      try {
+        const email = getCurrentUserEmail();
+        await window.PlansRepo.restoreTask(taskId, email);
+        await loadActiveRoomTasks(appState.activeRoom.id);
+        openRoomTrashModal();
+      } catch (err) {
+        alert("กู้คืนไม่สำเร็จ: " + err.message);
+      }
     }
 
     async function permanentlyDeleteRoomTask(taskId) {
+      const task = appState.roomTrashTasks.find(t => t.id === taskId);
+      if (!canManageTask(task, appState.activeRoom)) {
+        alert("🔒 คุณไม่มีสิทธิ์ลบงานย่อยนี้ถาวร");
+        return;
+      }
       if (!confirm("คุณแน่ใจว่าต้องการลบงานย่อยนี้ถาวร? ข้อมูลจะไม่สามารถกู้คืนได้")) return;
-      const email = appState.user ? appState.user.email : '';
+      const email = getCurrentUserEmail();
       try {
-        await window.PlansRepo.permanentlyDeleteTask(taskId, email, false);
+        await window.PlansRepo.permanentlyDeleteTask(taskId, email, isCurrentUserAdmin());
         await loadActiveRoomTasks(appState.activeRoom.id);
         openRoomTrashModal();
       } catch (e) {
@@ -1162,36 +1484,61 @@
     // Delete Current Room
     async function handleDeleteCurrentRoom() {
       if (!appState.activeRoom) return;
+      if (!canManagePlan(appState.activeRoom)) {
+        alert("🔒 คุณไม่มีสิทธิ์ลบห้องงานนี้\n(เฉพาะผู้สร้างห้องงานหรือผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ลบ)");
+        return;
+      }
       if (!confirm("คุณต้องการย้ายห้องงานนี้ไปยังถังขยะใช่หรือไม่? (งานย่อยทั้งหมดจะถูกเก็บไว้ เมื่อกู้คืนจะกลับมาด้วย)")) return;
 
-      const email = appState.user ? appState.user.email : 'guest@kkumail.com';
-      await window.PlansRepo.moveToTrashPlan(appState.activeRoom.id, email, 'owner');
-      backToRoomsList();
+      try {
+        const email = getCurrentUserEmail();
+        await window.PlansRepo.moveToTrashPlan(appState.activeRoom.id, email, isCurrentUserAdmin() ? 'admin' : 'owner');
+        backToRoomsList();
+      } catch (err) {
+        alert("ไม่สามารถย้ายลงถังขยะได้: " + err.message);
+      }
     }
 
     // Render Global Trash List
     function renderTrashList() {
       const container = document.getElementById('trashItemsList');
       container.innerHTML = '';
+      if (!appState.user || !appState.user.email) {
+        container.innerHTML = `
+          <div class="py-12 text-center text-slate-500 space-y-3">
+            <i data-lucide="lock" class="w-8 h-8 mx-auto text-slate-600"></i>
+            <p class="text-xs">กรุณาเข้าสู่ระบบ KKU Mail เพื่อเข้าถึงและจัดการถังขยะของคุณ</p>
+            <button onclick="triggerGoogleLogin()" class="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition">เข้าสู่ระบบ KKU</button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
       if (appState.allTrashPlans.length === 0) {
         container.innerHTML = '<p class="text-center py-8 text-slate-500 text-xs">ถังขยะว่างเปล่า ไม่มีห้องงานที่ถูกลบ</p>';
         return;
       }
 
       appState.allTrashPlans.forEach(p => {
+        const canManage = canManagePlan(p);
         const item = document.createElement('div');
         item.className = 'p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between gap-4';
         item.innerHTML = `
           <div>
             <div class="flex items-center gap-2">
               <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-500/20 text-rose-300">ลบแล้ว</span>
-              <h4 class="font-bold text-white text-sm">${p.title}</h4>
+              <h4 class="font-bold text-white text-sm">${escapeHtml(p.title)}</h4>
             </div>
-            <p class="text-xs text-slate-400 mt-1">ลบโดย: ${p.deleted_by_email || '-'} (${p.deleted_by_type === 'admin' ? 'ถังขยะหลังบ้าน' : 'ถังขยะส่วนตัว'})</p>
+            <p class="text-xs text-slate-400 mt-1">ผู้สร้าง: ${escapeHtml(p.creator_email || '-')} | ลบโดย: ${escapeHtml(p.deleted_by_email || '-')} (${p.deleted_by_type === 'admin' ? 'ถังขยะหลังบ้าน' : 'ถังขยะส่วนตัว'})</p>
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
-            <button onclick="restorePlan('${p.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold hover:bg-emerald-500 hover:text-white transition">กู้คืนห้อง & งานย่อย</button>
-            <button onclick="permanentlyDeletePlan('${p.id}')" class="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 text-xs font-bold hover:bg-rose-500 hover:text-white transition">ลบถาวร</button>
+            ${canManage ? `
+              <button onclick="restorePlan('${p.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold hover:bg-emerald-500 hover:text-white transition">กู้คืนห้อง & งานย่อย</button>
+              <button onclick="permanentlyDeletePlan('${p.id}')" class="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 text-xs font-bold hover:bg-rose-500 hover:text-white transition">ลบถาวร</button>
+            ` : `
+              <span class="text-[10px] text-slate-500 flex items-center gap-1"><i data-lucide="lock" class="w-3 h-3 text-slate-600"></i> จัดการได้เฉพาะผู้สร้าง</span>
+            `}
           </div>
         `;
         container.appendChild(item);
@@ -1200,16 +1547,31 @@
     }
 
     async function restorePlan(planId) {
-      await window.PlansRepo.restorePlan(planId);
-      await refreshAllData();
-      renderTrashList();
+      const p = appState.allTrashPlans.find(x => x.id === planId);
+      if (!canManagePlan(p)) {
+        alert("🔒 คุณไม่มีสิทธิ์กู้คืนห้องงานนี้ (เฉพาะผู้สร้างห้องงานหรือผู้ดูแลระบบเท่านั้น)");
+        return;
+      }
+      try {
+        const email = getCurrentUserEmail();
+        await window.PlansRepo.restorePlan(planId, email);
+        await refreshAllData();
+        renderTrashList();
+      } catch (err) {
+        alert("กู้คืนห้องงานไม่สำเร็จ: " + err.message);
+      }
     }
 
     async function permanentlyDeletePlan(planId) {
+      const p = appState.allTrashPlans.find(x => x.id === planId);
+      if (!canManagePlan(p)) {
+        alert("🔒 คุณไม่มีสิทธิ์ลบห้องงานนี้ถาวร (เฉพาะผู้สร้างห้องงานหรือผู้ดูแลระบบเท่านั้น)");
+        return;
+      }
       if (!confirm("คุณแน่ใจว่าต้องการลบห้องงานนี้ถาวร? งานย่อยทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้")) return;
-      const email = appState.user ? appState.user.email : '';
+      const email = getCurrentUserEmail();
       try {
-        await window.PlansRepo.permanentlyDeletePlan(planId, email, false);
+        await window.PlansRepo.permanentlyDeletePlan(planId, email, isCurrentUserAdmin());
         await refreshAllData();
         renderTrashList();
       } catch (e) {

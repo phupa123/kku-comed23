@@ -48,12 +48,35 @@
       });
     },
 
-    // 1. ดึงแผนงานหลัก (กรองถังขยะและสิทธิ์การเข้าถึง)
+    // ตรวจสอบสิทธิ์ผู้ดูแลระบบ (Admin Whitelist)
+    isAdminUser(email) {
+      if (!email) return false;
+      const clean = email.toLowerCase().trim();
+      const whitelist = [
+        'thitiwut.a@kkumail.com',
+        'phupa5874@gmail.com',
+        'pichamon.sam@kkumail.com',
+        'nattachai.p@kkumail.com'
+      ];
+      if (whitelist.includes(clean)) return true;
+      if (typeof window !== 'undefined' && window.AdminSecurityGuard && typeof window.AdminSecurityGuard.getCurrentAdminEmail === 'function') {
+        const cur = window.AdminSecurityGuard.getCurrentAdminEmail();
+        if (cur && cur.toLowerCase().trim() === clean) return true;
+      }
+      return false;
+    },
+
+    // 1. ดึงแผนงานหลัก (กรองถังขยะและสิทธิ์การเข้าถึงอย่างปลอดภัย)
     async fetchPlans(userEmail = null, includeDeleted = false, deletedByType = null) {
       const client = getClient();
       if (!client) {
         console.warn("[PlansRepo] Supabase client not initialized.");
         return runtimePlansCache;
+      }
+
+      // ถ้าเป็นถังขยะแต่ยังไม่ได้ล็อกอิน ให้คืนค่าว่าง ป้องกันบุคคลภายนอกเข้าถึงถังขยะ
+      if (includeDeleted && (!userEmail || userEmail === 'guest@kkumail.com')) {
+        return [];
       }
 
       try {
@@ -78,16 +101,29 @@
         }
 
         let filtered = data || [];
-        if (userEmail && !includeDeleted) {
-          const lowerEmail = userEmail.toLowerCase().trim();
-          filtered = filtered.filter(item => {
-            if (item.scope === 'department' || item.is_official) return true;
-            if (item.creator_email && item.creator_email.toLowerCase().trim() === lowerEmail) return true;
-            if (Array.isArray(item.collaborators)) {
-              return item.collaborators.some(c => (c.email || '').toLowerCase().trim() === lowerEmail);
-            }
-            return false;
-          });
+        const lowerEmail = userEmail ? userEmail.toLowerCase().trim() : null;
+
+        if (!includeDeleted) {
+          if (lowerEmail) {
+            filtered = filtered.filter(item => {
+              if (item.scope === 'department' || item.is_official) return true;
+              if (item.creator_email && item.creator_email.toLowerCase().trim() === lowerEmail) return true;
+              if (Array.isArray(item.collaborators)) {
+                return item.collaborators.some(c => (c.email || '').toLowerCase().trim() === lowerEmail);
+              }
+              return false;
+            });
+          }
+        } else {
+          // สิทธิ์ดูถังขยะ: ถ้าไม่ใช่แอดมิน ให้เห็นเฉพาะห้องที่ตนเองเป็นผู้สร้าง หรือเป็นผู้ลบเท่านั้น
+          const isAdmin = this.isAdminUser(lowerEmail);
+          if (!isAdmin) {
+            filtered = filtered.filter(item => {
+              const cEmail = (item.creator_email || '').toLowerCase().trim();
+              const dEmail = (item.deleted_by_email || '').toLowerCase().trim();
+              return cEmail === lowerEmail || dEmail === lowerEmail;
+            });
+          }
         }
 
         if (!includeDeleted) {
@@ -312,18 +348,41 @@
       return pct;
     },
 
-    // 8. ลบห้องงานหลักลงถังขยะ (Soft Delete)
+    // 8. ลบห้องงานหลักลงถังขยะ (Soft Delete - เฉพาะผู้สร้างหรือแอดมิน)
     async moveToTrashPlan(planId, userEmail, deletedByType = 'owner') {
       const client = getClient();
       if (!client) throw new Error("Supabase client is not available.");
+
+      if (!userEmail || userEmail === 'guest@kkumail.com') {
+        throw new Error("🔒 คุณต้องเข้าสู่ระบบก่อน จึงจะมีสิทธิ์ลบหรือจัดการแผนงานได้");
+      }
+
+      const cleanEmail = userEmail.toLowerCase().trim();
+      const isAdmin = this.isAdminUser(cleanEmail) || deletedByType === 'admin';
+
+      // ดึงข้อมูลห้องงานจากฐานข้อมูลเพื่อตรวจสอบผู้สร้างจริง
+      const { data: plan, error: fetchErr } = await client
+        .from('plans')
+        .select('id, creator_email, title')
+        .eq('id', planId)
+        .single();
+
+      if (fetchErr || !plan) {
+        throw new Error("ไม่พบข้อมูลห้องงานที่ต้องการลบ");
+      }
+
+      const planCreator = (plan.creator_email || '').toLowerCase().trim();
+      if (!isAdmin && planCreator && planCreator !== cleanEmail) {
+        throw new Error(`🔒 คุณไม่มีสิทธิ์ลบห้องงานนี้ เนื่องจากห้องงานนี้ถูกสร้างโดย ${planCreator}`);
+      }
 
       const { data, error } = await client
         .from('plans')
         .update({
           is_deleted: true,
           deleted_at: new Date().toISOString(),
-          deleted_by_type: deletedByType, // 'owner' หรือ 'admin'
-          deleted_by_email: userEmail
+          deleted_by_type: isAdmin ? 'admin' : 'owner',
+          deleted_by_email: cleanEmail
         })
         .eq('id', planId)
         .select()
@@ -334,10 +393,39 @@
       return data;
     },
 
-    // 9. กู้คืนห้องงานหลักจากถังขยะ (Restore Plan & Tasks)
-    async restorePlan(planId) {
+    // Alias สำหรับการเรียก deletePlan
+    async deletePlan(planId, userEmail, deletedByType = 'owner') {
+      return this.moveToTrashPlan(planId, userEmail, deletedByType);
+    },
+
+    // 9. กู้คืนห้องงานหลักจากถังขยะ (Restore Plan & Tasks - เฉพาะผู้สร้างหรือแอดมิน)
+    async restorePlan(planId, userEmail = null) {
       const client = getClient();
       if (!client) throw new Error("Supabase client is not available.");
+
+      if (!userEmail || userEmail === 'guest@kkumail.com') {
+        throw new Error("🔒 คุณต้องเข้าสู่ระบบก่อน จึงจะมีสิทธิ์กู้คืนแผนงานได้");
+      }
+
+      const cleanEmail = userEmail.toLowerCase().trim();
+      const isAdmin = this.isAdminUser(cleanEmail);
+
+      const { data: plan, error: fetchErr } = await client
+        .from('plans')
+        .select('id, creator_email, deleted_by_email, title')
+        .eq('id', planId)
+        .single();
+
+      if (fetchErr || !plan) {
+        throw new Error("ไม่พบข้อมูลห้องงาน");
+      }
+
+      const planCreator = (plan.creator_email || '').toLowerCase().trim();
+      const deletedBy = (plan.deleted_by_email || '').toLowerCase().trim();
+
+      if (!isAdmin && cleanEmail !== planCreator && cleanEmail !== deletedBy) {
+        throw new Error("🔒 คุณไม่มีสิทธิ์กู้คืนห้องงานนี้ (เฉพาะผู้สร้างหรือผู้ดูแลระบบเท่านั้น)");
+      }
 
       const { data, error } = await client
         .from('plans')
@@ -360,12 +448,26 @@
       const client = getClient();
       if (!client) throw new Error("Supabase client is not available.");
 
-      // Check ownership unless admin
-      if (!isAdmin) {
-        const plan = runtimePlansCache.find(p => p.id === planId);
-        if (plan && plan.creator_email && plan.creator_email.toLowerCase() !== currentUserEmail.toLowerCase()) {
-          throw new Error("คุณไม่ได้รับอนุญาตให้ลบงานของผู้อื่นถาวร");
-        }
+      if (!currentUserEmail || currentUserEmail === 'guest@kkumail.com') {
+        throw new Error("🔒 คุณต้องเข้าสู่ระบบก่อน จึงจะมีสิทธิ์ลบข้อมูลถาวร");
+      }
+
+      const cleanEmail = currentUserEmail.toLowerCase().trim();
+      const adminAllowed = isAdmin || this.isAdminUser(cleanEmail);
+
+      const { data: plan, error: fetchErr } = await client
+        .from('plans')
+        .select('id, creator_email, title')
+        .eq('id', planId)
+        .single();
+
+      if (fetchErr || !plan) {
+        throw new Error("ไม่พบข้อมูลห้องงานที่ต้องการลบถาวร");
+      }
+
+      const planCreator = (plan.creator_email || '').toLowerCase().trim();
+      if (!adminAllowed && planCreator && planCreator !== cleanEmail) {
+        throw new Error("🔒 คุณไม่ได้รับอนุญาตให้ลบงานของผู้อื่นถาวร (เฉพาะผู้สร้างห้องงานหรือผู้ดูแลระบบเท่านั้น)");
       }
 
       // Delete tasks first then plan
@@ -380,12 +482,43 @@
       const client = getClient();
       if (!client) throw new Error("Supabase client is not available.");
 
+      if (!userEmail || userEmail === 'guest@kkumail.com') {
+        throw new Error("🔒 คุณต้องเข้าสู่ระบบก่อน จึงจะมีสิทธิ์ลบงานย่อยได้");
+      }
+
+      const cleanEmail = userEmail.toLowerCase().trim();
+      const isAdmin = this.isAdminUser(cleanEmail);
+
+      const { data: task, error: taskErr } = await client
+        .from('plan_tasks')
+        .select('id, plan_id, creator_email')
+        .eq('id', taskId)
+        .single();
+
+      if (taskErr || !task) throw new Error("ไม่พบข้อมูลงานย่อยที่ต้องการลบ");
+
+      if (!isAdmin) {
+        const taskCreator = (task.creator_email || '').toLowerCase().trim();
+        const { data: plan } = await client
+          .from('plans')
+          .select('id, creator_email, collaborators')
+          .eq('id', task.plan_id)
+          .single();
+
+        const planCreator = plan ? (plan.creator_email || '').toLowerCase().trim() : '';
+        const isCollab = plan && Array.isArray(plan.collaborators) && plan.collaborators.some(c => (c.email || '').toLowerCase().trim() === cleanEmail);
+
+        if (taskCreator !== cleanEmail && planCreator !== cleanEmail && !isCollab) {
+          throw new Error("🔒 คุณไม่มีสิทธิ์ลบงานย่อยนี้ (เฉพาะผู้สร้างงาน ผู้สร้างห้อง หรือผู้ร่วมงานเท่านั้น)");
+        }
+      }
+
       const { data, error } = await client
         .from('plan_tasks')
         .update({
           is_deleted: true,
           deleted_at: new Date().toISOString(),
-          deleted_by_email: userEmail
+          deleted_by_email: cleanEmail
         })
         .eq('id', taskId)
         .select()
@@ -399,9 +532,35 @@
     },
 
     // 12. กู้คืนงานย่อยกลับห้องงานหลัก
-    async restoreTask(taskId) {
+    async restoreTask(taskId, userEmail = null) {
       const client = getClient();
       if (!client) throw new Error("Supabase client is not available.");
+
+      if (!userEmail || userEmail === 'guest@kkumail.com') {
+        throw new Error("🔒 คุณต้องเข้าสู่ระบบก่อน จึงจะมีสิทธิ์กู้คืนงานย่อยได้");
+      }
+
+      const cleanEmail = userEmail.toLowerCase().trim();
+      const isAdmin = this.isAdminUser(cleanEmail);
+
+      const { data: task, error: taskErr } = await client
+        .from('plan_tasks')
+        .select('id, plan_id, creator_email, deleted_by_email')
+        .eq('id', taskId)
+        .single();
+
+      if (taskErr || !task) throw new Error("ไม่พบข้อมูลงานย่อย");
+
+      if (!isAdmin) {
+        const taskCreator = (task.creator_email || '').toLowerCase().trim();
+        const deletedBy = (task.deleted_by_email || '').toLowerCase().trim();
+        const { data: plan } = await client.from('plans').select('creator_email').eq('id', task.plan_id).single();
+        const planCreator = plan ? (plan.creator_email || '').toLowerCase().trim() : '';
+
+        if (cleanEmail !== taskCreator && cleanEmail !== deletedBy && cleanEmail !== planCreator) {
+          throw new Error("🔒 คุณไม่มีสิทธิ์กู้คืนงานย่อยนี้");
+        }
+      }
 
       const { data, error } = await client
         .from('plan_tasks')
@@ -426,9 +585,24 @@
       const client = getClient();
       if (!client) throw new Error("Supabase client is not available.");
 
+      if (!currentUserEmail || currentUserEmail === 'guest@kkumail.com') {
+        throw new Error("🔒 คุณต้องเข้าสู่ระบบก่อน จึงจะมีสิทธิ์ลบถาวรได้");
+      }
+
+      const cleanEmail = currentUserEmail.toLowerCase().trim();
+      const adminAllowed = isAdmin || this.isAdminUser(cleanEmail);
+
       const { data: task } = await client.from('plan_tasks').select('creator_email, plan_id').eq('id', taskId).single();
-      if (task && !isAdmin && task.creator_email && task.creator_email.toLowerCase() !== currentUserEmail.toLowerCase()) {
-        throw new Error("คุณสามารถลบถาวรได้เฉพาะงานย่อยที่คุณเป็นผู้สร้างเท่านั้น");
+      if (!task) throw new Error("ไม่พบข้อมูลงานย่อย");
+
+      if (!adminAllowed) {
+        const { data: plan } = await client.from('plans').select('creator_email').eq('id', task.plan_id).single();
+        const planCreator = plan ? (plan.creator_email || '').toLowerCase().trim() : '';
+        const taskCreator = (task.creator_email || '').toLowerCase().trim();
+
+        if (taskCreator !== cleanEmail && planCreator !== cleanEmail) {
+          throw new Error("🔒 คุณสามารถลบถาวรได้เฉพาะงานย่อยที่คุณเป็นผู้สร้าง หรือเป็นผู้สร้างห้องงานเท่านั้น");
+        }
       }
 
       const { error } = await client.from('plan_tasks').delete().eq('id', taskId);
