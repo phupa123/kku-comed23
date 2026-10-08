@@ -1046,12 +1046,12 @@
             </div>
           </div>
 
-          <button onclick="openBatchMoveModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+          <button id="batchMoveBtn" onclick="openBatchMoveModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="folder-symlink" class="w-3.5 h-3.5 text-amber-400"></i>
             <span>ย้ายไปที่โฟลเดอร์</span>
           </button>
           <!-- Share multiple files as ZIP link -->
-          <button onclick="handleBatchShareAsZip()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 cursor-pointer">
+          <button id="batchShareZipBtn" onclick="handleBatchShareAsZip()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
             <span>แชร์รวมเป็น ZIP</span>
           </button>
@@ -3132,7 +3132,7 @@
           insideToolbar.classList.remove('hidden');
           if (activeNameSpan) activeNameSpan.textContent = currentF.name;
 
-          const isEditor = isViewingShared ? (currentSharedFolderContext.role === 'editor') : true;
+          const isReadOnly = isCurrentFolderReadOnly();
 
           const btnEdit = document.getElementById('btnFolderEdit');
           const btnShare = document.getElementById('btnFolderShare');
@@ -3140,7 +3140,7 @@
           const btnUpload = document.getElementById('btnFolderUpload');
           const btnDelete = document.getElementById('btnFolderDelete');
 
-          if (isViewingShared && !isEditor) {
+          if (isReadOnly) {
             if (btnEdit) btnEdit.classList.add('hidden');
             if (btnShare) btnShare.classList.add('hidden');
             if (btnLock) btnLock.classList.add('hidden');
@@ -3160,7 +3160,9 @@
         }
       } else if (insideToolbar) {
         insideToolbar.classList.add('hidden');
-        if (uploadSection && currentUser && currentUser.email) {
+        if (isCurrentFolderReadOnly()) {
+          if (uploadSection) uploadSection.classList.add('hidden');
+        } else if (uploadSection && currentUser && currentUser.email) {
           uploadSection.classList.remove('hidden');
         }
       }
@@ -3956,6 +3958,18 @@
       return !!(type && typeof type === 'string' && type.toLowerCase().startsWith('video/'));
     }
 
+    // Checks if the active view/folder is in Read-Only (Viewer) mode
+    function isCurrentFolderReadOnly() {
+      if (currentSharedFolderContext && (currentFolderId === currentSharedFolderContext.targetId || !currentFolderId)) {
+        if (currentUser && currentUser.email && currentSharedFolderContext.creatorEmail && 
+            currentUser.email.toLowerCase().trim() === currentSharedFolderContext.creatorEmail.toLowerCase().trim()) {
+          return false;
+        }
+        return currentSharedFolderContext.role !== 'editor';
+      }
+      return false;
+    }
+
     // Returns the exact list of files currently visible to the active user based on active folder & filters
     function getCurrentlyDisplayedFiles() {
       let files = getUserFilesList();
@@ -4461,6 +4475,7 @@
             const isVid = isVideoFile(f.type, fileName, f.url);
             const isEffectiveLocked = f.isLocked && !sessionUnlockedItems.has(f.id);
             const isSelected = selectedFileIds.has(f.id);
+            const isReadOnly = isCurrentFolderReadOnly();
             const fileSizeFormatted = formatBytes(f.size);
             const shareInfo = repo.getShareByTarget('file', f.id);
             const isShared = !!shareInfo;
@@ -4523,12 +4538,14 @@
                     <button onclick="event.stopPropagation(); openFullMediaViewer('${f.id}')" class="pointer-events-auto w-8 h-8 rounded-xl bg-orange-600 hover:bg-orange-500 text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="เปิดดูเต็มจอ (ดับเบิ้ลคลิก)">
                       <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                     </button>
+                    ${!isReadOnly ? `
                     <button onclick="event.stopPropagation(); openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="pointer-events-auto w-8 h-8 rounded-xl ${isShared ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/30' : 'bg-slate-800/90 hover:bg-slate-700'} text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
                       <i data-lucide="${isShared ? 'link-2' : 'share-2'}" class="w-3.5 h-3.5"></i>
                     </button>
                     <button onclick="event.stopPropagation(); openFileTagsModal('${f.id}', '${escapeHtml(fileName)}')" class="pointer-events-auto w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="จัดการแท็ก">
                       <i data-lucide="tag" class="w-3.5 h-3.5"></i>
                     </button>
+                    ` : ''}
                     <button onclick="event.stopPropagation(); downloadSingleFileDirectly('${f.id}')" class="pointer-events-auto w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-emerald-600 text-slate-200 hover:text-white flex items-center justify-center transition shadow-lg active:scale-95 cursor-pointer" title="ดาวน์โหลดไฟล์ต้นฉบับ">
                       <i data-lucide="download" class="w-3.5 h-3.5"></i>
                     </button>
@@ -4563,6 +4580,7 @@
             ${files.map(f => {
               const isSelected = selectedFileIds.has(f.id);
               const fileName = f.originalName || f.id;
+              const isReadOnly = isCurrentFolderReadOnly();
               const fileSizeFormatted = formatBytes(f.size);
               const isImg = isImageFile(f.type, fileName, f.url);
               const isVid = isVideoFile(f.type, fileName, f.url);
@@ -4625,6 +4643,7 @@
                     <button onclick="openFullMediaViewer('${f.id}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-orange-400 transition" title="เปิดดูเต็มจอ (ดับเบิ้ลคลิก)">
                       <i data-lucide="eye" class="w-4 h-4"></i>
                     </button>
+                    ${!isReadOnly ? `
                     <button onclick="openShareModal('file', '${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 ${isShared ? 'text-orange-400' : 'text-slate-400'} hover:text-white transition" title="${isShared ? 'จัดการลิงก์แชร์ / หยุดแชร์' : 'แชร์ลิงก์'}">
                       <i data-lucide="${isShared ? 'link-2' : 'share-2'}" class="w-4 h-4"></i>
                     </button>
@@ -4637,12 +4656,15 @@
                     <button onclick="openSingleMoveModal('${f.id}', '${escapeHtml(fileName)}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition" title="ย้ายไปโฟลเดอร์">
                       <i data-lucide="folder-symlink" class="w-4 h-4"></i>
                     </button>
+                    ` : ''}
                     <button onclick="downloadSingleFileDirectly('${f.id}')" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-emerald-400 transition" title="ดาวน์โหลดไฟล์ต้นฉบับ">
                       <i data-lucide="download" class="w-4 h-4"></i>
                     </button>
+                    ${!isReadOnly ? `
                     <button onclick="handleDeleteSingleFile('${f.id}')" class="p-2 rounded-xl hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition" title="ลบไฟล์">
                       <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
+                    ` : ''}
                   </div>
 
                 </div>
@@ -4794,7 +4816,7 @@
         showToast('⚠️ กรุณาเลือกไฟล์ที่ต้องการดาวน์โหลด', 'error');
         return;
       }
-      showToast(`⏳ กำลังเริ่มดาวน์โหลด ${files.length} ไฟล์แยกทีละไฟล์...`);
+      showToast(`⏳ เริ่มดาวน์โหลด ${files.length} ไฟล์แยกทีละไฟล์... (หากเบราว์เซอร์แจ้งเตือน กรุณากด "อนุญาต" ให้ดาวน์โหลดหลายไฟล์)`);
       await window.MultiDownloader.downloadFilesSequentially(files, (curr, total, name) => {
         showToast(`📥 กำลังโหลด (${curr}/${total}): ${name}`);
       });
@@ -4829,6 +4851,24 @@
       if (count > 0) {
         bar.classList.remove('hidden');
         if (countText) countText.textContent = count;
+
+        const isReadOnly = isCurrentFolderReadOnly();
+        const btnMove = document.getElementById('batchMoveBtn');
+        const btnShareZip = document.getElementById('batchShareZipBtn');
+        const btnTrash = document.getElementById('batchMoveToTrashBtn');
+
+        if (btnTrash) {
+          if (isReadOnly || isTrashView) btnTrash.classList.add('hidden');
+          else btnTrash.classList.remove('hidden');
+        }
+        if (btnMove) {
+          if (isReadOnly || isTrashView) btnMove.classList.add('hidden');
+          else btnMove.classList.remove('hidden');
+        }
+        if (btnShareZip) {
+          if (isReadOnly || isTrashView) btnShareZip.classList.add('hidden');
+          else btnShareZip.classList.remove('hidden');
+        }
       } else {
         bar.classList.add('hidden');
         if (chkAll) chkAll.checked = false;
@@ -4936,6 +4976,10 @@
     }
 
     async function deleteBatchSelectedFiles() {
+      if (isCurrentFolderReadOnly()) {
+        showToast('🔒 คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถลบไฟล์ในโฟลเดอร์นี้ได้', 'error');
+        return;
+      }
       const count = selectedFileIds.size;
       if (count === 0) return;
 
@@ -4994,6 +5038,10 @@
     }
 
     async function handleDeleteSingleFile(fileId) {
+      if (isCurrentFolderReadOnly()) {
+        showToast('🔒 คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถลบไฟล์ในโฟลเดอร์นี้ได้', 'error');
+        return;
+      }
       if (pendingDeletion) {
         await finalizePendingDeletion();
       }
@@ -5818,6 +5866,10 @@
     }
 
     async function handleDeleteFolder(folderId) {
+      if (isCurrentFolderReadOnly()) {
+        showToast('🔒 คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถลบโฟลเดอร์นี้ได้', 'error');
+        return;
+      }
       const repo = getRepo();
       const userEmail = getCurrentUserEmail();
       const folders = repo.getUserFolders(userEmail);
@@ -5851,11 +5903,19 @@
     let pendingMoveItem = null;
 
     function openSingleMoveModal(fileId, fileName) {
+      if (isCurrentFolderReadOnly()) {
+        showToast('🔒 คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถย้ายไฟล์ในโฟลเดอร์นี้ได้', 'error');
+        return;
+      }
       pendingMoveItem = { type: 'file', ids: [fileId], name: fileName };
       renderMoveModalDestinations(`ไฟล์: ${fileName}`);
     }
 
     function openBatchMoveModal() {
+      if (isCurrentFolderReadOnly()) {
+        showToast('🔒 คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถย้ายไฟล์ในโฟลเดอร์นี้ได้', 'error');
+        return;
+      }
       const count = selectedFileIds.size;
       if (count === 0) return;
       pendingMoveItem = { type: 'file', ids: Array.from(selectedFileIds), name: `${count} ไฟล์` };
@@ -5863,6 +5923,10 @@
     }
 
     function openMoveFolderModal(folderId, folderName) {
+      if (isCurrentFolderReadOnly()) {
+        showToast('🔒 คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถย้ายโฟลเดอร์นี้ได้', 'error');
+        return;
+      }
       pendingMoveItem = { type: 'folder', id: folderId, name: folderName };
       renderMoveModalDestinations(`โฟลเดอร์: ${folderName}`);
     }
@@ -5991,6 +6055,10 @@
     // 6. Lock / Password Protection Modal
     // ----------------------------------------------------
     function openLockModal(type, id, name) {
+      if (isCurrentFolderReadOnly()) {
+        showToast('🔒 คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถล็อคหรือตั้งรหัสผ่านในโฟลเดอร์นี้ได้', 'error');
+        return;
+      }
       targetItemForAction = { type, id, name };
       const modal = document.getElementById('modalLockItem');
       const title = document.getElementById('lockModalTitle');
@@ -6926,15 +6994,16 @@
         }
       }
 
-      // Safe Stream Proxy Fallback - forces real file download with Content-Disposition
-      const proxyDownloadUrl = `/api/download-proxy?url=${encodeURIComponent(file.url)}&filename=${encodeURIComponent(fileName)}`;
+      // Safe Direct Download Fallback
       const a = document.createElement('a');
-      a.href = proxyDownloadUrl;
+      a.href = file.url;
       a.download = fileName;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
       document.body.appendChild(a);
       a.click();
       setTimeout(() => {
-        document.body.removeChild(a);
+        if (a.parentNode) document.body.removeChild(a);
         showToast(`✨ เริ่มดาวน์โหลด: ${fileName}`);
       }, 1000);
     }
@@ -6966,6 +7035,22 @@
       }
 
       if (menu) {
+        // Hide modify actions in read-only mode
+        const isReadOnly = isCurrentFolderReadOnly();
+        const btnTag = menu.querySelector('button[onclick*="handleCtxAction(\'tag\')"]');
+        const btnMove = menu.querySelector('button[onclick*="handleCtxAction(\'move\')"]');
+        const btnLock = menu.querySelector('button[onclick*="handleCtxAction(\'lock\')"]');
+        const btnDelete = menu.querySelector('button[onclick*="handleCtxAction(\'delete\')"]');
+        const btnShare = menu.querySelector('button[onclick*="handleCtxAction(\'share\')"]');
+        const divider = menu.querySelector('.h-px');
+
+        if (btnTag) btnTag.classList.toggle('hidden', isReadOnly);
+        if (btnMove) btnMove.classList.toggle('hidden', isReadOnly);
+        if (btnLock) btnLock.classList.toggle('hidden', isReadOnly);
+        if (btnDelete) btnDelete.classList.toggle('hidden', isReadOnly);
+        if (btnShare) btnShare.classList.toggle('hidden', isReadOnly);
+        if (divider) divider.classList.toggle('hidden', isReadOnly);
+
         menu.classList.remove('hidden');
         menu.style.display = 'block';
 
@@ -7016,6 +7101,11 @@
       const fileId = activeContextMenuFileId;
       closeContextMenu();
       if (!fileId) return;
+
+      if (isCurrentFolderReadOnly() && ['share', 'tag', 'move', 'lock', 'delete'].includes(action)) {
+        showToast('🔒 คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถดำเนินการนี้ได้', 'error');
+        return;
+      }
 
       const allFiles = getUserFilesList();
       const file = allFiles.find(f => f.id === fileId);
@@ -7564,6 +7654,7 @@
 
         // Delete / Backspace : Batch Delete
         if (e.key === 'Delete' || e.key === 'Backspace') {
+          if (isCurrentFolderReadOnly()) return;
           if (selectedFileIds.size > 0) {
             e.preventDefault();
             deleteBatchSelectedFiles();
@@ -7582,6 +7673,7 @@
 
         // N or Ctrl + N : Create Folder
         if ((isCtrl && (e.key === 'n' || e.key === 'N')) || (!isCtrl && e.key === 'n')) {
+          if (isCurrentFolderReadOnly()) return;
           e.preventDefault();
           openCreateFolderModal();
           return;
@@ -7589,6 +7681,7 @@
 
         // U or Ctrl + U : Upload File
         if ((isCtrl && (e.key === 'u' || e.key === 'U')) || (!isCtrl && e.key === 'u')) {
+          if (isCurrentFolderReadOnly()) return;
           e.preventDefault();
           triggerUploadModalOrZone();
           return;
@@ -7628,6 +7721,10 @@
     let draggedFileId = null;
 
     function handleFileDragStart(e, fileId) {
+      if (isCurrentFolderReadOnly()) {
+        e.preventDefault();
+        return false;
+      }
       draggedFileId = fileId;
       e.dataTransfer.setData('text/plain', fileId);
       e.dataTransfer.effectAllowed = 'move';
@@ -7673,6 +7770,11 @@
         targetFolderEl.classList.remove('ring-4', 'ring-orange-500', 'bg-orange-500/20');
       }
 
+      if (isCurrentFolderReadOnly()) {
+        showToast('⚠️ คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถย้ายไฟล์ได้', 'error');
+        return;
+      }
+
       const fileId = e.dataTransfer.getData('text/plain') || draggedFileId;
       if (!fileId && selectedFileIds.size === 0) return;
 
@@ -7697,6 +7799,10 @@
     let currentTagTargetFileId = null;
 
     function openFileTagsModal(fileId, fileName) {
+      if (isCurrentFolderReadOnly()) {
+        showToast('⚠️ คุณมีสิทธิ์ดูเท่านั้น ไม่สามารถแก้ไขแท็กได้', 'error');
+        return;
+      }
       currentTagTargetFileId = fileId;
       document.getElementById('modalTagFileName').textContent = fileName || fileId;
       document.getElementById('newTagInput').value = '';

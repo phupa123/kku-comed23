@@ -54,6 +54,17 @@
         }
       }
 
+      // 4. AllOrigins fallback for public files
+      try {
+        const corsAnywhere = `https://api.allorigins.win/raw?url=${encodeURIComponent(fileUrl)}`;
+        const cRes = await fetch(corsAnywhere);
+        if (cRes.ok) {
+          return await cRes.blob();
+        }
+      } catch (e) {
+        // Continue
+      }
+
       throw new Error(`Unable to fetch blob for ${fileUrl}`);
     }
 
@@ -66,17 +77,23 @@
         this.saveBlob(blob, fileName);
         return true;
       } catch (err) {
-        console.warn('[MultiDownloader] Blob fetch failed, falling back to direct stream link:', err);
-        // Fallback using proxy download link or direct link
-        const directProxyUrl = `/api/download-proxy?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(fileName)}`;
-        const a = document.createElement('a');
-        a.href = directProxyUrl;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => document.body.removeChild(a), 1500);
+        console.warn('[MultiDownloader] Blob fetch failed, falling back to direct link:', err);
+        this.triggerDirectDownload(fileUrl, fileName);
         return true;
       }
+    }
+
+    triggerDirectDownload(url, filename = 'download') {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (a.parentNode) document.body.removeChild(a);
+      }, 2000);
     }
 
     /**
@@ -91,9 +108,16 @@
       for (let i = 0; i < fileList.length; i++) {
         const item = fileList[i];
         if (onProgress) onProgress(i + 1, fileList.length, item.name);
-        await this.downloadSingleFile(item.url, item.name);
-        // Add small pause between downloads so browser doesn't block spam
-        await new Promise(res => setTimeout(res, 600));
+        try {
+          await this.downloadSingleFile(item.url, item.name);
+        } catch (itemErr) {
+          console.warn(`[MultiDownloader] Fallback direct download for ${item.name}:`, itemErr);
+          this.triggerDirectDownload(item.url, item.name);
+        }
+        // เว้นช่วง 1.2 วินาทีเพื่อป้องกันเบราว์เซอร์ (Safari, Chrome) บล็อค Multiple Downloads Spam
+        if (i < fileList.length - 1) {
+          await new Promise(res => setTimeout(res, 1200));
+        }
       }
 
       this.isDownloading = false;
@@ -181,9 +205,9 @@
       document.body.appendChild(a);
       a.click();
       setTimeout(() => {
-        document.body.removeChild(a);
+        if (a.parentNode) document.body.removeChild(a);
         URL.revokeObjectURL(url);
-      }, 1000);
+      }, 3000);
     }
   }
 
