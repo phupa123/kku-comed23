@@ -103,20 +103,20 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         } catch(e) {}
       }
     })
-    .catch(() => {});
-
-    // Step 3: Fallback Background Sync Check via GAS
-    if (GAS_CONFIG_API_URL) {
-      fetch(GAS_CONFIG_API_URL + "?action=get_maintenance_config")
-        .then(res => res.json())
-        .then(cloudConfig => {
-          if (cloudConfig && typeof cloudConfig === 'object' && cloudConfig.all) {
-            localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cloudConfig));
-            checkAndRedirect(cloudConfig);
-          }
-        })
-        .catch(() => {});
-    }
+    .catch(() => {
+      // Step 3: Fallback Background Sync Check via GAS (เฉพาะกรณีที่ Supabase ล่มหรือไม่สามารถเข้าถึงได้)
+      if (GAS_CONFIG_API_URL) {
+        fetch(GAS_CONFIG_API_URL + "?action=get_maintenance_config")
+          .then(res => res.json())
+          .then(cloudConfig => {
+            if (cloudConfig && typeof cloudConfig === 'object' && cloudConfig.all) {
+              localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cloudConfig));
+              checkAndRedirect(cloudConfig);
+            }
+          })
+          .catch(() => {});
+      }
+    });
 
   } catch(e) {
     console.warn("Maintenance Guard Check", e);

@@ -200,6 +200,16 @@ export default {
       fetchUrl = targetUrl.toString();
     } else if (path === "/maintenance") {
       fetchUrl = new URL("/maintenance.html", url.origin).toString();
+    } else if (path === "/favicon.ico") {
+      fetchUrl = new URL("/favicon.ico", url.origin).toString();
+    } else if (path === "/echo" || path === "/api/echo") {
+      return withSecurityHeaders(new Response(JSON.stringify({ status: "ok", timestamp: Date.now() }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        }
+      }));
     } else if (path === "/404") {
       fetchUrl = new URL("/404.html", url.origin).toString();
     }
@@ -241,7 +251,7 @@ export default {
     else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") target = "/shortlink-admin.html";
     else if (path === "/maintenance" || path === "/maintenance.html") target = "/maintenance.html";
     else if (path === "/404" || path === "/404.html") target = "/404.html";
-    else if (path.startsWith("/assets/") || path.startsWith("/config/") || path.endsWith(".png") || path.endsWith(".js") || path.endsWith(".css")) {
+    else if (path === "/favicon.ico" || path.endsWith(".ico") || path.endsWith(".svg") || path.startsWith("/assets/") || path.startsWith("/config/") || path.endsWith(".png") || path.endsWith(".js") || path.endsWith(".css")) {
       target = url.pathname;
     }
 
@@ -298,6 +308,8 @@ function getContentType(filePath) {
   if (filePath.endsWith(".css")) return "text/css; charset=utf-8";
   if (filePath.endsWith(".js")) return "application/javascript; charset=utf-8";
   if (filePath.endsWith(".png")) return "image/png";
+  if (filePath.endsWith(".ico")) return "image/x-icon";
+  if (filePath.endsWith(".svg")) return "image/svg+xml";
   if (filePath.endsWith(".json")) return "application/json";
   return "text/plain; charset=utf-8";
 }
