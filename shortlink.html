@@ -38,6 +38,9 @@
   <script src="config/supabase_config.js"></script>
   <script src="assets/js/shortlink_repo.js"></script>
   <script src="assets/js/storage_drive_repo.js"></script>
+  <!-- Highlight.js for In-Browser Code & Text Previews -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <!-- SheetJS & Mammoth.js for In-Browser Document Previews -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -1058,10 +1061,15 @@
       const previewCanvas = document.getElementById('redirectPreviewCanvas');
       if (previewCanvas) {
         const docFileName = link.title || rawTargetUrl.split('/').pop().split('?')[0] || 'document';
+        const isTargetCode = (window.DocPreviewEngine && window.DocPreviewEngine.isCodeOrText(docFileName)) || 
+          ['c', 'cpp', 'cc', 'h', 'hpp', 'py', 'pyw', 'html', 'htm', 'css', 'scss', 'js', 'ts', 'json', 'xml', 'sql', 'sh', 'txt', 'md'].includes(targetExt);
+
         if (isTargetXls && window.DocPreviewEngine) {
           window.DocPreviewEngine.renderExcel(previewCanvas, rawTargetUrl, docFileName, { heightClass: 'min-h-[320px] max-h-[460px] h-[360px]' });
         } else if (isTargetDoc && window.DocPreviewEngine) {
           window.DocPreviewEngine.renderWord(previewCanvas, rawTargetUrl, docFileName, { heightClass: 'min-h-[320px] max-h-[460px] h-[360px]' });
+        } else if (isTargetCode && window.DocPreviewEngine) {
+          window.DocPreviewEngine.renderCode(previewCanvas, rawTargetUrl, docFileName, { heightClass: 'min-h-[320px] max-h-[460px] h-[360px]' });
         } else if (isTargetPdf) {
           previewCanvas.innerHTML = `<iframe src="${rawTargetUrl}#toolbar=1" class="w-full h-80 sm:h-96 border-0 bg-white" loading="eager"></iframe>`;
         } else {

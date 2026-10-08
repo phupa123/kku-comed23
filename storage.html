@@ -53,6 +53,9 @@
 
   <!-- JSZip for Folder / Multi-File Downloads -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Highlight.js for In-Browser Code & Text Previews (.c, .py, .html, .css, .js, .txt, etc.) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <!-- SheetJS & Mammoth.js for Client-Side Excel & Word Previews (Zero External Cloud Server Dependencies) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -3964,7 +3967,7 @@
           if (driveCategoryFilter === 'image') return type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
           if (driveCategoryFilter === 'video') return type.startsWith('video/') || ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext);
           if (driveCategoryFilter === 'audio') return type.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext);
-          if (driveCategoryFilter === 'document') return ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(ext);
+          if (driveCategoryFilter === 'document') return ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'c', 'cpp', 'py', 'html', 'css', 'js', 'ts', 'json', 'sql', 'sh', 'php', 'java', 'md', 'xml', 'yaml', 'yml', 'env', 'log'].includes(ext) || type.startsWith('text/') || type.includes('code');
           return true;
         });
       }
@@ -4664,12 +4667,16 @@
       const t = (type || '').toLowerCase();
       const ext = ((name || '').split('.').pop() || '').toLowerCase();
 
-      if (t.startsWith('image/') || ['jpg', 'png', 'jpeg', 'webp', 'gif'].includes(ext)) return 'image';
-      if (t.startsWith('video/') || ['mp4', 'mov', 'avi'].includes(ext)) return 'video';
-      if (t.startsWith('audio/') || ['mp3', 'wav', 'ogg'].includes(ext)) return 'music';
+      if (t.startsWith('image/') || ['jpg', 'png', 'jpeg', 'webp', 'gif', 'svg'].includes(ext)) return 'image';
+      if (t.startsWith('video/') || ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) return 'video';
+      if (t.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext)) return 'music';
       if (['pdf'].includes(ext)) return 'file-text';
       if (['doc', 'docx'].includes(ext)) return 'file-text';
-      if (['zip', 'rar', '7z'].includes(ext)) return 'archive';
+      if (['xls', 'xlsx', 'csv'].includes(ext)) return 'file-spreadsheet';
+      if (['ppt', 'pptx'].includes(ext)) return 'presentation';
+      if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return 'archive';
+      if (['c', 'cpp', 'cc', 'h', 'hpp', 'py', 'pyw', 'html', 'htm', 'css', 'scss', 'js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx', 'json', 'xml', 'sql', 'sh', 'bash', 'zsh', 'php', 'java', 'cs', 'go', 'rs', 'yaml', 'yml'].includes(ext)) return 'file-code';
+      if (['txt', 'log', 'env', 'md', 'markdown'].includes(ext)) return 'file-text';
       return 'file';
     }
 
@@ -6458,6 +6465,8 @@
         const isDoc = ['doc', 'docx'].includes(ext) || fileType.includes('word') || fileType.includes('officedocument.wordprocessingml');
         const isXls = ['xls', 'xlsx', 'csv'].includes(ext) || fileType.includes('excel') || fileType.includes('spreadsheetml');
         const isPpt = ['ppt', 'pptx'].includes(ext) || fileType.includes('presentationml');
+        const isCode = (window.DocPreviewEngine && window.DocPreviewEngine.isCodeOrText(fileName, fileType)) || 
+          ['c', 'cpp', 'cc', 'h', 'hpp', 'py', 'pyw', 'html', 'htm', 'css', 'scss', 'js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx', 'json', 'xml', 'sql', 'sh', 'bash', 'zsh', 'php', 'java', 'cs', 'go', 'rs', 'md', 'txt', 'log', 'env', 'yaml', 'yml'].includes(ext);
         const isOfficeDoc = isDoc || isXls || isPpt;
 
         if (isImg && fileUrl) {
@@ -6494,6 +6503,11 @@
           // สำหรับ PPT แสดงหน้าบัตรดาวน์โหลดและเปิดดู
           if (window.DocPreviewEngine) {
             window.DocPreviewEngine.renderFallback(canvas, fileUrl, fileName, 'PowerPoint Presentation');
+          }
+        } else if (isCode && fileUrl) {
+          // Client-side Code & Text Preview with Syntax Highlighting (.c, .py, .html, .css, .js, .txt ฯลฯ)
+          if (window.DocPreviewEngine) {
+            window.DocPreviewEngine.renderCode(canvas, fileUrl, fileName, { heightClass: 'min-h-[75vh] h-[80vh]' });
           }
         } else {
           canvas.innerHTML = `
@@ -6685,6 +6699,8 @@
       const isDoc = ['doc', 'docx'].includes(ext) || type.includes('word') || type.includes('officedocument.wordprocessingml');
       const isXls = ['xls', 'xlsx', 'csv'].includes(ext) || type.includes('excel') || type.includes('spreadsheetml');
       const isPpt = ['ppt', 'pptx'].includes(ext) || type.includes('presentationml');
+      const isCode = (window.DocPreviewEngine && window.DocPreviewEngine.isCodeOrText(fileName, type)) || 
+        ['c', 'cpp', 'cc', 'h', 'hpp', 'py', 'pyw', 'html', 'htm', 'css', 'scss', 'js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx', 'json', 'xml', 'sql', 'sh', 'bash', 'zsh', 'php', 'java', 'cs', 'go', 'rs', 'md', 'txt', 'log', 'env', 'yaml', 'yml'].includes(ext);
       const isOfficeDoc = isDoc || isXls || isPpt;
 
       if (typeIcon) {
@@ -6696,6 +6712,7 @@
         else if (isXls) iconName = 'table';
         else if (isDoc) iconName = 'file-text';
         else if (isPpt) iconName = 'presentation';
+        else if (isCode) iconName = 'file-code';
         typeIcon.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i>`;
       }
 
@@ -6766,6 +6783,11 @@
       } else if (isPpt) {
         if (window.DocPreviewEngine) {
           window.DocPreviewEngine.renderFallback(canvas, file.url, fileName, 'PowerPoint Presentation');
+        }
+      } else if (isCode) {
+        // Client-side Code & Text Preview with Syntax Highlighting (.c, .py, .html, .css, .js, .txt ฯลฯ)
+        if (window.DocPreviewEngine) {
+          window.DocPreviewEngine.renderCode(canvas, file.url, fileName, { heightClass: 'max-w-5xl h-[82vh]' });
         }
       } else {
         canvas.innerHTML = `
