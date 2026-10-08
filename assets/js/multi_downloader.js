@@ -40,8 +40,9 @@
         // Continue
       }
 
-      // 3. Fallback via public images/files proxy for image files
-      if (fileUrl.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) || fileUrl.includes('catbox.moe')) {
+      // 3. Fallback via public images proxy (เฉพาะไฟล์ภาพเท่านั้น เพื่อป้องกัน 404 จาก weserv)
+      const isImageFile = fileUrl.match(/\.(jpg|jpeg|png|gif|webp|svg|avif|bmp)(\?.*)?$/i) || (fileName && fileName.match(/\.(jpg|jpeg|png|gif|webp|svg|avif|bmp)$/i));
+      if (isImageFile) {
         try {
           const imgProxy = `https://images.weserv.nl/?url=${encodeURIComponent(fileUrl)}&default=${encodeURIComponent(fileUrl)}`;
           const imgRes = await fetch(imgProxy);

@@ -3937,6 +3937,25 @@
       });
     }
 
+    // Robust file type helpers preventing false positives for code and document files
+    function isImageFile(type = '', name = '', url = '') {
+      const ext = ((name || url || '').split('?')[0].split('.').pop() || '').toLowerCase();
+      const nonImageExts = ['c', 'cpp', 'cc', 'h', 'hpp', 'py', 'pyw', 'html', 'htm', 'css', 'scss', 'js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx', 'json', 'xml', 'sql', 'sh', 'bash', 'zsh', 'php', 'java', 'cs', 'go', 'rs', 'yaml', 'yml', 'txt', 'log', 'env', 'md', 'markdown', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'zip', 'rar', '7z', 'tar', 'gz', 'mp4', 'mov', 'webm', 'avi', 'mkv', 'mp3', 'wav', 'ogg', 'm4a', 'flac'];
+      if (nonImageExts.includes(ext)) return false;
+      const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif', 'bmp', 'ico'];
+      if (imageExts.includes(ext)) return true;
+      return !!(type && typeof type === 'string' && type.toLowerCase().startsWith('image/'));
+    }
+
+    function isVideoFile(type = '', name = '', url = '') {
+      const ext = ((name || url || '').split('?')[0].split('.').pop() || '').toLowerCase();
+      const videoExts = ['mp4', 'mov', 'webm', 'avi', 'mkv', 'm4v'];
+      if (videoExts.includes(ext)) return true;
+      const nonVideoExts = ['c', 'cpp', 'cc', 'h', 'hpp', 'py', 'html', 'css', 'js', 'json', 'txt', 'md', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'webp', 'gif'];
+      if (nonVideoExts.includes(ext)) return false;
+      return !!(type && typeof type === 'string' && type.toLowerCase().startsWith('video/'));
+    }
+
     // Returns the exact list of files currently visible to the active user based on active folder & filters
     function getCurrentlyDisplayedFiles() {
       let files = getUserFilesList();
@@ -3964,8 +3983,8 @@
           const type = (f.type || '').toLowerCase();
           const ext = ((f.originalName || '').split('.').pop() || '').toLowerCase();
 
-          if (driveCategoryFilter === 'image') return type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
-          if (driveCategoryFilter === 'video') return type.startsWith('video/') || ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext);
+          if (driveCategoryFilter === 'image') return isImageFile(type, f.originalName, f.url);
+          if (driveCategoryFilter === 'video') return isVideoFile(type, f.originalName, f.url);
           if (driveCategoryFilter === 'audio') return type.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext);
           if (driveCategoryFilter === 'document') return ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'c', 'cpp', 'py', 'html', 'css', 'js', 'ts', 'json', 'sql', 'sh', 'php', 'java', 'md', 'xml', 'yaml', 'yml', 'env', 'log'].includes(ext) || type.startsWith('text/') || type.includes('code');
           return true;
@@ -4162,7 +4181,7 @@
                 ${folderFiles.map(f => {
                   const fileName = f.originalName || f.id;
                   const fileSizeFormatted = formatBytes(f.size || 0);
-                  const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+                  const isImg = isImageFile(f.type, fileName, f.url);
 
                   return `
                     <div data-file-id="${f.id}" class="p-3.5 flex items-center justify-between gap-3 hover:bg-rose-950/20 transition select-none">
@@ -4334,7 +4353,7 @@
                   const isSelected = selectedFileIds.has(f.id);
                   const fileName = f.originalName || f.id;
                   const fileSizeFormatted = formatBytes(f.size || 0);
-                  const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+                  const isImg = isImageFile(f.type, fileName, f.url);
                   const trashedDate = f.trashedAt ? new Date(f.trashedAt).toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
                   
                   let daysLeft = 30;
@@ -4394,6 +4413,11 @@
     // Fast Thumbnail Optimizer for Drive items (matching Roster speed & WebP cache)
     function getOptimizedDriveThumbUrl(rawUrl, targetSize = 250) {
       if (!rawUrl || typeof rawUrl !== 'string') return '';
+      const ext = (rawUrl.split('?')[0].split('.').pop() || '').toLowerCase();
+      const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif', 'bmp'];
+      const nonImageExts = ['c', 'cpp', 'cc', 'h', 'hpp', 'py', 'html', 'css', 'js', 'json', 'xml', 'sql', 'sh', 'php', 'java', 'go', 'rs', 'txt', 'md', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', 'mp4', 'mov', 'mp3', 'wav'];
+      if (nonImageExts.includes(ext)) return '';
+
       if (rawUrl.includes('/storage/v1/object/public/')) {
         return rawUrl.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + `?width=${targetSize}&height=${targetSize}&resize=cover&quality=80`;
       }
@@ -4401,6 +4425,8 @@
         return rawUrl.replace('/upload/', `/upload/c_thumb,w_${targetSize},h_${targetSize},q_auto,f_auto/`);
       }
       if (rawUrl.includes('catbox.moe') || rawUrl.includes('files.catbox.moe')) {
+        // Weserv proxy ONLY for image files to prevent 404
+        if (!imageExts.includes(ext)) return '';
         return `https://images.weserv.nl/?url=${encodeURIComponent(rawUrl)}&w=${targetSize}&h=${targetSize}&fit=cover&output=webp&q=80`;
       }
       return rawUrl;
@@ -4430,11 +4456,11 @@
       container.innerHTML = `
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           ${files.map(f => {
-            const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
-            const isVid = (f.type && f.type.startsWith('video/')) || (f.url && f.url.match(/\.(mp4|mov|webm)$/i));
+            const fileName = f.originalName || f.id;
+            const isImg = isImageFile(f.type, fileName, f.url);
+            const isVid = isVideoFile(f.type, fileName, f.url);
             const isEffectiveLocked = f.isLocked && !sessionUnlockedItems.has(f.id);
             const isSelected = selectedFileIds.has(f.id);
-            const fileName = f.originalName || f.id;
             const fileSizeFormatted = formatBytes(f.size);
             const shareInfo = repo.getShareByTarget('file', f.id);
             const isShared = !!shareInfo;
@@ -4538,8 +4564,8 @@
               const isSelected = selectedFileIds.has(f.id);
               const fileName = f.originalName || f.id;
               const fileSizeFormatted = formatBytes(f.size);
-              const isImg = (f.type && f.type.startsWith('image/')) || (f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i));
-              const isVid = (f.type && f.type.startsWith('video/')) || (f.url && f.url.match(/\.(mp4|mov|webm)$/i));
+              const isImg = isImageFile(f.type, fileName, f.url);
+              const isVid = isVideoFile(f.type, fileName, f.url);
               const isEffectiveLocked = f.isLocked && !sessionUnlockedItems.has(f.id);
               const shareInfo = repo.getShareByTarget('file', f.id);
               const isShared = !!shareInfo;
@@ -4664,19 +4690,19 @@
     }
 
     function getFileIconName(type = '', name = '') {
-      const t = (type || '').toLowerCase();
       const ext = ((name || '').split('.').pop() || '').toLowerCase();
 
-      if (t.startsWith('image/') || ['jpg', 'png', 'jpeg', 'webp', 'gif', 'svg'].includes(ext)) return 'image';
-      if (t.startsWith('video/') || ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) return 'video';
-      if (t.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext)) return 'music';
+      if (['c', 'cpp', 'cc', 'h', 'hpp', 'py', 'pyw', 'html', 'htm', 'css', 'scss', 'js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx', 'json', 'xml', 'sql', 'sh', 'bash', 'zsh', 'php', 'java', 'cs', 'go', 'rs', 'yaml', 'yml'].includes(ext)) return 'file-code';
+      if (['txt', 'log', 'env', 'md', 'markdown'].includes(ext)) return 'file-text';
       if (['pdf'].includes(ext)) return 'file-text';
       if (['doc', 'docx'].includes(ext)) return 'file-text';
       if (['xls', 'xlsx', 'csv'].includes(ext)) return 'file-spreadsheet';
       if (['ppt', 'pptx'].includes(ext)) return 'presentation';
       if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return 'archive';
-      if (['c', 'cpp', 'cc', 'h', 'hpp', 'py', 'pyw', 'html', 'htm', 'css', 'scss', 'js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx', 'json', 'xml', 'sql', 'sh', 'bash', 'zsh', 'php', 'java', 'cs', 'go', 'rs', 'yaml', 'yml'].includes(ext)) return 'file-code';
-      if (['txt', 'log', 'env', 'md', 'markdown'].includes(ext)) return 'file-text';
+      if (isImageFile(type, name)) return 'image';
+      if (isVideoFile(type, name)) return 'video';
+      const t = (type || '').toLowerCase();
+      if (t.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext)) return 'music';
       return 'file';
     }
 
@@ -6458,8 +6484,8 @@
       if (canvas) {
         canvas.innerHTML = '';
         const ext = fileName.split('.').pop().toLowerCase();
-        const isImg = fileType.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
-        const isVid = fileType.startsWith('video/') || ['mp4', 'webm', 'mov'].includes(ext);
+        const isImg = isImageFile(fileType, fileName, fileUrl);
+        const isVid = isVideoFile(fileType, fileName, fileUrl);
         const isAud = fileType.startsWith('audio/') || ['mp3', 'wav', 'ogg'].includes(ext);
         const isPdf = fileType === 'application/pdf' || ext === 'pdf';
         const isDoc = ['doc', 'docx'].includes(ext) || fileType.includes('word') || fileType.includes('officedocument.wordprocessingml');
@@ -6692,8 +6718,8 @@
 
       const type = (file.type || '').toLowerCase();
       const ext = ((fileName || '').split('.').pop() || '').toLowerCase();
-      const isImg = type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
-      const isVid = type.startsWith('video/') || ['mp4', 'mov', 'webm'].includes(ext);
+      const isImg = isImageFile(type, fileName, file.url);
+      const isVid = isVideoFile(type, fileName, file.url);
       const isAud = type.startsWith('audio/') || ['mp3', 'wav', 'ogg'].includes(ext);
       const isPdf = type === 'application/pdf' || ext === 'pdf';
       const isDoc = ['doc', 'docx'].includes(ext) || type.includes('word') || type.includes('officedocument.wordprocessingml');

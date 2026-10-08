@@ -429,6 +429,48 @@
               email: options.uploaderEmail || (storedUser?.email || sessionStorage.getItem('COMED_KKU69_USER_EMAIL') || '-')
             };
 
+  function detectMimeType(fileName, originalType) {
+    const ext = ((fileName || '').split('.').pop() || '').toLowerCase();
+    const mimeMap = {
+      // Images
+      'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png', 'gif': 'image/gif',
+      'webp': 'image/webp', 'svg': 'image/svg+xml', 'avif': 'image/avif', 'bmp': 'image/bmp', 'ico': 'image/x-icon',
+      // Documents
+      'pdf': 'application/pdf',
+      'doc': 'application/msword', 'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'xls': 'application/vnd.ms-excel', 'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'ppt': 'application/vnd.ms-powerpoint', 'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'csv': 'text/csv',
+      // Code & Text
+      'c': 'text/x-c', 'h': 'text/x-c', 'cpp': 'text/x-c++src', 'hpp': 'text/x-c++hdr', 'cc': 'text/x-c++src',
+      'py': 'text/x-python', 'pyw': 'text/x-python',
+      'html': 'text/html', 'htm': 'text/html',
+      'css': 'text/css', 'scss': 'text/x-scss', 'sass': 'text/x-sass', 'less': 'text/x-less',
+      'js': 'text/javascript', 'mjs': 'text/javascript', 'cjs': 'text/javascript',
+      'ts': 'text/typescript', 'tsx': 'text/typescript-jsx', 'jsx': 'text/jsx',
+      'json': 'application/json', 'xml': 'application/xml',
+      'sql': 'application/sql',
+      'sh': 'text/x-sh', 'bash': 'text/x-sh', 'zsh': 'text/x-sh',
+      'php': 'text/x-php',
+      'java': 'text/x-java-source',
+      'cs': 'text/x-csharp',
+      'go': 'text/x-go',
+      'rs': 'text/x-rust',
+      'md': 'text/markdown', 'markdown': 'text/markdown',
+      'txt': 'text/plain', 'log': 'text/plain', 'env': 'text/plain',
+      'yaml': 'text/yaml', 'yml': 'text/yaml',
+      // Audio & Video
+      'mp4': 'video/mp4', 'webm': 'video/webm', 'mov': 'video/quicktime', 'mkv': 'video/x-matroska',
+      'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'ogg': 'audio/ogg', 'm4a': 'audio/mp4', 'flac': 'audio/flac',
+      // Archives
+      'zip': 'application/zip', 'rar': 'application/x-rar-compressed', '7z': 'application/x-7z-compressed',
+      'tar': 'application/x-tar', 'gz': 'application/gzip'
+    };
+    if (mimeMap[ext]) return mimeMap[ext];
+    if (originalType && originalType !== 'application/octet-stream') return originalType;
+    return 'application/octet-stream';
+  }
+
             const fileItem = {
               id: 'FILE_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
               name: fileName,
@@ -438,7 +480,7 @@
               publicId: uploadResult.publicId || '',
               deleteToken: uploadResult.deleteToken || '',
               size: fileObj.size || 0,
-              type: fileObj.type || 'image/png',
+              type: detectMimeType(fileName, fileObj.type),
               category: options.category || 'อัปโหลดทั่วไป',
               uploaderId: uploaderInfo.id,
               uploaderName: uploaderInfo.name,
