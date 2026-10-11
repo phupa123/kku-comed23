@@ -468,16 +468,29 @@
       if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({ root: container });
     }
 
-    // เมื่อกดเลือกอุปกรณ์รอบข้างเพื่อส่งไฟล์
+    // เมื่อกดเลือกอุปกรณ์รอบข้างเพื่อส่งไฟล์ (หรือกดซ้ำเพื่อยกเลิก)
     async function triggerSendToDevice(targetId, targetName, targetEmail) {
-      if (!currentSelectedFile) {
-        alert('⚠️ กรุณาคลิกเลือกไฟล์ในขั้นตอนที่ 1 ก่อนครับ แล้วค่อยกดที่โปรไฟล์เพื่อส่ง!');
-        document.getElementById('dropzone').scrollIntoView({ behavior: 'smooth' });
+      // 1. ถ้ากำลังส่งให้เครื่องนี้อยู่แล้วผู้ใช้กดซ้ำ -> ยกเลิกการส่งทันที!
+      if (activeSendingTransfer && activeSendingTransfer.targetId === targetId) {
+        if (confirm(`ต้องการยกเลิกการส่งไฟล์ไปยัง "${targetName}" ใช่หรือไม่?`)) {
+          const transferId = activeSendingTransfer.transferId;
+          stopCircularProgress(targetId, false, 'ยกเลิกแล้ว');
+          activeSendingTransfer = null;
+          if (transferId && window.FastShare.cancelTransfer) {
+            await window.FastShare.cancelTransfer(transferId);
+          }
+        }
         return;
       }
 
       if (activeSendingTransfer) {
-        alert('กำลังส่งไฟล์อยู่ กรุณารอสักครู่ครับ');
+        alert('กำลังส่งไฟล์ไปยังอุปกรณ์อื่นอยู่ กรุณารอสักครู่หรือกดแตะที่เครื่องเดิมเพื่อยกเลิกครับ');
+        return;
+      }
+
+      if (!currentSelectedFile) {
+        alert('⚠️ กรุณาคลิกเลือกไฟล์ในขั้นตอนที่ 1 ก่อนครับ แล้วค่อยกดที่โปรไฟล์เพื่อส่ง!');
+        document.getElementById('dropzone').scrollIntoView({ behavior: 'smooth' });
         return;
       }
 
@@ -491,7 +504,7 @@
           targetEmail: targetEmail || null
         });
 
-        // จำ transfer ID เพื่อรอผู้รับกดยอมรับ
+        // จำ transfer ID เพื่อรอผู้รับกดยอมรับ หรือไว้สำหรับกดยกเลิก
         if (activeSendingTransfer) {
           activeSendingTransfer.transferId = transferRecord.id;
         }

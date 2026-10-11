@@ -93,7 +93,36 @@
       this.initRealtimeListener();
       this.mountIncomingDialog();
       this.checkUrlPairing();
+      this.checkNotificationActions(); // รับคำสั่ง accept/decline ที่กดมาจากแถบแจ้งเตือน
       this.checkPendingTransfers(); // กู้คืนไฟล์ที่ส่งมาหากมีการกดรีเฟรชหน้าเว็บ
+      this.listenToServiceWorkerMessages();
+    },
+
+    // ดักฟังข้อความจาก Service Worker เมื่อผู้ใช้กดปุ่มบนแถบแจ้งเตือน
+    listenToServiceWorkerMessages() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'FASTSHARE_DECLINE') {
+            const transferId = event.data.transferId;
+            console.log('[FastShare] Declined from notification bar:', transferId);
+            this.declineTransfer({ id: transferId, sender_name: 'อุปกรณ์ที่ส่ง' });
+          }
+        });
+      }
+    },
+
+    // ตรวจสอบ URL query หากผู้ใช้กด "ยอมรับไฟล์" จากแถบ Notification
+    checkNotificationActions() {
+      const params = new URLSearchParams(window.location.search);
+      const autoAcceptId = params.get('auto_accept');
+      const fileUrl = params.get('file_url');
+      const fileName = params.get('file_name');
+
+      if (autoAcceptId && fileUrl) {
+        console.log('[FastShare] Auto-accepting from notification action click:', autoAcceptId);
+        this.acceptTransfer({ id: autoAcceptId, file_url: fileUrl, file_name: fileName || 'file' }, true);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     },
 
     // ตรวจสอบไฟล์ที่ยังรอการตอบรับ (Pending) ในช่วง 5 นาทีล่าสุด แม้ผู้ใช้จะเผลอกดรีเฟรชหน้าเว็บ
@@ -373,13 +402,17 @@
           try {
             navigator.serviceWorker?.ready?.then((reg) => {
               reg.showNotification(`FastShare: ${transfer.sender_name || 'อุปกรณ์ใกล้เคียง'} ต้องการส่งไฟล์ให้คุณ`, {
-                body: `ไฟล์: ${transfer.file_name} (${this.formatBytes(transfer.file_size || 0)})\nแตะเพื่อเปิดเข้ามากดยอมรับไฟล์`,
+                body: `ไฟล์: ${transfer.file_name} (${this.formatBytes(transfer.file_size || 0)})`,
                 icon: '/logo.png',
                 badge: '/favicon.png',
                 tag: 'fastshare-incoming-' + (transfer.id || Date.now()),
                 vibrate: [300, 100, 400, 100, 300],
                 requireInteraction: true,
-                data: { url: '/fastshare.html' }
+                data: { url: '/fastshare.html', transfer: transfer },
+                actions: [
+                  { action: 'accept', title: '✅ ยอมรับไฟล์' },
+                  { action: 'decline', title: '❌ ปฏิเสธ' }
+                ]
               });
             }).catch(() => {
               new Notification(`FastShare: ${transfer.sender_name || 'อุปกรณ์ใกล้เคียง'} ส่งไฟล์ให้คุณ`, {
@@ -393,6 +426,32 @@
 
       // แสดง Popup ขออนุมัติรับไฟล์
       this.showIncomingModal(transfer);
+    },
+
+    // ยกเลิกการส่งไฟล์ (ระหว่างที่รอผู้รับตอบรับ)
+    async cancelTransfer(transferId) {
+      const client = getClient();
+      const updatedTransfer = { id: transferId, status: 'cancelled' };
+
+      // 1. Broadcast แจ้งเตือนฝั่งผู้รับทันทีว่าผู้ส่งยกเลิกแล้ว
+      if (this.realtimeChannel) {
+        try {
+          await this.realtimeChannel.send({
+            type: 'broadcast',
+            event: 'transfer:status',
+            payload: updatedTransfer
+          });
+        } catch (e) {}
+      }
+
+      // 2. อัปเดตใน Supabase
+      if (client && transferId) {
+        try {
+          await client.from('fastshare_transfers').update({ status: 'cancelled' }).eq('id', transferId);
+        } catch (e) {}
+      }
+
+      this.showToast('ยกเลิกการส่งไฟล์เรียบร้อยแล้ว');
     },
 
     // รับไฟล์
@@ -484,7 +543,16 @@
     },
 
     handleStatusUpdate(transfer) {
-      // แจ้งเตือนฝั่งคนส่งว่าผู้รับกดยอมรับหรือปฏิเสธ
+      // 1. ถ้าเป็นฝั่งผู้รับ และผู้ส่งยกเลิกการส่งกลางคัน -> ปิด modal
+      if (transfer.status === 'cancelled') {
+        const modal = document.getElementById('fastShareIncomingModal');
+        if (modal && !modal.classList.contains('hidden')) {
+          modal.classList.add('hidden');
+          this.showToast('ผู้ส่งได้ยกเลิกการส่งไฟล์นี้แล้ว');
+        }
+      }
+
+      // 2. แจ้งเตือนฝั่งคนส่งว่าผู้รับกดยอมรับหรือปฏิเสธ
       if (transfer.sender_device_id === this.deviceId) {
         if (typeof this.onTransferStatusChange === 'function') {
           this.onTransferStatusChange(transfer);

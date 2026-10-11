@@ -92,12 +92,26 @@ self.addEventListener('push', (event) => {
 // Push & System Notification Click handler
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const notifData = event.notification.data || {};
+  const transfer = notifData.transfer;
 
-  if (event.action === 'close') {
+  if (event.action === 'decline' && transfer) {
+    // ผู้ใช้กดปฏิเสธจากแถบแจ้งเตือน
+    event.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+        for (let client of windowClients) {
+          client.postMessage({ type: 'FASTSHARE_DECLINE', transferId: transfer.id });
+        }
+      })
+    );
     return;
   }
 
-  const urlToOpen = (event.notification.data && event.notification.data.url) || '/';
+  // หากกด 'accept' หรือคลิกที่ตัวการ์ดแจ้งเตือน
+  let urlToOpen = notifData.url || '/fastshare.html';
+  if (event.action === 'accept' && transfer) {
+    urlToOpen = `/fastshare.html?auto_accept=${encodeURIComponent(transfer.id || '')}&file_url=${encodeURIComponent(transfer.file_url || '')}&file_name=${encodeURIComponent(transfer.file_name || '')}`;
+  }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
