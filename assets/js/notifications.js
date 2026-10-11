@@ -83,14 +83,20 @@
         badge: '/favicon.png',
         tag: 'comed-notif-' + (item.id || Date.now()),
         data: { url: item.link || window.location.href },
-        vibrate: [200, 100, 200]
+        // สั่นกระตุ้นเตือนโทรศัพท์มือถือ (Vibrate pattern)
+        vibrate: [300, 100, 400, 100, 300],
+        renotify: true,
+        requireInteraction: item.type === 'urgent',
+        actions: [
+          { action: 'open', title: 'เปิดดูทันที' }
+        ]
       };
 
       try {
         if ('serviceWorker' in navigator) {
-          const reg = await navigator.serviceWorker.getRegistration();
+          const reg = await navigator.serviceWorker.ready;
           if (reg && reg.showNotification) {
-            reg.showNotification(title, options);
+            await reg.showNotification(title, options);
             return;
           }
         }

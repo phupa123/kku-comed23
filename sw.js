@@ -43,9 +43,53 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Push Event: รับข้อมูล Push จาก Server เมื่อผู้ใช้ปิดแอปหรือล็อกหน้าจอ
+self.addEventListener('push', (event) => {
+  let data = {
+    title: 'ประกาศจากสาขา COMED KKU',
+    message: 'มีข้อความและการแจ้งเตือนใหม่',
+    link: '/',
+    type: 'info'
+  };
+
+  if (event.data) {
+    try {
+      data = Object.assign(data, event.data.json());
+    } catch (e) {
+      data.message = event.data.text();
+    }
+  }
+
+  const title = data.title || 'ประกาศด่วนจาก COMED23';
+  const options = {
+    body: data.message || '',
+    icon: '/logo.png',
+    badge: '/favicon.png',
+    tag: 'comed-push-' + (data.id || Date.now()),
+    data: { url: data.link || '/' },
+    // สั่นเตือนบนโทรศัพท์: สั่น 300ms, หยุด 100ms, สั่น 400ms, หยุด 100ms, สั่น 300ms
+    vibrate: [300, 100, 400, 100, 300],
+    renotify: true,
+    requireInteraction: true,
+    actions: [
+      { action: 'open', title: 'เปิดดูทันที' },
+      { action: 'close', title: 'ปิด' }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
 // Push & System Notification Click handler
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+
+  if (event.action === 'close') {
+    return;
+  }
+
   const urlToOpen = (event.notification.data && event.notification.data.url) || '/';
 
   event.waitUntil(
