@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="th" class="dark scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FastShare (AirDrop & QuickShare Suite) | COMED KKU</title>
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+            mono: ['Plus Jakarta Sans', 'monospace']
+          },
+          colors: {
+            brand: {
+              500: '#f97316',
+              600: '#ea580c',
+              kku: '#A73B24'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Supabase JS Client & Configs -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <script src="students_data.js"></script>
+
+  <!-- QRCode Suite & QR Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
+
+  <!-- Real-Time Push Notification Engine -->
+  <script src="assets/js/notifications.js"></script>
+
+  <!-- FastShare Engine -->
+  <script src="assets/js/fastshare.js"></script>
+
+  <style>
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(249, 115, 22, 0.4);
+      border-radius: 999px;
+    }
+    .radar-pulse {
+      animation: radar 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+    }
+    @keyframes radar {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+  </style>
+</head>
+
+<body class="bg-[#090D16] text-slate-100 min-h-screen flex flex-col font-sans relative overflow-x-hidden">
+
+  <!-- Header Navigation -->
+  <header class="sticky top-0 z-40 bg-[#090D16]/90 backdrop-blur-2xl border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2.5 group">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-sky-500 to-blue-600 p-0.5 shadow-lg shadow-sky-500/20">
+            <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+              <i data-lucide="zap" class="w-5 h-5 text-sky-400"></i>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-black text-white group-hover:text-sky-400 transition">
+                FastShare Live
+              </h1>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                AirDrop & QuickShare
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">ส่งต่อไฟล์ด่วนข้ามอุปกรณ์ สแกน QR & เรดาร์ตรวจจับ</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <!-- Settings Modal Trigger -->
+        <button onclick="openSettingsModal()" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="settings-2" class="w-4 h-4 text-orange-400"></i>
+          <span class="hidden sm:inline">ตั้งค่าการรับ-ส่ง</span>
+        </button>
+        <a href="index.html" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>หน้าแรก</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+
+    <!-- Top Radar & Device Status Hub -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      
+      <!-- Left: Device Identity & Mode Pill (7 Cols) -->
+      <div class="lg:col-span-7 space-y-5">
+        <div class="glass-card rounded-3xl p-6 sm:p-7 border border-white/10 space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-lg border border-sky-500/30">
+                <i data-lucide="smartphone" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 id="txtDeviceName" class="text-base font-black text-white">อุปกรณ์ของคุณ</h3>
+                  <button onclick="changeDeviceName()" class="text-slate-400 hover:text-white text-xs" title="เปลี่ยนชื่อ">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+                <p id="txtDeviceId" class="text-xs text-slate-400 font-mono">ID: ...</p>
+              </div>
+            </div>
+
+            <!-- Discoverable Scope Badge -->
+            <div class="flex items-center gap-2">
+              <span id="badgeCurrentMode" class="px-3 py-1.5 rounded-2xl text-xs font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="txtCurrentMode">เปิดรับทุกคน (Everyone)</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Quick Discovery Selector Buttons -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-slate-400 block">โหมดการเปิดรับไฟล์ของคุณ:</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button type="button" onclick="setReceiveMode('everyone')" id="btnModeEveryone"
+                class="mode-btn p-2.5 rounded-xl border border-sky-500/50 bg-sky-500/20 text-sky-200 text-xs font-bold text-center transition cursor-pointer">
+                🌐 รับทุกคน
+              </button>
+              <button type="button" onclick="setReceiveMode('paired')" id="btnModePaired"
+                class="mode-btn p-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-300 text-xs font-bold text-center transition cursor-pointer hover:bg-white/10">
+                🔗 เฉพาะที่จับคู่
+              </button>
+              <button type="button" onclick="setReceiveMode('specific')" id="btnModeSpecific"
+                class="mode-btn p-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-300 text-xs font-bold text-center transition cursor-pointer hover:bg-white/10">
+                🎯 เฉพาะที่กำหนด
+              </button>
+              <button type="button" onclick="setReceiveMode('off')" id="btnModeOff"
+                class="mode-btn p-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-400 text-xs font-bold text-center transition cursor-pointer hover:bg-white/10">
+                ⛔ ปิดการรับ
+              </button>
+            </div>
+          </div>
+
+          <!-- Auto-Accept Alert Option Indicator -->
+          <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5 text-xs text-slate-300">
+            <div class="flex items-center gap-2">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+              <span>การรับไฟล์อัตโนมัติ:</span>
+              <strong id="txtAutoAcceptStatus" class="text-white">ต้องกดยอมรับก่อน (ปลอดภัย)</strong>
+            </div>
+            <button onclick="toggleAutoAccept()" class="text-[11px] font-bold text-orange-400 hover:text-orange-300 cursor-pointer">
+              สลับเปิด/ปิด
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Radar Pairing & Instant QR Code Scanner (5 Cols) -->
+      <div class="lg:col-span-5 space-y-4">
+        <div class="glass-card rounded-3xl p-6 border border-white/10 text-center space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-white/10">
+            <h3 class="text-sm font-black text-white flex items-center gap-2">
+              <i data-lucide="qr-code" class="w-4 h-4 text-sky-400"></i>
+              <span>สแกน QR เพื่อเชื่อมต่อด่วน</span>
+            </h3>
+            <span class="text-[10px] text-slate-400 font-mono">Zero Config</span>
+          </div>
+
+          <div class="p-3 bg-white rounded-3xl inline-block shadow-2xl mx-auto">
+            <div id="deviceQrContainer" class="w-40 h-40"></div>
+          </div>
+
+          <p class="text-xs text-slate-300">
+            ให้เพื่อนสแกนด้วยกล้องมือถือ เพื่อจับคู่และส่งไฟล์หากันได้ทันทีโดยไม่ต้องถามหาอุปกรณ์
+          </p>
+
+          <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code เครื่องเพื่อนเพื่อจับคู่' })"
+            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="scan-line" class="w-4 h-4"></i>
+            <span>เปิดกล้องสแกน QR เพื่อน</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- File Dropzone & Transfer Center -->
+    <div class="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">ส่งไฟล์ด่วน (Send Files)</h3>
+            <p class="text-xs text-slate-400">ลากไฟล์มาวางหรือกดเลือกไฟล์ เพื่อกระจายไปยังอุปกรณ์ที่ต้องการ</p>
+          </div>
+        </div>
+
+        <!-- Target Destination Selector -->
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-slate-400">ส่งถึง:</label>
+          <select id="selectSendTargetMode" onchange="updateTargetUI()"
+            class="px-3 py-1.5 rounded-xl bg-slate-950 border border-white/15 text-white text-xs font-bold outline-none focus:border-orange-500">
+            <option value="everyone">🌐 ทุกเครื่องที่เปิดรับ (Broadcast Everyone)</option>
+            <option value="paired">🔗 อุปกรณ์ที่จับคู่ไว้ (Paired Devices)</option>
+            <option value="specific">🎯 ระบุชื่อนักศึกษา / อีเมล (@kkumail.com)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Specific User Selector Container (Hidden by default) -->
+      <div id="boxSpecificRecipient" class="hidden p-4 rounded-2xl bg-white/5 border border-amber-500/30 space-y-3">
+        <label class="text-xs font-bold text-amber-400 block">ค้นหาชื่อหรืออีเมลเพื่อนที่จะรับไฟล์:</label>
+        <div class="relative">
+          <input type="text" id="inputRecipientSearch" oninput="searchRecipient(this.value)" placeholder="พิมพ์ชื่อ, ชื่อเล่น เช่น มิวสิค, ภูผา, หรืออีเมล..."
+            class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white placeholder-slate-500 text-xs outline-none focus:border-amber-500">
+          <div id="recipientSearchResults" class="hidden absolute top-full left-0 right-0 mt-1 max-h-40 overflow-y-auto bg-slate-900 border border-white/15 rounded-xl shadow-2xl z-50 divide-y divide-white/5 custom-scroll"></div>
+        </div>
+        <div id="targetRecipientBadge" class="hidden flex items-center gap-2 text-xs text-emerald-400 font-bold">
+          <span>เป้าหมายที่เลือก: <span id="txtTargetEmail" class="text-white"></span></span>
+          <button type="button" onclick="clearTargetRecipient()" class="text-rose-400 hover:text-white">&times;</button>
+        </div>
+      </div>
+
+      <!-- Drag & Drop Area -->
+      <div id="dropzone" onclick="document.getElementById('fileInput').click()"
+        class="border-2 border-dashed border-white/20 hover:border-orange-500/60 rounded-3xl p-8 sm:p-12 text-center transition cursor-pointer bg-slate-950/40 hover:bg-slate-950/70 space-y-4">
+        
+        <input type="file" id="fileInput" class="hidden" onchange="handleFileSelected(event)">
+        
+        <div class="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-orange-400 shadow-inner">
+          <i data-lucide="file-up" class="w-8 h-8"></i>
+        </div>
+
+        <div class="space-y-1">
+          <h4 class="text-sm sm:text-base font-black text-white">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</h4>
+          <p class="text-xs text-slate-400">รองรับ รูปภาพ, วิดีโอ, PDF, สไลด์, และเอกสารทุกประเภท</p>
+        </div>
+
+        <div id="selectedFileInfo" class="hidden p-3 rounded-2xl bg-orange-500/10 border border-orange-500/30 max-w-md mx-auto text-left flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2.5 truncate">
+            <i data-lucide="file-check" class="w-4 h-4 text-orange-400 flex-shrink-0"></i>
+            <span id="txtSelectedFileName" class="font-bold text-white truncate">file.pdf</span>
+            <span id="txtSelectedFileSize" class="text-slate-400 font-mono text-[11px]"></span>
+          </div>
+          <button type="button" onclick="event.stopPropagation(); removeSelectedFile();" class="text-rose-400 hover:text-white p-1">&times;</button>
+        </div>
+
+        <div class="pt-2">
+          <button type="button" id="btnTriggerSend" onclick="event.stopPropagation(); executeSendFile();" disabled
+            class="px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 disabled:opacity-40 disabled:pointer-events-none text-white font-black text-xs shadow-xl shadow-orange-500/30 transition flex items-center justify-center gap-2 mx-auto cursor-pointer">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>ยิงส่งไฟล์ทันที (Send via FastShare)</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Paired Devices List -->
+    <div class="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <i data-lucide="link-2" class="w-4 h-4 text-sky-400"></i>
+          <h3 class="text-sm font-black text-white">อุปกรณ์ที่จับคู่แล้ว (Paired Devices)</h3>
+        </div>
+        <button onclick="clearPairedDevices()" class="text-xs text-rose-400 hover:underline">ล้างทั้งหมด</button>
+      </div>
+
+      <div id="pairedDevicesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Settings Modal Dialog -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-md w-full p-6 shadow-2xl space-y-5 bg-slate-900/95">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h4 class="text-sm font-black text-white flex items-center gap-2">
+          <i data-lucide="sliders" class="w-4 h-4 text-orange-400"></i>
+          <span>ตั้งค่าความปลอดภัย FastShare</span>
+        </h4>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">&times;</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+          <div>
+            <span class="font-bold text-white block">ต้องกดยอมรับก่อนส่งไฟล์</span>
+            <span class="text-slate-400 text-[11px]">หากปิด จะรับไฟล์และบันทึกอัตโนมัติทันที</span>
+          </div>
+          <input type="checkbox" id="chkAutoAccept" onchange="onAutoAcceptChange(this)" class="w-4 h-4 accent-orange-500 rounded cursor-pointer">
+        </div>
+
+        <div class="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+          <div>
+            <span class="font-bold text-white block">ส่งเสียงและสั่นเมื่อมีคนส่งไฟล์มา</span>
+            <span class="text-slate-400 text-[11px]">สั่นและส่งเสียงเตือนสไตล์ AirDrop</span>
+          </div>
+          <input type="checkbox" id="chkSoundAlert" checked class="w-4 h-4 accent-orange-500 rounded cursor-pointer">
+        </div>
+      </div>
+
+      <div class="pt-2 text-right">
+        <button onclick="closeSettingsModal()" class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition">
+          บันทึกการตั้งค่า
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentSelectedFile = null;
+    let selectedTargetEmail = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initFastShareUI();
+    });
+
+    function initFastShareUI() {
+      const fs = window.FastShare;
+      document.getElementById('txtDeviceName').textContent = fs.deviceName;
+      document.getElementById('txtDeviceId').textContent = `ID: ${fs.deviceId}`;
+      
+      renderQR();
+      renderModeButtons();
+      renderPairedDevices();
+      updateAutoAcceptUI();
+
+      if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function renderQR() {
+      const container = document.getElementById('deviceQrContainer');
+      container.innerHTML = '';
+      const pairUrl = `${window.location.origin}/fastshare.html?pair=${window.FastShare.deviceId}&name=${encodeURIComponent(window.FastShare.deviceName)}`;
+      
+      new QRCode(container, {
+        text: pairUrl,
+        width: 160,
+        height: 160,
+        colorDark: '#090D16',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function setReceiveMode(mode) {
+      window.FastShare.updateSettings({ discoverableMode: mode });
+      renderModeButtons();
+    }
+
+    function renderModeButtons() {
+      const mode = window.FastShare.settings.discoverableMode;
+      const modes = ['everyone', 'paired', 'specific', 'off'];
+      
+      modes.forEach(m => {
+        const btn = document.getElementById(`btnMode${m.charAt(0).toUpperCase() + m.slice(1)}`);
+        if (!btn) return;
+        if (m === mode) {
+          btn.className = 'mode-btn p-2.5 rounded-xl border border-sky-500/50 bg-sky-500/20 text-sky-200 text-xs font-bold text-center transition cursor-pointer';
+        } else {
+          btn.className = 'mode-btn p-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-300 text-xs font-bold text-center transition cursor-pointer hover:bg-white/10';
+        }
+      });
+
+      const modeTextMap = {
+        everyone: 'เปิดรับทุกคน (Everyone)',
+        paired: 'เฉพาะที่จับคู่ (Paired)',
+        specific: 'เฉพาะที่กำหนด (Specific)',
+        off: 'ปิดการรับ (Off)'
+      };
+      document.getElementById('txtCurrentMode').textContent = modeTextMap[mode] || mode;
+    }
+
+    function toggleAutoAccept() {
+      const current = window.FastShare.settings.autoAccept;
+      window.FastShare.updateSettings({ autoAccept: !current });
+      updateAutoAcceptUI();
+    }
+
+    function updateAutoAcceptUI() {
+      const isAuto = window.FastShare.settings.autoAccept;
+      const statusEl = document.getElementById('txtAutoAcceptStatus');
+      const chk = document.getElementById('chkAutoAccept');
+      if (statusEl) {
+        statusEl.textContent = isAuto ? 'รับไฟล์อัตโนมัติทันที (Auto-Accept)' : 'ต้องกดยอมรับก่อน (ปลอดภัย)';
+        statusEl.className = isAuto ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold';
+      }
+      if (chk) chk.checked = !isAuto;
+    }
+
+    function onAutoAcceptChange(chk) {
+      window.FastShare.updateSettings({ autoAccept: !chk.checked });
+      updateAutoAcceptUI();
+    }
+
+    function changeDeviceName() {
+      const newName = prompt('ระบุชื่ออุปกรณ์ใหม่ของคุณ:', window.FastShare.deviceName);
+      if (newName && newName.trim()) {
+        window.FastShare.deviceName = newName.trim();
+        localStorage.setItem('COMED23_FASTSHARE_DEVICE_NAME', newName.trim());
+        document.getElementById('txtDeviceName').textContent = newName.trim();
+        renderQR();
+      }
+    }
+
+    function updateTargetUI() {
+      const mode = document.getElementById('selectSendTargetMode').value;
+      const box = document.getElementById('boxSpecificRecipient');
+      if (mode === 'specific') {
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    function searchRecipient(q) {
+      const results = document.getElementById('recipientSearchResults');
+      const clean = (q || '').toLowerCase().trim();
+      if (!clean) {
+        results.classList.add('hidden');
+        return;
+      }
+
+      const list = window.STUDENTS_DATA || [];
+      const matches = list.filter(s => 
+        (s.name || '').toLowerCase().includes(clean) ||
+        (s.nickname || '').toLowerCase().includes(clean) ||
+        (s.email || '').toLowerCase().includes(clean)
+      ).slice(0, 5);
+
+      if (matches.length === 0) {
+        results.innerHTML = '<div class="p-3 text-slate-500 text-xs text-center">ไม่พบรายชื่อ</div>';
+        results.classList.remove('hidden');
+        return;
+      }
+
+      results.innerHTML = matches.map(s => `
+        <div onclick="selectTargetRecipient('${s.email}', '${s.name}')" class="p-2.5 hover:bg-white/10 transition flex items-center justify-between cursor-pointer text-xs">
+          <div>
+            <span class="font-bold text-white block">${s.name} (${s.nickname || '-'})</span>
+            <span class="text-[10px] text-slate-400 font-mono">${s.email}</span>
+          </div>
+          <span class="text-[10px] text-amber-400 font-bold">+ เลือก</span>
+        </div>
+      `).join('');
+      results.classList.remove('hidden');
+    }
+
+    function selectTargetRecipient(email, name) {
+      selectedTargetEmail = email;
+      document.getElementById('txtTargetEmail').textContent = `${name} (${email})`;
+      document.getElementById('targetRecipientBadge').classList.remove('hidden');
+      document.getElementById('recipientSearchResults').classList.add('hidden');
+      document.getElementById('inputRecipientSearch').value = '';
+    }
+
+    function clearTargetRecipient() {
+      selectedTargetEmail = null;
+      document.getElementById('targetRecipientBadge').classList.add('hidden');
+    }
+
+    function handleFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      currentSelectedFile = file;
+
+      document.getElementById('txtSelectedFileName').textContent = file.name;
+      document.getElementById('txtSelectedFileSize').textContent = `(${window.FastShare.formatBytes(file.size)})`;
+      document.getElementById('selectedFileInfo').classList.remove('hidden');
+      document.getElementById('btnTriggerSend').disabled = false;
+
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    }
+
+    function removeSelectedFile() {
+      currentSelectedFile = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('selectedFileInfo').classList.add('hidden');
+      document.getElementById('btnTriggerSend').disabled = true;
+    }
+
+    async function executeSendFile() {
+      if (!currentSelectedFile) return;
+      const btn = document.getElementById('btnTriggerSend');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>กำลังส่งไฟล์ข้ามอุปกรณ์...</span>';
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+
+      const targetMode = document.getElementById('selectSendTargetMode').value;
+
+      try {
+        await window.FastShare.sendFile(currentSelectedFile, {
+          mode: targetMode,
+          targetEmail: targetMode === 'specific' ? selectedTargetEmail : null
+        });
+
+        alert(`ยิงส่งไฟล์ "${currentSelectedFile.name}" เรียบร้อยแล้ว! อุปกรณ์ปลายทางจะได้รับการแจ้งเตือนและ Popup เด้งรับไฟล์ทันที`);
+        removeSelectedFile();
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดในการส่งไฟล์: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i><span>ยิงส่งไฟล์ทันที (Send via FastShare)</span>';
+        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      }
+    }
+
+    function renderPairedDevices() {
+      const container = document.getElementById('pairedDevicesGrid');
+      const paired = JSON.parse(localStorage.getItem('COMED23_FASTSHARE_PAIRED_DEVICES') || '[]');
+      
+      if (paired.length === 0) {
+        container.innerHTML = '<div class="col-span-full p-4 rounded-2xl bg-white/5 text-center text-slate-500 text-xs">ยังไม่มีอุปกรณ์ที่จับคู่ (สแกน QR เพื่อจับคู่อุปกรณ์)</div>';
+        return;
+      }
+
+      container.innerHTML = paired.map(d => `
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2.5 truncate">
+            <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="smartphone" class="w-4 h-4"></i>
+            </div>
+            <div class="truncate">
+              <span class="font-bold text-white block truncate">${d.name || 'Device'}</span>
+              <span class="text-[10px] text-slate-400 font-mono truncate">${d.id}</span>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">เชื่อมต่อแล้ว</span>
+        </div>
+      `).join('');
+
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({ root: container });
+    }
+
+    function clearPairedDevices() {
+      if (!confirm('ต้องการล้างอุปกรณ์ที่จับคู่ทั้งหมดใช่หรือไม่?')) return;
+      localStorage.removeItem('COMED23_FASTSHARE_PAIRED_DEVICES');
+      renderPairedDevices();
+    }
+
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+  </script>
+
+</body>
+</html>

@@ -449,6 +449,7 @@ export default {
     else if (path === "/upload-admin" || path === "/upload-admin.html") target = "/upload-admin.html";
     else if (path === "/settings" || path === "/settings.html") target = "/settings.html";
     else if (path === "/settings-admin" || path === "/settings-admin.html") target = "/settings-admin.html";
+    else if (path === "/fastshare" || path === "/fastshare.html") target = "/fastshare.html";
     else if (path === "/shortlink" || path === "/shortlink.html" || path.startsWith("/s/")) target = "/shortlink.html";
     else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") target = "/shortlink-admin.html";
     else if (path === "/maintenance" || path === "/maintenance.html") target = "/maintenance.html";

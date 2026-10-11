@@ -746,5 +746,55 @@ CREATE POLICY "Allow public upsert push_subscriptions" ON public.push_subscripti
 DROP POLICY IF EXISTS "Allow public update push_subscriptions" ON public.push_subscriptions;
 CREATE POLICY "Allow public update push_subscriptions" ON public.push_subscriptions FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
 
+-- =========================================================================
+-- FASTSHARE TRANSFERS TABLE (Airdrop / QuickShare Style Live Transfers)
+-- รองรับการรับ-ส่งไฟล์ด่วน พร้อมระบบตอบรับ / ปฏิเสธ และการแจ้งเตือน Realtime
+-- =========================================================================
+
+CREATE TABLE IF NOT EXISTS public.fastshare_transfers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_device_id TEXT NOT NULL,
+  sender_name TEXT NOT NULL,
+  sender_email TEXT,
+  target_mode TEXT DEFAULT 'everyone', -- 'everyone' | 'paired' | 'specific'
+  target_device_id TEXT,
+  target_email TEXT,
+  file_name TEXT NOT NULL,
+  file_size BIGINT DEFAULT 0,
+  file_type TEXT,
+  file_url TEXT NOT NULL,
+  status TEXT DEFAULT 'pending', -- 'pending' | 'accepted' | 'declined' | 'completed'
+  auto_accept BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.fastshare_transfers ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read fastshare_transfers" ON public.fastshare_transfers;
+CREATE POLICY "Allow public read fastshare_transfers" ON public.fastshare_transfers FOR SELECT TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert fastshare_transfers" ON public.fastshare_transfers;
+CREATE POLICY "Allow public insert fastshare_transfers" ON public.fastshare_transfers FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public update fastshare_transfers" ON public.fastshare_transfers;
+CREATE POLICY "Allow public update fastshare_transfers" ON public.fastshare_transfers FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public delete fastshare_transfers" ON public.fastshare_transfers;
+CREATE POLICY "Allow public delete fastshare_transfers" ON public.fastshare_transfers FOR DELETE TO anon, authenticated USING (true);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+      AND schemaname = 'public' 
+      AND tablename = 'fastshare_transfers'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.fastshare_transfers;
+  END IF;
+END;
+$$;
+
 DROP POLICY IF EXISTS "Allow public delete push_subscriptions" ON public.push_subscriptions;
 CREATE POLICY "Allow public delete push_subscriptions" ON public.push_subscriptions FOR DELETE TO anon, authenticated USING (true);
