@@ -454,6 +454,7 @@ export default {
     else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") target = "/shortlink-admin.html";
     else if (path === "/maintenance" || path === "/maintenance.html") target = "/maintenance.html";
     else if (path === "/404" || path === "/404.html") target = "/404.html";
+    else if (path === "/default-icon" || path === "/default-icon.png") target = "/logo.png";
     else if (path === "/favicon.ico" || path.endsWith(".ico") || path.endsWith(".svg") || path.startsWith("/assets/") || path.startsWith("/config/") || path.endsWith(".png") || path.endsWith(".js") || path.endsWith(".css") || path.endsWith(".json")) {
       target = url.pathname;
     }
