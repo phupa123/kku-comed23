@@ -52,6 +52,8 @@
     renderNotificationDropdown();
   }
 
+  const STORAGE_DISMISSED_PROMPT = 'COMED23_NOTIF_PROMPT_DISMISSED';
+
   const NotificationEngine = {
     // 1. ขอสิทธิ์ Web Notification
     async requestPermission() {
@@ -60,6 +62,15 @@
       }
       try {
         const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          // ทดสอบแจ้งเตือนต้อนรับ 1 ครั้ง เพื่อให้มั่นใจว่าเครื่องเปิดรับระบบ
+          this.triggerSystemNotification({
+            id: 'welcome_test',
+            title: 'เปิดการแจ้งเตือน COMED23 สำเร็จแล้ว!',
+            message: 'คุณจะได้รับข้อความแจ้งเตือนด่วนแม้ปิดแอปหรือล็อกหน้าจอ',
+            type: 'info'
+          });
+        }
         return perm;
       } catch (e) {
         console.warn('[NotificationEngine] Permission request error:', e);
@@ -70,6 +81,67 @@
     getPermissionStatus() {
       if (!('Notification' in window)) return 'unsupported';
       return Notification.permission; // 'granted', 'denied', 'default'
+    },
+
+    // แสดงป๊อปอัปขออนุญาตรับการแจ้งเตือนอัตโนมัติเมื่อเข้าแอป/เว็บ
+    promptPermissionModal() {
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'granted') return;
+      if (sessionStorage.getItem(STORAGE_DISMISSED_PROMPT)) return;
+      if (document.getElementById('modalNotifPrompt')) return;
+
+      const modal = document.createElement('div');
+      modal.id = 'modalNotifPrompt';
+      modal.className = 'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 sm:max-w-md z-[999999] animate-in fade-in slide-in-from-bottom-5 duration-300';
+      
+      modal.innerHTML = `
+        <div class="rounded-3xl p-5 bg-slate-900/95 backdrop-blur-2xl border border-orange-500/40 shadow-2xl shadow-orange-500/20 text-white space-y-3.5">
+          <div class="flex items-start gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-500/30">
+              <i data-lucide="bell-ring" class="w-5 h-5 animate-bounce"></i>
+            </div>
+            <div class="flex-grow min-w-0 pr-1">
+              <div class="flex items-center gap-1.5 mb-0.5">
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                  COMED KKU Alert
+                </span>
+              </div>
+              <h4 class="text-sm font-bold text-white leading-snug">เปิดการแจ้งเตือนสำคัญของสาขา?</h4>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                รับข่าวสารด่วน ตารางสอน เลื่อนคาบ และเตือนชำระเงิน แม้ปัดปิดแอปหรือล็อกหน้าจอ
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button id="btnNotifDismiss" type="button"
+              class="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white font-bold text-xs transition border border-white/10 text-center cursor-pointer">
+              ไว้คราวหลัง
+            </button>
+            <button id="btnNotifAccept" type="button"
+              class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-xs shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 text-center">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>เปิดการแจ้งเตือน</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons({ root: modal });
+      }
+
+      modal.querySelector('#btnNotifDismiss').onclick = () => {
+        sessionStorage.setItem(STORAGE_DISMISSED_PROMPT, 'true');
+        modal.remove();
+      };
+
+      modal.querySelector('#btnNotifAccept').onclick = async () => {
+        modal.remove();
+        await NotificationEngine.requestPermission();
+      };
     },
 
     // 2. ส่ง System Web Notification (ถ้าได้รับอนุญาต)
@@ -286,6 +358,11 @@
       renderBellButton();
       this.fetchNotifications();
       this.initRealtime();
+
+      // ขออนุญาตเปิดการแจ้งเตือนอัตโนมัติเมื่อเข้าแอป/เว็บ
+      setTimeout(() => {
+        this.promptPermissionModal();
+      }, 1200);
     }
   };
 
