@@ -1,7 +1,14 @@
 /**
  * COMED23 Service Worker for PWA (Progressive Web App)
- * Caches core assets and provides offline resilience
+ * Caches core assets, provides offline resilience and OneSignal Web Push
  */
+
+// Import OneSignal SDK Service Worker for reliable Background Push (RFC 8291)
+try {
+  importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
+} catch (e) {
+  console.warn('[SW] OneSignal import deferred:', e);
+}
 
 const CACHE_NAME = 'comed23-pwa-v2';
 const CORE_ASSETS = [

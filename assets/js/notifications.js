@@ -53,8 +53,36 @@
   }
 
   const STORAGE_DISMISSED_PROMPT = 'COMED23_NOTIF_PROMPT_DISMISSED';
+  const STORAGE_ONESIGNAL_APP_ID = 'COMED23_ONESIGNAL_APP_ID';
   // VAPID Public Key generated for COMED KKU
   const VAPID_PUBLIC_KEY = 'BEzlXgMuqgINsrzdcWJ5CQyXg83AKAlzvyruFr5BVJhwT_-oX7c2CIIUsiUZTJOm4emMbDtOF8hWpDNa6uvKUAk';
+
+  // โหลด OneSignal SDK อัตโนมัติสำหรับ Background Push
+  function initOneSignalSDK() {
+    const appId = localStorage.getItem(STORAGE_ONESIGNAL_APP_ID) || 'b52ce748-0c6a-4952-b88d-e6b7cf4cbcf1';
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async function(OneSignal) {
+      try {
+        await OneSignal.init({
+          appId: appId,
+          notifyButton: { enable: false },
+          allowLocalhostAsSecureOrigin: true
+        });
+      } catch(e) {
+        console.warn('[OneSignal] Init notice:', e);
+      }
+    });
+
+    if (!document.getElementById('onesignal-sdk-script')) {
+      const s = document.createElement('script');
+      s.id = 'onesignal-sdk-script';
+      s.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+      s.defer = true;
+      document.head.appendChild(s);
+    }
+  }
+
+  initOneSignalSDK();
 
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -68,8 +96,15 @@
   }
 
   const NotificationEngine = {
-    // 1. ขอสิทธิ์ Web Notification และลงทะเบียน VAPID Push Subscription
+    // 1. ขอสิทธิ์ Web Notification และลงทะเบียน OneSignal + VAPID
     async requestPermission() {
+      // 1. OneSignal Opt-in
+      if (window.OneSignal) {
+        try {
+          await window.OneSignal.Notifications.requestPermission();
+        } catch (e) {}
+      }
+
       if (!('Notification' in window)) {
         return 'unsupported';
       }

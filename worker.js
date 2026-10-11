@@ -289,6 +289,8 @@ export default {
       fetchUrl = new URL("/manifest.json", url.origin).toString();
     } else if (path === "/sw.js") {
       fetchUrl = new URL("/sw.js", url.origin).toString();
+    } else if (path === "/onesignalsdkworker.js") {
+      fetchUrl = new URL("/OneSignalSDKWorker.js", url.origin).toString();
     } else if (path === "/echo" || path === "/api/echo") {
       return withSecurityHeaders(new Response(JSON.stringify({ status: "ok", timestamp: Date.now() }), {
         status: 200,
