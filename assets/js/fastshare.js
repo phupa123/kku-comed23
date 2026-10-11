@@ -93,6 +93,34 @@
       this.initRealtimeListener();
       this.mountIncomingDialog();
       this.checkUrlPairing();
+      this.checkPendingTransfers(); // กู้คืนไฟล์ที่ส่งมาหากมีการกดรีเฟรชหน้าเว็บ
+    },
+
+    // ตรวจสอบไฟล์ที่ยังรอการตอบรับ (Pending) ในช่วง 5 นาทีล่าสุด แม้ผู้ใช้จะเผลอกดรีเฟรชหน้าเว็บ
+    async checkPendingTransfers() {
+      const client = getClient();
+      if (!client) return;
+
+      try {
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const { data, error } = await client
+          .from('fastshare_transfers')
+          .select('*')
+          .eq('status', 'pending')
+          .gt('created_at', fiveMinutesAgo)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (!error && data && data.length > 0) {
+          const pendingTransfer = data[0];
+          if (this.shouldReceiveTransfer(pendingTransfer)) {
+            console.log('[FastShare] Restoring pending transfer after page refresh:', pendingTransfer.id);
+            this.handleIncomingTransfer(pendingTransfer);
+          }
+        }
+      } catch (err) {
+        console.warn('[FastShare] checkPendingTransfers error:', err);
+      }
     },
 
     // ตรวจสอบ URL query หากเปิดมาจาก QR Code เพื่อ Pair อัตโนมัติ (เช่น ?pair=fs_xyz&name=...)
@@ -337,6 +365,30 @@
       if (s.autoAccept) {
         this.acceptTransfer(transfer, true);
         return;
+      }
+
+      // หากผู้ใช้พับหน้าจออยู่ ไปหน้า Home หรือเปิดแท็บอื่น ให้เด้ง Notification เตือนสไตล์ QuickShare
+      if (document.hidden || !document.hasFocus()) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try {
+            navigator.serviceWorker?.ready?.then((reg) => {
+              reg.showNotification(`FastShare: ${transfer.sender_name || 'อุปกรณ์ใกล้เคียง'} ต้องการส่งไฟล์ให้คุณ`, {
+                body: `ไฟล์: ${transfer.file_name} (${this.formatBytes(transfer.file_size || 0)})\nแตะเพื่อเปิดเข้ามากดยอมรับไฟล์`,
+                icon: '/logo.png',
+                badge: '/favicon.png',
+                tag: 'fastshare-incoming-' + (transfer.id || Date.now()),
+                vibrate: [300, 100, 400, 100, 300],
+                requireInteraction: true,
+                data: { url: '/fastshare.html' }
+              });
+            }).catch(() => {
+              new Notification(`FastShare: ${transfer.sender_name || 'อุปกรณ์ใกล้เคียง'} ส่งไฟล์ให้คุณ`, {
+                body: `ไฟล์: ${transfer.file_name} (${this.formatBytes(transfer.file_size || 0)})`,
+                icon: '/logo.png'
+              });
+            });
+          } catch(errNotif) {}
+        }
       }
 
       // แสดง Popup ขออนุมัติรับไฟล์
