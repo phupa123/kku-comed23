@@ -86,7 +86,11 @@
      */
     vibrate(pattern = [200, 100, 200]) {
       if (window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate(pattern);
+        try {
+          if (navigator.userActivation ? navigator.userActivation.hasBeenActive : true) {
+            window.navigator.vibrate(pattern);
+          }
+        } catch (_) {}
       }
     }
   };

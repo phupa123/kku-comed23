@@ -384,10 +384,14 @@
     handleIncomingTransfer(transfer) {
       const s = this.settings;
 
-      // เล่นเสียง & สั่นแจ้งเตือน
+      // เล่นเสียง & สั่นแจ้งเตือน (เรียกเฉพาะเมื่อผู้ใช้เคยมี interaction กับหน้าเว็บเพื่อป้องกัน Intervention Error)
       if (s.soundAlert) this.playSound();
       if (s.vibrationAlert && 'vibrate' in navigator) {
-        navigator.vibrate([300, 100, 300, 100, 400]);
+        try {
+          if (navigator.userActivation ? navigator.userActivation.hasBeenActive : true) {
+            navigator.vibrate([300, 100, 300, 100, 400]);
+          }
+        } catch (_) {}
       }
 
       // หากตั้งค่า Auto-Accept ไว้ ให้ยอมรับและดาวน์โหลดทันที
