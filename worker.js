@@ -281,6 +281,10 @@ export default {
       const targetUrl = new URL("/storage.html", url.origin);
       if (shareCode) targetUrl.searchParams.set("share", shareCode);
       fetchUrl = targetUrl.toString();
+    } else if (path === "/download" || path === "/download.html" || path === "/install" || path === "/app") {
+      fetchUrl = new URL("/download.html", url.origin).toString();
+    } else if (path === "/fastshare" || path === "/fastshare.html") {
+      fetchUrl = new URL("/fastshare.html", url.origin).toString();
     } else if (path === "/maintenance") {
       fetchUrl = new URL("/maintenance.html", url.origin).toString();
     } else if (path === "/favicon.ico") {

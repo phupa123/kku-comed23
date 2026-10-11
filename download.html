@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th" class="dark scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ดาวน์โหลดและติดตั้งแอป | KKU COMED</title>
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Fonts & Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+            mono: ['Plus Jakarta Sans', 'monospace']
+          },
+          colors: {
+            brand: {
+              500: '#f97316',
+              600: '#ea580c',
+              kku: '#A73B24'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="assets/js/pwa-installer.js"></script>
+
+  <style>
+    .glass-card {
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(24px);
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-orange-500 selection:text-white flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="border-b border-white/10 bg-slate-900/60 backdrop-blur-xl sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2.5 hover:opacity-80 transition">
+        <img src="logo.png" alt="Logo" class="w-8 h-8 rounded-xl object-contain bg-slate-800 p-0.5 border border-white/10">
+        <div>
+          <span class="font-extrabold text-sm text-white tracking-tight">KKU COMED</span>
+          <span class="text-[10px] text-orange-400 block -mt-1 font-mono">App Installation Hub</span>
+        </div>
+      </a>
+      <a href="index.html" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 border border-white/10 transition flex items-center gap-1.5">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        <span>กลับหน้าหลัก</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-4 py-10 flex-grow w-full space-y-8">
+
+    <!-- Hero Card -->
+    <div class="glass-card rounded-[32px] border border-orange-500/30 p-6 sm:p-10 relative overflow-hidden text-center space-y-4 shadow-2xl">
+      <div class="absolute -right-16 -top-16 w-64 h-64 bg-orange-500/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-orange-500 via-amber-500 to-orange-600 p-0.5 mx-auto shadow-2xl shadow-orange-500/30 flex items-center justify-center">
+        <div class="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center">
+          <img src="logo.png" alt="Logo" class="w-12 h-12 object-contain">
+        </div>
+      </div>
+
+      <div class="space-y-2 max-w-lg mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          ติดตั้งแอป <span class="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">KKU COMED</span> ลงเครื่อง
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          ติดตั้งลงบนมือถือ iPhone, iPad หรือ Android ได้ทันที โดยไม่ต้องรอโหลด Build ใน Android Studio ให้เสียเวลา!
+        </p>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="pt-4 flex flex-wrap items-center justify-center gap-3">
+        <button onclick="window.triggerPwaInstall()" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-sm shadow-xl shadow-orange-500/30 flex items-center gap-2 cursor-pointer transition active:scale-95">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>ติดตั้งลงหน้าจอมือถือทันที (1 คลิก)</span>
+        </button>
+
+        <a href="#android-section" class="px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-200 font-bold text-sm border border-white/10 flex items-center gap-2 transition">
+          <i data-lucide="smartphone" class="w-4 h-4 text-emerald-400"></i>
+          <span>วิธีสำหรับ Android & iOS</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Step Guides for Both Platforms -->
+    <div id="android-section" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Android Card -->
+      <div class="glass-card rounded-3xl border border-white/10 p-6 space-y-4 shadow-xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold">
+            <i data-lucide="smartphone" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base">สำหรับ Android (เร็วที่สุด)</h3>
+            <span class="text-[11px] text-slate-400">ไม่ต้องต่อสาย ไม่ต้องคอมไพล์ใน Android Studio</span>
+          </div>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300">
+          <div class="p-3 rounded-2xl bg-white/5 border border-white/5 flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center flex-shrink-0">1</span>
+            <p>เปิดเว็บนี้ใน <strong>Google Chrome</strong> บนมือถือ Android</p>
+          </div>
+          <div class="p-3 rounded-2xl bg-white/5 border border-white/5 flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center flex-shrink-0">2</span>
+            <p>แตะเมนูจุด 3 จุด (⋮) ที่มุมขวาบน หรือกดปุ่ม <strong>"ติดตั้งแอป"</strong> ที่เด้งขึ้นมา</p>
+          </div>
+          <div class="p-3 rounded-2xl bg-white/5 border border-white/5 flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center flex-shrink-0">3</span>
+            <p>เลือก <strong>"ติดตั้งแอป (Install App)"</strong> ไอคอนจะถูกสร้างบนหน้าจอหลักมือถือทันที เปิดเร็ว เต็มจอ ไม่ติดขอบ URL</p>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300">
+            💡 <strong>สำหรับผู้พัฒนาที่ต้องการไฟล์ .apk:</strong> เราได้ทำไฟล์ <code class="bg-black/30 px-1 py-0.5 rounded font-mono">build-apk.bat</code> ไว้ให้ในโฟลเดอร์โปรเจกต์ ดับเบิ้ลคลิกเพื่อ Build APK ใน Background ได้ทันทีโดยไม่ต้องเปิด Android Studio
+          </div>
+        </div>
+      </div>
+
+      <!-- iOS Card -->
+      <div class="glass-card rounded-3xl border border-white/10 p-6 space-y-4 shadow-xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center font-bold">
+            <i data-lucide="apple" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base">สำหรับ iPhone & iPad (iOS)</h3>
+            <span class="text-[11px] text-slate-400">ติดตั้งผ่าน Safari ไม่ต้องง้อ App Store</span>
+          </div>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300">
+          <div class="p-3 rounded-2xl bg-white/5 border border-white/5 flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center flex-shrink-0">1</span>
+            <p>เปิดเว็บนี้ด้วย <strong>Safari</strong> บนเครื่อง iPhone หรือ iPad</p>
+          </div>
+          <div class="p-3 rounded-2xl bg-white/5 border border-white/5 flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center flex-shrink-0">2</span>
+            <p>แตะปุ่ม <strong>แชร์ [ ↑ ]</strong> ที่แถบเมนูด้านล่างของ Safari</p>
+          </div>
+          <div class="p-3 rounded-2xl bg-white/5 border border-white/5 flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center flex-shrink-0">3</span>
+            <p>เลื่อนลงมาเลือก <strong>"เพิ่มไปยังหน้าจอโฮม (Add to Home Screen)"</strong> แล้วกด "เพิ่ม" ได้ทันที</p>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <div class="p-3 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-[11px] text-sky-300">
+            ⚡ <strong>ข้อดี:</strong> ใช้งานได้แบบแอปแท้ 100%, ปิดการเชื่อมต่อเน็ตก็ยังเปิดแอปได้ (Offline Cache), รองรับ FastShare และระบบแจ้งเตือน Push Notification
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10 py-6 text-center text-xs text-slate-500">
+    <p>© 2026 KKU COMED 69. High-Performance Mobile Web Suite.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>
