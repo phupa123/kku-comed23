@@ -13,3 +13,7 @@ www/
 kku-comed23.apk
 .gradle/
 build/
+package.json
+package-lock.json
+capacitor.config.json
+build-apk.*
