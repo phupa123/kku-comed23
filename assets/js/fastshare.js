@@ -86,6 +86,9 @@
     activeTransfers: [],
     realtimeChannel: null,
 
+    nearbyDevices: [],
+    onNearbyDevicesChange: null,
+
     init() {
       this.initRealtimeListener();
       this.mountIncomingDialog();
@@ -100,6 +103,8 @@
       if (pairId && pairId !== this.deviceId) {
         addPairedDevice({ id: pairId, name: pairName || 'อุปกรณ์ที่สแกน', pairedAt: new Date().toISOString() });
         console.log('[FastShare] Paired with device:', pairId);
+        // Clean URL to prevent re-pairing alert loop
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     },
 
@@ -172,14 +177,31 @@
       return transferRecord;
     },
 
-    // ติดตาม Realtime การส่งไฟล์เข้าเครื่องเรา
+    // ติดตาม Realtime การส่งไฟล์เข้าเครื่องเรา และตรวจจับอุปกรณ์รอบข้างแบบ Live Radar
     initRealtimeListener() {
       const client = getClient();
       if (!client || this.realtimeChannel) return;
 
       try {
+        let currentEmail = '';
+        try {
+          const raw = sessionStorage.getItem('COMED_USER_SESSION') || localStorage.getItem('COMED_USER_SESSION') || '';
+          if (raw.startsWith('{')) {
+            const parsed = JSON.parse(raw);
+            currentEmail = (parsed.email || parsed.email_address || '').toLowerCase().trim();
+          } else if (raw.includes('@')) {
+            currentEmail = raw.toLowerCase().trim();
+          }
+        } catch(e) {}
+
         this.realtimeChannel = client
-          .channel('public:fastshare_transfers')
+          .channel('public:fastshare_transfers', {
+            config: {
+              presence: {
+                key: this.deviceId
+              }
+            }
+          })
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'fastshare_transfers' }, (payload) => {
             const transfer = payload.new;
             if (this.shouldReceiveTransfer(transfer)) {
@@ -190,7 +212,39 @@
             const updated = payload.new;
             this.handleStatusUpdate(updated);
           })
-          .subscribe();
+          .on('presence', { event: 'sync' }, () => {
+            const state = this.realtimeChannel.presenceState();
+            const onlineList = [];
+            for (const id in state) {
+              if (id !== this.deviceId) {
+                const dev = state[id][0];
+                if (dev && dev.mode !== 'off') {
+                  onlineList.push({
+                    id: dev.id || id,
+                    name: dev.name || 'อุปกรณ์ใกล้เคียง',
+                    email: dev.email || '',
+                    mode: dev.mode || 'everyone',
+                    onlineAt: dev.onlineAt || new Date().toISOString()
+                  });
+                }
+              }
+            }
+            this.nearbyDevices = onlineList;
+            if (typeof this.onNearbyDevicesChange === 'function') {
+              this.onNearbyDevicesChange(onlineList);
+            }
+          })
+          .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+              await this.realtimeChannel.track({
+                id: this.deviceId,
+                name: this.deviceName,
+                email: currentEmail,
+                mode: this.settings.discoverableMode,
+                onlineAt: new Date().toISOString()
+              });
+            }
+          });
       } catch (e) {
         console.warn('[FastShare] Realtime subscription note:', e);
       }

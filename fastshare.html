@@ -43,8 +43,9 @@
   <script src="config/supabase_config.js"></script>
   <script src="students_data.js"></script>
 
-  <!-- QRCode Suite & QR Generator -->
+  <!-- QRCode Suite & QR Generator & Camera Scanner -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="assets/js/qr_suite.js"></script>
 
   <!-- Real-Time Push Notification Engine -->
@@ -210,7 +211,7 @@
             ให้เพื่อนสแกนด้วยกล้องมือถือ เพื่อจับคู่และส่งไฟล์หากันได้ทันทีโดยไม่ต้องถามหาอุปกรณ์
           </p>
 
-          <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code เครื่องเพื่อนเพื่อจับคู่' })"
+          <button onclick="openQrScannerForFastShare()"
             class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
             <i data-lucide="scan-line" class="w-4 h-4"></i>
             <span>เปิดกล้องสแกน QR เพื่อน</span>
@@ -294,6 +295,29 @@
 
     </div>
 
+    <!-- Live Radar: Nearby Online Devices (AirDrop Discovery) -->
+    <div class="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></div>
+          <h3 class="text-sm font-black text-white flex items-center gap-2">
+            <i data-lucide="radio" class="w-4 h-4 text-cyan-400"></i>
+            <span>อุปกรณ์ใกล้เคียงที่เปิดรับ (Nearby Radar)</span>
+          </h3>
+          <span id="badgeNearbyCount" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">0 เครื่อง</span>
+        </div>
+        <span class="text-[11px] text-slate-400">คลิกที่อุปกรณ์เพื่อส่งไฟล์ทันที</span>
+      </div>
+
+      <div id="nearbyDevicesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <!-- Rendered by Live Presence -->
+        <div class="col-span-full p-6 rounded-2xl bg-white/5 border border-dashed border-white/10 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-2">
+          <i data-lucide="radar" class="w-6 h-6 text-cyan-400 animate-spin"></i>
+          <span>กำลังค้นหาอุปกรณ์ใกล้เคียงรอบตัวคุณ... (เปิดหน้า FastShare บนอีกเครื่องเพื่อทดสอบ)</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Paired Devices List -->
     <div class="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-white/10">
@@ -365,6 +389,14 @@
       renderModeButtons();
       renderPairedDevices();
       updateAutoAcceptUI();
+
+      // Hook Live Radar Presence listener
+      fs.onNearbyDevicesChange = (devices) => {
+        renderNearbyDevices(devices);
+      };
+      if (fs.nearbyDevices && fs.nearbyDevices.length > 0) {
+        renderNearbyDevices(fs.nearbyDevices);
+      }
 
       if (window.lucide && window.lucide.createIcons) {
         window.lucide.createIcons();
@@ -568,11 +600,93 @@
               <span class="text-[10px] text-slate-400 font-mono truncate">${d.id}</span>
             </div>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">เชื่อมต่อแล้ว</span>
+          <button onclick="selectPairedDeviceToSend('${d.id}', '${d.name}')" class="px-2.5 py-1 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 font-bold text-[10px] border border-sky-500/30 transition cursor-pointer">
+            ส่งให้เครื่องนี้
+          </button>
         </div>
       `).join('');
 
       if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({ root: container });
+    }
+
+    function renderNearbyDevices(devices) {
+      const container = document.getElementById('nearbyDevicesGrid');
+      const badge = document.getElementById('badgeNearbyCount');
+      if (badge) badge.textContent = `${devices.length} เครื่อง`;
+
+      if (!devices || devices.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full p-6 rounded-2xl bg-white/5 border border-dashed border-white/10 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-2">
+            <i data-lucide="radar" class="w-6 h-6 text-cyan-400 animate-spin"></i>
+            <span>กำลังค้นหาอุปกรณ์ใกล้เคียงรอบตัวคุณ... (เปิดหน้า FastShare บนอีกเครื่องเพื่อทดสอบ)</span>
+          </div>`;
+        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({ root: container });
+        return;
+      }
+
+      container.innerHTML = devices.map(d => `
+        <div onclick="selectNearbyDeviceToSend('${d.id}', '${d.name}')" class="p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/40 to-slate-900 border border-cyan-500/30 hover:border-cyan-400 transition cursor-pointer group flex items-center justify-between text-xs">
+          <div class="flex items-center gap-3 truncate">
+            <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition shadow-md shadow-cyan-500/20">
+              <i data-lucide="wifi" class="w-4 h-4"></i>
+            </div>
+            <div class="truncate">
+              <div class="font-black text-white group-hover:text-cyan-300 transition truncate">${d.name || 'Nearby Device'}</div>
+              <div class="text-[10px] text-slate-400 font-mono truncate">${d.id}</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+            <span>ออนไลน์</span>
+          </span>
+        </div>
+      `).join('');
+
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({ root: container });
+    }
+
+    function selectNearbyDeviceToSend(id, name) {
+      document.getElementById('selectSendTargetMode').value = 'paired';
+      updateTargetUI();
+      // Add to paired devices
+      const paired = JSON.parse(localStorage.getItem('COMED23_FASTSHARE_PAIRED_DEVICES') || '[]');
+      if (!paired.some(p => p.id === id)) {
+        paired.push({ id, name, pairedAt: new Date().toISOString() });
+        localStorage.setItem('COMED23_FASTSHARE_PAIRED_DEVICES', JSON.stringify(paired));
+        renderPairedDevices();
+      }
+      alert(`🎯 เลือกเป้าหมาย: "${name}" (${id})\nตอนนี้คุณสามารถลากไฟล์มาวางและกดส่งได้ทันที!`);
+    }
+
+    function selectPairedDeviceToSend(id, name) {
+      document.getElementById('selectSendTargetMode').value = 'paired';
+      updateTargetUI();
+      alert(`🎯 เลือกเป้าหมาย: "${name}" (${id})\nตอนนี้คุณสามารถลากไฟล์มาวางและกดส่งได้ทันที!`);
+    }
+
+    function openQrScannerForFastShare() {
+      if (!window.QRSuite) return;
+      window.QRSuite.openScannerModal({
+        title: 'สแกน QR Code เครื่องเพื่อนเพื่อจับคู่ด่วน',
+        onScanSuccess: (decodedText) => {
+          try {
+            const url = new URL(decodedText);
+            const pairId = url.searchParams.get('pair');
+            const pairName = url.searchParams.get('name') || 'อุปกรณ์ที่สแกน';
+            if (pairId) {
+              const paired = JSON.parse(localStorage.getItem('COMED23_FASTSHARE_PAIRED_DEVICES') || '[]');
+              if (!paired.some(p => p.id === pairId)) {
+                paired.push({ id: pairId, name: pairName, pairedAt: new Date().toISOString() });
+                localStorage.setItem('COMED23_FASTSHARE_PAIRED_DEVICES', JSON.stringify(paired));
+                renderPairedDevices();
+              }
+              window.QRSuite.closeScannerModal();
+              alert(`🎉 จับคู่สำเร็จกับ: "${pairName}" (${pairId}) เรียบร้อยแล้ว!`);
+              return;
+            }
+          } catch(e) {}
+        }
+      });
     }
 
     function clearPairedDevices() {

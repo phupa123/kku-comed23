@@ -57,7 +57,7 @@
   // VAPID Public Key generated for COMED KKU
   const VAPID_PUBLIC_KEY = 'BEzlXgMuqgINsrzdcWJ5CQyXg83AKAlzvyruFr5BVJhwT_-oX7c2CIIUsiUZTJOm4emMbDtOF8hWpDNa6uvKUAk';
 
-  // ฟังก์ชันล้างคิวคำสั่งที่อาจค้างอยู่ใน IndexedDB (ONE_SIGNAL_SDK_DB) จากรอบก่อน
+  // ตรวจสอบและรีเซ็ตฐานข้อมูล IndexedDB ของ OneSignal หากมีคิวคำสั่งเสียติดค้าง
   async function clearCorruptedOneSignalQueue() {
     return new Promise((resolve) => {
       try {
@@ -67,10 +67,28 @@
           try {
             const db = ev.target.result;
             if (db.objectStoreNames.contains('Operations')) {
-              const tx = db.transaction('Operations', 'readwrite');
-              tx.objectStore('Operations').clear();
-              tx.oncomplete = () => { db.close(); resolve(); };
-              tx.onerror = () => { db.close(); resolve(); };
+              const tx = db.transaction('Operations', 'readonly');
+              const store = tx.objectStore('Operations');
+              const getAllReq = store.getAll();
+              getAllReq.onsuccess = function() {
+                const items = getAllReq.result || [];
+                const hasCorrupted = items.some(item => {
+                  const s = JSON.stringify(item);
+                  return s.includes('isspecialtester') || s.includes('admin-tester') || (item.model && item.model.external_id && item.model.external_id.startsWith('{'));
+                });
+                db.close();
+
+                if (hasCorrupted) {
+                  console.log('[OneSignal] Detected corrupted operation queue in IndexedDB. Purging database...');
+                  const delReq = window.indexedDB.deleteDatabase('ONE_SIGNAL_SDK_DB');
+                  delReq.onsuccess = () => resolve();
+                  delReq.onerror = () => resolve();
+                  delReq.onblocked = () => resolve();
+                } else {
+                  resolve();
+                }
+              };
+              getAllReq.onerror = () => { db.close(); resolve(); };
               return;
             }
             db.close();
