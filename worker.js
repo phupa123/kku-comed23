@@ -283,9 +283,11 @@ export default {
       fetchUrl = targetUrl.toString();
     } else if (path === "/download" || path === "/download.html" || path === "/install" || path === "/app") {
       fetchUrl = new URL("/download.html", url.origin).toString();
+    } else if (path === "/app-auth" || path === "/app-auth.html") {
+      fetchUrl = new URL("/app-auth.html", url.origin).toString();
     } else if (path === "/download/apk" || path === "/kku-comed23.apk" || path === "/app.apk") {
       // 🚀 High-Speed Direct APK CDN Download (Deep-Link Enabled)
-      return Response.redirect("https://files.catbox.moe/gje3lw.apk", 302);
+      return Response.redirect("https://files.catbox.moe/l36vl0.apk", 302);
     } else if (path === "/fastshare" || path === "/fastshare.html") {
       fetchUrl = new URL("/fastshare.html", url.origin).toString();
     } else if (path === "/maintenance") {

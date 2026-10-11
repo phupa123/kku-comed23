@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ลงชื่อเข้าใช้สำหรับแอปพลิเคชัน | KKU COMED 69</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="students_data.js"></script>
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #090d16 60%, #030712 100%);
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(249, 115, 22, 0.25);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 flex items-center justify-center p-4">
+
+  <div class="w-full max-w-md">
+    
+    <!-- Step 1: Login Card -->
+    <div id="cardLogin" class="glass-card rounded-[36px] p-7 sm:p-8 shadow-[0_25px_70px_rgba(0,0,0,0.6)] text-center space-y-6">
+      
+      <!-- Logo & Brand Header -->
+      <div class="relative w-20 h-20 mx-auto">
+        <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 blur-xl opacity-60 animate-pulse"></div>
+        <div class="relative w-20 h-20 rounded-3xl bg-gradient-to-tr from-orange-500 via-amber-500 to-orange-600 p-0.5 shadow-2xl">
+          <div class="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center p-2.5">
+            <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-500/15 text-orange-400 border border-orange-500/30">
+          KKU COMED APP AUTH
+        </span>
+        <h1 class="text-xl sm:text-2xl font-black text-white pt-1">
+          ลงชื่อเข้าใช้แอป KKU COMED
+        </h1>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          เลือกบัญชี Google (<strong class="text-orange-400">@kkumail.com</strong>) เพื่อยืนยันตัวตนและนำ Session กลับเข้าสู่แอปมือถืออัตโนมัติ
+        </p>
+      </div>
+
+      <!-- Google Button Wrapper -->
+      <div class="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-4">
+        <div id="googleButtonWrapper" class="flex justify-center min-h-[46px] items-center scale-105"></div>
+        <p class="text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>เข้าสู่ระบบอย่างปลอดภัยตามมาตรฐาน Google OAuth 2.0</span>
+        </p>
+      </div>
+
+      <!-- Error Alert Box -->
+      <div id="authErrorBox" class="hidden p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-2 text-left">
+        <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
+        <span id="authErrorMsg">เกิดข้อผิดพลาดในการลงชื่อเข้าใช้</span>
+      </div>
+
+    </div>
+
+    <!-- Step 2: Success & Deep Link Return Card -->
+    <div id="cardSuccess" class="hidden glass-card rounded-[36px] p-7 sm:p-8 shadow-[0_25px_80px_rgba(249,115,22,0.25)] text-center space-y-6">
+      
+      <div class="w-20 h-20 rounded-3xl bg-emerald-500/20 border border-emerald-500/30 mx-auto flex items-center justify-center text-emerald-400 shadow-xl shadow-emerald-500/20">
+        <i data-lucide="check-circle-2" class="w-10 h-10"></i>
+      </div>
+
+      <div class="space-y-2">
+        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+          LOGIN SUCCESSFUL
+        </span>
+        <h2 class="text-xl sm:text-2xl font-black text-white">
+          เข้าสู่ระบบสำเร็จ!
+        </h2>
+        <div class="flex items-center justify-center gap-2 pt-1">
+          <img id="userAvatar" src="" class="w-7 h-7 rounded-full border border-orange-500">
+          <div class="text-left text-xs">
+            <p id="userName" class="font-bold text-white"></p>
+            <p id="userEmail" class="text-[11px] text-slate-400 font-mono"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <a id="btnReturnApp" href="#" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-sm shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2 cursor-pointer transition active:scale-95">
+          <i data-lucide="smartphone" class="w-5 h-5"></i>
+          <span>แตะที่นี่เพื่อกลับเข้าแอป KKU COMED ทันที</span>
+        </a>
+
+        <p class="text-[11px] text-slate-400 flex items-center justify-center gap-1.5 animate-pulse">
+          <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-orange-400"></i>
+          <span>กำลังพาท่านกลับเข้าแอปมือถืออัตโนมัติ...</span>
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) {
+        return null;
+      }
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('authErrorBox');
+      const text = document.getElementById('authErrorMsg');
+      if (box && text) {
+        text.textContent = msg;
+        box.classList.remove('hidden');
+      }
+    }
+
+    function handleGoogleCredentialResponse(response) {
+      const data = parseJwt(response.credential);
+      if (!data || !data.email) {
+        showError("ไม่สามารถดึงข้อมูลบัญชีจาก Google ได้");
+        return;
+      }
+
+      const emailLower = data.email.toLowerCase().trim();
+      const isSpecialTester = (emailLower === 'phupa5874@gmail.com');
+      
+      if (!emailLower.endsWith('@kkumail.com') && !isSpecialTester) {
+        showError(`อีเมล "${emailLower}" ไม่ใช่ @kkumail.com กรุณาใช้เมลมหาวิทยาลัย`);
+        return;
+      }
+
+      const student = (window.STUDENTS_DATA || []).find(st => st.email.toLowerCase() === emailLower);
+      const userSession = {
+        email: emailLower,
+        name: student ? student.name : (isSpecialTester ? 'ภูผา (ผู้ดูแลระบบ & ทดสอบระบบ)' : data.name),
+        nickname: student ? student.nickname : (isSpecialTester ? 'ภูผา' : ''),
+        studentId: student ? student.id : (isSpecialTester ? 'ADMIN-TESTER' : ''),
+        avatar: data.picture || `https://api.dicebear.com/7.x/bottts/svg?seed=${emailLower}`,
+        isSpecialTester: isSpecialTester,
+        loggedInAt: new Date().toISOString()
+      };
+
+      // บันทึก Session ลงในเว็บ
+      localStorage.setItem('COMED_USER_SESSION', JSON.stringify(userSession));
+
+      // เปลี่ยนการแสดงผลเป็นหน้ากลับเข้าแอป
+      document.getElementById('cardLogin').classList.add('hidden');
+      document.getElementById('cardSuccess').classList.remove('hidden');
+
+      document.getElementById('userName').textContent = userSession.name;
+      document.getElementById('userEmail').textContent = userSession.email;
+      document.getElementById('userAvatar').src = userSession.avatar;
+
+      // สร้าง Deep link URL สำหรับปลุกแอป
+      const encodedUser = encodeURIComponent(JSON.stringify(userSession));
+      const appDeepLink = `th.ac.kku.comed23://auth?session=${encodedUser}`;
+      const btnReturn = document.getElementById('btnReturnApp');
+      if (btnReturn) btnReturn.href = appDeepLink;
+
+      // เอฟเฟกต์จุดพลุฉลอง
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      }
+
+      if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons();
+      }
+
+      // พยายามเด้ง Deep link เข้าแอปอัตโนมัติ
+      setTimeout(() => {
+        window.location.href = appDeepLink;
+      }, 600);
+    }
+
+    window.onload = function() {
+      if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons();
+      }
+
+      try {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+            ux_mode: "popup",
+            auto_select: false,
+            cancel_on_tap_outside: false
+          });
+
+          const btnWrapper = document.getElementById('googleButtonWrapper');
+          if (btnWrapper) {
+            google.accounts.id.renderButton(
+              btnWrapper,
+              { theme: "outline", size: "large", width: 280, text: "signin_with", shape: "pill", logo_alignment: "left" }
+            );
+          }
+
+          google.accounts.id.prompt();
+        }
+      } catch (e) {
+        console.warn('Google GSI error:', e);
+      }
+    };
+  </script>
+</body>
+</html>

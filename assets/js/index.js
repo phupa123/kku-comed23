@@ -23,7 +23,7 @@ function applyDynamicCMS() {
 document.addEventListener("DOMContentLoaded", () => {
   applyDynamicCMS();
 
-  // ตรวจจับหากแอปเปิดขึ้นมาจาก Deep link auth callback
+  // 1. ตรวจจับหากแอปเปิดขึ้นมาจาก Deep link auth callback ใน URL query (เช่น ?session=...)
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionParam = urlParams.get('session');
@@ -36,6 +36,36 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   } catch(e) {}
+
+  // 2. ตรวจจับผ่าน Capacitor App Plugin (เมื่อ Intent ส่งลึกเข้ามาใน Native App)
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+    window.Capacitor.Plugins.App.addListener('appUrlOpen', (data) => {
+      try {
+        if (data && data.url) {
+          const urlObj = new URL(data.url);
+          const sParam = urlObj.searchParams.get('session');
+          if (sParam) {
+            const restored = JSON.parse(decodeURIComponent(sParam));
+            if (restored && restored.email) {
+              localStorage.setItem('COMED_USER_SESSION', JSON.stringify(restored));
+              updateUserUI(restored);
+              showLoginSuccessPopup(restored);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('AppUrlOpen process error:', err);
+      }
+    });
+  }
+
+  // 3. ตรวจจับ Custom Event ที่ Inject มาจาก Native Android Activity
+  window.addEventListener('comed:session_restored', (e) => {
+    if (e.detail && e.detail.email) {
+      updateUserUI(e.detail);
+      showLoginSuccessPopup(e.detail);
+    }
+  });
 });
 
 /**
@@ -161,10 +191,10 @@ function handleDirectStudentLogin() {
   }
 }
 
-// ฟังก์ชันเปิดเบราว์เซอร์จริงสำหรับแอป APK
+// ฟังก์ชันเปิดเบราว์เซอร์จริงสำหรับแอป APK (เปิดหน้า App Auth Portal โดยเฉพาะ)
 function launchExternalBrowserLogin() {
   const currentDomain = 'https://kku-comed23.edspace.workers.dev';
-  const redirectTarget = `${currentDomain}/index.html?return_to_app=1`;
+  const redirectTarget = `${currentDomain}/app-auth.html`;
   
   if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
     window.Capacitor.Plugins.Browser.open({ url: redirectTarget });
