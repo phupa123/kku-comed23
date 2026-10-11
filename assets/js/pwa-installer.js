@@ -8,7 +8,41 @@
 
   let deferredPrompt = null;
 
-  // 1. Register Service Worker
+  const STORAGE_INSTALLED_FLAG = 'COMED23_APP_INSTALLED';
+
+  // ตรวจสอบอย่างละเอียดว่าแอปถูกติดตั้งแล้ว หรือเปิดอยู่ในโหมด Standalone / Web App หรือไม่
+  function isAppInstalled() {
+    // 1. ตรวจสอบ display-mode standalone, fullscreen, minimal-ui
+    const isStandaloneDisplay = window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches;
+    
+    // 2. ตรวจสอบ iOS Safari Standalone
+    const isIosStandalone = ('standalone' in window.navigator) && (window.navigator.standalone === true);
+
+    // 3. ตรวจสอบ Document Referrer หรือ URL parameter (เช่น ?source=pwa หรือเปิดจาก homescreen)
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPwaParam = urlParams.get('source') === 'pwa' || urlParams.get('utm_source') === 'pwa';
+
+    // 4. ตรวจสอบ Flag ที่บันทึกไว้ใน LocalStorage เมื่อเคยกดติดตั้งสำเร็จ
+    const isInstalledFlag = localStorage.getItem(STORAGE_INSTALLED_FLAG) === 'true';
+
+    return isStandaloneDisplay || isIosStandalone || isPwaParam || isInstalledFlag;
+  }
+
+  // 1. ซ่อนปุ่มติดตั้งทุกจุดในหน้าเว็บทันทีถ้าติดตั้งแล้ว
+  function hideAllInstallButtons() {
+    const triggers = document.querySelectorAll('.btn-pwa-install-trigger, [title*="ติดตั้งแอป"], button[onclick*="triggerPwaInstall"]');
+    triggers.forEach(el => {
+      el.style.display = 'none';
+      el.classList.add('hidden');
+    });
+
+    const pill = document.getElementById('pwaInstallFloatingPill');
+    if (pill) pill.remove();
+  }
+
+  // 2. Register Service Worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
@@ -21,8 +55,13 @@
     });
   }
 
-  // 2. Capture install prompt (Chrome / Android)
+  // 3. Capture install prompt (Chrome / Android)
   window.addEventListener('beforeinstallprompt', (e) => {
+    if (isAppInstalled()) {
+      e.preventDefault();
+      hideAllInstallButtons();
+      return;
+    }
     e.preventDefault();
     deferredPrompt = e;
     showPwaInstallBanner();
@@ -30,17 +69,19 @@
 
   window.addEventListener('appinstalled', () => {
     console.log('[PWA] Application successfully installed');
+    localStorage.setItem(STORAGE_INSTALLED_FLAG, 'true');
     deferredPrompt = null;
-    hidePwaInstallBanner();
+    hideAllInstallButtons();
   });
 
-  // 3. Render PWA Install Floating Pill & Rich Modal
+  // 4. Render PWA Install Floating Pill & Rich Modal
   function showPwaInstallBanner() {
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-      return; // Already in standalone app mode
+    if (isAppInstalled()) {
+      hideAllInstallButtons();
+      return; // Already installed or in app mode
     }
 
-    // Update any navbar button if present
+    // Only show navbar button if really not installed yet
     document.querySelectorAll('.btn-pwa-install-trigger').forEach(el => {
       el.classList.remove('hidden');
     });
@@ -58,11 +99,6 @@
       </button>
     `;
     document.body.appendChild(pill);
-  }
-
-  function hidePwaInstallBanner() {
-    const pill = document.getElementById('pwaInstallFloatingPill');
-    if (pill) pill.remove();
   }
 
   // Visual Interactive Install Guide Modal
@@ -199,9 +235,29 @@
     document.body.appendChild(modal);
   }
 
-  // Always check after load
+  // Run immediately as script evaluates and when DOM is loaded
+  if (isAppInstalled()) {
+    hideAllInstallButtons();
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (isAppInstalled()) hideAllInstallButtons();
+    });
+  }
+
+  // Listen to display-mode changes (e.g. user launches standalone window)
+  try {
+    window.matchMedia('(display-mode: standalone)').addEventListener('change', (e) => {
+      if (e.matches) hideAllInstallButtons();
+    });
+  } catch(e) {}
+
+  // Check after window load
   window.addEventListener('load', () => {
-    setTimeout(showPwaInstallBanner, 1500);
+    if (isAppInstalled()) {
+      hideAllInstallButtons();
+    } else {
+      setTimeout(showPwaInstallBanner, 1500);
+    }
   });
 
 })();
