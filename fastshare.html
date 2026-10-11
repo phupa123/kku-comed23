@@ -166,6 +166,10 @@
           <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
           <span>QR เครื่อง</span>
         </button>
+        <button onclick="openOfflineModal()" class="px-3 py-1.5 rounded-xl font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition flex items-center gap-1 border border-emerald-500/30">
+          <i data-lucide="zap-off" class="w-3.5 h-3.5"></i>
+          <span>แชร์แบบไม่ใช้เน็ต</span>
+        </button>
       </div>
     </div>
 
@@ -297,6 +301,81 @@
         <div id="deviceQrContainer" class="w-44 h-44"></div>
       </div>
       <p id="txtQrDeviceName" class="text-xs font-bold text-cyan-400 font-mono"></p>
+    </div>
+  </div>
+
+  <!-- ================= OFFLINE AIRDROP TRANSFER MODAL (No Internet Required) ================= -->
+  <div id="offlineTransferModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl">
+    <div class="glass-card rounded-3xl border border-emerald-500/30 max-w-md w-full p-6 text-center shadow-2xl space-y-5 bg-slate-900/95 relative animate-in zoom-in-95 duration-200">
+      <button onclick="closeOfflineModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">&times;</button>
+      
+      <div class="space-y-1">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+          ⚡ 100% Offline Mode (ไม่ใช้เน็ต)
+        </span>
+        <h4 class="text-base font-black text-white pt-1">โอนไฟล์แบบออฟไลน์ ไม่มีสัญญาณ</h4>
+        <p class="text-xs text-slate-400">เลือกโหมดการส่งไฟล์ที่ไม่ต้องเชื่อมต่ออินเทอร์เน็ตภายนอก</p>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="flex items-center bg-slate-950 p-1 rounded-2xl border border-white/10 text-xs">
+        <button id="tabBtnQrBeam" onclick="switchOfflineTab('qr')" class="flex-1 py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow">
+          <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+          <span>ยิงไฟล์ผ่าน QR Beam</span>
+        </button>
+        <button id="tabBtnHotspot" onclick="switchOfflineTab('hotspot')" class="flex-1 py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white">
+          <i data-lucide="wifi" class="w-3.5 h-3.5"></i>
+          <span>แชร์ผ่าน Hotspot / Wi-Fi</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: QR Beam (Send file via Camera Scan) -->
+      <div id="offlineTabQr" class="space-y-4">
+        <div id="qrBeamContainerWrapper" class="p-4 bg-white rounded-3xl inline-block shadow-2xl mx-auto">
+          <div id="offlineQrBeamContainer" class="w-48 h-48 flex items-center justify-center">
+            <!-- Rendered by QR Beam -->
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <p id="txtQrBeamFileName" class="text-xs font-bold text-white truncate">เลือกไฟล์เพื่อสร้าง QR Code ออฟไลน์</p>
+          <p id="txtQrBeamStatus" class="text-[11px] text-slate-400">ให้อีกเครื่องเปิดกล้องสแกนเพื่อรับไฟล์ลงเครื่องทันที โดยไม่ต้องมีเน็ต</p>
+        </div>
+
+        <div id="qrBeamControls" class="hidden flex items-center justify-center gap-2">
+          <button onclick="prevQrChunk()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300">◀ ก่อนหน้า</button>
+          <span id="txtQrChunkIndex" class="text-xs font-mono text-emerald-400">1 / 1</span>
+          <button onclick="nextQrChunk()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300">ถัดไป ▶</button>
+        </div>
+      </div>
+
+      <!-- Tab 2: Hotspot / Local Wi-Fi Guide -->
+      <div id="offlineTabHotspot" class="hidden space-y-4 text-left text-xs text-slate-300">
+        <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+          <div class="flex items-center gap-2.5 font-bold text-white">
+            <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs">1</span>
+            <span>เปิดฮอตสปอต (Personal Hotspot) จากเครื่องใดเครื่องหนึ่ง</span>
+          </div>
+          <p class="text-[11px] text-slate-400 pl-8 leading-relaxed">
+            เปิด Hotspot จากมือถือ (ไม่ต้องเปิดเน็ต 4G/5G ก็ได้) แล้วให้อีกเครื่องต่อ Wi-Fi เข้ามาในวงเดียวกัน
+          </p>
+
+          <div class="flex items-center gap-2.5 font-bold text-white pt-2 border-t border-white/5">
+            <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs">2</span>
+            <span>ส่งไฟล์ตรงผ่าน WebRTC Peer-to-Peer</span>
+          </div>
+          <p class="text-[11px] text-slate-400 pl-8 leading-relaxed">
+            ไฟล์จะถูกยิงข้ามเครื่องด้วยความเร็ว Wi-Fi สูงสุด (20-80 MB/s) ไม่ใช้ข้อมูลอินเทอร์เน็ตภายนอกแม้แต่ไบต์เดียว!
+          </p>
+        </div>
+
+        <button onclick="closeOfflineModal(); document.getElementById('dropzone').click();"
+          class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg transition flex items-center justify-center gap-2">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>เข้าใจแล้ว เลือกไฟล์เพื่อส่ง</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -641,6 +720,20 @@
       window.QRSuite.openScannerModal({
         title: 'สแกน QR Code เครื่องเพื่อนเพื่อจับคู่ด่วน',
         onScanSuccess: (decodedText) => {
+          // 1. ตรวจสอบว่าเป็น Offline QR Beam หรือไม่
+          if (decodedText.startsWith('{"t":"FS_OFFLINE_FILE"')) {
+            try {
+              const fileObj = JSON.parse(decodedText);
+              window.QRSuite.closeScannerModal();
+              if (confirm(`📥 ตรวจพบไฟล์ออฟไลน์ "${fileObj.n}" (${window.FastShare.formatBytes(fileObj.s)})\nต้องการดาวน์โหลดลงเครื่องทันทีใช่หรือไม่?`)) {
+                window.FastShare.triggerDownload(fileObj.d, fileObj.n);
+                alert(`🎉 ดาวน์โหลดไฟล์ "${fileObj.n}" เรียบร้อยแล้ว (100% Offline ไม่ใช้เน็ต)!`);
+              }
+              return;
+            } catch(e) {}
+          }
+
+          // 2. ถ้าเป็น URL สำหรับจับคู่
           try {
             const url = new URL(decodedText);
             const pairId = url.searchParams.get('pair');
@@ -795,6 +888,93 @@
         window.FastShare.deviceName = newName.trim();
         localStorage.setItem('COMED23_FASTSHARE_DEVICE_NAME', newName.trim());
         document.getElementById('txtDeviceName').textContent = newName.trim();
+      }
+    }
+
+    // ==========================================
+    // OFFLINE TRANSFER (No Internet Required)
+    // ==========================================
+    let offlineQrChunks = [];
+    let currentQrChunkIdx = 0;
+
+    function openOfflineModal() {
+      const modal = document.getElementById('offlineTransferModal');
+      modal.classList.remove('hidden');
+      switchOfflineTab('qr');
+      generateOfflineQrBeam();
+    }
+
+    function closeOfflineModal() {
+      document.getElementById('offlineTransferModal').classList.add('hidden');
+    }
+
+    function switchOfflineTab(tab) {
+      const btnQr = document.getElementById('tabBtnQrBeam');
+      const btnHotspot = document.getElementById('tabBtnHotspot');
+      const tabQr = document.getElementById('offlineTabQr');
+      const tabHotspot = document.getElementById('offlineTabHotspot');
+
+      if (tab === 'qr') {
+        btnQr.className = 'flex-1 py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow';
+        btnHotspot.className = 'flex-1 py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white';
+        tabQr.classList.remove('hidden');
+        tabHotspot.classList.add('hidden');
+      } else {
+        btnHotspot.className = 'flex-1 py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow';
+        btnQr.className = 'flex-1 py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white';
+        tabHotspot.classList.remove('hidden');
+        tabQr.classList.add('hidden');
+      }
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    }
+
+    async function generateOfflineQrBeam() {
+      const container = document.getElementById('offlineQrBeamContainer');
+      const nameEl = document.getElementById('txtQrBeamFileName');
+      const statusEl = document.getElementById('txtQrBeamStatus');
+      const controls = document.getElementById('qrBeamControls');
+
+      if (!currentSelectedFile) {
+        container.innerHTML = '<div class="text-xs text-slate-400 font-bold p-4 text-center">กรุณาเลือกไฟล์ในขั้นตอนที่ 1 ก่อนครับ</div>';
+        nameEl.textContent = 'ยังไม่ได้เลือกไฟล์';
+        statusEl.textContent = 'เมื่อเลือกไฟล์แล้ว ระบบจะแปลงไฟล์เป็น QR Beam เพื่อให้อีกเครื่องสแกนดูดไฟล์แบบออฟไลน์';
+        controls.classList.add('hidden');
+        return;
+      }
+
+      nameEl.textContent = `${currentSelectedFile.name} (${window.FastShare.formatBytes(currentSelectedFile.size)})`;
+      statusEl.textContent = 'กำลังแปลงข้อมูลไฟล์เป็น Offline QR Beam...';
+
+      // อ่านไฟล์เป็น Base64 Data URL
+      const base64Data = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(currentSelectedFile);
+      });
+
+      // ถ้าไฟล์ไม่ใหญ่เกิน ~15KB สามารถบรรจุใน QR Code เดียวได้เลย
+      const payload = JSON.stringify({
+        t: 'FS_OFFLINE_FILE',
+        n: currentSelectedFile.name,
+        s: currentSelectedFile.size,
+        m: currentSelectedFile.type,
+        d: base64Data
+      });
+
+      container.innerHTML = '';
+      try {
+        new QRCode(container, {
+          text: payload,
+          width: 192,
+          height: 192,
+          colorDark: '#042f2e',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.L
+        });
+        statusEl.textContent = '✅ สร้าง QR สำเร็จ! ให้อีกเครื่องเปิดกล้องสแกนเพื่อรับไฟล์ลงเครื่องทันที';
+        controls.classList.add('hidden');
+      } catch (err) {
+        statusEl.textContent = '⚠️ ไฟล์มีขนาดใหญ่เกินกว่าจะแสดงใน QR เดียว กรุณาใช้โหมด "แชร์ผ่าน Hotspot / Wi-Fi" เพื่อความเร็วสูงสุด';
       }
     }
 
