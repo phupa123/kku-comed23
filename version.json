@@ -1,0 +1,13 @@
+{
+  "version": "1.0.2",
+  "versionCode": 3,
+  "releaseDate": "2026-10-12",
+  "title": "อัปเดตระบบ FastShare & Google OAuth 2.0",
+  "changelog": [
+    "รองรับการล็อกอิน Google ผ่านเบราว์เซอร์จริงตามมาตรฐาน OAuth 2.0",
+    "ปรับปรุงระบบ FastShare และการแชร์ไฟล์ไร้สาย",
+    "เพิ่มระบบตรวจสอบและแจ้งเตือนอัปเดตเวอร์ชันใหม่อัตโนมัติ"
+  ],
+  "downloadUrl": "https://files.catbox.moe/s8s543.apk",
+  "mandatory": false
+}
