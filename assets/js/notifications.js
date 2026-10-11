@@ -57,28 +57,42 @@
   // VAPID Public Key generated for COMED KKU
   const VAPID_PUBLIC_KEY = 'BEzlXgMuqgINsrzdcWJ5CQyXg83AKAlzvyruFr5BVJhwT_-oX7c2CIIUsiUZTJOm4emMbDtOF8hWpDNa6uvKUAk';
 
+  // ฟังก์ชันล้างคิวคำสั่งที่อาจค้างอยู่ใน IndexedDB (ONE_SIGNAL_SDK_DB) จากรอบก่อน
+  async function clearCorruptedOneSignalQueue() {
+    return new Promise((resolve) => {
+      try {
+        if (!window.indexedDB) return resolve();
+        const dbreq = window.indexedDB.open('ONE_SIGNAL_SDK_DB');
+        dbreq.onsuccess = function(ev) {
+          try {
+            const db = ev.target.result;
+            if (db.objectStoreNames.contains('Operations')) {
+              const tx = db.transaction('Operations', 'readwrite');
+              tx.objectStore('Operations').clear();
+              tx.oncomplete = () => { db.close(); resolve(); };
+              tx.onerror = () => { db.close(); resolve(); };
+              return;
+            }
+            db.close();
+            resolve();
+          } catch(e) { resolve(); }
+        };
+        dbreq.onerror = function() { resolve(); };
+      } catch(e) { resolve(); }
+    });
+  }
+
   // โหลด OneSignal SDK อัตโนมัติสำหรับ Background Push
-  function initOneSignalSDK() {
+  async function initOneSignalSDK() {
     const OFFICIAL_APP_ID = '0bb74e88-0d82-463b-bc8d-ae5a27f659c3';
     const appId = localStorage.getItem(STORAGE_ONESIGNAL_APP_ID) || OFFICIAL_APP_ID;
     
+    // เคลียร์ Operation ค้างเก่าก่อนที่ OneSignal จะเริ่มอ่านคิว
+    await clearCorruptedOneSignalQueue();
+
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async function(OneSignal) {
       try {
-        // ล้างคิว Operation เก่าที่ติดค้างใน IndexedDB จาก externalId ที่เป็น JSON เสียหาย
-        try {
-          if (window.indexedDB) {
-            const dbreq = window.indexedDB.open('ONE_SIGNAL_SDK_DB');
-            dbreq.onsuccess = function(ev) {
-              const db = ev.target.result;
-              if (db.objectStoreNames.contains('Operations')) {
-                const tx = db.transaction('Operations', 'readwrite');
-                tx.objectStore('Operations').clear();
-              }
-            };
-          }
-        } catch(errClear) {}
-
         await OneSignal.init({
           appId: appId,
           notifyButton: { enable: false },
@@ -88,7 +102,7 @@
         });
         console.log('[OneSignal] Initialized with App ID:', appId);
 
-        // เชื่อมโยงอีเมลของผู้ใช้เข้ากับ OneSignal (External ID) เพื่อให้ส่งเจาะจงรายคนได้
+        // เชื่อมโยงอีเมลของผู้ใช้เข้ากับ OneSignal (External ID)
         let userEmail = '';
         try {
           const rawSession = sessionStorage.getItem('COMED_USER_SESSION') || localStorage.getItem('COMED_USER_SESSION') || '';
