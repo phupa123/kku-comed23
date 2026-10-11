@@ -150,7 +150,8 @@
     }
   }
 
-  initOneSignalSDK();
+  // OneSignal SDK ปิดชั่วคราวเพื่อป้องกัน Error 400 จาก Operation ค้างเก่าในเบราว์เซอร์
+  // initOneSignalSDK();
 
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);

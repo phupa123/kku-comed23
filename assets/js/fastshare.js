@@ -140,6 +140,7 @@
       const currentUserName = this.deviceName;
 
       const transferRecord = {
+        id: 'tf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
         sender_device_id: this.deviceId,
         sender_name: currentUserName,
         sender_email: currentUserEmail || null,
@@ -155,23 +156,27 @@
         created_at: new Date().toISOString()
       };
 
-      if (client) {
-        const { data, error } = await client.from('fastshare_transfers').insert([transferRecord]).select();
-        if (error) {
-          console.warn('[FastShare] Supabase insert warning:', error);
-        } else if (data && data[0]) {
-          transferRecord.id = data[0].id;
+      // 1. ส่งผ่าน Direct Realtime Broadcast เพื่อให้เด้ง Popup ที่เครื่องปลายทางทันที 0 วินาที
+      if (this.realtimeChannel) {
+        try {
+          await this.realtimeChannel.send({
+            type: 'broadcast',
+            event: 'transfer:incoming',
+            payload: transferRecord
+          });
+        } catch (e) {
+          console.warn('[FastShare] Broadcast direct transfer error:', e);
         }
       }
 
-      // ส่ง Push Notification แจ้งเตือนไปยังเป้าหมาย (หากมีอีเมลหรือ VAPID / OneSignal)
-      if (window.NotificationEngine && typeof window.NotificationEngine.triggerSystemNotification === 'function') {
-        window.NotificationEngine.triggerSystemNotification({
-          title: `FastShare: ${currentUserName} ส่งไฟล์ให้คุณ`,
-          message: `ไฟล์: ${file.name} (${this.formatBytes(file.size)})`,
-          link: '/fastshare.html',
-          type: 'urgent'
-        });
+      // 2. บันทึกลงฐานข้อมูล Supabase เพื่อความทนทาน
+      if (client) {
+        try {
+          const { data, error } = await client.from('fastshare_transfers').insert([transferRecord]).select();
+          if (!error && data && data[0]) {
+            transferRecord.id = data[0].id;
+          }
+        } catch (errDb) {}
       }
 
       return transferRecord;
@@ -197,9 +202,22 @@
         this.realtimeChannel = client
           .channel('public:fastshare_transfers', {
             config: {
+              broadcast: { self: false },
               presence: {
                 key: this.deviceId
               }
+            }
+          })
+          .on('broadcast', { event: 'transfer:incoming' }, (event) => {
+            const transfer = event.payload;
+            if (transfer && this.shouldReceiveTransfer(transfer)) {
+              this.handleIncomingTransfer(transfer);
+            }
+          })
+          .on('broadcast', { event: 'transfer:status' }, (event) => {
+            const updated = event.payload;
+            if (updated) {
+              this.handleStatusUpdate(updated);
             }
           })
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'fastshare_transfers' }, (payload) => {
@@ -313,8 +331,24 @@
     // รับไฟล์
     async acceptTransfer(transfer, auto = false) {
       const client = getClient();
+      const updatedTransfer = { ...transfer, status: 'accepted' };
+
+      // 1. Broadcast แจ้งเตือนคนส่งทันที (0ms)
+      if (this.realtimeChannel) {
+        try {
+          await this.realtimeChannel.send({
+            type: 'broadcast',
+            event: 'transfer:status',
+            payload: updatedTransfer
+          });
+        } catch (e) {}
+      }
+
+      // 2. อัปเดตลง Supabase
       if (client && transfer.id) {
-        await client.from('fastshare_transfers').update({ status: 'accepted' }).eq('id', transfer.id);
+        try {
+          await client.from('fastshare_transfers').update({ status: 'accepted' }).eq('id', transfer.id);
+        } catch (e) {}
       }
 
       // ดาวน์โหลดไฟล์อัตโนมัติ
@@ -328,8 +362,23 @@
     // ปฏิเสธไฟล์
     async declineTransfer(transfer) {
       const client = getClient();
+      const updatedTransfer = { ...transfer, status: 'declined' };
+
+      // 1. Broadcast แจ้งเตือนคนส่งทันที
+      if (this.realtimeChannel) {
+        try {
+          await this.realtimeChannel.send({
+            type: 'broadcast',
+            event: 'transfer:status',
+            payload: updatedTransfer
+          });
+        } catch (e) {}
+      }
+
       if (client && transfer.id) {
-        await client.from('fastshare_transfers').update({ status: 'declined' }).eq('id', transfer.id);
+        try {
+          await client.from('fastshare_transfers').update({ status: 'declined' }).eq('id', transfer.id);
+        } catch (e) {}
       }
       this.showToast(`ปฏิเสธไฟล์จาก ${transfer.sender_name}`);
     },
@@ -370,6 +419,9 @@
     handleStatusUpdate(transfer) {
       // แจ้งเตือนฝั่งคนส่งว่าผู้รับกดยอมรับหรือปฏิเสธ
       if (transfer.sender_device_id === this.deviceId) {
+        if (typeof this.onTransferStatusChange === 'function') {
+          this.onTransferStatusChange(transfer);
+        }
         if (transfer.status === 'accepted') {
           this.showToast(`🎉 ผู้รับกดยอมรับไฟล์ "${transfer.file_name}" แล้ว!`);
         } else if (transfer.status === 'declined') {
