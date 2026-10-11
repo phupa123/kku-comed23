@@ -669,3 +669,48 @@ BEGIN
   END IF;
 END;
 $$;
+
+-- =========================================================================
+-- NOTIFICATIONS TABLE & REALTIME PUBLICATION
+-- ระบบแจ้งเตือนด่วน Realtime Push สำหรับนักศึกษาและแอดมิน
+-- =========================================================================
+
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  type TEXT DEFAULT 'info', -- 'info' | 'urgent' | 'warning' | 'event'
+  link TEXT,
+  target_audience TEXT DEFAULT 'all', -- 'all' | 'unpaid' | 'committee'
+  sender_email TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read notifications" ON public.notifications;
+CREATE POLICY "Allow public read notifications" ON public.notifications FOR SELECT TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert notifications" ON public.notifications;
+CREATE POLICY "Allow public insert notifications" ON public.notifications FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public update notifications" ON public.notifications;
+CREATE POLICY "Allow public update notifications" ON public.notifications FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public delete notifications" ON public.notifications;
+CREATE POLICY "Allow public delete notifications" ON public.notifications FOR DELETE TO anon, authenticated USING (true);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+      AND schemaname = 'public' 
+      AND tablename = 'notifications'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+  END IF;
+END;
+$$;

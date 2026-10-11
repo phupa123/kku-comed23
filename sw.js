@@ -3,7 +3,7 @@
  * Caches core assets and provides offline resilience
  */
 
-const CACHE_NAME = 'comed23-pwa-v1';
+const CACHE_NAME = 'comed23-pwa-v2';
 const CORE_ASSETS = [
   '/',
   '/index.html',
@@ -14,7 +14,8 @@ const CORE_ASSETS = [
   '/logo.png',
   '/favicon.png',
   '/assets/js/calendar_sync.js',
-  '/assets/js/plans_repo.js'
+  '/assets/js/plans_repo.js',
+  '/assets/js/notifications.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -39,6 +40,28 @@ self.addEventListener('activate', (event) => {
         })
       );
     }).then(() => self.clients.claim())
+  );
+});
+
+// Push & System Notification Click handler
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const urlToOpen = (event.notification.data && event.notification.data.url) || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (let client of windowClients) {
+        if (client.url.includes(location.origin) && 'focus' in client) {
+          if (urlToOpen && client.navigate) {
+            client.navigate(urlToOpen);
+          }
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
   );
 });
 

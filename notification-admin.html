@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="th" class="dark scroll-smooth">
+
+<head>
+  <!-- Core Admin Security Guard Engine -->
+  <script src="config/admin_guard.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบกระจายการแจ้งเตือนด่วน (Notification Broadcast Admin) | COMED KKU</title>
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+            mono: ['Plus Jakarta Sans', 'monospace']
+          },
+          colors: {
+            brand: {
+              500: '#f97316',
+              600: '#ea580c',
+              kku: '#A73B24'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Supabase JS Client & Configs -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+
+  <style>
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(249, 115, 22, 0.4);
+      border-radius: 999px;
+    }
+    .pulse-ping {
+      animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-[#090D16] text-slate-100 min-h-screen flex flex-col font-sans relative">
+
+  <!-- Top Admin Navigation -->
+  <header class="sticky top-0 z-40 bg-[#090D16]/90 backdrop-blur-2xl border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      
+      <div class="flex items-center gap-3">
+        <a href="admin.html" class="flex items-center gap-2.5 group">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-600 p-0.5 shadow-lg shadow-rose-500/20">
+            <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+              <i data-lucide="bell-ring" class="w-5 h-5 text-amber-400"></i>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-black text-white group-hover:text-amber-400 transition">
+                Notification Broadcast Station
+              </h1>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                Live Dispatcher
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">ส่งแจ้งเตือนด่วน & ข่าวสารสำคัญหานักศึกษาทุกคน</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <a href="admin.html" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">กลับศูนย์บัญชาการ</span>
+        </a>
+        <a href="index.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-xs font-bold text-orange-300 hover:text-orange-200 transition flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+          <span>ดูหน้าเว็บ</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+    
+    <!-- Top Action Bar & Quick Template Presets -->
+    <div class="glass-card rounded-3xl p-5 sm:p-6 border border-white/10 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-sm font-black text-white flex items-center gap-2">
+            <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+            <span>ข้อความด่วนสำเร็จรูป (Quick Templates)</span>
+          </h2>
+          <p class="text-xs text-slate-400">คลิกเพื่อใส่ข้อความและกระจายส่งได้ทันทีใน 1 คลิก</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Supabase Realtime Ready
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Template Buttons Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <button type="button" onclick="applyTemplate('payment')"
+          class="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition group cursor-pointer hover:border-orange-500/40">
+          <div class="flex items-center gap-2 text-orange-400 mb-1">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+            <span class="text-xs font-bold">แจ้งเตือนชำระเงิน</span>
+          </div>
+          <p class="text-[11px] text-slate-400 line-clamp-1 group-hover:text-slate-300">แจ้งส่งสลิปยอด ฿190 กองกลาง</p>
+        </button>
+
+        <button type="button" onclick="applyTemplate('cancel')"
+          class="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition group cursor-pointer hover:border-rose-500/40">
+          <div class="flex items-center gap-2 text-rose-400 mb-1">
+            <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+            <span class="text-xs font-bold">ยกเลิก/ย้ายคาบ</span>
+          </div>
+          <p class="text-[11px] text-slate-400 line-clamp-1 group-hover:text-slate-300">แจ้งอาจารย์เลื่อนหรือย้ายห้องเรียน</p>
+        </button>
+
+        <button type="button" onclick="applyTemplate('event')"
+          class="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition group cursor-pointer hover:border-indigo-500/40">
+          <div class="flex items-center gap-2 text-indigo-400 mb-1">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <span class="text-xs font-bold">กิจกรรมใหม่</span>
+          </div>
+          <p class="text-[11px] text-slate-400 line-clamp-1 group-hover:text-slate-300">แจ้งนัดประชุมหรือลงทะเบียนกิจกรรม</p>
+        </button>
+
+        <button type="button" onclick="applyTemplate('urgent')"
+          class="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition group cursor-pointer hover:border-amber-500/40">
+          <div class="flex items-center gap-2 text-amber-400 mb-1">
+            <i data-lucide="megaphone" class="w-4 h-4"></i>
+            <span class="text-xs font-bold">ประกาศสำคัญสาขา</span>
+          </div>
+          <p class="text-[11px] text-slate-400 line-clamp-1 group-hover:text-slate-300">ประกาศด่วนจากหัวหน้าสาขา/อาจารย์</p>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2 Column Layout: Dispatch Form & Real-time Live Preview -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left Column: Notification Creator Form (7 Cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        <form id="broadcastForm" onsubmit="handleSendBroadcast(event)" class="glass-card rounded-3xl p-6 sm:p-7 border border-white/10 space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
+                <i data-lucide="send" class="w-4 h-4"></i>
+              </div>
+              <h3 class="text-base font-black text-white">แบบฟอร์มส่งการแจ้งเตือน</h3>
+            </div>
+            <span class="text-xs text-slate-400 font-mono">Instant Push</span>
+          </div>
+
+          <!-- Title Input -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <span>หัวข้อการแจ้งเตือน</span>
+              <span class="text-rose-400">*</span>
+            </label>
+            <input type="text" id="notifTitle" required placeholder="เช่น ด่วน! แจ้งส่งหลักฐานสลิปยอดโอนเงิน"
+              oninput="updateLivePreview()"
+              class="w-full px-4 py-3 rounded-2xl bg-slate-950/80 border border-white/15 text-white placeholder-slate-500 text-sm outline-none focus:border-amber-500 transition font-sans">
+          </div>
+
+          <!-- Type Selector & Priority -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">ระดับความสำคัญ / ประเภท</label>
+              <select id="notifType" onchange="updateLivePreview()"
+                class="w-full px-4 py-3 rounded-2xl bg-slate-950/80 border border-white/15 text-white text-sm outline-none focus:border-amber-500 transition font-sans">
+                <option value="info">ทั่วไป (Information)</option>
+                <option value="urgent">ด่วนที่สุด (Urgent Alert)</option>
+                <option value="warning">สำคัญ (Important Warning)</option>
+                <option value="event">กิจกรรม / นัดหมาย (Event)</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">กลุ่มเป้าหมาย (Audience)</label>
+              <select id="notifAudience"
+                class="w-full px-4 py-3 rounded-2xl bg-slate-950/80 border border-white/15 text-white text-sm outline-none focus:border-amber-500 transition font-sans">
+                <option value="all">นักศึกษาและทุกคนในระบบ (All 60 Users)</option>
+                <option value="unpaid">เฉพาะคนที่ยังไม่ส่งสลิปชำระเงิน</option>
+                <option value="committee">ฝ่ายบริหารและกรรมการสาขา</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Message Textarea -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <span>เนื้อหาข้อความ</span>
+              <span class="text-rose-400">*</span>
+            </label>
+            <textarea id="notifMessage" rows="3" required placeholder="ระบุข้อความรายละเอียดที่ต้องการแจ้งให้นักศึกษาทราบอย่างชัดเจน..."
+              oninput="updateLivePreview()"
+              class="w-full px-4 py-3 rounded-2xl bg-slate-950/80 border border-white/15 text-white placeholder-slate-500 text-sm outline-none focus:border-amber-500 transition font-sans leading-relaxed custom-scroll"></textarea>
+          </div>
+
+          <!-- Link / URL Action -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300 flex items-center justify-between">
+              <span>ลิงก์ปลายทาง (เมื่อผู้ใช้กดที่การแจ้งเตือน)</span>
+              <span class="text-[11px] text-slate-500 font-normal">ไม่บังคับ</span>
+            </label>
+            <input type="text" id="notifLink" placeholder="เช่น /payment.html หรือ /Plans.html หรือ https://..."
+              oninput="updateLivePreview()"
+              class="w-full px-4 py-3 rounded-2xl bg-slate-950/80 border border-white/15 text-white placeholder-slate-500 text-sm outline-none focus:border-amber-500 transition font-mono text-xs">
+          </div>
+
+          <!-- Options Checkboxes -->
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+            <label class="flex items-center gap-2.5 cursor-pointer text-xs text-slate-300">
+              <input type="checkbox" id="chkWebPush" checked class="rounded border-slate-700 text-orange-500 focus:ring-0 w-4 h-4">
+              <span>ส่งเสียงและแจ้งเตือนผ่าน Web Notification / PWA Alert ทันที</span>
+            </label>
+            <label class="flex items-center gap-2.5 cursor-pointer text-xs text-slate-300">
+              <input type="checkbox" id="chkPinBanner" checked class="rounded border-slate-700 text-orange-500 focus:ring-0 w-4 h-4">
+              <span>แสดง In-App Toast Popup ทันทีที่ผู้ใช้เปิดหน้าเว็บ</span>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="btnSubmitBroadcast"
+            class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-600 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white font-black text-sm shadow-xl shadow-orange-600/30 transition flex items-center justify-center gap-2 active:scale-98 cursor-pointer">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span id="btnSubmitText">ยิงกระจายข้อความแจ้งเตือนทันที (Broadcast Now)</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: Live Mobile Preview & Device Simulator (5 Cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <i data-lucide="smartphone" class="w-4 h-4 text-sky-400"></i>
+              <h3 class="text-sm font-black text-white">ตัวอย่างการแสดงผลบนมือถือ</h3>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-sky-500/20 text-sky-300 border border-sky-500/30">
+              Live Preview
+            </span>
+          </div>
+
+          <!-- Simulated Phone Frame -->
+          <div class="relative w-full max-w-[320px] mx-auto rounded-[36px] bg-slate-950 p-3.5 border-4 border-slate-800 shadow-2xl shadow-black/80 space-y-4 min-h-[460px] flex flex-col justify-between">
+            
+            <!-- Phone Notch & Status Bar -->
+            <div class="flex items-center justify-between px-3 text-[10px] text-slate-400 font-mono">
+              <span>09:41</span>
+              <div class="w-16 h-3.5 bg-slate-800 rounded-full mx-auto"></div>
+              <div class="flex items-center gap-1">
+                <i data-lucide="wifi" class="w-3 h-3"></i>
+                <i data-lucide="battery" class="w-3 h-3"></i>
+              </div>
+            </div>
+
+            <!-- Simulated Lockscreen Notification Card -->
+            <div id="previewCard" class="rounded-2xl p-4 bg-slate-900/90 border border-amber-500/40 text-white shadow-xl backdrop-blur-xl space-y-2 transition-all">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <img src="logo.png" alt="Logo" class="w-4 h-4 rounded-full">
+                  <span class="text-[10px] font-black text-slate-300 uppercase">COMED KKU 69</span>
+                </div>
+                <span class="text-[9px] text-slate-400 font-mono">ตอนนี้</span>
+              </div>
+
+              <div>
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span id="previewBadge" class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    ทั่วไป
+                  </span>
+                  <h4 id="previewTitle" class="text-xs font-bold text-white line-clamp-1">
+                    ตัวอย่างหัวข้อแจ้งเตือน
+                  </h4>
+                </div>
+                <p id="previewMessage" class="text-[11px] text-slate-300 line-clamp-2 leading-relaxed">
+                  ข้อความรายละเอียดจะปรากฏตรงนี้บนหน้าจอของผู้ใช้
+                </p>
+              </div>
+
+              <div id="previewLinkRow" class="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] text-orange-400">
+                <span id="previewLinkText">เปิดดูในระบบ</span>
+                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              </div>
+            </div>
+
+            <!-- Bottom App Mockup -->
+            <div class="p-3 rounded-2xl bg-slate-900/40 border border-white/5 text-center text-[10px] text-slate-500">
+              <i data-lucide="bell" class="w-5 h-5 mx-auto mb-1 text-slate-600"></i>
+              <p>ระบบแจ้งเตือนแบบเรียลไทม์จะเด้งไปยังแถบสถานะและกล่องแจ้งเตือนทันที</p>
+            </div>
+
+            <!-- Home indicator bar -->
+            <div class="w-24 h-1 bg-slate-700 rounded-full mx-auto mt-2"></div>
+          </div>
+        </div>
+
+        <!-- System Stats Pill -->
+        <div class="glass-card rounded-3xl p-5 border border-white/10 flex items-center justify-around text-center">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">ผู้รับทั้งหมด</span>
+            <span class="text-lg font-black text-white font-mono">60 คน</span>
+          </div>
+          <div class="w-px h-8 bg-white/10"></div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">ความเร็วส่งมอบ</span>
+            <span class="text-lg font-black text-emerald-400 font-mono">&lt; 1 วินาที</span>
+          </div>
+          <div class="w-px h-8 bg-white/10"></div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">สถานะ Server</span>
+            <span class="text-lg font-black text-sky-400 font-mono">Active</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom History & Logs Table -->
+    <div class="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+            <i data-lucide="history" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">ประวัติการกระจายแจ้งเตือนล่าสุด</h3>
+            <p class="text-xs text-slate-400">รายการแจ้งเตือนที่ถูกส่งออกไปแล้ว และสถานะการเปิด/ปิด</p>
+          </div>
+        </div>
+        <button onclick="loadBroadcastHistory()" class="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>รีเฟรชประวัติ</span>
+        </button>
+      </div>
+
+      <!-- History Table Container -->
+      <div class="overflow-x-auto custom-scroll">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="text-[10px] uppercase font-mono tracking-wider text-slate-400 border-b border-white/10">
+            <tr>
+              <th class="py-3 px-3">เวลาที่ส่ง</th>
+              <th class="py-3 px-3">ประเภท</th>
+              <th class="py-3 px-3">หัวข้อ / ข้อความ</th>
+              <th class="py-3 px-3">กลุ่มเป้าหมาย</th>
+              <th class="py-3 px-3">ลิงก์</th>
+              <th class="py-3 px-3 text-right">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody" class="divide-y divide-white/5 font-sans">
+            <tr>
+              <td colspan="6" class="py-8 text-center text-slate-500">กำลังโหลดประวัติการแจ้งเตือน...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- JavaScript Operations -->
+  <script>
+    const TEMPLATES = {
+      payment: {
+        title: 'ด่วน! แจ้งส่งหลักฐานสลิปยอดชำระ ฿190',
+        message: 'กรุณาส่งหลักฐานการโอนเงินกองกลางสาขา COMED23 ทางระบบให้เรียบร้อยเพื่อบันทึกประวัติ',
+        type: 'urgent',
+        link: '/payment.html',
+        audience: 'all'
+      },
+      cancel: {
+        title: 'แจ้งเลื่อน/เปลี่ยนสถานที่เรียนรายวิชา',
+        message: 'มีการเปลี่ยนแปลงคาบเรียน กรุณาตรวจสอบตารางเรียนและรายละเอียดในระบบปฏิทินสาขา',
+        type: 'warning',
+        link: '/Calendar.html',
+        audience: 'all'
+      },
+      event: {
+        title: 'นัดหมายกิจกรรมใหม่ของสาขา COMED23',
+        message: 'เปิดลงทะเบียนและเตรียมความพร้อมสำหรับกิจกรรมใหม่ ขอให้นักศึกษาทุกคนตรวจสอบกำหนดการ',
+        type: 'event',
+        link: '/Plans.html',
+        audience: 'all'
+      },
+      urgent: {
+        title: 'ประกาศสำคัญอย่างเป็นทางการจากฝ่ายบริหารสาขา',
+        message: 'มีข้อชี้แจงสำคัญเกี่ยวกับกิจกรรมและการดำเนินงานสาขา กรุณาเข้าอ่านรายละเอียดในระบบ',
+        type: 'urgent',
+        link: '/index.html',
+        audience: 'all'
+      }
+    };
+
+    function applyTemplate(key) {
+      const t = TEMPLATES[key];
+      if (!t) return;
+      document.getElementById('notifTitle').value = t.title;
+      document.getElementById('notifMessage').value = t.message;
+      document.getElementById('notifType').value = t.type;
+      document.getElementById('notifLink').value = t.link;
+      document.getElementById('notifAudience').value = t.audience;
+      updateLivePreview();
+    }
+
+    function updateLivePreview() {
+      const title = document.getElementById('notifTitle').value || 'ตัวอย่างหัวข้อแจ้งเตือน';
+      const message = document.getElementById('notifMessage').value || 'ข้อความรายละเอียดจะปรากฏตรงนี้บนหน้าจอของผู้ใช้';
+      const type = document.getElementById('notifType').value;
+      const link = document.getElementById('notifLink').value;
+
+      document.getElementById('previewTitle').textContent = title;
+      document.getElementById('previewMessage').textContent = message;
+
+      const badge = document.getElementById('previewBadge');
+      const card = document.getElementById('previewCard');
+
+      if (type === 'urgent') {
+        badge.textContent = 'ด่วนที่สุด';
+        badge.className = 'px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40';
+        card.className = 'rounded-2xl p-4 bg-slate-900/90 border border-rose-500/50 text-white shadow-xl backdrop-blur-xl space-y-2 transition-all';
+      } else if (type === 'warning') {
+        badge.textContent = 'สำคัญ';
+        badge.className = 'px-1.5 py-0.2 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        card.className = 'rounded-2xl p-4 bg-slate-900/90 border border-amber-500/50 text-white shadow-xl backdrop-blur-xl space-y-2 transition-all';
+      } else if (type === 'event') {
+        badge.textContent = 'กิจกรรม';
+        badge.className = 'px-1.5 py-0.2 rounded-full text-[9px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/40';
+        card.className = 'rounded-2xl p-4 bg-slate-900/90 border border-indigo-500/50 text-white shadow-xl backdrop-blur-xl space-y-2 transition-all';
+      } else {
+        badge.textContent = 'ทั่วไป';
+        badge.className = 'px-1.5 py-0.2 rounded-full text-[9px] font-black bg-sky-500/20 text-sky-300 border border-sky-500/40';
+        card.className = 'rounded-2xl p-4 bg-slate-900/90 border border-sky-500/50 text-white shadow-xl backdrop-blur-xl space-y-2 transition-all';
+      }
+
+      const linkRow = document.getElementById('previewLinkRow');
+      if (link && link.trim()) {
+        linkRow.classList.remove('hidden');
+      } else {
+        linkRow.classList.add('hidden');
+      }
+    }
+
+    async function handleSendBroadcast(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitBroadcast');
+      const btnText = document.getElementById('btnSubmitText');
+
+      const title = document.getElementById('notifTitle').value.trim();
+      const message = document.getElementById('notifMessage').value.trim();
+      const type = document.getElementById('notifType').value;
+      const link = document.getElementById('notifLink').value.trim();
+      const audience = document.getElementById('notifAudience').value;
+      const adminEmail = (sessionStorage.getItem('COMED_KKU69_ADMIN_LOGGED_USER') || 'admin@comed23.local').toLowerCase().trim();
+
+      if (!title || !message) {
+        alert('กรุณากรอกหัวข้อและข้อความให้ครบถ้วน');
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = 'กำลังยิงกระจายข้อความ...';
+
+      const payload = {
+        title,
+        message,
+        type,
+        link: link || null,
+        target_audience: audience,
+        sender_email: adminEmail,
+        is_active: true,
+        created_at: new Date().toISOString()
+      };
+
+      try {
+        const client = typeof window.getSupabaseClient === 'function' ? window.getSupabaseClient() : null;
+        let success = false;
+
+        if (client) {
+          const { data, error } = await client.from('notifications').insert([payload]);
+          if (!error) {
+            success = true;
+          } else {
+            console.warn('[Admin Broadcast] Supabase insert note:', error);
+          }
+        }
+
+        // เก็บใน Local Storage ประวัติสำรอง
+        saveLocalHistory(payload);
+
+        alert('ยิงกระจายข้อความแจ้งเตือนสำเร็จแล้ว!');
+        document.getElementById('broadcastForm').reset();
+        updateLivePreview();
+        loadBroadcastHistory();
+      } catch (err) {
+        console.error('[Admin Broadcast Error]:', err);
+        alert('เกิดข้อผิดพลาดในการกระจายข้อความ: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'ยิงกระจายข้อความแจ้งเตือนทันที (Broadcast Now)';
+      }
+    }
+
+    function saveLocalHistory(item) {
+      try {
+        const key = 'COMED23_NOTIFICATIONS_CACHE_V1';
+        let list = JSON.parse(localStorage.getItem(key) || '[]');
+        item.id = item.id || ('local_' + Date.now());
+        list.unshift(item);
+        localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
+      } catch (e) {}
+    }
+
+    async function loadBroadcastHistory() {
+      const tbody = document.getElementById('historyTableBody');
+      tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500">กำลังโหลดข้อมูล...</td></tr>';
+
+      let items = [];
+      const client = typeof window.getSupabaseClient === 'function' ? window.getSupabaseClient() : null;
+
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from('notifications')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(20);
+          if (!error && Array.isArray(data)) {
+            items = data;
+          }
+        } catch (e) {}
+      }
+
+      if (items.length === 0) {
+        try {
+          items = JSON.parse(localStorage.getItem('COMED23_NOTIFICATIONS_CACHE_V1') || '[]');
+        } catch (e) {}
+      }
+
+      if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500">ยังไม่มีประวัติการแจ้งเตือน</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = items.map(item => {
+        let typeBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">ทั่วไป</span>';
+        if (item.type === 'urgent') typeBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">ด่วนที่สุด</span>';
+        if (item.type === 'warning') typeBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">สำคัญ</span>';
+        if (item.type === 'event') typeBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">กิจกรรม</span>';
+
+        const timeStr = item.created_at ? new Date(item.created_at).toLocaleString('th-TH') : '-';
+
+        return `
+          <tr class="hover:bg-white/5 transition">
+            <td class="py-3 px-3 font-mono text-[11px] text-slate-400">${timeStr}</td>
+            <td class="py-3 px-3">${typeBadge}</td>
+            <td class="py-3 px-3">
+              <strong class="text-white block text-xs">${item.title || '-'}</strong>
+              <span class="text-slate-400 text-[11px] line-clamp-1">${item.message || '-'}</span>
+            </td>
+            <td class="py-3 px-3 text-slate-400 text-[11px]">${item.target_audience || 'All'}</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-orange-400">${item.link ? `<a href="${item.link}" target="_blank" class="hover:underline">${item.link}</a>` : '-'}</td>
+            <td class="py-3 px-3 text-right">
+              <button onclick="deleteNotification('${item.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[10px] font-bold transition">
+                ลบ
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons();
+      }
+    }
+
+    async function deleteNotification(id) {
+      if (!confirm('ต้องการลบการแจ้งเตือนนี้ใช่หรือไม่?')) return;
+      const client = typeof window.getSupabaseClient === 'function' ? window.getSupabaseClient() : null;
+
+      if (client && !String(id).startsWith('local_')) {
+        try {
+          await client.from('notifications').delete().eq('id', id);
+        } catch (e) {}
+      }
+
+      // ลบจาก local cache
+      try {
+        const key = 'COMED23_NOTIFICATIONS_CACHE_V1';
+        let list = JSON.parse(localStorage.getItem(key) || '[]');
+        list = list.filter(item => item.id !== id);
+        localStorage.setItem(key, JSON.stringify(list));
+      } catch (e) {}
+
+      loadBroadcastHistory();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons();
+      }
+      updateLivePreview();
+      loadBroadcastHistory();
+    });
+  </script>
+
+</body>
+</html>

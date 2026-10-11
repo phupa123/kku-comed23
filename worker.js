@@ -188,6 +188,10 @@ export default {
       fetchUrl = new URL("/shortlink.html", url.origin).toString();
     } else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") {
       fetchUrl = new URL("/shortlink-admin.html", url.origin).toString();
+    } else if (path === "/notification-admin" || path === "/notification-admin.html") {
+      fetchUrl = new URL("/notification-admin.html", url.origin).toString();
+    } else if (path === "/plans-admin" || path === "/plans-admin.html") {
+      fetchUrl = new URL("/Plans-admin.html", url.origin).toString();
     } else if (path.startsWith("/s/")) {
       const shortCode = path.replace("/s/", "").split("/")[0].trim();
       const targetUrl = new URL("/shortlink.html", url.origin);
