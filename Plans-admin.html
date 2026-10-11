@@ -47,8 +47,9 @@
   <!-- Supabase JS Client & Configs -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
-  <script src="students_data.js"></script>
   <script src="assets/js/plans_repo.js"></script>
+  <!-- Google Calendar & iCalendar (.ics) Sync Suite -->
+  <script src="assets/js/calendar_sync.js"></script>
 
   <style>
     .glass-card {
@@ -128,15 +129,19 @@
         </div>
       </div>
       <div class="glass-card rounded-3xl p-5 border-l-4 border-l-sky-500 flex flex-col justify-between">
-        <span class="text-xs font-bold text-slate-400">การส่งออกข้อมูล</span>
-        <div class="flex items-center gap-2 mt-2">
-          <button onclick="exportPlansCSV()" class="w-full py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-xs font-bold border border-sky-500/30 flex items-center justify-center gap-1.5 transition">
+        <span class="text-xs font-bold text-slate-400">การส่งออกข้อมูล & ปฏิทิน</span>
+        <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+          <button onclick="exportPlansCSV()" class="flex-1 py-2 px-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-xs font-bold border border-sky-500/30 flex items-center justify-center gap-1 transition">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
-            <span>Export CSV</span>
+            <span>CSV</span>
           </button>
-          <button onclick="openPublishModal()" class="w-full py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition">
+          <button onclick="exportAdminPlansIcs()" class="flex-1 py-2 px-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold border border-amber-500/30 flex items-center justify-center gap-1 transition" title="ส่งออกไฟล์ .ics สำหรับเปิดบน Apple Calendar, Windows Calendar หรือ Google Calendar">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            <span>.ICS</span>
+          </button>
+          <button onclick="openPublishModal()" class="flex-1 py-2 px-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-extrabold flex items-center justify-center gap-1 transition">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span>เพิ่มงานทางการ</span>
+            <span>สร้างงาน</span>
           </button>
         </div>
       </div>
@@ -286,6 +291,15 @@
       a.href = url;
       a.download = `comed_plans_export_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
+    }
+
+    function exportAdminPlansIcs() {
+      if (!adminPlansList || adminPlansList.length === 0) {
+        return alert("ไม่มีข้อมูลแผนงานสำหรับ Export .ICS");
+      }
+      if (window.CalendarSync) {
+        window.CalendarSync.exportAllPlansIcs(adminPlansList, 'COMED23 Official Calendar');
+      }
     }
 
     function openPublishModal() {

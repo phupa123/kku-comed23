@@ -210,6 +210,92 @@ export default {
           "Access-Control-Allow-Origin": "*"
         }
       }));
+    } else if (path === "/api/calendar.ics" || path === "/calendar.ics") {
+      // 🌟 LIVE ICALENDAR FEED SUBSCRIPTION (สำหรับ Subscribe เข้า Google Calendar, Apple Calendar, Outlook)
+      try {
+        const SUPABASE_URL = "https://womovxeyfuzpogghikfu.supabase.co";
+        const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvbW92eGV5ZnV6cG9nZ2hpa2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk4MTU2MDQsImV4cCI6MjA2NTM5MTYwNH0.kF0l7_7Bq8F44i-zL7GqE4N631h40wW_v_6pI1J8y-M";
+        
+        const scope = url.searchParams.get("scope") || "department";
+        let queryUrl = `${SUPABASE_URL}/rest/v1/plans?select=*&order=start_date.asc`;
+        if (scope === "department") {
+          queryUrl += `&scope=eq.department`;
+        }
+        queryUrl += `&or=(is_deleted.is.null,is_deleted.eq.false)`;
+
+        const supaRes = await fetch(queryUrl, {
+          headers: {
+            "apikey": SUPABASE_ANON,
+            "Authorization": `Bearer ${SUPABASE_ANON}`
+          }
+        });
+
+        const plans = supaRes.ok ? await supaRes.json() : [];
+        const nowStr = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+        
+        const cleanText = (str) => {
+          if (!str) return "";
+          return String(str).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+        };
+
+        const vevents = plans.map(p => {
+          if (!p.start_date) return "";
+          const uid = (p.id || "comed-" + Math.random().toString(36).substring(2)) + "@comed23.kku.ac.th";
+          const summary = cleanText(p.title || "กิจกรรม COMED");
+          let desc = (p.description || "") + "\\n";
+          if (p.location) desc += `สถานที่: ${p.location}\\n`;
+          if (p.creator_name) desc += `ผู้จัดทำ: ${p.creator_name}\\n`;
+          desc += `ดูบนระบบ: https://comed23.pages.dev/Plans.html?plan=${p.id || ""}`;
+          
+          const loc = cleanText(p.location || (p.meet_link || "คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น"));
+          const start = new Date(p.start_date);
+          let end = p.end_date ? new Date(p.end_date) : new Date(start.getTime() + (2 * 60 * 60 * 1000));
+          if (end <= start) end = new Date(start.getTime() + (2 * 60 * 60 * 1000));
+
+          const startUtc = start.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+          const endUtc = end.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+
+          return [
+            "BEGIN:VEVENT",
+            `UID:${uid}`,
+            `DTSTAMP:${nowStr}`,
+            `SUMMARY:${summary}`,
+            `DESCRIPTION:${cleanText(desc)}`,
+            `LOCATION:${loc}`,
+            `DTSTART:${startUtc}`,
+            `DTEND:${endUtc}`,
+            "STATUS:CONFIRMED",
+            "END:VEVENT"
+          ].join("\r\n");
+        }).filter(Boolean);
+
+        const icsContent = [
+          "BEGIN:VCALENDAR",
+          "VERSION:2.0",
+          "PRODID:-//COMED KKU//Plans Calendar Hub//TH",
+          "X-WR-CALNAME:COMED23 Plans Calendar",
+          "CALSCALE:GREGORIAN",
+          "METHOD:PUBLISH",
+          vevents.join("\r\n"),
+          "END:VCALENDAR"
+        ].join("\r\n");
+
+        return new Response(icsContent, {
+          status: 200,
+          headers: {
+            "Content-Type": "text/calendar; charset=utf-8",
+            "Content-Disposition": 'inline; filename="calendar.ics"',
+            "Cache-Control": "public, max-age=300",
+            "Access-Control-Allow-Origin": "*"
+          }
+        });
+      } catch (calErr) {
+        return new Response("Calendar feed error: " + calErr.message, { status: 500 });
+      }
+    } else if (path === "/plans" || path === "/plans.html") {
+      fetchUrl = new URL("/Plans.html", url.origin).toString();
+    } else if (path === "/plans-admin" || path === "/plans-admin.html") {
+      fetchUrl = new URL("/Plans-admin.html", url.origin).toString();
     } else if (path === "/404") {
       fetchUrl = new URL("/404.html", url.origin).toString();
     }
