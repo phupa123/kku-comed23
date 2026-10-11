@@ -547,31 +547,34 @@
     function handleRecipientStatusResponse(transfer) {
       if (!activeSendingTransfer) return;
 
+      const targetId = activeSendingTransfer.targetId;
+      const targetName = activeSendingTransfer.targetName;
+
       if (transfer.status === 'accepted') {
         // วิ่งเต็ม 100% เสร็จสมบูรณ์
-        clearInterval(activeSendingTransfer.interval);
+        if (activeSendingTransfer.interval) clearInterval(activeSendingTransfer.interval);
         activeSendingTransfer.progress = 100;
-        updateCircleUI(activeSendingTransfer.targetId, 100, 'รับไฟล์แล้ว! 🎉');
+        updateCircleUI(targetId, 100, 'รับไฟล์แล้ว! 🎉');
 
-        const ring = document.getElementById(`circleRing_${activeSendingTransfer.targetId}`);
+        const ring = document.getElementById(`circleRing_${targetId}`);
         if (ring) ring.setAttribute('stroke', '#10b981'); // สีเขียวสำเร็จ
 
         setTimeout(() => {
-          stopCircularProgress(activeSendingTransfer.targetId, true, 'ส่งสำเร็จ');
-          alert(`🎉 ปลายทาง "${activeSendingTransfer.targetName}" กดยอมรับและดาวน์โหลดไฟล์เรียบร้อยแล้ว!`);
+          stopCircularProgress(targetId, true, 'ส่งสำเร็จ');
+          alert(`🎉 ปลายทาง "${targetName}" กดยอมรับและดาวน์โหลดไฟล์เรียบร้อยแล้ว!`);
           removeSelectedFile();
           activeSendingTransfer = null;
         }, 1000);
 
       } else if (transfer.status === 'declined') {
-        clearInterval(activeSendingTransfer.interval);
-        const ring = document.getElementById(`circleRing_${activeSendingTransfer.targetId}`);
+        if (activeSendingTransfer.interval) clearInterval(activeSendingTransfer.interval);
+        const ring = document.getElementById(`circleRing_${targetId}`);
         if (ring) ring.setAttribute('stroke', '#ef4444'); // สีแดงปฏิเสธ
 
-        updateCircleUI(activeSendingTransfer.targetId, 100, 'ถูกปฏิเสธ ❌');
+        updateCircleUI(targetId, 100, 'ถูกปฏิเสธ ❌');
         setTimeout(() => {
-          stopCircularProgress(activeSendingTransfer.targetId, false, 'ปฏิเสธไฟล์');
-          alert(`❌ ปลายทาง "${activeSendingTransfer.targetName}" ปฏิเสธการรับไฟล์`);
+          stopCircularProgress(targetId, false, 'ปฏิเสธไฟล์');
+          alert(`❌ ปลายทาง "${targetName}" ปฏิเสธการรับไฟล์`);
           activeSendingTransfer = null;
         }, 1200);
       }
