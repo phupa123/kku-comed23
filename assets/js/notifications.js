@@ -73,6 +73,13 @@
           serviceWorkerParam: { scope: '/' }
         });
         console.log('[OneSignal] Initialized with App ID:', appId);
+
+        // เชื่อมโยงอีเมลของผู้ใช้เข้ากับ OneSignal (External ID) เพื่อให้ส่งเจาะจงรายคนได้
+        const userEmail = (sessionStorage.getItem('COMED_USER_SESSION') || '').toLowerCase().trim();
+        if (userEmail && OneSignal.login) {
+          await OneSignal.login(userEmail);
+          console.log('[OneSignal] Logged in as:', userEmail);
+        }
       } catch(e) {
         console.warn('[OneSignal] Init notice:', e);
       }

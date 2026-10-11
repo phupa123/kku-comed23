@@ -43,6 +43,8 @@
   <!-- Supabase JS Client & Configs -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
+  <!-- Students Database -->
+  <script src="students_data.js"></script>
 
   <style>
     .glass-card {
@@ -209,12 +211,49 @@
 
             <div class="space-y-1.5">
               <label class="text-xs font-bold text-slate-300">กลุ่มเป้าหมาย (Audience)</label>
-              <select id="notifAudience"
+              <select id="notifAudience" onchange="toggleAudienceMode()"
                 class="w-full px-4 py-3 rounded-2xl bg-slate-950/80 border border-white/15 text-white text-sm outline-none focus:border-amber-500 transition font-sans">
                 <option value="all">นักศึกษาและทุกคนในระบบ (All 60 Users)</option>
+                <option value="specific">🎯 เลือกผู้ใช้เฉพาะบุคคล (ระบุชื่อ / อีเมล)</option>
                 <option value="unpaid">เฉพาะคนที่ยังไม่ส่งสลิปชำระเงิน</option>
                 <option value="committee">ฝ่ายบริหารและกรรมการสาขา</option>
               </select>
+            </div>
+          </div>
+
+          <!-- Specific User Selection Box (ซ่อน/แสดงเมื่อเลือก 'specific') -->
+          <div id="boxSpecificUsers" class="hidden p-4 rounded-2xl bg-white/5 border border-amber-500/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                <i data-lucide="user-check" class="w-4 h-4"></i>
+                <span>ค้นหาและเลือกผู้รับเฉพาะบุคคล (ชื่อ, นามสกุล, ชื่อเล่น หรือ @kkumail.com)</span>
+              </label>
+              <span id="selectedCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                เลือก 0 คน
+              </span>
+            </div>
+
+            <!-- Search input with auto-suggest -->
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+              <input type="text" id="inputStudentSearch" oninput="searchStudents(this.value)" placeholder="พิมพ์ชื่อ, ชื่อเล่น เช่น มิวสิค, ภูผา, หรืออีเมล..."
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white placeholder-slate-500 text-xs outline-none focus:border-amber-500 transition">
+              
+              <!-- Dropdown Search Results -->
+              <div id="studentSearchResults" class="hidden absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-slate-900 border border-white/15 rounded-xl shadow-2xl z-50 divide-y divide-white/5 custom-scroll">
+              </div>
+            </div>
+
+            <!-- Selected Students Tags / Pills -->
+            <div id="selectedStudentsList" class="flex flex-wrap gap-1.5 min-h-[32px] p-2 rounded-xl bg-slate-950/60 border border-white/5">
+              <span class="text-[11px] text-slate-500 italic p-1">ยังไม่ได้เลือกผู้ใช้ (สามารถพิมพ์ค้นหาด้านบนหรือเลือกจากรายชื่อด้านล่าง)</span>
+            </div>
+
+            <!-- Quick pick buttons for convenience -->
+            <div class="flex items-center gap-2 pt-1 border-t border-white/5 text-[11px]">
+              <span class="text-slate-400">เลือกด่วน:</span>
+              <button type="button" onclick="selectAllStudents()" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer">เลือกทั้ง 60 คน</button>
+              <button type="button" onclick="clearSelectedStudents()" class="px-2 py-0.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition cursor-pointer">ล้างที่เลือก</button>
             </div>
           </div>
 
@@ -499,6 +538,118 @@
       }
     }
 
+    let selectedStudents = []; // [{ id, name, nickname, email }]
+
+    function toggleAudienceMode() {
+      const audience = document.getElementById('notifAudience').value;
+      const box = document.getElementById('boxSpecificUsers');
+      if (audience === 'specific') {
+        box.classList.remove('hidden');
+        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({ root: box });
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    function searchStudents(query) {
+      const resultsBox = document.getElementById('studentSearchResults');
+      const clean = (query || '').toLowerCase().trim();
+      
+      if (!clean) {
+        resultsBox.classList.add('hidden');
+        resultsBox.innerHTML = '';
+        return;
+      }
+
+      const list = window.STUDENTS_DATA || [];
+      const matches = list.filter(s => {
+        const name = (s.name || '').toLowerCase();
+        const nick = (s.nickname || '').toLowerCase();
+        const email = (s.email || '').toLowerCase();
+        const stdId = (s.id || '').toLowerCase();
+        return name.includes(clean) || nick.includes(clean) || email.includes(clean) || stdId.includes(clean);
+      }).slice(0, 8);
+
+      if (matches.length === 0) {
+        resultsBox.innerHTML = '<div class="p-3 text-slate-500 text-xs text-center">ไม่พบรายชื่อที่ค้นหา</div>';
+        resultsBox.classList.remove('hidden');
+        return;
+      }
+
+      resultsBox.innerHTML = matches.map(s => {
+        const isSelected = selectedStudents.some(item => item.email.toLowerCase() === s.email.toLowerCase());
+        return `
+          <div onclick="addStudentRecipient('${s.email}')" class="p-2.5 hover:bg-white/10 transition flex items-center justify-between cursor-pointer ${isSelected ? 'opacity-50 pointer-events-none' : ''}">
+            <div>
+              <span class="text-xs font-bold text-white block">${s.name} (${s.nickname || '-'})</span>
+              <span class="text-[10px] text-slate-400 font-mono">${s.email} | ${s.id}</span>
+            </div>
+            ${isSelected ? '<span class="text-[10px] text-emerald-400 font-bold">เลือกแล้ว</span>' : '<span class="text-[10px] text-amber-400 font-bold">+ เลือก</span>'}
+          </div>
+        `;
+      }).join('');
+
+      resultsBox.classList.remove('hidden');
+    }
+
+    function addStudentRecipient(email) {
+      const list = window.STUDENTS_DATA || [];
+      const found = list.find(s => s.email.toLowerCase() === email.toLowerCase());
+      if (!found) return;
+
+      if (!selectedStudents.some(s => s.email.toLowerCase() === found.email.toLowerCase())) {
+        selectedStudents.push(found);
+        renderSelectedStudents();
+      }
+
+      document.getElementById('inputStudentSearch').value = '';
+      document.getElementById('studentSearchResults').classList.add('hidden');
+    }
+
+    function removeStudentRecipient(email) {
+      selectedStudents = selectedStudents.filter(s => s.email.toLowerCase() !== email.toLowerCase());
+      renderSelectedStudents();
+    }
+
+    function selectAllStudents() {
+      const list = window.STUDENTS_DATA || [];
+      selectedStudents = [...list];
+      renderSelectedStudents();
+    }
+
+    function clearSelectedStudents() {
+      selectedStudents = [];
+      renderSelectedStudents();
+    }
+
+    function renderSelectedStudents() {
+      const container = document.getElementById('selectedStudentsList');
+      const badge = document.getElementById('selectedCountBadge');
+      
+      badge.textContent = `เลือก ${selectedStudents.length} คน`;
+
+      if (selectedStudents.length === 0) {
+        container.innerHTML = '<span class="text-[11px] text-slate-500 italic p-1">ยังไม่ได้เลือกผู้ใช้ (สามารถพิมพ์ค้นหาด้านบนหรือเลือกจากรายชื่อด้านล่าง)</span>';
+        return;
+      }
+
+      container.innerHTML = selectedStudents.map(s => `
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium">
+          <span>${s.name} (${s.nickname || '-'})</span>
+          <button type="button" onclick="removeStudentRecipient('${s.email}')" class="hover:text-white transition text-slate-400">&times;</button>
+        </span>
+      `).join('');
+    }
+
+    // Close search dropdown on click outside
+    document.addEventListener('click', (e) => {
+      const searchBox = document.getElementById('inputStudentSearch');
+      const resultsBox = document.getElementById('studentSearchResults');
+      if (searchBox && resultsBox && !searchBox.contains(e.target) && !resultsBox.contains(e.target)) {
+        resultsBox.classList.add('hidden');
+      }
+    });
+
     async function handleSendBroadcast(e) {
       e.preventDefault();
       const btn = document.getElementById('btnSubmitBroadcast');
@@ -516,8 +667,15 @@
         return;
       }
 
+      if (audience === 'specific' && selectedStudents.length === 0) {
+        alert('กรุณาเลือกผู้ใช้อย่างน้อย 1 คนที่ต้องการส่งแจ้งเตือน');
+        return;
+      }
+
       btn.disabled = true;
       btnText.textContent = 'กำลังยิงกระจายข้อความ...';
+
+      const targetEmails = audience === 'specific' ? selectedStudents.map(s => s.email.toLowerCase()) : null;
 
       const payload = {
         title,
@@ -525,6 +683,7 @@
         type,
         link: link || null,
         target_audience: audience,
+        target_users: targetEmails, // รายชื่ออีเมลผู้รับเฉพาะบุคคล
         sender_email: adminEmail,
         is_active: true,
         created_at: new Date().toISOString()
@@ -552,24 +711,33 @@
           localStorage.setItem('COMED23_ONESIGNAL_REST_KEY', osRestKey);
 
           try {
+            const osBody = {
+              app_id: osAppId,
+              headings: { en: title, th: title },
+              contents: { en: message, th: message },
+              url: link || window.location.origin,
+              chrome_web_icon: window.location.origin + '/logo.png',
+              chrome_web_badge: window.location.origin + '/favicon.png',
+              priority: 10
+            };
+
+            // หากเลือกเฉพาะบุคคลให้ส่งแบบ Target Aliases / External IDs (email)
+            if (audience === 'specific' && targetEmails && targetEmails.length > 0) {
+              osBody.include_aliases = { external_id: targetEmails };
+              osBody.target_channel = "push";
+            } else {
+              osBody.included_segments = ['Total Subscriptions'];
+            }
+
             await fetch('https://onesignal.com/api/v1/notifications', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Basic ${osRestKey}`
               },
-              body: JSON.stringify({
-                app_id: osAppId,
-                included_segments: ['Total Subscriptions'],
-                headings: { en: title, th: title },
-                contents: { en: message, th: message },
-                url: link || window.location.origin,
-                chrome_web_icon: window.location.origin + '/logo.png',
-                chrome_web_badge: window.location.origin + '/favicon.png',
-                priority: 10
-              })
+              body: JSON.stringify(osBody)
             });
-            console.log('[Admin] OneSignal broadcast dispatched successfully');
+            console.log('[Admin] OneSignal targeted broadcast dispatched successfully');
           } catch (osErr) {
             console.warn('[Admin] OneSignal dispatch note:', osErr);
           }
@@ -584,7 +752,8 @@
               title,
               message,
               link: link || '/',
-              type
+              type,
+              target_users: targetEmails
             })
           });
         } catch (pushErr) {
@@ -594,8 +763,11 @@
         // เก็บใน Local Storage ประวัติสำรอง
         saveLocalHistory(payload);
 
-        alert('ยิงกระจายข้อความแจ้งเตือนสำเร็จแล้ว! ระบบส่ง Push เข้าเครื่องนักศึกษาทุกคน แม้ปัดปิดแอป');
+        const targetCountTxt = audience === 'specific' ? `(เฉพาะบุคคล ${selectedStudents.length} คน)` : '(ทุกคนในระบบ)';
+        alert(`ยิงกระจายข้อความแจ้งเตือนสำเร็จแล้ว! ระบบส่ง Push เข้าเครื่องนักศึกษา ${targetCountTxt} เรียบร้อยแล้ว`);
         document.getElementById('broadcastForm').reset();
+        clearSelectedStudents();
+        toggleAudienceMode();
         // Restore remembered keys
         if (osAppId) document.getElementById('osAppId').value = osAppId;
         if (osRestKey) document.getElementById('osRestKey').value = osRestKey;
