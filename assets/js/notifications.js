@@ -75,7 +75,17 @@
         console.log('[OneSignal] Initialized with App ID:', appId);
 
         // เชื่อมโยงอีเมลของผู้ใช้เข้ากับ OneSignal (External ID) เพื่อให้ส่งเจาะจงรายคนได้
-        const userEmail = (sessionStorage.getItem('COMED_USER_SESSION') || '').toLowerCase().trim();
+        let userEmail = '';
+        try {
+          const rawSession = sessionStorage.getItem('COMED_USER_SESSION') || localStorage.getItem('COMED_USER_SESSION') || '';
+          if (rawSession.startsWith('{')) {
+            const parsed = JSON.parse(rawSession);
+            userEmail = (parsed.email || parsed.email_address || '').toLowerCase().trim();
+          } else if (rawSession.includes('@')) {
+            userEmail = rawSession.toLowerCase().trim();
+          }
+        } catch(errUser) {}
+
         if (userEmail && OneSignal.login) {
           await OneSignal.login(userEmail);
           console.log('[OneSignal] Logged in as:', userEmail);
@@ -165,7 +175,16 @@
 
           if (endpoint && p256dh && auth) {
             const client = getClient();
-            const userEmail = (sessionStorage.getItem('COMED_USER_SESSION') || '').toLowerCase().trim();
+            let userEmail = '';
+            try {
+              const rawSession = sessionStorage.getItem('COMED_USER_SESSION') || localStorage.getItem('COMED_USER_SESSION') || '';
+              if (rawSession.startsWith('{')) {
+                const parsed = JSON.parse(rawSession);
+                userEmail = (parsed.email || parsed.email_address || '').toLowerCase().trim();
+              } else if (rawSession.includes('@')) {
+                userEmail = rawSession.toLowerCase().trim();
+              }
+            } catch(errUser) {}
             const deviceInfo = navigator.userAgent;
 
             if (client) {

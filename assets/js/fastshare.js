@@ -201,7 +201,16 @@
       // ไม่รับไฟล์ที่ส่งมาจากเครื่องตัวเอง
       if (transfer.sender_device_id === this.deviceId) return false;
 
-      const currentEmail = (sessionStorage.getItem('COMED_USER_SESSION') || '').toLowerCase().trim();
+      let currentEmail = '';
+      try {
+        const raw = sessionStorage.getItem('COMED_USER_SESSION') || localStorage.getItem('COMED_USER_SESSION') || '';
+        if (raw.startsWith('{')) {
+          const parsed = JSON.parse(raw);
+          currentEmail = (parsed.email || parsed.email_address || '').toLowerCase().trim();
+        } else if (raw.includes('@')) {
+          currentEmail = raw.toLowerCase().trim();
+        }
+      } catch(e) {}
       const s = this.settings;
 
       // ถ้าปิดโหมดรับไฟล์
