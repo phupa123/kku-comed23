@@ -22,6 +22,20 @@ function applyDynamicCMS() {
 
 document.addEventListener("DOMContentLoaded", () => {
   applyDynamicCMS();
+
+  // ตรวจจับหากแอปเปิดขึ้นมาจาก Deep link auth callback
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionParam = urlParams.get('session');
+    if (sessionParam) {
+      const restored = JSON.parse(decodeURIComponent(sessionParam));
+      if (restored && restored.email) {
+        localStorage.setItem('COMED_USER_SESSION', JSON.stringify(restored));
+        updateUserUI(restored);
+        showLoginSuccessPopup(restored);
+      }
+    }
+  } catch(e) {}
 });
 
 /**
@@ -38,6 +52,15 @@ if (typeof lucide !== 'undefined' && lucide.createIcons) {
 
 // ================= GOOGLE AUTHENTICATION SYSTEM (KKUMAIL ONLY) =================
 const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
+
+// ตรวจสอบว่าแอปกำลังเปิดอยู่ในโหมด WebView/APK หรือไม่
+function isRunningInAppWebView() {
+  const ua = (navigator.userAgent || '').toLowerCase();
+  const isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  const isAndroidWebView = /wv|android.*version\/[0-9.]+/i.test(ua) && !/chrome\/[0-9.]+\s+mobile/i.test(ua);
+  const isLocalOrigin = window.location.protocol === 'capacitor:' || window.location.hostname === 'localhost';
+  return isCapacitor || isAndroidWebView || isLocalOrigin;
+}
 
 function openGoogleLoginModal() {
   const modal = document.getElementById('modalGoogleLogin');
@@ -58,7 +81,32 @@ function openGoogleLoginModal() {
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
-  // Render Official Google Sign-in Button & Reset Prompt
+  const btnWrapper = document.getElementById('googleButtonWrapper');
+
+  // 🛡️ หากเปิดอยู่ใน APK (WebView) ซึ่ง Google บล็อก OAuth โดยตรง ให้แสดงปุ่มเปิดเบราว์เซอร์จริง
+  if (isRunningInAppWebView()) {
+    if (btnWrapper) {
+      btnWrapper.innerHTML = `
+        <div class="space-y-3 w-full max-w-[280px] mx-auto text-center">
+          <button onclick="launchExternalBrowserLogin()" class="w-full py-3 px-4 rounded-full bg-white border border-slate-300 hover:border-orange-500 text-slate-800 font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>ลงชื่อเข้าใช้ด้วยเบราว์เซอร์ Chrome</span>
+          </button>
+          <p class="text-[10px] text-amber-600 font-medium">
+            (เปิด Chrome เพื่อความปลอดภัยตามมาตรฐาน Google OAuth 2.0)
+          </p>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  // Render Official Google Sign-in Button & Reset Prompt (สำหรับ Web / PWA ปกติ)
   try {
     if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
       google.accounts.id.initialize({
@@ -68,7 +116,6 @@ function openGoogleLoginModal() {
         cancel_on_tap_outside: false
       });
 
-      const btnWrapper = document.getElementById('googleButtonWrapper');
       if (btnWrapper) {
         btnWrapper.innerHTML = ''; // Clear old instance
         google.accounts.id.renderButton(
@@ -82,6 +129,18 @@ function openGoogleLoginModal() {
     }
   } catch (e) {
     console.warn("Google One-Tap Init", e);
+  }
+}
+
+// ฟังก์ชันเปิดเบราว์เซอร์จริงสำหรับแอป APK
+function launchExternalBrowserLogin() {
+  const currentDomain = 'https://kku-comed23.pages.dev'; // หรือโดเมน Cloudflare ของระบบ
+  const redirectTarget = `${currentDomain}/index.html?return_to_app=1`;
+  
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+    window.Capacitor.Plugins.Browser.open({ url: redirectTarget });
+  } else {
+    window.open(redirectTarget, '_system');
   }
 }
 
@@ -157,6 +216,14 @@ function validateAndSetUser(email, name, avatarUrl) {
   localStorage.setItem('COMED_USER_SESSION', JSON.stringify(userSession));
   updateUserUI(userSession);
   closeGoogleLoginModal();
+
+  // หากมาจากการกด Login นอกแอป ให้เปิดแอปกลับเข้าไปพร้อม session
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('return_to_app') === '1') {
+    const encodedUser = encodeURIComponent(JSON.stringify(userSession));
+    window.location.href = `th.ac.kku.comed23://auth?session=${encodedUser}`;
+    return;
+  }
   
   // Trigger Luxury Welcome Success Popup
   showLoginSuccessPopup(userSession);
