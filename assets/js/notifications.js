@@ -64,7 +64,20 @@
     
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async function(OneSignal) {
-      try {
+        // ล้างคิว Operation เก่าที่ติดค้างใน IndexedDB จาก externalId ที่เป็น JSON เสียหาย
+        try {
+          if (window.indexedDB) {
+            const dbreq = window.indexedDB.open('ONE_SIGNAL_SDK_DB');
+            dbreq.onsuccess = function(ev) {
+              const db = ev.target.result;
+              if (db.objectStoreNames.contains('Operations')) {
+                const tx = db.transaction('Operations', 'readwrite');
+                tx.objectStore('Operations').clear();
+              }
+            };
+          }
+        } catch(errClear) {}
+
         await OneSignal.init({
           appId: appId,
           notifyButton: { enable: false },
