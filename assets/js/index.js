@@ -83,26 +83,42 @@ function openGoogleLoginModal() {
 
   const btnWrapper = document.getElementById('googleButtonWrapper');
 
-  // 🛡️ หากเปิดอยู่ใน APK (WebView) ซึ่ง Google บล็อก OAuth โดยตรง ให้แสดงปุ่มเปิดเบราว์เซอร์จริง
-  if (isRunningInAppWebView()) {
-    if (btnWrapper) {
-      btnWrapper.innerHTML = `
-        <div class="space-y-3 w-full max-w-[280px] mx-auto text-center">
-          <button onclick="launchExternalBrowserLogin()" class="w-full py-3 px-4 rounded-full bg-white border border-slate-300 hover:border-orange-500 text-slate-800 font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-            <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-            </svg>
-            <span>ลงชื่อเข้าใช้ด้วยเบราว์เซอร์ Chrome</span>
+  // 🛡️ หากเปิดอยู่ใน APK (WebView) หรือต้องการล็อกอินตรงแบบผู้พัฒนา (ไม่ต้องง้อ Google API)
+  if (btnWrapper) {
+    btnWrapper.innerHTML = `
+      <div class="space-y-3 w-full max-w-[280px] mx-auto text-center">
+        <!-- Direct Student Email / ID Login (100% Works in APK & No Google API Needed) -->
+        <div class="space-y-2 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-left">
+          <label class="text-[11px] font-bold text-slate-700 block">เข้าสู่ระบบด้วยรหัสนักศึกษา หรือ อีเมล:</label>
+          <div class="relative">
+            <input type="text" id="directLoginInput" placeholder="เช่น 663050... หรือ @kkumail.com" 
+              class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-orange-500 shadow-inner">
+          </div>
+          <button onclick="handleDirectStudentLogin()" type="button"
+            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+            <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+            <span>เข้าสู่ระบบทันที (Direct Access)</span>
           </button>
-          <p class="text-[10px] text-amber-600 font-medium">
-            (เปิด Chrome เพื่อความปลอดภัยตามมาตรฐาน Google OAuth 2.0)
-          </p>
         </div>
-      `;
-    }
+
+        <div class="relative flex py-1 items-center">
+          <div class="flex-grow border-t border-slate-200"></div>
+          <span class="flex-shrink mx-2 text-[10px] text-slate-400 font-bold uppercase">หรือ</span>
+          <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <button onclick="launchExternalBrowserLogin()" class="w-full py-2.5 px-3 rounded-full bg-white border border-slate-300 hover:border-orange-500 text-slate-700 font-bold text-[11px] shadow-sm transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+          <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span>เปิดเบราว์เซอร์ Chrome เพื่อเลือกบัญชี Google</span>
+        </button>
+      </div>
+    `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     return;
   }
 
@@ -131,6 +147,55 @@ function openGoogleLoginModal() {
   } catch (e) {
     console.warn("Google One-Tap Init", e);
   }
+}
+
+// ล็อกอินตรงผ่านรหัสนักศึกษา หรือ อีเมล (สำหรับ Developer & APK โดยไม่ต้องพึ่งพา Google API)
+function handleDirectStudentLogin() {
+  const inputEl = document.getElementById('directLoginInput');
+  if (!inputEl) return;
+  const raw = (inputEl.value || '').trim();
+  if (!raw) {
+    showAuthError("กรุณากรอกรหัสนักศึกษา หรือ อีเมล @kkumail.com");
+    return;
+  }
+
+  const query = raw.toLowerCase();
+  const students = window.STUDENTS_DATA || [];
+  
+  // ค้นหาจาก ID หรือ Email
+  let matched = students.find(s => 
+    (s.id && s.id.toLowerCase() === query) || 
+    (s.email && s.email.toLowerCase() === query) ||
+    (s.email && s.email.toLowerCase().startsWith(query))
+  );
+
+  // พิเศษสำหรับ Developer account
+  if (query === 'phupa5874@gmail.com' || query === 'phupa' || query === 'admin') {
+    matched = {
+      id: 'ADMIN-663050',
+      name: 'ภูผา (ผู้ดูแลระบบ & ผู้พัฒนา)',
+      nickname: 'ภูผา',
+      email: 'phupa5874@gmail.com'
+    };
+  }
+
+  if (!matched) {
+    // หากพิมพ์อีเมล @kkumail.com แต่ไม่อยู่ใน roster ให้สร้างเป็นนักศึกษาทั่วไป
+    if (query.endsWith('@kkumail.com')) {
+      const prefix = query.split('@')[0];
+      matched = {
+        id: prefix,
+        name: prefix,
+        nickname: '',
+        email: query
+      };
+    } else {
+      showAuthError(`ไม่พบข้อมูลนักศึกษา "${raw}" ในฐานข้อมูลรุ่น COMED 69`);
+      return;
+    }
+  }
+
+  validateAndSetUser(matched.email, matched.name, `https://api.dicebear.com/7.x/bottts/svg?seed=${matched.email}`);
 }
 
 // ฟังก์ชันเปิดเบราว์เซอร์จริงสำหรับแอป APK

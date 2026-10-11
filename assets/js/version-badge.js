@@ -45,9 +45,9 @@
     const vCode = detectRuntimeCode();
     const badge = document.createElement('div');
     badge.id = 'comedAppVersionBadge';
-    badge.className = 'fixed bottom-2 right-2.5 z-40 pointer-events-none select-none opacity-40 hover:opacity-100 transition-opacity duration-300';
+    badge.style.cssText = 'position:fixed;bottom:8px;right:10px;z-index:999999;pointer-events:none;user-select:none;font-family:monospace;';
     badge.innerHTML = `
-      <span class="text-[9px] font-mono tracking-widest text-slate-400 bg-slate-950/60 px-1.5 py-0.5 rounded border border-white/5 backdrop-blur-xs">
+      <span style="font-size:10px;font-weight:bold;letter-spacing:1px;color:#f97316;background:rgba(15,23,42,0.85);padding:2px 8px;border-radius:8px;border:1px solid rgba(249,115,22,0.3);box-shadow:0 2px 8px rgba(0,0,0,0.4);display:inline-block;">
         ${vCode}
       </span>
     `;
