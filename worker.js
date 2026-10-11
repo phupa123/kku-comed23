@@ -284,8 +284,8 @@ export default {
     } else if (path === "/download" || path === "/download.html" || path === "/install" || path === "/app") {
       fetchUrl = new URL("/download.html", url.origin).toString();
     } else if (path === "/download/apk" || path === "/kku-comed23.apk" || path === "/app.apk") {
-      // 🚀 High-Speed Direct APK CDN Download (OAuth Compliant Build)
-      return Response.redirect("https://files.catbox.moe/s8s543.apk", 302);
+      // 🚀 High-Speed Direct APK CDN Download (Deep-Link Enabled)
+      return Response.redirect("https://files.catbox.moe/f4izud.apk", 302);
     } else if (path === "/fastshare" || path === "/fastshare.html") {
       fetchUrl = new URL("/fastshare.html", url.origin).toString();
     } else if (path === "/maintenance") {

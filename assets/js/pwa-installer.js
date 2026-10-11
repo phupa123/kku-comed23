@@ -10,8 +10,14 @@
 
   const STORAGE_INSTALLED_FLAG = 'COMED23_APP_INSTALLED';
 
-  // ตรวจสอบอย่างละเอียดว่าแอปถูกติดตั้งแล้ว หรือเปิดอยู่ในโหมด Standalone / Web App หรือไม่
+  // ตรวจสอบอย่างละเอียดว่าแอปถูกติดตั้งแล้ว หรือเปิดอยู่ในโหมด Standalone / Web App หรือ Native APK หรือไม่
   function isAppInstalled() {
+    // 0. ตรวจสอบโหมด Native App (Capacitor / Android WebView / Local Origin)
+    const isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    const isLocalOrigin = window.location.protocol === 'capacitor:' || window.location.hostname === 'localhost';
+    const isWebView = /wv|android.*version\/[0-9.]+/i.test(navigator.userAgent || '') && !/chrome\/[0-9.]+\s+mobile/i.test(navigator.userAgent || '');
+    if (isCapacitor || isLocalOrigin || isWebView) return true;
+
     // 1. ตรวจสอบ display-mode standalone, fullscreen, minimal-ui
     const isStandaloneDisplay = window.matchMedia('(display-mode: standalone)').matches ||
       window.matchMedia('(display-mode: fullscreen)').matches ||

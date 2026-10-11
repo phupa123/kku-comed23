@@ -222,7 +222,26 @@ function validateAndSetUser(email, name, avatarUrl) {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('return_to_app') === '1') {
     const encodedUser = encodeURIComponent(JSON.stringify(userSession));
-    window.location.href = `th.ac.kku.comed23://auth?session=${encodedUser}`;
+    const appDeepLink = `th.ac.kku.comed23://auth?session=${encodedUser}`;
+    
+    // แสดงกล่องแจ้งเตือนให้แตะกลับเข้าแอป พร้อมพยายามเด้งอัตโนมัติ
+    document.body.innerHTML = `
+      <div style="min-height:100vh;background:#090d16;display:flex;align-items:center;justify-content:center;padding:24px;font-family:'Prompt',sans-serif;color:#fff;text-align:center;">
+        <div style="background:#0f172a;border:1px solid rgba(249,115,22,0.4);padding:32px;border-radius:28px;max-width:380px;width:100%;box-shadow:0 25px 50px rgba(0,0,0,0.5);">
+          <div style="width:64px;height:64px;background:#22c55e20;color:#22c55e;border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px auto;font-size:28px;">✓</div>
+          <h2 style="font-size:18px;font-weight:900;margin-bottom:8px;">เข้าสู่ระบบสำเร็จ!</h2>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:20px;">ลงชื่อเข้าใช้ด้วย ${userSession.email} เรียบร้อยแล้ว</p>
+          <a href="${appDeepLink}" style="display:block;background:linear-gradient(to right,#f97316,#ea580c);color:#fff;font-weight:900;padding:14px;border-radius:18px;text-decoration:none;font-size:13px;box-shadow:0 10px 25px rgba(249,115,22,0.35);">
+            แตะที่นี่เพื่อกลับเข้าแอป COMED23
+          </a>
+          <p style="font-size:11px;color:#64748b;margin-top:16px;">กำลังพากลับเข้าแอปอัตโนมัติในไม่กี่วินาที...</p>
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      window.location.href = appDeepLink;
+    }, 500);
     return;
   }
   
