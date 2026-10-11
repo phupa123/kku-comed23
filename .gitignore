@@ -5,3 +5,11 @@
 node_modules/
 .DS_Store
 *.log
+
+# Mobile Native Builds & Artifacts (Ignore from Cloudflare Static Assets)
+android/
+www/
+*.apk
+kku-comed23.apk
+.gradle/
+build/
