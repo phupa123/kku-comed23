@@ -142,6 +142,10 @@
           <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i>
           <span>ปฏิทินงาน & ซิงค์</span>
         </button>
+        <a href="Calendar.html" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5" title="เปิดหน้า Calendar Hub แยกเต็มจอ">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>หน้าปฏิทินเต็ม</span>
+        </a>
         <button id="navTabTrash" onclick="switchNavSection('trash')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
           <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
           <span>ถังขยะกู้คืน</span>
@@ -2044,7 +2048,10 @@
       modal.id = 'calendarSubscriptionModal';
       modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200';
       
-      const feedUrl = `${window.location.origin}/api/calendar.ics`;
+      const userEmail = (appState.user && appState.user.email) ? encodeURIComponent(appState.user.email.toLowerCase().trim()) : '';
+      const feedUrl = userEmail 
+        ? `${window.location.origin}/api/calendar.ics?user=${userEmail}`
+        : `${window.location.origin}/api/calendar.ics`;
       const webcalUrl = feedUrl.replace(/^https?:\/\//, 'webcal://');
       const googleSubscribeUrl = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(feedUrl)}`;
 

@@ -216,12 +216,13 @@ export default {
         const SUPABASE_URL = "https://womovxeyfuzpogghikfu.supabase.co";
         const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvbW92eGV5ZnV6cG9nZ2hpa2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk4MTU2MDQsImV4cCI6MjA2NTM5MTYwNH0.kF0l7_7Bq8F44i-zL7GqE4N631h40wW_v_6pI1J8y-M";
         
-        const scope = url.searchParams.get("scope") || "department";
-        let queryUrl = `${SUPABASE_URL}/rest/v1/plans?select=*&order=start_date.asc`;
+        const scope = url.searchParams.get("scope") || "all";
+        const userEmail = (url.searchParams.get("user") || "").toLowerCase().trim();
+
+        let queryUrl = `${SUPABASE_URL}/rest/v1/plans?select=*&order=start_date.asc&or=(is_deleted.is.null,is_deleted.eq.false)`;
         if (scope === "department") {
           queryUrl += `&scope=eq.department`;
         }
-        queryUrl += `&or=(is_deleted.is.null,is_deleted.eq.false)`;
 
         const supaRes = await fetch(queryUrl, {
           headers: {
@@ -230,7 +231,21 @@ export default {
           }
         });
 
-        const plans = supaRes.ok ? await supaRes.json() : [];
+        let plans = supaRes.ok ? await supaRes.json() : [];
+
+        // กรองตามสิทธิ์ของผู้ใช้ถ้ามีการระบุ user email (งานสาขา + งานที่สร้างเอง + งานที่ถูกแชร์)
+        if (userEmail) {
+          plans = plans.filter(p => {
+            if (p.scope === "department" || p.is_official) return true;
+            if (p.creator_email && p.creator_email.toLowerCase().trim() === userEmail) return true;
+            if (Array.isArray(p.collaborators)) {
+              return p.collaborators.some(c => (c.email || "").toLowerCase().trim() === userEmail);
+            }
+            return false;
+          });
+        } else if (scope !== "all") {
+          plans = plans.filter(p => p.scope === "department");
+        }
         const nowStr = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
         
         const cleanText = (str) => {
@@ -296,6 +311,8 @@ export default {
       fetchUrl = new URL("/Plans.html", url.origin).toString();
     } else if (path === "/plans-admin" || path === "/plans-admin.html") {
       fetchUrl = new URL("/Plans-admin.html", url.origin).toString();
+    } else if (path === "/calendar" || path === "/calendar.html") {
+      fetchUrl = new URL("/Calendar.html", url.origin).toString();
     } else if (path === "/404") {
       fetchUrl = new URL("/404.html", url.origin).toString();
     }
