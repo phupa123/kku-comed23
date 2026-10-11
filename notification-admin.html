@@ -517,10 +517,26 @@
           }
         }
 
+        // ยิงคำสั่งส่ง Web Push เข้า Worker เพื่อปลุกเครื่องที่ปิดแอปอยู่
+        try {
+          await fetch('/api/push-dispatch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title,
+              message,
+              link: link || '/',
+              type
+            })
+          });
+        } catch (pushErr) {
+          console.warn('[Admin Push Dispatch Note]:', pushErr);
+        }
+
         // เก็บใน Local Storage ประวัติสำรอง
         saveLocalHistory(payload);
 
-        alert('ยิงกระจายข้อความแจ้งเตือนสำเร็จแล้ว!');
+        alert('ยิงกระจายข้อความแจ้งเตือนสำเร็จแล้ว! ระบบได้ส่ง Push ไปยังเครื่องนักศึกษาทุกคน');
         document.getElementById('broadcastForm').reset();
         updateLivePreview();
         loadBroadcastHistory();

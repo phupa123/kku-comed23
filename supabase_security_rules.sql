@@ -714,3 +714,33 @@ BEGIN
   END IF;
 END;
 $$;
+
+-- =========================================================================
+-- PUSH SUBSCRIPTIONS TABLE (VAPID / Web Push Tokens)
+-- จัดเก็บ Endpoint Token ของโทรศัพท์แต่ละเครื่องเพื่อส่ง Push ตอนปิดแอป
+-- =========================================================================
+
+CREATE TABLE IF NOT EXISTS public.push_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  endpoint TEXT NOT NULL UNIQUE,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  user_email TEXT,
+  device_info TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read push_subscriptions" ON public.push_subscriptions;
+CREATE POLICY "Allow public read push_subscriptions" ON public.push_subscriptions FOR SELECT TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "Allow public upsert push_subscriptions" ON public.push_subscriptions;
+CREATE POLICY "Allow public upsert push_subscriptions" ON public.push_subscriptions FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public update push_subscriptions" ON public.push_subscriptions;
+CREATE POLICY "Allow public update push_subscriptions" ON public.push_subscriptions FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public delete push_subscriptions" ON public.push_subscriptions;
+CREATE POLICY "Allow public delete push_subscriptions" ON public.push_subscriptions FOR DELETE TO anon, authenticated USING (true);

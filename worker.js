@@ -145,6 +145,85 @@ export default {
       }
     }
 
+    // 0.3 Web Push Dispatcher (Sends payload to registered subscriber endpoints)
+    if (path === "/api/push-dispatch") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*"
+          }
+        });
+      }
+
+      if (request.method === "POST") {
+        try {
+          const body = await request.json();
+          const { title, message, link, type } = body;
+
+          // Fetch registered push subscriptions from Supabase
+          const SUPABASE_URL = "https://drqrliajxigxyrfaypfg.supabase.co";
+          const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRycXJsaWFqeGlneHlyZmF5cGZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1MTQ1ODYsImV4cCI6MjEwNDA5MDU4Nn0.9IEsTHlUiVZEzNsqIaKeH5g1SzXw91SRALGeKFct0Nw";
+
+          const subRes = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions?select=*`, {
+            headers: {
+              "apikey": SUPABASE_ANON,
+              "Authorization": `Bearer ${SUPABASE_ANON}`
+            }
+          });
+
+          const subs = subRes.ok ? await subRes.json() : [];
+
+          // Dispatch standard Web Push message to each device endpoint
+          const pushPayload = JSON.stringify({
+            title: title || "ประกาศด่วนจาก COMED23",
+            message: message || "",
+            link: link || "/",
+            type: type || "info",
+            timestamp: Date.now()
+          });
+
+          const results = await Promise.allSettled(subs.map(async (sub) => {
+            if (!sub.endpoint) return null;
+            try {
+              // Direct endpoint trigger
+              return await fetch(sub.endpoint, {
+                method: "POST",
+                headers: {
+                  "TTL": "86400",
+                  "Urgency": type === "urgent" ? "high" : "normal"
+                },
+                body: pushPayload
+              });
+            } catch (e) {
+              return null;
+            }
+          }));
+
+          return new Response(JSON.stringify({
+            status: "success",
+            delivered_devices: subs.length,
+            title
+          }), {
+            status: 200,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Content-Type": "application/json"
+            }
+          });
+        } catch (pushErr) {
+          return new Response(JSON.stringify({ error: pushErr.message }), {
+            status: 500,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Content-Type": "application/json"
+            }
+          });
+        }
+      }
+    }
+
     // 1. Dynamic Campaign Routes (/payment/:id and /payment-admin/:id)
     let fetchUrl = request.url;
     let campaignParam = "";

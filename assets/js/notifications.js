@@ -53,9 +53,22 @@
   }
 
   const STORAGE_DISMISSED_PROMPT = 'COMED23_NOTIF_PROMPT_DISMISSED';
+  // VAPID Public Key generated for COMED KKU
+  const VAPID_PUBLIC_KEY = 'BEzlXgMuqgINsrzdcWJ5CQyXg83AKAlzvyruFr5BVJhwT_-oX7c2CIIUsiUZTJOm4emMbDtOF8hWpDNa6uvKUAk';
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
 
   const NotificationEngine = {
-    // 1. ขอสิทธิ์ Web Notification
+    // 1. ขอสิทธิ์ Web Notification และลงทะเบียน VAPID Push Subscription
     async requestPermission() {
       if (!('Notification' in window)) {
         return 'unsupported';
@@ -63,6 +76,9 @@
       try {
         const perm = await Notification.requestPermission();
         if (perm === 'granted') {
+          // ลงทะเบียน VAPID Push Token กับ Google/Apple Push Service
+          await this.subscribePushDevice();
+
           // ทดสอบแจ้งเตือนต้อนรับ 1 ครั้ง เพื่อให้มั่นใจว่าเครื่องเปิดรับระบบ
           this.triggerSystemNotification({
             id: 'welcome_test',
@@ -75,6 +91,53 @@
       } catch (e) {
         console.warn('[NotificationEngine] Permission request error:', e);
         return 'denied';
+      }
+    },
+
+    // บันทึก Token โทรศัพท์เข้าตาราง push_subscriptions ใน Supabase
+    async subscribePushDevice() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+
+        if (!sub) {
+          const appServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: appServerKey
+          });
+        }
+
+        if (sub) {
+          const subJson = sub.toJSON();
+          const endpoint = sub.endpoint;
+          const p256dh = subJson.keys?.p256dh;
+          const auth = subJson.keys?.auth;
+
+          if (endpoint && p256dh && auth) {
+            const client = getClient();
+            const userEmail = (sessionStorage.getItem('COMED_USER_SESSION') || '').toLowerCase().trim();
+            const deviceInfo = navigator.userAgent;
+
+            if (client) {
+              await client.from('push_subscriptions').upsert([{
+                endpoint,
+                p256dh,
+                auth,
+                user_email: userEmail || null,
+                device_info: deviceInfo,
+                updated_at: new Date().toISOString()
+              }], { onConflict: 'endpoint' });
+              console.log('[NotificationEngine] Push Subscription synced successfully');
+            }
+          }
+        }
+        return sub;
+      } catch (err) {
+        console.warn('[NotificationEngine] Push subscription registration note:', err);
+        return null;
       }
     },
 
