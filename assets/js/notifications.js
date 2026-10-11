@@ -64,6 +64,7 @@
     
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async function(OneSignal) {
+      try {
         // ล้างคิว Operation เก่าที่ติดค้างใน IndexedDB จาก externalId ที่เป็น JSON เสียหาย
         try {
           if (window.indexedDB) {
