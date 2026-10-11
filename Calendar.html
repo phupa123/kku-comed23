@@ -189,26 +189,43 @@
       </div>
     </div>
 
-    <!-- Calendar Month Navigation & Filters -->
-    <div class="glass-card rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2">
-        <button onclick="changeCalendarMonth(-1)" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer">
+    <!-- Calendar Navigation, View Switcher & Filters -->
+    <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="changeCalendarPeriod(-1)" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer" title="ช่วงก่อนหน้า">
           <i data-lucide="chevron-left" class="w-4 h-4"></i>
         </button>
-        <h3 id="calendarCurrentMonthTitle" class="text-base sm:text-lg font-black text-white min-w-[160px] text-center">
+        <h3 id="calendarCurrentMonthTitle" class="text-base sm:text-lg font-black text-white min-w-[170px] text-center">
           ตุลาคม 2569
         </h3>
-        <button onclick="changeCalendarMonth(1)" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer">
+        <button onclick="changeCalendarPeriod(1)" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer" title="ช่วงถัดไป">
           <i data-lucide="chevron-right" class="w-4 h-4"></i>
         </button>
         <button onclick="jumpToCalendarToday()" class="ml-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-amber-300 border border-amber-500/20 transition cursor-pointer">
           วันนี้
         </button>
+
+        <!-- View Switcher Tabs -->
+        <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-white/10 ml-0 sm:ml-2">
+          <button id="viewBtnMonth" onclick="setCalendarViewMode('month')" class="px-3 py-1 rounded-lg text-xs font-black transition bg-orange-500 text-white shadow-xs">
+            รายเดือน
+          </button>
+          <button id="viewBtnWeek" onclick="setCalendarViewMode('week')" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+            รายสัปดาห์ (Weekly)
+          </button>
+          <button id="viewBtnAgenda" onclick="setCalendarViewMode('agenda')" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+            กำหนดการ
+          </button>
+        </div>
       </div>
 
-      <!-- Scope Filter -->
+      <!-- Scope Filter & Quick Search -->
       <div class="flex items-center gap-2 flex-wrap text-xs">
-        <span class="text-slate-400 font-bold hidden sm:inline">กรองหมวดหมู่:</span>
+        <div class="relative flex-1 sm:flex-initial">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input type="text" id="calendarSearchInput" oninput="handleCalendarSearch(this.value)" placeholder="ค้นหากิจกรรม, สถานที่..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-full sm:w-48">
+        </div>
+
         <select id="calendarScopeFilter" onchange="renderCalendarView()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs">
           <option value="all">ทุกกิจกรรมที่มองเห็น</option>
           <option value="department">🏛️ เฉพาะงานสาขา</option>
@@ -218,9 +235,17 @@
       </div>
     </div>
 
-    <!-- Calendar Grid Table (Responsive) -->
-    <div class="glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
-      
+    <!-- Drag & Drop Hint Banner -->
+    <div id="calendarDragDropHint" class="hidden text-[11px] text-amber-300/90 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="move" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span><strong>เคล็ดลับ:</strong> คุณสามารถลาก (Drag & Drop) แถบกิจกรรมที่คุณสร้าง หรือมีสิทธิ์แอดมิน เพื่อเลื่อนวันจัดกิจกรรมได้โดยตรง</span>
+      </div>
+      <span class="text-slate-400 text-[10px]">บันทึกลง Cloud อัตโนมัติ</span>
+    </div>
+
+    <!-- VIEW 1: MONTH GRID VIEW -->
+    <div id="containerMonthView" class="glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
       <!-- Day Names Header (Sun - Sat) -->
       <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-black uppercase tracking-wider text-slate-400">
         <div class="py-2 text-rose-400">อา.</div>
@@ -236,17 +261,47 @@
       <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2">
         <!-- Rendered dynamically -->
       </div>
-
     </div>
 
-    <!-- Upcoming Events Agenda List -->
-    <div class="glass-card rounded-3xl p-6">
+    <!-- VIEW 2: WEEKLY TIME GRID VIEW -->
+    <div id="containerWeekView" class="hidden glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
+      <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+          <span class="font-bold text-amber-300">มุมมองรายสัปดาห์ (Weekly View & Time Grid)</span>
+          <span class="text-slate-400 text-[11px] hidden sm:inline">• เส้นสีส้มแสดงเวลาปัจจุบัน</span>
+        </div>
+        <span id="calendarWeekRangeBadge" class="font-mono text-slate-400 text-xs">-- ถึง --</span>
+      </div>
+
+      <div class="overflow-x-auto custom-scroll -mx-2 px-2">
+        <div class="min-w-[760px]">
+          <!-- Week Header with Days -->
+          <div id="calendarWeekHeader" class="grid grid-cols-8 gap-2 pb-2 text-center border-b border-white/10 font-mono text-xs">
+            <!-- Col 0 is Time, Col 1-7 are Sun-Sat -->
+          </div>
+
+          <!-- All-Day Events row if any -->
+          <div id="calendarWeekAllDayRow" class="grid grid-cols-8 gap-2 py-2 border-b border-white/10 text-[11px] bg-white/[0.01]">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- 24-Hour Scrollable Grid -->
+          <div id="calendarWeekTimeBody" class="relative max-h-[560px] overflow-y-auto custom-scroll mt-2 divide-y divide-white/5 border-b border-white/10">
+            <!-- Hour slots rendered dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: UPCOMING AGENDA LIST -->
+    <div id="containerAgendaView" class="glass-card rounded-3xl p-6">
       <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
         <h3 class="text-base font-black text-white flex items-center gap-2">
           <i data-lucide="list-checks" class="w-4 h-4 text-orange-400"></i>
-          <span>กำหนดการกิจกรรมที่กำลังจะมาถึง (Upcoming Agenda)</span>
+          <span>กำหนดการกิจกรรม (Upcoming Agenda)</span>
         </h3>
-        <span class="text-xs text-slate-400">กดที่การ์ดเพื่อซิงค์เข้าปฏิทิน</span>
+        <span class="text-xs text-slate-400">กดที่การ์ดเพื่อดูรายละเอียดหรือซิงค์</span>
       </div>
       <div id="calendarAgendaList" class="space-y-3">
         <!-- Rendered dynamically -->
@@ -312,6 +367,20 @@
           <textarea id="newRoomDesc" rows="3" placeholder="ระบุสิ่งที่ต้องเตรียม หรือกำหนดการย่อ..." class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
         </div>
 
+        <!-- Admin Official Publishing Badge & Switch -->
+        <div id="adminOfficialContainer" class="hidden p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+              🛡️ Admin Master
+            </span>
+            <span class="text-xs text-slate-200 font-bold">ประกาศเป็นกิจกรรมทางการของสาขา</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="newRoomIsOfficial" class="sr-only peer">
+            <div class="w-9 h-5 bg-slate-700 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+          </label>
+        </div>
+
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
           <button type="button" onclick="closeCreatePlanModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold">ยกเลิก</button>
           <button type="submit" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-black shadow-md transition">สร้างกิจกรรม</button>
@@ -360,7 +429,11 @@
       plans: [],
       calendarYear: new Date().getFullYear(),
       calendarMonth: new Date().getMonth(), // 0-11
-      calendarScopeFilter: 'all'
+      calendarWeekStart: getStartOfWeek(new Date()), // Date object (Sunday)
+      calendarViewMode: 'month', // 'month' | 'week' | 'agenda'
+      calendarScopeFilter: 'all',
+      searchQuery: '',
+      draggedPlanId: null
     };
 
     const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
@@ -369,6 +442,8 @@
       'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
+
+    const THAI_DAY_SHORT = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 
     function parseJwt(token) {
       try {
@@ -379,6 +454,15 @@
       } catch (e) {
         return null;
       }
+    }
+
+    function getStartOfWeek(date) {
+      const d = new Date(date);
+      const day = d.getDay(); // 0 is Sunday
+      const diff = d.getDate() - day;
+      const start = new Date(d.setDate(diff));
+      start.setHours(0, 0, 0, 0);
+      return start;
     }
 
     function setupGoogleAuth() {
@@ -496,16 +580,36 @@
       const userName = document.getElementById('authUserName');
       const userAvatar = document.getElementById('authUserAvatar');
       const userBadge = document.getElementById('calendarUserBadge');
+      const adminContainer = document.getElementById('adminOfficialContainer');
+      const dragHint = document.getElementById('calendarDragDropHint');
 
-      if (appState.user && appState.user.email) {
+      const isLogged = appState.user && appState.user.email;
+      const isAdmin = isLogged && (appState.user.isAdmin || (window.PlansRepo && window.PlansRepo.isAdminUser(appState.user.email)));
+
+      if (isLogged) {
         if (loginBtn) loginBtn.classList.add('hidden');
         if (userInfo) {
           userInfo.classList.remove('hidden');
           userInfo.classList.add('flex');
         }
-        if (userName) userName.textContent = appState.user.name || 'สมาชิก';
+        if (userName) {
+          userName.innerHTML = (isAdmin ? '<span class="text-amber-400">🛡️ </span>' : '') + escapeHtml(appState.user.name || 'สมาชิก');
+        }
         if (userAvatar) userAvatar.src = appState.user.avatar || '';
-        if (userBadge) userBadge.classList.remove('hidden');
+        if (userBadge) {
+          userBadge.classList.remove('hidden');
+          if (isAdmin) {
+            userBadge.className = 'text-xs text-amber-300 font-bold px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center gap-1';
+            userBadge.innerHTML = '🛡️ บัญชี Admin Master (สิทธิ์เต็ม)';
+          } else {
+            userBadge.className = 'text-xs text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-1';
+            userBadge.innerHTML = '✓ รวมงานส่วนตัวของคุณ';
+          }
+        }
+        if (dragHint) {
+          dragHint.classList.remove('hidden');
+          dragHint.classList.add('flex');
+        }
       } else {
         if (loginBtn) loginBtn.classList.remove('hidden');
         if (userInfo) {
@@ -513,6 +617,20 @@
           userInfo.classList.remove('flex');
         }
         if (userBadge) userBadge.classList.add('hidden');
+        if (dragHint) {
+          dragHint.classList.add('hidden');
+          dragHint.classList.remove('flex');
+        }
+      }
+
+      if (adminContainer) {
+        if (isAdmin) {
+          adminContainer.classList.remove('hidden');
+          adminContainer.classList.add('flex');
+        } else {
+          adminContainer.classList.add('hidden');
+          adminContainer.classList.remove('flex');
+        }
       }
     }
 
@@ -534,14 +652,57 @@
       renderCalendarView();
     }
 
-    function changeCalendarMonth(delta) {
-      appState.calendarMonth += delta;
-      if (appState.calendarMonth < 0) {
-        appState.calendarMonth = 11;
-        appState.calendarYear -= 1;
-      } else if (appState.calendarMonth > 11) {
-        appState.calendarMonth = 0;
-        appState.calendarYear += 1;
+    function setCalendarViewMode(mode) {
+      appState.calendarViewMode = mode;
+      
+      const btnMonth = document.getElementById('viewBtnMonth');
+      const btnWeek = document.getElementById('viewBtnWeek');
+      const btnAgenda = document.getElementById('viewBtnAgenda');
+
+      const cMonth = document.getElementById('containerMonthView');
+      const cWeek = document.getElementById('containerWeekView');
+      const cAgenda = document.getElementById('containerAgendaView');
+
+      [btnMonth, btnWeek, btnAgenda].forEach(b => {
+        if (!b) return;
+        b.className = 'px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
+      });
+
+      if (cMonth) cMonth.classList.add('hidden');
+      if (cWeek) cWeek.classList.add('hidden');
+      if (cAgenda) cAgenda.classList.add('hidden');
+
+      if (mode === 'month') {
+        if (btnMonth) btnMonth.className = 'px-3 py-1 rounded-lg text-xs font-black transition bg-orange-500 text-white shadow-xs';
+        if (cMonth) cMonth.classList.remove('hidden');
+      } else if (mode === 'week') {
+        if (btnWeek) btnWeek.className = 'px-3 py-1 rounded-lg text-xs font-black transition bg-orange-500 text-white shadow-xs';
+        if (cWeek) cWeek.classList.remove('hidden');
+      } else {
+        if (btnAgenda) btnAgenda.className = 'px-3 py-1 rounded-lg text-xs font-black transition bg-orange-500 text-white shadow-xs';
+        if (cAgenda) cAgenda.classList.remove('hidden');
+      }
+
+      renderCalendarView();
+    }
+
+    function changeCalendarPeriod(delta) {
+      if (appState.calendarViewMode === 'week') {
+        const cur = new Date(appState.calendarWeekStart);
+        cur.setDate(cur.getDate() + (delta * 7));
+        appState.calendarWeekStart = cur;
+        appState.calendarYear = cur.getFullYear();
+        appState.calendarMonth = cur.getMonth();
+      } else {
+        appState.calendarMonth += delta;
+        if (appState.calendarMonth < 0) {
+          appState.calendarMonth = 11;
+          appState.calendarYear -= 1;
+        } else if (appState.calendarMonth > 11) {
+          appState.calendarMonth = 0;
+          appState.calendarYear += 1;
+        }
+        appState.calendarWeekStart = getStartOfWeek(new Date(appState.calendarYear, appState.calendarMonth, 1));
       }
       renderCalendarView();
     }
@@ -550,19 +711,69 @@
       const now = new Date();
       appState.calendarYear = now.getFullYear();
       appState.calendarMonth = now.getMonth();
+      appState.calendarWeekStart = getStartOfWeek(now);
+      renderCalendarView();
+    }
+
+    function handleCalendarSearch(query) {
+      appState.searchQuery = (query || '').trim().toLowerCase();
       renderCalendarView();
     }
 
     function getFilteredCalendarPlans() {
       const scopeFilter = document.getElementById('calendarScopeFilter') ? document.getElementById('calendarScopeFilter').value : 'all';
       let list = appState.plans || [];
+
       if (scopeFilter !== 'all') {
         list = list.filter(p => p.scope === scopeFilter);
       }
+
+      if (appState.searchQuery) {
+        const q = appState.searchQuery;
+        list = list.filter(p => 
+          (p.title && p.title.toLowerCase().includes(q)) ||
+          (p.location && p.location.toLowerCase().includes(q)) ||
+          (p.description && p.description.toLowerCase().includes(q)) ||
+          (p.creator_name && p.creator_name.toLowerCase().includes(q))
+        );
+      }
+
       return list;
     }
 
+    // Permission Check: Can current user edit or reschedule this plan?
+    function canUserManagePlan(plan) {
+      if (!appState.user || !appState.user.email || !plan) return false;
+      const userEmail = appState.user.email.toLowerCase().trim();
+      const isAdmin = appState.user.isAdmin || (window.PlansRepo && window.PlansRepo.isAdminUser(userEmail));
+      if (isAdmin) return true;
+
+      const creatorEmail = (plan.creator_email || '').toLowerCase().trim();
+      return creatorEmail === userEmail;
+    }
+
     function renderCalendarView() {
+      const allPlans = getFilteredCalendarPlans();
+      const badgeEl = document.getElementById('calendarTotalPlansBadge');
+      if (badgeEl) {
+        badgeEl.textContent = `${allPlans.length} กิจกรรม`;
+      }
+
+      if (appState.calendarViewMode === 'month') {
+        renderMonthGrid(allPlans);
+      } else if (appState.calendarViewMode === 'week') {
+        renderWeekGrid(allPlans);
+      } else {
+        renderCalendarAgendaList(allPlans);
+      }
+
+      // Always update agenda list container too
+      renderCalendarAgendaList(allPlans);
+      lucide.createIcons();
+    }
+
+    // 1. MONTH GRID
+    function renderMonthGrid(allPlans) {
       const year = appState.calendarYear;
       const month = appState.calendarMonth; // 0-11
       const thaiYear = year + 543;
@@ -570,12 +781,6 @@
       const titleEl = document.getElementById('calendarCurrentMonthTitle');
       if (titleEl) {
         titleEl.textContent = `${THAI_MONTH_NAMES[month]} ${thaiYear}`;
-      }
-
-      const allPlans = getFilteredCalendarPlans();
-      const badgeEl = document.getElementById('calendarTotalPlansBadge');
-      if (badgeEl) {
-        badgeEl.textContent = `${allPlans.length} กิจกรรม`;
       }
 
       const gridEl = document.getElementById('calendarDaysGrid');
@@ -602,6 +807,8 @@
       // Active Month Days
       for (let d = 1; d <= daysInMonth; d++) {
         const isToday = isCurrentMonthYear && d === todayDate;
+        const targetDateObj = new Date(year, month, d);
+        const dateIsoStr = targetDateObj.toISOString().slice(0, 10);
 
         const dayPlans = allPlans.filter(p => {
           if (!p.start_date) return false;
@@ -613,11 +820,29 @@
         });
 
         const cell = document.createElement('div');
+        cell.setAttribute('data-date', dateIsoStr);
         cell.className = `min-h-[90px] sm:min-h-[110px] p-1.5 sm:p-2 rounded-2xl border transition flex flex-col justify-between relative group ${
           isToday
             ? 'bg-amber-500/10 border-amber-500/50 shadow-lg shadow-amber-500/10'
             : 'bg-slate-900/60 border-white/10 hover:border-white/25 hover:bg-slate-900/90'
         }`;
+
+        // Enable Drop on day cell
+        cell.ondragover = (e) => {
+          e.preventDefault();
+          cell.classList.add('border-amber-400', 'bg-amber-500/20');
+        };
+        cell.ondragleave = () => {
+          cell.classList.remove('border-amber-400', 'bg-amber-500/20');
+        };
+        cell.ondrop = async (e) => {
+          e.preventDefault();
+          cell.classList.remove('border-amber-400', 'bg-amber-500/20');
+          const planId = e.dataTransfer.getData('text/plain') || appState.draggedPlanId;
+          if (planId) {
+            await handleDropPlanOnDate(planId, targetDateObj);
+          }
+        };
 
         let cellHtml = `
           <div class="flex items-center justify-between mb-1">
@@ -632,17 +857,25 @@
         dayPlans.slice(0, 3).forEach(p => {
           const color = p.color || (p.scope === 'department' ? '#f97316' : '#38bdf8');
           const timeStr = new Date(p.start_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+          const isOwnerOrAdmin = canUserManagePlan(p);
+          const officialStar = p.is_official ? '⭐ ' : '';
+
           cellHtml += `
-            <div onclick="openCalendarPlanModal('${p.id}')" class="px-1.5 py-0.5 rounded-lg text-[10px] font-bold text-white truncate cursor-pointer transition hover:scale-[1.02] flex items-center gap-1 shadow-xs" style="background-color: ${color}33; border: 1px solid ${color}88" title="${escapeHtml(p.title)} (${timeStr})">
+            <div draggable="${isOwnerOrAdmin}"
+                 ondragstart="handleDragStart(event, '${p.id}')"
+                 onclick="openCalendarPlanModal('${p.id}')"
+                 class="px-1.5 py-0.5 rounded-lg text-[10px] font-bold text-white truncate transition hover:scale-[1.02] flex items-center gap-1 shadow-xs ${isOwnerOrAdmin ? 'cursor-grab active:cursor-grabbing hover:ring-1 hover:ring-amber-400' : 'cursor-pointer'}"
+                 style="background-color: ${color}33; border: 1px solid ${color}88"
+                 title="${officialStar}${escapeHtml(p.title)} (${timeStr})${isOwnerOrAdmin ? ' - ลากเพื่อเปลี่ยนวันได้' : ''}">
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color: ${color}"></span>
-              <span class="truncate">${escapeHtml(p.title)}</span>
+              <span class="truncate">${officialStar}${escapeHtml(p.title)}</span>
             </div>
           `;
         });
 
         if (dayPlans.length > 3) {
           cellHtml += `
-            <div class="text-[9px] font-bold text-amber-400 hover:text-amber-300 cursor-pointer text-center pt-0.5">
+            <div class="text-[9px] font-bold text-amber-400 hover:text-amber-300 cursor-pointer text-center pt-0.5" onclick="setCalendarViewMode('week')">
               + อีก ${dayPlans.length - 3} งาน
             </div>
           `;
@@ -662,11 +895,203 @@
         cell.innerHTML = `<span class="text-xs font-mono font-bold text-slate-500">${n}</span>`;
         gridEl.appendChild(cell);
       }
-
-      renderCalendarAgendaList(allPlans);
-      lucide.createIcons();
     }
 
+    // 2. WEEK VIEW (Weekly Time Grid & Real-time Indicator Line)
+    function renderWeekGrid(allPlans) {
+      const startOfWeek = new Date(appState.calendarWeekStart);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(endOfWeek.getDate() + 6);
+
+      const titleEl = document.getElementById('calendarCurrentMonthTitle');
+      if (titleEl) {
+        titleEl.textContent = `${THAI_MONTH_NAMES[startOfWeek.getMonth()]} ${startOfWeek.getFullYear() + 543}`;
+      }
+
+      const badgeRange = document.getElementById('calendarWeekRangeBadge');
+      if (badgeRange) {
+        const sTxt = `${startOfWeek.getDate()} ${THAI_MONTH_NAMES[startOfWeek.getMonth()].slice(0, 3)}`;
+        const eTxt = `${endOfWeek.getDate()} ${THAI_MONTH_NAMES[endOfWeek.getMonth()].slice(0, 3)} ${endOfWeek.getFullYear() + 543}`;
+        badgeRange.textContent = `${sTxt} - ${eTxt}`;
+      }
+
+      const headerEl = document.getElementById('calendarWeekHeader');
+      if (!headerEl) return;
+      headerEl.innerHTML = `
+        <div class="text-slate-500 text-[11px] py-1 font-bold">เวลา</div>
+      `;
+
+      const today = new Date();
+      const weekDays = [];
+
+      for (let i = 0; i < 7; i++) {
+        const curDate = new Date(startOfWeek);
+        curDate.setDate(curDate.getDate() + i);
+        weekDays.push(curDate);
+
+        const isToday = curDate.toDateString() === today.toDateString();
+        const dayHeader = document.createElement('div');
+        dayHeader.className = `p-1.5 rounded-xl border text-center transition ${
+          isToday ? 'bg-amber-500/20 border-amber-500/60 text-amber-300' : 'bg-slate-900/60 border-white/5 text-slate-300'
+        }`;
+        dayHeader.innerHTML = `
+          <div class="text-[10px] uppercase font-bold text-slate-400">${THAI_DAY_SHORT[curDate.getDay()]}</div>
+          <div class="text-sm font-black font-mono ${isToday ? 'text-amber-300' : 'text-white'}">${curDate.getDate()}</div>
+        `;
+        headerEl.appendChild(dayHeader);
+      }
+
+      // Time Body: Hours 06:00 to 22:00 (17 active hours for student schedule)
+      const timeBodyEl = document.getElementById('calendarWeekTimeBody');
+      if (!timeBodyEl) return;
+      timeBodyEl.innerHTML = '';
+
+      const START_HOUR = 7; // 07:00
+      const END_HOUR = 21;  // 21:00
+
+      // Calculate real-time line position if today is in this week
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      const isTodayInWeek = weekDays.some(d => d.toDateString() === today.toDateString());
+      const todayDayIndex = today.getDay(); // 0-6
+
+      for (let h = START_HOUR; h <= END_HOUR; h++) {
+        const hourRow = document.createElement('div');
+        hourRow.className = 'grid grid-cols-8 gap-2 py-3 relative min-h-[56px] items-start';
+
+        // Col 0: Hour Label
+        const hourLabel = document.createElement('div');
+        hourLabel.className = 'text-[11px] font-mono text-slate-400 font-bold -mt-2';
+        hourLabel.textContent = `${String(h).padStart(2, '0')}:00`;
+        hourRow.appendChild(hourLabel);
+
+        // Cols 1-7: Day Slots
+        for (let di = 0; di < 7; di++) {
+          const slotDate = weekDays[di];
+          const slotCell = document.createElement('div');
+          slotCell.className = 'relative min-h-[48px] rounded-xl border border-transparent hover:border-white/10 hover:bg-white/[0.02] transition p-1';
+          
+          // Drop target
+          slotCell.ondragover = (e) => {
+            e.preventDefault();
+            slotCell.classList.add('border-amber-400', 'bg-amber-500/20');
+          };
+          slotCell.ondragleave = () => {
+            slotCell.classList.remove('border-amber-400', 'bg-amber-500/20');
+          };
+          slotCell.ondrop = async (e) => {
+            e.preventDefault();
+            slotCell.classList.remove('border-amber-400', 'bg-amber-500/20');
+            const planId = e.dataTransfer.getData('text/plain') || appState.draggedPlanId;
+            if (planId) {
+              const targetTime = new Date(slotDate);
+              targetTime.setHours(h, 0, 0, 0);
+              await handleDropPlanOnDate(planId, targetTime);
+            }
+          };
+
+          // Find plans matching this specific day and hour slot
+          const slotPlans = allPlans.filter(p => {
+            if (!p.start_date) return false;
+            const pStart = new Date(p.start_date);
+            const isSameDay = pStart.toDateString() === slotDate.toDateString();
+            const isSameHour = pStart.getHours() === h;
+            return isSameDay && isSameHour;
+          });
+
+          slotPlans.forEach(p => {
+            const color = p.color || '#f97316';
+            const isOwnerOrAdmin = canUserManagePlan(p);
+            const timeStr = new Date(p.start_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            
+            const badge = document.createElement('div');
+            badge.draggable = isOwnerOrAdmin;
+            badge.ondragstart = (e) => handleDragStart(e, p.id);
+            badge.onclick = () => openCalendarPlanModal(p.id);
+            badge.className = `p-1.5 rounded-xl text-[10px] font-bold text-white shadow-md transition hover:scale-[1.02] mb-1 ${
+              isOwnerOrAdmin ? 'cursor-grab active:cursor-grabbing hover:ring-1 hover:ring-amber-400' : 'cursor-pointer'
+            }`;
+            badge.style.backgroundColor = `${color}33`;
+            badge.style.border = `1px solid ${color}aa`;
+            badge.innerHTML = `
+              <div class="flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color: ${color}"></span>
+                <span class="font-mono text-[9px] text-amber-300 font-extrabold">${timeStr}</span>
+              </div>
+              <div class="truncate text-[10px] font-bold text-white mt-0.5">${p.is_official ? '⭐ ' : ''}${escapeHtml(p.title)}</div>
+              ${p.location ? `<div class="truncate text-[9px] text-slate-300">📍 ${escapeHtml(p.location)}</div>` : ''}
+            `;
+            slotCell.appendChild(badge);
+          });
+
+          hourRow.appendChild(slotCell);
+        }
+
+        timeBodyEl.appendChild(hourRow);
+      }
+
+      // If Today is in current week, add Real-Time Amber Indicator Line
+      if (isTodayInWeek && currentHour >= START_HOUR && currentHour <= END_HOUR) {
+        const hourDiff = (currentHour - START_HOUR) + (currentMinute / 60);
+        const approxTopPx = hourDiff * 62; // roughly 62px per hour row
+        
+        const nowLine = document.createElement('div');
+        nowLine.className = 'absolute left-0 right-0 pointer-events-none flex items-center z-10';
+        nowLine.style.top = `${approxTopPx}px`;
+        nowLine.innerHTML = `
+          <div class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50 -ml-1"></div>
+          <div class="flex-1 h-[2px] bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 shadow-sm shadow-amber-400/50"></div>
+          <span class="px-2 py-0.5 rounded-md bg-amber-500 text-slate-950 font-black text-[9px] font-mono shadow-sm ml-1">
+            NOW ${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}
+          </span>
+        `;
+        timeBodyEl.appendChild(nowLine);
+      }
+    }
+
+    // Drag & Drop Reschedule Handlers
+    function handleDragStart(e, planId) {
+      appState.draggedPlanId = planId;
+      e.dataTransfer.setData('text/plain', planId);
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    async function handleDropPlanOnDate(planId, targetDateObj) {
+      const plan = (appState.plans || []).find(p => p.id === planId);
+      if (!plan) return;
+
+      if (!canUserManagePlan(plan)) {
+        alert("🔒 คุณไม่มีสิทธิ์เลื่อนกำหนดการกิจกรรมนี้ (เฉพาะผู้สร้างกิจกรรม หรือแอดมินเท่านั้น)");
+        return;
+      }
+
+      const originalStart = new Date(plan.start_date);
+      const newStart = new Date(targetDateObj);
+      newStart.setHours(originalStart.getHours(), originalStart.getMinutes(), 0, 0);
+
+      let newEnd = null;
+      if (plan.end_date) {
+        const originalEnd = new Date(plan.end_date);
+        const durationMs = originalEnd.getTime() - originalStart.getTime();
+        newEnd = new Date(newStart.getTime() + durationMs).toISOString();
+      }
+
+      const confirmMsg = `🗓️ ยืนยันการเลื่อนกิจกรรม:\n"${plan.title}"\nไปยังวันที่: ${newStart.toLocaleDateString('th-TH', { dateStyle: 'full' })} เวลา ${newStart.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น. ใช่หรือไม่?`;
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        await window.PlansRepo.updatePlan(planId, {
+          start_date: newStart.toISOString(),
+          end_date: newEnd
+        });
+        await refreshCalendarData();
+        alert(`🎉 เลื่อนกิจกรรม "${plan.title}" ไปวันที่ ${newStart.toLocaleDateString('th-TH')} เรียบร้อยแล้ว`);
+      } catch (err) {
+        alert("เลื่อนกิจกรรมไม่สำเร็จ: " + err.message);
+      }
+    }
+
+    // 3. AGENDA LIST
     function renderCalendarAgendaList(plans) {
       const container = document.getElementById('calendarAgendaList');
       if (!container) return;
@@ -685,12 +1110,13 @@
         return;
       }
 
-      sorted.slice(0, 10).forEach(p => {
+      sorted.slice(0, 15).forEach(p => {
         const startDate = new Date(p.start_date);
         const dateStr = startDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
         const timeStr = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
         const scopeBadge = p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
         const color = p.color || '#f97316';
+        const isOfficial = p.is_official;
 
         const item = document.createElement('div');
         item.className = 'p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-amber-500/40 hover:bg-white/[0.05] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 group';
@@ -703,6 +1129,7 @@
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/10 text-slate-300">${scopeBadge}</span>
+                ${isOfficial ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">⭐ ทางการ</span>' : ''}
                 <span class="text-xs font-mono text-amber-400 font-bold">${dateStr} • ${timeStr}</span>
               </div>
               <h4 class="text-sm font-bold text-white group-hover:text-amber-300 transition mt-0.5">${escapeHtml(p.title)}</h4>
@@ -742,12 +1169,17 @@
       const dateText = sDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' น.' +
         (eDate ? ` - ${eDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} น.` : '');
 
+      const isOwnerOrAdmin = canUserManagePlan(p);
+
       modal.innerHTML = `
         <div class="glass-card rounded-3xl border border-white/20 max-w-md w-full p-6 shadow-2xl relative space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-white/10">
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-300">
-              ${p.scope === 'department' ? '🏛️ งานสาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว'}
-            </span>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-300">
+                ${p.scope === 'department' ? '🏛️ งานสาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว'}
+              </span>
+              ${p.is_official ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">⭐ ทางการ</span>' : ''}
+            </div>
             <button onclick="this.closest('#calendarQuickModal').remove()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
           </div>
 
@@ -925,6 +1357,8 @@
       const endDate = document.getElementById('newRoomEndDate').value;
       const location = document.getElementById('newRoomLocation').value;
       const desc = document.getElementById('newRoomDesc').value;
+      const isOfficialCheck = document.getElementById('newRoomIsOfficial');
+      const isOfficial = isOfficialCheck ? isOfficialCheck.checked : false;
 
       const payload = {
         title,
@@ -935,6 +1369,7 @@
         custom_columns: ["สิ่งที่ต้องทำ", "กำลังทำ", "เสร็จสิ้น"],
         start_date: new Date(startDate).toISOString(),
         end_date: endDate ? new Date(endDate).toISOString() : null,
+        is_official: isOfficial,
         creator_email: appState.user.email,
         creator_name: appState.user.name || 'สมาชิกสาขา',
         creator_avatar: appState.user.avatar || '',

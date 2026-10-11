@@ -280,6 +280,16 @@ export default {
             `DTSTART:${startUtc}`,
             `DTEND:${endUtc}`,
             "STATUS:CONFIRMED",
+            "BEGIN:VALARM",
+            "ACTION:DISPLAY",
+            "DESCRIPTION:แจ้งเตือนกิจกรรมล่วงหน้า 1 วัน",
+            "TRIGGER:-P1D",
+            "END:VALARM",
+            "BEGIN:VALARM",
+            "ACTION:DISPLAY",
+            "DESCRIPTION:แจ้งเตือนกิจกรรมล่วงหน้า 1 ชั่วโมง",
+            "TRIGGER:-PT1H",
+            "END:VALARM",
             "END:VEVENT"
           ].join("\r\n");
         }).filter(Boolean);

@@ -534,10 +534,16 @@
           <textarea id="taskFormDesc" rows="3" placeholder="ระบุสิ่งที่ต้องทำ ลำดับขั้นตอน..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
         </div>
 
-        <div class="flex items-center justify-between pt-3 border-t border-white/10">
-          <button type="button" id="btnDeleteTaskInsideModal" onclick="handleDeleteTaskFromModal()" class="hidden px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white transition font-bold">
-            ทิ้งลงถังขยะห้อง
-          </button>
+        <div class="flex items-center justify-between pt-3 border-t border-white/10 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <button type="button" id="btnDeleteTaskInsideModal" onclick="handleDeleteTaskFromModal()" class="hidden px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white transition font-bold">
+              ทิ้งลงถังขยะห้อง
+            </button>
+            <button type="button" id="btnConvertTaskToCalendar" onclick="handleConvertTaskToCalendarEvent()" class="hidden px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-slate-950 transition font-bold flex items-center gap-1" title="ดึงชื่องานย่อยนี้ไปสร้างเป็นกิจกรรมบน Calendar">
+              <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+              <span>สร้างกิจกรรมบน Calendar</span>
+            </button>
+          </div>
           <div class="flex items-center gap-2 ml-auto">
             <button type="button" onclick="closeTaskModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold">ยกเลิก</button>
             <button type="submit" id="btnSaveTask" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-black shadow-md transition">บันทึก</button>
@@ -1479,6 +1485,12 @@
         }
       }
 
+      // ปุ่มแปลงงานย่อยเป็นกิจกรรมบน Calendar
+      const btnConvert = document.getElementById('btnConvertTaskToCalendar');
+      if (btnConvert) {
+        btnConvert.classList.remove('hidden');
+      }
+
       const colSelect = document.getElementById('taskFormColumn');
       colSelect.innerHTML = '';
       (appState.activeRoom.custom_columns || []).forEach(c => {
@@ -1495,6 +1507,18 @@
     function closeTaskModal() {
       document.getElementById('taskModal').classList.add('hidden');
       document.getElementById('taskModal').classList.remove('flex');
+    }
+
+    function handleConvertTaskToCalendarEvent() {
+      const taskTitle = document.getElementById('taskFormTitle').value;
+      const taskDesc = document.getElementById('taskFormDesc').value;
+      const roomTitle = appState.activeRoom ? appState.activeRoom.title : 'ห้องงาน';
+
+      closeTaskModal();
+      openCreatePlanModal();
+
+      document.getElementById('newRoomTitle').value = `${taskTitle} (จาก: ${roomTitle})`;
+      document.getElementById('newRoomDesc').value = taskDesc || `สร้างจากงานย่อยในห้อง: ${roomTitle}`;
     }
 
     async function handleTaskSubmit(e) {
