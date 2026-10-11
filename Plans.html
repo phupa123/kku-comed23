@@ -275,6 +275,14 @@
               <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i>
               <span>ปฏิทินในเครื่อง (.ics)</span>
             </button>
+            <button onclick="openManageColumnsModal()" class="px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500 text-purple-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-purple-500/30 transition cursor-pointer" title="ปรับแต่งขั้นตอนคอลัมน์ของบอร์ดนี้">
+              <i data-lucide="columns" class="w-3.5 h-3.5 text-purple-400"></i>
+              <span>ปรับแต่งคอลัมน์</span>
+            </button>
+            <button onclick="exportRoomTasksSummary()" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-emerald-500/30 transition cursor-pointer" title="คัดลอกสรุปรายการงานทั้งหมดสำหรับส่งอาจารย์หรือรายงานในกลุ่ม">
+              <i data-lucide="copy-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>คัดลอกสรุปงาน</span>
+            </button>
             <button onclick="openAddTaskModal()" class="px-3.5 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>เพิ่มงานย่อย</span>
@@ -520,6 +528,30 @@
           </div>
         </div>
 
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">กำหนดส่ง (Due Date)</label>
+            <input type="datetime-local" id="taskFormDueDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ป้ายกำกับ / หมวดหมู่</label>
+            <input type="text" id="taskFormTag" placeholder="เช่น #ฝ่ายสถานที่, #เอกสาร" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+          </div>
+        </div>
+
+        <!-- Task Assignee Selector -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span>ผู้รับผิดชอบงาน (Assignee)</span>
+            <span class="text-[10px] text-slate-400">เลือกจากเพื่อนในสาขา</span>
+          </label>
+          <div class="relative">
+            <input type="text" id="taskFormAssigneeSearch" oninput="searchAssigneeForTask(this.value)" placeholder="พิมพ์ชื่อ, ชื่อเล่น หรือรหัสนักศึกษา..." class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <div id="taskFormAssigneeDropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-900/95 border border-white/15 rounded-xl shadow-2xl z-20 max-h-36 overflow-y-auto custom-scroll p-1"></div>
+          </div>
+          <div id="taskFormSelectedAssignee" class="flex flex-wrap gap-1.5 mt-1.5"></div>
+        </div>
+
         <!-- File / Image / Video URL Attachment -->
         <div>
           <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
@@ -566,6 +598,40 @@
 
       <div id="roomTrashItemsList" class="py-4 space-y-2.5 max-h-80 overflow-y-auto custom-scroll text-xs">
         <!-- Rendered items -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: MANAGE ROOM COLUMNS ================= -->
+  <div id="modalManageColumns" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-md w-full p-6 shadow-2xl relative space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="columns" class="w-4 h-4 text-purple-400"></i>
+          <span>ปรับแต่งคอลัมน์ขั้นตอนการทำงาน</span>
+        </h3>
+        <button onclick="closeManageColumnsModal()" class="p-1 text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <p class="text-xs text-slate-300">
+        กำหนดขั้นตอนการทำงานของบอร์ดนี้ (เช่น สิ่งที่ต้องทำ, กำลังทำ, รอตรวจ, เสร็จสิ้น):
+      </p>
+
+      <div id="manageColumnsList" class="space-y-2 max-h-60 overflow-y-auto custom-scroll">
+        <!-- List of columns rendered dynamically -->
+      </div>
+
+      <div class="flex items-center gap-2 pt-2">
+        <input type="text" id="newColumnInput" placeholder="เพิ่มชื่อขั้นตอนใหม่..." class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs">
+        <button type="button" onclick="handleAddColumnToRoom()" class="px-3.5 py-2 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs flex items-center gap-1 transition">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>เพิ่ม</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+        <button type="button" onclick="closeManageColumnsModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 text-xs font-bold">ยกเลิก</button>
+        <button type="button" onclick="saveCustomColumnsToRoom()" class="px-5 py-2 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-black text-xs shadow-md transition">บันทึกขั้นตอน</button>
       </div>
     </div>
   </div>
@@ -627,6 +693,8 @@
       activeRoom: null,
       activeTasks: [],
       selectedRoomCollabs: [],
+      selectedTaskAssignees: [],
+      editingRoomColumns: [],
       activeNavTab: 'rooms', // 'rooms' | 'calendar' | 'trash'
       roomFilter: 'all',
       searchQuery: '',
@@ -1128,17 +1196,63 @@
           const priorityBadge = task.priority === 'urgent' ? '<span class="text-[9px] px-1.5 py-0.2 rounded-md bg-rose-500/20 text-rose-300 font-black">ด่วนสุด</span>' :
                                 task.priority === 'high' ? '<span class="text-[9px] px-1.5 py-0.2 rounded-md bg-orange-500/20 text-orange-300 font-bold">สำคัญ</span>' : '';
 
+          // Due date check & overdue formatting
+          let dueDateHtml = '';
+          if (task.due_date) {
+            const dueObj = new Date(task.due_date);
+            const isOverdue = dueObj < new Date() && !task.is_completed;
+            const dueStr = dueObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+            dueDateHtml = `
+              <span class="inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded-md ${
+                isOverdue ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse font-bold' : 'bg-white/5 text-slate-300'
+              }" title="กำหนดส่ง: ${dueObj.toLocaleString('th-TH')}">
+                <i data-lucide="clock" class="w-2.5 h-2.5 ${isOverdue ? 'text-rose-400' : 'text-slate-400'}"></i>
+                <span>${isOverdue ? 'เลยกำหนด ' : ''}${dueStr}</span>
+              </span>
+            `;
+          }
+
+          // Assignee pill
+          let assigneesHtml = '';
+          if (Array.isArray(task.assignees) && task.assignees.length > 0) {
+            assigneesHtml = `<div class="flex items-center -space-x-1.5" title="ผู้รับผิดชอบ: ${task.assignees.map(a => a.name).join(', ')}">`;
+            task.assignees.slice(0, 3).forEach(a => {
+              const av = a.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>";
+              assigneesHtml += `<img src="${av}" class="w-4 h-4 rounded-full border border-slate-900 object-cover" alt="${escapeHtml(a.name)}">`;
+            });
+            if (task.assignees.length > 3) {
+              assigneesHtml += `<span class="text-[8px] font-bold text-slate-400 px-1">+${task.assignees.length - 3}</span>`;
+            }
+            assigneesHtml += `</div>`;
+          }
+
+          // Tag badge
+          const tagHtml = task.tags && task.tags.length > 0
+            ? `<span class="text-[9px] px-1.5 py-0.2 rounded-md bg-purple-500/15 text-purple-300 border border-purple-500/20 font-bold">${escapeHtml(task.tags[0])}</span>`
+            : '';
+
           card.innerHTML = `
-            <div class="flex items-center justify-between gap-1">
-              ${priorityBadge}
+            <div class="flex items-center justify-between gap-1 flex-wrap">
+              <div class="flex items-center gap-1">
+                ${priorityBadge}
+                ${tagHtml}
+              </div>
               <!-- Last Mover Profile -->
               <div class="flex items-center gap-1 text-[10px] text-slate-400 ml-auto" title="ย้ายล่าสุดโดย: ${task.last_moved_by_name || '-'}">
                 <img src="${task.last_moved_by_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>"}" class="w-3.5 h-3.5 rounded-full">
-                <span class="truncate max-w-[80px]">${task.last_moved_by_name || 'สมาชิก'}</span>
+                <span class="truncate max-w-[70px]">${task.last_moved_by_name || 'สมาชิก'}</span>
               </div>
             </div>
+
             <h4 class="font-bold text-white text-xs line-clamp-2">${task.title}</h4>
-            ${task.attachments && task.attachments.length > 0 ? `<div class="text-[10px] text-sky-400 flex items-center gap-1"><i data-lucide="paperclip" class="w-3 h-3"></i> มีไฟล์แนบ</div>` : ''}
+
+            <div class="flex items-center justify-between gap-2 pt-1 border-t border-white/5 text-[10px]">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                ${dueDateHtml}
+                ${task.attachments && task.attachments.length > 0 ? `<span class="text-sky-400 flex items-center gap-0.5" title="มีไฟล์แนบ"><i data-lucide="paperclip" class="w-3 h-3"></i></span>` : ''}
+              </div>
+              ${assigneesHtml}
+            </div>
           `;
           dropzone.appendChild(card);
         });
@@ -1433,6 +1547,47 @@
       renderNewRoomCollabs();
     }
 
+    // Task Assignee Autocomplete Helper
+    function searchAssigneeForTask(q) {
+      const drop = document.getElementById('taskFormAssigneeDropdown');
+      if (!drop) return;
+      const results = window.PlansRepo.getStudentOptions(q);
+      if (!q.trim() || results.length === 0) { drop.classList.add('hidden'); return; }
+      drop.innerHTML = '';
+      results.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'p-2 hover:bg-white/10 rounded-lg cursor-pointer flex items-center justify-between text-xs';
+        item.onclick = () => {
+          if (!appState.selectedTaskAssignees.some(c => c.email === s.email)) {
+            appState.selectedTaskAssignees.push(s);
+            renderSelectedTaskAssignees();
+          }
+          drop.classList.add('hidden');
+          document.getElementById('taskFormAssigneeSearch').value = '';
+        };
+        item.innerHTML = `<span class="font-bold text-white">${s.name} (${s.nickname || '-'})</span><span class="text-slate-400 text-[10px]">${s.id}</span>`;
+        drop.appendChild(item);
+      });
+      drop.classList.remove('hidden');
+    }
+
+    function renderSelectedTaskAssignees() {
+      const container = document.getElementById('taskFormSelectedAssignee');
+      if (!container) return;
+      container.innerHTML = '';
+      appState.selectedTaskAssignees.forEach(s => {
+        const tag = document.createElement('span');
+        tag.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-orange-500/20 text-orange-300 border border-orange-500/30';
+        tag.innerHTML = `${escapeHtml(s.name)} <button type="button" onclick="removeTaskAssignee('${s.email}')" class="hover:text-rose-400">&times;</button>`;
+        container.appendChild(tag);
+      });
+    }
+
+    function removeTaskAssignee(email) {
+      appState.selectedTaskAssignees = appState.selectedTaskAssignees.filter(c => c.email !== email);
+      renderSelectedTaskAssignees();
+    }
+
     // Task Modal (Add / Edit)
     function openAddTaskModal() {
       if (!appState.activeRoom) return;
@@ -1452,6 +1607,11 @@
       document.getElementById('taskFormTitle').value = '';
       document.getElementById('taskFormAttachmentUrl').value = '';
       document.getElementById('taskFormDesc').value = '';
+      document.getElementById('taskFormDueDate').value = '';
+      document.getElementById('taskFormTag').value = '';
+      document.getElementById('taskFormAssigneeSearch').value = '';
+      appState.selectedTaskAssignees = [];
+      renderSelectedTaskAssignees();
       document.getElementById('btnDeleteTaskInsideModal').classList.add('hidden');
 
       const colSelect = document.getElementById('taskFormColumn');
@@ -1475,7 +1635,23 @@
       document.getElementById('taskFormPriority').value = task.priority || 'normal';
       document.getElementById('taskFormAttachmentUrl').value = (task.attachments && task.attachments[0]) ? task.attachments[0].url : '';
       
-      // สิทธิ์การลบงานย่อย: แสดงปุ่มลบเฉพาะผู้สร้างงานย่อย, ผู้สร้างห้องงาน หรือแอดมินเท่านั้น
+      // Due Date ISO convert to datetime-local value
+      if (task.due_date) {
+        const d = new Date(task.due_date);
+        const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('taskFormDueDate').value = iso;
+      } else {
+        document.getElementById('taskFormDueDate').value = '';
+      }
+
+      document.getElementById('taskFormTag').value = (task.tags && task.tags[0]) ? task.tags[0] : '';
+
+      // Assignees
+      appState.selectedTaskAssignees = Array.isArray(task.assignees) ? [...task.assignees] : [];
+      renderSelectedTaskAssignees();
+      document.getElementById('taskFormAssigneeSearch').value = '';
+
+      // สิทธิ์การลบงานย่อย
       const btnDeleteTask = document.getElementById('btnDeleteTaskInsideModal');
       if (btnDeleteTask) {
         if (canManageTask(task, appState.activeRoom)) {
@@ -1535,8 +1711,13 @@
       const priority = document.getElementById('taskFormPriority').value;
       const attachUrl = document.getElementById('taskFormAttachmentUrl').value.trim();
       const desc = document.getElementById('taskFormDesc').value;
+      const dueDateVal = document.getElementById('taskFormDueDate').value;
+      const tagVal = document.getElementById('taskFormTag').value.trim();
 
       const attachments = attachUrl ? [{ url: attachUrl, name: 'ไฟล์แนบ' }] : [];
+      const tags = tagVal ? [tagVal] : [];
+      const dueDateIso = dueDateVal ? new Date(dueDateVal).toISOString() : null;
+
       const moverUser = {
         email: appState.user.email,
         name: appState.user.name,
@@ -1551,6 +1732,9 @@
             column_name: col,
             priority,
             attachments,
+            tags,
+            due_date: dueDateIso,
+            assignees: appState.selectedTaskAssignees,
             is_completed: col.includes('เสร็จ')
           }, moverUser);
         } else {
@@ -1561,6 +1745,9 @@
             column_name: col,
             priority,
             attachments,
+            tags,
+            due_date: dueDateIso,
+            assignees: appState.selectedTaskAssignees,
             creator_email: moverUser.email,
             creator_name: moverUser.name,
             creator_avatar: moverUser.avatar,
@@ -1572,6 +1759,138 @@
       } catch (err) {
         alert("บันทึกงานย่อยไม่สำเร็จ: " + err.message);
       }
+    }
+
+    // =========================================================================
+    // CUSTOM WORKFLOW COLUMNS MANAGEMENT & EXPORT SUMMARY
+    // =========================================================================
+
+    function openManageColumnsModal() {
+      if (!appState.activeRoom) return;
+      if (!canManagePlan(appState.activeRoom)) {
+        alert("🔒 เฉพาะผู้สร้างห้องงานหรือแอดมินเท่านั้นที่สามารถปรับแต่งคอลัมน์ขั้นตอนได้");
+        return;
+      }
+
+      appState.editingRoomColumns = [...(appState.activeRoom.custom_columns || ["สิ่งที่ต้องทำ", "กำลังทำ", "เสร็จสิ้น"])];
+      renderManageColumnsList();
+
+      document.getElementById('modalManageColumns').classList.remove('hidden');
+      document.getElementById('modalManageColumns').classList.add('flex');
+    }
+
+    function closeManageColumnsModal() {
+      document.getElementById('modalManageColumns').classList.add('hidden');
+      document.getElementById('modalManageColumns').classList.remove('flex');
+    }
+
+    function renderManageColumnsList() {
+      const container = document.getElementById('manageColumnsList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      appState.editingRoomColumns.forEach((colName, index) => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-white/10 text-xs';
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-md bg-white/10 flex items-center justify-center font-mono text-[10px] text-slate-400 font-bold">${index + 1}</span>
+            <span class="font-bold text-white">${escapeHtml(colName)}</span>
+          </div>
+          <div class="flex items-center gap-1">
+            ${index > 0 ? `<button type="button" onclick="moveColumnIndex(${index}, -1)" class="p-1 hover:text-white text-slate-400" title="เลื่อนขึ้น">▲</button>` : ''}
+            ${index < appState.editingRoomColumns.length - 1 ? `<button type="button" onclick="moveColumnIndex(${index}, 1)" class="p-1 hover:text-white text-slate-400" title="เลื่อนลง">▼</button>` : ''}
+            <button type="button" onclick="removeColumnIndex(${index})" class="p-1 hover:text-rose-400 text-slate-400 ml-1" title="ลบขั้นตอนนี้">&times;</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function handleAddColumnToRoom() {
+      const input = document.getElementById('newColumnInput');
+      const val = input.value.trim();
+      if (!val) return;
+      if (appState.editingRoomColumns.includes(val)) {
+        alert("มีชื่อขั้นตอนนี้ในบอร์ดแล้ว");
+        return;
+      }
+      appState.editingRoomColumns.push(val);
+      input.value = '';
+      renderManageColumnsList();
+    }
+
+    function moveColumnIndex(index, delta) {
+      const target = index + delta;
+      if (target < 0 || target >= appState.editingRoomColumns.length) return;
+      const temp = appState.editingRoomColumns[index];
+      appState.editingRoomColumns[index] = appState.editingRoomColumns[target];
+      appState.editingRoomColumns[target] = temp;
+      renderManageColumnsList();
+    }
+
+    function removeColumnIndex(index) {
+      if (appState.editingRoomColumns.length <= 1) {
+        alert("บอร์ดต้องมีขั้นตอนอย่างน้อย 1 คอลัมน์");
+        return;
+      }
+      if (confirm(`คุณต้องการลบคอลัมน์ "${appState.editingRoomColumns[index]}" ใช่หรือไม่?`)) {
+        appState.editingRoomColumns.splice(index, 1);
+        renderManageColumnsList();
+      }
+    }
+
+    async function saveCustomColumnsToRoom() {
+      if (!appState.activeRoom) return;
+      if (appState.editingRoomColumns.length === 0) {
+        alert("กรุณาระบุอย่างน้อย 1 คอลัมน์");
+        return;
+      }
+
+      try {
+        await window.PlansRepo.updatePlan(appState.activeRoom.id, {
+          custom_columns: appState.editingRoomColumns
+        });
+        appState.activeRoom.custom_columns = [...appState.editingRoomColumns];
+        closeManageColumnsModal();
+        renderKanbanColumns();
+        alert("🎉 บันทึกขั้นตอนของบอร์ดเรียบร้อยแล้ว");
+      } catch (err) {
+        alert("บันทึกคอลัมน์ไม่สำเร็จ: " + err.message);
+      }
+    }
+
+    function exportRoomTasksSummary() {
+      if (!appState.activeRoom) return;
+      const room = appState.activeRoom;
+      const tasks = appState.activeTasks || [];
+
+      let summary = `📋 รายงานสรุปความคืบหน้า: ${room.title}\n`;
+      summary += `ความคืบหน้าโดยรวม: ${document.getElementById('activeRoomProgressNumber').textContent}\n`;
+      summary += `วันที่สร้าง: ${new Date(room.created_at || new Date()).toLocaleDateString('th-TH')}\n`;
+      summary += `-----------------------------------------\n\n`;
+
+      const cols = room.custom_columns || ["สิ่งที่ต้องทำ", "กำลังทำ", "เสร็จสิ้น"];
+      cols.forEach(col => {
+        const colTasks = tasks.filter(t => t.column_name === col);
+        summary += `[${col}] (${colTasks.length} งาน):\n`;
+        if (colTasks.length === 0) {
+          summary += `  - ไม่มีงานในขั้นตอนนี้\n`;
+        } else {
+          colTasks.forEach((t, i) => {
+            const assignees = (t.assignees && t.assignees.length > 0) ? ` (ผู้รับผิดชอบ: ${t.assignees.map(a => a.name).join(', ')})` : '';
+            const due = t.due_date ? ` [ส่ง: ${new Date(t.due_date).toLocaleDateString('th-TH')}]` : '';
+            summary += `  ${i + 1}. ${t.title}${due}${assignees}\n`;
+          });
+        }
+        summary += `\n`;
+      });
+
+      navigator.clipboard.writeText(summary).then(() => {
+        alert("📋 คัดลอกสรุปรายการงานทั้งหมดลงคลิปบอร์ดแล้ว! สามารถนำไปวางส่งใน LINE หรือเอกสารรายงานได้ทันที");
+      }).catch(() => {
+        prompt("คัดลอกข้อความสรุปงานด้านล่างนี้:", summary);
+      });
     }
 
     // Delete Task to Room Trash
