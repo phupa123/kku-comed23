@@ -169,10 +169,25 @@
         }
       }
 
-      // 2. บันทึกลงฐานข้อมูล Supabase เพื่อความทนทาน
+      // 2. บันทึกลงฐานข้อมูล Supabase เพื่อความทนทาน (ปล่อยให้ Supabase สร้าง UUID id อัตโนมัติ)
       if (client) {
         try {
-          const { data, error } = await client.from('fastshare_transfers').insert([transferRecord]).select();
+          const dbPayload = {
+            sender_device_id: transferRecord.sender_device_id,
+            sender_name: transferRecord.sender_name,
+            sender_email: transferRecord.sender_email,
+            target_mode: transferRecord.target_mode,
+            target_device_id: transferRecord.target_device_id,
+            target_email: transferRecord.target_email,
+            file_name: transferRecord.file_name,
+            file_size: transferRecord.file_size,
+            file_type: transferRecord.file_type,
+            file_url: transferRecord.file_url,
+            status: transferRecord.status,
+            auto_accept: transferRecord.auto_accept,
+            created_at: transferRecord.created_at
+          };
+          const { data, error } = await client.from('fastshare_transfers').insert([dbPayload]).select();
           if (!error && data && data[0]) {
             transferRecord.id = data[0].id;
           }
