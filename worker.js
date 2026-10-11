@@ -202,6 +202,10 @@ export default {
       fetchUrl = new URL("/maintenance.html", url.origin).toString();
     } else if (path === "/favicon.ico") {
       fetchUrl = new URL("/favicon.ico", url.origin).toString();
+    } else if (path === "/manifest.json") {
+      fetchUrl = new URL("/manifest.json", url.origin).toString();
+    } else if (path === "/sw.js") {
+      fetchUrl = new URL("/sw.js", url.origin).toString();
     } else if (path === "/echo" || path === "/api/echo") {
       return withSecurityHeaders(new Response(JSON.stringify({ status: "ok", timestamp: Date.now() }), {
         status: 200,
@@ -364,7 +368,7 @@ export default {
     else if (path === "/shortlink-admin" || path === "/shortlink-admin.html") target = "/shortlink-admin.html";
     else if (path === "/maintenance" || path === "/maintenance.html") target = "/maintenance.html";
     else if (path === "/404" || path === "/404.html") target = "/404.html";
-    else if (path === "/favicon.ico" || path.endsWith(".ico") || path.endsWith(".svg") || path.startsWith("/assets/") || path.startsWith("/config/") || path.endsWith(".png") || path.endsWith(".js") || path.endsWith(".css")) {
+    else if (path === "/favicon.ico" || path.endsWith(".ico") || path.endsWith(".svg") || path.startsWith("/assets/") || path.startsWith("/config/") || path.endsWith(".png") || path.endsWith(".js") || path.endsWith(".css") || path.endsWith(".json")) {
       target = url.pathname;
     }
 

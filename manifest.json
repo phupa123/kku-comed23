@@ -1,0 +1,51 @@
+{
+  "name": "COMED23 KKU - สาขาวิชาคอมพิวเตอร์ศึกษา",
+  "short_name": "COMED23",
+  "description": "ระบบกิจกรรม แผนงานสาขา และบริการนักศึกษา สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#090D16",
+  "theme_color": "#ea580c",
+  "lang": "th",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ปฏิทินกิจกรรม (Calendar)",
+      "short_name": "Calendar",
+      "description": "เปิดดูปฏิทินกิจกรรมและซิงค์กำหนดการ",
+      "url": "/Calendar.html",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "ห้องงาน PlanToDo",
+      "short_name": "Plans",
+      "description": "เปิดบอร์ดแผนงานและโปรเจกต์สาขา",
+      "url": "/Plans.html",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "ระบบชำระเงิน",
+      "short_name": "Payment",
+      "description": "ชำระเงินค่ากิจกรรมนักศึกษา",
+      "url": "/payment.html",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["education", "productivity", "utilities"]
+}
