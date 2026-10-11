@@ -112,6 +112,7 @@ function openGoogleLoginModal() {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCredentialResponse,
+        ux_mode: "popup",
         auto_select: false,
         cancel_on_tap_outside: false
       });
