@@ -56,6 +56,18 @@
     }
   </script>
 
+  <!-- OneSignal Web Push SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "0bb74e88-0d82-463b-bc8d-ae5a27f659c3",
+        serviceWorkerPath: "OneSignalSDKWorker.js",
+        serviceWorkerParam: { scope: "/" }
+      });
+    });
+  </script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Google Identity Services -->

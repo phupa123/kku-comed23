@@ -59,15 +59,20 @@
 
   // โหลด OneSignal SDK อัตโนมัติสำหรับ Background Push
   function initOneSignalSDK() {
-    const appId = localStorage.getItem(STORAGE_ONESIGNAL_APP_ID) || 'b52ce748-0c6a-4952-b88d-e6b7cf4cbcf1';
+    const OFFICIAL_APP_ID = '0bb74e88-0d82-463b-bc8d-ae5a27f659c3';
+    const appId = localStorage.getItem(STORAGE_ONESIGNAL_APP_ID) || OFFICIAL_APP_ID;
+    
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async function(OneSignal) {
       try {
         await OneSignal.init({
           appId: appId,
           notifyButton: { enable: false },
-          allowLocalhostAsSecureOrigin: true
+          allowLocalhostAsSecureOrigin: true,
+          serviceWorkerPath: 'OneSignalSDKWorker.js',
+          serviceWorkerParam: { scope: '/' }
         });
+        console.log('[OneSignal] Initialized with App ID:', appId);
       } catch(e) {
         console.warn('[OneSignal] Init notice:', e);
       }
