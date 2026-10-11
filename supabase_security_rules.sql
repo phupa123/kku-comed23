@@ -681,12 +681,16 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   message TEXT NOT NULL,
   type TEXT DEFAULT 'info', -- 'info' | 'urgent' | 'warning' | 'event'
   link TEXT,
-  target_audience TEXT DEFAULT 'all', -- 'all' | 'unpaid' | 'committee'
+  target_audience TEXT DEFAULT 'all', -- 'all' | 'specific' | 'unpaid' | 'committee'
+  target_users JSONB DEFAULT '[]'::jsonb, -- รายชื่ออีเมลผู้รับเฉพาะบุคคล
   sender_email TEXT,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- เพิ่มคอลัมน์ target_users ในกรณีที่ตาราง notifications มีอยู่แล้ว
+ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS target_users JSONB DEFAULT '[]'::jsonb;
 
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 

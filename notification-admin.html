@@ -694,7 +694,17 @@
         let success = false;
 
         if (client) {
-          const { data, error } = await client.from('notifications').insert([payload]);
+          // พยายามบันทึกข้อมูลแจ้งเตือน
+          let { data, error } = await client.from('notifications').insert([payload]);
+          
+          // หากตารางใน Supabase ยังไม่ได้เพิ่มคอลัมน์ target_users ให้ตัดฟิลด์นี้ออกแล้วลอง insert อีกครั้ง
+          if (error && (error.message?.includes('target_users') || error.code === 'PGRST204' || error.message?.includes('column'))) {
+            const fallbackPayload = Object.assign({}, payload);
+            delete fallbackPayload.target_users;
+            const retryRes = await client.from('notifications').insert([fallbackPayload]);
+            error = retryRes.error;
+          }
+
           if (!error) {
             success = true;
           } else {
