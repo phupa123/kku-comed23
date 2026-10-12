@@ -89,7 +89,14 @@
         ? `https://kku-comed23.edspace.workers.dev/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(safeName)}`
         : url;
 
-      // บน Native App (Android Capacitor WebView) ให้เปิด URL เพื่อส่งให้ DownloadManager ของระบบดาวน์โหลดลงเครื่องทันที
+      // บน Native App: ถ้ามี AndroidNativeDownload ให้สั่งดาวน์โหลดผ่าน DownloadManager ของระบบโดยตรงทันที
+      if (window.AndroidNativeDownload && typeof window.AndroidNativeDownload.downloadUrl === 'function') {
+        try {
+          window.AndroidNativeDownload.downloadUrl(proxyUrl, safeName, '');
+          return;
+        } catch (eNative) {}
+      }
+
       if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
         window.location.href = proxyUrl;
         return;
@@ -209,7 +216,22 @@
     }
 
     saveBlob(blob, filename) {
-      // 1. บน Native Android WebView: แปลงเป็น DataURL พร้อม filename= เพื่อส่งให้ DownloadListener บันทึกลง Downloads ทันที
+      // 1. บน Native Android ถ้ามี AndroidNativeDownload ให้ส่ง Base64 ไปเซฟลง Downloads ตรงทันที
+      if (window.AndroidNativeDownload && typeof window.AndroidNativeDownload.downloadBase64 === 'function') {
+        try {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const res = reader.result;
+            if (res && typeof res === 'string') {
+              window.AndroidNativeDownload.downloadBase64(res, filename, blob.type || '');
+            }
+          };
+          reader.readAsDataURL(blob);
+          return;
+        } catch (eNativeBridge) {}
+      }
+
+      // 2. บน Native Android WebView: แปลงเป็น DataURL พร้อม filename= เพื่อส่งให้ DownloadListener บันทึกลง Downloads ทันที
       if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
         try {
           const reader = new FileReader();

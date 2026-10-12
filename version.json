@@ -1,13 +1,13 @@
 {
-  "version": "1.0.5",
-  "versionCode": 6,
-  "releaseDate": "2026-10-12",
-  "title": "อัปเดตระบบเลือกไฟล์บนมือถือ (File Picker) & FastShare ไร้เน็ตสมบูรณ์แบบ",
+  "version": "1.0.6",
+  "versionCode": 7,
+  "releaseDate": "2026-10-13",
+  "title": "อัปเดตระบบ Native Download Bridge & FastShare รับไฟล์ชัวร์ 100%",
   "changelog": [
-    "แก้ไขปัญหากดเลือกไฟล์บนมือถือไม่ได้: เพิ่ม onShowFileChooser ให้ Android เปิดคลังภาพและตัวจัดการไฟล์ทันที",
-    "ปรับปรุงการแตะพื้นที่ Dropzone ในหน้า FastShare ให้ตอบสนองทันทีบนหน้าจอมือถือ",
-    "ปรับปรุงหน้าดาวน์โหลดใหม่ (download.html): สวยงาม ทันสมัย และระบุข้อมูลเวอร์ชันตรง 100%"
+    "เพิ่มระบบ Native Download Bridge: บันทึกไฟล์ที่รับจาก FastShare และไฟล์จากหน้าเว็บลงเครื่องโฟลเดอร์ Download ทันที",
+    "แก้ไขปัญหากดดาวน์โหลดแล้วเงียบ ไม่ขึ้นแถบดาวน์โหลดใน Android Native",
+    "ปรับปรุงระบบรับส่งไฟล์ Web-to-Mobile และ Mobile-to-Mobile ให้เสถียรและเชื่อมต่อทันที"
   ],
-  "downloadUrl": "https://files.catbox.moe/v8gk5r.apk",
+  "downloadUrl": "https://files.catbox.moe/milqd6.apk",
   "mandatory": false
 }

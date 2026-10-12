@@ -658,8 +658,15 @@
         ? `https://kku-comed23.edspace.workers.dev/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(safeName)}`
         : url;
 
-      // บน Android Native App ให้เปลี่ยน window.location เพื่อเรียก DownloadManager โดยตรง
-      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      // บน Android Native App ให้เรียก AndroidNativeDownload ถ้ามี
+      if (window.AndroidNativeDownload && typeof window.AndroidNativeDownload.downloadUrl === 'function') {
+        try {
+          window.AndroidNativeDownload.downloadUrl(fallbackUrl, safeName, '');
+          return;
+        } catch (eNative) {}
+      }
+
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
         window.location.href = fallbackUrl;
         return;
       }
@@ -675,8 +682,23 @@
     },
 
     saveBlob(blob, filename) {
-      // 1. ตรวจสอบ Native Capacitor Filesystem ถ้ามีปลั๊กอิน
-      if (window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins?.Filesystem) {
+      // 1. บน Native Android ถ้ามี AndroidNativeDownload ให้ส่ง Base64 ไปเซฟลง Downloads ตรงทันที
+      if (window.AndroidNativeDownload && typeof window.AndroidNativeDownload.downloadBase64 === 'function') {
+        try {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const res = reader.result;
+            if (res && typeof res === 'string') {
+              window.AndroidNativeDownload.downloadBase64(res, filename, blob.type || '');
+            }
+          };
+          reader.readAsDataURL(blob);
+          return;
+        } catch (eNativeBridge) {}
+      }
+
+      // 2. ตรวจสอบ Native Capacitor Filesystem ถ้ามีปลั๊กอิน
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.Plugins?.Filesystem) {
         try {
           const reader = new FileReader();
           reader.onloadend = async () => {
@@ -698,15 +720,13 @@
         } catch (e) {}
       }
 
-      // 2. ถ้าเป็น Native Android WebView (แต่ไม่มี Filesystem Plugin)
-      // ให้แปลงเป็น DataURL ที่แนบ filename= เพื่อให้ DownloadListener ใน MainActivity บันทึกลง Downloads อัตโนมัติ
-      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      // 3. ถ้าเป็น Native Android WebView (แต่ไม่มี Filesystem Plugin)
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
         try {
           const reader = new FileReader();
           reader.onloadend = () => {
             let dataUrl = reader.result;
             if (dataUrl && typeof dataUrl === 'string') {
-              // แทรก ;filename= เข้าไปใน DataURL เพื่อส่งชื่อไฟล์ให้ Android
               const commaIdx = dataUrl.indexOf(',');
               if (commaIdx !== -1) {
                 const header = dataUrl.substring(0, commaIdx) + ';filename=' + encodeURIComponent(filename);
