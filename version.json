@@ -1,14 +1,13 @@
 {
-  "version": "1.0.4",
-  "versionCode": 5,
+  "version": "1.0.5",
+  "versionCode": 6,
   "releaseDate": "2026-10-12",
-  "title": "อัปเดตระบบขอสิทธิ์กล้อง QR Code & รับไฟล์ FastShare สู่โฟลเดอร์เครื่องอัตโนมัติ",
+  "title": "อัปเดตระบบเลือกไฟล์บนมือถือ (File Picker) & FastShare ไร้เน็ตสมบูรณ์แบบ",
   "changelog": [
-    "แก้ไขปัญหากล้องสแกน QR Code บนมือถือ: เพิ่ม WebChromeClient permission grant และขอสิทธิ์กล้องอัตโนมัติ",
-    "แก้ไขปัญหาส่งไฟล์จากเว็ปมายังมือถือ: บันทึกไฟล์ลงโฟลเดอร์ Download ของเครื่องพร้อมชื่อไฟล์จริงทันที",
-    "รองรับการทำงานเบื้องหลัง: คงการเชื่อมต่อ Realtime WebSocket และ WakeLock แม้พับหน้าจอหรือสลับแอป",
-    "ระบบแจ้งเตือนไฟล์เข้าสไตล์ QuickShare พร้อมปุ่มยอมรับ/ปฏิเสธ"
+    "แก้ไขปัญหากดเลือกไฟล์บนมือถือไม่ได้: เพิ่ม onShowFileChooser ให้ Android เปิดคลังภาพและตัวจัดการไฟล์ทันที",
+    "ปรับปรุงการแตะพื้นที่ Dropzone ในหน้า FastShare ให้ตอบสนองทันทีบนหน้าจอมือถือ",
+    "ปรับปรุงหน้าดาวน์โหลดใหม่ (download.html): สวยงาม ทันสมัย และระบุข้อมูลเวอร์ชันตรง 100%"
   ],
-  "downloadUrl": "https://files.catbox.moe/bawh6i.apk",
+  "downloadUrl": "https://files.catbox.moe/et9rfr.apk",
   "mandatory": false
 }

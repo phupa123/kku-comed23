@@ -196,17 +196,17 @@
       </div>
 
       <!-- File Dropzone -->
-      <div id="dropzone" onclick="document.getElementById('fileInput').click()"
-        class="border-2 border-dashed border-orange-500/30 hover:border-orange-500/70 rounded-3xl p-6 sm:p-8 text-center transition cursor-pointer bg-slate-950/40 hover:bg-slate-950/70 space-y-3 group">
+      <label for="fileInput" id="dropzone"
+        class="block border-2 border-dashed border-orange-500/30 hover:border-orange-500/70 rounded-3xl p-6 sm:p-8 text-center transition cursor-pointer bg-slate-950/40 hover:bg-slate-950/70 space-y-3 group select-none">
         
-        <input type="file" id="fileInput" class="hidden" onchange="handleFileSelected(event)">
+        <input type="file" id="fileInput" class="hidden" accept="*/*" onchange="handleFileSelected(event)">
         
         <div class="w-14 h-14 rounded-2xl bg-orange-500/15 border border-orange-500/20 group-hover:scale-105 transition-transform flex items-center justify-center mx-auto text-orange-400 shadow-inner">
           <i data-lucide="file-up" class="w-7 h-7"></i>
         </div>
 
         <div>
-          <h4 class="text-sm font-black text-white group-hover:text-orange-400 transition">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</h4>
+          <h4 class="text-sm font-black text-white group-hover:text-orange-400 transition">แตะที่นี่เพื่อเลือกไฟล์ หรือลากไฟล์มาวาง</h4>
           <p class="text-xs text-slate-400">ส่งได้ทั้ง รูปภาพ, วิดีโอ, PDF, APK, Word, Excel และไฟล์ทุกชนิด</p>
         </div>
 

@@ -229,7 +229,7 @@ export default {
     let campaignParam = "";
 
     if (path === "/kku-comed23.apk") {
-      return Response.redirect("https://files.catbox.moe/bawh6i.apk", 302);
+      return Response.redirect("https://files.catbox.moe/et9rfr.apk", 302);
     }
 
     if (path === "/" || path === "") {
