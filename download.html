@@ -93,20 +93,20 @@
       <div class="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-5 py-2 rounded-2xl bg-slate-900/90 border border-orange-500/30 text-xs font-mono shadow-inner">
         <span class="flex items-center gap-1.5 font-bold text-orange-400">
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>เวอร์ชันล่าสุด: v1.0.5</span>
+          <span>เวอร์ชันล่าสุด: <span id="hero-version-text">v1.0.5</span></span>
         </span>
         <span class="text-slate-600">•</span>
-        <span class="text-slate-300">Code: 6</span>
+        <span class="text-slate-300">Code: <span id="hero-version-code">6</span></span>
         <span class="text-slate-600">•</span>
-        <span class="text-slate-400">12 ต.ค. 2026</span>
+        <span class="text-slate-400" id="hero-release-date">12 ต.ค. 2026</span>
         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Stable Release</span>
       </div>
 
       <!-- Quick Action Buttons -->
       <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-lg mx-auto">
-        <a href="https://files.catbox.moe/et9rfr.apk" download="kku-comed23.apk" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2.5 transition active:scale-95 cursor-pointer">
+        <a id="hero-apk-btn" href="https://files.catbox.moe/et9rfr.apk" download="kku-comed23.apk" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2.5 transition active:scale-95 cursor-pointer">
           <i data-lucide="download" class="w-4 h-4"></i>
-          <span>ดาวน์โหลด APK v1.0.5 (Direct)</span>
+          <span>ดาวน์โหลด APK <span id="hero-btn-version">v1.0.5</span> (Direct)</span>
         </a>
 
         <button onclick="window.triggerPwaInstall()" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-sm shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2.5 cursor-pointer transition active:scale-95">
@@ -119,20 +119,20 @@
       <div class="max-w-lg mx-auto p-4 rounded-2xl bg-white/5 border border-white/10 text-left space-y-2 mt-4">
         <div class="text-[11px] font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
           <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-          <span>อัปเดตใหม่ในเวอร์ชัน 1.0.4:</span>
+          <span>อัปเดตใหม่ในเวอร์ชัน <span id="hero-changelog-version">1.0.5</span>:</span>
         </div>
-        <ul class="text-xs text-slate-300 space-y-1.5 leading-relaxed pl-1">
+        <ul id="hero-changelog-list" class="text-xs text-slate-300 space-y-1.5 leading-relaxed pl-1">
           <li class="flex items-start gap-2">
             <span class="text-orange-400">•</span>
-            <span>แก้ปัญหากล้องสแกน QR Code บนมือถือ: เปิดใช้งานกล้องและขอสิทธิ์ระบบอัตโนมัติ</span>
+            <span>แก้ไขปัญหากดเลือกไฟล์บนมือถือไม่ได้ (เพิ่ม onShowFileChooser รองรับคลังภาพและไฟล์)</span>
           </li>
           <li class="flex items-start gap-2">
             <span class="text-orange-400">•</span>
-            <span>แก้ปัญหาส่งไฟล์ FastShare เว็ป ➔ มือถือ: บันทึกลงโฟลเดอร์ Download ของเครื่องตรงทันที</span>
+            <span>แก้ปัญหาส่งไฟล์ FastShare เว็ป ➔ มือถือ และรองรับการบันทึกลง Download ของเครื่องตรงทันที</span>
           </li>
           <li class="flex items-start gap-2">
             <span class="text-orange-400">•</span>
-            <span>รองรับการส่งไฟล์แบบไร้เน็ต (Direct Local Transfer) และระบบดาวน์โหลดไฟล์ใน Cloud Storage</span>
+            <span>ส่งไฟล์แบบไร้เน็ต (Direct Local Transfer) และระบบดาวน์โหลดไฟล์ใน Storage</span>
           </li>
         </ul>
       </div>
@@ -172,9 +172,9 @@
         </div>
 
         <div class="pt-4 space-y-2">
-          <a href="https://files.catbox.moe/bawh6i.apk" download="kku-comed23.apk" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg shadow-emerald-600/20 cursor-pointer">
+          <a id="card-apk-btn" href="https://files.catbox.moe/et9rfr.apk" download="kku-comed23.apk" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg shadow-emerald-600/20 cursor-pointer">
             <i data-lucide="download" class="w-4 h-4"></i>
-            <span>ดาวน์โหลด APK v1.0.4 (10.5 MB)</span>
+            <span>ดาวน์โหลด APK <span id="card-btn-version">v1.0.5</span></span>
           </a>
           <a href="https://kku-comed23.edspace.workers.dev/kku-comed23.apk" class="w-full py-2 px-3 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1.5 transition">
             <i data-lucide="link-2" class="w-3.5 h-3.5"></i>
@@ -235,7 +235,66 @@
   </footer>
 
   <script>
+    // ดึงข้อมูลเวอร์ชันล่าสุดจาก version.json อัตโนมัติ (Dynamic Version Detection & Sync)
+    async function loadLatestVersionInfo() {
+      try {
+        const res = await fetch(`version.json?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // 1. อัปเดตข้อความเวอร์ชัน
+        const versionStr = data.version ? (data.version.startsWith('v') ? data.version : `v${data.version}`) : 'v1.0.5';
+        const vCode = data.versionCode || '-';
+        
+        const heroVer = document.getElementById('hero-version-text');
+        if (heroVer) heroVer.textContent = versionStr;
+
+        const heroCode = document.getElementById('hero-version-code');
+        if (heroCode) heroCode.textContent = vCode;
+
+        const heroDate = document.getElementById('hero-release-date');
+        if (heroDate && data.releaseDate) heroDate.textContent = data.releaseDate;
+
+        const btnVer = document.getElementById('hero-btn-version');
+        if (btnVer) btnVer.textContent = versionStr;
+
+        const cardVer = document.getElementById('card-btn-version');
+        if (cardVer) cardVer.textContent = versionStr;
+
+        const changelogVer = document.getElementById('hero-changelog-version');
+        if (changelogVer) changelogVer.textContent = data.version || '';
+
+        // 2. อัปเดตลิงก์ดาวน์โหลด APK
+        if (data.downloadUrl) {
+          const heroBtn = document.getElementById('hero-apk-btn');
+          if (heroBtn) heroBtn.href = data.downloadUrl;
+
+          const cardBtn = document.getElementById('card-apk-btn');
+          if (cardBtn) cardBtn.href = data.downloadUrl;
+        }
+
+        // 3. อัปเดต Changelog แบบไดนามิก
+        if (Array.isArray(data.changelog) && data.changelog.length > 0) {
+          const list = document.getElementById('hero-changelog-list');
+          if (list) {
+            list.innerHTML = data.changelog.map(item => `
+              <li class="flex items-start gap-2">
+                <span class="text-orange-400">•</span>
+                <span>${item}</span>
+              </li>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        console.warn('[download.html] Failed to auto-fetch version.json:', err);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+      loadLatestVersionInfo();
       if (window.lucide && window.lucide.createIcons) {
         window.lucide.createIcons();
       }
