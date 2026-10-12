@@ -617,43 +617,57 @@
 
       const div = document.createElement('div');
       div.id = 'fastShareIncomingModal';
-      div.className = 'hidden fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl animate-in fade-in duration-200';
+      div.className = 'hidden fixed inset-0 z-[9999999] flex items-end sm:items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md transition-all duration-300';
       div.innerHTML = `
-        <div class="glass-card rounded-[32px] border border-orange-500/40 p-6 sm:p-7 max-w-sm w-full bg-slate-900/95 shadow-2xl text-center space-y-5 animate-in zoom-in-95 duration-200">
-          <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 p-0.5 mx-auto shadow-xl shadow-orange-500/30">
-            <div class="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center text-orange-400">
-              <i data-lucide="share-2" class="w-8 h-8 animate-pulse"></i>
+        <div class="relative w-full max-w-sm sm:max-w-md bg-slate-900/95 border border-orange-500/40 rounded-t-[32px] sm:rounded-[32px] p-5 sm:p-6 shadow-[0_-15px_60px_rgba(249,115,22,0.25)] text-center space-y-4 animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300">
+          
+          <!-- Drag Handle Indicator for Mobile Bottom Sheet -->
+          <div class="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-1 sm:hidden"></div>
+
+          <div class="flex items-center gap-3.5 text-left p-3 rounded-2xl bg-white/5 border border-white/10">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 p-0.5 shadow-lg shadow-orange-500/30 flex-shrink-0">
+              <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-orange-400">
+                <i data-lucide="share-2" class="w-6 h-6 animate-pulse"></i>
+              </div>
+            </div>
+            <div class="min-w-0 flex-grow">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                  FastShare Live
+                </span>
+                <span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  อุปกรณ์ใกล้เคียง
+                </span>
+              </div>
+              <h3 class="text-sm font-black text-white truncate pt-0.5">
+                <span id="fsModalSenderName">เพื่อนของคุณ</span> ส่งไฟล์ให้คุณ
+              </h3>
             </div>
           </div>
 
-          <div class="space-y-1">
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-500/20 text-orange-300 border border-orange-500/30">
-              AirDrop / QuickShare Live
-            </span>
-            <h3 class="text-base font-black text-white pt-1">
-              <span id="fsModalSenderName">อุปกรณ์ใกล้เคียง</span> ต้องการส่งไฟล์ให้คุณ
-            </h3>
-          </div>
-
-          <div class="p-3.5 rounded-2xl bg-slate-950 border border-white/10 flex items-center gap-3 text-left">
-            <div id="fsModalFileIcon" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 flex-shrink-0">
-              <i data-lucide="file" class="w-5 h-5 text-amber-400"></i>
+          <!-- File Info Card -->
+          <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-white/10 flex items-center gap-3 text-left">
+            <div id="fsModalFileIcon" class="w-11 h-11 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 flex-shrink-0">
+              <i data-lucide="file" class="w-6 h-6"></i>
             </div>
             <div class="min-w-0 flex-grow">
               <p id="fsModalFileName" class="text-xs font-bold text-white truncate">document.pdf</p>
-              <p id="fsModalFileSize" class="text-[10px] text-slate-400 font-mono">0 MB</p>
+              <p id="fsModalFileSize" class="text-[10px] text-slate-400 font-mono mt-0.5">0 MB</p>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 pt-1">
+          <!-- Action Buttons (ปฏิเสธ / ยอมรับ) -->
+          <div class="grid grid-cols-2 gap-2.5 pt-1">
             <button id="fsBtnDecline" type="button"
-              class="py-3 px-4 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-bold text-xs border border-white/10 transition cursor-pointer">
-              ปฏิเสธ
+              class="py-3.5 px-4 rounded-2xl bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 font-bold text-xs border border-white/10 hover:border-rose-500/30 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+              <i data-lucide="x" class="w-4 h-4"></i>
+              <span>ปฏิเสธ</span>
             </button>
             <button id="fsBtnAccept" type="button"
-              class="py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+              class="py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs shadow-xl shadow-orange-500/30 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
               <i data-lucide="check" class="w-4 h-4"></i>
-              <span>ยอมรับไฟล์</span>
+              <span>รับไฟล์ทันที</span>
             </button>
           </div>
         </div>
