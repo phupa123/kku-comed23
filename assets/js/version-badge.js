@@ -45,12 +45,22 @@
     const vCode = detectRuntimeCode();
     const badge = document.createElement('div');
     badge.id = 'comedAppVersionBadge';
-    badge.style.cssText = 'position:fixed;bottom:8px;right:10px;z-index:999999;pointer-events:none;user-select:none;font-family:monospace;';
+    badge.style.cssText = 'position:fixed;bottom:8px;right:10px;z-index:999999;user-select:none;font-family:monospace;cursor:pointer;';
+    badge.title = 'แตะเพื่อตรวจสอบการอัปเดตเวอร์ชันล่าสุด';
     badge.innerHTML = `
-      <span style="font-size:10px;font-weight:bold;letter-spacing:1px;color:#f97316;background:rgba(15,23,42,0.85);padding:2px 8px;border-radius:8px;border:1px solid rgba(249,115,22,0.3);box-shadow:0 2px 8px rgba(0,0,0,0.4);display:inline-block;">
+      <span style="font-size:10px;font-weight:bold;letter-spacing:1px;color:#f97316;background:rgba(15,23,42,0.85);padding:3px 9px;border-radius:10px;border:1px solid rgba(249,115,22,0.35);box-shadow:0 2px 10px rgba(0,0,0,0.5);display:inline-flex;align-items:center;gap:4px;transition:all 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+        <span style="width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
         ${vCode}
       </span>
     `;
+
+    badge.onclick = () => {
+      if (window.AppUpdater && typeof window.AppUpdater.checkUpdate === 'function') {
+        window.AppUpdater.checkUpdate(true);
+      } else {
+        window.location.href = 'download.html';
+      }
+    };
 
     document.body.appendChild(badge);
   }

@@ -32,9 +32,13 @@
             return; // ผู้ใช้เคยกดเลื่อนการอัปเดตไปแล้ว
           }
           this.showUpdateDialog(remote);
+        } else if (force) {
+          // หากผู้ใช้กดแตะตรวจสอบเวอร์ชันเองและเป็นเวอร์ชันล่าสุดแล้ว
+          this.showLatestToast(CURRENT_APP_VERSION);
         }
       } catch (err) {
         console.log('[AppUpdater] Check error (ignored):', err);
+        if (force) alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ตรวจสอบเวอร์ชันได้ กรุณาลองใหม่อีกครั้ง');
       }
     },
 
@@ -119,6 +123,23 @@
       localStorage.setItem(STORAGE_DISMISSED_KEY, ver);
       const m = document.getElementById('modalAppUpdatePrompt');
       if (m) m.remove();
+    },
+
+    showLatestToast(ver) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-12 right-4 sm:right-6 z-[9999999] bg-slate-900/95 border border-emerald-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 backdrop-blur-xl animate-in slide-in-from-bottom-5 duration-200';
+      toast.innerHTML = `
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <div class="text-xs">
+          <p class="font-bold text-white">แอปของคุณเป็นเวอร์ชันล่าสุดแล้ว!</p>
+          <p class="text-[10px] text-emerald-400 font-mono mt-0.5">เวอร์ชันปัจจุบัน: v${ver} (เสถียรที่สุด)</p>
+        </div>
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => toast.remove(), 350);
+      }, 3500);
     }
   };
 
