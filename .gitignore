@@ -10,6 +10,7 @@ node_modules/
 android/
 www/
 *.apk
+*.idsig
 kku-comed23.apk
 .gradle/
 build/
