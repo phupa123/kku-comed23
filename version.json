@@ -1,13 +1,13 @@
 {
-  "version": "1.0.7",
-  "versionCode": 8,
+  "version": "1.0.8",
+  "versionCode": 9,
   "releaseDate": "2026-10-13",
-  "title": "อัปเดตระบบ MediaStore Android 10+ (แก้ปัญหา Permission EACCES) & Background Upload",
+  "title": "FastShare รับไฟล์ทุกชนิด & แก้ไขการรับไฟล์ขนาดใหญ่/วิดีโอกลายเป็น HTML",
   "changelog": [
-    "แก้ไขปัญหาการรับไฟล์: เปลี่ยนมาใช้ MediaStore API สำหรับ Android 10+ ป้องกันปัญหา EACCES (Permission Denied) 100%",
-    "ระบบ Background Upload Widget: อัปโหลดวิดีโอและไฟล์ใหญ่ได้เร็วขึ้น มีแถบแสดงสถานะมุมจอ",
-    "รองรับการรับไฟล์ผ่าน FastShare และบันทึกลงโฟลเดอร์ Download ของตัวเครื่องได้อย่างราบรื่น"
+    "แก้ไขปัญหา FastShare: รับไฟล์ขนาดใหญ่ วิดีโอ ไม่กลายเป็น fastshare_file.html อีกต่อไป ด้วย Native Download Streaming",
+    "เพิ่มปุ่มตัวกรองประเภทไฟล์ใน FastShare (ทุกประเภท, วิดีโอ, รูปภาพ, เอกสาร, เสียง/เพลง)",
+    "ส่งไฟล์ขนาดใหญ่และวิดีโอผ่าน High-Speed Cloud Uploader โดยไม่ติดค้าง Base64"
   ],
-  "downloadUrl": "https://files.catbox.moe/35biwk.apk",
+  "downloadUrl": "https://files.catbox.moe/34coh6.apk",
   "mandatory": false
 }

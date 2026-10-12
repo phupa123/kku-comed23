@@ -181,7 +181,10 @@
       let fileUrl = '';
       const onProgress = targetOptions.onProgress || (() => {});
 
-      const isOfflineOrDirect = !navigator.onLine || file.size <= 8 * 1024 * 1024; // ไฟล์ไม่เกิน 8MB หรืออยู่ในโหมดออฟไลน์ ให้ส่ง Base64 ตรงทันที ไม่ต้องเสียเวลารออัปโหลดคลาวด์
+      // ถ้าออฟไลน์ หรือไฟล์ขนาดเล็ก (< 4MB) ให้ส่ง Base64 ตรงได้
+      // แต่ถ้าเป็นไฟล์วิดีโอ หรือขนาดใหญ่กว่า 4MB ให้อัปโหลดผ่าน MultiCloudUploader (Catbox/Cloudinary) เพื่อรองรับไฟล์ระดับ 50MB - 1GB+
+      const isVideo = file.type && file.type.startsWith('video/');
+      const isOfflineOrDirect = (!navigator.onLine && file.size <= 8 * 1024 * 1024) || (!isVideo && file.size <= 4 * 1024 * 1024);
 
       if (isOfflineOrDirect) {
         onProgress(30, 'กำลังเตรียมไฟล์ส่งตรง...');
@@ -588,7 +591,22 @@
     },
 
     async triggerDownload(url, filename) {
-      const safeName = filename || 'fastshare_file';
+      const safeName = (filename && filename.trim()) ? filename.trim() : 'downloaded_file';
+
+      // 0. ถ้ากำลังรันบน Native Android และมี AndroidNativeDownload และเป็น HTTP/HTTPS URL
+      // ให้ส่งตรงไปยัง DownloadManager ของระบบ Android เพื่อรองรับไฟล์ขนาดใหญ่ วิดีโอ และทำงานในพื้นหลังได้ 100%
+      if (window.AndroidNativeDownload && typeof window.AndroidNativeDownload.downloadUrl === 'function' && typeof url === 'string' && url.startsWith('http')) {
+        try {
+          const proxyUrl = !url.includes('/api/download-proxy')
+            ? `https://kku-comed23.edspace.workers.dev/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(safeName)}`
+            : url;
+          window.AndroidNativeDownload.downloadUrl(proxyUrl, safeName, '');
+          this.showToast(`🚀 เริ่มดาวน์โหลดไฟล์ "${safeName}" ลงเครื่องแล้ว`);
+          return;
+        } catch (eNative) {
+          console.warn('[FastShare] AndroidNativeDownload failed, falling back:', eNative);
+        }
+      }
 
       // 1. ถ้าเป็น DataURL (Base64) ให้แปลงเป็น Blob แล้วบันทึกทันที
       if (typeof url === 'string' && url.startsWith('data:')) {
@@ -618,7 +636,11 @@
         try {
           const directRes = await fetch(url, { mode: 'cors' });
           if (directRes.ok) {
-            blob = await directRes.blob();
+            const b = await directRes.blob();
+            // ตรวจสอบว่าไม่ได้รับหน้าเว็บ HTML แจ้งเตือน Error
+            if (b && b.size > 0 && (!b.type || !b.type.includes('text/html') || safeName.toLowerCase().endsWith('.html'))) {
+              blob = b;
+            }
           }
         } catch (corsErr) {}
 
@@ -636,7 +658,7 @@
               if (res.ok) {
                 const b = await res.blob();
                 // ตรวจสอบว่าไม่ได้รับไฟล์ error เป็น html กลับมา
-                if (b && b.size > 0 && (!b.type || !b.type.includes('text/html') || safeName.endsWith('.html'))) {
+                if (b && b.size > 0 && (!b.type || !b.type.includes('text/html') || safeName.toLowerCase().endsWith('.html'))) {
                   blob = b;
                   break;
                 }
@@ -682,6 +704,8 @@
     },
 
     saveBlob(blob, filename) {
+      const safeName = (filename && filename.trim()) ? filename.trim() : 'downloaded_file';
+
       // 1. บน Native Android ถ้ามี AndroidNativeDownload ให้ส่ง Base64 ไปเซฟลง Downloads ตรงทันที
       if (window.AndroidNativeDownload && typeof window.AndroidNativeDownload.downloadBase64 === 'function') {
         try {
@@ -689,7 +713,7 @@
           reader.onloadend = () => {
             const res = reader.result;
             if (res && typeof res === 'string') {
-              window.AndroidNativeDownload.downloadBase64(res, filename, blob.type || '');
+              window.AndroidNativeDownload.downloadBase64(res, safeName, blob.type || '');
             }
           };
           reader.readAsDataURL(blob);
@@ -705,14 +729,14 @@
             try {
               const base64Data = reader.result.split(',')[1];
               await window.Capacitor.Plugins.Filesystem.writeFile({
-                path: 'Download/' + filename,
+                path: 'Download/' + safeName,
                 data: base64Data,
                 directory: 'DOCUMENTS',
                 recursive: true
               });
-              this.showToast(`บันทึกไฟล์ "${filename}" ลงเครื่องเรียบร้อยแล้ว`);
+              this.showToast(`บันทึกไฟล์ "${safeName}" ลงเครื่องเรียบร้อยแล้ว`);
             } catch (fsErr) {
-              this.fallbackSaveBlob(blob, filename);
+              this.fallbackSaveBlob(blob, safeName);
             }
           };
           reader.readAsDataURL(blob);
@@ -720,40 +744,25 @@
         } catch (e) {}
       }
 
-      // 3. ถ้าเป็น Native Android WebView (แต่ไม่มี Filesystem Plugin)
-      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-        try {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            let dataUrl = reader.result;
-            if (dataUrl && typeof dataUrl === 'string') {
-              const commaIdx = dataUrl.indexOf(',');
-              if (commaIdx !== -1) {
-                const header = dataUrl.substring(0, commaIdx) + ';filename=' + encodeURIComponent(filename);
-                dataUrl = header + dataUrl.substring(commaIdx);
-              }
-              window.location.href = dataUrl;
-            }
-          };
-          reader.readAsDataURL(blob);
-          return;
-        } catch (eNative) {}
-      }
-
-      this.fallbackSaveBlob(blob, filename);
+      // 3. Fallback: ดาวน์โหลดผ่าน Object URL หรือจำลองคลิก <a>
+      this.fallbackSaveBlob(blob, safeName);
     },
 
     fallbackSaveBlob(blob, filename) {
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        if (a.parentNode) document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-      }, 3000);
+      try {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          if (a.parentNode) document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 3000);
+      } catch (err) {
+        console.error('[FastShare] fallbackSaveBlob failed:', err);
+      }
     },
 
     playSound() {

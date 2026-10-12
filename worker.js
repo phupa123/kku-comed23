@@ -229,7 +229,7 @@ export default {
     let campaignParam = "";
 
     if (path === "/kku-comed23.apk") {
-      return Response.redirect("https://files.catbox.moe/35biwk.apk", 302);
+      return Response.redirect("https://files.catbox.moe/34coh6.apk", 302);
     }
 
     if (path === "/" || path === "") {
@@ -291,7 +291,7 @@ export default {
       fetchUrl = new URL("/app-auth.html", url.origin).toString();
     } else if (path === "/download/apk" || path === "/kku-comed23.apk" || path === "/app.apk") {
       // 🚀 High-Speed Direct APK CDN Download (Deep-Link Enabled)
-      return Response.redirect("https://files.catbox.moe/35biwk.apk", 302);
+      return Response.redirect("https://files.catbox.moe/34coh6.apk", 302);
     } else if (path === "/fastshare" || path === "/fastshare.html") {
       fetchUrl = new URL("/fastshare.html", url.origin).toString();
     } else if (path === "/maintenance") {
