@@ -773,7 +773,12 @@
       const container = document.getElementById('deviceQrContainer');
       container.innerHTML = '';
       
-      const pairUrl = `${window.location.origin}/fastshare.html?pair=${window.FastShare.deviceId}&name=${encodeURIComponent(window.FastShare.deviceName)}`;
+      const PUBLIC_ORIGIN = "https://kku-comed23.edspace.workers.dev";
+      const origin = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'capacitor:')
+        ? PUBLIC_ORIGIN
+        : window.location.origin;
+
+      const pairUrl = `${origin}/fastshare.html?pair=${window.FastShare.deviceId}&name=${encodeURIComponent(window.FastShare.deviceName)}`;
       
       new QRCode(container, {
         text: pairUrl,

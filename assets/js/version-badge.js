@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  const BUILD_NUMBER = "10104"; // รหัสเวอร์ชันแอปปัจจุบัน v1.0.4
+  const BUILD_NUMBER = "10105"; // รหัสเวอร์ชันแอปปัจจุบัน v1.0.5
 
   function detectRuntimeCode() {
     const isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());

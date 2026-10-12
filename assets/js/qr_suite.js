@@ -213,12 +213,25 @@
      */
     openPageQrModal(options = {}) {
       this.ensureModalsExist();
-      const currentLoc = window.location;
-      const origin = currentLoc.origin || (window.location.protocol + '//' + window.location.host);
+      const PUBLIC_ORIGIN = "https://kku-comed23.edspace.workers.dev";
+      const isLocalhostOrApp = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'capacitor:';
       
-      // Default URL calculation
-      let userUrl = options.userUrl || window.location.href;
-      let adminUrl = options.adminUrl || window.location.href;
+      const cleanUrl = (rawUrl) => {
+        if (!rawUrl) return PUBLIC_ORIGIN + '/index.html';
+        try {
+          const parsed = new URL(rawUrl, window.location.href);
+          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.protocol === 'capacitor:') {
+            return PUBLIC_ORIGIN + (parsed.pathname === '/' ? '/index.html' : parsed.pathname) + parsed.search;
+          }
+          return parsed.href;
+        } catch (e) {
+          return rawUrl;
+        }
+      };
+
+      // Default URL calculation (แทนที่ localhost เป็น Public Production Domain เสมอ เพื่อให้สแกนข้ามเครื่องได้จริง)
+      let userUrl = cleanUrl(options.userUrl || window.location.href);
+      let adminUrl = cleanUrl(options.adminUrl || window.location.href);
 
       this.currentShareData = {
         title: options.title || document.title.split('|')[0].trim() || 'หน้าเว็บสาขาวิชา',

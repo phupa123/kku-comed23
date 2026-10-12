@@ -198,7 +198,16 @@
       `;
     } else {
       // Desktop / PC Guide with QR Code to open directly on phone
-      const currentUrl = encodeURIComponent(window.location.href);
+      const PUBLIC_ORIGIN = "https://kku-comed23.edspace.workers.dev";
+      let shareUrl = window.location.href;
+      try {
+        const parsed = new URL(shareUrl);
+        if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.protocol === 'capacitor:') {
+          shareUrl = PUBLIC_ORIGIN + (parsed.pathname === '/' ? '/index.html' : parsed.pathname) + parsed.search;
+        }
+      } catch (e) {}
+
+      const currentUrl = encodeURIComponent(shareUrl);
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${currentUrl}`;
       contentHtml = `
         <div class="text-center space-y-4">
