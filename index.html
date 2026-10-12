@@ -439,18 +439,12 @@
 
 
       <!-- 3. Prominent CTA Button & Auth on the Right -->
-      <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
         
-        <!-- Check App Update / Version Button in Navbar -->
-        <button onclick="if(window.AppUpdater) window.AppUpdater.checkUpdate(true);" class="px-2.5 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 hover:text-orange-700 text-xs font-bold border border-orange-500/20 transition flex items-center gap-1.5 cursor-pointer" title="ตรวจสอบการอัปเดตเวอร์ชันแอป">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-          <span class="hidden md:inline">เช็กอัปเดต</span>
-        </button>
-
-        <!-- PWA / Direct APK Download Link in Navbar -->
-        <a href="download.html" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500/15 via-amber-500/15 to-orange-500/15 hover:from-orange-500 hover:to-amber-500 hover:text-white text-orange-700 text-xs font-black border border-orange-500/30 shadow-xs transition flex items-center gap-1.5 cursor-pointer" title="ติดตั้งแอปหรือดาวน์โหลด APK">
+        <!-- PWA / Direct APK Download Link in Navbar (ซ่อนบนหน้าจอเล็กเพื่อลดความรก ป้องกัน UI ล้นขอบ และคงไว้ใน Drawer Menu) -->
+        <a href="download.html" class="hidden 2xl:flex px-2.5 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-700 text-xs font-bold border border-orange-500/25 transition items-center gap-1.5 cursor-pointer" title="ติดตั้งแอปหรือดาวน์โหลด APK">
           <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">ดาวน์โหลดแอป</span>
+          <span>แอปพลิเคชัน</span>
         </a>
 
         <!-- Not Logged In State (Default) -->

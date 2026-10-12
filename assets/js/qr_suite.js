@@ -572,7 +572,7 @@
     // Universal Floating Quick Access Buttons (Share QR & Scan QR)
     if (!document.getElementById('qrSuiteFloatingWidget')) {
       const floatHtml = `
-        <div id="qrSuiteFloatingWidget" class="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 pointer-events-auto">
+        <div id="qrSuiteFloatingWidget" class="fixed bottom-20 xl:bottom-6 right-4 sm:right-6 z-30 flex flex-col items-end gap-2 pointer-events-auto">
           <!-- Expanded Menu -->
           <div id="qrSuiteFloatMenu" class="hidden flex-col items-end gap-2 mb-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
             <button onclick="window.QRSuite.openScannerModal(); document.getElementById('qrSuiteFloatMenu').classList.add('hidden');" class="px-3.5 py-2 rounded-2xl bg-slate-900/95 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 text-xs font-bold shadow-xl backdrop-blur-md flex items-center gap-2 cursor-pointer transition transform hover:scale-105 active:scale-95">
@@ -585,7 +585,7 @@
             </button>
           </div>
           <!-- Trigger FAB -->
-          <button onclick="const m = document.getElementById('qrSuiteFloatMenu'); m.classList.toggle('hidden');" class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 via-amber-500 to-sky-500 p-[1.5px] shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer group" title="เปิดเมนู QR Code & สแกนเนอร์">
+          <button onclick="const m = document.getElementById('qrSuiteFloatMenu'); m.classList.toggle('hidden');" class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-orange-600 via-amber-500 to-sky-500 p-[1.5px] shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer group" title="เปิดเมนู QR Code & สแกนเนอร์">
             <div class="w-full h-full bg-slate-950/90 rounded-[14px] flex items-center justify-center text-orange-400 group-hover:text-white transition">
               <i data-lucide="qr-code" class="w-5 h-5"></i>
             </div>

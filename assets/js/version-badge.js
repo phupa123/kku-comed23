@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  const BUILD_NUMBER = "10103"; // รหัสเวอร์ชันแอปปัจจุบัน v1.0.3
+  const BUILD_NUMBER = "10104"; // รหัสเวอร์ชันแอปปัจจุบัน v1.0.4
 
   function detectRuntimeCode() {
     const isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -45,10 +45,12 @@
     const vCode = detectRuntimeCode();
     const badge = document.createElement('div');
     badge.id = 'comedAppVersionBadge';
-    badge.style.cssText = 'position:fixed;bottom:8px;right:10px;z-index:999999;user-select:none;font-family:monospace;cursor:pointer;';
-    badge.title = 'แตะเพื่อตรวจสอบการอัปเดตเวอร์ชันล่าสุด';
+    // ย้ายไปมุมซ้ายล่าง และซ่อนบนหน้าจอเล็กเพื่อไม่ให้ทับกับ QR Code, ปุ่มแชร์ และ Mobile Bottom Dock
+    badge.style.cssText = 'position:fixed;bottom:10px;left:12px;z-index:30;user-select:none;font-family:monospace;cursor:pointer;';
+    badge.className = 'hidden md:block transition-transform hover:scale-105 active:scale-95';
+    badge.title = 'แตะเพื่อตรวจสอบการอัปเดตเวอร์ชัน';
     badge.innerHTML = `
-      <span style="font-size:10px;font-weight:bold;letter-spacing:1px;color:#f97316;background:rgba(15,23,42,0.85);padding:3px 9px;border-radius:10px;border:1px solid rgba(249,115,22,0.35);box-shadow:0 2px 10px rgba(0,0,0,0.5);display:inline-flex;align-items:center;gap:4px;transition:all 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+      <span style="font-size:10px;font-weight:bold;letter-spacing:0.5px;color:#f97316;background:rgba(15,23,42,0.85);backdrop-filter:blur(8px);padding:3px 8px;border-radius:10px;border:1px solid rgba(249,115,22,0.3);box-shadow:0 2px 10px rgba(0,0,0,0.4);display:inline-flex;align-items:center;gap:4px;">
         <span style="width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
         ${vCode}
       </span>

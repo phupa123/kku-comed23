@@ -181,8 +181,19 @@
       let fileUrl = '';
       const onProgress = targetOptions.onProgress || (() => {});
 
-      // Upload file via MultiUploader or Cloudinary
-      if (window.MultiCloudUploader && typeof window.MultiCloudUploader.upload === 'function') {
+      const isOfflineOrDirect = !navigator.onLine || file.size <= 8 * 1024 * 1024; // ไฟล์ไม่เกิน 8MB หรืออยู่ในโหมดออฟไลน์ ให้ส่ง Base64 ตรงทันที ไม่ต้องเสียเวลารออัปโหลดคลาวด์
+
+      if (isOfflineOrDirect) {
+        onProgress(30, 'กำลังเตรียมไฟล์ส่งตรง...');
+        fileUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error('ไม่สามารถอ่านไฟล์ได้'));
+          reader.readAsDataURL(file);
+        });
+        onProgress(100, 'ไฟล์พร้อมส่ง (Direct Local Transfer)');
+      } else if (window.MultiCloudUploader && typeof window.MultiCloudUploader.upload === 'function') {
+        // ไฟล์ขนาดใหญ่ส่งผ่าน MultiUploader / Cloudinary
         const upRes = await window.MultiCloudUploader.upload(file, {
           folder: 'fastshare',
           skipCompression: true, // รักษาไฟล์ต้นฉบับ 100% ไม่ดรอปคุณภาพ
@@ -190,7 +201,7 @@
         });
         fileUrl = upRes.url;
       } else {
-        // Fallback: ใช้ DataURL หรือ Catbox / FreeImage
+        // Fallback
         onProgress(20, 'กำลังแปลงไฟล์สำรอง...');
         fileUrl = await new Promise((resolve) => {
           const reader = new FileReader();

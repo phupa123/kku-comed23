@@ -84,9 +84,20 @@
     }
 
     triggerDirectDownload(url, filename = 'download') {
+      const safeName = filename || 'download';
+      const proxyUrl = (url.startsWith('http') && !url.includes('/api/download-proxy'))
+        ? `https://kku-comed23.edspace.workers.dev/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(safeName)}`
+        : url;
+
+      // บน Native App (Android Capacitor WebView) ให้เปิด URL เพื่อส่งให้ DownloadManager ของระบบดาวน์โหลดลงเครื่องทันที
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        window.location.href = proxyUrl;
+        return;
+      }
+
       const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
+      a.href = proxyUrl;
+      a.download = safeName;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
       document.body.appendChild(a);
@@ -198,6 +209,26 @@
     }
 
     saveBlob(blob, filename) {
+      // 1. บน Native Android WebView: แปลงเป็น DataURL พร้อม filename= เพื่อส่งให้ DownloadListener บันทึกลง Downloads ทันที
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        try {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            let dataUrl = reader.result;
+            if (dataUrl && typeof dataUrl === 'string') {
+              const commaIdx = dataUrl.indexOf(',');
+              if (commaIdx !== -1) {
+                const header = dataUrl.substring(0, commaIdx) + ';filename=' + encodeURIComponent(filename);
+                dataUrl = header + dataUrl.substring(commaIdx);
+              }
+              window.location.href = dataUrl;
+            }
+          };
+          reader.readAsDataURL(blob);
+          return;
+        } catch (eNative) {}
+      }
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

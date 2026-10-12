@@ -26,6 +26,13 @@
         if (!res.ok) return;
         const remote = await res.json();
 
+        const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+
+        // บนเว็บบราวเซอร์ทั่วไป ไม่ต้องเด้งป๊อปอัปบอกว่าพบการอัปเดตใหม่ (แสดงเฉพาะแอปมือถือ Native หรือเมื่อผู้ใช้กดเช็กเอง)
+        if (!isNative && !force) {
+          return;
+        }
+
         if (this.isNewerVersion(CURRENT_APP_VERSION, remote.version)) {
           const dismissed = localStorage.getItem(STORAGE_DISMISSED_KEY);
           if (dismissed === remote.version && !force && !remote.mandatory) {
