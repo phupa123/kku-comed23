@@ -9,7 +9,7 @@
   'use strict';
 
   // เวอร์ชันที่ฝังอยู่ในตัวแอปเวอร์ชันนี้
-  const CURRENT_APP_VERSION = "1.0.2";
+  const CURRENT_APP_VERSION = "1.0.5";
   const STORAGE_DISMISSED_KEY = "COMED_DISMISSED_UPDATE_VER";
 
   const AppUpdater = {
