@@ -294,9 +294,25 @@
     }
 
     async upload(fileInput, options = {}) {
-      const onProgress = options.onProgress || (() => {});
+      const userOnProgress = options.onProgress || (() => {});
       const preferred = options.preferredProvider || this.config.activeProvider || 'auto';
       const rawName = options.customName || (fileInput && fileInput.name ? fileInput.name : ('file_' + Date.now()));
+
+      let bgJobId = null;
+      if (window.BackgroundUploadManager && typeof window.BackgroundUploadManager.createJob === 'function') {
+        try {
+          bgJobId = window.BackgroundUploadManager.createJob(rawName, fileInput.size || 0);
+        } catch (e) {}
+      }
+
+      const onProgress = (pct, msg, details) => {
+        userOnProgress(pct, msg, details);
+        if (bgJobId && window.BackgroundUploadManager) {
+          try {
+            window.BackgroundUploadManager.updateJob(bgJobId, pct, msg, pct >= 100 ? 'completed' : 'uploading');
+          } catch(e) {}
+        }
+      };
 
       // Resolve user settings (Quota & Image resolution)
       let storedUser = null;
@@ -363,6 +379,9 @@
       const configuredPriority = Array.isArray(this.config.providerPriority) ? this.config.providerPriority : ['catbox', 'imgbb', 'cloudinary', 'freeimage'];
       const enabledList = Array.isArray(this.config.enabledProviders) ? this.config.enabledProviders : configuredPriority;
 
+      const isVideoOrNonImage = (fileObj && fileObj.type && !fileObj.type.startsWith('image/')) || 
+                                (fileName && !fileName.match(/\.(jpg|jpeg|png|gif|webp|svg|avif|bmp|ico)$/i));
+
       if (preferred !== 'auto' && enabledList.includes(preferred)) {
         providers.push(preferred);
       }
@@ -376,6 +395,14 @@
       // If all disabled, fallback to [catbox, imgbb, cloudinary]
       if (providers.length === 0) {
         providers = ['catbox', 'imgbb', 'cloudinary', 'freeimage'];
+      }
+
+      // ถ้าเป็นไฟล์วิดีโอ หรือไม่ใช่รูปภาพ: กรอง ImgBB และ FreeImage ออก เพราะรับเฉพาะรูปภาพ
+      // และสลับเอา Catbox / Cloudinary ขึ้นมาอันดับแรกทันทีเพื่อความเร็วและไม่หลุด error
+      if (isVideoOrNonImage) {
+        providers = providers.filter(p => p !== 'imgbb' && p !== 'freeimage');
+        if (!providers.includes('catbox')) providers.unshift('catbox');
+        if (!providers.includes('cloudinary')) providers.push('cloudinary');
       }
 
       let lastError = null;
@@ -517,6 +544,12 @@
           lastError = err;
           onProgress(40, `${this.getProviderName(provider)} ไม่ตอบสนอง กำลังสลับตัวสำรอง...`);
         }
+      }
+
+      if (bgJobId && window.BackgroundUploadManager) {
+        try {
+          window.BackgroundUploadManager.updateJob(bgJobId, 100, lastError?.message || 'อัปโหลดล้มเหลว', 'failed');
+        } catch(e) {}
       }
 
       throw new Error("ไม่สามารถอัปโหลดไฟล์ผ่านบริการใดๆ ได้: " + (lastError?.message || "Unknown error"));
@@ -678,13 +711,16 @@
         return true;
       });
 
+      // กำหนด Timeout แบบไดนามิกตามขนาดไฟล์ (ไฟล์วิดีโอ/ไฟล์ใหญ่ ให้เวลาอย่างน้อย 120-600 วินาที)
+      const dynamicTimeout = Math.max(120000, Math.min(600000, Math.round((fileObj.size || 1024 * 1024) / (50 * 1024) * 1000)));
+
       let lastError = null;
       for (const targetUrl of validProxies) {
         try {
           const res = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', targetUrl);
-            xhr.timeout = 7000; // Fail quickly on 522 Cloudflare Origin Connection Time-out
+            xhr.timeout = dynamicTimeout;
 
             if (xhr.upload && typeof onProgress === 'function') {
               xhr.upload.onprogress = (evt) => {
