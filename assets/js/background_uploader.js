@@ -106,7 +106,17 @@
     }
 
     initWidgetDOM() {
+      if (typeof document === 'undefined') return;
       if (document.getElementById('bgUploadFloatingWidget')) return;
+
+      if (!document.body) {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => this.initWidgetDOM(), { once: true });
+        } else {
+          window.addEventListener('load', () => this.initWidgetDOM(), { once: true });
+        }
+        return;
+      }
 
       const widget = document.createElement('div');
       widget.id = 'bgUploadFloatingWidget';
@@ -127,6 +137,7 @@
         </div>
       `;
       document.body.appendChild(widget);
+      this.renderWidget();
     }
 
     renderWidget() {
