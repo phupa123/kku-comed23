@@ -1,13 +1,14 @@
 {
-  "version": "1.0.2",
-  "versionCode": 3,
+  "version": "1.0.3",
+  "versionCode": 4,
   "releaseDate": "2026-10-12",
-  "title": "อัปเดตระบบ FastShare & Google OAuth 2.0",
+  "title": "อัปเดตระบบ FastShare 2-Step & แก้ไขดาวน์โหลด/ติดตั้ง APK อัตโนมัติ",
   "changelog": [
-    "รองรับการล็อกอิน Google ผ่านเบราว์เซอร์จริงตามมาตรฐาน OAuth 2.0",
-    "ปรับปรุงระบบ FastShare และการแชร์ไฟล์ไร้สาย",
-    "เพิ่มระบบตรวจสอบและแจ้งเตือนอัปเดตเวอร์ชันใหม่อัตโนมัติ"
+    "ปรับปรุงหน้า FastShare 2 ขั้นตอน (เลือกไฟล์ก่อน ➔ แตะเลือกอุปกรณ์รอบข้าง)",
+    "แก้ปัญหารับไฟล์แล้วเป็น .html และข้อผิดพลาด Couldn't download",
+    "เพิ่มระบบ Auto-Installer: เมื่อดาวน์โหลดอัปเดตในแอปเสร็จ จะเปิดหน้าติดตั้งทันที",
+    "เพิ่มสิทธิ์ติดตั้งแพ็กเกจ (REQUEST_INSTALL_PACKAGES) และเชื่อมต่อ DownloadManager สมบูรณ์"
   ],
-  "downloadUrl": "https://files.catbox.moe/j5w550.apk",
+  "downloadUrl": "https://files.catbox.moe/107mhm.apk",
   "mandatory": false
 }

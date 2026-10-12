@@ -99,11 +99,11 @@
 
           <!-- Action Buttons -->
           <div class="space-y-2 pt-1">
-            <a href="${remote.downloadUrl || '/kku-comed23.apk'}" download="kku-comed23.apk" id="btnConfirmUpdate"
+            <button onclick="window.AppUpdater.triggerApkDownload('${remote.downloadUrl || 'https://kku-comed23.edspace.workers.dev/kku-comed23.apk'}')" id="btnConfirmUpdate"
               class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-black text-xs shadow-xl shadow-orange-500/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
               <span>ดาวน์โหลดและอัปเดตทันที (Direct)</span>
-            </a>
+            </button>
 
             ${!remote.mandatory ? `
               <button onclick="window.AppUpdater.dismissUpdate('${remote.version}')"
@@ -123,6 +123,38 @@
       localStorage.setItem(STORAGE_DISMISSED_KEY, ver);
       const m = document.getElementById('modalAppUpdatePrompt');
       if (m) m.remove();
+    },
+
+    triggerApkDownload(downloadUrl) {
+      const url = downloadUrl || 'https://kku-comed23.edspace.workers.dev/kku-comed23.apk';
+      
+      // ถ้าเปิดใน Capacitor Native WebView ให้ใช้ window.open หรือส่งให้ DownloadManager
+      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        try {
+          // แจ้งเตือนผู้ใช้ว่าระบบกำลังเริ่มดาวน์โหลด
+          if (window.NotificationEngine && typeof window.NotificationEngine.showToast === 'function') {
+            window.NotificationEngine.showToast({
+              title: 'กำลังดาวน์โหลดอัปเดต',
+              message: 'ระบบกำลังดาวน์โหลดไฟล์ APK เมื่อเสร็จแล้วจะเปิดหน้าติดตั้งทันที',
+              type: 'info'
+            });
+          }
+        } catch (_) {}
+
+        // สั่งเปิด URL เพื่อให้ DownloadListener ใน MainActivity.java ดักจับ
+        window.location.href = url;
+        return;
+      }
+
+      // สำหรับ Browser ทั่วไป ให้สั่งดาวน์โหลดปกติ
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'kku-comed23.apk';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 2000);
     },
 
     showLatestToast(ver) {

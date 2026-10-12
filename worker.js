@@ -228,6 +228,10 @@ export default {
     let fetchUrl = request.url;
     let campaignParam = "";
 
+    if (path === "/kku-comed23.apk") {
+      return Response.redirect("https://files.catbox.moe/107mhm.apk", 302);
+    }
+
     if (path === "/" || path === "") {
       fetchUrl = new URL("/index.html", url.origin).toString();
     } else if (path === "/payment" || path === "/payment.html") {
