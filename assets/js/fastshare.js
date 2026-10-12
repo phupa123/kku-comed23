@@ -174,23 +174,30 @@
 
     // ส่งไฟล์
     async sendFile(file, targetOptions) {
-      // targetOptions: { mode: 'everyone'|'paired'|'specific', targetDeviceId, targetEmail, targetName }
+      // targetOptions: { mode: 'everyone'|'paired'|'specific', targetDeviceId, targetEmail, targetName, onProgress }
       if (!file) throw new Error('ไม่พบไฟล์ที่ต้องการส่ง');
 
       const client = getClient();
       let fileUrl = '';
+      const onProgress = targetOptions.onProgress || (() => {});
 
       // Upload file via MultiUploader or Cloudinary
       if (window.MultiCloudUploader && typeof window.MultiCloudUploader.upload === 'function') {
-        const upRes = await window.MultiCloudUploader.upload(file, { folder: 'fastshare' });
+        const upRes = await window.MultiCloudUploader.upload(file, {
+          folder: 'fastshare',
+          skipCompression: true, // รักษาไฟล์ต้นฉบับ 100% ไม่ดรอปคุณภาพ
+          onProgress: (pct, msg) => onProgress(pct, msg)
+        });
         fileUrl = upRes.url;
       } else {
         // Fallback: ใช้ DataURL หรือ Catbox / FreeImage
+        onProgress(20, 'กำลังแปลงไฟล์สำรอง...');
         fileUrl = await new Promise((resolve) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result);
           reader.readAsDataURL(file);
         });
+        onProgress(100, 'เตรียมไฟล์พร้อมส่ง');
       }
 
       const currentUserEmail = (sessionStorage.getItem('COMED_USER_SESSION') || '').toLowerCase().trim();
@@ -569,14 +576,125 @@
       }
     },
 
-    triggerDownload(url, filename) {
+    async triggerDownload(url, filename) {
+      const safeName = filename || 'fastshare_file';
+
+      // 1. ถ้าเป็น DataURL (Base64) ให้แปลงเป็น Blob แล้วบันทึกทันที
+      if (typeof url === 'string' && url.startsWith('data:')) {
+        try {
+          const parts = url.split(',');
+          const mime = (parts[0].match(/:(.*?);/) || [])[1] || 'application/octet-stream';
+          const bstr = atob(parts[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          const blob = new Blob([u8arr], { type: mime });
+          this.saveBlob(blob, safeName);
+          return;
+        } catch (e) {
+          console.warn('[FastShare] DataURL to Blob conversion failed, falling back:', e);
+        }
+      }
+
+      // 2. ถ้าเป็น URL ทั่วไป (เช่น Catbox, Cloudinary, ImgBB, Supabase)
+      // ให้ดึงผ่าน Fetch Blob เพื่อป้องกัน Browser โหลดเป็น HTML หรือ "(Couldn't download)"
+      try {
+        let blob = null;
+
+        // ลอง fetch จาก URL ตรงก่อน (ถ้า Server รองรับ CORS)
+        try {
+          const directRes = await fetch(url, { mode: 'cors' });
+          if (directRes.ok) {
+            blob = await directRes.blob();
+          }
+        } catch (corsErr) {}
+
+        // ถ้า fetch ตรงไม่ได้ ให้ผ่าน Cloudflare Worker /api/download-proxy
+        if (!blob) {
+          const proxyCandidates = [
+            `/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(safeName)}`,
+            `https://kku-comed23.edspace.workers.dev/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(safeName)}`,
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+          ];
+
+          for (const pUrl of proxyCandidates) {
+            try {
+              const res = await fetch(pUrl);
+              if (res.ok) {
+                const b = await res.blob();
+                // ตรวจสอบว่าไม่ได้รับไฟล์ error เป็น html กลับมา
+                if (b && b.size > 0 && (!b.type || !b.type.includes('text/html') || safeName.endsWith('.html'))) {
+                  blob = b;
+                  break;
+                }
+              }
+            } catch (errProxy) {}
+          }
+        }
+
+        if (blob) {
+          this.saveBlob(blob, safeName);
+          return;
+        }
+      } catch (err) {
+        console.warn('[FastShare] Blob fetch error, trying direct fallback:', err);
+      }
+
+      // 3. Fallback สุดท้าย: เปิด URL ผ่าน Worker download proxy หรือ Direct Link
+      const fallbackUrl = (window.location.protocol.startsWith('http') && !url.includes('/api/download-proxy'))
+        ? `https://kku-comed23.edspace.workers.dev/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(safeName)}`
+        : url;
+
       const a = document.createElement('a');
-      a.href = url;
-      a.download = filename || 'fastshare_file';
+      a.href = fallbackUrl;
+      a.download = safeName;
       a.target = '_blank';
+      a.rel = 'noopener noreferrer';
       document.body.appendChild(a);
       a.click();
-      a.remove();
+      setTimeout(() => a.remove(), 2000);
+    },
+
+    saveBlob(blob, filename) {
+      // ตรวจสอบ Native Capacitor Filesystem ถ้ามี
+      if (window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins?.Filesystem) {
+        try {
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            try {
+              const base64Data = reader.result.split(',')[1];
+              await window.Capacitor.Plugins.Filesystem.writeFile({
+                path: 'Download/' + filename,
+                data: base64Data,
+                directory: 'DOCUMENTS',
+                recursive: true
+              });
+              this.showToast(`บันทึกไฟล์ "${filename}" ลงเครื่องเรียบร้อยแล้ว`);
+            } catch (fsErr) {
+              this.fallbackSaveBlob(blob, filename);
+            }
+          };
+          reader.readAsDataURL(blob);
+          return;
+        } catch (e) {}
+      }
+
+      this.fallbackSaveBlob(blob, filename);
+    },
+
+    fallbackSaveBlob(blob, filename) {
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (a.parentNode) document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 3000);
     },
 
     playSound() {

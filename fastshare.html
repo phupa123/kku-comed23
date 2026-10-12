@@ -51,6 +51,10 @@
   <!-- Real-Time Push Notification Engine -->
   <script src="assets/js/notifications.js"></script>
 
+  <!-- Multi-Cloud File Transfer & Download Engine -->
+  <script src="assets/js/multi_uploader.js"></script>
+  <script src="assets/js/multi_downloader.js"></script>
+
   <!-- FastShare Engine & Native Hardware Bridge -->
   <script src="assets/js/fastshare.js"></script>
   <script src="assets/js/fastshare-native.js"></script>
@@ -177,75 +181,97 @@
     </div>
 
     <!-- ================= STEP 1: SELECT FILE ================= -->
-    <div class="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
+    <div id="cardStep1" class="glass-card rounded-3xl p-6 border border-orange-500/30 space-y-4 transition-all duration-300">
       <div class="flex items-center justify-between pb-3 border-b border-white/10">
         <div class="flex items-center gap-2.5">
-          <span class="w-6 h-6 rounded-full bg-orange-500 text-white font-black text-xs flex items-center justify-center shadow-md shadow-orange-500/30">1</span>
-          <h3 class="text-base font-black text-white">เลือกไฟล์ที่ต้องการส่ง</h3>
+          <span class="w-7 h-7 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white font-black text-xs flex items-center justify-center shadow-lg shadow-orange-500/30 ring-2 ring-orange-500/20">1</span>
+          <div>
+            <h3 class="text-base font-black text-white">ขั้นตอนที่ 1: เลือกไฟล์ที่ต้องการจะส่ง</h3>
+            <p class="text-xs text-slate-400">เลือกไฟล์ก่อนเพื่อเตรียมส่งให้อุปกรณ์รอบข้าง</p>
+          </div>
         </div>
-        <span id="step1Status" class="text-xs font-bold text-slate-400">ยังไม่ได้เลือกไฟล์</span>
+        <span id="step1Status" class="text-xs font-bold text-slate-400 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+          ยังไม่ได้เลือกไฟล์
+        </span>
       </div>
 
       <!-- File Dropzone -->
       <div id="dropzone" onclick="document.getElementById('fileInput').click()"
-        class="border-2 border-dashed border-white/15 hover:border-orange-500/60 rounded-3xl p-6 sm:p-8 text-center transition cursor-pointer bg-slate-950/40 hover:bg-slate-950/70 space-y-3">
+        class="border-2 border-dashed border-orange-500/30 hover:border-orange-500/70 rounded-3xl p-6 sm:p-8 text-center transition cursor-pointer bg-slate-950/40 hover:bg-slate-950/70 space-y-3 group">
         
         <input type="file" id="fileInput" class="hidden" onchange="handleFileSelected(event)">
         
-        <div class="w-14 h-14 rounded-2xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center mx-auto text-orange-400 shadow-inner">
+        <div class="w-14 h-14 rounded-2xl bg-orange-500/15 border border-orange-500/20 group-hover:scale-105 transition-transform flex items-center justify-center mx-auto text-orange-400 shadow-inner">
           <i data-lucide="file-up" class="w-7 h-7"></i>
         </div>
 
         <div>
-          <h4 class="text-sm font-black text-white">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</h4>
-          <p class="text-xs text-slate-400">ส่งได้ทั้ง รูปภาพ, วิดีโอ, PDF, สไลด์, และเอกสารทุกประเภท</p>
+          <h4 class="text-sm font-black text-white group-hover:text-orange-400 transition">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</h4>
+          <p class="text-xs text-slate-400">ส่งได้ทั้ง รูปภาพ, วิดีโอ, PDF, APK, Word, Excel และไฟล์ทุกชนิด</p>
         </div>
 
         <!-- Selected File Preview Pill -->
-        <div id="selectedFileInfo" class="hidden p-3.5 rounded-2xl bg-orange-500/10 border border-orange-500/30 max-w-md mx-auto text-left flex items-center justify-between text-xs animate-in zoom-in-95 duration-200">
-          <div class="flex items-center gap-3 truncate">
-            <div class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center flex-shrink-0">
-              <i data-lucide="file-check-2" class="w-5 h-5"></i>
+        <div id="selectedFileInfo" class="hidden p-4 rounded-2xl bg-gradient-to-r from-orange-500/15 to-amber-500/15 border border-orange-500/40 max-w-lg mx-auto text-left flex items-center justify-between text-xs animate-in zoom-in-95 duration-200 shadow-lg shadow-orange-500/10">
+          <div class="flex items-center gap-3.5 truncate">
+            <div class="w-11 h-11 rounded-xl bg-orange-500/25 text-orange-400 flex items-center justify-center flex-shrink-0 shadow">
+              <i data-lucide="file-check-2" class="w-6 h-6"></i>
             </div>
             <div class="truncate">
-              <span id="txtSelectedFileName" class="font-bold text-white block truncate">file.pdf</span>
-              <span id="txtSelectedFileSize" class="text-slate-400 font-mono text-[11px]">0 MB</span>
+              <span id="txtSelectedFileName" class="font-black text-white text-sm block truncate">file.pdf</span>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span id="txtSelectedFileSize" class="text-slate-300 font-mono text-xs">0 MB</span>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+                  พร้อมส่งไป Step 2 แล้ว
+                </span>
+              </div>
             </div>
           </div>
-          <button type="button" onclick="event.stopPropagation(); removeSelectedFile();" class="text-rose-400 hover:text-white p-1 text-lg font-bold">&times;</button>
+          <button type="button" onclick="event.stopPropagation(); removeSelectedFile();" class="text-slate-400 hover:text-rose-400 p-2 text-xl font-bold transition cursor-pointer" title="เปลี่ยนไฟล์">&times;</button>
         </div>
       </div>
     </div>
 
     <!-- ================= STEP 2: CHOOSE RECIPIENT TO AIRDROP ================= -->
-    <div id="sectionStep2" class="glass-card rounded-3xl p-6 border border-white/10 space-y-5 transition-all">
+    <div id="sectionStep2" class="glass-card rounded-3xl p-6 border border-white/10 space-y-5 transition-all duration-300 opacity-60">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/10">
         <div class="flex items-center gap-2.5">
-          <span class="w-6 h-6 rounded-full bg-cyan-500 text-white font-black text-xs flex items-center justify-center shadow-md shadow-cyan-500/30">2</span>
-          <h3 class="text-base font-black text-white">กดเลือกคนที่ต้องการส่งให้ (AirDrop People)</h3>
+          <span id="badgeStep2Num" class="w-7 h-7 rounded-full bg-slate-700 text-white font-black text-xs flex items-center justify-center shadow-md">2</span>
+          <div>
+            <h3 class="text-base font-black text-white">ขั้นตอนที่ 2: เลือกอุปกรณ์ที่อยู่รอบข้าง</h3>
+            <p class="text-xs text-slate-400">แตะที่โปรไฟล์เครื่องเพื่อนในเรดาร์เพื่อส่งไฟล์ได้ทันที</p>
+          </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="openQrScannerForFastShare()" class="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer">
+          <button onclick="openQrScannerForFastShare()" class="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer px-3 py-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
             <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
             <span>สแกนกล้อง QR เพื่อน</span>
           </button>
         </div>
       </div>
 
+      <!-- Active File Banner at Step 2 -->
+      <div id="bannerActiveFileStep2" class="hidden p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-xs flex items-center justify-between animate-in slide-in-from-top-2 duration-300">
+        <div class="flex items-center gap-2.5 text-cyan-300">
+          <i data-lucide="send" class="w-4 h-4 text-cyan-400"></i>
+          <span>ไฟล์ที่พร้อมจะส่ง: <b id="lblStep2FileName" class="text-white underline">file.pdf</b> (<span id="lblStep2FileSize">0 MB</span>)</span>
+        </div>
+        <button onclick="document.getElementById('fileInput').click()" class="text-xs font-bold text-cyan-400 hover:text-white underline ml-2">เปลี่ยนไฟล์</button>
+      </div>
+
       <!-- Notice when file not chosen yet -->
       <div id="alertSelectFileFirst" class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center gap-2.5">
         <i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i>
-        <span>กรุณาคลิกเลือกไฟล์ในขั้นตอนที่ 1 ด้านบนก่อน จากนั้นกดคลิกที่โปรไฟล์คนเพื่อยิงส่งได้ทันที!</span>
+        <span>👉 กรุณาเลือกไฟล์ในขั้นตอนที่ 1 ด้านบนก่อน จากนั้นเรดาร์จะเปิดให้คุณแตะส่งให้อุปกรณ์ที่อยู่รอบข้างได้ทันที!</span>
       </div>
 
       <!-- AirDrop Avatar Grid: Online Nearby Devices -->
       <div>
         <div class="flex items-center justify-between pb-2">
-          <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+          <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
             <span>อุปกรณ์ออนไลน์รอบข้าง (Nearby Radar):</span>
           </span>
-          <span id="badgeNearbyCount" class="text-[11px] font-mono text-cyan-400 font-bold">0 เครื่อง</span>
+          <span id="badgeNearbyCount" class="text-[11px] font-mono text-cyan-400 font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20">0 เครื่อง</span>
         </div>
 
         <div id="nearbyRadarContainer" class="flex items-center gap-6 overflow-x-auto py-4 px-2 custom-scroll min-h-[140px]">
@@ -455,20 +481,47 @@
     }
 
     // ==========================================
-    // STEP 1: FILE PICKER HANDLING
+    // STEP 1: FILE PICKER HANDLING & STEP 2 TRANSITION
     // ==========================================
     function handleFileSelected(e) {
       const file = e.target.files[0];
       if (!file) return;
       currentSelectedFile = file;
 
+      // Update Step 1 File Card
       document.getElementById('txtSelectedFileName').textContent = file.name;
-      document.getElementById('txtSelectedFileSize').textContent = window.FastShare.formatBytes(file.size);
+      const formattedSize = window.FastShare.formatBytes(file.size);
+      document.getElementById('txtSelectedFileSize').textContent = formattedSize;
       document.getElementById('selectedFileInfo').classList.remove('hidden');
       document.getElementById('step1Status').textContent = '✅ เลือกไฟล์แล้ว';
-      document.getElementById('step1Status').className = 'text-xs font-bold text-emerald-400';
+      document.getElementById('step1Status').className = 'text-xs font-bold text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30';
       
-      document.getElementById('alertSelectFileFirst').classList.add('hidden');
+      // Update Step 2 Banner & Active State
+      const sec2 = document.getElementById('sectionStep2');
+      const badge2 = document.getElementById('badgeStep2Num');
+      const banner2 = document.getElementById('bannerActiveFileStep2');
+      const alert1 = document.getElementById('alertSelectFileFirst');
+
+      if (sec2) {
+        sec2.classList.remove('opacity-60');
+        sec2.classList.add('ring-2', 'ring-cyan-500/40', 'shadow-2xl', 'shadow-cyan-500/10');
+      }
+      if (badge2) {
+        badge2.className = 'w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-white font-black text-xs flex items-center justify-center shadow-lg shadow-cyan-500/30 ring-2 ring-cyan-500/20';
+      }
+      if (banner2) {
+        document.getElementById('lblStep2FileName').textContent = file.name;
+        document.getElementById('lblStep2FileSize').textContent = formattedSize;
+        banner2.classList.remove('hidden');
+      }
+      if (alert1) {
+        alert1.classList.add('hidden');
+      }
+
+      // Smooth scroll to Step 2 so user immediately sees nearby devices ready to tap
+      setTimeout(() => {
+        sec2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 250);
 
       if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
     }
@@ -478,8 +531,22 @@
       document.getElementById('fileInput').value = '';
       document.getElementById('selectedFileInfo').classList.add('hidden');
       document.getElementById('step1Status').textContent = 'ยังไม่ได้เลือกไฟล์';
-      document.getElementById('step1Status').className = 'text-xs font-bold text-slate-400';
-      document.getElementById('alertSelectFileFirst').classList.remove('hidden');
+      document.getElementById('step1Status').className = 'text-xs font-bold text-slate-400 px-3 py-1 rounded-full bg-white/5 border border-white/10';
+
+      const sec2 = document.getElementById('sectionStep2');
+      const badge2 = document.getElementById('badgeStep2Num');
+      const banner2 = document.getElementById('bannerActiveFileStep2');
+      const alert1 = document.getElementById('alertSelectFileFirst');
+
+      if (sec2) {
+        sec2.classList.add('opacity-60');
+        sec2.classList.remove('ring-2', 'ring-cyan-500/40', 'shadow-2xl', 'shadow-cyan-500/10');
+      }
+      if (badge2) {
+        badge2.className = 'w-7 h-7 rounded-full bg-slate-700 text-white font-black text-xs flex items-center justify-center shadow-md';
+      }
+      if (banner2) banner2.classList.add('hidden');
+      if (alert1) alert1.classList.remove('hidden');
     }
 
     // ==========================================
@@ -583,7 +650,14 @@
         const transferRecord = await window.FastShare.sendFile(currentSelectedFile, {
           mode: 'everyone',
           targetDeviceId: targetId,
-          targetEmail: targetEmail || null
+          targetEmail: targetEmail || null,
+          onProgress: (pct, msg) => {
+            if (activeSendingTransfer && activeSendingTransfer.targetId === targetId) {
+              const mapped = Math.min(85, Math.max(15, pct));
+              activeSendingTransfer.progress = mapped;
+              updateCircleUI(targetId, mapped, msg || 'กำลังส่ง...');
+            }
+          }
         });
 
         // จำ transfer ID เพื่อรอผู้รับกดยอมรับ หรือไว้สำหรับกดยกเลิก
