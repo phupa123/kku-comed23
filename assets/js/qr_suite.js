@@ -395,13 +395,32 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     },
 
-    startCameraScanner() {
+    async startCameraScanner() {
       if (typeof Html5Qrcode === 'undefined') {
         console.warn('Html5Qrcode library not loaded.');
         return;
       }
 
       if (this.isScanning) return;
+
+      // 1. ตรวจสอบและขอสิทธิ์การใช้งานกล้องผ่าน Web MediaDevices API
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: this.currentFacingMode }
+          });
+          // ได้รับสิทธิ์กล้องแล้ว ให้หยุดสตรีมชั่วคราวเพื่อให้ Html5Qrcode ควบคุม
+          stream.getTracks().forEach(t => t.stop());
+        } catch (permErr) {
+          console.warn('[QRSuite] getUserMedia request note:', permErr);
+          // หากผู้ใช้ปฏิเสธการเข้าถึงกล้อง
+          if (permErr.name === 'NotAllowedError' || permErr.name === 'PermissionDeniedError') {
+            alert('⚠️ กรุณาอนุญาตการเข้าถึงกล้องถ่ายรูปในระบบ เพื่อเปิดใช้งานการสแกน QR Code หรือสามารถสลับไปใช้แท็บ "อัปโหลดรูปภาพ QR" ได้');
+            this.switchScannerTab('file');
+            return;
+          }
+        }
+      }
 
       const videoElementId = "qrSuiteReaderVideo";
       if (!this.scannerInstance) {
@@ -427,7 +446,9 @@
       ).catch(err => {
         console.error("Failed to start camera scanner:", err);
         this.isScanning = false;
-        // fallback to file panel or notify user
+        // หากเปิดกล้องไม่สำเร็จ ให้แจ้งเตือนและสลับไปหน้าเลือกไฟล์ภาพอัตโนมัติ
+        alert('ไม่สามารถเปิดใช้งานกล้องได้ในขณะนี้ กรุณาตรวจสอบสิทธิ์กล้องหรือเลือกอัปโหลดรูปภาพ QR Code');
+        this.switchScannerTab('file');
       });
     },
 

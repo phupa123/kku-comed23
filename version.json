@@ -1,14 +1,14 @@
 {
-  "version": "1.0.3",
-  "versionCode": 4,
+  "version": "1.0.4",
+  "versionCode": 5,
   "releaseDate": "2026-10-12",
-  "title": "อัปเดตระบบ FastShare 2-Step & แก้ไขดาวน์โหลด/ติดตั้ง APK อัตโนมัติ",
+  "title": "อัปเดตระบบขอสิทธิ์กล้อง QR Code & รับไฟล์ FastShare สู่โฟลเดอร์เครื่องอัตโนมัติ",
   "changelog": [
-    "ปรับปรุงหน้า FastShare 2 ขั้นตอน (เลือกไฟล์ก่อน ➔ แตะเลือกอุปกรณ์รอบข้าง)",
-    "แก้ปัญหารับไฟล์แล้วเป็น .html และข้อผิดพลาด Couldn't download",
-    "เพิ่มระบบ Auto-Installer: เมื่อดาวน์โหลดอัปเดตในแอปเสร็จ จะเปิดหน้าติดตั้งทันที",
-    "เพิ่มสิทธิ์ติดตั้งแพ็กเกจ (REQUEST_INSTALL_PACKAGES) และเชื่อมต่อ DownloadManager สมบูรณ์"
+    "แก้ไขปัญหากล้องสแกน QR Code บนมือถือ: เพิ่ม WebChromeClient permission grant และขอสิทธิ์กล้องอัตโนมัติ",
+    "แก้ไขปัญหาส่งไฟล์จากเว็ปมายังมือถือ: บันทึกไฟล์ลงโฟลเดอร์ Download ของเครื่องพร้อมชื่อไฟล์จริงทันที",
+    "รองรับการทำงานเบื้องหลัง: คงการเชื่อมต่อ Realtime WebSocket และ WakeLock แม้พับหน้าจอหรือสลับแอป",
+    "ระบบแจ้งเตือนไฟล์เข้าสไตล์ QuickShare พร้อมปุ่มยอมรับ/ปฏิเสธ"
   ],
-  "downloadUrl": "https://files.catbox.moe/107mhm.apk",
+  "downloadUrl": "https://files.catbox.moe/bawh6i.apk",
   "mandatory": false
 }
