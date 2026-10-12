@@ -77,6 +77,29 @@
       this.broadcast({ type: 'JOB_UPDATED', job });
 
       if (status === 'completed' || status === 'failed') {
+        // แจ้งเตือนผ่าน NotificationEngine ถ้ามี หรือ Web Notification API
+        try {
+          const isSuccess = status === 'completed';
+          const notifTitle = isSuccess ? '✅ อัปโหลดไฟล์สำเร็จแล้ว' : '❌ อัปโหลดไฟล์ไม่สำเร็จ';
+          const notifMsg = `ไฟล์: "${job.name}" ${isSuccess ? 'พร้อมใช้งานแล้ว' : (statusText || 'กรุณาลองใหม่อีกครั้ง')}`;
+          
+          if (window.NotificationEngine && typeof window.NotificationEngine.triggerSystemNotification === 'function') {
+            window.NotificationEngine.triggerSystemNotification({
+              id: 'upload_' + Date.now(),
+              title: notifTitle,
+              message: notifMsg,
+              type: isSuccess ? 'info' : 'warning'
+            });
+            window.NotificationEngine.showToast({
+              title: notifTitle,
+              message: notifMsg,
+              type: isSuccess ? 'info' : 'warning'
+            });
+          } else if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(notifTitle, { body: notifMsg, icon: '/logo.png' });
+          }
+        } catch(eNotif) {}
+
         setTimeout(() => {
           this.activeJobs.delete(jobId);
           this.renderWidget();

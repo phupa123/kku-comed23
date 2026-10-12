@@ -1,13 +1,13 @@
 {
-  "version": "1.0.8",
-  "versionCode": 9,
+  "version": "1.0.9",
+  "versionCode": 10,
   "releaseDate": "2026-10-13",
-  "title": "FastShare รับไฟล์ทุกชนิด & แก้ไขการรับไฟล์ขนาดใหญ่/วิดีโอกลายเป็น HTML",
+  "title": "ปรับปรุงระบบอัปโหลดวิดีโอ 100MB+ & ระบบแจ้งเตือน Native Push Alert",
   "changelog": [
-    "แก้ไขปัญหา FastShare: รับไฟล์ขนาดใหญ่ วิดีโอ ไม่กลายเป็น fastshare_file.html อีกต่อไป ด้วย Native Download Streaming",
-    "เพิ่มปุ่มตัวกรองประเภทไฟล์ใน FastShare (ทุกประเภท, วิดีโอ, รูปภาพ, เอกสาร, เสียง/เพลง)",
-    "ส่งไฟล์ขนาดใหญ่และวิดีโอผ่าน High-Speed Cloud Uploader โดยไม่ติดค้าง Base64"
+    "แก้ไขปัญหาอัปโหลดวิดีโอขนาดใหญ่ (100MB+): ปรับสถาปัตยกรรม Direct Stream ไปยัง Cloudinary ไม่ติดค้างที่ 11%",
+    "ระบบแจ้งเตือนระดับระบบ (POST_NOTIFICATIONS): ขอสิทธิ์แจ้งเตือนอัตโนมัติบน Android 13+ และส่งเสียงเตือนเมื่ออัปโหลดเสร็จ",
+    "ปรับ Timeout ยืดหยุ่นสูงสุด 10 นาทีสำหรับไฟล์วิดีโอขนาดใหญ่พิเศษ"
   ],
-  "downloadUrl": "https://files.catbox.moe/34coh6.apk",
+  "downloadUrl": "https://files.catbox.moe/fh86x2.apk",
   "mandatory": false
 }

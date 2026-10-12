@@ -398,11 +398,16 @@
       }
 
       // ถ้าเป็นไฟล์วิดีโอ หรือไม่ใช่รูปภาพ: กรอง ImgBB และ FreeImage ออก เพราะรับเฉพาะรูปภาพ
-      // และสลับเอา Catbox / Cloudinary ขึ้นมาอันดับแรกทันทีเพื่อความเร็วและไม่หลุด error
+      // สำหรับไฟล์ขนาดใหญ่มาก (> 25MB หรือ วิดีโอ) ให้สลับเอา Cloudinary ขึ้นเป็นอันดับหนึ่งทันที
+      // เพราะ Cloudinary รองรับ direct chunked stream จากเบราว์เซอร์ตรง ไม่ติดขีดจำกัด 100MB body ของ Cloudflare Worker
       if (isVideoOrNonImage) {
         providers = providers.filter(p => p !== 'imgbb' && p !== 'freeimage');
-        if (!providers.includes('catbox')) providers.unshift('catbox');
-        if (!providers.includes('cloudinary')) providers.push('cloudinary');
+        if (fileObj.size > 25 * 1024 * 1024) {
+          // ไฟล์ใหญ่กว่า 25MB: Cloudinary ก่อน แล้วค่อย Catbox สำรอง
+          providers = ['cloudinary', 'catbox'];
+        } else {
+          providers = ['catbox', 'cloudinary'];
+        }
       }
 
       let lastError = null;
@@ -771,9 +776,13 @@
 
       const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/auto/upload`;
 
+      // ไดนามิก Timeout ตามขนาดไฟล์ (อย่างน้อย 3 นาที สูงสุด 10 นาที สำหรับไฟล์ 100MB+)
+      const dynamicTimeout = Math.max(180000, Math.min(600000, Math.round((fileObj.size || 1024 * 1024) / (40 * 1024) * 1000)));
+
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open('POST', endpoint);
+        xhr.timeout = dynamicTimeout;
 
         if (xhr.upload && typeof onProgress === 'function') {
           xhr.upload.onprogress = (evt) => {
@@ -801,6 +810,7 @@
           }
         };
 
+        xhr.ontimeout = () => reject(new Error('การเชื่อมต่อกับ Cloudinary หมดเวลา (Timeout)'));
         xhr.onerror = () => reject(new Error("Cloudinary network error"));
         xhr.send(formData);
       });
