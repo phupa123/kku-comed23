@@ -1499,6 +1499,8 @@ function renderStatusTable() {
   }
   if (emptyMsg) emptyMsg.classList.add('hidden');
 
+  tbody.innerHTML = list.map((st, index) => {
+    const isPaid = paymentRecords[st.id] && paymentRecords[st.id].paid;
     const rec = paymentRecords[st.id];
     const sizeBadge = rec && rec.shirtSize 
       ? `<span class="inline-block mt-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-black border border-indigo-200">ไซส์ ${rec.shirtSize}</span>`
