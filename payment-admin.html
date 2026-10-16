@@ -1056,6 +1056,84 @@
     </div>
   </div>
 
+  <!-- MODAL: AUDIENCE & ELIGIBILITY MANAGER (กำหนดผู้มีสิทธิ์ชำระ / ยกเว้นรายบุคคล) -->
+  <div id="modalAudienceManager" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
+    <div class="cyber-glass bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl relative max-h-[92vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white flex items-center gap-2">
+              <span>กำหนดผู้มีสิทธิ์ชำระ / ยกเว้นรายบุคคล</span>
+              <span id="audTargetCampBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono"></span>
+            </h3>
+            <p id="audTargetCampTitle" class="text-xs text-slate-400 line-clamp-1">เลือกนักศึกษาที่ต้องชำระ หรือเลือกคนที่ไม่ต้องชำระเงินสำหรับรายการนี้</p>
+          </div>
+        </div>
+        <button onclick="closeAudienceModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quick Summary / Stats bar -->
+      <div class="grid grid-cols-3 gap-2 py-3 flex-shrink-0">
+        <div class="p-2.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-center">
+          <div class="text-[10px] font-bold text-slate-400 uppercase">นักศึกษาทั้งหมด</div>
+          <div id="audTotalCount" class="text-sm sm:text-base font-black text-white font-mono mt-0.5">60 คน</div>
+        </div>
+        <div class="p-2.5 rounded-2xl bg-emerald-950/30 border border-emerald-900/50 text-center">
+          <div class="text-[10px] font-bold text-emerald-400 uppercase">ต้องชำระเงิน</div>
+          <div id="audEligibleCount" class="text-sm sm:text-base font-black text-emerald-300 font-mono mt-0.5">0 คน</div>
+        </div>
+        <div class="p-2.5 rounded-2xl bg-amber-950/30 border border-amber-900/50 text-center">
+          <div class="text-[10px] font-bold text-amber-400 uppercase">ได้รับการยกเว้น</div>
+          <div id="audExemptedCount" class="text-sm sm:text-base font-black text-amber-300 font-mono mt-0.5">0 คน</div>
+        </div>
+      </div>
+
+      <!-- Search & Bulk Selection Toolbar -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pb-3 flex-shrink-0">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="audSearchInput" oninput="renderAudienceList()" placeholder="ค้นหารหัส, ชื่อ, ชื่อเล่น..." 
+            class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-xs outline-none focus:border-indigo-500 transition">
+        </div>
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          <button type="button" onclick="bulkSetAudience(true)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+            <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-400"></i> เลือกทุกคน
+          </button>
+          <button type="button" onclick="bulkSetAudience(false)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+            <i data-lucide="slash" class="w-3.5 h-3.5 text-amber-400"></i> ยกเว้นทุกคน
+          </button>
+        </div>
+      </div>
+
+      <!-- Students List (Scrollable) -->
+      <div class="overflow-y-auto flex-1 pr-1 space-y-1.5 divide-y divide-slate-800/60" id="audienceStudentsListContainer">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between pt-4 border-t border-slate-800 flex-shrink-0 mt-2">
+        <div class="text-[11px] text-slate-400">
+          💡 นักศึกษาที่ยกเว้น จะไม่ถูกนำไปคิดยอดค้างชำระ
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeAudienceModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition cursor-pointer">
+            ยกเลิก
+          </button>
+          <button type="button" onclick="saveAudienceSettings()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-extrabold text-xs shadow-lg shadow-indigo-500/25 transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>บันทึกการตั้งค่า</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Load Student Database -->
   <script src="students_data.js"></script>
   <!-- Multi-Cloud File Uploader (Cloudinary, ImgBB, FreeImage, Catbox) -->

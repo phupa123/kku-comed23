@@ -38,6 +38,9 @@ const DEFAULT_COMED_CAMPAIGNS = [
       { size: "2XL", chest: "44\"", length: "30\"", price: 310 },
       { size: "3XL", chest: "48\"", length: "31\"", price: 330 }
     ],
+    targetMode: "all", // "all" = ทุกคนต้องชำระ (เว้นแต่จะอยู่ใน exemptedStudentIds), "specific" = เฉพาะคนที่เลือกใน eligibleStudentIds
+    eligibleStudentIds: [], // รหัสที่ต้องชำระ (ใช้เมื่อ targetMode === "specific")
+    exemptedStudentIds: [], // รหัสที่ได้รับการยกเว้น (ไม่ต้องชำระ)
     gasApiUrl: "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec",
     googleSheetUrl: "https://docs.google.com/spreadsheets/d/1tD13_pZ4Vp27V8Z34wL2-Sample/edit",
     status: "open", // 'open' | 'completed' | 'temp_closed' | 'permanently_closed'
@@ -198,6 +201,9 @@ window.ComedCampaignManager = {
                 bannerImage: item.banner_image || matchedLocal.bannerImage || '',
                 galleryImages: item.gallery_images || matchedLocal.galleryImages || [],
                 shirtSizes: item.shirt_sizes || matchedLocal.shirtSizes || [],
+                targetMode: item.target_mode || matchedLocal.targetMode || 'all',
+                eligibleStudentIds: item.eligible_student_ids || matchedLocal.eligibleStudentIds || [],
+                exemptedStudentIds: item.exempted_student_ids || matchedLocal.exemptedStudentIds || [],
                 status: item.status || 'open',
                 closedReason: item.closed_reason || '',
                 isDefault: item.is_default || false,
@@ -214,6 +220,24 @@ window.ComedCampaignManager = {
       console.warn("Supabase Campaign Sync Error:", e);
     }
     return this.getAllCampaigns();
+  },
+
+  // Helper: ตรวจสอบว่านักศึกษาคนนี้ต้องชำระในแคมเปญนี้หรือไม่
+  isStudentEligible: function(campaign, studentId) {
+    if (!campaign || !studentId) return true;
+    const cleanId = String(studentId).trim();
+    const cleanIdNoDash = cleanId.replace(/-/g, '');
+
+    const exempted = Array.isArray(campaign.exemptedStudentIds) ? campaign.exemptedStudentIds : [];
+    const isExempted = exempted.some(id => id === cleanId || id.replace(/-/g, '') === cleanIdNoDash);
+    if (isExempted) return false;
+
+    if (campaign.targetMode === 'specific') {
+      const eligible = Array.isArray(campaign.eligibleStudentIds) ? campaign.eligibleStudentIds : [];
+      return eligible.some(id => id === cleanId || id.replace(/-/g, '') === cleanIdNoDash);
+    }
+
+    return true; // default: all
   },
 
   // Sync single or all campaigns to Supabase
@@ -247,6 +271,9 @@ window.ComedCampaignManager = {
           if (c.bannerImage !== undefined) payload.banner_image = c.bannerImage;
           if (c.galleryImages !== undefined) payload.gallery_images = c.galleryImages;
           if (c.shirtSizes !== undefined) payload.shirt_sizes = c.shirtSizes;
+          if (c.targetMode !== undefined) payload.target_mode = c.targetMode;
+          if (c.eligibleStudentIds !== undefined) payload.eligible_student_ids = c.eligibleStudentIds;
+          if (c.exemptedStudentIds !== undefined) payload.exempted_student_ids = c.exemptedStudentIds;
 
           await sb.from('campaigns').upsert(payload, { onConflict: 'id' });
         } catch (innerErr) {

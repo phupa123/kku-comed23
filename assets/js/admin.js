@@ -524,14 +524,18 @@ function renderAdminCampaignsNav() {
           }
 
           <div class="flex items-center gap-1">
-            <button onclick="openEditCampaignModal('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 font-bold transition flex items-center gap-1" title="แก้ไขรายละเอียดแคมเปญ">
+            <button onclick="openAudienceModal('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 font-bold transition flex items-center gap-1 cursor-pointer" title="กำหนดผู้มีสิทธิ์ชำระ / ยกเว้นรายบุคคล">
+              <i data-lucide="users" class="w-3 h-3"></i>
+              <span>สิทธิ์</span>
+            </button>
+            <button onclick="openEditCampaignModal('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 font-bold transition flex items-center gap-1 cursor-pointer" title="แก้ไขรายละเอียดแคมเปญ">
               <i data-lucide="edit-3" class="w-3 h-3"></i>
               <span>แก้ไข</span>
             </button>
-            <button onclick="toggleCampaignStatus('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="เปิด/ปิดการชำระเงิน">
+            <button onclick="toggleCampaignStatus('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer" title="เปิด/ปิดการชำระเงิน">
               ${camp.status === 'open' ? 'ปิดรับ' : 'เปิดรับ'}
             </button>
-            <button onclick="openDeleteCampaignModal('${camp.id}')" class="text-[9px] p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition" title="ลบรายการเก็บเงินนี้">
+            <button onclick="openDeleteCampaignModal('${camp.id}')" class="text-[9px] p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition cursor-pointer" title="ลบรายการเก็บเงินนี้">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
             <a href="payment.html?camp=${encodeURIComponent(camp.id)}" target="_blank" class="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-orange-400" title="ดูหน้าชำระเงินของนศ.">
@@ -1056,6 +1060,179 @@ function toggleCampaignStatus(campId) {
   alert(`✨ เปลี่ยนสถานะของ "${camp.title}" เป็น ${newStatus === 'open' ? 'เปิดรับชำระ' : 'ปิดชั่วคราว'} เรียบร้อย!`);
 }
 
+// ================= AUDIENCE & ELIGIBILITY MANAGER =================
+let currentAudienceCamp = null;
+let currentAudienceExemptedMap = {}; // { studentId: boolean }
+
+function openAudienceModal(campId) {
+  if (!window.ComedCampaignManager) return;
+  const camp = window.ComedCampaignManager.getCampaignById(campId);
+  if (!camp) return;
+
+  currentAudienceCamp = camp;
+
+  const badge = document.getElementById('audTargetCampBadge');
+  const title = document.getElementById('audTargetCampTitle');
+  const searchInput = document.getElementById('audSearchInput');
+
+  if (badge) badge.textContent = camp.code || camp.id.toUpperCase();
+  if (title) title.textContent = `กำหนดสิทธิ์: ${camp.title} (คนละ ฿${camp.amount})`;
+  if (searchInput) searchInput.value = '';
+
+  // Initialize Map from campaign data
+  currentAudienceExemptedMap = {};
+  const exemptedList = Array.isArray(camp.exemptedStudentIds) ? camp.exemptedStudentIds : [];
+  exemptedList.forEach(id => {
+    currentAudienceExemptedMap[id] = true;
+  });
+
+  renderAudienceList();
+
+  const modal = document.getElementById('modalAudienceManager');
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeAudienceModal() {
+  const modal = document.getElementById('modalAudienceManager');
+  if (modal) modal.classList.add('hidden');
+  currentAudienceCamp = null;
+  currentAudienceExemptedMap = {};
+}
+
+function renderAudienceList() {
+  const container = document.getElementById('audienceStudentsListContainer');
+  if (!container || !currentAudienceCamp) return;
+
+  const searchVal = (document.getElementById('audSearchInput')?.value || '').toLowerCase().trim();
+  const students = studentDatabase || [];
+
+  let eligibleCount = 0;
+  let exemptedCount = 0;
+
+  students.forEach(st => {
+    if (currentAudienceExemptedMap[st.id]) {
+      exemptedCount++;
+    } else {
+      eligibleCount++;
+    }
+  });
+
+  const elTotal = document.getElementById('audTotalCount');
+  const elEligible = document.getElementById('audEligibleCount');
+  const elExempted = document.getElementById('audExemptedCount');
+
+  if (elTotal) elTotal.textContent = `${students.length} คน`;
+  if (elEligible) elEligible.textContent = `${eligibleCount} คน`;
+  if (elExempted) elExempted.textContent = `${exemptedCount} คน`;
+
+  const filtered = students.filter(st => {
+    if (!searchVal) return true;
+    const matchStr = `${st.id} ${st.name} ${st.nickname} ${st.email}`.toLowerCase();
+    return matchStr.includes(searchVal);
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="py-8 text-center text-xs text-slate-500 font-bold">ไม่พบนักศึกษาที่ตรงกับคำค้นหา</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(st => {
+    const isExempted = !!currentAudienceExemptedMap[st.id];
+    return `
+      <div class="py-2.5 px-3 rounded-2xl flex items-center justify-between gap-3 transition ${
+        isExempted ? 'bg-amber-950/20 border border-amber-900/30' : 'bg-slate-950/40 hover:bg-slate-900/80 border border-slate-800/80'
+      }">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl ${isExempted ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300'} flex items-center justify-center font-bold text-xs">
+            ${st.nickname.slice(0, 1)}
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs text-white">${st.name}</span>
+              <span class="px-1.5 py-0.2 rounded-md bg-orange-500/10 text-orange-400 font-bold text-[10px]">
+                น้อง${st.nickname}
+              </span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400">${st.id}</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          ${isExempted ? `
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1">
+              <i data-lucide="shield-off" class="w-3 h-3"></i> ได้รับการยกเว้น
+            </span>
+            <button type="button" onclick="toggleStudentAudience('${st.id}', false)" 
+              class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold transition cursor-pointer">
+              เปลี่ยนเป็นต้องชำระ
+            </button>
+          ` : `
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+              <i data-lucide="check" class="w-3 h-3"></i> ต้องชำระเงิน
+            </span>
+            <button type="button" onclick="toggleStudentAudience('${st.id}', true)" 
+              class="px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold transition cursor-pointer">
+              ยกเว้นคนนี้
+            </button>
+          `}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function toggleStudentAudience(studentId, setExempted) {
+  if (setExempted) {
+    currentAudienceExemptedMap[studentId] = true;
+  } else {
+    delete currentAudienceExemptedMap[studentId];
+  }
+  renderAudienceList();
+}
+
+function bulkSetAudience(requireAllToPay) {
+  if (requireAllToPay) {
+    // ทุกคนต้องชำระ = ล้างรายการยกเว้น
+    currentAudienceExemptedMap = {};
+  } else {
+    // ยกเว้นทุกคน
+    studentDatabase.forEach(st => {
+      currentAudienceExemptedMap[st.id] = true;
+    });
+  }
+  renderAudienceList();
+}
+
+async function saveAudienceSettings() {
+  if (!currentAudienceCamp || !window.ComedCampaignManager) return;
+
+  const exemptedIds = Object.keys(currentAudienceExemptedMap);
+  currentAudienceCamp.exemptedStudentIds = exemptedIds;
+  currentAudienceCamp.targetMode = "all";
+
+  window.ComedCampaignManager.updateCampaign(currentAudienceCamp);
+
+  try {
+    await logAdminAction(
+      "กำหนดสิทธิ์ผู้ชำระเงิน",
+      `อัปเดตสิทธิ์ "${currentAudienceCamp.title}": ต้องชำระ ${studentDatabase.length - exemptedIds.length} คน, ยกเว้น ${exemptedIds.length} คน`
+    );
+  } catch (err) {}
+
+  // Update current session if viewing this campaign
+  if (currentAdminCampaign && currentAdminCampaign.id === currentAudienceCamp.id) {
+    currentAdminCampaign.exemptedStudentIds = exemptedIds;
+    renderStats();
+    renderAdminTable();
+  }
+
+  closeAudienceModal();
+  alert(`✨ บันทึกการกำหนดสิทธิ์ของ "${currentAudienceCamp.title}" สำเร็จ!\n(ต้องชำระ ${studentDatabase.length - exemptedIds.length} คน, ยกเว้น ${exemptedIds.length} คน)`);
+}
+
 async function loadAllPayments(silent = false) {
   // Priority 1: Supabase
   const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
@@ -1116,10 +1293,18 @@ async function loadAllPayments(silent = false) {
 }
 
 function renderStats() {
-  const total = studentDatabase.length;
+  const allStudents = studentDatabase || [];
+  const exemptedList = Array.isArray(currentAdminCampaign.exemptedStudentIds) ? currentAdminCampaign.exemptedStudentIds : [];
+  
+  // Eligible students = นักเรียนที่ไม่ได้รับการยกเว้น
+  const eligibleStudents = allStudents.filter(st => {
+    return !exemptedList.includes(st.id) && !exemptedList.includes(st.id.replace(/-/g, ''));
+  });
+
+  const total = eligibleStudents.length; // จำนวนคนที่ต้องชำระจริง
   let paidCount = 0;
 
-  studentDatabase.forEach(st => {
+  eligibleStudents.forEach(st => {
     if (paymentRecords[st.id] && paymentRecords[st.id].paid) {
       paidCount++;
     }
@@ -1410,6 +1595,18 @@ function renderAdminTable() {
       ? `<span class="inline-block mt-1 px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold text-[10px] border border-indigo-500/30">ไซส์ ${record.shirtSize}</span>` 
       : '';
 
+    const exemptedList = Array.isArray(currentAdminCampaign.exemptedStudentIds) ? currentAdminCampaign.exemptedStudentIds : [];
+    const isExempted = exemptedList.includes(st.id) || exemptedList.includes(st.id.replace(/-/g, ''));
+
+    let statusHtml = '';
+    if (isPaid) {
+      statusHtml = `<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"><i data-lucide="check" class="w-3.5 h-3.5"></i> จ่ายแล้ว (฿${amountDisplay.toLocaleString()})</span>`;
+    } else if (isExempted) {
+      statusHtml = `<span class="inline-flex items-center gap-1 text-[11px] font-black text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20"><i data-lucide="shield-off" class="w-3.5 h-3.5"></i> ได้รับการยกเว้น</span>`;
+    } else {
+      statusHtml = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20"><i data-lucide="x" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>';
+    }
+
     return `
       <tr class="hover:bg-slate-800/40 transition">
         <td class="p-4 text-center text-slate-500 font-mono text-xs">${idx + 1}</td>
@@ -1425,10 +1622,7 @@ function renderAdminTable() {
         </td>
         <td class="p-4 hidden md:table-cell text-slate-400 font-mono text-xs">${st.email}</td>
         <td class="p-4 text-center">
-          ${isPaid
-        ? `<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"><i data-lucide="check" class="w-3.5 h-3.5"></i> จ่ายแล้ว (฿${amountDisplay.toLocaleString()})</span>`
-        : '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20"><i data-lucide="x" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>'
-      }
+          ${statusHtml}
         </td>
         <td class="p-4 text-center">
           ${isPaid && slipUrl
@@ -2024,10 +2218,24 @@ async function executeCustomExcelExport() {
     if (local) paymentRecords = JSON.parse(local);
   } catch(e) {}
 
+  const exemptedList = Array.isArray(currentAdminCampaign.exemptedStudentIds) ? currentAdminCampaign.exemptedStudentIds : [];
+
   // 3. Prepare base dataset
   let dataset = studentDatabase.map((st, idx) => {
     const record = paymentRecords[st.id];
     const isPaid = !!(record && record.paid);
+    const isExempted = !isPaid && (exemptedList.includes(st.id) || exemptedList.includes(st.id.replace(/-/g, '')));
+
+    let statusText = "ยังไม่ชำระเงิน";
+    let statusVisual = "✖ ยังไม่ชำระเงิน";
+    if (isPaid) {
+      statusText = "ชำระเงินแล้ว";
+      statusVisual = "✔ ชำระเงินแล้ว";
+    } else if (isExempted) {
+      statusText = "ได้รับการยกเว้น";
+      statusVisual = "⚪ ได้รับการยกเว้น";
+    }
+
     return {
       originalIndex: idx + 1,
       id: st.id,
@@ -2035,8 +2243,9 @@ async function executeCustomExcelExport() {
       nickname: `น้อง${st.nickname}`,
       email: st.email,
       isPaid: isPaid,
-      statusText: isPaid ? "ชำระเงินแล้ว" : "ยังไม่ชำระเงิน",
-      statusVisual: isPaid ? "✔ ชำระเงินแล้ว" : "✖ ยังไม่ชำระเงิน",
+      isExempted: isExempted,
+      statusText: statusText,
+      statusVisual: statusVisual,
       shirtSize: record?.shirtSize || "-",
       amount: isPaid ? (record.amount || currentCampaign.amount || 190) : 0,
       timestamp: record?.timestamp || "-",

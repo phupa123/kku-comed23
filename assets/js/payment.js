@@ -715,10 +715,18 @@ function setupCountdownTimer() {
 
 // --- STATS & PROGRESS CALCULATION ---
 function refreshProgressStats() {
-  const totalCount = studentDatabase.length;
+  const allStudents = studentDatabase || [];
+  const exemptedList = Array.isArray(currentCampaign.exemptedStudentIds) ? currentCampaign.exemptedStudentIds : [];
+  
+  // Eligible students = นักเรียนที่ไม่ได้รับการยกเว้น
+  const eligibleStudents = allStudents.filter(st => {
+    return !exemptedList.includes(st.id) && !exemptedList.includes(st.id.replace(/-/g, ''));
+  });
+
+  const totalCount = eligibleStudents.length; // จำนวนคนที่ต้องชำระจริง
   let paidCount = 0;
 
-  studentDatabase.forEach(st => {
+  eligibleStudents.forEach(st => {
     if (paymentRecords[st.id] && paymentRecords[st.id].paid) {
       paidCount++;
     }
@@ -748,7 +756,7 @@ function refreshProgressStats() {
   const peopleProgressBarEl = document.getElementById('peopleProgressBar');
 
   if (totalPeopleEl) totalPeopleEl.textContent = `${paidCount}`;
-  if (targetPeopleEl) targetPeopleEl.textContent = `/ ${totalCount} คนทั้งหมด`;
+  if (targetPeopleEl) targetPeopleEl.textContent = `/ ${totalCount} คนที่ต้องชำระ`;
   if (peoplePercentBadgeEl) peoplePercentBadgeEl.textContent = `${peoplePercent}%`;
   if (peopleProgressBarEl) peopleProgressBarEl.style.width = `${peoplePercent}%`;
 
@@ -757,7 +765,7 @@ function refreshProgressStats() {
   const countPaidEl = document.getElementById('countPaidFilter');
   const countUnpaidEl = document.getElementById('countUnpaidFilter');
 
-  if (countAllEl) countAllEl.textContent = totalCount;
+  if (countAllEl) countAllEl.textContent = allStudents.length;
   if (countPaidEl) countPaidEl.textContent = paidCount;
   if (countUnpaidEl) countUnpaidEl.textContent = (totalCount - paidCount);
 }
@@ -932,6 +940,18 @@ function renderAutocompleteList(list) {
 
   dropdown.innerHTML = list.map(st => {
     const isPaid = paymentRecords[st.id] && paymentRecords[st.id].paid;
+    const isEligible = window.ComedCampaignManager ? window.ComedCampaignManager.isStudentEligible(currentCampaign, st.id) : true;
+    const isExempted = !isPaid && !isEligible;
+
+    let badgeHtml = '';
+    if (isPaid) {
+      badgeHtml = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> จ่ายแล้ว</span>';
+    } else if (isExempted) {
+      badgeHtml = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-300"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> ได้รับการยกเว้น</span>';
+    } else {
+      badgeHtml = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>';
+    }
+
     return `
       <div onclick="handleAutocompleteSelect('${st.id}')" class="p-3.5 hover:bg-orange-50/80 cursor-pointer flex items-center justify-between transition group">
         <div class="flex items-center gap-3">
@@ -951,10 +971,7 @@ function renderAutocompleteList(list) {
           </div>
         </div>
         <div>
-          ${isPaid
-        ? '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> จ่ายแล้ว</span>'
-        : '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>'
-      }
+          ${badgeHtml}
         </div>
       </div>
     `;
@@ -995,10 +1012,15 @@ function selectStudent(st) {
 
   const record = paymentRecords[st.id];
   const isPaid = record && record.paid;
+  
+  // Check if student is exempted from current campaign
+  const isEligible = window.ComedCampaignManager ? window.ComedCampaignManager.isStudentEligible(currentCampaign, st.id) : true;
+  const isExempted = !isPaid && !isEligible;
 
   const statusBadgeContainer = document.getElementById('profileStatusBadgeContainer');
   const unpaidSection = document.getElementById('unpaidSection');
   const paidSection = document.getElementById('paidSection');
+  const exemptedSection = document.getElementById('exemptedSection');
 
   if (isPaid) {
     if (statusBadgeContainer) {
@@ -1043,17 +1065,39 @@ function selectStudent(st) {
 
     if (unpaidSection) unpaidSection.classList.add('hidden');
     if (paidSection) paidSection.classList.remove('hidden');
+    if (exemptedSection) exemptedSection.classList.add('hidden');
+  } else if (isExempted) {
+    if (statusBadgeContainer) {
+      statusBadgeContainer.innerHTML = `
+        <div class="px-4 py-2 rounded-2xl bg-amber-100 text-amber-900 border border-amber-300 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
+          <i data-lucide="shield-check" class="w-4 h-4 text-amber-600"></i>
+          <span>ได้รับการยกเว้นไม่ต้องชำระ</span>
+        </div>
+        <button type="button" onclick="clearSelectedStudent()" class="px-3.5 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition border border-slate-200 cursor-pointer">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <span>เปลี่ยนคน</span>
+        </button>
+      `;
+    }
+    const exCampNotice = document.getElementById('exemptedNoticeCampaignName');
+    if (exCampNotice) exCampNotice.textContent = `รายการ "${currentCampaign.title}" แอดมินได้ยกเว้นค่าใช้จ่ายให้คุณ`;
+
+    if (unpaidSection) unpaidSection.classList.add('hidden');
+    if (paidSection) paidSection.classList.add('hidden');
+    if (exemptedSection) exemptedSection.classList.remove('hidden');
   } else {
+    const currentPrice = currentSelectedShirtSize && currentSelectedShirtSize.price ? currentSelectedShirtSize.price : (currentCampaign.amount || 190);
     if (statusBadgeContainer) {
       statusBadgeContainer.innerHTML = `
         <div class="px-4 py-2 rounded-2xl bg-rose-100 text-rose-900 border border-rose-300 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
           <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600"></i>
-          <span>ยังไม่ได้ชำระเงิน (฿190)</span>
+          <span>ยังไม่ได้ชำระเงิน (฿${currentPrice.toLocaleString()})</span>
         </div>
       `;
     }
     if (unpaidSection) unpaidSection.classList.remove('hidden');
     if (paidSection) paidSection.classList.add('hidden');
+    if (exemptedSection) exemptedSection.classList.add('hidden');
   }
 
   // Show Card with GSAP Animation
@@ -1505,6 +1549,18 @@ function renderStatusTable() {
     const sizeBadge = rec && rec.shirtSize 
       ? `<span class="inline-block mt-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-black border border-indigo-200">ไซส์ ${rec.shirtSize}</span>`
       : '';
+    const isEligible = window.ComedCampaignManager ? window.ComedCampaignManager.isStudentEligible(currentCampaign, st.id) : true;
+    const isExempted = !isPaid && !isEligible;
+
+    let statusPill = '';
+    if (isPaid) {
+      statusPill = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-700 bg-emerald-100/90 px-3 py-1 rounded-full border border-emerald-300 shadow-xs"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> จ่ายแล้ว</span>';
+    } else if (isExempted) {
+      statusPill = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-amber-800 bg-amber-100/90 px-3 py-1 rounded-full border border-amber-300 shadow-xs"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> ได้รับการยกเว้น</span>';
+    } else {
+      statusPill = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-700 bg-rose-100/90 px-3 py-1 rounded-full border border-rose-300 shadow-xs"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>';
+    }
+
     return `
       <tr class="hover:bg-slate-50/80 transition-colors">
         <td class="p-4 text-center text-slate-400 font-mono text-xs">${index + 1}</td>
@@ -1520,10 +1576,7 @@ function renderStatusTable() {
         </td>
         <td class="p-4 hidden md:table-cell text-slate-500 font-mono text-xs">${st.email}</td>
         <td class="p-4 text-center">
-          ${isPaid
-        ? '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-700 bg-emerald-100/90 px-3 py-1 rounded-full border border-emerald-300 shadow-xs"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> จ่ายแล้ว</span>'
-        : '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-700 bg-rose-100/90 px-3 py-1 rounded-full border border-rose-300 shadow-xs"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>'
-      }
+          ${statusPill}
         </td>
         <td class="p-4 text-center">
           ${isPaid
