@@ -7,12 +7,12 @@
 
 // ================= DYNAMIC MULTI-CAMPAIGN CONTEXT =================
 const urlParams = new URLSearchParams(window.location.search);
-const currentCampaignId = urlParams.get("camp") || urlParams.get("id") || "paimai69";
+const currentCampaignId = urlParams.get("camp") || urlParams.get("id") || "shirt69";
 let currentAdminCampaign = (window.ComedCampaignManager ? window.ComedCampaignManager.getCampaignById(currentCampaignId) : null) || {
-  id: "paimai69",
-  title: "ค่าทำป้ายสาขาวิชาเอก",
-  amount: 190,
-  deadline: "2026-09-04T23:59:00+07:00",
+  id: "shirt69",
+  title: "ค่าเสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา",
+  amount: 290,
+  deadline: "2026-11-15T23:59:00+07:00",
   gasApiUrl: "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec"
 };
 
