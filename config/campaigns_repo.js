@@ -11,6 +11,42 @@ const COMED_DELETED_CAMPAIGNS_KEY = 'COMED_DELETED_CAMPAIGNS_V2';
 // 1. Initial Default Campaigns Repository
 const DEFAULT_COMED_CAMPAIGNS = [
   {
+    id: "shirt69",
+    code: "SHIRT69",
+    title: "ค่าเสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา",
+    subtitle: "เสื้อกิจกรรม & เสื้อเอกสาขาวิชาคอมพิวเตอร์ศึกษา (COMED KKU 69)",
+    category: "เสื้อสาขาวิชาเอก (COMED 69)",
+    amount: 290.00,
+    currency: "THB",
+    deadline: "2026-11-15T23:59:00+07:00",
+    deadlineDisplay: "15 พ.ย. 2569 (23:59 น.)",
+    bankName: "ธนาคารกสิกรไทย (KPlus)",
+    accountNumber: "236-2-47817-3",
+    accountName: "น.ส. พิชามญธุ์ สามสี",
+    qrImage: "qr_payment.png",
+    bgImage: "", // URL ภาพพื้นหลังแคมเปญ
+    bannerImage: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80", // ภาพประกอบหลัก/เสื้อสาขา
+    galleryImages: [
+      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=800&q=80"
+    ],
+    shirtSizes: [
+      { size: "S", chest: "36\"", length: "26\"", price: 290 },
+      { size: "M", chest: "38\"", length: "27\"", price: 290 },
+      { size: "L", chest: "40\"", length: "28\"", price: 290 },
+      { size: "XL", chest: "42\"", length: "29\"", price: 290 },
+      { size: "2XL", chest: "44\"", length: "30\"", price: 310 },
+      { size: "3XL", chest: "48\"", length: "31\"", price: 330 }
+    ],
+    gasApiUrl: "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec",
+    googleSheetUrl: "https://docs.google.com/spreadsheets/d/1tD13_pZ4Vp27V8Z34wL2-Sample/edit",
+    status: "open", // 'open' | 'completed' | 'temp_closed' | 'permanently_closed'
+    closedReason: "",
+    isDefault: true,
+    showOnIndex: true,
+    createdAt: "2026-10-16T00:00:00Z"
+  },
+  {
     id: "paimai69",
     code: "PAIMAI69",
     title: "ค่าทำป้ายสาขาวิชาเอก",
@@ -24,13 +60,15 @@ const DEFAULT_COMED_CAMPAIGNS = [
     accountNumber: "236-2-47817-3",
     accountName: "น.ส. พิชามญธุ์ สามสี",
     qrImage: "qr_payment.png",
-    
+    bgImage: "",
+    bannerImage: "",
+    galleryImages: [],
+    shirtSizes: [],
     gasApiUrl: "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec",
     googleSheetUrl: "https://docs.google.com/spreadsheets/d/1tD13_pZ4Vp27V8Z34wL2-Sample/edit",
-    
-    status: "completed", // 'open' | 'completed' | 'temp_closed' | 'permanently_closed'
+    status: "completed",
     closedReason: "ชำระครบ 60/60 คนเรียบร้อยแล้ว",
-    isDefault: true,
+    isDefault: false,
     showOnIndex: true,
     createdAt: "2026-08-30T00:00:00Z"
   }
@@ -156,6 +194,10 @@ window.ComedCampaignManager = {
                 accountNumber: item.account_number || '',
                 accountName: item.account_name || '',
                 qrImage: item.qr_image || 'qr_payment.png',
+                bgImage: item.bg_image || matchedLocal.bgImage || '',
+                bannerImage: item.banner_image || matchedLocal.bannerImage || '',
+                galleryImages: item.gallery_images || matchedLocal.galleryImages || [],
+                shirtSizes: item.shirt_sizes || matchedLocal.shirtSizes || [],
                 status: item.status || 'open',
                 closedReason: item.closed_reason || '',
                 isDefault: item.is_default || false,
@@ -182,7 +224,7 @@ window.ComedCampaignManager = {
       const list = Array.isArray(campaigns) ? campaigns : [campaigns];
       for (const c of list) {
         try {
-          await sb.from('campaigns').upsert({
+          const payload = {
             id: c.id,
             code: c.code || c.id.toUpperCase(),
             title: c.title,
@@ -200,7 +242,13 @@ window.ComedCampaignManager = {
             closed_reason: c.closedReason || '',
             is_default: !!c.isDefault,
             updated_at: new Date().toISOString()
-          }, { onConflict: 'id' });
+          };
+          if (c.bgImage !== undefined) payload.bg_image = c.bgImage;
+          if (c.bannerImage !== undefined) payload.banner_image = c.bannerImage;
+          if (c.galleryImages !== undefined) payload.gallery_images = c.galleryImages;
+          if (c.shirtSizes !== undefined) payload.shirt_sizes = c.shirtSizes;
+
+          await sb.from('campaigns').upsert(payload, { onConflict: 'id' });
         } catch (innerErr) {
           console.warn(`Supabase Upsert skipped for campaign ${c.id}:`, innerErr);
         }

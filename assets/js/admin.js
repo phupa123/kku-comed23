@@ -644,6 +644,16 @@ function openCreateCampaignModal() {
   const qrInput = document.getElementById('campQrImageInput');
   if (qrInput) qrInput.value = 'qr_payment.png';
 
+  const bannerPreview = document.getElementById('campBannerPreviewImg');
+  if (bannerPreview) bannerPreview.src = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80';
+  const bannerInput = document.getElementById('campBannerImageInput');
+  if (bannerInput) bannerInput.value = '';
+
+  const bgPreview = document.getElementById('campBgPreviewImg');
+  if (bgPreview) bgPreview.src = 'logo.png';
+  const bgInput = document.getElementById('campBgImageInput');
+  if (bgInput) bgInput.value = '';
+
   const modal = document.getElementById('modalCreateCampaign');
   if (modal) modal.classList.remove('hidden');
 
@@ -714,6 +724,18 @@ function openEditCampaignModal(campId) {
 
   const qrPreview = document.getElementById('campQrPreviewImg');
   if (qrPreview) qrPreview.src = camp.qrImage || 'qr_payment.png';
+
+  const bannerInput = document.getElementById('campBannerImageInput');
+  if (bannerInput) bannerInput.value = camp.bannerImage || '';
+
+  const bannerPreview = document.getElementById('campBannerPreviewImg');
+  if (bannerPreview) bannerPreview.src = camp.bannerImage || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80';
+
+  const bgInput = document.getElementById('campBgImageInput');
+  if (bgInput) bgInput.value = camp.bgImage || '';
+
+  const bgPreview = document.getElementById('campBgPreviewImg');
+  if (bgPreview) bgPreview.src = camp.bgImage || 'logo.png';
 
   // Populate multiple selected slip providers
   const selectedProviders = Array.isArray(camp.slipProviders) 
@@ -946,6 +968,15 @@ async function handleSaveCampaignSubmit(e) {
   const qrInputVal = document.getElementById('campQrImageInput')?.value.trim();
   const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || 'qr_payment.png';
   const qrImage = qrInputVal || qrPreviewSrc;
+
+  const bannerInputVal = document.getElementById('campBannerImageInput')?.value.trim();
+  const bannerPreviewSrc = document.getElementById('campBannerPreviewImg')?.src || '';
+  const bannerImage = bannerInputVal || bannerPreviewSrc;
+
+  const bgInputVal = document.getElementById('campBgImageInput')?.value.trim();
+  const bgPreviewSrc = document.getElementById('campBgPreviewImg')?.src || '';
+  const bgImage = bgInputVal || (bgPreviewSrc && !bgPreviewSrc.includes('logo.png') ? bgPreviewSrc : '');
+
   const isOpen = document.getElementById('campStatusOpenInput')?.checked;
 
   let existingCampaign = editId && window.ComedCampaignManager ? window.ComedCampaignManager.getCampaignById(editId) : null;
@@ -965,6 +996,8 @@ async function handleSaveCampaignSubmit(e) {
     accountNumber: accountNumber,
     accountName: accountName,
     qrImage: qrImage,
+    bannerImage: bannerImage,
+    bgImage: bgImage,
     slipProvider: slipProvider,
     slipProviders: slipProviders,
     status: isOpen ? 'open' : (existingCampaign && existingCampaign.status === 'completed' ? 'completed' : 'temp_closed'),
@@ -1372,11 +1405,19 @@ function renderAdminTable() {
     const isPaid = record && record.paid;
     const slipUrl = record?.slipUrl || '';
 
+    const amountDisplay = record && record.amount ? record.amount : (currentCampaign.amount || 190);
+    const shirtSizeBadge = record && record.shirtSize 
+      ? `<span class="inline-block mt-1 px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold text-[10px] border border-indigo-500/30">ไซส์ ${record.shirtSize}</span>` 
+      : '';
+
     return `
       <tr class="hover:bg-slate-800/40 transition">
         <td class="p-4 text-center text-slate-500 font-mono text-xs">${idx + 1}</td>
         <td class="p-4 font-mono font-bold text-white">${st.id}</td>
-        <td class="p-4 font-bold text-slate-200">${st.name}</td>
+        <td class="p-4">
+          <div class="font-bold text-slate-200">${st.name}</div>
+          ${shirtSizeBadge}
+        </td>
         <td class="p-4">
           <span class="px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-400 font-bold text-xs border border-orange-500/20">
             น้อง${st.nickname}
@@ -1385,7 +1426,7 @@ function renderAdminTable() {
         <td class="p-4 hidden md:table-cell text-slate-400 font-mono text-xs">${st.email}</td>
         <td class="p-4 text-center">
           ${isPaid
-        ? '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"><i data-lucide="check" class="w-3.5 h-3.5"></i> จ่ายแล้ว (฿190)</span>'
+        ? `<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"><i data-lucide="check" class="w-3.5 h-3.5"></i> จ่ายแล้ว (฿${amountDisplay.toLocaleString()})</span>`
         : '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20"><i data-lucide="x" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>'
       }
         </td>
@@ -1996,7 +2037,8 @@ async function executeCustomExcelExport() {
       isPaid: isPaid,
       statusText: isPaid ? "ชำระเงินแล้ว" : "ยังไม่ชำระเงิน",
       statusVisual: isPaid ? "✔ ชำระเงินแล้ว" : "✖ ยังไม่ชำระเงิน",
-      amount: isPaid ? (record.amount || 190) : 0,
+      shirtSize: record?.shirtSize || "-",
+      amount: isPaid ? (record.amount || currentCampaign.amount || 190) : 0,
       timestamp: record?.timestamp || "-",
       refCode: record?.refCode || "-",
       slipUrl: record?.slipUrl || "-"
@@ -2030,6 +2072,7 @@ async function executeCustomExcelExport() {
     "ชื่อเล่น",
     "อีเมล (KKU Mail)",
     "สถานะการชำระเงิน",
+    "ไซส์เสื้อ",
     "ยอดเงิน (บาท)",
     "วัน-เวลาที่ชำระ",
     "รหัสอ้างอิง",
@@ -2054,6 +2097,7 @@ async function executeCustomExcelExport() {
       item.nickname,
       item.email,
       statusDisplay,
+      item.shirtSize,
       item.amount,
       item.timestamp,
       item.refCode,
@@ -2072,6 +2116,7 @@ async function executeCustomExcelExport() {
     { wch: 12 }, // ชื่อเล่น
     { wch: 32 }, // อีเมล
     { wch: 20 }, // สถานะ
+    { wch: 12 }, // ไซส์เสื้อ
     { wch: 14 }, // ยอดเงิน
     { wch: 24 }, // วันเวลา
     { wch: 20 }, // รหัสอ้างอิง
@@ -2120,9 +2165,10 @@ async function executeCustomExcelExport() {
       };
 
       // Alignment rules
-      if (C === 0 || C === 1 || C === 3 || C === 5 || C === 7 || C === 8) {
+      // 0:ลำดับ, 1:รหัส, 2:ชื่อ, 3:ชื่อเล่น, 4:อีเมล, 5:สถานะ, 6:ไซส์เสื้อ, 7:ยอดเงิน, 8:วันเวลา, 9:รหัสอ้างอิง, 10:ลิงก์
+      if (C === 0 || C === 1 || C === 3 || C === 5 || C === 6 || C === 8 || C === 9) {
         cellStyle.alignment.horizontal = "center";
-      } else if (C === 6) {
+      } else if (C === 7) {
         cellStyle.alignment.horizontal = "right";
       }
 
@@ -2138,14 +2184,14 @@ async function executeCustomExcelExport() {
           // Status Column: Green for Paid, Red for Unpaid
           cellStyle.fill = { fgColor: { rgb: isPaid ? "DCFCE7" : "FEE2E2" } };
           cellStyle.font = { name: "Prompt", sz: 10, bold: true, color: { rgb: isPaid ? "15803D" : "B91C1C" } };
-        } else if (C === 6 && isPaid) {
+        } else if (C === 7 && isPaid) {
           cellStyle.font.color = { rgb: "15803D" };
           cellStyle.font.bold = true;
         }
       }
 
       // Slip Link formatting
-      if (C === 9 && item?.slipUrl && item.slipUrl !== '-') {
+      if (C === 10 && item?.slipUrl && item.slipUrl !== '-') {
         cellStyle.font = { name: "Prompt", sz: 10, color: { rgb: "EA580C" }, underline: true };
       }
 

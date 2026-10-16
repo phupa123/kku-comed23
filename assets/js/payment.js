@@ -335,7 +335,9 @@ function renderCampaignsNav() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-// Update Hero, Bank Details & QR according to current campaign
+let currentSelectedShirtSize = null;
+
+// Update Hero, Bank Details, Shirt Showcase & Background according to current campaign
 function applyCampaignDetailsToUI() {
   const c = currentCampaign;
   if (!c) return;
@@ -356,6 +358,23 @@ function applyCampaignDetailsToUI() {
   const totalTarget = (c.amount || 190) * 60;
   if (targetMoney) targetMoney.textContent = `/ ฿${totalTarget.toLocaleString()} (เป้าหมาย)`;
 
+  // Dynamic Custom Background Wallpaper
+  const heroBg = document.getElementById('heroCustomBgLayer');
+  const heroTint = document.getElementById('heroCustomBgTint');
+  if (heroBg) {
+    if (c.bgImage && c.bgImage.trim()) {
+      heroBg.style.backgroundImage = `url('${c.bgImage.trim()}')`;
+      heroBg.classList.remove('opacity-0');
+      heroBg.classList.add('opacity-40');
+      if (heroTint) heroTint.classList.remove('hidden');
+    } else {
+      heroBg.style.backgroundImage = 'none';
+      heroBg.classList.add('opacity-0');
+      heroBg.classList.remove('opacity-40');
+      if (heroTint) heroTint.classList.add('hidden');
+    }
+  }
+
   // Bank Info Update
   const bTitle = document.getElementById('bankDetailTitle');
   const bAmt = document.getElementById('bankDetailAmount');
@@ -365,13 +384,181 @@ function applyCampaignDetailsToUI() {
   const bAmtHi = document.getElementById('bankAmountHighlight');
   const bQr = document.getElementById('bankQrImage');
 
-  if (bTitle) bTitle.textContent = `${c.title} (รหัส 69)`;
+  if (bTitle) bTitle.textContent = `${c.title} (COMED KKU 69)`;
   if (bAmt) bAmt.textContent = `฿${Number(c.amount).toFixed(2)} บาท / คน`;
   if (bBank) bBank.textContent = c.bankName || "ธนาคารกสิกรไทย (KPlus)";
   if (bAccNum) bAccNum.textContent = c.accountNumber || "236-2-47817-3";
   if (bAccName) bAccName.textContent = c.accountName || "น.ส. พิชามญธุ์ สามสี";
   if (bAmtHi) bAmtHi.textContent = `฿${Number(c.amount).toLocaleString()} บาท`;
   if (bQr && c.qrImage) bQr.src = c.qrImage;
+
+  // Render Shirt Showcase UI (If banner or shirt sizes available)
+  renderShirtShowcaseUI(c);
+}
+
+function renderShirtShowcaseUI(campaign) {
+  const showcaseSection = document.getElementById('campaignShirtShowcaseSection');
+  if (!showcaseSection) return;
+
+  const hasBanner = !!(campaign.bannerImage && campaign.bannerImage.trim());
+  const hasSizes = Array.isArray(campaign.shirtSizes) && campaign.shirtSizes.length > 0;
+  const isShirtCampaign = campaign.id.toLowerCase().includes('shirt') || 
+                          campaign.title.toLowerCase().includes('เสื้อ') || 
+                          hasBanner || hasSizes;
+
+  if (!isShirtCampaign) {
+    showcaseSection.classList.add('hidden');
+    const studentShirtBox = document.getElementById('studentShirtSizeCard');
+    if (studentShirtBox) studentShirtBox.classList.add('hidden');
+    return;
+  }
+
+  showcaseSection.classList.remove('hidden');
+
+  // 1. Banner Image & Price
+  const bannerImg = document.getElementById('showcaseMainBannerImg');
+  const bannerUrl = campaign.bannerImage || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80';
+  if (bannerImg) bannerImg.src = bannerUrl;
+
+  const priceTag = document.getElementById('showcasePriceTag');
+  if (priceTag) priceTag.textContent = `฿${Number(campaign.amount || 290).toLocaleString()}.-`;
+
+  const titleEl = document.getElementById('showcaseTitleText');
+  if (titleEl) titleEl.textContent = campaign.title;
+
+  const subEl = document.getElementById('showcaseSubtitleText');
+  if (subEl) subEl.textContent = campaign.subtitle || 'เสื้อกิจกรรมและเสื้อเอกประจำรุ่น เนื้อผ้า Cotton 100% สั่งทอพิเศษ สวมใส่สบาย ระบายอากาศดี';
+
+  const catPill = document.getElementById('showcaseCategoryPill');
+  if (catPill) catPill.textContent = campaign.category || 'เสื้อสาขาวิชาเอก';
+
+  // 2. Thumbnails Gallery (if galleryImages provided)
+  const thumbRow = document.getElementById('showcaseThumbnailsRow');
+  const gallery = Array.isArray(campaign.galleryImages) && campaign.galleryImages.length > 0
+    ? campaign.galleryImages
+    : (hasBanner ? [bannerUrl] : []);
+
+  if (thumbRow) {
+    if (gallery.length > 1) {
+      thumbRow.classList.remove('hidden');
+      thumbRow.innerHTML = gallery.map((imgUrl, i) => `
+        <div onclick="switchShowcaseBanner('${escapeHtmlAttr(imgUrl)}')" class="w-16 h-12 rounded-xl overflow-hidden border-2 border-orange-300 hover:border-orange-500 cursor-pointer flex-shrink-0 transition-transform hover:scale-105 shadow-xs">
+          <img src="${escapeHtmlAttr(imgUrl)}" alt="thumb ${i+1}" class="w-full h-full object-cover">
+        </div>
+      `).join('');
+    } else {
+      thumbRow.classList.add('hidden');
+    }
+  }
+
+  // 3. Sizes Grid
+  const sizes = hasSizes ? campaign.shirtSizes : [
+    { size: "S", chest: "36\"", length: "26\"", price: campaign.amount || 290 },
+    { size: "M", chest: "38\"", length: "27\"", price: campaign.amount || 290 },
+    { size: "L", chest: "40\"", length: "28\"", price: campaign.amount || 290 },
+    { size: "XL", chest: "42\"", length: "29\"", price: campaign.amount || 290 },
+    { size: "2XL", chest: "44\"", length: "30\"", price: (campaign.amount || 290) + 20 },
+    { size: "3XL", chest: "48\"", length: "31\"", price: (campaign.amount || 290) + 40 }
+  ];
+
+  // Default selection: L or first
+  if (!currentSelectedShirtSize) {
+    currentSelectedShirtSize = sizes.find(s => s.size === 'L') || sizes[0];
+  }
+
+  renderSizeButtons(sizes);
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function escapeHtmlAttr(str) {
+  if (!str) return '';
+  return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function switchShowcaseBanner(imgUrl) {
+  const bannerImg = document.getElementById('showcaseMainBannerImg');
+  if (bannerImg && imgUrl) {
+    bannerImg.src = imgUrl;
+  }
+}
+
+function openCurrentShirtBannerFullscreen() {
+  const bannerImg = document.getElementById('showcaseMainBannerImg');
+  const url = bannerImg ? bannerImg.src : (currentCampaign.bannerImage || 'logo.png');
+  openFullscreenModal(url);
+}
+
+function renderSizeButtons(sizes) {
+  const showcaseGrid = document.getElementById('showcaseSizesGrid');
+  const studentGrid = document.getElementById('studentSizeButtonsContainer');
+  const studentShirtBox = document.getElementById('studentShirtSizeCard');
+
+  if (studentShirtBox) {
+    studentShirtBox.classList.remove('hidden');
+  }
+
+  const renderBtns = (container, isStudentCard) => {
+    if (!container) return;
+    container.innerHTML = sizes.map(s => {
+      const isSelected = currentSelectedShirtSize && (currentSelectedShirtSize.size === s.size);
+      return `
+        <button type="button" onclick="selectShirtSize('${s.size}')"
+          class="p-2.5 rounded-xl border-2 transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 text-center ${
+            isSelected
+              ? 'bg-gradient-to-tr from-orange-500 to-amber-500 border-orange-500 text-white shadow-md shadow-orange-500/30 font-black'
+              : 'bg-white hover:bg-orange-50/60 border-slate-200 text-slate-800 font-bold hover:border-orange-300'
+          }">
+          <span class="text-sm font-black block">${s.size}</span>
+          <span class="text-[10px] ${isSelected ? 'text-orange-100' : 'text-slate-500'} block">อก ${s.chest}</span>
+          <span class="text-[9px] ${isSelected ? 'text-amber-200' : 'text-orange-600 font-bold'} block mt-0.5">฿${s.price || currentCampaign.amount}</span>
+        </button>
+      `;
+    }).join('');
+  };
+
+  renderBtns(showcaseGrid, false);
+  renderBtns(studentGrid, true);
+  updateSelectedSizeUI();
+}
+
+function selectShirtSize(sizeName) {
+  const c = currentCampaign;
+  const sizes = (c && Array.isArray(c.shirtSizes) && c.shirtSizes.length > 0)
+    ? c.shirtSizes
+    : [
+      { size: "S", chest: "36\"", length: "26\"", price: c.amount || 290 },
+      { size: "M", chest: "38\"", length: "27\"", price: c.amount || 290 },
+      { size: "L", chest: "40\"", length: "28\"", price: c.amount || 290 },
+      { size: "XL", chest: "42\"", length: "29\"", price: c.amount || 290 },
+      { size: "2XL", chest: "44\"", length: "30\"", price: (c.amount || 290) + 20 },
+      { size: "3XL", chest: "48\"", length: "31\"", price: (c.amount || 290) + 40 }
+    ];
+
+  const found = sizes.find(s => s.size === sizeName) || sizes[0];
+  currentSelectedShirtSize = found;
+
+  renderSizeButtons(sizes);
+}
+
+function updateSelectedSizeUI() {
+  if (!currentSelectedShirtSize) return;
+
+  const notice = document.getElementById('showcaseSelectedSizeNotice');
+  const label = document.getElementById('showcaseSelectedSizeLabel');
+  const price = document.getElementById('showcaseSelectedSizePrice');
+  const studentBadge = document.getElementById('studentSelectedSizePriceBadge');
+
+  if (notice) notice.classList.remove('hidden');
+  if (label) label.textContent = `ไซส์ที่เลือก: ${currentSelectedShirtSize.size} (รอบอก ${currentSelectedShirtSize.chest} ยาว ${currentSelectedShirtSize.length})`;
+  if (price) price.textContent = `฿${Number(currentSelectedShirtSize.price).toLocaleString()}`;
+  if (studentBadge) studentBadge.textContent = `ไซส์ ${currentSelectedShirtSize.size} (฿${Number(currentSelectedShirtSize.price).toLocaleString()})`;
+
+  // Also update bank detail amount if size has custom price
+  const bAmtHi = document.getElementById('bankAmountHighlight');
+  const bAmt = document.getElementById('bankDetailAmount');
+  if (bAmtHi) bAmtHi.textContent = `฿${Number(currentSelectedShirtSize.price).toLocaleString()} บาท`;
+  if (bAmt) bAmt.textContent = `฿${Number(currentSelectedShirtSize.price).toFixed(2)} บาท / คน (ไซส์ ${currentSelectedShirtSize.size})`;
 }
 
 function openCurrentQrFullscreen() {
@@ -962,12 +1149,45 @@ function openConfirmModal() {
     return;
   }
 
+  // If campaign has shirt sizes configured, ensure student selected a size
+  const hasShirtSizes = Array.isArray(currentCampaign.shirtSizes) && currentCampaign.shirtSizes.length > 0;
+  if (hasShirtSizes && !currentSelectedShirtSize) {
+    alert("⚠️ กรุณาเลือกไซส์เสื้อของคุณก่อนส่งสลิปหลักฐาน");
+    const sizeCard = document.getElementById('studentShirtSizeCard');
+    if (sizeCard) {
+      sizeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      sizeCard.classList.add('ring-4', 'ring-orange-500/50');
+      setTimeout(() => sizeCard.classList.remove('ring-4', 'ring-orange-500/50'), 1500);
+    }
+    return;
+  }
+
+  const mCampaignTitle = document.getElementById('modalConfirmCampaignTitle');
   const mName = document.getElementById('modalConfirmName');
   const mId = document.getElementById('modalConfirmId');
+  const mAmount = document.getElementById('modalConfirmAmount');
+  const mSizeRow = document.getElementById('modalConfirmSizeRow');
+  const mSelectedSize = document.getElementById('modalConfirmSelectedSize');
   const mImg = document.getElementById('modalConfirmSlipImg');
 
+  if (mCampaignTitle) mCampaignTitle.textContent = currentCampaign.title || 'ชำระเงินสาขา';
   if (mName) mName.textContent = `${currentSelectedStudent.name} (${currentSelectedStudent.nickname})`;
   if (mId) mId.textContent = currentSelectedStudent.id;
+  
+  const finalAmount = currentSelectedShirtSize && currentSelectedShirtSize.price
+    ? currentSelectedShirtSize.price
+    : (currentCampaign.amount || 190);
+  if (mAmount) mAmount.textContent = `฿${finalAmount.toLocaleString()}`;
+
+  if (hasShirtSizes && currentSelectedShirtSize) {
+    if (mSizeRow) mSizeRow.classList.remove('hidden');
+    if (mSelectedSize) {
+      mSelectedSize.textContent = `${currentSelectedShirtSize.size} (รอบอก ${currentSelectedShirtSize.chest}" ความยาว ${currentSelectedShirtSize.length}")`;
+    }
+  } else {
+    if (mSizeRow) mSizeRow.classList.add('hidden');
+  }
+
   if (mImg) mImg.src = tempSlipDataUrl;
 
   // Reset Modal UI state
@@ -1023,6 +1243,11 @@ async function executeSlipSubmission() {
   const timestamp = new Date().toLocaleString('th-TH');
   const refCode = "TXN-COMED-" + Math.floor(100000 + Math.random() * 900000);
 
+  const finalAmount = currentSelectedShirtSize && currentSelectedShirtSize.price
+    ? currentSelectedShirtSize.price
+    : (currentCampaign.amount || 190);
+  const selectedShirtSizeStr = currentSelectedShirtSize ? currentSelectedShirtSize.size : null;
+
   const payload = {
     studentId: studentId,
     name: currentSelectedStudent.name,
@@ -1030,7 +1255,9 @@ async function executeSlipSubmission() {
     email: currentSelectedStudent.email,
     slipBase64: tempSlipDataUrl,
     timestamp: timestamp,
-    refCode: refCode
+    refCode: refCode,
+    shirtSize: selectedShirtSizeStr,
+    amount: finalAmount
   };
 
   let uploadedSlipUrl = tempSlipDataUrl;
@@ -1080,7 +1307,8 @@ async function executeSlipSubmission() {
     slipUrl: uploadedSlipUrl,
     slipProvider: resolvedSlipProvider,
     refCode: refCode,
-    amount: currentCampaign.amount || 190
+    shirtSize: selectedShirtSizeStr,
+    amount: finalAmount
   };
 
   paymentRecords[studentId] = recordData;
@@ -1105,9 +1333,9 @@ async function executeSlipSubmission() {
         campaign_id: currentCampaign.id,
         student_id: studentId,
         student_name: currentSelectedStudent.name,
-        student_nickname: currentSelectedStudent.nickname,
+        student_nickname: selectedShirtSizeStr ? `${currentSelectedStudent.nickname} [ไซส์: ${selectedShirtSizeStr}]` : currentSelectedStudent.nickname,
         student_email: currentSelectedStudent.email,
-        amount: currentCampaign.amount || 190,
+        amount: finalAmount,
         paid: true,
         timestamp: timestamp,
         slip_url: uploadedSlipUrl,
@@ -1271,13 +1499,18 @@ function renderStatusTable() {
   }
   if (emptyMsg) emptyMsg.classList.add('hidden');
 
-  tbody.innerHTML = list.map((st, index) => {
-    const isPaid = paymentRecords[st.id] && paymentRecords[st.id].paid;
+    const rec = paymentRecords[st.id];
+    const sizeBadge = rec && rec.shirtSize 
+      ? `<span class="inline-block mt-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-black border border-indigo-200">ไซส์ ${rec.shirtSize}</span>`
+      : '';
     return `
       <tr class="hover:bg-slate-50/80 transition-colors">
         <td class="p-4 text-center text-slate-400 font-mono text-xs">${index + 1}</td>
         <td class="p-4 font-mono font-bold text-slate-800">${st.id}</td>
-        <td class="p-4 font-bold text-slate-900">${st.name}</td>
+        <td class="p-4">
+          <div class="font-bold text-slate-900">${st.name}</div>
+          ${sizeBadge}
+        </td>
         <td class="p-4">
           <span class="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-800 text-xs font-black border border-orange-200/80 shadow-xs">
             น้อง${st.nickname}
@@ -1428,12 +1661,20 @@ function openStudentDetail(studentId) {
       </div>
 
       <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs sm:text-sm">
-        <div class="flex justify-between">
+        <div class="flex justify-between items-center">
           <span class="text-slate-500">สถานะ:</span>
           <span class="font-black ${isPaid ? 'text-emerald-600' : 'text-rose-600'}">
-            ${isPaid ? 'ชำระเงินแล้ว (฿190)' : 'ยังไม่ได้ชำระเงิน'}
+            ${isPaid ? `ชำระเงินแล้ว (฿${(record?.amount || currentCampaign.amount || 190).toLocaleString()})` : 'ยังไม่ได้ชำระเงิน'}
           </span>
         </div>
+        ${(isPaid && record?.shirtSize) ? `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500">ไซส์เสื้อที่เลือก:</span>
+            <span class="px-2.5 py-0.5 rounded-lg bg-orange-100 text-orange-800 font-extrabold text-xs border border-orange-300">
+              ไซส์ ${record.shirtSize}
+            </span>
+          </div>
+        ` : ''}
         ${isPaid ? `
           <div class="flex justify-between">
             <span class="text-slate-500">วันที่-เวลาที่บันทึก:</span>
