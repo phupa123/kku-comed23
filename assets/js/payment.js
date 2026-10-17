@@ -266,6 +266,30 @@ window.scrollToCampaignSelector = function(event) {
   }
 };
 
+// Smooth Page Transition Swapper for Campaigns
+window.switchCampaignWithAnimation = function(targetCampId, event, extraTab = '') {
+  if (event) event.preventDefault();
+  if (!targetCampId || targetCampId.toLowerCase() === currentCampaign.id.toLowerCase()) return;
+
+  const main = document.querySelector('main');
+  const targetUrl = `payment.html?camp=${encodeURIComponent(targetCampId)}${extraTab ? `&${extraTab}` : ''}`;
+
+  if (typeof gsap !== 'undefined' && main) {
+    gsap.to(main, {
+      opacity: 0,
+      y: -18,
+      scale: 0.985,
+      duration: 0.28,
+      ease: "power2.inOut",
+      onComplete: () => {
+        window.location.href = targetUrl;
+      }
+    });
+  } else {
+    window.location.href = targetUrl;
+  }
+};
+
 // Render dynamic campaign switcher cards
 function renderCampaignsNav() {
   const container = document.getElementById('campaignsNavGrid');
@@ -282,6 +306,7 @@ function renderCampaignsNav() {
       const isSelected = (camp.id.toLowerCase() === currentCampaign.id.toLowerCase());
       return `
         <a href="payment.html?camp=${encodeURIComponent(camp.id)}" 
+          onclick="switchCampaignWithAnimation('${camp.id}', event)"
           class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 flex-shrink-0 cursor-pointer active:scale-95 ${
             isSelected 
               ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 ring-2 ring-orange-500/30' 
@@ -313,7 +338,7 @@ function renderCampaignsNav() {
       const checkLink = `payment.html?camp=${encodeURIComponent(camp.id)}&tab=status`;
 
       return `
-        <div onclick="window.location.href='payment.html?camp=${encodeURIComponent(camp.id)}'" 
+        <div onclick="switchCampaignWithAnimation('${camp.id}', event)" 
           class="p-4 rounded-3xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer hover-elevate group ${
             isSelected 
               ? 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-white border-2 border-orange-500 active-campaign-glow ring-2 ring-orange-500/30' 
@@ -337,6 +362,7 @@ function renderCampaignsNav() {
 
           <div class="mt-3.5 pt-2.5 border-t border-slate-100 grid grid-cols-2 gap-2" onclick="event.stopPropagation()">
             <a href="${payLink}" 
+              onclick="switchCampaignWithAnimation('${camp.id}', event, 'auto=pay')"
               class="py-2 px-3 rounded-2xl text-xs font-black text-center flex items-center justify-center gap-1.5 transition active:scale-95 ${
                 isSelected 
                   ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md shadow-orange-500/25' 
@@ -346,6 +372,7 @@ function renderCampaignsNav() {
               <span>ชำระเงิน</span>
             </a>
             <a href="${checkLink}" 
+              onclick="switchCampaignWithAnimation('${camp.id}', event, 'tab=status')"
               class="py-2 px-3 rounded-2xl text-xs font-bold text-center flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 transition active:scale-95">
               <i data-lucide="users" class="w-3.5 h-3.5 text-slate-500"></i>
               <span>เช็ครายชื่อ</span>

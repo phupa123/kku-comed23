@@ -753,17 +753,17 @@
               </div>
             </div>
 
-            <!-- Autocomplete Dropdown List -->
+            <!-- Quick Selector Hints -->
+            <div class="flex items-center justify-between text-[11px] sm:text-xs text-slate-400 pt-0.5">
+              <span>✨ ใส่ขีด (-) ให้อัตโนมัติเมื่อพิมพ์</span>
+              <span id="matchCountHint" class="hidden font-bold text-orange-600"></span>
+            </div>
+
+            <!-- In-flow Autocomplete Results Panel (Natural Layout - ไม่ลอยทับหรือจมด้านหลัง) -->
             <div id="autocompleteDropdown"
-              class="hidden absolute left-0 right-0 top-full mt-2 bg-white/98 backdrop-blur-2xl rounded-2xl shadow-2xl border-2 border-orange-200/80 z-[100] max-h-80 sm:max-h-96 overflow-y-auto custom-scrollbar divide-y divide-slate-100 overscroll-contain">
+              class="hidden mt-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border-2 border-orange-200/90 max-h-96 overflow-y-auto custom-scrollbar divide-y divide-slate-100/90 transition-all duration-300">
               <!-- Rendered dynamically -->
             </div>
-          </div>
-
-          <!-- Quick Selector Hints -->
-          <div class="flex items-center justify-between text-[11px] sm:text-xs text-slate-400 pt-0.5">
-            <span>✨ ใส่ขีด (-) ให้อัตโนมัติเมื่อพิมพ์</span>
-            <span id="matchCountHint" class="hidden font-bold text-orange-600"></span>
           </div>
         </div>
       </div>
