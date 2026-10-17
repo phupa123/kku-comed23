@@ -235,6 +235,7 @@ async function initApp() {
   setupCountdownTimer();
   refreshProgressStats();
   renderStatusTable();
+  checkPaymentUserSession();
 
   // GSAP Page Entrance Animation
   if (typeof gsap !== 'undefined') {
@@ -463,6 +464,8 @@ function applyCampaignDetailsToUI() {
   if (bAccNum) bAccNum.textContent = c.accountNumber || "236-2-47817-3";
   if (bAccName) bAccName.textContent = c.accountName || "น.ส. พิชามญธุ์ สามสี";
   if (bAmtHi) bAmtHi.textContent = `฿${Number(c.amount).toLocaleString()} บาท`;
+  const dzAmt = document.getElementById('slipDropZoneTargetAmount');
+  if (dzAmt) dzAmt.textContent = `฿${Number(c.amount).toFixed(2)} บาท`;
 
   // Dynamic QR Code Generation (Auto Locked PromptPay vs Custom Image)
   renderCurrentCampaignQrCode(c.amount);
@@ -694,6 +697,8 @@ function updateSelectedSizeUI() {
   const bAmt = document.getElementById('bankDetailAmount');
   if (bAmtHi) bAmtHi.textContent = `฿${Number(currentSelectedShirtSize.price).toLocaleString()} บาท`;
   if (bAmt) bAmt.textContent = `฿${Number(currentSelectedShirtSize.price).toFixed(2)} บาท / คน (ไซส์ ${currentSelectedShirtSize.size})`;
+  const dzAmt = document.getElementById('slipDropZoneTargetAmount');
+  if (dzAmt) dzAmt.textContent = `฿${Number(currentSelectedShirtSize.price).toFixed(2)} บาท`;
 
   // Re-generate locked QR Code for this exact selected size amount!
   if (typeof renderCurrentCampaignQrCode === 'function') {
@@ -730,9 +735,16 @@ async function loadPaymentRecords() {
               slips = [{ url: item.slip_url, timestamp: item.timestamp || '', amount: item.amount || currentCampaign.amount }];
             }
           }
-          const primarySlip = slips.length > 0 ? (slips[0].url || slips[0]) : (item.slip_url || '');
+          // Pick the most recent slip as primarySlip
+          const latestSlip = slips.length > 0 ? slips[slips.length - 1] : null;
+          const primarySlip = latestSlip ? (latestSlip.url || latestSlip) : (item.slip_url || '');
 
           paymentRecords[item.student_id] = {
+            studentId: item.student_id,
+            studentName: item.student_name || '',
+            name: item.student_name || '',
+            nickname: item.student_nickname || '',
+            email: item.student_email || '',
             paid: !!item.paid,
             timestamp: item.timestamp || '',
             slipUrl: primarySlip,
@@ -1196,8 +1208,11 @@ function selectStudent(st) {
     }
     const pTime = document.getElementById('paidTimestampText');
     const pRef = document.getElementById('paidRefCode');
+    const pAmtEl = document.getElementById('paidAmountDisplay');
     if (pTime) pTime.textContent = record.timestamp || '-';
     if (pRef) pRef.textContent = record.refCode || 'TXN-COMED-' + st.id.replace(/\D/g, '');
+    const paidAmtNum = record.amount || currentCampaign.amount || 190;
+    if (pAmtEl) pAmtEl.textContent = `฿${Number(paidAmtNum).toFixed(2)} บาท`;
 
     currentStudentPaidSlip = record.slipUrl || '';
     const driveLinkEl = document.getElementById('paidSectionDriveLink');
@@ -1567,7 +1582,7 @@ async function executeSlipSubmission() {
     try {
       const allowedProviders = Array.isArray(currentCampaign.slipProviders) && currentCampaign.slipProviders.length > 0
         ? currentCampaign.slipProviders
-        : [currentCampaign.slipProvider || 'cloudinary'];
+        : (currentCampaign.slipProvider ? [currentCampaign.slipProvider] : ['catbox', 'imgbb', 'cloudinary']);
 
       const firstProvider = allowedProviders[0];
       const providerName = window.MultiCloudUploader.getProviderName(firstProvider);
@@ -2415,7 +2430,8 @@ function syncUserPaymentTag(user) {
   const myEmail = (user.email || '').toLowerCase().trim();
   const myName = (user.name || '').trim();
 
-  const isPaid = (window.cachedSubmissions || []).some(s => {
+  const rec = (typeof paymentRecords !== 'undefined') ? (paymentRecords[user.studentId] || paymentRecords[myId]) : null;
+  const isPaid = (rec && rec.paid) || (window.cachedSubmissions || []).some(s => {
     const sEmail = (s.email || '').toLowerCase().trim();
     const sId = (s.studentId || '').replace(/-/g, '').trim();
     const sName = (s.studentName || '').trim();
@@ -2424,9 +2440,10 @@ function syncUserPaymentTag(user) {
            (myName && sName && sName.includes(myName));
   });
 
+  const payAmt = (rec && rec.amount) || (currentCampaign && currentCampaign.amount) || 190;
   if (isPaid) {
     tagEl.className = "text-[10px] text-emerald-600 font-bold block leading-tight flex items-center gap-1";
-    tagEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>ชำระเงินแล้ว ฿190';
+    tagEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>ชำระเงินแล้ว ฿${Number(payAmt).toLocaleString()}`;
   } else {
     tagEl.className = "text-[10px] text-amber-600 font-bold block leading-tight flex items-center gap-1";
     tagEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>ยังไม่ชำระเงิน';
@@ -2509,16 +2526,18 @@ function openMyProfileModal() {
 
   const myId = (user.studentId || '').replace(/-/g, '').trim();
   const myEmail = (user.email || '').toLowerCase().trim();
-  const isPaid = (window.cachedSubmissions || []).some(s => {
+  const rec = (typeof paymentRecords !== 'undefined') ? (paymentRecords[user.studentId] || paymentRecords[myId]) : null;
+  const isPaid = (rec && rec.paid) || (window.cachedSubmissions || []).some(s => {
     return ((s.email || '').toLowerCase().trim() === myEmail) ||
            ((s.studentId || '').replace(/-/g, '').trim() === myId);
   });
+  const payAmt = (rec && rec.amount) || (currentCampaign && currentCampaign.amount) || 190;
 
   const badge = document.getElementById('myProfileModalStatusBadge');
   if (badge) {
     if (isPaid) {
       badge.className = "font-black text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300";
-      badge.textContent = "ชำระเงินเรียบร้อยแล้ว (฿190.00)";
+      badge.textContent = `ชำระเงินเรียบร้อยแล้ว (฿${Number(payAmt).toFixed(2)})`;
     } else {
       badge.className = "font-black text-xs px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
       badge.textContent = "ยังไม่ได้ชำระเงิน (รอแนบสลิป)";

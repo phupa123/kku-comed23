@@ -207,8 +207,8 @@ window.ComedCampaignManager = {
                   status: item.status || 'open',
                   closedReason: item.closed_reason || '',
                   isDefault: item.is_default || false,
-                  slipProvider: matchedLocal.slipProvider || 'cloudinary',
-                  slipProviders: matchedLocal.slipProviders || ['cloudinary'],
+                  slipProvider: extraMeta.slipProvider || matchedLocal.slipProvider || 'catbox',
+                  slipProviders: extraMeta.slipProviders || matchedLocal.slipProviders || ['catbox', 'imgbb', 'cloudinary'],
                   createdAt: item.created_at
                 };
               });
@@ -298,6 +298,8 @@ window.ComedCampaignManager = {
             if (c.bgImage !== undefined) parsedMeta.bgImage = c.bgImage;
             if (c.bannerImage !== undefined) parsedMeta.bannerImage = c.bannerImage;
             if (c.galleryImages !== undefined) parsedMeta.galleryImages = c.galleryImages;
+            if (c.slipProvider !== undefined) parsedMeta.slipProvider = c.slipProvider;
+            if (c.slipProviders !== undefined) parsedMeta.slipProviders = c.slipProviders;
             metaClosedReason = JSON.stringify(parsedMeta);
           } catch(e) {}
 

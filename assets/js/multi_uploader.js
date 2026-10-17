@@ -21,8 +21,8 @@
   // Default keys and fallbacks
   const DEFAULT_CONFIG = {
     activeProvider: 'auto', // 'auto' | 'imgbb' | 'cloudinary' | 'freeimage' | 'catbox'
-    enabledProviders: ['cloudinary', 'imgbb', 'catbox'],
-    providerPriority: ['cloudinary', 'imgbb', 'catbox', 'freeimage'],
+    enabledProviders: ['catbox', 'imgbb', 'cloudinary'],
+    providerPriority: ['catbox', 'imgbb', 'cloudinary', 'freeimage'],
     
     // Auto compression settings
     autoCompress: true,
@@ -376,18 +376,22 @@
 
       // Build Provider Sequence based on Admin Priority & Enabled settings
       let providers = [];
-      const configuredPriority = Array.isArray(this.config.providerPriority) ? this.config.providerPriority : ['catbox', 'imgbb', 'cloudinary', 'freeimage'];
-      const enabledList = Array.isArray(this.config.enabledProviders) ? this.config.enabledProviders : configuredPriority;
+      const configuredPriority = (Array.isArray(options.priorityProviders) && options.priorityProviders.length > 0)
+        ? options.priorityProviders
+        : (Array.isArray(this.config.providerPriority) ? this.config.providerPriority : ['catbox', 'imgbb', 'cloudinary', 'freeimage']);
+      const enabledList = (Array.isArray(options.priorityProviders) && options.priorityProviders.length > 0)
+        ? options.priorityProviders
+        : (Array.isArray(this.config.enabledProviders) ? this.config.enabledProviders : configuredPriority);
 
       const isVideoOrNonImage = (fileObj && fileObj.type && !fileObj.type.startsWith('image/')) || 
                                 (fileName && !fileName.match(/\.(jpg|jpeg|png|gif|webp|svg|avif|bmp|ico)$/i));
 
-      if (preferred !== 'auto' && enabledList.includes(preferred)) {
+      if (preferred !== 'auto' && (enabledList.includes(preferred) || options.priorityProviders)) {
         providers.push(preferred);
       }
 
       for (const p of configuredPriority) {
-        if (enabledList.includes(p) && !providers.includes(p)) {
+        if (!providers.includes(p)) {
           providers.push(p);
         }
       }

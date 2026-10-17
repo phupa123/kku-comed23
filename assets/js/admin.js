@@ -868,7 +868,7 @@ function openEditCampaignModal(campId) {
   // Populate multiple selected slip providers
   const selectedProviders = Array.isArray(camp.slipProviders) 
     ? camp.slipProviders 
-    : (camp.slipProvider ? [camp.slipProvider] : ['cloudinary', 'catbox']);
+    : (camp.slipProvider ? [camp.slipProvider] : ['catbox', 'imgbb', 'cloudinary']);
 
   document.querySelectorAll('input[name="campSlipProviderOption"]').forEach(cb => {
     cb.checked = selectedProviders.includes(cb.value);
@@ -1090,7 +1090,7 @@ async function handleSaveCampaignSubmit(e) {
   const checkedBoxes = Array.from(document.querySelectorAll('input[name="campSlipProviderOption"]:checked'));
   let slipProviders = checkedBoxes.map(cb => cb.value);
   if (slipProviders.length === 0) {
-    slipProviders = ['cloudinary']; // fallback
+    slipProviders = ['catbox', 'imgbb', 'cloudinary']; // fallback
   }
   const slipProvider = slipProviders[0]; // primary
   
@@ -1435,9 +1435,15 @@ async function loadAllPayments(silent = false) {
               slips = [{ url: item.slip_url, timestamp: item.timestamp || '', amount: item.amount || currentAdminCampaign.amount }];
             }
           }
-          const primarySlip = slips.length > 0 ? (slips[0].url || slips[0]) : (item.slip_url || '');
+          const latestSlip = slips.length > 0 ? slips[slips.length - 1] : null;
+          const primarySlip = latestSlip ? (latestSlip.url || latestSlip) : (item.slip_url || '');
 
           paymentRecords[item.student_id] = {
+            studentId: item.student_id,
+            studentName: item.student_name || '',
+            name: item.student_name || '',
+            nickname: item.student_nickname || '',
+            email: item.student_email || '',
             paid: !!item.paid,
             timestamp: item.timestamp || '',
             slipUrl: primarySlip,
