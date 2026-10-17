@@ -1378,10 +1378,27 @@ async function loadAllPayments(silent = false) {
       if (!error && Array.isArray(data)) {
         paymentRecords = {};
         data.forEach(item => {
+          let slips = [];
+          if (Array.isArray(item.slips)) {
+            slips = item.slips;
+          } else if (typeof item.slips === 'string' && item.slips.startsWith('[')) {
+            try { slips = JSON.parse(item.slips); } catch(e){}
+          }
+          if (slips.length === 0 && item.slip_url) {
+            // Check if slip_url is JSON array of slips
+            if (item.slip_url.startsWith('[') && item.slip_url.endsWith(']')) {
+              try { slips = JSON.parse(item.slip_url); } catch(e){}
+            } else {
+              slips = [{ url: item.slip_url, timestamp: item.timestamp || '', amount: item.amount || currentAdminCampaign.amount }];
+            }
+          }
+          const primarySlip = slips.length > 0 ? (slips[0].url || slips[0]) : (item.slip_url || '');
+
           paymentRecords[item.student_id] = {
             paid: !!item.paid,
             timestamp: item.timestamp || '',
-            slipUrl: item.slip_url || '',
+            slipUrl: primarySlip,
+            slips: slips,
             refCode: item.ref_code || '',
             amount: item.amount || currentAdminCampaign.amount
           };
@@ -2123,10 +2140,33 @@ async function adminMoveToTrash(studentId) {
       nickname: st?.nickname || '',
       email: st?.email || '',
       slipUrl: slipUrl,
+      slips: record.slips || (slipUrl ? [{ url: slipUrl, timestamp: record.timestamp || '' }] : []),
       timestamp: new Date().toLocaleString('th-TH'),
       refCode: record.refCode || ''
     };
     delete paymentRecords[studentId];
+
+    // Permanently remove from Supabase payments table for this campaign
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+    if (sb && currentAdminCampaign && currentAdminCampaign.id) {
+      try {
+        await sb.from('payments').delete().match({
+          campaign_id: currentAdminCampaign.id,
+          student_id: studentId
+        });
+      } catch (sbErr) {
+        console.warn("Supabase delete payment notice:", sbErr);
+      }
+    }
+
+    // Clean up local student storage caches so it doesn't bounce back
+    try {
+      const localPay = JSON.parse(localStorage.getItem('COMED_LOCAL_PAYMENTS') || '{}');
+      const cleanId = studentId.replace(/-/g, '').trim();
+      delete localPay[studentId];
+      if (cleanId) delete localPay[cleanId];
+      localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localPay));
+    } catch(e) {}
 
     if (googleAppsScriptUrl) {
       try {
@@ -2151,7 +2191,7 @@ async function adminMoveToTrash(studentId) {
     logAdminAction("ย้ายไปถังขยะ", `ย้ายข้อมูลของ ${name} (${studentId}) ไปถังขยะ`);
     renderStats();
     renderAdminTable();
-    showToastNotification(`ย้ายข้อมูลของ ${name} ไปถังขยะเรียบร้อย`);
+    showToastNotification(`ย้ายข้อมูลของ ${name} ไปถังขยะเรียบร้อย (สถานะกลับเป็นยังไม่ชำระ)`);
   }
 }
 
@@ -2165,10 +2205,33 @@ async function adminRestoreFromTrash(studentId) {
       paid: true,
       timestamp: item.timestamp || new Date().toLocaleString('th-TH'),
       slipUrl: item.slipUrl || '',
+      slips: item.slips || (item.slipUrl ? [{ url: item.slipUrl, timestamp: item.timestamp }] : []),
       refCode: item.refCode || '',
-      amount: 190
+      amount: currentAdminCampaign?.amount || 190
     };
     delete trashRecords[studentId];
+
+    // Restore to Supabase
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+    if (sb && currentAdminCampaign && currentAdminCampaign.id) {
+      try {
+        await sb.from('payments').upsert({
+          campaign_id: currentAdminCampaign.id,
+          student_id: studentId,
+          student_name: item.name || '',
+          student_nickname: item.nickname || '',
+          student_email: item.email || '',
+          amount: currentAdminCampaign.amount || 190,
+          paid: true,
+          timestamp: paymentRecords[studentId].timestamp,
+          slip_url: item.slipUrl || '',
+          ref_code: item.refCode || '',
+          verified: true
+        }, { onConflict: 'campaign_id,student_id' });
+      } catch(sbErr) {
+        console.warn("Supabase restore error:", sbErr);
+      }
+    }
 
     if (googleAppsScriptUrl) {
       try {
@@ -2266,21 +2329,81 @@ function inspectSlip(studentId) {
   const record = paymentRecords[studentId];
   if (!st || !record) return;
 
-  const rawSlipUrl = record.slipUrl || '';
-  let drivePreviewUrl = rawSlipUrl;
-  let driveViewUrl = rawSlipUrl;
-
-  if (rawSlipUrl.includes('drive.google.com')) {
-    const idMatch = rawSlipUrl.match(/[-\w]{25,}/);
-    if (idMatch) {
-      const fileId = idMatch[0];
-      drivePreviewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-      driveViewUrl = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
-    }
-  }
-
   const content = document.getElementById('inspectorContent');
   if (!content) return;
+
+  // Collect all slips
+  let slipsList = [];
+  if (Array.isArray(record.slips) && record.slips.length > 0) {
+    slipsList = record.slips;
+  } else if (record.slipUrl) {
+    slipsList = [{ url: record.slipUrl, timestamp: record.timestamp || '', amount: record.amount }];
+  }
+
+  const slipsHtml = slipsList.length === 0 ? `
+    <div class="p-8 text-center bg-slate-950 rounded-2xl border border-slate-800 text-slate-500 text-sm">
+      ไม่มีประวัติหลักฐานสลิป
+    </div>
+  ` : slipsList.map((slipItem, idx) => {
+    const rawUrl = typeof slipItem === 'string' ? slipItem : (slipItem.url || '');
+    const slipTime = typeof slipItem === 'object' && slipItem.timestamp ? slipItem.timestamp : (record.timestamp || '-');
+    const slipAmt = typeof slipItem === 'object' && slipItem.amount ? slipItem.amount : null;
+
+    let drivePreview = rawUrl;
+    let driveView = rawUrl;
+    if (rawUrl.includes('drive.google.com')) {
+      const idMatch = rawUrl.match(/[-\w]{25,}/);
+      if (idMatch) {
+        drivePreview = `https://drive.google.com/file/d/${idMatch[0]}/preview`;
+        driveView = `https://drive.google.com/file/d/${idMatch[0]}/view?usp=sharing`;
+      }
+    }
+
+    const isDirectImage = rawUrl.startsWith('data:image') ||
+      rawUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) ||
+      rawUrl.includes('cloudinary') ||
+      rawUrl.includes('catbox') ||
+      rawUrl.includes('ibb.co');
+
+    return `
+      <div class="bg-slate-950/90 rounded-2xl border border-slate-800 p-4 space-y-3 relative">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-orange-500/20 text-orange-400 font-bold text-xs flex items-center justify-center border border-orange-500/30">
+              #${idx + 1}
+            </span>
+            <span class="text-xs font-bold text-white">สลิปใบที่ ${idx + 1}</span>
+            ${slipAmt ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-mono text-[11px] font-bold">฿${Number(slipAmt).toLocaleString()}</span>` : ''}
+          </div>
+          <div class="text-[11px] text-slate-400 font-mono">
+            ${slipTime}
+          </div>
+        </div>
+
+        <div class="w-full h-72 sm:h-80 rounded-xl bg-slate-900 border border-slate-800/80 overflow-hidden flex items-center justify-center relative">
+          ${isDirectImage
+            ? `<img src="${rawUrl}" alt="สลิป ${idx + 1}" class="max-h-full max-w-full object-contain mx-auto rounded-lg">`
+            : `<iframe src="${drivePreview}" class="w-full h-full border-0 rounded-xl" allow="autoplay" loading="lazy"></iframe>`
+          }
+        </div>
+
+        <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/60">
+          <div class="flex items-center gap-2">
+            <a href="${driveView}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold rounded-lg transition inline-flex items-center gap-1.5">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>ดูภาพเต็ม</span>
+            </a>
+          </div>
+
+          <!-- ลบเฉพาะสลิปนี้ -->
+          <button type="button" onclick="adminDeleteSingleSlip('${st.id}', ${idx})" class="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 hover:text-rose-300 text-xs font-bold rounded-lg transition border border-rose-500/30 inline-flex items-center gap-1 cursor-pointer" title="ลบเฉพาะสลิปใบนี้">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>ลบสลิปนี้</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
 
   content.innerHTML = `
     <div class="space-y-4">
@@ -2294,8 +2417,8 @@ function inspectSlip(studentId) {
           <span class="font-mono text-orange-400 font-bold">${st.id}</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-slate-500">วัน-เวลาที่ส่ง:</span>
-          <span class="text-slate-300 font-mono">${record.timestamp || '-'}</span>
+          <span class="text-slate-500">จำนวนสลิปที่แนบ:</span>
+          <span class="text-orange-400 font-bold">${slipsList.length} ใบ</span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-500">รหัสอ้างอิง:</span>
@@ -2303,21 +2426,16 @@ function inspectSlip(studentId) {
         </div>
       </div>
 
-      <div class="w-full h-96 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner flex items-center justify-center relative">
-        ${rawSlipUrl.startsWith('data:image') || rawSlipUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || rawSlipUrl.includes('cloudinary') || rawSlipUrl.includes('catbox') || rawSlipUrl.includes('ibb.co')
-          ? `<img src="${rawSlipUrl}" alt="หลักฐานสลิป" class="max-h-full max-w-full object-contain mx-auto rounded-xl">`
-          : `<iframe src="${drivePreviewUrl}" class="w-full h-full border-0 rounded-2xl" allow="autoplay" loading="lazy"></iframe>`
-        }
+      <!-- รายการสลิปทั้งหมดที่นักศึกษาอัปโหลด -->
+      <div class="space-y-4 max-h-[55vh] overflow-y-auto pr-1">
+        ${slipsHtml}
       </div>
 
-      <div class="flex items-center justify-between gap-2 pt-1">
-        ${driveViewUrl
-          ? `<a href="${driveViewUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md shadow-sky-600/25">
-              <i data-lucide="external-link" class="w-4 h-4"></i>
-              <span>เปิดดูไฟล์ภาพต้นฉบับ</span>
-            </a>`
-          : `<div></div>`
-        }
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800">
+        <button type="button" onclick="adminMoveToTrash('${st.id}')" class="px-4 py-2 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+          <span>ย้ายผู้ใช้นี้ไปถังขยะ (ยกเลิกสถานะทั้งหมด)</span>
+        </button>
         <button onclick="closeInspectorModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">
           ปิดหน้าต่าง
         </button>
@@ -2328,6 +2446,68 @@ function inspectSlip(studentId) {
   const modal = document.getElementById('modalSlipInspector');
   if (modal) modal.classList.remove('hidden');
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// Selective slip deletion
+async function adminDeleteSingleSlip(studentId, slipIndex) {
+  const st = studentDatabase.find(s => s.id === studentId);
+  const name = st ? st.name : studentId;
+  const record = paymentRecords[studentId];
+  if (!record) return;
+
+  let slips = Array.isArray(record.slips) ? [...record.slips] : (record.slipUrl ? [{ url: record.slipUrl, timestamp: record.timestamp }] : []);
+  if (slipIndex < 0 || slipIndex >= slips.length) return;
+
+  if (!confirm(`คุณต้องการลบสลิปใบที่ ${slipIndex + 1} ของ "${name}" ใช่หรือไม่?`)) return;
+
+  // Remove the slip
+  slips.splice(slipIndex, 1);
+
+  if (slips.length === 0) {
+    // If no slips remain, move to trash / set unpaid so student can pay again!
+    alert(`ไม่มีสลิปหลงเหลือสำหรับ ${name}\nระบบจะยกเลิกสถานะชำระเงินและย้ายข้อมูลไปถังขยะ เพื่อให้นักศึกษาสามารถเข้ามาชำระเงินใหม่ได้`);
+    closeInspectorModal();
+    await adminMoveToTrash(studentId);
+    return;
+  }
+
+  // Update remaining slips
+  record.slips = slips;
+  record.slipUrl = typeof slips[0] === 'string' ? slips[0] : (slips[0].url || '');
+
+  // Recalculate amount if itemized
+  const sumAmount = slips.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+  if (sumAmount > 0) {
+    record.amount = sumAmount;
+  }
+
+  paymentRecords[studentId] = record;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+
+  // Update Supabase
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (sb && currentAdminCampaign && currentAdminCampaign.id) {
+    try {
+      await sb.from('payments').upsert({
+        campaign_id: currentAdminCampaign.id,
+        student_id: studentId,
+        slip_url: record.slipUrl,
+        slips: JSON.stringify(record.slips),
+        amount: record.amount,
+        timestamp: record.timestamp,
+        paid: true,
+        verified: true
+      }, { onConflict: 'campaign_id,student_id' });
+    } catch(e) {
+      console.warn("Supabase update after single slip delete:", e);
+    }
+  }
+
+  logAdminAction("ลบสลิปย่อย", `ลบสลิปใบที่ ${slipIndex + 1} ของ ${name} (${studentId})`);
+  showToastNotification(`ลบสลิปใบที่ ${slipIndex + 1} เรียบร้อยแล้ว (เหลือ ${slips.length} ใบ)`);
+  inspectSlip(studentId);
+  renderStats();
+  renderAdminTable();
 }
 
 function closeInspectorModal() {

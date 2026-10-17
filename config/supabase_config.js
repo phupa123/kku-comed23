@@ -33,17 +33,17 @@ window.getSupabaseClient = function() {
 // Global Handler: Prevent browser uncaught promise errors from noisy external network failures
 window.addEventListener('unhandledrejection', function(event) {
   const reason = event.reason;
-  const reasonStr = String(reason || '');
+  const reasonStr = String(reason?.message || reason || '');
   if (
     reasonStr.includes('Load failed') ||
     reasonStr.includes('access control checks') ||
     reasonStr.includes('Failed to fetch') ||
     reasonStr.includes('NetworkError') ||
-    (reason && reason.name === 'TypeError' && reasonStr.includes('Load failed'))
+    reasonStr.includes('supabase.co') ||
+    (reason && reason.name === 'TypeError' && (reasonStr.includes('Load failed') || reasonStr.includes('fetch')))
   ) {
     // Suppress noisy network rejection popup/logs
     event.preventDefault();
-    console.warn("[SafeNetworkGuard] Suppressed background fetch/network error:", reason);
   }
 });
 

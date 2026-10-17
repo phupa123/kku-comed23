@@ -289,16 +289,19 @@ window.ComedCampaignManager = {
           payload.closed_reason = metaClosedReason;
 
           // Attempt upsert with core columns
-          await sb.from('campaigns').upsert(payload, { onConflict: 'id' }).catch(fetchErr => {
-            console.warn(`Supabase network/CORS upsert notice for campaign ${c.id}:`, fetchErr?.message || fetchErr);
+          const { error: upsertErr } = await sb.from('campaigns').upsert(payload, { onConflict: 'id' }).catch(fetchErr => {
             return { error: fetchErr };
           });
+          if (upsertErr) {
+            // Suppress CORS/access control noise from anon users
+            // console.warn(`Supabase upsert campaign notice (${c.id}):`, upsertErr.message || upsertErr);
+          }
         } catch (innerErr) {
-          console.warn(`Supabase Upsert skipped for campaign ${c.id}:`, innerErr?.message || innerErr);
+          // ignore network failure on anon client
         }
       }
     } catch(e) {
-      console.warn("Supabase Upsert Campaign Error:", e?.message || e);
+      // ignore
     }
   }
 };

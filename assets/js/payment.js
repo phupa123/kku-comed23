@@ -681,10 +681,26 @@ async function loadPaymentRecords() {
       if (!error && Array.isArray(data)) {
         paymentRecords = {};
         data.forEach(item => {
+          let slips = [];
+          if (Array.isArray(item.slips)) {
+            slips = item.slips;
+          } else if (typeof item.slips === 'string' && item.slips.startsWith('[')) {
+            try { slips = JSON.parse(item.slips); } catch(e){}
+          }
+          if (slips.length === 0 && item.slip_url) {
+            if (item.slip_url.startsWith('[') && item.slip_url.endsWith(']')) {
+              try { slips = JSON.parse(item.slip_url); } catch(e){}
+            } else {
+              slips = [{ url: item.slip_url, timestamp: item.timestamp || '', amount: item.amount || currentCampaign.amount }];
+            }
+          }
+          const primarySlip = slips.length > 0 ? (slips[0].url || slips[0]) : (item.slip_url || '');
+
           paymentRecords[item.student_id] = {
             paid: !!item.paid,
             timestamp: item.timestamp || '',
-            slipUrl: item.slip_url || '',
+            slipUrl: primarySlip,
+            slips: slips,
             refCode: item.ref_code || '',
             amount: item.amount || currentCampaign.amount
           };
@@ -1163,10 +1179,58 @@ function selectStudent(st) {
       driveLinkEl.href = currentStudentPaidSlip || '#';
     }
     if (wrapperEl) {
-      if (drivePreviewUrl) {
+      const isDirect = currentStudentPaidSlip.startsWith('data:image') ||
+        currentStudentPaidSlip.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) ||
+        currentStudentPaidSlip.includes('cloudinary') ||
+        currentStudentPaidSlip.includes('catbox');
+
+      if (isDirect) {
+        wrapperEl.innerHTML = `<img src="${currentStudentPaidSlip}" alt="สลิปโอนเงิน" class="max-h-full max-w-full object-contain mx-auto rounded-xl">`;
+      } else if (drivePreviewUrl) {
         wrapperEl.innerHTML = `<iframe src="${drivePreviewUrl}" class="w-full h-full border-0 rounded-xl" allow="autoplay" loading="lazy"></iframe>`;
       } else {
         wrapperEl.innerHTML = `<span class="text-xs text-slate-400 font-medium">ไม่มีภาพสลิป</span>`;
+      }
+    }
+    // Multi-slip rendering
+    const slipsList = Array.isArray(record.slips) && record.slips.length > 0 
+      ? record.slips 
+      : (record.slipUrl ? [{ url: record.slipUrl, timestamp: record.timestamp || '', amount: record.amount }] : []);
+
+    const counterBadge = document.getElementById('paidSlipCounterBadge');
+    if (counterBadge) {
+      counterBadge.textContent = `${slipsList.length} ใบ`;
+    }
+
+    const multiContainer = document.getElementById('paidMultiSlipsContainer');
+    const multiCount = document.getElementById('paidMultiSlipsCount');
+    const multiList = document.getElementById('paidMultiSlipsList');
+
+    if (multiContainer && multiList) {
+      if (slipsList.length > 1) {
+        multiContainer.classList.remove('hidden');
+        if (multiCount) multiCount.textContent = slipsList.length;
+        multiList.innerHTML = slipsList.map((sItem, sIdx) => {
+          const sUrl = typeof sItem === 'string' ? sItem : (sItem.url || '');
+          const sTime = typeof sItem === 'object' && sItem.timestamp ? sItem.timestamp : '';
+          const isDirectImg = sUrl.startsWith('data:image') || sUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || sUrl.includes('cloudinary') || sUrl.includes('catbox');
+          return `
+            <div onclick="openFullscreenModal('${sUrl}')" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-orange-300 transition cursor-pointer group flex flex-col items-center">
+              <div class="w-full h-24 rounded-lg bg-white overflow-hidden flex items-center justify-center border border-slate-100 shadow-xs mb-1.5">
+                ${isDirectImg 
+                  ? `<img src="${sUrl}" alt="สลิป ${sIdx+1}" class="max-h-full max-w-full object-contain">`
+                  : `<iframe src="${sUrl}" class="w-full h-full pointer-events-none border-0" loading="lazy"></iframe>`
+                }
+              </div>
+              <div class="w-full flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                <span class="font-bold text-slate-700">ใบที่ #${sIdx+1}</span>
+                <span class="text-orange-600 font-bold group-hover:underline">ดูรูป</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        multiContainer.classList.add('hidden');
       }
     }
 
@@ -1492,6 +1556,29 @@ async function executeSlipSubmission() {
     }
   }
 
+  // Collect and preserve previous slips if this student has uploaded before
+  const existingRecord = paymentRecords[studentId] || {};
+  let updatedSlips = [];
+  if (Array.isArray(existingRecord.slips) && existingRecord.slips.length > 0) {
+    updatedSlips = [...existingRecord.slips];
+  } else if (existingRecord.slipUrl) {
+    updatedSlips = [{
+      url: existingRecord.slipUrl,
+      timestamp: existingRecord.timestamp || '',
+      amount: existingRecord.amount || finalAmount,
+      provider: existingRecord.slipProvider || 'cloud'
+    }];
+  }
+
+  // Push the newly uploaded slip
+  updatedSlips.push({
+    url: uploadedSlipUrl,
+    timestamp: thaiTimestamp,
+    refCode: refCode,
+    amount: finalAmount,
+    provider: resolvedSlipProvider
+  });
+
   // บันทึกลงหน่วยความจำและ LocalStorage ทันที
   const recordData = {
     studentId: studentId,
@@ -1501,10 +1588,11 @@ async function executeSlipSubmission() {
     email: currentSelectedStudent.email,
     paid: true,
     timestamp: thaiTimestamp,
-    slipUrl: uploadedSlipUrl,
+    slipUrl: uploadedSlipUrl, // Most recent slip as primary
+    slips: updatedSlips,
     slipProvider: resolvedSlipProvider,
     refCode: refCode,
-    shirtSize: selectedShirtSizeStr,
+    shirtSize: selectedShirtSizeStr || existingRecord.shirtSize,
     amount: finalAmount,
     autoVerified: isVerifiedAuto
   };
@@ -1537,6 +1625,7 @@ async function executeSlipSubmission() {
         paid: true,
         timestamp: thaiTimestamp,
         slip_url: uploadedSlipUrl,
+        slips: JSON.stringify(updatedSlips),
         ref_code: refCode,
         verified: isVerifiedAuto
       }, { onConflict: 'campaign_id,student_id' });
@@ -1605,20 +1694,44 @@ async function executeSlipSubmission() {
 
 async function promptResetPayment() {
   if (!currentSelectedStudent) return;
+  const stId = currentSelectedStudent.id;
   if (confirm(`คุณต้องการยกเลิกสถานะการชำระเงินของ "${currentSelectedStudent.name}" เพื่อส่งสลิปใหม่หรือไม่?`)) {
+    // 1. Delete from Supabase
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+    if (sb && currentCampaign && currentCampaign.id) {
+      try {
+        await sb.from('payments').delete().match({
+          campaign_id: currentCampaign.id,
+          student_id: stId
+        });
+      } catch(e) {
+        console.warn("Supabase reset payment error:", e);
+      }
+    }
+
+    // 2. Clear local caches
+    try {
+      const localPay = JSON.parse(localStorage.getItem('COMED_LOCAL_PAYMENTS') || '{}');
+      const cleanId = stId.replace(/-/g, '').trim();
+      delete localPay[stId];
+      if (cleanId) delete localPay[cleanId];
+      localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localPay));
+    } catch (e) { }
+
     try {
       await fetch('/api/reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId: currentSelectedStudent.id })
+        body: JSON.stringify({ studentId: stId })
       });
     } catch (e) { }
 
-    delete paymentRecords[currentSelectedStudent.id];
+    delete paymentRecords[stId];
     saveLocalBackup();
     refreshProgressStats();
     selectStudent(currentSelectedStudent);
     renderStatusTable();
+    showFrontendToast("ยกเลิกสถานะและพร้อมส่งสลิปใหม่แล้ว");
   }
 }
 
@@ -1935,31 +2048,55 @@ function openStudentDetail(studentId) {
         ` : ''}
       </div>
 
-      ${(isPaid && rawSlipUrl) ? `
-        <div class="space-y-3">
+      ${(isPaid && (rawSlipUrl || (record.slips && record.slips.length > 0))) ? `
+        <div class="space-y-4">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-700 block">ภาพสลิปหลักฐาน:</span>
+            <span class="text-xs font-bold text-slate-700 block">ภาพสลิปหลักฐาน (${(record.slips && record.slips.length) || 1} ใบ):</span>
             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-orange-400 border border-slate-700 flex items-center gap-1">
               <i data-lucide="cloud" class="w-3 h-3 text-orange-400"></i>
               <span>จัดเก็บบน: ${window.MultiCloudUploader ? window.MultiCloudUploader.getProviderName(record.slipProvider || 'cloudinary') : (record.slipProvider || 'Cloud')}</span>
             </span>
           </div>
-          <div class="w-full h-80 sm:h-96 rounded-2xl border border-slate-200 overflow-hidden shadow-inner bg-slate-100">
-            <iframe 
-              src="${rawSlipUrl.includes('drive.google.com') ? rawSlipUrl.replace(/\/view.*|\/open\?id=/, '/file/d/').replace('/file/d/', 'https://drive.google.com/file/d/').split('&')[0].replace('?usp=sharing', '') + '/preview' : rawSlipUrl}" 
-              class="w-full h-full border-0" 
-              loading="lazy"
-            ></iframe>
-          </div>
-          <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
-            <button type="button" onclick="triggerFileDownload('${rawSlipUrl}', 'Slip-${st.id}.png')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-md active:scale-95 cursor-pointer">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              <span>ดาวน์โหลดสลิป</span>
-            </button>
-            <a href="${rawSlipUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-md active:scale-95">
-              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> 
-              <span>เปิดดูบน Google Drive</span>
-            </a>
+
+          <div class="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+            ${((record.slips && record.slips.length > 0) ? record.slips : [{ url: rawSlipUrl, timestamp: record.timestamp }]).map((slItem, slIdx) => {
+              const slUrl = typeof slItem === 'string' ? slItem : (slItem.url || '');
+              const slTime = typeof slItem === 'object' && slItem.timestamp ? slItem.timestamp : record.timestamp;
+              const isImg = slUrl.startsWith('data:image') || slUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || slUrl.includes('cloudinary') || slUrl.includes('catbox');
+              let slPreview = slUrl;
+              if (slUrl.includes('drive.google.com')) {
+                const idMatch = slUrl.match(/[-\w]{25,}/);
+                if (idMatch) slPreview = `https://drive.google.com/file/d/${idMatch[0]}/preview`;
+              }
+
+              return `
+                <div class="p-3 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-xs">
+                  <div class="flex items-center justify-between text-xs font-bold">
+                    <span class="text-slate-700 flex items-center gap-1.5">
+                      <span class="w-5 h-5 rounded-md bg-orange-100 text-orange-700 flex items-center justify-center text-[10px] font-black">#${slIdx+1}</span>
+                      สลิปใบที่ ${slIdx+1}
+                    </span>
+                    <span class="text-slate-400 font-mono text-[11px]">${slTime || '-'}</span>
+                  </div>
+                  <div class="w-full h-72 sm:h-80 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center">
+                    ${isImg
+                      ? `<img src="${slUrl}" alt="สลิป ${slIdx+1}" class="max-h-full max-w-full object-contain mx-auto rounded-lg">`
+                      : `<iframe src="${slPreview}" class="w-full h-full border-0" loading="lazy"></iframe>`
+                    }
+                  </div>
+                  <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                    <button type="button" onclick="triggerFileDownload('${slUrl}', 'Slip-${st.id}-${slIdx+1}.png')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-md active:scale-95 cursor-pointer">
+                      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                      <span>ดาวน์โหลดสลิป</span>
+                    </button>
+                    <a href="${slUrl}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-md active:scale-95">
+                      <i data-lucide="external-link" class="w-3.5 h-3.5"></i> 
+                      <span>เปิดดูรูปเต็ม</span>
+                    </a>
+                  </div>
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
       ` : ''}
@@ -1971,10 +2108,31 @@ function openStudentDetail(studentId) {
       </div>
     </div>
   `;
-
   const modal = document.getElementById('modalStudentDetail');
   if (modal) modal.classList.remove('hidden');
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// Function to allow uploading additional slip (เช่น กรณีโอนไม่ครบ หรือโอนเพิ่ม)
+function openAddExtraSlipModal() {
+  if (!currentSelectedStudent) {
+    alert("กรุณาเลือกนักศึกษาก่อน");
+    return;
+  }
+  
+  // Show upload zone directly so the user can pick a new slip
+  const unpaidSection = document.getElementById('unpaidSection');
+  const paidSection = document.getElementById('paidSection');
+  
+  if (unpaidSection) {
+    unpaidSection.classList.remove('hidden');
+    unpaidSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  if (paidSection) {
+    paidSection.classList.add('hidden');
+  }
+
+  showFrontendToast("📎 กรุณาเลือกไฟล์สลิปเพิ่มเติมเพื่ออัปโหลดแนบเข้ากับรายการเดิม");
 }
 
 function closeStudentDetailModal() {

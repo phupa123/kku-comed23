@@ -1101,32 +1101,6 @@
               <h4 id="paidNoticeTitle" class="text-2xl font-black text-emerald-950">ชำระเงินเรียบร้อยแล้ว</h4>
               <p id="paidNoticeSubtitle" class="text-xs sm:text-sm text-emerald-700 max-w-md mx-auto">
                 ระบบได้บันทึกข้อมูลและยอดเงินเข้าสู่ฐานข้อมูลเรียบร้อยแล้ว
-              </p>
-            </div>
-          </div>
-
-          <!-- DYNAMIC CONTENT: EXEMPTED STATE (ได้รับการยกเว้นไม่ต้องชำระ) -->
-          <div id="exemptedSection" class="hidden pt-4 space-y-6">
-            <div class="bg-gradient-to-br from-amber-50/80 via-white to-amber-50/80 rounded-3xl p-6 sm:p-8 border-2 border-amber-300 text-center space-y-4 shadow-sm">
-              <div class="w-16 h-16 mx-auto rounded-3xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30">
-                <i data-lucide="shield-check" class="w-9 h-9"></i>
-              </div>
-              <div class="space-y-1">
-                <span class="inline-block px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300">
-                  🎉 สิทธิพิเศษ / ได้รับการยกเว้น
-                </span>
-                <h4 class="text-2xl font-black text-slate-900">คุณได้รับการยกเว้นสำหรับรายการนี้</h4>
-                <p id="exemptedNoticeCampaignName" class="text-xs sm:text-sm text-slate-600 max-w-md mx-auto font-medium">
-                  แอดมินหรือคณะกรรมการสาขาวิชาได้ตั้งค่าให้คุณไม่ต้องชำระเงินในกิจกรรมนี้
-                </p>
-              </div>
-              <div class="p-4 bg-white/90 rounded-2xl border border-amber-200 max-w-sm mx-auto text-xs text-slate-500 text-left space-y-1">
-                <div class="flex items-center gap-1.5 font-bold text-amber-900">
-                  <i data-lucide="info" class="w-4 h-4 text-amber-600"></i>
-                  <span>หมายเหตุการยกเว้น:</span>
-                </div>
-                <p class="text-[11px] text-slate-600">คุณไม่มียอดค้างชำระในกิจกรรมนี้ และไม่มีผลกระทบต่อสิทธิ์กิจกรรมใดๆ ของสาขา</p>
-              </div>
             </div>
 
             <!-- Receipt & Proof Details Box -->
@@ -1160,14 +1134,17 @@
 
                 <!-- Proof Slip Action & Embedded Preview Box -->
                 <div class="flex flex-col p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-                  <span class="text-xs font-bold text-slate-700 block text-center">ภาพสลิปหลักฐาน:</span>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-700">ภาพสลิปหลักฐาน:</span>
+                    <span id="paidSlipCounterBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-100 text-orange-800 border border-orange-200">1 ใบ</span>
+                  </div>
                   <div id="paidSectionIframeWrapper"
                     class="w-full h-72 sm:h-80 rounded-xl bg-white border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
                     <span class="text-xs text-slate-400 font-medium">กำลังโหลดสลิป...</span>
                   </div>
                   <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
                     <button type="button" onclick="downloadCurrentSlip()"
-                      class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/25 active:scale-95">
+                      class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer">
                       <i data-lucide="download" class="w-4 h-4"></i>
                       <span>ดาวน์โหลดสลิป</span>
                     </button>
@@ -1180,13 +1157,35 @@
                 </div>
               </div>
 
-              <!-- Actions: Choose Another Student OR Reset -->
+              <!-- Multi-Slip History Gallery (กรณีโอนหลายยอด หรือ แนบสลิปเพิ่ม) -->
+              <div id="paidMultiSlipsContainer" class="hidden space-y-3 pt-3 border-t border-slate-100">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-orange-600"></i>
+                    <span>ประวัติสลิปทั้งหมดที่คุณแนบไว้ (<span id="paidMultiSlipsCount">0</span> ใบ)</span>
+                  </span>
+                </div>
+                <div id="paidMultiSlipsList" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Actions: Add Extra Slip / Search Another / Cancel -->
               <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
-                <button type="button" onclick="clearSelectedStudent()"
-                  class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
-                  <i data-lucide="user-search" class="w-4 h-4"></i>
-                  <span>ค้นหา / ส่งสลิปให้เพื่อนคนอื่น</span>
-                </button>
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                  <button type="button" onclick="openAddExtraSlipModal()"
+                    class="w-full sm:w-auto px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-sky-600/20 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+                    title="กรณีโอนไม่ครบ หรือต้องการส่งสลิปเพิ่มอีกใบ">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>แนบสลิปเพิ่มเติม (โอนเพิ่ม)</span>
+                  </button>
+
+                  <button type="button" onclick="clearSelectedStudent()"
+                    class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+                    <i data-lucide="user-search" class="w-4 h-4"></i>
+                    <span>ค้นหา / ส่งให้เพื่อน</span>
+                  </button>
+                </div>
 
                 <button type="button" onclick="promptResetPayment()"
                   class="text-xs text-slate-400 hover:text-rose-600 transition font-medium flex items-center gap-1">
@@ -1196,6 +1195,31 @@
               </div>
             </div>
 
+          </div>
+
+          <!-- DYNAMIC CONTENT: EXEMPTED STATE (ได้รับการยกเว้นไม่ต้องชำระ) -->
+          <div id="exemptedSection" class="hidden pt-4 space-y-6">
+            <div class="bg-gradient-to-br from-amber-50/80 via-white to-amber-50/80 rounded-3xl p-6 sm:p-8 border-2 border-amber-300 text-center space-y-4 shadow-sm">
+              <div class="w-16 h-16 mx-auto rounded-3xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <i data-lucide="shield-check" class="w-9 h-9"></i>
+              </div>
+              <div class="space-y-1">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300">
+                  🎉 สิทธิพิเศษ / ได้รับการยกเว้น
+                </span>
+                <h4 class="text-2xl font-black text-slate-900">คุณได้รับการยกเว้นสำหรับรายการนี้</h4>
+                <p id="exemptedNoticeCampaignName" class="text-xs sm:text-sm text-slate-600 max-w-md mx-auto font-medium">
+                  แอดมินหรือคณะกรรมการสาขาวิชาได้ตั้งค่าให้คุณไม่ต้องชำระเงินในกิจกรรมนี้
+                </p>
+              </div>
+              <div class="p-4 bg-white/90 rounded-2xl border border-amber-200 max-w-sm mx-auto text-xs text-slate-500 text-left space-y-1">
+                <div class="flex items-center gap-1.5 font-bold text-amber-900">
+                  <i data-lucide="info" class="w-4 h-4 text-amber-600"></i>
+                  <span>หมายเหตุการยกเว้น:</span>
+                </div>
+                <p class="text-[11px] text-slate-600">คุณไม่มียอดค้างชำระในกิจกรรมนี้ และไม่มีผลกระทบต่อสิทธิ์กิจกรรมใดๆ ของสาขา</p>
+              </div>
+            </div>
           </div>
 
         </div>
