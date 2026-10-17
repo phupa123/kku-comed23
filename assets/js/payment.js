@@ -1712,14 +1712,16 @@ async function executeSlipSubmission() {
     }
   }
 
-  // 2. Send to Local Backend Server (if available)
-  try {
-    fetch('/api/pay', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch (e) { }
+  // 2. Send to Local Backend Server (if running on localhost)
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    try {
+      fetch('/api/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) { }
+  }
 
   if (bar) bar.style.width = '100%';
   if (title) title.textContent = '✨ อัปโหลดและบันทึกข้อมูลเสร็จสิ้น!';
@@ -1779,13 +1781,16 @@ async function promptResetPayment() {
       localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localPay));
     } catch (e) { }
 
-    try {
-      await fetch('/api/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId: stId })
-      });
-    } catch (e) { }
+    // 3. Localhost Development Server only (if available)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      try {
+        await fetch('/api/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId: stId })
+        });
+      } catch (e) { }
+    }
 
     delete paymentRecords[stId];
     saveLocalBackup();
