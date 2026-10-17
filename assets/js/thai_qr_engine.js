@@ -117,11 +117,33 @@
     canvas.height = 1024;
     const ctx = canvas.getContext('2d');
 
-    // Background: Crisp white with rounded corners
+    // Helper to draw rounded rectangle
+    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+      if (typeof radius === 'number') {
+        radius = { tl: radius, tr: radius, br: radius, bl: radius };
+      } else {
+        radius = Object.assign({ tl: 0, tr: 0, br: 0, bl: 0 }, radius);
+      }
+      ctx.beginPath();
+      ctx.moveTo(x + radius.tl, y);
+      ctx.lineTo(x + width - radius.tr, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+      ctx.lineTo(x + width, y + height - radius.br);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+      ctx.lineTo(x + radius.bl, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+      ctx.lineTo(x, y + radius.tl);
+      ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // 1. Canvas Base: Crisp White with subtle outer border
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Header Background: Deep Blue `#0b436c`
+    // 2. Header Background: Deep Blue `#0b436c`
     ctx.fillStyle = '#0b436c';
     ctx.fillRect(0, 0, canvas.width, 140);
 
@@ -134,7 +156,6 @@
         resolve();
       };
       headerImg.onerror = () => {
-        // Fallback Vector Header
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 36px "Prompt", sans-serif';
         ctx.textAlign = 'center';
@@ -144,32 +165,45 @@
       headerImg.src = 'assets/images/thai_qr_header.png';
     });
 
-    // PromptPay Logo Banner (y: 155, height: 60)
+    // 3. PromptPay Logo Banner (y: 152, height: ~55)
     await new Promise(resolve => {
       const ppImg = new Image();
       ppImg.crossOrigin = 'anonymous';
       ppImg.onload = () => {
-        const w = 170;
+        const w = 175;
         const h = (ppImg.height / ppImg.width) * w;
-        ctx.drawImage(ppImg, (755 - w) / 2, 158, w, h);
+        ctx.drawImage(ppImg, (755 - w) / 2, 154, w, h);
         resolve();
       };
       ppImg.onerror = () => {
         ctx.fillStyle = '#003366';
-        ctx.fillRect(300, 160, 155, 45);
+        ctx.fillRect(300, 155, 155, 45);
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 22px "Prompt", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('PromptPay', 377, 190);
+        ctx.fillText('PromptPay', 377, 185);
         resolve();
       };
       ppImg.src = 'assets/images/promptpay_logo.png';
     });
 
-    // Draw Dynamic QR Code in Center (y: 235, size: 400x400)
-    const qrSize = 400;
+    // 4. Subtle QR Frame with soft shadow
+    const qrSize = 390;
     const qrX = (755 - qrSize) / 2;
-    const qrY = 232;
+    const qrY = 222;
+
+    // QR Outer card frame with soft rounded border
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetY = 4;
+    ctx.fillStyle = '#ffffff';
+    roundRect(ctx, qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 20, true, false);
+    ctx.restore();
+
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 20, false, true);
 
     // Draw QR canvas
     ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
@@ -177,31 +211,31 @@
     // Draw subtle PromptPay mini badge in center of QR
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(377, qrY + (qrSize / 2), 26, 0, Math.PI * 2);
+    ctx.arc(377, qrY + (qrSize / 2), 24, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#0b436c';
     ctx.beginPath();
-    ctx.arc(377, qrY + (qrSize / 2), 22, 0, Math.PI * 2);
+    ctx.arc(377, qrY + (qrSize / 2), 20, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 15px "Prompt", sans-serif';
+    ctx.font = 'bold 13px "Prompt", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('QR', 377, qrY + (qrSize / 2));
 
-    // Text Section Below QR (y: 685+)
-    ctx.textAlign = 'center';
+    // 5. Text Section Below QR (y: 650+)
     ctx.textBaseline = 'alphabetic';
 
     // Teal Title: สแกน QR เพื่อโอนเข้าบัญชี
-    ctx.fillStyle = '#2ab7a8';
-    ctx.font = 'bold 34px "Prompt", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('สแกน QR เพื่อโอนเข้าบัญชี', 377, 690);
+    ctx.fillStyle = '#1eb19f';
+    ctx.font = 'bold 30px "Prompt", "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('สแกน QR เพื่อโอนเข้าบัญชี', 377, 658);
 
     // Account Name: ชื่อ: ...
-    ctx.fillStyle = '#2d3748';
-    ctx.font = 'bold 34px "Prompt", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`ชื่อ: ${accountName}`, 377, 742);
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 30px "Prompt", "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`ชื่อ: ${accountName}`, 377, 702);
 
     // Masked Account: บัญชี: xxx-x-x...
     let maskedAcc = accountNumber;
@@ -210,44 +244,65 @@
       const last4 = clean.slice(-4);
       maskedAcc = `xxx-x-x${last4.slice(0, 3)}-${last4.slice(3)}`;
     }
-    ctx.fillStyle = '#4a5568';
-    ctx.font = 'bold 34px "Prompt", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`บัญชี: ${maskedAcc}`, 377, 792);
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 28px "Prompt", "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`บัญชี: ${maskedAcc}`, 377, 744);
 
     // Reference Code: เลขที่อ้างอิง: ...
-    ctx.fillStyle = '#a0aec0';
-    ctx.font = '500 24px "Prompt", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`เลขที่อ้างอิง: ${refCode}`, 377, 836);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '500 21px "Prompt", "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`เลขที่อ้างอิง: ${refCode}`, 377, 780);
 
-    // Amount Badge: ยอดชำระเงินที่ล็อคไว้
+    // 6. Premium Highlighted Locked Amount Card (y: 808 - 898)
     if (amount !== undefined && amount !== null && Number(amount) > 0) {
-      const amtStr = `฿${Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2})} บาท (ล็อคยอดอัตโนมัติ)`;
-      ctx.fillStyle = '#059669';
-      ctx.font = 'bold 26px "Prompt", "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(amtStr, 377, 882);
+      const badgeW = 635;
+      const badgeH = 88;
+      const badgeX = (755 - badgeW) / 2;
+      const badgeY = 806;
+
+      // Soft green background
+      ctx.fillStyle = '#f0fdf4';
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 18, true, false);
+
+      // Emerald border
+      ctx.strokeStyle = '#86efac';
+      ctx.lineWidth = 2;
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 18, false, true);
+
+      // Badge Label: "ยอดชำระที่ล็อคไว้"
+      ctx.fillStyle = '#15803d';
+      ctx.font = 'bold 19px "Prompt", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🔒 ล็อคยอดชำระเงินอัตโนมัติ (ไม่ต้องระบุจำนวนเงินเอง)', 377, badgeY + 34);
+
+      // Amount Number: "฿190.00 บาท"
+      const formattedAmt = Number(amount).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      ctx.fillStyle = '#047857';
+      ctx.font = 'bold 36px "Prompt", sans-serif';
+      ctx.fillText(`฿${formattedAmt} บาท`, 377, badgeY + 74);
     }
 
-    // Divider Line above footer
+    // 7. Divider Line above footer
     ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(30, 934);
-    ctx.lineTo(725, 934);
+    ctx.moveTo(35, 922);
+    ctx.lineTo(720, 922);
     ctx.stroke();
 
-    // Footer: K+ Accepts all banks | รับเงินได้จากทุกธนาคาร
+    // 8. Footer: K+ Accepts all banks | รับเงินได้จากทุกธนาคาร
     await new Promise(resolve => {
       const footerImg = new Image();
       footerImg.crossOrigin = 'anonymous';
       footerImg.onload = () => {
-        ctx.drawImage(footerImg, 0, 934, 755, 90);
+        ctx.drawImage(footerImg, 0, 924, 755, 95);
         resolve();
       };
       footerImg.onerror = () => {
         ctx.fillStyle = '#10b981';
         ctx.font = 'bold 22px "Prompt", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('K+ Accepts all banks | รับเงินได้จากทุกธนาคาร', 377, 985);
+        ctx.fillText('K+ Accepts all banks | รับเงินได้จากทุกธนาคาร', 377, 980);
         resolve();
       };
       footerImg.src = 'assets/images/thai_qr_footer.png';

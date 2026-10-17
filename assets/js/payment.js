@@ -1179,13 +1179,14 @@ function selectStudent(st) {
       driveLinkEl.href = currentStudentPaidSlip || '#';
     }
     if (wrapperEl) {
+      const displayUrl = formatDriveImageUrl(currentStudentPaidSlip);
       const isDirect = currentStudentPaidSlip.startsWith('data:image') ||
         currentStudentPaidSlip.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) ||
         currentStudentPaidSlip.includes('cloudinary') ||
         currentStudentPaidSlip.includes('catbox');
 
       if (isDirect) {
-        wrapperEl.innerHTML = `<img src="${currentStudentPaidSlip}" alt="สลิปโอนเงิน" class="max-h-full max-w-full object-contain mx-auto rounded-xl">`;
+        wrapperEl.innerHTML = `<img src="${displayUrl}" alt="สลิปโอนเงิน" class="max-h-full max-w-full object-contain mx-auto rounded-xl">`;
       } else if (drivePreviewUrl) {
         wrapperEl.innerHTML = `<iframe src="${drivePreviewUrl}" class="w-full h-full border-0 rounded-xl" allow="autoplay" loading="lazy"></iframe>`;
       } else {
@@ -1211,15 +1212,16 @@ function selectStudent(st) {
         multiContainer.classList.remove('hidden');
         if (multiCount) multiCount.textContent = slipsList.length;
         multiList.innerHTML = slipsList.map((sItem, sIdx) => {
-          const sUrl = typeof sItem === 'string' ? sItem : (sItem.url || '');
+          const rawSUrl = typeof sItem === 'string' ? sItem : (sItem.url || '');
+          const sDisplayUrl = formatDriveImageUrl(rawSUrl);
           const sTime = typeof sItem === 'object' && sItem.timestamp ? sItem.timestamp : '';
-          const isDirectImg = sUrl.startsWith('data:image') || sUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || sUrl.includes('cloudinary') || sUrl.includes('catbox');
+          const isDirectImg = rawSUrl.startsWith('data:image') || rawSUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || rawSUrl.includes('cloudinary') || rawSUrl.includes('catbox');
           return `
-            <div onclick="openFullscreenModal('${sUrl}')" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-orange-300 transition cursor-pointer group flex flex-col items-center">
+            <div onclick="openFullscreenModal('${sDisplayUrl}')" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-orange-300 transition cursor-pointer group flex flex-col items-center">
               <div class="w-full h-24 rounded-lg bg-white overflow-hidden flex items-center justify-center border border-slate-100 shadow-xs mb-1.5">
                 ${isDirectImg 
-                  ? `<img src="${sUrl}" alt="สลิป ${sIdx+1}" class="max-h-full max-w-full object-contain">`
-                  : `<iframe src="${sUrl}" class="w-full h-full pointer-events-none border-0" loading="lazy"></iframe>`
+                  ? `<img src="${sDisplayUrl}" alt="สลิป ${sIdx+1}" class="max-h-full max-w-full object-contain">`
+                  : `<iframe src="${sDisplayUrl}" class="w-full h-full pointer-events-none border-0" loading="lazy"></iframe>`
                 }
               </div>
               <div class="w-full flex items-center justify-between text-[10px] text-slate-500 font-medium">
@@ -1908,11 +1910,16 @@ function redirectToPayment(studentId) {
 
 function formatDriveImageUrl(url) {
   if (!url) return '';
+  // 1. Google Drive direct thumbnail
   if (url.includes('drive.google.com')) {
     const idMatch = url.match(/[-\w]{25,}/);
     if (idMatch) {
       return `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w1200`;
     }
+  }
+  // 2. Catbox.moe: If ISP/DNS blocks files.catbox.moe directly, route through Cloudflare-backed global image CDN (wsrv.nl)
+  if (url.includes('files.catbox.moe') || url.includes('catbox.moe')) {
+    return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=webp&q=85`;
   }
   return url;
 }
@@ -2069,7 +2076,8 @@ function openStudentDetail(studentId) {
                 if (idMatch) slPreview = `https://drive.google.com/file/d/${idMatch[0]}/preview`;
               }
 
-              return `
+                const displaySlUrl = formatDriveImageUrl(slUrl);
+                return `
                 <div class="p-3 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-xs">
                   <div class="flex items-center justify-between text-xs font-bold">
                     <span class="text-slate-700 flex items-center gap-1.5">
@@ -2080,7 +2088,7 @@ function openStudentDetail(studentId) {
                   </div>
                   <div class="w-full h-72 sm:h-80 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center">
                     ${isImg
-                      ? `<img src="${slUrl}" alt="สลิป ${slIdx+1}" class="max-h-full max-w-full object-contain mx-auto rounded-lg">`
+                      ? `<img src="${displaySlUrl}" alt="สลิป ${slIdx+1}" class="max-h-full max-w-full object-contain mx-auto rounded-lg">`
                       : `<iframe src="${slPreview}" class="w-full h-full border-0" loading="lazy"></iframe>`
                     }
                   </div>
@@ -2089,7 +2097,7 @@ function openStudentDetail(studentId) {
                       <i data-lucide="download" class="w-3.5 h-3.5"></i>
                       <span>ดาวน์โหลดสลิป</span>
                     </button>
-                    <a href="${slUrl}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-md active:scale-95">
+                    <a href="${displaySlUrl}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-md active:scale-95">
                       <i data-lucide="external-link" class="w-3.5 h-3.5"></i> 
                       <span>เปิดดูรูปเต็ม</span>
                     </a>

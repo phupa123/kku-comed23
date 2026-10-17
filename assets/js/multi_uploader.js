@@ -21,8 +21,8 @@
   // Default keys and fallbacks
   const DEFAULT_CONFIG = {
     activeProvider: 'auto', // 'auto' | 'imgbb' | 'cloudinary' | 'freeimage' | 'catbox'
-    enabledProviders: ['catbox', 'imgbb', 'cloudinary'],
-    providerPriority: ['catbox', 'imgbb', 'cloudinary', 'freeimage'],
+    enabledProviders: ['cloudinary', 'imgbb', 'catbox'],
+    providerPriority: ['cloudinary', 'imgbb', 'catbox', 'freeimage'],
     
     // Auto compression settings
     autoCompress: true,
