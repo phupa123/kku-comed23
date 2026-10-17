@@ -1148,7 +1148,7 @@ async function handleSaveCampaignSubmit(e) {
   try {
     // 1. Save in local & sync to Supabase
     if (window.ComedCampaignManager) {
-      window.ComedCampaignManager.updateCampaign(campaignPayload);
+      await window.ComedCampaignManager.updateCampaign(campaignPayload);
     }
 
     // 2. Log Admin Action
@@ -1179,14 +1179,14 @@ async function handleSaveCampaignSubmit(e) {
   }
 }
 
-function toggleCampaignStatus(campId) {
+async function toggleCampaignStatus(campId) {
   if (!window.ComedCampaignManager) return;
   const camp = window.ComedCampaignManager.getCampaignById(campId);
   if (!camp) return;
 
   const newStatus = (camp.status === 'open') ? 'temp_closed' : 'open';
   camp.status = newStatus;
-  window.ComedCampaignManager.updateCampaign(camp);
+  await window.ComedCampaignManager.updateCampaign(camp);
   logAdminAction("เปลี่ยนสถานะรายการชำระ", `เปลี่ยนสถานะ "${camp.title}" เป็น ${newStatus}`);
   renderAdminCampaignsNav();
   alert(`✨ เปลี่ยนสถานะของ "${camp.title}" เป็น ${newStatus === 'open' ? 'เปิดรับชำระ' : 'ปิดชั่วคราว'} เรียบร้อย!`);
@@ -1345,7 +1345,7 @@ async function saveAudienceSettings() {
   currentAudienceCamp.exemptedStudentIds = exemptedIds;
   currentAudienceCamp.targetMode = "all";
 
-  window.ComedCampaignManager.updateCampaign(currentAudienceCamp);
+  await window.ComedCampaignManager.updateCampaign(currentAudienceCamp);
 
   try {
     await logAdminAction(

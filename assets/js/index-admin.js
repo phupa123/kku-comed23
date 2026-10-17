@@ -635,14 +635,14 @@ function renderCampaignsList() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-function setCampaignStatus(id, newStatus, reason = "") {
+async function setCampaignStatus(id, newStatus, reason = "") {
   if (!window.ComedCampaignManager) return;
   const camp = window.ComedCampaignManager.getCampaignById(id);
   if (!camp) return;
 
   camp.status = newStatus;
   camp.closedReason = reason;
-  window.ComedCampaignManager.updateCampaign(camp);
+  await window.ComedCampaignManager.updateCampaign(camp);
   renderCampaignsList();
   showToastNotification(`✨ อัปเดตสถานะของ "${camp.title}" เป็น ${newStatus} สำเร็จ!`);
 }
@@ -719,7 +719,7 @@ function closeCampaignModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-function saveCampaignSubmit(e) {
+async function saveCampaignSubmit(e) {
   e.preventDefault();
   if (!window.ComedCampaignManager) return;
 
@@ -751,7 +751,7 @@ function saveCampaignSubmit(e) {
       camp.accountNumber = accountNumber;
       camp.accountName = accountName;
       camp.qrImage = finalQr;
-      window.ComedCampaignManager.updateCampaign(camp);
+      await window.ComedCampaignManager.updateCampaign(camp);
     }
   } else {
     const newId = "camp_" + Date.now();
@@ -774,7 +774,7 @@ function saveCampaignSubmit(e) {
       isDefault: false,
       createdAt: new Date().toISOString()
     };
-    window.ComedCampaignManager.updateCampaign(newCamp);
+    await window.ComedCampaignManager.updateCampaign(newCamp);
   }
 
   closeCampaignModal();

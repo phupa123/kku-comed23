@@ -108,14 +108,14 @@ window.ComedCampaignManager = {
     return found || list[0] || DEFAULT_COMED_CAMPAIGNS[0];
   },
 
-  saveCampaigns: function(campaigns) {
+  saveCampaigns: async function(campaigns) {
     const deletedIds = this.getDeletedIds();
     const filtered = (Array.isArray(campaigns) ? campaigns : []).filter(c => !String(c.id).startsWith("system_") && !deletedIds.includes(c.id));
     localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(filtered));
-    this.syncToSupabase(filtered);
+    return await this.syncToSupabase(filtered);
   },
 
-  updateCampaign: function(updatedCampaign) {
+  updateCampaign: async function(updatedCampaign) {
     // If updating a previously deleted campaign, remove from deleted list
     let deletedIds = this.getDeletedIds();
     if (deletedIds.includes(updatedCampaign.id)) {
@@ -130,7 +130,7 @@ window.ComedCampaignManager = {
     } else {
       list.unshift(updatedCampaign);
     }
-    this.saveCampaigns(list);
+    return await this.saveCampaigns(list);
   },
 
   deleteCampaign: async function(id) {
