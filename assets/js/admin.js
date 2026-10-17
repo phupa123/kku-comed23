@@ -1374,25 +1374,26 @@ async function saveAudienceSettings() {
     );
   } catch (err) {}
 
+  const campId = currentAudienceCamp.id;
   const savedCampTitle = currentAudienceCamp.title || 'แคมเปญ';
   const totalEligible = studentDatabase.length - exemptedIds.length;
   const totalExempted = exemptedIds.length;
 
   // Update current session if viewing this campaign
-  if (currentAdminCampaign && currentAdminCampaign.id === currentAudienceCamp.id) {
+  if (currentAdminCampaign && currentAdminCampaign.id === campId) {
     currentAdminCampaign.exemptedStudentIds = exemptedIds;
     renderStats();
     renderAdminTable();
   }
 
-  closeAudienceModal();
-  alert(`✨ บันทึกการกำหนดสิทธิ์ของ "${savedCampTitle}" สำเร็จ!\n(ต้องชำระ ${totalEligible} คน, ยกเว้น ${totalExempted} คน)`);
-
   // Ensure current URL reflects the campaign ID so browser reload retains exact context
-  if (window.history && window.history.replaceState) {
-    const newUrl = `${window.location.pathname}?camp=${encodeURIComponent(currentAudienceCamp.id)}`;
+  if (campId && window.history && window.history.replaceState) {
+    const newUrl = `${window.location.pathname}?camp=${encodeURIComponent(campId)}`;
     window.history.replaceState(null, '', newUrl);
   }
+
+  closeAudienceModal();
+  alert(`✨ บันทึกการกำหนดสิทธิ์ของ "${savedCampTitle}" สำเร็จ!\n(ต้องชำระ ${totalEligible} คน, ยกเว้น ${totalExempted} คน)`);
 }
 
 async function loadAllPayments(silent = false) {
