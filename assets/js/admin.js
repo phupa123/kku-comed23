@@ -1219,6 +1219,10 @@ async function saveAudienceSettings() {
     );
   } catch (err) {}
 
+  const savedCampTitle = currentAudienceCamp.title || 'แคมเปญ';
+  const totalEligible = studentDatabase.length - exemptedIds.length;
+  const totalExempted = exemptedIds.length;
+
   // Update current session if viewing this campaign
   if (currentAdminCampaign && currentAdminCampaign.id === currentAudienceCamp.id) {
     currentAdminCampaign.exemptedStudentIds = exemptedIds;
@@ -1227,7 +1231,7 @@ async function saveAudienceSettings() {
   }
 
   closeAudienceModal();
-  alert(`✨ บันทึกการกำหนดสิทธิ์ของ "${currentAudienceCamp.title}" สำเร็จ!\n(ต้องชำระ ${studentDatabase.length - exemptedIds.length} คน, ยกเว้น ${exemptedIds.length} คน)`);
+  alert(`✨ บันทึกการกำหนดสิทธิ์ของ "${savedCampTitle}" สำเร็จ!\n(ต้องชำระ ${totalEligible} คน, ยกเว้น ${totalExempted} คน)`);
 }
 
 async function loadAllPayments(silent = false) {
