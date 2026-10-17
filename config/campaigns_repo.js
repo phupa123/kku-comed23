@@ -16,7 +16,7 @@ const DEFAULT_COMED_CAMPAIGNS = [
     title: "ค่าเสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา",
     subtitle: "เสื้อกิจกรรม & เสื้อเอกสาขาวิชาคอมพิวเตอร์ศึกษา (COMED KKU 69)",
     category: "เสื้อสาขาวิชาเอก (COMED 69)",
-    amount: 290.00,
+    amount: 390.00,
     currency: "THB",
     deadline: "2026-11-15T23:59:00+07:00",
     deadlineDisplay: "15 พ.ย. 2569 (23:59 น.)",
@@ -31,12 +31,12 @@ const DEFAULT_COMED_CAMPAIGNS = [
       "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=800&q=80"
     ],
     shirtSizes: [
-      { size: "S", chest: "36\"", length: "26\"", price: 290 },
-      { size: "M", chest: "38\"", length: "27\"", price: 290 },
-      { size: "L", chest: "40\"", length: "28\"", price: 290 },
-      { size: "XL", chest: "42\"", length: "29\"", price: 290 },
-      { size: "2XL", chest: "44\"", length: "30\"", price: 310 },
-      { size: "3XL", chest: "48\"", length: "31\"", price: 330 }
+      { size: "S", chest: "36\"", length: "26\"", price: 390 },
+      { size: "M", chest: "38\"", length: "27\"", price: 390 },
+      { size: "L", chest: "40\"", length: "28\"", price: 390 },
+      { size: "XL", chest: "42\"", length: "29\"", price: 390 },
+      { size: "2XL", chest: "44\"", length: "30\"", price: 410 },
+      { size: "3XL", chest: "48\"", length: "31\"", price: 430 }
     ],
     targetMode: "all", // "all" = ทุกคนต้องชำระ (เว้นแต่จะอยู่ใน exemptedStudentIds), "specific" = เฉพาะคนที่เลือกใน eligibleStudentIds
     eligibleStudentIds: [], // รหัสที่ต้องชำระ (ใช้เมื่อ targetMode === "specific")

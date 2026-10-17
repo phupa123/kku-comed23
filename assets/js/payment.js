@@ -474,13 +474,16 @@ function renderShirtShowcaseUI(campaign) {
   if (bannerImg) bannerImg.src = bannerUrl;
 
   const priceTag = document.getElementById('showcasePriceTag');
-  if (priceTag) priceTag.textContent = `฿${Number(campaign.amount || 290).toLocaleString()}.-`;
+  if (priceTag) priceTag.textContent = `฿${Number(campaign.amount || 390).toLocaleString()}.-`;
+
+  const singlePriceEl = document.getElementById('showcaseSinglePriceText');
+  if (singlePriceEl) singlePriceEl.textContent = `฿${Number(campaign.amount || 390).toLocaleString()}`;
 
   const titleEl = document.getElementById('showcaseTitleText');
   if (titleEl) titleEl.textContent = campaign.title;
 
   const subEl = document.getElementById('showcaseSubtitleText');
-  if (subEl) subEl.textContent = campaign.subtitle || 'เสื้อกิจกรรมและเสื้อเอกประจำรุ่น เนื้อผ้า Cotton 100% สั่งทอพิเศษ สวมใส่สบาย ระบายอากาศดี';
+  if (subEl) subEl.textContent = campaign.subtitle || 'เสื้อกิจกรรมและเสื้อเอกประจำรุ่น สวมใส่สบาย ระบายอากาศดี';
 
   const catPill = document.getElementById('showcaseCategoryPill');
   if (catPill) catPill.textContent = campaign.category || 'เสื้อสาขาวิชาเอก';
@@ -2322,7 +2325,65 @@ function handleGoogleCredentialResponse(response) {
   localStorage.setItem('COMED_USER_SESSION', JSON.stringify(userSession));
   closeGoogleLoginModal();
   checkPaymentUserSession();
-  alert(`🎉 ยินดีต้อนรับคุณ ${userSession.name} เข้าสู่ระบบสำเร็จ`);
+  openLoginSuccessModal(userSession);
+}
+
+function openLoginSuccessModal(user) {
+  const modal = document.getElementById('modalLoginSuccess');
+  const card = document.getElementById('loginSuccessCard');
+  if (!modal || !card) {
+    showFrontendToast(`🎉 ยินดีต้อนรับคุณ ${user.name} เข้าสู่ระบบสำเร็จ`);
+    return;
+  }
+
+  const avatar = document.getElementById('loginSuccessAvatar');
+  const title = document.getElementById('loginSuccessTitle');
+  const name = document.getElementById('loginSuccessName');
+  const sid = document.getElementById('loginSuccessId');
+  const email = document.getElementById('loginSuccessEmail');
+
+  if (avatar) avatar.src = user.avatar;
+  if (title) title.textContent = user.nickname ? `ยินดีต้อนรับ น้อง${user.nickname}!` : `ยินดีต้อนรับ!`;
+  if (name) name.textContent = user.nickname ? `${user.name} (${user.nickname})` : user.name;
+  if (sid) sid.textContent = user.studentId || '-';
+  if (email) email.textContent = user.email || '-';
+
+  modal.classList.remove('hidden');
+  if (typeof gsap !== 'undefined') {
+    gsap.fromTo(card, 
+      { opacity: 0, scale: 0.8, y: 30 }, 
+      { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: "back.out(1.6)" }
+    );
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeLoginSuccessModal(autoScroll) {
+  const modal = document.getElementById('modalLoginSuccess');
+  const card = document.getElementById('loginSuccessCard');
+  if (!modal || !card) return;
+
+  const doClose = () => {
+    modal.classList.add('hidden');
+    if (autoScroll) {
+      setTimeout(() => {
+        scrollToUploadForm();
+      }, 100);
+    }
+  };
+
+  if (typeof gsap !== 'undefined') {
+    gsap.to(card, {
+      opacity: 0,
+      scale: 0.85,
+      y: 20,
+      duration: 0.25,
+      ease: "power2.in",
+      onComplete: doClose
+    });
+  } else {
+    doClose();
+  }
 }
 
 // Run user auth & payment sync on page load and table render
