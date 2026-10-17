@@ -781,254 +781,243 @@
           <span id="campFormErrorText" class="font-medium"></span>
         </div>
 
-        <div class="space-y-1">
-          <label class="font-bold text-slate-300">ชื่อรายการเก็บเงิน <span class="text-rose-400">*</span></label>
-          <input type="text" id="campTitleInput" placeholder="เช่น ค่าเสื้อสาขาวิชาเอก, ค่าทริปสัมมนา"
-            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
+        <!-- Clean Tab Nav inside Modal -->
+        <div class="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs font-bold overflow-x-auto">
+          <button type="button" id="tabCampBasic" onclick="switchCampaignModalTab('basic')"
+            class="px-3 py-1.5 rounded-xl bg-orange-600 text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            <span>ข้อมูลทั่วไป</span>
+          </button>
+          <button type="button" id="tabCampBank" onclick="switchCampaignModalTab('bank')"
+            class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+            <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+            <span>บัญชี & QR Code</span>
+          </button>
+          <button type="button" id="tabCampShirt" onclick="switchCampaignModalTab('shirt')"
+            class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+            <i data-lucide="shirt" class="w-3.5 h-3.5"></i>
+            <span>ตัวเลือกเสื้อ (ไม่บังคับ)</span>
+          </button>
+          <button type="button" id="tabCampStorage" onclick="switchCampaignModalTab('storage')"
+            class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+            <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
+            <span>ที่เก็บสลิป</span>
+          </button>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- ================= TAB 1: BASIC INFO ================= -->
+        <div id="viewCampTabBasic" class="space-y-3.5">
           <div class="space-y-1">
-            <label class="font-bold text-slate-300">รหัสรายการ (ID/Code) <span class="text-rose-400">*</span></label>
-            <input type="text" id="campCodeInput" placeholder="เช่น shirt69, trip69 (เว้นว่างเพื่อสร้างอัตโนมัติ)"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500 transition">
-          </div>
-          <div class="space-y-1">
-            <label class="font-bold text-slate-300">ยอดเงินที่ต้องชำระ (บาท/คน) <span class="text-rose-400">*</span></label>
-            <input type="number" id="campAmountInput" min="0" step="0.01" placeholder="เช่น 250.00"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500 transition">
-          </div>
-        </div>
-
-        <div class="space-y-1">
-          <label class="font-bold text-slate-300">คำอธิบายเพิ่มเติม</label>
-          <input type="text" id="campSubtitleInput" placeholder="เช่น สำหรับนักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน"
-            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="space-y-1">
-            <label class="font-bold text-slate-300">หมวดหมู่กิจกรรม</label>
-            <input type="text" id="campCategoryInput" placeholder="เช่น กิจกรรมรุ่น 69, กิจกรรมสาขา"
+            <label class="font-bold text-slate-300">ชื่อรายการเก็บเงิน <span class="text-rose-400">*</span></label>
+            <input type="text" id="campTitleInput" placeholder="เช่น ค่าทำป้ายสาขาวิชาเอก, ค่าทริปศึกษาดูงาน"
               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
           </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label class="font-bold text-slate-300">รหัสรายการ (ID/Code)</label>
+              <input type="text" id="campCodeInput" placeholder="เช่น camp_paimai, trip69 (หรือปล่อยว่าง)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500 transition">
+              <span class="text-[10px] text-slate-500 block">ปล่อยว่างได้ ระบบจะสร้างรหัสให้โดยอัตโนมัติ</span>
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-slate-300">ยอดเงินที่ต้องชำระ (บาท/คน) <span class="text-rose-400">*</span></label>
+              <input type="number" id="campAmountInput" min="0" step="0.01" placeholder="เช่น 190.00"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500 transition">
+            </div>
+          </div>
+
           <div class="space-y-1">
-            <label class="font-bold text-slate-300">กำหนดปิดรับชำระ (วัน-เวลา)</label>
-            <input type="datetime-local" id="campDeadlineInput"
+            <label class="font-bold text-slate-300">คำอธิบายเพิ่มเติม</label>
+            <input type="text" id="campSubtitleInput" placeholder="เช่น สำหรับนักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน"
               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label class="font-bold text-slate-300">หมวดหมู่กิจกรรม</label>
+              <input type="text" id="campCategoryInput" placeholder="เช่น กิจกรรมชั้นปีที่ 1, กิจกรรมสาขา"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-slate-300">กำหนดปิดรับชำระ</label>
+              <input type="datetime-local" id="campDeadlineInput"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-orange-500 transition">
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center justify-between border-t border-slate-800">
+            <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-slate-300 font-bold">
+              <input type="checkbox" id="campStatusOpenInput" checked class="rounded accent-orange-500 w-4 h-4">
+              <span>เปิดรับชำระเงินทันที</span>
+            </label>
           </div>
         </div>
 
-        <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
-          <span class="font-bold text-orange-400 block">ข้อมูลบัญชีรับเงิน & QR Code</span>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <input type="text" id="campBankNameInput" placeholder="ชื่อธนาคาร (เช่น กสิกรไทย)"
-              class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
-            <input type="text" id="campAccountNumInput" placeholder="เลขที่บัญชี (เช่น 236-2-47817-3)"
-              class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
+        <!-- ================= TAB 2: BANK & QR CODE ================= -->
+        <div id="viewCampTabBank" class="hidden space-y-3.5">
+          <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <span class="font-bold text-orange-400 block text-xs">ข้อมูลบัญชีธนาคาร</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อธนาคาร</label>
+                <input type="text" id="campBankNameInput" placeholder="เช่น ธนาคารกสิกรไทย"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-400 mb-1">เลขที่บัญชี</label>
+                <input type="text" id="campAccountNumInput" placeholder="เช่น 236-2-47817-3"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อเจ้าของบัญชี</label>
+              <input type="text" id="campAccountNameInput" placeholder="เช่น น.ส. พิชามญธุ์ สามสี"
+                class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+            </div>
           </div>
-          <input type="text" id="campAccountNameInput" placeholder="ชื่อบัญชี (เช่น น.ส. พิชามญธุ์ สามสี)"
-            class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
-          
-          <!-- Dedicated QR Code Option: Choose Provider, Upload or URL Link -->
-          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
-              <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+
+          <!-- Dedicated QR Upload Box -->
+          <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
                 <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
-                <span>รูปภาพ QR Code สำหรับการชำระเงิน</span>
-              </label>
-              
-              <!-- Provider Picker Dropdown -->
-              <div class="flex items-center gap-1.5 text-[11px]">
-                <span class="text-slate-400 font-medium">เลือกคลาวด์ที่จะเก็บ:</span>
-                <select id="campQrProviderSelect" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-white font-bold text-xs outline-none focus:border-orange-500">
-                  <option value="cloudinary">⚡ Cloudinary (แนะนำ - โหลดไว CDN ทั่วโลก)</option>
-                  <option value="catbox">🚀 Catbox.moe (ฟรีถาวร ไม่จำกัด ไม่ใช้คีย์)</option>
-                  <option value="imgbb">🖼️ ImgBB (ฟรี 32MB Direct URL ชัดเจน)</option>
-                  <option value="freeimage">📦 FreeImage.host (ฟรี ถาวร)</option>
+                <span>รูปภาพ QR Code พร้อมเพย์</span>
+              </span>
+              <div class="flex items-center gap-1 text-[11px]">
+                <span class="text-slate-500">บันทึกที่:</span>
+                <select id="campQrProviderSelect" class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-[11px] outline-none">
+                  <option value="cloudinary">Cloudinary</option>
+                  <option value="catbox">Catbox</option>
+                  <option value="imgbb">ImgBB</option>
                 </select>
               </div>
             </div>
 
-            <!-- Provider Advice Pill -->
-            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-2 text-[11px] text-slate-300">
-              <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5"></i>
-              <div class="space-y-0.5">
-                <span class="font-bold text-white block">คำแนะนำในการเลือก:</span>
-                <span class="text-slate-400 block">
-                  • <strong>Cloudinary:</strong> แนะนำอันดับ 1 ภาพ QR คมชัด สแกนติดง่ายที่สุด โหลดไวมาก<br>
-                  • <strong>Catbox:</strong> เหมาะสำหรับบันทึกถาวรตลอดกาล ไม่ต้องกังวลเรื่องโควต้าหรือวันหมดอายุ
-                </span>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center pt-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
               <div>
-                <span class="text-[11px] font-bold text-slate-300 block mb-1">1. เลือกไฟล์ภาพเพื่ออัปโหลดขึ้นคลาวด์ที่เลือก:</span>
+                <label class="block text-[11px] font-bold text-slate-400 mb-1">1. อัปโหลดภาพ QR จากเครื่อง:</label>
                 <input type="file" id="campQrFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campQrPreviewImg', 'campQrImageInput')"
                   class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-500/20 file:text-orange-300 hover:file:bg-orange-500/30 cursor-pointer">
               </div>
               <div>
-                <span class="text-[11px] font-bold text-slate-300 block mb-1">2. หรือ วางลิงก์รูปภาพโดยตรง (Direct URL):</span>
-                <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="https://res.cloudinary.com/... หรือ https://..."
-                  class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
+                <label class="block text-[11px] font-bold text-slate-400 mb-1">2. หรือวาง Direct URL:</label>
+                <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="https://..."
+                  class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
               </div>
             </div>
-            <!-- Live QR Preview -->
+
             <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
               <div class="w-14 h-14 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md">
                 <img id="campQrPreviewImg" src="qr_payment.png" alt="QR Preview" class="w-full h-full object-contain">
               </div>
-              <div class="text-[11px] text-slate-400 space-y-0.5">
-                <span class="font-bold text-slate-300 block">พรีวิว QR Code ที่ นศ. จะเห็น</span>
-                <span>ภาพจะถูกปรับขนาดและบีบอัดให้อัตโนมัติ เพื่อให้สแกนติดง่ายที่สุด</span>
-              </div>
+              <span class="text-[11px] text-slate-400">พรีวิว QR Code ที่เพื่อนนักศึกษาจะเห็นในหน้าชำระเงิน</span>
             </div>
           </div>
+        </div>
 
-          <!-- Dedicated Campaign Background & Illustration Image Section -->
-          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
-              <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-                <i data-lucide="image" class="w-4 h-4 text-sky-400"></i>
-                <span>รูปภาพประกอบ / แบนเนอร์เสื้อสาขา (Illustration Banner)</span>
+        <!-- ================= TAB 3: SHIRT & MERCH SETTINGS (OPTIONAL) ================= -->
+        <div id="viewCampTabShirt" class="hidden space-y-3.5">
+          <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-slate-200 font-bold">
+                <input type="checkbox" id="campIsShirtCheckbox" onchange="toggleShirtConfigFields(this.checked)" class="rounded accent-orange-500 w-4 h-4">
+                <span>เปิดใช้งานตัวเลือกไซส์เสื้อ / สินค้าสาขา</span>
               </label>
-              <span class="text-[10px] text-sky-400 bg-sky-950/80 border border-sky-800 px-2 py-0.5 rounded-full font-bold">
-                แสดงเด่นหน้าเว็บ
-              </span>
+              <span class="text-[10px] text-slate-500">เปิดเฉพาะรายการที่เป็นการสั่งเสื้อ</span>
             </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
-              <div>
-                <span class="text-[11px] font-bold text-slate-300 block mb-1">1. อัปโหลดภาพประกอบ / เสื้อสาขา:</span>
-                <input type="file" id="campBannerFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campBannerPreviewImg', 'campBannerImageInput')"
-                  class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-500/20 file:text-sky-300 hover:file:bg-sky-500/30 cursor-pointer">
-              </div>
-              <div>
-                <span class="text-[11px] font-bold text-slate-300 block mb-1">2. หรือ วางลิงก์รูปภาพประกอบ (Direct URL):</span>
-                <input type="text" id="campBannerImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campBannerPreviewImg')" placeholder="https://images.unsplash.com/... หรือ ลิงก์รูปเสื้อ"
-                  class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-sky-500">
-              </div>
-            </div>
-
-            <!-- Banner Preview -->
-            <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
-              <div class="w-20 h-14 rounded-xl bg-slate-950 p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
-                <img id="campBannerPreviewImg" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80" alt="Banner Preview" class="w-full h-full object-cover rounded-lg">
-              </div>
-              <div class="text-[11px] text-slate-400 space-y-0.5">
-                <span class="font-bold text-slate-300 block">พรีวิวภาพประกอบเสื้อสาขา / ภาพกิจกรรม</span>
-                <span>จะแสดงเป็นการ์ดโชว์ดีไซน์เสื้อ หรือแบนเนอร์ด้านบนให้เพื่อนๆ เห็นทันที</span>
-              </div>
-            </div>
+            <p class="text-[11px] text-slate-400">
+              หากเปิดใช้งาน หน้ารับชำระเงินจะแสดงส่วนเลือกไซส์เสื้อ (S, M, L, XL, 2XL ฯลฯ) และการ์ดแสดงดีไซน์เสื้อให้อัตโนมัติ หากไม่ใช่รายการสั่งเสื้อให้ปิดส่วนนี้ไว้
+            </p>
           </div>
 
-          <!-- Dedicated Campaign Background Texture/Wallpaper Section -->
-          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
-              <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-                <i data-lucide="palette" class="w-4 h-4 text-purple-400"></i>
-                <span>ภาพพื้นหลังหน้าเว็บ (Background Wallpaper / Texture)</span>
+          <div id="shirtFieldsContainer" class="hidden space-y-3">
+            <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+              <span class="font-bold text-sky-400 block text-xs">รูปภาพประกอบดีไซน์เสื้อ (Illustration Banner)</span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-400 mb-1">อัปโหลดรูปเสื้อ:</label>
+                  <input type="file" id="campBannerFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campBannerPreviewImg', 'campBannerImageInput')"
+                    class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-500/20 file:text-sky-300 hover:file:bg-sky-500/30 cursor-pointer">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-400 mb-1">หรือวางลิงก์รูปภาพตรง:</label>
+                  <input type="text" id="campBannerImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campBannerPreviewImg')" placeholder="https://..."
+                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-sky-500">
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
+                <div class="w-16 h-12 rounded-xl bg-slate-950 p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
+                  <img id="campBannerPreviewImg" src="" alt="Banner Preview" class="w-full h-full object-cover rounded-lg">
+                </div>
+                <span class="text-[11px] text-slate-400">พรีวิวรูปภาพเสื้อที่จะแสดงให้นักศึกษาเห็น</span>
+              </div>
+            </div>
+
+            <!-- Optional Custom Background Wallpaper -->
+            <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+              <span class="font-bold text-purple-400 block text-xs">ภาพพื้นหลังเฉพาะกิจกรรม (ไม่บังคับ)</span>
+              <input type="text" id="campBgImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campBgPreviewImg')" placeholder="วาง Direct URL ภาพพื้นหลัง (หรือเว้นว่างเพื่อใช้ดีไซน์มาตรฐาน)"
+                class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-purple-500">
+              <img id="campBgPreviewImg" src="logo.png" class="hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= TAB 4: SLIP STORAGE SETTINGS ================= -->
+        <div id="viewCampTabStorage" class="hidden space-y-3.5">
+          <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="font-bold text-slate-200 text-xs">บริการคลาวด์สำหรับจัดเก็บไฟล์สลิป</span>
+              <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800">Smart Failover</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="campSlipProvidersGrid">
+              <!-- 1. Cloudinary -->
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+                <input type="checkbox" name="campSlipProviderOption" value="cloudinary" checked class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+                <div>
+                  <span class="font-bold text-white text-xs block">⚡ Cloudinary CDN</span>
+                  <span class="text-[10px] text-slate-400 block">โหลดเร็ว สลิปคมชัด ตรวจสอบง่าย</span>
+                </div>
               </label>
-              <span class="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">
-                ไม่บังคับ (Optional)
-              </span>
+
+              <!-- 2. Catbox.moe -->
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+                <input type="checkbox" name="campSlipProviderOption" value="catbox" checked class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+                <div>
+                  <span class="font-bold text-white text-xs block">🚀 Catbox.moe</span>
+                  <span class="text-[10px] text-slate-400 block">ฟรีถาวร ไม่จำกัดจำนวนสลิป</span>
+                </div>
+              </label>
+
+              <!-- 3. ImgBB -->
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+                <input type="checkbox" name="campSlipProviderOption" value="imgbb" class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+                <div>
+                  <span class="font-bold text-white text-xs block">🖼️ ImgBB API</span>
+                  <span class="text-[10px] text-slate-400 block">ฟรี 32MB/รูป ลิงก์ตรงแสดงสลิปทันที</span>
+                </div>
+              </label>
+
+              <!-- 4. FreeImage -->
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+                <input type="checkbox" name="campSlipProviderOption" value="freeimage" class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+                <div>
+                  <span class="font-bold text-white text-xs block">📦 FreeImage.host</span>
+                  <span class="text-[10px] text-slate-400 block">สำรองฉุกเฉิน มั่นใจสลิปไม่หาย</span>
+                </div>
+              </label>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
-              <div>
-                <span class="text-[11px] font-bold text-slate-300 block mb-1">1. อัปโหลดภาพพื้นหลังเว็บ:</span>
-                <input type="file" id="campBgFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campBgPreviewImg', 'campBgImageInput')"
-                  class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-500/20 file:text-purple-300 hover:file:bg-purple-500/30 cursor-pointer">
-              </div>
-              <div>
-                <span class="text-[11px] font-bold text-slate-300 block mb-1">2. หรือ วางลิงก์ภาพพื้นหลัง (Direct URL):</span>
-                <input type="text" id="campBgImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campBgPreviewImg')" placeholder="https://... (เว้นว่างไว้เพื่อใช้พื้นหลัง Mesh มาตรฐาน)"
-                  class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-purple-500">
-              </div>
-            </div>
-
-            <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
-              <div class="w-20 h-14 rounded-xl bg-slate-950 p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
-                <img id="campBgPreviewImg" src="logo.png" alt="BG Preview" class="w-full h-full object-cover rounded-lg opacity-70">
-              </div>
-              <div class="text-[11px] text-slate-400 space-y-0.5">
-                <span class="font-bold text-slate-300 block">พรีวิวภาพพื้นหลังของหน้านี้</span>
-                <span>ระบบจะปรับความโปร่งแสงให้อัตโนมัติเพื่อให้ตัวหนังสือยังอ่านง่าย คมชัด และสวยงามหรูหรา</span>
-              </div>
-            </div>
+            <p class="text-[11px] text-slate-400">
+              💡 <strong>Smart Failover:</strong> ระบบจะใช้ตัวแรกที่เปิดไว้ หากติดปัญหาหรือโควตาเต็ม ระบบจะสลับไปบันทึกยังคลาวด์ถัดไปให้อัตโนมัติ
+            </p>
           </div>
         </div>
 
-        <!-- Dedicated Slip Storage Provider for this Campaign (Multi-Select Supported) -->
-        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
-            <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-              <i data-lucide="receipt" class="w-4 h-4 text-orange-400"></i>
-              <span>เลือกคลาวด์สำหรับจัดเก็บไฟล์สลิป (เลือกได้มากกว่า 1 ตัว):</span>
-            </label>
-            <span class="text-[10px] text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">
-              Auto Failover ลำดับสำรอง
-            </span>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1" id="campSlipProvidersGrid">
-            <!-- 1. Cloudinary -->
-            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
-              <input type="checkbox" name="campSlipProviderOption" value="cloudinary" checked class="mt-0.5 rounded accent-orange-500 w-4 h-4">
-              <div class="space-y-0.5">
-                <span class="font-bold text-white text-xs block flex items-center gap-1.5">
-                  <span>⚡ Cloudinary CDN</span>
-                  <span class="px-1.5 py-0.2 rounded text-[9px] bg-cyan-950 text-cyan-300 border border-cyan-800">แนะนำ</span>
-                </span>
-                <span class="text-[11px] text-slate-400 block">สลิปโหลดเร็วสุดในไทย ตรวจสอบง่าย จัดการลบไฟล์ได้</span>
-              </div>
-            </label>
-
-            <!-- 2. Catbox.moe -->
-            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
-              <input type="checkbox" name="campSlipProviderOption" value="catbox" checked class="mt-0.5 rounded accent-orange-500 w-4 h-4">
-              <div class="space-y-0.5">
-                <span class="font-bold text-white text-xs block flex items-center gap-1.5">
-                  <span>🚀 Catbox.moe</span>
-                  <span class="px-1.5 py-0.2 rounded text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-800">ฟรีถาวร</span>
-                </span>
-                <span class="text-[11px] text-slate-400 block">ฟรีตลอดกาล ไม่มีวันหมดอายุ ไม่จำกัดจำนวนสลิป</span>
-              </div>
-            </label>
-
-            <!-- 3. ImgBB -->
-            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
-              <input type="checkbox" name="campSlipProviderOption" value="imgbb" class="mt-0.5 rounded accent-orange-500 w-4 h-4">
-              <div class="space-y-0.5">
-                <span class="font-bold text-white text-xs block">🖼️ ImgBB API</span>
-                <span class="text-[11px] text-slate-400 block">ฟรี 32MB/รูป ลิงก์ตรงโหลดเร็วแสดงสลิปทันที</span>
-              </div>
-            </label>
-
-            <!-- 4. FreeImage -->
-            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
-              <input type="checkbox" name="campSlipProviderOption" value="freeimage" class="mt-0.5 rounded accent-orange-500 w-4 h-4">
-              <div class="space-y-0.5">
-                <span class="font-bold text-white text-xs block">📦 FreeImage.host</span>
-                <span class="text-[11px] text-slate-400 block">พื้นที่สำรองฉุกเฉิน มั่นใจว่าสลิปไม่หลุดหาย</span>
-              </div>
-            </label>
-          </div>
-
-          <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-300 leading-relaxed flex items-start gap-2">
-            <i data-lucide="info" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5"></i>
-            <span><strong>ระบบสลับตัวสำรอง (Smart Failover):</strong> หากเลือกมากกว่า 1 ตัว ระบบจะบันทึกสลิปไปยังตัวแรกที่เปิดไว้ หากคลาวด์ตัวแรกติดปัญหาขัดข้อง ระบบจะสลับไปบันทึกตัวถัดไปให้อัตโนมัติทันที พร้อมแสดงป้ายบอกว่าสลิปนี้ถูกเก็บไว้ที่คลาวด์ตัวใด</span>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between pt-1">
-          <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-slate-300 font-bold">
-            <input type="checkbox" id="campStatusOpenInput" checked class="rounded accent-orange-500 w-4 h-4">
-            <span>เปิดรับชำระเงินทันที</span>
-          </label>
-        </div>
-
+        <!-- Footer Actions -->
         <div class="flex items-center justify-between gap-2 pt-3 border-t border-slate-800">
           <button type="button" id="btnDeleteCampaignInModal" onclick="confirmDeleteCurrentCampaign()"
             class="hidden px-3.5 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">

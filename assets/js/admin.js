@@ -621,8 +621,50 @@ function updateQrPreviewFromUrl(url, previewImgId) {
   preview.src = url.trim();
 }
 
+// Modal Tabs Management
+function switchCampaignModalTab(tabKey) {
+  const tabs = ['basic', 'bank', 'shirt', 'storage'];
+  const tabBtnMap = {
+    basic: 'tabCampBasic',
+    bank: 'tabCampBank',
+    shirt: 'tabCampShirt',
+    storage: 'tabCampStorage'
+  };
+  const tabViewMap = {
+    basic: 'viewCampTabBasic',
+    bank: 'viewCampTabBank',
+    shirt: 'viewCampTabShirt',
+    storage: 'viewCampTabStorage'
+  };
+
+  tabs.forEach(t => {
+    const btn = document.getElementById(tabBtnMap[t]);
+    const view = document.getElementById(tabViewMap[t]);
+    if (t === tabKey) {
+      if (btn) btn.className = 'px-3 py-1.5 rounded-xl bg-orange-600 text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap';
+      if (view) view.classList.remove('hidden');
+    } else {
+      if (btn) btn.className = 'px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap';
+      if (view) view.classList.add('hidden');
+    }
+  });
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function toggleShirtConfigFields(enabled) {
+  const container = document.getElementById('shirtFieldsContainer');
+  if (container) {
+    if (enabled) {
+      container.classList.remove('hidden');
+    } else {
+      container.classList.add('hidden');
+    }
+  }
+}
+
 function openCreateCampaignModal() {
   clearCampaignFormError();
+  switchCampaignModalTab('basic');
   const form = document.getElementById('createCampaignForm');
   if (form) form.reset();
   
@@ -640,13 +682,18 @@ function openCreateCampaignModal() {
     `;
   }
 
+  // Reset Shirt checkbox & container to hidden by default for general campaigns
+  const shirtCb = document.getElementById('campIsShirtCheckbox');
+  if (shirtCb) shirtCb.checked = false;
+  toggleShirtConfigFields(false);
+
   const qrPreview = document.getElementById('campQrPreviewImg');
   if (qrPreview) qrPreview.src = 'qr_payment.png';
   const qrInput = document.getElementById('campQrImageInput');
   if (qrInput) qrInput.value = 'qr_payment.png';
 
   const bannerPreview = document.getElementById('campBannerPreviewImg');
-  if (bannerPreview) bannerPreview.src = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80';
+  if (bannerPreview) bannerPreview.src = '';
   const bannerInput = document.getElementById('campBannerImageInput');
   if (bannerInput) bannerInput.value = '';
 
@@ -675,6 +722,7 @@ function openCreateCampaignModal() {
 
 function openEditCampaignModal(campId) {
   clearCampaignFormError();
+  switchCampaignModalTab('basic');
   if (!window.ComedCampaignManager) return;
   const camp = window.ComedCampaignManager.getCampaignById(campId);
   if (!camp) return;
@@ -726,11 +774,22 @@ function openEditCampaignModal(campId) {
   const qrPreview = document.getElementById('campQrPreviewImg');
   if (qrPreview) qrPreview.src = camp.qrImage || 'qr_payment.png';
 
+  // Determine if this is a shirt campaign
+  const isShirt = !!(
+    (Array.isArray(camp.shirtSizes) && camp.shirtSizes.length > 0) ||
+    (camp.bannerImage && camp.bannerImage.trim()) ||
+    camp.id.toLowerCase().includes('shirt') ||
+    (camp.title && camp.title.toLowerCase().includes('เสื้อ'))
+  );
+  const shirtCb = document.getElementById('campIsShirtCheckbox');
+  if (shirtCb) shirtCb.checked = isShirt;
+  toggleShirtConfigFields(isShirt);
+
   const bannerInput = document.getElementById('campBannerImageInput');
   if (bannerInput) bannerInput.value = camp.bannerImage || '';
 
   const bannerPreview = document.getElementById('campBannerPreviewImg');
-  if (bannerPreview) bannerPreview.src = camp.bannerImage || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80';
+  if (bannerPreview) bannerPreview.src = camp.bannerImage || '';
 
   const bgInput = document.getElementById('campBgImageInput');
   if (bgInput) bgInput.value = camp.bgImage || '';
@@ -968,11 +1027,10 @@ async function handleSaveCampaignSubmit(e) {
   
   const qrInputVal = document.getElementById('campQrImageInput')?.value.trim();
   const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || 'qr_payment.png';
-  const qrImage = qrInputVal || qrPreviewSrc;
-
+  const isShirtChecked = !!document.getElementById('campIsShirtCheckbox')?.checked;
   const bannerInputVal = document.getElementById('campBannerImageInput')?.value.trim();
   const bannerPreviewSrc = document.getElementById('campBannerPreviewImg')?.src || '';
-  const bannerImage = bannerInputVal || bannerPreviewSrc;
+  const bannerImage = isShirtChecked ? (bannerInputVal || bannerPreviewSrc) : '';
 
   const bgInputVal = document.getElementById('campBgImageInput')?.value.trim();
   const bgPreviewSrc = document.getElementById('campBgPreviewImg')?.src || '';
@@ -998,6 +1056,7 @@ async function handleSaveCampaignSubmit(e) {
     accountName: accountName,
     qrImage: qrImage,
     bannerImage: bannerImage,
+    shirtSizes: isShirtChecked ? (existingCampaign?.shirtSizes || ['S', 'M', 'L', 'XL', '2XL', '3XL']) : [],
     bgImage: bgImage,
     slipProvider: slipProvider,
     slipProviders: slipProviders,
