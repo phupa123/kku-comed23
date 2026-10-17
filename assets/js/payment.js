@@ -267,10 +267,26 @@ window.scrollToCampaignSelector = function(event) {
   }
 };
 
-// Smooth Page Transition Swapper for Campaigns
+// Smooth Page Transition Swapper for Campaigns & Tab Switching
 window.switchCampaignWithAnimation = function(targetCampId, event, extraTab = '') {
   if (event) event.preventDefault();
-  if (!targetCampId || targetCampId.toLowerCase() === currentCampaign.id.toLowerCase()) return;
+  if (!targetCampId) return;
+
+  const isSameCampaign = (targetCampId.toLowerCase() === currentCampaign.id.toLowerCase());
+  
+  if (isSameCampaign) {
+    // If clicking on the currently selected campaign's buttons
+    if (extraTab.includes('tab=status')) {
+      switchMainTab('status');
+      const statusEl = document.getElementById('tabContentStatus');
+      if (statusEl) statusEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (extraTab.includes('auto=pay') || extraTab === '') {
+      switchMainTab('payment');
+      const payForm = document.getElementById('searchContainer') || document.getElementById('smartSearchInput') || document.getElementById('bankQrCardSection');
+      if (payForm) payForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
 
   const main = document.querySelector('main');
   const targetUrl = `payment.html?camp=${encodeURIComponent(targetCampId)}${extraTab ? `&${extraTab}` : ''}`;
@@ -2205,6 +2221,16 @@ function switchMainTab(tab) {
       navStatus.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 cursor-pointer';
     }
 
+    // Hero/Section Tab Bar Buttons
+    const campBtnPay = document.getElementById('campaignTabBtnPayment');
+    const campBtnStat = document.getElementById('campaignTabBtnStatus');
+    if (campBtnPay) {
+      campBtnPay.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-black transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 cursor-pointer active:scale-95';
+    }
+    if (campBtnStat) {
+      campBtnStat.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-700 hover:text-slate-900 hover:bg-white/60 cursor-pointer active:scale-95';
+    }
+
     if (mobPayment) {
       mobPayment.className = 'flex-1 py-1.5 px-1 rounded-2xl text-orange-400 bg-white/10 font-black text-[11px] transition-all flex flex-col items-center gap-1';
     }
@@ -2234,6 +2260,16 @@ function switchMainTab(tab) {
     }
     if (navPayment) {
       navPayment.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 cursor-pointer';
+    }
+
+    // Hero/Section Tab Bar Buttons
+    const campBtnPay = document.getElementById('campaignTabBtnPayment');
+    const campBtnStat = document.getElementById('campaignTabBtnStatus');
+    if (campBtnPay) {
+      campBtnPay.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-700 hover:text-slate-900 hover:bg-white/60 cursor-pointer active:scale-95';
+    }
+    if (campBtnStat) {
+      campBtnStat.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-black transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 cursor-pointer active:scale-95';
     }
 
     if (mobPayment) {
