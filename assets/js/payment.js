@@ -459,13 +459,24 @@ async function renderCurrentCampaignQrCode(amountOverride) {
   if (!c) return;
 
   const bQr = document.getElementById('bankQrImage');
+  const spinner = document.getElementById('qrLoadingSpinner');
   const amtToLock = (amountOverride !== undefined && amountOverride !== null) ? Number(amountOverride) : Number(c.amount || 190);
   currentEffectiveAmount = amtToLock;
+
+  // Helper: show image, hide spinner
+  function showQrImg(src) {
+    if (bQr) { bQr.src = src; bQr.classList.remove('hidden'); }
+    if (spinner) spinner.classList.add('hidden');
+  }
+
+  // Show spinner while loading
+  if (bQr) bQr.classList.add('hidden');
+  if (spinner) spinner.classList.remove('hidden');
 
   // If campaign specifies qrType === 'custom' and has a custom image, use that image
   if (c.qrType === 'custom' && c.qrImage && c.qrImage.trim()) {
     currentGeneratedDynamicQrDataUrl = c.qrImage;
-    if (bQr) bQr.src = c.qrImage;
+    showQrImg(c.qrImage);
     return;
   }
 
@@ -481,7 +492,7 @@ async function renderCurrentCampaignQrCode(amountOverride) {
         refCode: c.code ? `KKU${c.code}69` : '004999250006870'
       });
       currentGeneratedDynamicQrDataUrl = cardDataUrl;
-      if (bQr) bQr.src = cardDataUrl;
+      showQrImg(cardDataUrl);
       return;
     } catch(err) {
       console.warn("ThaiQrEngine slip generation failed, falling back to static QR image:", err);
@@ -489,7 +500,13 @@ async function renderCurrentCampaignQrCode(amountOverride) {
   }
 
   // Fallback to static qrImage or default
-  if (bQr && c.qrImage) bQr.src = c.qrImage;
+  if (c.qrImage) {
+    currentGeneratedDynamicQrDataUrl = c.qrImage;
+    showQrImg(c.qrImage);
+  } else {
+    // Last resort — show qr_payment.png
+    showQrImg('qr_payment.png');
+  }
 }
 
 function renderShirtShowcaseUI(campaign) {

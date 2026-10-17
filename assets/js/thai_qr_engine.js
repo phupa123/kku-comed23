@@ -95,25 +95,28 @@
 
     const payload = generatePromptPayPayload(target, amount);
 
-    // 1. Generate QR Code – render into hidden off-screen div, grab img element
+    // 1. Fetch QR Code image from external API (ส่ง EMVCo payload → รับรูป QR PNG กลับ)
+    //    api.qrserver.com รองรับ Thai QR / PromptPay payload โดยตรง — ไม่ต้องใช้ QRCode.js
     const qrImgEl = await new Promise(resolve => {
-      if (typeof QRCode === 'undefined') { resolve(null); return; }
-      const holder = document.createElement('div');
-      holder.style.cssText = 'position:fixed;left:-9999px;top:-9999px;visibility:hidden;';
-      document.body.appendChild(holder);
-      new QRCode(holder, {
-        text: payload,
-        width: 500,
-        height: 500,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-      setTimeout(() => {
-        const el = holder.querySelector('img') || holder.querySelector('canvas');
-        document.body.removeChild(holder);
-        resolve(el || null);
-      }, 250);
+      const url = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&ecc=M&format=png&data=${encodeURIComponent(payload)}`;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = () => {
+        // Fallback: ลอง QRCode.js ถ้า API ไม่ตอบ
+        if (typeof QRCode === 'undefined') { resolve(null); return; }
+        const holder = document.createElement('div');
+        holder.style.cssText = 'position:fixed;left:-9999px;top:-9999px;visibility:hidden;';
+        document.body.appendChild(holder);
+        new QRCode(holder, { text: payload, width: 500, height: 500,
+          colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+        setTimeout(() => {
+          const el = holder.querySelector('img') || holder.querySelector('canvas');
+          document.body.removeChild(holder);
+          resolve(el || null);
+        }, 300);
+      };
+      img.src = url;
     });
 
     // 2. Prepare Main Output Canvas (755 x 1060)
