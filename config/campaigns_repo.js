@@ -23,6 +23,8 @@ const DEFAULT_COMED_CAMPAIGNS = [
     bankName: "ธนาคารกสิกรไทย (KPlus)",
     accountNumber: "236-2-47817-3",
     accountName: "น.ส. พิชามญธุ์ สามสี",
+    qrType: "auto", // 'auto' (dynamic locked PromptPay slip card) | 'custom' (static image)
+    promptpayTarget: "2362478173",
     qrImage: "qr_payment.png",
     bgImage: "", // URL ภาพพื้นหลังแคมเปญ
     bannerImage: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80", // ภาพประกอบหลัก/เสื้อสาขา
@@ -62,6 +64,8 @@ const DEFAULT_COMED_CAMPAIGNS = [
     bankName: "ธนาคารกสิกรไทย (KPlus)",
     accountNumber: "236-2-47817-3",
     accountName: "น.ส. พิชามญธุ์ สามสี",
+    qrType: "auto",
+    promptpayTarget: "2362478173",
     qrImage: "qr_payment.png",
     bgImage: "",
     bannerImage: "",

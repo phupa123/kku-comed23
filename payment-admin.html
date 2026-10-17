@@ -60,6 +60,7 @@
   <link rel="stylesheet" href="assets/css/admin.css">
   <!-- QRCode Generator & Scanner Suite -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/js/thai_qr_engine.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="assets/js/qr_suite.js"></script>
   <script src="config/campaigns_repo.js?v=20261017_1440"></script>
@@ -877,41 +878,83 @@
             </div>
           </div>
 
-          <!-- Dedicated QR Upload Box -->
-          <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+          <!-- Dedicated QR Option & Upload Box -->
+          <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-4">
             <div class="flex items-center justify-between">
               <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
                 <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
-                <span>รูปภาพ QR Code พร้อมเพย์</span>
+                <span>รูปแบบ QR Code รับชำระเงิน</span>
               </span>
-              <div class="flex items-center gap-1 text-[11px]">
-                <span class="text-slate-500">บันทึกที่:</span>
-                <select id="campQrProviderSelect" class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-[11px] outline-none">
-                  <option value="cloudinary">Cloudinary</option>
-                  <option value="catbox">Catbox</option>
-                  <option value="imgbb">ImgBB</option>
-                </select>
+              <span class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">รองรับ PromptPay EMVCo</span>
+            </div>
+
+            <!-- Choice Selector: Auto PromptPay vs Custom Image -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <label class="p-3 rounded-xl border border-slate-700 hover:border-orange-500/60 bg-slate-900/80 cursor-pointer flex items-start gap-2.5 transition">
+                <input type="radio" name="campQrTypeChoice" id="campQrTypeAuto" value="auto" checked onchange="toggleQrModeFields('auto')" class="mt-0.5 accent-orange-500">
+                <div class="space-y-0.5">
+                  <span class="text-xs font-black text-white block">1. สร้าง QR PromptPay ล็อคยอดอัตโนมัติ (แนะนำ)</span>
+                  <p class="text-[10px] text-slate-400 leading-relaxed">
+                    ระบบจะสร้างภาพสลิปการ์ดมาตรฐาน Thai QR พร้อมเพย์ เมื่อกำหนดจำนวนเงินใหม่ QR จะล็อคยอดเงินตามนั้นทันที
+                  </p>
+                </div>
+              </label>
+
+              <label class="p-3 rounded-xl border border-slate-700 hover:border-orange-500/60 bg-slate-900/80 cursor-pointer flex items-start gap-2.5 transition">
+                <input type="radio" name="campQrTypeChoice" id="campQrTypeCustom" value="custom" onchange="toggleQrModeFields('custom')" class="mt-0.5 accent-orange-500">
+                <div class="space-y-0.5">
+                  <span class="text-xs font-black text-white block">2. ใช้วิธีอัปโหลดรูปภาพ QR Code เอง</span>
+                  <p class="text-[10px] text-slate-400 leading-relaxed">
+                    เลือกใช้รูปภาพ QR Code ที่คุณอัปโหลดเองจากในเครื่อง หรือใส่ลิงก์ภาพ
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Fields for Custom Image Mode -->
+            <div id="campQrCustomUploadFields" class="hidden space-y-3 pt-2 border-t border-slate-800">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-300">ตั้งค่ารูปภาพ QR Code ที่อัปโหลดเอง</span>
+                <div class="flex items-center gap-1 text-[11px]">
+                  <span class="text-slate-500">บันทึกที่:</span>
+                  <select id="campQrProviderSelect" class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-[11px] outline-none">
+                    <option value="cloudinary">Cloudinary</option>
+                    <option value="catbox">Catbox</option>
+                    <option value="imgbb">ImgBB</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-400 mb-1">1. อัปโหลดภาพ QR จากเครื่อง:</label>
+                  <input type="file" id="campQrFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campQrPreviewImg', 'campQrImageInput')"
+                    class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-500/20 file:text-orange-300 hover:file:bg-orange-500/30 cursor-pointer">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-400 mb-1">2. หรือวาง Direct URL:</label>
+                  <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="https://..."
+                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
+                </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1">1. อัปโหลดภาพ QR จากเครื่อง:</label>
-                <input type="file" id="campQrFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campQrPreviewImg', 'campQrImageInput')"
-                  class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-500/20 file:text-orange-300 hover:file:bg-orange-500/30 cursor-pointer">
+            <!-- Preview QR Section -->
+            <div class="flex items-center justify-between gap-3 pt-3 border-t border-slate-800">
+              <div class="flex items-center gap-3">
+                <div class="w-16 h-20 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
+                  <img id="campQrPreviewImg" src="qr_payment.png" alt="QR Preview" class="w-full h-full object-contain">
+                </div>
+                <div>
+                  <span id="campQrPreviewNotice" class="text-xs font-bold text-emerald-400 block">กำลังใช้: ระบบสร้าง QR PromptPay ล็อคยอดอัตโนมัติ</span>
+                  <span class="text-[11px] text-slate-400 block mt-0.5">ภาพพรีวิวที่จะแสดงให้เพื่อนนักศึกษาเห็นและสแกนชำระเงิน</span>
+                </div>
               </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1">2. หรือวาง Direct URL:</label>
-                <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="https://..."
-                  class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
-              </div>
-            </div>
-
-            <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
-              <div class="w-14 h-14 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md">
-                <img id="campQrPreviewImg" src="qr_payment.png" alt="QR Preview" class="w-full h-full object-contain">
-              </div>
-              <span class="text-[11px] text-slate-400">พรีวิว QR Code ที่เพื่อนนักศึกษาจะเห็นในหน้าชำระเงิน</span>
+              <button type="button" onclick="previewAdminGeneratedQr()"
+                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-orange-400"></i>
+                <span>รีเฟรชพรีวิว</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1322,12 +1365,12 @@
   </div>
 
   <!-- Load Student Database -->
-  <script src="students_data.js?v=20261017_1435"></script>
+  <script src="students_data.js?v=20261017_1510"></script>
   <!-- Multi-Cloud File Uploader (Cloudinary, ImgBB, FreeImage, Catbox) -->
-  <script src="assets/js/multi_uploader.js?v=20261017_1435"></script>
+  <script src="assets/js/multi_uploader.js?v=20261017_1510"></script>
   <!-- Slip Verification Engine (SlipOK / Multi-Provider / Thai Timezone) -->
-  <script src="assets/js/slip_verifier.js?v=20261017_1435"></script>
+  <script src="assets/js/slip_verifier.js?v=20261017_1510"></script>
   <!-- Admin Dashboard Logic -->
-  <script src="assets/js/admin.js?v=20261017_1435"></script>
+  <script src="assets/js/admin.js?v=20261017_1510"></script>
 </body>
 </html>

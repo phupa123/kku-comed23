@@ -70,6 +70,10 @@
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+  <!-- QRCode Generator Lib & Thai QR Payment Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/js/thai_qr_engine.js"></script>
+
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
@@ -932,6 +936,15 @@
                 <div class="mt-3 text-xs text-slate-700 font-medium">
                   ยอดโอนตรงตามจำนวน: <strong id="bankAmountHighlight" class="text-emerald-700 text-base font-black">฿190 บาท</strong>
                 </div>
+
+                <!-- Direct Download QR Button -->
+                <div class="mt-3 w-full flex items-center justify-center gap-2">
+                  <button type="button" onclick="downloadCurrentQrImage()"
+                    class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>บันทึกรูป QR Code ลงเครื่อง</span>
+                  </button>
+                </div>
               </div>
 
               <!-- Bank & Transfer Details -->
@@ -1353,24 +1366,24 @@
 
       <form onsubmit="handleIssueSubmit(event)" class="space-y-4 text-xs sm:text-sm">
         <div>
-          <label class="block font-bold text-slate-700 mb-1">รหัสนักศึกษา หรือ ชื่อของคุณ <span
-              class="text-rose-500">*จำเป็น</span></label>
+          <label class="block font-black text-slate-800 mb-1">รหัสนักศึกษา หรือ ชื่อของคุณ <span
+              class="text-rose-600 font-extrabold">*จำเป็น</span></label>
           <input type="text" id="issueStudentInput" required placeholder="เช่น 693050XXX-X หรือ ชื่อเล่นของคุณ"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-orange-500 outline-none">
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 placeholder:text-slate-400 font-bold focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">ช่องทางติดต่อกลับ (เบอร์โทร, IG หรือ Line ID) <span
-              class="text-rose-500">*จำเป็น</span></label>
+          <label class="block font-black text-slate-800 mb-1">ช่องทางติดต่อกลับ (เบอร์โทร, IG หรือ Line ID) <span
+              class="text-rose-600 font-extrabold">*จำเป็น</span></label>
           <input type="text" id="issueContactInput" required placeholder="เช่น IG: my_ig หรือ 081-234-5678"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-orange-500 outline-none">
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 placeholder:text-slate-400 font-bold focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">หัวข้อปัญหา <span
-              class="text-rose-500">*จำเป็น</span></label>
+          <label class="block font-black text-slate-800 mb-1">หัวข้อปัญหา <span
+              class="text-rose-600 font-extrabold">*จำเป็น</span></label>
           <select id="issueCategorySelect"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-orange-500 outline-none bg-white font-medium">
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 font-bold focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
             <option value="โอนเงินแล้วแต่สถานะไม่ขึ้น">โอนเงินแล้วแต่สถานะไม่ขึ้น</option>
             <option value="แนบสลิปผิด / ต้องการแก้ไขสลิป">แนบสลิปผิด / ต้องการแก้ไขสลิป</option>
             <option value="ชื่อหรือข้อมูลส่วนตัวไม่ถูกต้อง">ชื่อหรือข้อมูลส่วนตัวไม่ถูกต้อง</option>
@@ -1380,29 +1393,29 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">รายละเอียดปัญหา <span
-              class="text-slate-400 font-normal text-xs">(ถ้ามี)</span></label>
+          <label class="block font-black text-slate-800 mb-1">รายละเอียดปัญหา <span
+              class="text-slate-500 font-bold text-xs">(ถ้ามี)</span></label>
           <textarea id="issueDetailInput" rows="3"
             placeholder="อธิบายปัญหาที่พบ เช่น โอนเงินเวลา 14:30 น. ยอด 190 บาท แต่สถานะยังไม่ขึ้น..."
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-orange-500 outline-none resize-none"></textarea>
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 placeholder:text-slate-400 font-medium focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none shadow-xs"></textarea>
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">ลิงก์หลักฐาน / Google Drive (ถ้ามี)</label>
+          <label class="block font-black text-slate-800 mb-1">ลิงก์หลักฐาน / Google Drive (ถ้ามี)</label>
           <input type="url" id="issueEvidenceUrlInput"
             placeholder="https://drive.google.com/... (โปรดเปิดสิทธิ์ Public)"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-orange-500 outline-none">
-          <span class="text-[11px] text-slate-400 mt-1 block">หากเป็นลิงก์ Google Drive โปรดเปิดสิทธิ์แชร์เป็น
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 placeholder:text-slate-400 font-mono text-xs focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
+          <span class="text-[11px] text-slate-600 font-medium mt-1 block">หากเป็นลิงก์ Google Drive โปรดเปิดสิทธิ์แชร์เป็น
             "ทุกคนที่มีลิงก์สามารถดูได้"</span>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2">
           <button type="button" onclick="closeIssueModal()"
-            class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition">
+            class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition cursor-pointer">
             ยกเลิก
           </button>
           <button type="button" onclick="openIssueConfirmModal()"
-            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black transition flex items-center gap-1.5 shadow-md shadow-orange-600/25">
+            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black transition flex items-center gap-1.5 shadow-md shadow-orange-600/25 cursor-pointer">
             <i data-lucide="send" class="w-4 h-4"></i>
             <span>ตรวจสอบข้อมูลและส่งปัญหา</span>
           </button>
@@ -1415,45 +1428,45 @@
   <div id="modalConfirmIssue"
     class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 transform transition-all">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 transform transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2.5">
           <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-sm">
             <i data-lucide="help-circle" class="w-5 h-5"></i>
           </div>
           <div>
             <h3 class="text-base sm:text-lg font-black text-slate-900">ตรวจสอบรายละเอียดปัญหา</h3>
-            <p class="text-xs text-slate-400">โปรดตรวจความถูกต้องก่อนยืนยันส่งข้อมูล</p>
+            <p class="text-xs text-slate-500 font-medium">โปรดตรวจความถูกต้องก่อนยืนยันส่งข้อมูล</p>
           </div>
         </div>
         <button onclick="closeIssueConfirmModal()"
-          class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition">
+          class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs sm:text-sm">
-        <div class="flex justify-between">
-          <span class="text-slate-500">ผู้แจ้ง:</span>
-          <span id="confirmIssueStudent" class="font-bold text-slate-900">-</span>
+      <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 text-xs sm:text-sm">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-600 font-bold">ผู้แจ้ง:</span>
+          <span id="confirmIssueStudent" class="font-black text-slate-900 text-sm">-</span>
         </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">ติดต่อกลับ:</span>
-          <span id="confirmIssueContact" class="font-bold text-sky-600">-</span>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-600 font-bold">ติดต่อกลับ:</span>
+          <span id="confirmIssueContact" class="font-black text-sky-700 text-sm">-</span>
         </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">หมวดหมู่:</span>
-          <span id="confirmIssueCategory" class="font-bold text-amber-700">-</span>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-600 font-bold">หมวดหมู่:</span>
+          <span id="confirmIssueCategory" class="font-black text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-lg border border-amber-300">-</span>
         </div>
-        <div class="border-t border-slate-200/80 pt-2 space-y-1">
-          <span class="text-slate-500 block">รายละเอียด:</span>
+        <div class="border-t border-slate-200 pt-2 space-y-1">
+          <span class="text-slate-600 font-bold block">รายละเอียด:</span>
           <p id="confirmIssueDetail"
-            class="text-slate-800 bg-white p-2.5 rounded-xl border border-slate-200 font-medium whitespace-pre-wrap">-
+            class="text-slate-900 bg-white p-3 rounded-xl border border-slate-300 font-semibold whitespace-pre-wrap leading-relaxed shadow-xs">-
           </p>
         </div>
-        <div id="confirmIssueEvidenceRow" class="border-t border-slate-200/80 pt-2 flex justify-between hidden">
-          <span class="text-slate-500">ลิงก์หลักฐาน:</span>
-          <span id="confirmIssueEvidence" class="font-mono text-sky-600 text-xs truncate max-w-[200px]">-</span>
+        <div id="confirmIssueEvidenceRow" class="border-t border-slate-200 pt-2 flex justify-between items-center hidden">
+          <span class="text-slate-600 font-bold">ลิงก์หลักฐาน:</span>
+          <span id="confirmIssueEvidence" class="font-mono font-bold text-sky-700 text-xs truncate max-w-[200px]">-</span>
         </div>
       </div>
 
@@ -1640,15 +1653,17 @@
 
 
   <!-- Load Student Database -->
-  <script src="students_data.js?v=20261017_1452"></script>
+  <script src="students_data.js?v=20261017_1510"></script>
   <!-- Multi-Cloud File Uploader (Cloudinary, ImgBB, FreeImage, Catbox) -->
-  <script src="assets/js/multi_uploader.js?v=20261017_1452"></script>
+  <script src="assets/js/multi_uploader.js?v=20261017_1510"></script>
   <!-- Slip Verification Engine (SlipOK / Multi-Provider / Thai Timezone) -->
-  <script src="assets/js/slip_verifier.js?v=20261017_1452"></script>
+  <script src="assets/js/slip_verifier.js?v=20261017_1510"></script>
   <!-- Real-Time Push Notification Engine -->
-  <script src="assets/js/notifications.js?v=20261017_1452"></script>
+  <script src="assets/js/notifications.js?v=20261017_1510"></script>
+  <!-- Thai QR Payment & PromptPay Slip Generator Engine -->
+  <script src="assets/js/thai_qr_engine.js?v=20261017_1510"></script>
   <!-- Application Logic -->
-  <script src="assets/js/payment.js?v=20261017_1452"></script>
+  <script src="assets/js/payment.js?v=20261017_1510"></script>
 </body>
 
 </html>

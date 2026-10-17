@@ -435,7 +435,6 @@ function applyCampaignDetailsToUI() {
   const bAccNum = document.getElementById('bankDetailAccountNum');
   const bAccName = document.getElementById('bankDetailAccountName');
   const bAmtHi = document.getElementById('bankAmountHighlight');
-  const bQr = document.getElementById('bankQrImage');
 
   if (bTitle) bTitle.textContent = `${c.title} (COMED KKU 69)`;
   if (bAmt) bAmt.textContent = `฿${Number(c.amount).toFixed(2)} บาท / คน`;
@@ -443,10 +442,54 @@ function applyCampaignDetailsToUI() {
   if (bAccNum) bAccNum.textContent = c.accountNumber || "236-2-47817-3";
   if (bAccName) bAccName.textContent = c.accountName || "น.ส. พิชามญธุ์ สามสี";
   if (bAmtHi) bAmtHi.textContent = `฿${Number(c.amount).toLocaleString()} บาท`;
-  if (bQr && c.qrImage) bQr.src = c.qrImage;
+
+  // Dynamic QR Code Generation (Auto Locked PromptPay vs Custom Image)
+  renderCurrentCampaignQrCode(c.amount);
 
   // Render Shirt Showcase UI (If banner or shirt sizes available)
   renderShirtShowcaseUI(c);
+}
+
+let currentGeneratedDynamicQrDataUrl = null;
+let currentEffectiveAmount = null;
+
+// Dynamically generate Thai QR Payment with locked amount or use custom image
+async function renderCurrentCampaignQrCode(amountOverride) {
+  const c = currentCampaign;
+  if (!c) return;
+
+  const bQr = document.getElementById('bankQrImage');
+  const amtToLock = (amountOverride !== undefined && amountOverride !== null) ? Number(amountOverride) : Number(c.amount || 190);
+  currentEffectiveAmount = amtToLock;
+
+  // If campaign specifies qrType === 'custom' and has a custom image, use that image
+  if (c.qrType === 'custom' && c.qrImage && c.qrImage.trim()) {
+    currentGeneratedDynamicQrDataUrl = c.qrImage;
+    if (bQr) bQr.src = c.qrImage;
+    return;
+  }
+
+  // Otherwise, automatically generate standard Thai QR Payment PromptPay slip card with locked amount!
+  if (window.ThaiQrEngine && typeof window.ThaiQrEngine.generatePromptPaySlipCard === 'function') {
+    try {
+      const cleanAcc = (c.promptpayTarget || c.accountNumber || '2362478173').replace(/[^0-9]/g, '');
+      const cardDataUrl = await window.ThaiQrEngine.generatePromptPaySlipCard({
+        target: cleanAcc || '2362478173',
+        amount: amtToLock,
+        accountName: c.accountName || 'น.ส. พิชามญธุ์ สามสี',
+        accountNumber: c.accountNumber || '236-2-47817-3',
+        refCode: c.code ? `KKU${c.code}69` : '004999250006870'
+      });
+      currentGeneratedDynamicQrDataUrl = cardDataUrl;
+      if (bQr) bQr.src = cardDataUrl;
+      return;
+    } catch(err) {
+      console.warn("ThaiQrEngine slip generation failed, falling back to static QR image:", err);
+    }
+  }
+
+  // Fallback to static qrImage or default
+  if (bQr && c.qrImage) bQr.src = c.qrImage;
 }
 
 function renderShirtShowcaseUI(campaign) {
@@ -615,10 +658,16 @@ function updateSelectedSizeUI() {
   const bAmt = document.getElementById('bankDetailAmount');
   if (bAmtHi) bAmtHi.textContent = `฿${Number(currentSelectedShirtSize.price).toLocaleString()} บาท`;
   if (bAmt) bAmt.textContent = `฿${Number(currentSelectedShirtSize.price).toFixed(2)} บาท / คน (ไซส์ ${currentSelectedShirtSize.size})`;
+
+  // Re-generate locked QR Code for this exact selected size amount!
+  if (typeof renderCurrentCampaignQrCode === 'function') {
+    renderCurrentCampaignQrCode(currentSelectedShirtSize.price);
+  }
 }
 
 function openCurrentQrFullscreen() {
-  const qr = currentCampaign.qrImage || 'qr_payment.png';
+  const qrImg = document.getElementById('bankQrImage');
+  const qr = currentGeneratedDynamicQrDataUrl || (qrImg ? qrImg.src : '') || currentCampaign.qrImage || 'qr_payment.png';
   openFullscreenModal(qr);
 }
 
@@ -1755,11 +1804,22 @@ function formatDriveImageUrl(url) {
   return url;
 }
 
-// --- SLIP DOWNLOAD HANDLERS ---
-function triggerFileDownload(url, filename = 'slip-payment.png') {
+// --- SLIP & QR DOWNLOAD HANDLERS (Direct Device Download) ---
+async function triggerFileDownload(url, filename = 'slip-payment.png') {
   if (!url) return;
 
-  // If it's Google Drive link, extract direct download URL
+  // 1. If it's a data URL or Blob URL, trigger direct anchor download immediately
+  if (url.startsWith('data:') || url.startsWith('blob:')) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 100);
+    return;
+  }
+
+  // 2. If it's Google Drive link, extract direct download URL
   let downloadUrl = url;
   if (url.includes('drive.google.com')) {
     const idMatch = url.match(/[-\w]{25,}/);
@@ -1768,16 +1828,44 @@ function triggerFileDownload(url, filename = 'slip-payment.png') {
     }
   }
 
-  if (downloadUrl.startsWith('data:image')) {
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  } else {
-    window.open(downloadUrl, '_blank');
+  // 3. Attempt direct fetch as Blob to trigger native Save As / Download
+  try {
+    const res = await fetch(downloadUrl, { mode: 'cors' });
+    if (res.ok) {
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        a.remove();
+      }, 1000);
+      return;
+    }
+  } catch (err) {
+    console.warn("Direct blob download fetch failed (CORS or network), falling back to anchor:", err);
   }
+
+  // 4. Fallback: Hidden anchor with target and download attribute
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = filename;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => a.remove(), 200);
+}
+
+// Download current generated/custom QR Code image
+async function downloadCurrentQrImage() {
+  const qrImg = document.getElementById('bankQrImage');
+  const src = (currentGeneratedDynamicQrDataUrl || (qrImg ? qrImg.src : '') || currentCampaign.qrImage || 'qr_payment.png');
+  const filename = `PromptPay-QR-${currentCampaign.code || currentCampaign.id || 'KKU'}-${currentEffectiveAmount || currentCampaign.amount || 190}THB.png`;
+  await triggerFileDownload(src, filename);
 }
 
 function downloadCurrentSlip() {
@@ -1903,9 +1991,30 @@ function switchMainTab(tab) {
   const mobPayment = document.getElementById('mobileNavPayment');
   const mobStatus = document.getElementById('mobileNavStatus');
 
+  // Update browser URL query params without reloading
+  try {
+    const url = new URL(window.location.href);
+    if (tab === 'status') {
+      url.searchParams.set('tab', 'status');
+      url.searchParams.delete('auto');
+    } else {
+      url.searchParams.delete('tab');
+      url.searchParams.delete('auto');
+    }
+    window.history.replaceState({}, '', url.toString());
+  } catch(e) {
+    // ignore
+  }
+
   if (tab === 'payment') {
-    if (tabPayment) tabPayment.classList.remove('hidden');
-    if (tabStatus) tabStatus.classList.add('hidden');
+    if (tabPayment) {
+      tabPayment.classList.remove('hidden');
+      tabPayment.style.display = 'block';
+    }
+    if (tabStatus) {
+      tabStatus.classList.add('hidden');
+      tabStatus.style.display = 'none';
+    }
 
     if (navPayment) {
       navPayment.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm cursor-pointer';
@@ -1924,13 +2033,19 @@ function switchMainTab(tab) {
     // GSAP Bouncy Spring Slide-Up Fade
     if (typeof gsap !== 'undefined' && tabPayment) {
       gsap.fromTo(tabPayment,
-        { opacity: 0, y: 20, scale: 0.99 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" }
+        { opacity: 0, y: 15, scale: 0.99 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "power2.out" }
       );
     }
   } else {
-    if (tabPayment) tabPayment.classList.add('hidden');
-    if (tabStatus) tabStatus.classList.remove('hidden');
+    if (tabPayment) {
+      tabPayment.classList.add('hidden');
+      tabPayment.style.display = 'none';
+    }
+    if (tabStatus) {
+      tabStatus.classList.remove('hidden');
+      tabStatus.style.display = 'block';
+    }
 
     if (navStatus) {
       navStatus.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm cursor-pointer';
@@ -1952,8 +2067,8 @@ function switchMainTab(tab) {
     // GSAP Bouncy Spring Slide-Up Fade
     if (typeof gsap !== 'undefined' && tabStatus) {
       gsap.fromTo(tabStatus,
-        { opacity: 0, y: 20, scale: 0.99 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" }
+        { opacity: 0, y: 15, scale: 0.99 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "power2.out" }
       );
     }
   }

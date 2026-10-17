@@ -687,6 +687,11 @@ function openCreateCampaignModal() {
   if (shirtCb) shirtCb.checked = false;
   toggleShirtConfigFields(false);
 
+  // Default to Auto Locked PromptPay mode
+  const rAuto = document.getElementById('campQrTypeAuto');
+  if (rAuto) rAuto.checked = true;
+  toggleQrModeFields('auto');
+
   const qrPreview = document.getElementById('campQrPreviewImg');
   if (qrPreview) qrPreview.src = 'qr_payment.png';
   const qrInput = document.getElementById('campQrImageInput');
@@ -719,6 +724,64 @@ function openCreateCampaignModal() {
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
+
+// Toggle between Auto Locked PromptPay QR vs Custom Upload
+window.toggleQrModeFields = function(mode) {
+  const customBox = document.getElementById('campQrCustomUploadFields');
+  const notice = document.getElementById('campQrPreviewNotice');
+  const rAuto = document.getElementById('campQrTypeAuto');
+  const rCustom = document.getElementById('campQrTypeCustom');
+
+  if (mode === 'custom') {
+    if (customBox) customBox.classList.remove('hidden');
+    if (rCustom) rCustom.checked = true;
+    if (notice) {
+      notice.textContent = 'กำลังใช้: รูปภาพ QR Code ที่อัปโหลดเอง';
+      notice.className = 'text-xs font-bold text-amber-400 block';
+    }
+  } else {
+    if (customBox) customBox.classList.add('hidden');
+    if (rAuto) rAuto.checked = true;
+    if (notice) {
+      notice.textContent = 'กำลังใช้: ระบบสร้าง QR PromptPay ล็อคยอดอัตโนมัติ';
+      notice.className = 'text-xs font-bold text-emerald-400 block';
+    }
+    previewAdminGeneratedQr();
+  }
+};
+
+// Admin dynamic QR preview helper
+window.previewAdminGeneratedQr = async function() {
+  const qrPreview = document.getElementById('campQrPreviewImg');
+  if (!qrPreview) return;
+
+  const isCustom = document.getElementById('campQrTypeCustom')?.checked;
+  if (isCustom) {
+    const customUrl = document.getElementById('campQrImageInput')?.value.trim();
+    if (customUrl) qrPreview.src = customUrl;
+    return;
+  }
+
+  if (window.ThaiQrEngine && typeof window.ThaiQrEngine.generatePromptPaySlipCard === 'function') {
+    try {
+      const amt = Number(document.getElementById('campAmountInput')?.value || 190);
+      const acc = document.getElementById('campAccountNumInput')?.value.trim() || '236-2-47817-3';
+      const name = document.getElementById('campAccountNameInput')?.value.trim() || 'น.ส. พิชามญธุ์ สามสี';
+      const code = document.getElementById('campCodeInput')?.value.trim() || 'COMED69';
+
+      const cardUrl = await window.ThaiQrEngine.generatePromptPaySlipCard({
+        target: acc.replace(/[^0-9]/g, '') || '2362478173',
+        amount: amt,
+        accountName: name,
+        accountNumber: acc,
+        refCode: `KKU${code}69`
+      });
+      qrPreview.src = cardUrl;
+    } catch(err) {
+      console.warn("previewAdminGeneratedQr error:", err);
+    }
+  }
+};
 
 function openEditCampaignModal(campId) {
   clearCampaignFormError();
@@ -773,6 +836,13 @@ function openEditCampaignModal(campId) {
 
   const qrPreview = document.getElementById('campQrPreviewImg');
   if (qrPreview) qrPreview.src = camp.qrImage || 'qr_payment.png';
+
+  // Setup QR Mode for Edit
+  const qrType = camp.qrType || (camp.qrImage && !camp.qrImage.includes('qr_payment.png') ? 'custom' : 'auto');
+  toggleQrModeFields(qrType);
+  if (qrType === 'auto') {
+    previewAdminGeneratedQr();
+  }
 
   // Determine if this is a shirt campaign
   const isShirt = !!(
@@ -1025,9 +1095,11 @@ async function handleSaveCampaignSubmit(e) {
   }
   const slipProvider = slipProviders[0]; // primary
   
+  const isCustomQr = !!document.getElementById('campQrTypeCustom')?.checked;
+  const qrType = isCustomQr ? 'custom' : 'auto';
   const qrInputVal = document.getElementById('campQrImageInput')?.value.trim();
   const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || 'qr_payment.png';
-  const qrImage = qrInputVal || qrPreviewSrc;
+  const qrImage = isCustomQr ? (qrInputVal || qrPreviewSrc) : 'qr_payment.png';
 
   const isShirtChecked = !!document.getElementById('campIsShirtCheckbox')?.checked;
   const bannerInputVal = document.getElementById('campBannerImageInput')?.value.trim();
@@ -1056,6 +1128,8 @@ async function handleSaveCampaignSubmit(e) {
     bankName: bankName,
     accountNumber: accountNumber,
     accountName: accountName,
+    qrType: qrType,
+    promptpayTarget: accountNumber.replace(/[^0-9]/g, ''),
     qrImage: qrImage,
     bannerImage: bannerImage,
     shirtSizes: isShirtChecked ? (existingCampaign?.shirtSizes || ['S', 'M', 'L', 'XL', '2XL', '3XL']) : [],
