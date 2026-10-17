@@ -1591,7 +1591,7 @@ function renderAdminTable() {
     const isPaid = record && record.paid;
     const slipUrl = record?.slipUrl || '';
 
-    const amountDisplay = record && record.amount ? record.amount : (currentCampaign.amount || 190);
+    const amountDisplay = record && record.amount ? record.amount : (currentAdminCampaign.amount || 190);
     const shirtSizeBadge = record && record.shirtSize 
       ? `<span class="inline-block mt-1 px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold text-[10px] border border-indigo-500/30">ไซส์ ${record.shirtSize}</span>` 
       : '';
@@ -2250,7 +2250,7 @@ async function executeCustomExcelExport() {
       statusText: statusText,
       statusVisual: statusVisual,
       shirtSize: record?.shirtSize || "-",
-      amount: isPaid ? (record.amount || currentCampaign.amount || 190) : 0,
+      amount: isPaid ? (record.amount || currentAdminCampaign.amount || 190) : 0,
       timestamp: record?.timestamp || "-",
       refCode: record?.refCode || "-",
       slipUrl: record?.slipUrl || "-"

@@ -183,35 +183,39 @@ window.ComedCampaignManager = {
             .filter(item => !String(item.id).startsWith("system_") && !deletedIds.includes(item.id))
             .map(item => {
               const matchedLocal = localList.find(loc => loc.id === item.id) || {};
-              return {
-                id: item.id,
-                code: item.code,
-                title: item.title,
-                subtitle: item.subtitle || '',
-                category: item.category || 'กิจกรรมสาขา',
-                amount: parseFloat(item.amount) || 0,
-                currency: item.currency || 'THB',
-                deadline: item.deadline,
-                deadlineDisplay: item.deadline_display || '',
-                bankName: item.bank_name || '',
-                accountNumber: item.account_number || '',
-                accountName: item.account_name || '',
-                qrImage: item.qr_image || 'qr_payment.png',
-                bgImage: item.bg_image || matchedLocal.bgImage || '',
-                bannerImage: item.banner_image || matchedLocal.bannerImage || '',
-                galleryImages: item.gallery_images || matchedLocal.galleryImages || [],
-                shirtSizes: item.shirt_sizes || matchedLocal.shirtSizes || [],
-                targetMode: item.target_mode || matchedLocal.targetMode || 'all',
-                eligibleStudentIds: item.eligible_student_ids || matchedLocal.eligibleStudentIds || [],
-                exemptedStudentIds: item.exempted_student_ids || matchedLocal.exemptedStudentIds || [],
-                status: item.status || 'open',
-                closedReason: item.closed_reason || '',
-                isDefault: item.is_default || false,
-                slipProvider: matchedLocal.slipProvider || 'cloudinary',
-                slipProviders: matchedLocal.slipProviders || ['cloudinary'],
-                createdAt: item.created_at
-              };
-            });
+                let extraMeta = {};
+                if (item.closed_reason && item.closed_reason.startsWith('{')) {
+                  try { extraMeta = JSON.parse(item.closed_reason); } catch(e) {}
+                }
+                return {
+                  id: item.id,
+                  code: item.code,
+                  title: item.title,
+                  subtitle: item.subtitle || '',
+                  category: item.category || 'กิจกรรมสาขา',
+                  amount: parseFloat(item.amount) || 0,
+                  currency: item.currency || 'THB',
+                  deadline: item.deadline,
+                  deadlineDisplay: item.deadline_display || '',
+                  bankName: item.bank_name || '',
+                  accountNumber: item.account_number || '',
+                  accountName: item.account_name || '',
+                  qrImage: item.qr_image || 'qr_payment.png',
+                  bgImage: item.bg_image || matchedLocal.bgImage || '',
+                  bannerImage: item.banner_image || matchedLocal.bannerImage || '',
+                  galleryImages: item.gallery_images || matchedLocal.galleryImages || [],
+                  shirtSizes: extraMeta.shirtSizes || item.shirt_sizes || matchedLocal.shirtSizes || [],
+                  targetMode: extraMeta.targetMode || item.target_mode || matchedLocal.targetMode || 'all',
+                  eligibleStudentIds: extraMeta.eligibleStudentIds || item.eligible_student_ids || matchedLocal.eligibleStudentIds || [],
+                  exemptedStudentIds: extraMeta.exemptedStudentIds || item.exempted_student_ids || matchedLocal.exemptedStudentIds || [],
+                  status: item.status || 'open',
+                  closedReason: item.closed_reason || '',
+                  isDefault: item.is_default || false,
+                  slipProvider: matchedLocal.slipProvider || 'cloudinary',
+                  slipProviders: matchedLocal.slipProviders || ['cloudinary'],
+                  createdAt: item.created_at
+                };
+              });
           localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(mapped));
           return mapped;
         }
@@ -267,15 +271,24 @@ window.ComedCampaignManager = {
             is_default: !!c.isDefault,
             updated_at: new Date().toISOString()
           };
-          if (c.bgImage !== undefined) payload.bg_image = c.bgImage;
-          if (c.bannerImage !== undefined) payload.banner_image = c.bannerImage;
-          if (c.galleryImages !== undefined) payload.gallery_images = c.galleryImages;
-          if (c.shirtSizes !== undefined) payload.shirt_sizes = c.shirtSizes;
-          if (c.targetMode !== undefined) payload.target_mode = c.targetMode;
-          if (c.eligibleStudentIds !== undefined) payload.eligible_student_ids = c.eligibleStudentIds;
-          if (c.exemptedStudentIds !== undefined) payload.exempted_student_ids = c.exemptedStudentIds;
+          // Pack extra metadata safely into closed_reason so it syncs across devices even if DB lacks dedicated columns
+          let metaClosedReason = c.closedReason || '';
+          try {
+            const parsedMeta = metaClosedReason && metaClosedReason.startsWith('{') ? JSON.parse(metaClosedReason) : {};
+            if (c.exemptedStudentIds) parsedMeta.exemptedStudentIds = c.exemptedStudentIds;
+            if (c.eligibleStudentIds) parsedMeta.eligibleStudentIds = c.eligibleStudentIds;
+            if (c.targetMode) parsedMeta.targetMode = c.targetMode;
+            if (c.shirtSizes) parsedMeta.shirtSizes = c.shirtSizes;
+            metaClosedReason = JSON.stringify(parsedMeta);
+          } catch(e) {}
 
-          await sb.from('campaigns').upsert(payload, { onConflict: 'id' });
+          payload.closed_reason = metaClosedReason;
+
+          // Attempt upsert with core columns
+          const { error } = await sb.from('campaigns').upsert(payload, { onConflict: 'id' });
+          if (error) {
+            console.warn(`Supabase Upsert skipped for campaign ${c.id}:`, error.message || error);
+          }
         } catch (innerErr) {
           console.warn(`Supabase Upsert skipped for campaign ${c.id}:`, innerErr);
         }
