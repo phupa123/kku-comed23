@@ -16,13 +16,13 @@ let currentCampaign = (window.ComedCampaignManager ? window.ComedCampaignManager
   gasApiUrl: "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec"
 };
 
-const TARGET_PAYMENT_PER_PERSON = currentCampaign.amount || 190;
-const STORAGE_KEY = `COMED_PAYMENT_DATA_${currentCampaign.id.toUpperCase()}`;
-const CLOUD_URL_KEY = `COMED_CLOUD_URL_${currentCampaign.id.toUpperCase()}`;
+let TARGET_PAYMENT_PER_PERSON = currentCampaign.amount || 190;
+let STORAGE_KEY = `COMED_PAYMENT_DATA_${currentCampaign.id.toUpperCase()}`;
+let CLOUD_URL_KEY = `COMED_CLOUD_URL_${currentCampaign.id.toUpperCase()}`;
 let googleAppsScriptUrl = currentCampaign.gasApiUrl || localStorage.getItem(CLOUD_URL_KEY) || "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
 
 // Deadline: Dynamic from campaign
-const DEADLINE_DATE = new Date(currentCampaign.deadline || '2026-09-04T23:59:00+07:00').getTime();
+let DEADLINE_DATE = new Date(currentCampaign.deadline || '2026-09-04T23:59:00+07:00').getTime();
 
 let studentDatabase = [];
 let paymentRecords = {}; // { studentId: { paid: true, timestamp: "...", slipUrl: "...", refCode: "..." } }
@@ -207,6 +207,10 @@ async function initApp() {
     try {
       await window.ComedCampaignManager.fetchFromCloud();
       currentCampaign = window.ComedCampaignManager.getCampaignById(currentCampaignId) || currentCampaign;
+      TARGET_PAYMENT_PER_PERSON = currentCampaign.amount || 190;
+      STORAGE_KEY = `COMED_PAYMENT_DATA_${currentCampaign.id.toUpperCase()}`;
+      CLOUD_URL_KEY = `COMED_CLOUD_URL_${currentCampaign.id.toUpperCase()}`;
+      DEADLINE_DATE = new Date(currentCampaign.deadline || '2026-09-04T23:59:00+07:00').getTime();
     } catch (e) {}
   }
 

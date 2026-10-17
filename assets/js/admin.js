@@ -557,55 +557,45 @@ async function handleQrFileUpload(event, previewImgId, inputId) {
     return;
   }
 
-  // 1. Show local preview immediately
   const preview = document.getElementById(previewImgId);
   const input = document.getElementById(inputId);
-  const localUrl = URL.createObjectURL(file);
-  if (preview) preview.src = localUrl;
 
-  // 2. Upload to Cloud Provider explicitly chosen by Admin
-  if (window.MultiCloudUploader) {
-    const selectedProvider = document.getElementById('campQrProviderSelect')?.value || 'cloudinary';
-    const providerLabel = window.MultiCloudUploader.getProviderName(selectedProvider);
-
-    if (typeof showToastNotification === 'function') {
-      showToastNotification(`☁️ กำลังส่งขึ้น ${providerLabel}...`);
-    }
-    try {
-      const res = await window.MultiCloudUploader.upload(file, {
-        preferredProvider: selectedProvider,
-        category: 'QR Code รับชำระเงิน',
-        onProgress: (pct, msg) => {
-          if (typeof showToastNotification === 'function' && pct < 100) {
-            showToastNotification(`☁️ ${msg}`);
-          }
-        }
-      });
-
-      if (res && res.url) {
-        if (input) input.value = res.url;
-        if (preview) preview.src = res.url;
-        if (typeof showToastNotification === 'function') {
-          showToastNotification(`🎉 อัปโหลดขึ้น ${window.MultiCloudUploader.getProviderName(res.provider)} สำเร็จแล้ว!`);
-        }
-        return;
-      }
-    } catch (err) {
-      console.warn("MultiCloud upload error, fallback to base64:", err);
-      if (typeof showToastNotification === 'function') {
-        showToastNotification("⚠️ คลาวด์ภายนอกมีปัญหา กำลังบันทึกเป็น Base64 สำรอง...");
-      }
-    }
-  }
-
-  // Fallback to Base64 data URL
+  // 1. Read Base64 immediately so there's always a valid persistent image string (never an ephemeral blob: URL)
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     const dataUrl = e.target.result;
     if (preview) preview.src = dataUrl;
     if (input) input.value = dataUrl;
-    if (typeof showToastNotification === 'function') {
-      showToastNotification("📸 โหลดรูปภาพ QR Code พร้อมใช้งานแล้ว!");
+
+    // 2. Upload to Cloud Provider in background to keep data light
+    if (window.MultiCloudUploader) {
+      const selectedProvider = document.getElementById('campQrProviderSelect')?.value || 'cloudinary';
+      const providerLabel = window.MultiCloudUploader.getProviderName(selectedProvider);
+
+      if (typeof showToastNotification === 'function') {
+        showToastNotification(`☁️ กำลังส่งขึ้น ${providerLabel}...`);
+      }
+      try {
+        const res = await window.MultiCloudUploader.upload(file, {
+          preferredProvider: selectedProvider,
+          category: 'QR Code รับชำระเงิน',
+          onProgress: (pct, msg) => {
+            if (typeof showToastNotification === 'function' && pct < 100) {
+              showToastNotification(`☁️ ${msg}`);
+            }
+          }
+        });
+
+        if (res && res.url) {
+          if (input) input.value = res.url;
+          if (preview) preview.src = res.url;
+          if (typeof showToastNotification === 'function') {
+            showToastNotification(`🎉 อัปโหลดขึ้น ${window.MultiCloudUploader.getProviderName(res.provider)} สำเร็จแล้ว!`);
+          }
+        }
+      } catch (err) {
+        console.warn("MultiCloud upload error, keeping base64 fallback:", err);
+      }
     }
   };
   reader.readAsDataURL(file);
@@ -731,17 +721,24 @@ window.toggleQrModeFields = function(mode) {
   const notice = document.getElementById('campQrPreviewNotice');
   const rAuto = document.getElementById('campQrTypeAuto');
   const rCustom = document.getElementById('campQrTypeCustom');
+  const qrPreview = document.getElementById('campQrPreviewImg');
 
   if (mode === 'custom') {
     if (customBox) customBox.classList.remove('hidden');
     if (rCustom) rCustom.checked = true;
+    if (rAuto) rAuto.checked = false;
     if (notice) {
       notice.textContent = 'กำลังใช้: รูปภาพ QR Code ที่อัปโหลดเอง';
       notice.className = 'text-xs font-bold text-amber-400 block';
     }
+    const customImgVal = document.getElementById('campQrImageInput')?.value.trim();
+    if (customImgVal && qrPreview) {
+      qrPreview.src = customImgVal;
+    }
   } else {
     if (customBox) customBox.classList.add('hidden');
     if (rAuto) rAuto.checked = true;
+    if (rCustom) rCustom.checked = false;
     if (notice) {
       notice.textContent = 'กำลังใช้: ระบบสร้าง QR PromptPay ล็อคยอดอัตโนมัติ';
       notice.className = 'text-xs font-bold text-emerald-400 block';
@@ -1098,8 +1095,23 @@ async function handleSaveCampaignSubmit(e) {
   const isCustomQr = !!document.getElementById('campQrTypeCustom')?.checked;
   const qrType = isCustomQr ? 'custom' : 'auto';
   const qrInputVal = document.getElementById('campQrImageInput')?.value.trim();
-  const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || 'qr_payment.png';
-  const qrImage = isCustomQr ? (qrInputVal || qrPreviewSrc) : 'qr_payment.png';
+  const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || '';
+  
+  let existingCampaign = (editId && window.ComedCampaignManager) ? window.ComedCampaignManager.getCampaignById(editId) : null;
+  if (!existingCampaign && code && window.ComedCampaignManager) {
+    existingCampaign = window.ComedCampaignManager.getCampaignById(code);
+  }
+
+  let qrImage = 'qr_payment.png';
+  if (isCustomQr) {
+    if (qrInputVal && !qrInputVal.includes('qr_payment.png')) {
+      qrImage = qrInputVal;
+    } else if (qrPreviewSrc && !qrPreviewSrc.includes('qr_payment.png')) {
+      qrImage = qrPreviewSrc;
+    } else if (existingCampaign && existingCampaign.qrImage && !existingCampaign.qrImage.includes('qr_payment.png')) {
+      qrImage = existingCampaign.qrImage;
+    }
+  }
 
   const isShirtChecked = !!document.getElementById('campIsShirtCheckbox')?.checked;
   const bannerInputVal = document.getElementById('campBannerImageInput')?.value.trim();
@@ -1111,8 +1123,6 @@ async function handleSaveCampaignSubmit(e) {
   const bgImage = bgInputVal || (bgPreviewSrc && !bgPreviewSrc.includes('logo.png') ? bgPreviewSrc : '');
 
   const isOpen = document.getElementById('campStatusOpenInput')?.checked;
-
-  let existingCampaign = editId && window.ComedCampaignManager ? window.ComedCampaignManager.getCampaignById(editId) : null;
 
   const campaignPayload = {
     ...(existingCampaign || {}),
@@ -1377,6 +1387,12 @@ async function saveAudienceSettings() {
 
   closeAudienceModal();
   alert(`✨ บันทึกการกำหนดสิทธิ์ของ "${savedCampTitle}" สำเร็จ!\n(ต้องชำระ ${totalEligible} คน, ยกเว้น ${totalExempted} คน)`);
+
+  // Ensure current URL reflects the campaign ID so browser reload retains exact context
+  if (window.history && window.history.replaceState) {
+    const newUrl = `${window.location.pathname}?camp=${encodeURIComponent(currentAudienceCamp.id)}`;
+    window.history.replaceState(null, '', newUrl);
+  }
 }
 
 async function loadAllPayments(silent = false) {
