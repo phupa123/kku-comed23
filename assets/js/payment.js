@@ -1237,7 +1237,7 @@ function selectStudent(st) {
         currentStudentPaidSlip.includes('catbox');
 
       if (isDirect) {
-        wrapperEl.innerHTML = `<img src="${displayUrl}" alt="สลิปโอนเงิน" class="max-h-full max-w-full object-contain mx-auto rounded-xl">`;
+        wrapperEl.innerHTML = `<img src="${displayUrl}" alt="สลิปโอนเงิน" class="max-h-full max-w-full object-contain mx-auto rounded-xl cursor-pointer hover:opacity-95 transition" onclick="openFullscreenModal('${displayUrl}')" title="คลิกเพื่อดูรูปขยายเต็มจอ">`;
       } else if (drivePreviewUrl) {
         wrapperEl.innerHTML = `<iframe src="${drivePreviewUrl}" class="w-full h-full border-0 rounded-xl" allow="autoplay" loading="lazy"></iframe>`;
       } else {
@@ -1976,10 +1976,8 @@ function formatDriveImageUrl(url) {
       return `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w1200`;
     }
   }
-  // 2. Catbox.moe: If ISP/DNS blocks files.catbox.moe directly, route through Cloudflare-backed global image CDN (wsrv.nl)
-  if (url.includes('files.catbox.moe') || url.includes('catbox.moe')) {
-    return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=webp&q=85`;
-  }
+  // 2. Catbox.moe / Direct Image Hosts: use original HTTPS URL directly
+  // Do NOT wrap in wsrv.nl/weserv.nl because they return 404 on catbox.moe DNS
   return url;
 }
 
