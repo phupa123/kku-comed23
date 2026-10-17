@@ -337,11 +337,3 @@
   };
 
 })(typeof window !== 'undefined' ? window : this);
-window.ThaiQrEngine = {
-  generatePromptPayPayload,
-  generatePromptPaySlipCard,
-  formatPromptPayDisplay,
-  crc16
-};
-
-}) (typeof window !== 'undefined' ? window : this);
