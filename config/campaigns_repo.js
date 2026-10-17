@@ -244,10 +244,27 @@ window.ComedCampaignManager = {
   syncToSupabase: async function(campaigns) {
     try {
       const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
-      if (!sb) return;
+      if (!sb) {
+        console.warn("Supabase client not initialized - campaign changes saved locally only");
+        return { success: false, error: "Supabase client not available" };
+      }
       const list = Array.isArray(campaigns) ? campaigns : [campaigns];
+      let hasError = false;
+      let lastErrorMessage = '';
+
       for (const c of list) {
         try {
+          // Parse deadline safely: never throw RangeError on empty/invalid dates
+          let validDeadlineIso = null;
+          if (c.deadline) {
+            try {
+              const d = new Date(c.deadline);
+              if (!isNaN(d.getTime())) {
+                validDeadlineIso = d.toISOString();
+              }
+            } catch(e) {}
+          }
+
           const payload = {
             id: c.id,
             code: c.code || c.id.toUpperCase(),
@@ -256,7 +273,7 @@ window.ComedCampaignManager = {
             category: c.category || 'กิจกรรม',
             amount: c.amount,
             currency: c.currency || 'THB',
-            deadline: c.deadline ? new Date(c.deadline).toISOString() : null,
+            deadline: validDeadlineIso,
             deadline_display: c.deadlineDisplay || '',
             bank_name: c.bankName || '',
             account_number: c.accountNumber || '',
@@ -267,6 +284,7 @@ window.ComedCampaignManager = {
             is_default: !!c.isDefault,
             updated_at: new Date().toISOString()
           };
+
           // Pack extra metadata safely into closed_reason so it syncs across devices even if DB lacks dedicated columns
           let metaClosedReason = c.closedReason || '';
           try {
@@ -287,22 +305,28 @@ window.ComedCampaignManager = {
           c.closedReason = metaClosedReason;
 
           // Attempt upsert with core columns
-          const { error: upsertErr } = await sb.from('campaigns').upsert(payload, { onConflict: 'id' }).catch(fetchErr => {
-            return { error: fetchErr };
-          });
+          const { error: upsertErr } = await sb.from('campaigns').upsert(payload, { onConflict: 'id' });
           if (upsertErr) {
-            console.error(`Supabase upsert campaign error (${c.id}):`, upsertErr.message || upsertErr);
+            hasError = true;
+            lastErrorMessage = upsertErr.message || String(upsertErr);
+            console.error(`Supabase upsert campaign error (${c.id}):`, lastErrorMessage);
           }
         } catch (innerErr) {
+          hasError = true;
+          lastErrorMessage = innerErr.message || String(innerErr);
           console.warn("Supabase upsert campaign exception:", innerErr);
         }
       }
+
       // Re-save list to localStorage so closedReason is preserved with latest JSON
       const deletedIds = this.getDeletedIds();
       const currentFiltered = this.getAllCampaigns().filter(c => !String(c.id).startsWith("system_") && !deletedIds.includes(c.id));
       localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(currentFiltered));
+
+      return { success: !hasError, error: lastErrorMessage || null };
     } catch(e) {
       console.warn("syncToSupabase error:", e);
+      return { success: false, error: e.message || String(e) };
     }
   }
 };

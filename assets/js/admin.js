@@ -1172,8 +1172,13 @@ async function handleSaveCampaignSubmit(e) {
 
   try {
     // 1. Save in local & sync to Supabase
+    let syncResult = null;
     if (window.ComedCampaignManager) {
-      await window.ComedCampaignManager.updateCampaign(campaignPayload);
+      syncResult = await window.ComedCampaignManager.updateCampaign(campaignPayload);
+    }
+
+    if (syncResult && syncResult.success === false && syncResult.error) {
+      console.warn("Notice: Cloud sync warning:", syncResult.error);
     }
 
     // 2. Log Admin Action
@@ -1184,7 +1189,12 @@ async function handleSaveCampaignSubmit(e) {
       console.warn("Admin log warning:", err);
     }
 
-    // 3. Immediately re-render Admin Campaigns Hub navigation
+    // 3. Update current campaign in runtime memory
+    if (window.ComedCampaignManager) {
+      currentAdminCampaign = window.ComedCampaignManager.getCampaignById(code);
+    }
+
+    // 4. Immediately re-render Admin Campaigns Hub navigation
     if (typeof renderAdminCampaignsNav === 'function') {
       renderAdminCampaignsNav();
     }
