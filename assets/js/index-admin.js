@@ -745,8 +745,18 @@ async function saveCampaignSubmit(e) {
       camp.subtitle = subtitle;
       camp.category = category;
       camp.amount = amount;
-      camp.deadline = deadline;
-      camp.deadlineDisplay = deadline ? new Date(deadline).toLocaleString('th-TH') : '-';
+      camp.deadline = deadline ? new Date(deadline).toISOString() : '';
+      camp.deadlineDisplay = deadline ? (function(dStr) {
+        try {
+          const d = new Date(dStr);
+          const datePart = d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+          const hours = String(d.getHours()).padStart(2, '0');
+          const mins = String(d.getMinutes()).padStart(2, '0');
+          return `${datePart} (${hours}:${mins} น.)`;
+        } catch(e) {
+          return new Date(dStr).toLocaleDateString('th-TH');
+        }
+      })(deadline) : '-';
       camp.bankName = bankName;
       camp.accountNumber = accountNumber;
       camp.accountName = accountName;
@@ -763,8 +773,18 @@ async function saveCampaignSubmit(e) {
       category,
       amount,
       currency: "THB",
-      deadline,
-      deadlineDisplay: deadline ? new Date(deadline).toLocaleString('th-TH') : '-',
+      deadline: deadline ? new Date(deadline).toISOString() : '',
+      deadlineDisplay: deadline ? (function(dStr) {
+        try {
+          const d = new Date(dStr);
+          const datePart = d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+          const hours = String(d.getHours()).padStart(2, '0');
+          const mins = String(d.getMinutes()).padStart(2, '0');
+          return `${datePart} (${hours}:${mins} น.)`;
+        } catch(e) {
+          return new Date(dStr).toLocaleDateString('th-TH');
+        }
+      })(deadline) : '-',
       bankName,
       accountNumber,
       accountName,

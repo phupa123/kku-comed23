@@ -202,8 +202,8 @@ window.ComedCampaignManager = {
                   galleryImages: extraMeta.galleryImages || item.gallery_images || [],
                   shirtSizes: extraMeta.shirtSizes !== undefined ? extraMeta.shirtSizes : (item.shirt_sizes !== undefined ? item.shirt_sizes : []),
                   targetMode: extraMeta.targetMode || item.target_mode || 'all',
-                  eligibleStudentIds: extraMeta.eligibleStudentIds || item.eligible_student_ids || matchedLocal.eligibleStudentIds || [],
-                  exemptedStudentIds: extraMeta.exemptedStudentIds || item.exempted_student_ids || matchedLocal.exemptedStudentIds || [],
+                  eligibleStudentIds: extraMeta.eligibleStudentIds !== undefined ? extraMeta.eligibleStudentIds : (item.eligible_student_ids || matchedLocal.eligibleStudentIds || []),
+                  exemptedStudentIds: extraMeta.exemptedStudentIds !== undefined ? extraMeta.exemptedStudentIds : (item.exempted_student_ids || matchedLocal.exemptedStudentIds || []),
                   status: item.status || 'open',
                   closedReason: item.closed_reason || '',
                   isDefault: item.is_default || false,
@@ -271,34 +271,38 @@ window.ComedCampaignManager = {
           let metaClosedReason = c.closedReason || '';
           try {
             const parsedMeta = metaClosedReason && metaClosedReason.startsWith('{') ? JSON.parse(metaClosedReason) : {};
-            if (c.exemptedStudentIds) parsedMeta.exemptedStudentIds = c.exemptedStudentIds;
-            if (c.eligibleStudentIds) parsedMeta.eligibleStudentIds = c.eligibleStudentIds;
-            if (c.targetMode) parsedMeta.targetMode = c.targetMode;
+            if (c.exemptedStudentIds !== undefined) parsedMeta.exemptedStudentIds = c.exemptedStudentIds;
+            if (c.eligibleStudentIds !== undefined) parsedMeta.eligibleStudentIds = c.eligibleStudentIds;
+            if (c.targetMode !== undefined) parsedMeta.targetMode = c.targetMode;
             if (c.shirtSizes !== undefined) parsedMeta.shirtSizes = c.shirtSizes;
-            if (c.qrType) parsedMeta.qrType = c.qrType;
-            if (c.promptpayTarget) parsedMeta.promptpayTarget = c.promptpayTarget;
-            if (c.bgImage) parsedMeta.bgImage = c.bgImage;
-            if (c.bannerImage) parsedMeta.bannerImage = c.bannerImage;
-            if (c.galleryImages) parsedMeta.galleryImages = c.galleryImages;
+            if (c.qrType !== undefined) parsedMeta.qrType = c.qrType;
+            if (c.promptpayTarget !== undefined) parsedMeta.promptpayTarget = c.promptpayTarget;
+            if (c.bgImage !== undefined) parsedMeta.bgImage = c.bgImage;
+            if (c.bannerImage !== undefined) parsedMeta.bannerImage = c.bannerImage;
+            if (c.galleryImages !== undefined) parsedMeta.galleryImages = c.galleryImages;
             metaClosedReason = JSON.stringify(parsedMeta);
           } catch(e) {}
 
           payload.closed_reason = metaClosedReason;
+          c.closedReason = metaClosedReason;
 
           // Attempt upsert with core columns
           const { error: upsertErr } = await sb.from('campaigns').upsert(payload, { onConflict: 'id' }).catch(fetchErr => {
             return { error: fetchErr };
           });
           if (upsertErr) {
-            // Suppress CORS/access control noise from anon users
-            // console.warn(`Supabase upsert campaign notice (${c.id}):`, upsertErr.message || upsertErr);
+            console.error(`Supabase upsert campaign error (${c.id}):`, upsertErr.message || upsertErr);
           }
         } catch (innerErr) {
-          // ignore network failure on anon client
+          console.warn("Supabase upsert campaign exception:", innerErr);
         }
       }
+      // Re-save list to localStorage so closedReason is preserved with latest JSON
+      const deletedIds = this.getDeletedIds();
+      const currentFiltered = this.getAllCampaigns().filter(c => !String(c.id).startsWith("system_") && !deletedIds.includes(c.id));
+      localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(currentFiltered));
     } catch(e) {
-      // ignore
+      console.warn("syncToSupabase error:", e);
     }
   }
 };

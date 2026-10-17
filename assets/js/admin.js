@@ -1123,8 +1123,18 @@ async function handleSaveCampaignSubmit(e) {
     category: category,
     amount: amount,
     currency: "THB",
-    deadline: deadline || (existingCampaign ? existingCampaign.deadline : new Date(Date.now() + 7*24*3600*1000).toISOString()),
-    deadlineDisplay: deadline ? new Date(deadline).toLocaleDateString('th-TH') : (existingCampaign ? existingCampaign.deadlineDisplay : ''),
+    deadline: deadline ? new Date(deadline).toISOString() : (existingCampaign ? existingCampaign.deadline : new Date(Date.now() + 7*24*3600*1000).toISOString()),
+    deadlineDisplay: deadline ? (function(dStr) {
+      try {
+        const d = new Date(dStr);
+        const datePart = d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        const hours = String(d.getHours()).padStart(2, '0');
+        const mins = String(d.getMinutes()).padStart(2, '0');
+        return `${datePart} (${hours}:${mins} น.)`;
+      } catch(e) {
+        return new Date(dStr).toLocaleDateString('th-TH');
+      }
+    })(deadline) : (existingCampaign ? existingCampaign.deadlineDisplay : ''),
     bankName: bankName,
     accountNumber: accountNumber,
     accountName: accountName,
