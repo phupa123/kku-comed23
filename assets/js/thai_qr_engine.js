@@ -95,26 +95,31 @@
 
     const payload = generatePromptPayPayload(target, amount);
 
-    // 1. Generate QR Code image matrix via QRCode lib
-    const qrCanvas = document.createElement('canvas');
-    if (typeof QRCode !== 'undefined') {
-      await new Promise(resolve => {
-        new QRCode(qrCanvas, {
-          text: payload,
-          width: 440,
-          height: 440,
-          colorDark: '#000000',
-          colorLight: '#ffffff',
-          correctLevel: QRCode.CorrectLevel.M
-        });
-        setTimeout(resolve, 50);
+    // 1. Generate QR Code – render into hidden off-screen div, grab img element
+    const qrImgEl = await new Promise(resolve => {
+      if (typeof QRCode === 'undefined') { resolve(null); return; }
+      const holder = document.createElement('div');
+      holder.style.cssText = 'position:fixed;left:-9999px;top:-9999px;visibility:hidden;';
+      document.body.appendChild(holder);
+      new QRCode(holder, {
+        text: payload,
+        width: 500,
+        height: 500,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
       });
-    }
+      setTimeout(() => {
+        const el = holder.querySelector('img') || holder.querySelector('canvas');
+        document.body.removeChild(holder);
+        resolve(el || null);
+      }, 250);
+    });
 
-    // 2. Prepare Main Output Canvas (755 x 1024 to match standard template)
+    // 2. Prepare Main Output Canvas (755 x 1060)
     const canvas = document.createElement('canvas');
     canvas.width = 755;
-    canvas.height = 1024;
+    canvas.height = 1060;
     const ctx = canvas.getContext('2d');
 
     // Helper to draw rounded rectangle
@@ -139,193 +144,184 @@
       if (stroke) ctx.stroke();
     }
 
-    // 1. Canvas Base: Crisp White with subtle outer border
+    // A. White base
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 2. Header Background: Deep Blue `#0b436c`
-    ctx.fillStyle = '#0b436c';
-    ctx.fillRect(0, 0, canvas.width, 140);
+    // B. Navy header bar
+    ctx.fillStyle = '#0b3d6b';
+    ctx.fillRect(0, 0, canvas.width, 148);
 
-    // Load Header Asset if available or draw vector header
+    // C. Header image
     await new Promise(resolve => {
-      const headerImg = new Image();
-      headerImg.crossOrigin = 'anonymous';
-      headerImg.onload = () => {
-        ctx.drawImage(headerImg, 0, 0, 755, 140);
-        resolve();
-      };
-      headerImg.onerror = () => {
+      const hImg = new Image();
+      hImg.crossOrigin = 'anonymous';
+      hImg.onload = () => { ctx.drawImage(hImg, 0, 0, 755, 148); resolve(); };
+      hImg.onerror = () => {
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 36px "Prompt", sans-serif';
+        ctx.font = 'bold 38px "Prompt", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('THAI QR PAYMENT', 377, 85);
+        ctx.textBaseline = 'middle';
+        ctx.fillText('THAI QR PAYMENT', 377, 74);
+        ctx.textBaseline = 'alphabetic';
         resolve();
       };
-      headerImg.src = 'assets/images/thai_qr_header.png';
+      hImg.src = 'assets/images/thai_qr_header.png';
     });
 
-    // 3. PromptPay Logo Banner (y: 152, height: ~55)
+    // D. PromptPay logo in bordered box
     await new Promise(resolve => {
       const ppImg = new Image();
       ppImg.crossOrigin = 'anonymous';
       ppImg.onload = () => {
-        const w = 175;
-        const h = (ppImg.height / ppImg.width) * w;
-        ctx.drawImage(ppImg, (755 - w) / 2, 154, w, h);
+        const w = 190; const h = Math.round((ppImg.height / ppImg.width) * w);
+        const bx = (755 - w - 24) / 2; const by = 158;
+        ctx.fillStyle = '#f8fafc';
+        ctx.strokeStyle = '#d1d5db';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, bx, by, w + 24, h + 14, 10, true, true);
+        ctx.drawImage(ppImg, bx + 12, by + 7, w, h);
         resolve();
       };
       ppImg.onerror = () => {
-        ctx.fillStyle = '#003366';
-        ctx.fillRect(300, 155, 155, 45);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 22px "Prompt", sans-serif';
+        ctx.fillStyle = '#1a56db';
+        ctx.font = 'bold 26px "Prompt", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('PromptPay', 377, 185);
+        ctx.fillText('PromptPay', 377, 205);
         resolve();
       };
       ppImg.src = 'assets/images/promptpay_logo.png';
     });
 
-    // 4. Subtle QR Frame with soft shadow
-    const qrSize = 390;
+    // E. QR Code card with shadow
+    const qrSize = 400;
     const qrX = (755 - qrSize) / 2;
-    const qrY = 222;
+    const qrY = 236;
+    const cardPad = 18;
 
-    // QR Outer card frame with soft rounded border
+    // Drop shadow
     ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
-    ctx.shadowBlur = 12;
-    ctx.shadowOffsetY = 4;
+    ctx.shadowColor = 'rgba(0,0,0,0.10)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetY = 6;
     ctx.fillStyle = '#ffffff';
-    roundRect(ctx, qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 20, true, false);
+    roundRect(ctx, qrX - cardPad, qrY - cardPad, qrSize + cardPad * 2, qrSize + cardPad * 2, 24, true, false);
     ctx.restore();
-
-    ctx.strokeStyle = '#e2e8f0';
+    ctx.strokeStyle = '#e8edf3';
     ctx.lineWidth = 1.5;
-    roundRect(ctx, qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 20, false, true);
+    roundRect(ctx, qrX - cardPad, qrY - cardPad, qrSize + cardPad * 2, qrSize + cardPad * 2, 24, false, true);
 
-    // Draw QR canvas
-    ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+    // Draw QR (img element from hidden div)
+    if (qrImgEl) {
+      if (qrImgEl.tagName === 'IMG' && (!qrImgEl.complete || qrImgEl.naturalWidth === 0)) {
+        await new Promise(r => { qrImgEl.onload = r; qrImgEl.onerror = r; });
+      }
+      ctx.drawImage(qrImgEl, qrX, qrY, qrSize, qrSize);
+    } else {
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillRect(qrX, qrY, qrSize, qrSize);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 22px "Prompt", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('QR Code', 377, qrY + qrSize / 2);
+      ctx.textBaseline = 'alphabetic';
+    }
 
-    // Draw subtle PromptPay mini badge in center of QR
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(377, qrY + (qrSize / 2), 24, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#0b436c';
-    ctx.beginPath();
-    ctx.arc(377, qrY + (qrSize / 2), 20, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 13px "Prompt", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('QR', 377, qrY + (qrSize / 2));
-
-    // 5. Account Details & Context (y: 648+)
+    // F. Account info (positions relative to QR card bottom)
+    const textTop = qrY + qrSize + cardPad + 26; // dynamic, ~686
     ctx.textBaseline = 'alphabetic';
-
-    // Teal Subtitle: สแกน QR เพื่อโอนเข้าบัญชี
-    ctx.fillStyle = '#0d9488';
-    ctx.font = 'bold 26px "Prompt", "Plus Jakarta Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('สแกน QR เพื่อโอนเข้าบัญชี', 377, 652);
 
-    // Account Name: น.ส. ...
+    // "สแกน QR เพื่อโอนเข้าบัญชี" – teal
+    ctx.fillStyle = '#0d9488';
+    ctx.font = 'bold 26px "Prompt", "Sarabun", sans-serif';
+    ctx.fillText('สแกน QR เพื่อโอนเข้าบัญชี', 377, textTop);
+
+    // Account name – dark
     ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 28px "Prompt", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`ชื่อบัญชี: ${accountName}`, 377, 692);
+    ctx.font = 'bold 28px "Prompt", "Sarabun", sans-serif';
+    ctx.fillText(`ชื่อบัญชี: ${accountName}`, 377, textTop + 44);
 
-    // Masked Account: xxx-x-x...
+    // Masked account – slate
     let maskedAcc = accountNumber;
-    if (accountNumber && accountNumber.length >= 9) {
+    if (accountNumber && accountNumber.replace(/[^0-9]/g, '').length >= 8) {
       const clean = accountNumber.replace(/[^0-9]/g, '');
       const last4 = clean.slice(-4);
       maskedAcc = `xxx-x-x${last4.slice(0, 3)}-${last4.slice(3)}`;
     }
-    ctx.fillStyle = '#475569';
-    ctx.font = '600 24px "Prompt", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`เลขที่บัญชี: ${maskedAcc}`, 377, 728);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '600 24px "Prompt", "Sarabun", sans-serif';
+    ctx.fillText(`เลขที่บัญชี: ${maskedAcc}`, 377, textTop + 84);
 
-    // 6. Modern Authentic Locked-Amount Card (y: 752 - 862)
+    // G. Locked-amount badge
     if (amount !== undefined && amount !== null && Number(amount) > 0) {
-      const formattedAmt = Number(amount).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const badgeW = 650;
-      const badgeH = 105;
+      const formattedAmt = Number(amount).toLocaleString('th-TH', {
+        minimumFractionDigits: 2, maximumFractionDigits: 2
+      });
+      const badgeW = 660; const badgeH = 128;
       const badgeX = (755 - badgeW) / 2;
-      const badgeY = 752;
+      const badgeY = textTop + 106;
 
-      // Soft emerald gradient background
       ctx.save();
-      const grad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY + badgeH);
+      const grad = ctx.createLinearGradient(badgeX, badgeY, badgeX, badgeY + badgeH);
       grad.addColorStop(0, '#f0fdf4');
-      grad.addColorStop(1, '#ecfdf5');
+      grad.addColorStop(1, '#d1fae5');
       ctx.fillStyle = grad;
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 20, true, false);
-
-      // Subtle border
-      ctx.strokeStyle = '#a7f3d0';
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 22, true, false);
+      ctx.strokeStyle = '#6ee7b7';
       ctx.lineWidth = 2;
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 20, false, true);
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 22, false, true);
 
-      // Inner subtle pill badge for "จำนวนเงินที่ต้องชำระ (ล็อคยอดอัตโนมัติ)"
-      const pillW = 340;
-      const pillH = 28;
-      const pillX = (755 - pillW) / 2;
-      const pillY = badgeY + 14;
-      ctx.fillStyle = '#dcfce7';
-      roundRect(ctx, pillX, pillY, pillW, pillH, 14, true, false);
-      ctx.strokeStyle = '#86efac';
-      ctx.lineWidth = 1;
-      roundRect(ctx, pillX, pillY, pillW, pillH, 14, false, true);
-
-      ctx.fillStyle = '#166534';
-      ctx.font = 'bold 16px "Prompt", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('🔒 จำนวนเงินที่ต้องชำระ (ล็อคยอดอัตโนมัติ)', 377, pillY + 19);
-
-      // Amount Display: "฿ 190.00 บาท"
+      // Pill label
+      const pillW = 380; const pillH = 32;
+      const pillX = (755 - pillW) / 2; const pillY = badgeY + 12;
+      ctx.fillStyle = '#a7f3d0';
+      roundRect(ctx, pillX, pillY, pillW, pillH, 16, true, false);
       ctx.fillStyle = '#065f46';
-      ctx.font = 'bold 44px "Prompt", "Plus Jakarta Sans", sans-serif';
+      ctx.font = 'bold 15px "Prompt", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`฿ ${formattedAmt}`, 377, badgeY + 84);
+      ctx.fillText('🔒 จำนวนเงินที่ต้องชำระ (ล็อคยอดอัตโนมัติ)', 377, pillY + 21);
+
+      // Big amount number
+      ctx.fillStyle = '#064e3b';
+      ctx.font = 'bold 58px "Prompt", "Sarabun", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`฿ ${formattedAmt}`, 377, badgeY + 114);
       ctx.restore();
     }
 
-    // Reference Code: เลขที่อ้างอิง
+    // H. Reference code
+    const refY = textTop + 106 + 128 + 22;
     ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 18px "Prompt", "Plus Jakarta Sans", sans-serif';
+    ctx.font = '500 18px "Prompt", "Sarabun", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`รหัสอ้างอิง: ${refCode}`, 377, 892);
+    ctx.fillText(`รหัสอ้างอิง: ${refCode}`, 377, refY);
 
-    // 7. Divider Line above footer
+    // I. Thin divider
+    const divY = refY + 24;
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(35, 915);
-    ctx.lineTo(720, 915);
+    ctx.moveTo(40, divY); ctx.lineTo(715, divY);
     ctx.stroke();
 
-    // 8. Footer: K+ Accepts all banks | รับเงินได้จากทุกธนาคาร
+    // J. Footer
     await new Promise(resolve => {
-      const footerImg = new Image();
-      footerImg.crossOrigin = 'anonymous';
-      footerImg.onload = () => {
-        ctx.drawImage(footerImg, 0, 924, 755, 95);
-        resolve();
-      };
-      footerImg.onerror = () => {
-        ctx.fillStyle = '#10b981';
-        ctx.font = 'bold 22px "Prompt", sans-serif';
+      const fImg = new Image();
+      fImg.crossOrigin = 'anonymous';
+      fImg.onload = () => { ctx.drawImage(fImg, 0, divY + 6, 755, 90); resolve(); };
+      fImg.onerror = () => {
+        ctx.fillStyle = '#0d9488';
+        ctx.font = 'bold 21px "Prompt", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('K+ Accepts all banks | รับเงินได้จากทุกธนาคาร', 377, 980);
+        ctx.fillText('K+ Accepts all banks | รับเงินได้จากทุกธนาคาร', 377, divY + 55);
         resolve();
       };
-      footerImg.src = 'assets/images/thai_qr_footer.png';
+      fImg.src = 'assets/images/thai_qr_footer.png';
     });
 
     return canvas.toDataURL('image/png');
+
   }
 
   // Export to global window object
