@@ -8,10 +8,10 @@
 // ================= DYNAMIC MULTI-CAMPAIGN CONTEXT =================
 const urlParams = new URLSearchParams(window.location.search);
 const currentCampaignId = urlParams.get("camp") || urlParams.get("id") || "shirt69";
-const currentCampaign = (window.ComedCampaignManager ? window.ComedCampaignManager.getCampaignById(currentCampaignId) : null) || {
+let currentCampaign = (window.ComedCampaignManager ? window.ComedCampaignManager.getCampaignById(currentCampaignId) : null) || {
   id: "shirt69",
   title: "ค่าเสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา",
-  amount: 290,
+  amount: 390,
   deadline: "2026-11-15T23:59:00+07:00",
   gasApiUrl: "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec"
 };
@@ -206,6 +206,7 @@ async function initApp() {
   if (window.ComedCampaignManager && typeof window.ComedCampaignManager.fetchFromCloud === 'function') {
     try {
       await window.ComedCampaignManager.fetchFromCloud();
+      currentCampaign = window.ComedCampaignManager.getCampaignById(currentCampaignId) || currentCampaign;
     } catch (e) {}
   }
 

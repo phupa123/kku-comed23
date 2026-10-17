@@ -194,14 +194,14 @@ window.ComedCampaignManager = {
                   bankName: item.bank_name || '',
                   accountNumber: item.account_number || '',
                   accountName: item.account_name || '',
-                  qrType: extraMeta.qrType || item.qr_type || matchedLocal.qrType || (item.qr_image && !item.qr_image.includes('qr_payment.png') ? 'custom' : 'auto'),
-                  promptpayTarget: extraMeta.promptpayTarget || item.promptpay_target || matchedLocal.promptpayTarget || (item.account_number || '').replace(/[^0-9]/g, ''),
-                  qrImage: item.qr_image || matchedLocal.qrImage || 'qr_payment.png',
-                  bgImage: item.bg_image || matchedLocal.bgImage || '',
-                  bannerImage: item.banner_image || matchedLocal.bannerImage || '',
-                  galleryImages: item.gallery_images || matchedLocal.galleryImages || [],
-                  shirtSizes: extraMeta.shirtSizes !== undefined ? extraMeta.shirtSizes : (item.shirt_sizes !== undefined ? item.shirt_sizes : (matchedLocal.shirtSizes || [])),
-                  targetMode: extraMeta.targetMode || item.target_mode || matchedLocal.targetMode || 'all',
+                  qrType: extraMeta.qrType || item.qr_type || (item.qr_image && !item.qr_image.includes('qr_payment.png') ? 'custom' : 'auto'),
+                  promptpayTarget: extraMeta.promptpayTarget || item.promptpay_target || (item.account_number || '').replace(/[^0-9]/g, ''),
+                  qrImage: item.qr_image || 'qr_payment.png',
+                  bgImage: extraMeta.bgImage || item.bg_image || '',
+                  bannerImage: extraMeta.bannerImage || item.banner_image || '',
+                  galleryImages: extraMeta.galleryImages || item.gallery_images || [],
+                  shirtSizes: extraMeta.shirtSizes !== undefined ? extraMeta.shirtSizes : (item.shirt_sizes !== undefined ? item.shirt_sizes : []),
+                  targetMode: extraMeta.targetMode || item.target_mode || 'all',
                   eligibleStudentIds: extraMeta.eligibleStudentIds || item.eligible_student_ids || matchedLocal.eligibleStudentIds || [],
                   exemptedStudentIds: extraMeta.exemptedStudentIds || item.exempted_student_ids || matchedLocal.exemptedStudentIds || [],
                   status: item.status || 'open',
@@ -277,6 +277,9 @@ window.ComedCampaignManager = {
             if (c.shirtSizes !== undefined) parsedMeta.shirtSizes = c.shirtSizes;
             if (c.qrType) parsedMeta.qrType = c.qrType;
             if (c.promptpayTarget) parsedMeta.promptpayTarget = c.promptpayTarget;
+            if (c.bgImage) parsedMeta.bgImage = c.bgImage;
+            if (c.bannerImage) parsedMeta.bannerImage = c.bannerImage;
+            if (c.galleryImages) parsedMeta.galleryImages = c.galleryImages;
             metaClosedReason = JSON.stringify(parsedMeta);
           } catch(e) {}
 
