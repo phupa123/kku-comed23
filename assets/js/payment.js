@@ -248,7 +248,7 @@ async function initApp() {
   } else if (autoPay === 'pay') {
     switchMainTab('payment');
     setTimeout(() => {
-      const payForm = document.getElementById('payment-form') || document.getElementById('searchStudentInput');
+      const payForm = document.getElementById('searchContainer') || document.getElementById('smartSearchInput');
       if (payForm) payForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 400);
   }
@@ -270,67 +270,91 @@ window.scrollToCampaignSelector = function(event) {
 function renderCampaignsNav() {
   const container = document.getElementById('campaignsNavGrid');
   const countBadge = document.getElementById('campaignsTotalCountBadge');
-  if (!container || !window.ComedCampaignManager) return;
+  const headerPillsContainer = document.getElementById('headerCampaignPillsContainer');
+  if (!window.ComedCampaignManager) return;
 
   const allCampaigns = window.ComedCampaignManager.getAllCampaigns();
   if (countBadge) countBadge.textContent = `${allCampaigns.length} รายการ`;
 
-  container.innerHTML = allCampaigns.map(camp => {
-    const isSelected = (camp.id.toLowerCase() === currentCampaign.id.toLowerCase());
-    let statusPill = '';
+  // 1. Render Header Quick Pills
+  if (headerPillsContainer) {
+    headerPillsContainer.innerHTML = allCampaigns.map(camp => {
+      const isSelected = (camp.id.toLowerCase() === currentCampaign.id.toLowerCase());
+      return `
+        <a href="payment.html?camp=${encodeURIComponent(camp.id)}" 
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 flex-shrink-0 cursor-pointer active:scale-95 ${
+            isSelected 
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 ring-2 ring-orange-500/30' 
+              : 'bg-white hover:bg-orange-50 text-slate-700 hover:text-orange-600 border border-slate-200 hover:border-orange-300 shadow-2xs'
+          }">
+          <span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white animate-ping' : 'bg-orange-400'}"></span>
+          <span class="truncate max-w-[150px] sm:max-w-none">${camp.title}</span>
+          <span class="text-[10px] font-mono opacity-85 px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}">฿${camp.amount}</span>
+        </a>
+      `;
+    }).join('');
+  }
 
-    if (camp.status === 'completed') {
-      statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1"><i data-lucide="check-check" class="w-3 h-3"></i> ชำระครบแล้ว</span>';
-    } else if (camp.status === 'open') {
-      statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-100 text-orange-800 border border-orange-300 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span> เปิดรับ</span>';
-    } else {
-      statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-700 border border-slate-300">ปิดรับชั่วคราว</span>';
-    }
+  // 2. Render Main Cards Grid
+  if (container) {
+    container.innerHTML = allCampaigns.map(camp => {
+      const isSelected = (camp.id.toLowerCase() === currentCampaign.id.toLowerCase());
+      let statusPill = '';
 
-    const payLink = `payment.html?camp=${encodeURIComponent(camp.id)}&auto=pay`;
-    const checkLink = `payment.html?camp=${encodeURIComponent(camp.id)}&tab=status`;
+      if (camp.status === 'completed') {
+        statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1"><i data-lucide="check-check" class="w-3 h-3"></i> ชำระครบแล้ว</span>';
+      } else if (camp.status === 'open') {
+        statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-100 text-orange-800 border border-orange-300 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span> เปิดรับ</span>';
+      } else {
+        statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-700 border border-slate-300">ปิดรับชั่วคราว</span>';
+      }
 
-    return `
-      <div class="p-3.5 rounded-2xl transition-all relative overflow-hidden flex flex-col justify-between ${
-        isSelected 
-          ? 'bg-gradient-to-br from-orange-500/10 via-amber-500/10 to-transparent border-2 border-orange-500 shadow-md ring-2 ring-orange-500/20' 
-          : 'bg-white hover:bg-slate-50 border border-slate-200 hover:border-orange-300 shadow-xs'
-      }">
-        ${isSelected ? '<div class="absolute top-0 right-0 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-xl shadow-xs">รายการปัจจุบัน</div>' : ''}
-        
-        <div>
-          <div class="flex items-start justify-between gap-2 mb-1.5">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">${camp.category || 'กิจกรรม'}</span>
-            <div class="pt-0.5">${statusPill}</div>
-          </div>
-          <h3 class="font-black text-xs sm:text-sm text-slate-900 line-clamp-1">${camp.title}</h3>
-          <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5">${camp.subtitle || 'คณะศึกษาศาสตร์ มข.'}</p>
+      const payLink = `payment.html?camp=${encodeURIComponent(camp.id)}&auto=pay`;
+      const checkLink = `payment.html?camp=${encodeURIComponent(camp.id)}&tab=status`;
+
+      return `
+        <div onclick="window.location.href='payment.html?camp=${encodeURIComponent(camp.id)}'" 
+          class="p-4 rounded-3xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer hover-elevate group ${
+            isSelected 
+              ? 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-white border-2 border-orange-500 active-campaign-glow ring-2 ring-orange-500/30' 
+              : 'bg-white hover:bg-orange-50/40 border border-slate-200/90 hover:border-orange-300 shadow-sm'
+          }">
+          ${isSelected ? '<div class="absolute top-0 right-0 bg-gradient-to-l from-orange-600 to-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-2xl shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> รายการที่เลือก</div>' : ''}
           
-          <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span class="font-bold text-slate-400 text-[10px]">ยอดชำระ</span>
-            <span class="font-black text-orange-600 font-mono text-sm">฿${Number(camp.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+          <div>
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-200">${camp.category || 'กิจกรรม'}</span>
+              <div class="pt-0.5">${statusPill}</div>
+            </div>
+            <h3 class="font-black text-sm sm:text-base text-slate-900 line-clamp-1 group-hover:text-orange-600 transition-colors">${camp.title}</h3>
+            <p class="text-xs text-slate-500 line-clamp-1 mt-0.5">${camp.subtitle || 'คณะศึกษาศาสตร์ มข.'}</p>
+            
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-400 text-[11px]">ยอดชำระต่อคน</span>
+              <span class="font-black text-orange-600 font-mono text-base">฿${Number(camp.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+            </div>
+          </div>
+
+          <div class="mt-3.5 pt-2.5 border-t border-slate-100 grid grid-cols-2 gap-2" onclick="event.stopPropagation()">
+            <a href="${payLink}" 
+              class="py-2 px-3 rounded-2xl text-xs font-black text-center flex items-center justify-center gap-1.5 transition active:scale-95 ${
+                isSelected 
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md shadow-orange-500/25' 
+                  : 'bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200'
+              }">
+              <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
+              <span>ชำระเงิน</span>
+            </a>
+            <a href="${checkLink}" 
+              class="py-2 px-3 rounded-2xl text-xs font-bold text-center flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 transition active:scale-95">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>เช็ครายชื่อ</span>
+            </a>
           </div>
         </div>
-
-        <div class="mt-3 pt-2.5 border-t border-slate-100 grid grid-cols-2 gap-1.5">
-          <a href="${payLink}" 
-            class="py-1.5 px-2 rounded-xl text-[11px] font-black text-center flex items-center justify-center gap-1 transition active:scale-95 ${
-              isSelected 
-                ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm' 
-                : 'bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200'
-            }">
-            <i data-lucide="credit-card" class="w-3 h-3"></i>
-            <span>ชำระเงิน</span>
-          </a>
-          <a href="${checkLink}" 
-            class="py-1.5 px-2 rounded-xl text-[11px] font-bold text-center flex items-center justify-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 transition active:scale-95">
-            <i data-lucide="users" class="w-3 h-3 text-slate-500"></i>
-            <span>เช็ครายชื่อ</span>
-          </a>
-        </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  }
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -348,7 +372,9 @@ function applyCampaignDetailsToUI() {
   const catText = document.getElementById('heroCategoryText');
   const dlineText = document.getElementById('heroDeadlineText');
   const targetMoney = document.getElementById('targetMoney');
+  const headTitle = document.getElementById('headerDynamicTitle');
 
+  if (headTitle) headTitle.textContent = c.title ? `ระบบชำระเงิน${c.title}` : "ระบบชำระเงินสาขาวิชาคอมพิวเตอร์ศึกษา";
   if (titleEl) titleEl.textContent = c.title || "ระบบชำระเงิน";
   if (subEl) subEl.textContent = c.subtitle || "สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มข.";
   if (amtText) amtText.textContent = `${c.title} คนละ ฿${Number(c.amount).toLocaleString()}`;
@@ -953,24 +979,26 @@ function renderAutocompleteList(list) {
     }
 
     return `
-      <div onclick="handleAutocompleteSelect('${st.id}')" class="p-3.5 hover:bg-orange-50/80 cursor-pointer flex items-center justify-between transition group">
+      <div onclick="handleAutocompleteSelect('${st.id}')" class="p-3.5 sm:p-4 hover:bg-orange-50/90 cursor-pointer flex items-center justify-between transition-all duration-200 group search-item-hover rounded-xl m-1 border border-transparent hover:border-orange-200/80 shadow-2xs">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-2xl bg-slate-100 group-hover:bg-orange-100 text-slate-700 group-hover:text-orange-700 flex items-center justify-center font-black text-xs shadow-sm">
-            ${st.nickname.slice(0, 1)}
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-orange-500 via-amber-500 to-orange-400 text-white flex items-center justify-center font-black text-sm shadow-md shadow-orange-500/25 border-2 border-white flex-shrink-0 group-hover:scale-105 transition-transform">
+            ${st.nickname.slice(0, 1) || st.name.slice(0, 1)}
           </div>
           <div>
-            <div class="flex items-center gap-2">
-              <span class="font-black text-slate-900 text-sm">${st.name}</span>
-              <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">น้อง${st.nickname}</span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-black text-slate-900 text-sm sm:text-base group-hover:text-orange-600 transition-colors">${st.name}</span>
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-orange-100/80 text-orange-800 font-extrabold border border-orange-200/60 shadow-3xs">
+                น้อง${st.nickname}
+              </span>
             </div>
-            <div class="text-xs text-slate-400 font-mono mt-0.5 flex items-center gap-2">
-              <span>${st.id}</span>
-              <span>•</span>
-              <span>${st.email}</span>
+            <div class="text-[11px] sm:text-xs text-slate-500 font-mono mt-1 flex items-center gap-1.5 flex-wrap">
+              <span class="font-extrabold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">${st.id}</span>
+              <span class="text-slate-300">•</span>
+              <span class="text-slate-500 truncate max-w-[150px] sm:max-w-none">${st.email}</span>
             </div>
           </div>
         </div>
-        <div>
+        <div class="flex-shrink-0 ml-2">
           ${badgeHtml}
         </div>
       </div>
@@ -1100,12 +1128,26 @@ function selectStudent(st) {
     if (exemptedSection) exemptedSection.classList.add('hidden');
   }
 
-  // Show Card with GSAP Animation
+  // Show Card with GSAP Animation & Smooth Auto-Scroll
   const card = document.getElementById('studentProfileCard');
   if (card) {
     card.classList.remove('hidden');
     if (typeof gsap !== 'undefined') {
-      gsap.fromTo(card, { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" });
+      gsap.fromTo(card, 
+        { opacity: 0, y: 30, scale: 0.98 }, 
+        { 
+          opacity: 1, 
+          y: 0, 
+          scale: 1, 
+          duration: 0.5, 
+          ease: "back.out(1.4)",
+          onComplete: () => {
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+      );
+    } else {
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
 

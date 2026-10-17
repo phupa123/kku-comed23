@@ -271,9 +271,9 @@
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Cloud Sync
             </span>
           </div>
-          <h1
+          <h1 id="headerDynamicTitle"
             class="text-xs sm:text-base font-extrabold text-slate-800 tracking-tight leading-tight line-clamp-1">
-            ระบบชำระเงินค่าป้ายเอก</h1>
+            ระบบชำระเงินสาขาวิชาเอกคอมพิวเตอร์ศึกษา</h1>
         </div>
       </div>
 
@@ -343,6 +343,17 @@
         </button>
       </div>
 
+    </div>
+
+    <!-- Quick Horizontal Campaign Switcher Bar -->
+    <div id="headerQuickCampaignBar" class="border-t border-slate-100 bg-slate-50/70 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-2 overflow-x-auto mobile-hide-scrollbar flex items-center gap-2">
+      <div class="flex items-center gap-1.5 text-[11px] font-black text-slate-400 uppercase tracking-wider flex-shrink-0 mr-1">
+        <i data-lucide="layers" class="w-3.5 h-3.5 text-orange-500"></i>
+        <span class="hidden sm:inline">รายการ:</span>
+      </div>
+      <div id="headerCampaignPillsContainer" class="flex items-center gap-2 flex-nowrap">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
     </div>
   </header>
 
