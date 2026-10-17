@@ -285,16 +285,16 @@ window.ComedCampaignManager = {
           payload.closed_reason = metaClosedReason;
 
           // Attempt upsert with core columns
-          const { error } = await sb.from('campaigns').upsert(payload, { onConflict: 'id' });
-          if (error) {
-            console.warn(`Supabase Upsert skipped for campaign ${c.id}:`, error.message || error);
-          }
+          await sb.from('campaigns').upsert(payload, { onConflict: 'id' }).catch(fetchErr => {
+            console.warn(`Supabase network/CORS upsert notice for campaign ${c.id}:`, fetchErr?.message || fetchErr);
+            return { error: fetchErr };
+          });
         } catch (innerErr) {
-          console.warn(`Supabase Upsert skipped for campaign ${c.id}:`, innerErr);
+          console.warn(`Supabase Upsert skipped for campaign ${c.id}:`, innerErr?.message || innerErr);
         }
       }
     } catch(e) {
-      console.warn("Supabase Upsert Campaign Error:", e);
+      console.warn("Supabase Upsert Campaign Error:", e?.message || e);
     }
   }
 };
