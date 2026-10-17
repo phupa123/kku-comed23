@@ -182,255 +182,285 @@
   <!-- ================= 2. MAIN ADMIN DASHBOARD ================= -->
   <div id="adminDashboard" class="hidden flex-grow flex flex-col">
 
-    <!-- Top Header -->
-    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800 shadow-md">
-      <div
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-0 sm:h-20 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-          <div class="flex items-center gap-3">
-            <div
-              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center flex-shrink-0">
-              <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
-            </div>
-            <div>
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[11px] font-black text-orange-400 uppercase tracking-wider">COMED23</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-950/60 text-orange-300 border border-orange-500/30">KKU63</span>
-                <span
-                  class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-orange-500/20 text-orange-300 border border-orange-500/30">Host
-                  Admin</span>
-              </div>
-              <h1 class="text-sm sm:text-lg font-black text-white">ระบบจัดการหลังบ้าน: ค่าทำป้ายสาขาวิชาเอก</h1>
-            </div>
+    <!-- Top Header (Clean & Focused) -->
+    <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+        <!-- Brand & Current Context -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center flex-shrink-0">
+            <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
           </div>
-
-          <div class="sm:hidden flex items-center gap-1.5">
-            <button onclick="openExportModal()"
-              class="p-2 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-700/60" title="ส่งออก Excel">
-              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-            </button>
-            <button onclick="refreshDataFromCloud()"
-              class="p-2 rounded-xl bg-sky-950/80 text-sky-400 border border-sky-700/60" title="รีเฟรชข้อมูล">
-              <i data-lucide="rotate-cw" class="w-4 h-4"></i>
-            </button>
-            <button onclick="handleAdminLogout()"
-              class="p-2 rounded-xl text-rose-400 bg-rose-500/10 border border-rose-500/20" title="ออกจากระบบ">
-              <i data-lucide="log-out" class="w-4 h-4"></i>
-            </button>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[10px] font-black text-orange-400 uppercase tracking-wider">COMED23</span>
+              <span class="px-1.5 py-0.2 rounded-md text-[9px] font-mono font-bold bg-orange-950/60 text-orange-300 border border-orange-500/30">KKU63</span>
+              <span id="currentCampaignBadgeMini" class="px-1.5 py-0.2 rounded-md text-[9px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 truncate max-w-[120px] sm:max-w-none">Live Hub</span>
+            </div>
+            <h1 class="text-sm sm:text-base font-black text-white truncate max-w-[200px] sm:max-w-md" id="adminHeaderCampaignTitle">
+              ระบบจัดการหลังบ้าน: ค่าทำป้ายสาขาวิชาเอก
+            </h1>
           </div>
         </div>
 
-        <div class="hidden sm:flex items-center gap-2.5">
-          <!-- QR Scanner -->
-          <button onclick="window.QRSuite.openScannerModal({ title: 'สแกน QR Code ตรวจสอบสลิป / ค้นหาข้อมูล' })"
-            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer" title="สแกน QR Code">
-            <i data-lucide="scan-line" class="w-4 h-4 text-emerald-400"></i>
-            <span>สแกน QR</span>
-          </button>
-
-          <!-- Share Page QR -->
-          <button onclick="window.QRSuite.openPageQrModal({ title: 'ระบบชำระเงินค่าป้ายเอก (payment.html)', userUrl: `${window.location.origin}/payment.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้ารับชำระเงินสำหรับเพื่อนนักศึกษา' })"
-            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer" title="เปิด QR ให้เพื่อนสแกน">
-            <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
-            <span>เปิด QR หน้านี้</span>
-          </button>
-
+        <!-- Action Bar: Essential Tools on Screen + Dropdown for Extra Tools -->
+        <div class="flex items-center gap-2">
+          <!-- Primary Actions -->
           <button onclick="refreshDataFromCloud()"
-            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-sky-400 bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 transition shadow-sm group">
-            <i data-lucide="rotate-cw" id="adminRefreshIcon"
-              class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500"></i>
-            <span>รีเฟรชข้อมูล</span>
+            class="p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold text-sky-400 bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 transition shadow-sm flex items-center gap-1.5 cursor-pointer" title="รีเฟรชข้อมูล">
+            <i data-lucide="rotate-cw" id="adminRefreshIcon" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">รีเฟรช</span>
           </button>
-          <a href="admin.html"
-            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-amber-300 bg-amber-950/80 hover:bg-amber-900 border border-amber-600/60 transition shadow-sm">
-            <i data-lucide="layout-grid" class="w-4 h-4 text-amber-400"></i>
-            <span>Admin Hub</span>
-          </a>
-          <a href="payment.html" target="_blank"
-            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
-            <i data-lucide="credit-card" class="w-4 h-4 text-orange-400"></i>
-            <span>ระบบชำระเงิน</span>
-          </a>
-          <a href="index.html" target="_blank"
-            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
-            <i data-lucide="external-link" class="w-4 h-4"></i>
-            <span>หน้าหลักสาขา</span>
-          </a>
-          <button onclick="openSlipVerificationConfigModal()"
-            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-cyan-300 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-700/60 transition shadow-sm cursor-pointer"
-            title="ตั้งค่าตรวจสลิปอัตโนมัติ / สลับโควตา">
-            <i data-lucide="scan-line" class="w-4 h-4 text-cyan-400"></i>
-            <span>ตรวจสลิป & โควตา</span>
-            <span id="adminSlipModeBadge" class="px-1.5 py-0.2 rounded text-[9px] bg-slate-900 text-slate-300 font-mono">Manual</span>
-          </button>
+
           <button onclick="openExportModal()"
-            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm cursor-pointer">
+            class="p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm flex items-center gap-1.5 cursor-pointer" title="ส่งออก Excel">
             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
-            <span>Export Excel</span>
+            <span class="hidden sm:inline">Export Excel</span>
           </button>
+
+          <!-- Dropdown: More Tools (สแกน QR, ตรวจสลิป, หน้าเว็บย่อย) -->
+          <div class="relative" id="adminMoreToolsDropdown">
+            <button onclick="toggleAdminToolsMenu(event)"
+              class="p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="more-horizontal" class="w-4 h-4 text-slate-400"></i>
+              <span class="hidden sm:inline">เครื่องมือเพิ่มเติม</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 hidden sm:inline"></i>
+            </button>
+
+            <!-- Dropdown Menu Content -->
+            <div id="adminToolsMenuContent" class="hidden absolute right-0 mt-2 w-64 bg-slate-900/95 backdrop-blur-2xl border border-slate-700/80 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
+              <div class="px-2.5 py-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                เครื่องมือ & ตั้งค่า
+              </div>
+              <button onclick="closeAdminToolsMenu(); window.QRSuite.openScannerModal({ title: 'สแกน QR Code ตรวจสอบสลิป / ค้นหาข้อมูล' })"
+                class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-emerald-400 transition text-left cursor-pointer">
+                <i data-lucide="scan-line" class="w-4 h-4 text-emerald-400"></i>
+                <span>สแกน QR Code ตรวจสลิป</span>
+              </button>
+              <button onclick="closeAdminToolsMenu(); window.QRSuite.openPageQrModal({ title: 'ระบบชำระเงินค่าป้ายเอก (payment.html)', userUrl: `${window.location.origin}/payment.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้ารับชำระเงินสำหรับเพื่อนนักศึกษา' })"
+                class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-orange-400 transition text-left cursor-pointer">
+                <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
+                <span>เปิด QR ให้เพื่อนสแกน</span>
+              </button>
+              <button onclick="closeAdminToolsMenu(); openSlipVerificationConfigModal()"
+                class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-cyan-400 transition text-left cursor-pointer">
+                <div class="flex items-center gap-2.5">
+                  <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i>
+                  <span>ตรวจสลิป & โควตา</span>
+                </div>
+                <span id="adminSlipModeBadge" class="px-1.5 py-0.2 rounded text-[9px] bg-slate-950 text-slate-300 font-mono">Manual</span>
+              </button>
+
+              <div class="my-1 border-t border-slate-800"></div>
+
+              <div class="px-2.5 py-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                ลิงก์ไปยังหน้าระบบ
+              </div>
+              <a href="payment.html" target="_blank"
+                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 hover:text-orange-400 transition">
+                <i data-lucide="credit-card" class="w-4 h-4 text-orange-400"></i>
+                <span>หน้ารับชำระเงิน (นักศึกษา)</span>
+              </a>
+              <a href="admin.html"
+                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 hover:text-amber-400 transition">
+                <i data-lucide="layout-grid" class="w-4 h-4 text-amber-400"></i>
+                <span>Admin Hub รวมระบบ</span>
+              </a>
+              <a href="index.html" target="_blank"
+                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 hover:text-sky-400 transition">
+                <i data-lucide="external-link" class="w-4 h-4 text-sky-400"></i>
+                <span>หน้าหลักเว็บไซต์สาขา</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Logout Button -->
           <button onclick="handleAdminLogout()"
-            class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+            class="p-2 sm:p-2.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
             title="ออกจากระบบ">
-            <i data-lucide="log-out" class="w-5 h-5"></i>
+            <i data-lucide="log-out" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </button>
         </div>
       </div>
     </header>
 
     <!-- Content -->
-    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-grow">
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 flex-grow">
 
-      <!-- ================= 0. CAMPAIGN MANAGER HUB IN ADMIN ================= -->
-      <div class="cyber-glass rounded-3xl p-5 sm:p-6 border border-orange-500/40 shadow-2xl space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center border border-orange-500/30 flex-shrink-0">
-              <i data-lucide="layers" class="w-5 h-5"></i>
+      <!-- ================= 0. CAMPAIGN MANAGER HUB (SLIM & CLEAN) ================= -->
+      <div class="bg-slate-900/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-800/80 shadow-xl space-y-3.5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center border border-orange-500/30 flex-shrink-0">
+              <i data-lucide="layers" class="w-4 h-4"></i>
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <h2 class="text-base sm:text-lg font-black text-white">จัดการและสลับรายการชำระเงิน (Campaigns Hub)</h2>
-                <span id="adminCampaignCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">1 รายการ</span>
+                <h2 class="text-sm sm:text-base font-black text-white">รายการชำระเงิน (Campaigns)</h2>
+                <span id="adminCampaignCountBadge" class="px-2 py-0.2 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">1 รายการ</span>
               </div>
-              <p class="text-xs text-slate-400">เลือกรายการเพื่อดูและตรวจสอบสลิปของกิจกรรมนั้น หรือสร้างรายการใหม่ให้เพื่อนๆ เห็นทันที</p>
+              <p class="text-[11px] text-slate-400 hidden sm:block">คลิกสลับรายการชำระเงิน หรือจัดการสิทธิ์ผู้ชำระได้ทันที</p>
             </div>
           </div>
 
-          <button onclick="openCreateCampaignModal()" 
-            class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-xs shadow-lg shadow-orange-500/25 transition flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>+ สร้างการเก็บเงินใหม่</span>
-          </button>
+          <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            <button onclick="openCurrentCampaignAudienceModal()" 
+              class="px-3 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 font-bold text-xs border border-indigo-500/30 transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="users" class="w-3.5 h-3.5"></i>
+              <span>กำหนดสิทธิ์คนชำระ</span>
+            </button>
+            <button onclick="openEditCurrentCampaignModal()" 
+              class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="settings" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>แก้ไขแคมเปญนี้</span>
+            </button>
+            <button onclick="openCreateCampaignModal()" 
+              class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>+ สร้างรายการใหม่</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Active Campaigns Selector Tabs -->
-        <div id="adminCampaignsNav" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <!-- Rendered via JS -->
+        <!-- Active Campaigns Segmented Nav (Horizontal Scroll or Compact Grid) -->
+        <div id="adminCampaignsNav" class="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-slate-800">
+          <!-- Rendered via JS in compact pill style -->
         </div>
       </div>
 
-      <!-- Stats Overview 4-Grid Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Stats Overview (Sleek 4-Grid Cards) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 
         <!-- 1. Total Received Money -->
-        <div class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800">
-          <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-            <span class="font-bold">ยอดเงินที่ได้รับแล้ว</span>
-            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-              <i data-lucide="wallet" class="w-4 h-4"></i>
+        <div class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80">
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+            <span class="font-bold">ยอดเงินที่ได้รับ</span>
+            <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+              <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
             </div>
           </div>
-          <div class="text-3xl font-black text-white font-mono" id="statMoneyReceived">฿0</div>
-          <div class="text-xs text-slate-500 mt-1 flex justify-between">
-            <span>เป้าหมาย ฿11,400</span>
+          <div class="text-xl sm:text-2xl font-black text-white font-mono" id="statMoneyReceived">฿0</div>
+          <div class="text-[11px] text-slate-500 mt-1 flex justify-between">
+            <span id="statTargetMoneyLabel">เป้าหมาย ฿11,400</span>
             <span id="statMoneyPercent" class="text-amber-400 font-bold">0%</span>
           </div>
         </div>
 
         <!-- 2. Paid Count -->
-        <div class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800">
-          <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+        <div class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80">
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-1.5">
             <span class="font-bold">ชำระเงินแล้ว</span>
-            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-              <i data-lucide="user-check" class="w-4 h-4"></i>
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
             </div>
           </div>
-          <div class="text-3xl font-black text-emerald-400 font-mono" id="statPaidCount">0 <span
+          <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono" id="statPaidCount">0 <span
               class="text-xs font-normal text-slate-400">คน</span></div>
-          <div class="text-xs text-slate-500 mt-1 flex justify-between">
-            <span>จากทั้งหมด 60 คน</span>
+          <div class="text-[11px] text-slate-500 mt-1 flex justify-between">
+            <span id="statTotalStudentsLabel">จากทั้งหมด 60 คน</span>
             <span id="statPaidPercent" class="text-emerald-400 font-bold">0%</span>
           </div>
         </div>
 
         <!-- 3. Unpaid Count -->
-        <div class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800">
-          <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+        <div class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80">
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-1.5">
             <span class="font-bold">ยังไม่ชำระเงิน</span>
-            <div class="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
-              <i data-lucide="user-x" class="w-4 h-4"></i>
+            <div class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
+              <i data-lucide="user-x" class="w-3.5 h-3.5"></i>
             </div>
           </div>
-          <div class="text-3xl font-black text-rose-400 font-mono" id="statUnpaidCount">60 <span
+          <div class="text-xl sm:text-2xl font-black text-rose-400 font-mono" id="statUnpaidCount">60 <span
               class="text-xs font-normal text-slate-400">คน</span></div>
-          <div class="text-xs text-slate-500 mt-1 flex justify-between">
+          <div class="text-[11px] text-slate-500 mt-1 flex justify-between">
             <span>ยอดค้างรับ</span>
             <span id="statUnpaidMoney" class="text-rose-400 font-bold">฿11,400</span>
           </div>
         </div>
 
-        <!-- 4. Cloud Sync Status -->
-        <div
-          class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span class="font-bold">การเชื่อมต่อ Cloud</span>
-            <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
-              <i data-lucide="cloud" class="w-4 h-4"></i>
+        <!-- 4. Exempted / Cloud Sync Status -->
+        <div class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+            <span class="font-bold">ได้รับการยกเว้น</span>
+            <div class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+              <i data-lucide="shield-off" class="w-3.5 h-3.5"></i>
             </div>
           </div>
-          <div>
-            <div class="flex items-center gap-2 text-sm font-bold text-white">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Google Sheets & Drive</span>
-            </div>
-            <span class="text-[11px] text-slate-400 block mt-1">ซิงค์อัตโนมัติ 2-Way</span>
+          <div class="text-xl sm:text-2xl font-black text-indigo-300 font-mono" id="statExemptedCount">0 <span
+              class="text-xs font-normal text-slate-400">คน</span></div>
+          <div class="text-[11px] text-slate-500 mt-1 flex justify-between items-center">
+            <span class="flex items-center gap-1.5 text-emerald-400 font-medium">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              2-Way Sync
+            </span>
+            <button onclick="refreshDataFromCloud()" class="text-sky-400 hover:text-sky-300 text-[10px] font-bold cursor-pointer">ซิงค์</button>
           </div>
-          <button onclick="refreshDataFromCloud()"
-            class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1 transition">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> ซิงค์ข้อมูลล่าสุด
-          </button>
         </div>
 
       </div>
 
       <!-- Main Management Table Card -->
       <div id="adminTableContainer"
-        class="cyber-glass rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-800">
+        class="bg-slate-900/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl space-y-5 border border-slate-800/80">
 
-        <!-- Controls: Filters, Search & Bulk Actions -->
+        <!-- Controls: Filters Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div class="flex items-center gap-2 flex-wrap">
-            <h2 class="text-xl font-black text-white flex items-center gap-2">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
               <i data-lucide="users" class="w-5 h-5 text-orange-500"></i>
-              รายชื่อนักศึกษาทั้งหมด 60 คน
+              <span>รายชื่อนักศึกษา</span>
             </h2>
+            <span id="adminTableCountBadge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-300">60 คน</span>
           </div>
 
-          <!-- Status & Management Filter Tabs -->
-          <div
-            class="flex items-center gap-1 p-1 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-bold flex-wrap">
+          <!-- Status Filters: Primary 4 Tabs + More Tab -->
+          <div class="flex items-center gap-1 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs font-bold overflow-x-auto">
             <button onclick="setFilter('all')" id="fBtnAll"
-              class="px-3.5 py-2 rounded-xl bg-slate-800 text-white shadow-sm transition">
-              ทั้งหมด (60)
+              class="px-3 py-1.5 rounded-xl bg-orange-600 text-white shadow-sm transition flex items-center gap-1 cursor-pointer whitespace-nowrap">
+              ทั้งหมด (<span id="countFAll">60</span>)
             </button>
             <button onclick="setFilter('paid')" id="fBtnPaid"
-              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-emerald-400 transition">
+              class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 transition flex items-center gap-1 cursor-pointer whitespace-nowrap">
               จ่ายแล้ว (<span id="countFPaid">0</span>)
             </button>
             <button onclick="setFilter('unpaid')" id="fBtnUnpaid"
-              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-rose-400 transition">
+              class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-rose-400 transition flex items-center gap-1 cursor-pointer whitespace-nowrap">
               ยังไม่จ่าย (<span id="countFUnpaid">60</span>)
             </button>
             <button onclick="setFilter('trash')" id="fBtnTrash"
-              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1">
+              class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1 cursor-pointer whitespace-nowrap">
               <i data-lucide="trash-2" class="w-3.5 h-3.5 text-amber-500"></i>
               <span>ถังขยะ (<span id="countFTrash">0</span>)</span>
             </button>
-            <button onclick="setFilter('issues')" id="fBtnIssues"
-              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-pink-400 transition flex items-center gap-1">
-              <i data-lucide="help-circle" class="w-3.5 h-3.5 text-pink-500"></i>
-              <span>ปัญหาผู้ใช้ (<span id="countFIssues">0</span>)</span>
-            </button>
-            <button onclick="setFilter('admins')" id="fBtnAdmins"
-              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-indigo-400 transition flex items-center gap-1">
-              <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-400"></i>
-              <span>จัดการแอดมิน</span>
-            </button>
-            <button onclick="setFilter('logs')" id="fBtnLogs"
-              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-sky-400 transition flex items-center gap-1">
-              <i data-lucide="activity" class="w-3.5 h-3.5 text-sky-400"></i>
-              <span>Logs ระบบ</span>
-            </button>
+
+            <!-- More System Views Dropdown / Toggle -->
+            <div class="relative">
+              <button onclick="toggleSystemViewsMenu(event)" id="fBtnSystemViews"
+                class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-indigo-300 transition flex items-center gap-1 cursor-pointer whitespace-nowrap border-l border-slate-800 pl-2 ml-1">
+                <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span>ระบบ & Logs</span>
+                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
+              </button>
+              <div id="systemViewsMenuContent" class="hidden absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-2xl shadow-xl p-1.5 z-40 space-y-1 text-xs">
+                <button onclick="closeSystemViewsMenu(); setFilter('issues')" id="fBtnIssues"
+                  class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-pink-400 transition text-left cursor-pointer">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="help-circle" class="w-3.5 h-3.5 text-pink-400"></i>
+                    <span>ปัญหาผู้ใช้</span>
+                  </div>
+                  <span id="countFIssues" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-pink-500/10 text-pink-400">0</span>
+                </button>
+                <button onclick="closeSystemViewsMenu(); setFilter('admins')" id="fBtnAdmins"
+                  class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-indigo-400 transition text-left cursor-pointer">
+                  <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  <span>จัดการบัญชี Admin</span>
+                </button>
+                <button onclick="closeSystemViewsMenu(); setFilter('logs')" id="fBtnLogs"
+                  class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-sky-400 transition text-left cursor-pointer">
+                  <i data-lucide="activity" class="w-3.5 h-3.5 text-sky-400"></i>
+                  <span>Activity Logs</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -481,74 +481,70 @@ function handleAdminLogout() {
 function renderAdminCampaignsNav() {
   const container = document.getElementById('adminCampaignsNav');
   const countBadge = document.getElementById('adminCampaignCountBadge');
+  const headerTitle = document.getElementById('adminHeaderCampaignTitle');
+  const headerBadge = document.getElementById('currentCampaignBadgeMini');
   if (!container || !window.ComedCampaignManager) return;
 
   const allCampaigns = window.ComedCampaignManager.getAllCampaigns();
   if (countBadge) countBadge.textContent = `${allCampaigns.length} รายการ`;
 
+  if (headerTitle && currentAdminCampaign) {
+    headerTitle.textContent = `หลังบ้าน: ${currentAdminCampaign.title}`;
+  }
+  if (headerBadge && currentAdminCampaign) {
+    headerBadge.textContent = currentAdminCampaign.code || currentAdminCampaign.id.toUpperCase();
+  }
+
   container.innerHTML = allCampaigns.map(camp => {
     const isSelected = (camp.id.toLowerCase() === currentAdminCampaign.id.toLowerCase());
-    let statusPill = '';
+    let statusDot = '';
 
     if (camp.status === 'completed') {
-      statusPill = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"><i data-lucide="check-check" class="w-3 h-3"></i> ครบแล้ว/ปิดรับ</span>';
+      statusDot = '<span class="w-2 h-2 rounded-full bg-emerald-400" title="ครบแล้ว"></span>';
     } else if (camp.status === 'open') {
-      statusPill = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-orange-500/20 text-orange-300 border border-orange-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></span> กำลังเปิดรับ</span>';
+      statusDot = '<span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse" title="เปิดรับชำระ"></span>';
     } else {
-      statusPill = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-slate-800 text-slate-400 border border-slate-700">ปิดชั่วคราว</span>';
+      statusDot = '<span class="w-2 h-2 rounded-full bg-slate-500" title="ปิดชั่วคราว"></span>';
     }
 
     const adminLink = `payment-admin.html?camp=${encodeURIComponent(camp.id)}`;
 
     return `
-      <div class="p-3.5 rounded-2xl transition-all relative overflow-hidden flex flex-col justify-between ${
+      <div class="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-2xl transition-all ${
         isSelected
-          ? 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-slate-900 border-2 border-orange-500 shadow-lg'
-          : 'bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 shadow-xs'
+          ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/15 border-2 border-orange-500 shadow-md text-white'
+          : 'bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 hover:text-white'
       }">
-        <div>
-          <div class="flex items-center justify-between gap-1 mb-1">
-            <span class="text-[9px] font-extrabold uppercase tracking-wider text-orange-400">${camp.category || 'กิจกรรม'}</span>
-            ${statusPill}
-          </div>
-          <h4 class="font-black text-xs text-white line-clamp-1">${camp.title}</h4>
-          <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-            <span>เป้าหมายคนละ:</span>
-            <span class="font-bold text-orange-400 font-mono">฿${Number(camp.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-          </div>
-        </div>
+        <a href="${adminLink}" class="flex items-center gap-2 text-xs font-bold truncate max-w-[180px] sm:max-w-[220px]">
+          ${statusDot}
+          <span class="truncate">${camp.title}</span>
+          <span class="font-mono text-[11px] text-orange-400 font-black">฿${Number(camp.amount).toLocaleString()}</span>
+        </a>
 
-        <div class="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
-          ${isSelected 
-            ? '<span class="text-[10px] font-black text-orange-400 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ใช้งานอยู่นี้</span>'
-            : `<a href="${adminLink}" class="text-[10px] font-bold text-slate-300 hover:text-white px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 transition">สลับมาดูรายการนี้</a>`
-          }
-
-          <div class="flex items-center gap-1">
-            <button onclick="openAudienceModal('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 font-bold transition flex items-center gap-1 cursor-pointer" title="กำหนดผู้มีสิทธิ์ชำระ / ยกเว้นรายบุคคล">
-              <i data-lucide="users" class="w-3 h-3"></i>
-              <span>สิทธิ์</span>
-            </button>
-            <button onclick="openEditCampaignModal('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 font-bold transition flex items-center gap-1 cursor-pointer" title="แก้ไขรายละเอียดแคมเปญ">
-              <i data-lucide="edit-3" class="w-3 h-3"></i>
-              <span>แก้ไข</span>
-            </button>
-            <button onclick="toggleCampaignStatus('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer" title="เปิด/ปิดการชำระเงิน">
-              ${camp.status === 'open' ? 'ปิดรับ' : 'เปิดรับ'}
-            </button>
-            <button onclick="openDeleteCampaignModal('${camp.id}')" class="text-[9px] p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition cursor-pointer" title="ลบรายการเก็บเงินนี้">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-            <a href="payment.html?camp=${encodeURIComponent(camp.id)}" target="_blank" class="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-orange-400" title="ดูหน้าชำระเงินของนศ.">
-              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-            </a>
-          </div>
+        <div class="flex items-center gap-1 border-l border-slate-800 pl-1.5 ml-0.5">
+          <button onclick="openAudienceModal('${camp.id}')" class="p-1 rounded-lg hover:bg-indigo-500/20 text-slate-400 hover:text-indigo-300 transition cursor-pointer" title="กำหนดสิทธิ์ผู้ชำระ">
+            <i data-lucide="users" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="openEditCampaignModal('${camp.id}')" class="p-1 rounded-lg hover:bg-orange-500/20 text-slate-400 hover:text-orange-300 transition cursor-pointer" title="แก้ไข">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="openDeleteCampaignModal('${camp.id}')" class="p-1 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition cursor-pointer" title="ลบรายการ">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
       </div>
     `;
   }).join('');
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function openCurrentCampaignAudienceModal() {
+  if (currentAdminCampaign) openAudienceModal(currentAdminCampaign.id);
+}
+
+function openEditCurrentCampaignModal() {
+  if (currentAdminCampaign) openEditCampaignModal(currentAdminCampaign.id);
 }
 
 async function handleQrFileUpload(event, previewImgId, inputId) {
@@ -1325,6 +1321,10 @@ function renderStats() {
   const elPaidPct = document.getElementById('statPaidPercent');
   const elUnpaidCnt = document.getElementById('statUnpaidCount');
   const elUnpaidMon = document.getElementById('statUnpaidMoney');
+  const elExemptedCnt = document.getElementById('statExemptedCount');
+  const elTargetLabel = document.getElementById('statTargetMoneyLabel');
+  const elTotalLabel = document.getElementById('statTotalStudentsLabel');
+  const elTableBadge = document.getElementById('adminTableCountBadge');
 
   if (elMoneyRec) elMoneyRec.textContent = `฿${moneyReceived.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
   if (elMoneyPct) elMoneyPct.textContent = `${moneyPercent}%`;
@@ -1335,16 +1335,59 @@ function renderStats() {
   if (elUnpaidCnt) elUnpaidCnt.innerHTML = `${unpaidCount} <span class="text-xs font-normal text-slate-400">คน</span>`;
   if (elUnpaidMon) elUnpaidMon.textContent = `฿${unpaidMoney.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 
+  if (elExemptedCnt) elExemptedCnt.innerHTML = `${exemptedList.length} <span class="text-xs font-normal text-slate-400">คน</span>`;
+  if (elTargetLabel) elTargetLabel.textContent = `เป้าหมาย ฿${totalTarget.toLocaleString()}`;
+  if (elTotalLabel) elTotalLabel.textContent = `จากต้องชำระ ${total} คน`;
+  if (elTableBadge) elTableBadge.textContent = `${allStudents.length} คน (ชำระ ${total} / ยกเว้น ${exemptedList.length})`;
+
+  const cFAll = document.getElementById('countFAll');
   const cFPaid = document.getElementById('countFPaid');
   const cFUnpaid = document.getElementById('countFUnpaid');
   const cFTrash = document.getElementById('countFTrash');
   const cFIssues = document.getElementById('countFIssues');
 
+  if (cFAll) cFAll.textContent = allStudents.length;
   if (cFPaid) cFPaid.textContent = paidCount;
   if (cFUnpaid) cFUnpaid.textContent = unpaidCount;
   if (cFTrash) cFTrash.textContent = Object.keys(trashRecords).length;
   if (cFIssues) cFIssues.textContent = userIssues.length;
 }
+
+// Menu Dropdowns Logic
+function toggleAdminToolsMenu(event) {
+  if (event) event.stopPropagation();
+  const menu = document.getElementById('adminToolsMenuContent');
+  if (menu) menu.classList.toggle('hidden');
+}
+
+function closeAdminToolsMenu() {
+  const menu = document.getElementById('adminToolsMenuContent');
+  if (menu) menu.classList.add('hidden');
+}
+
+function toggleSystemViewsMenu(event) {
+  if (event) event.stopPropagation();
+  const menu = document.getElementById('systemViewsMenuContent');
+  if (menu) menu.classList.toggle('hidden');
+}
+
+function closeSystemViewsMenu() {
+  const menu = document.getElementById('systemViewsMenuContent');
+  if (menu) menu.classList.add('hidden');
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', function(e) {
+  const toolsDropdown = document.getElementById('adminMoreToolsDropdown');
+  if (toolsDropdown && !toolsDropdown.contains(e.target)) {
+    closeAdminToolsMenu();
+  }
+  const sysBtn = document.getElementById('fBtnSystemViews');
+  const sysMenu = document.getElementById('systemViewsMenuContent');
+  if (sysBtn && sysMenu && !sysBtn.contains(e.target) && !sysMenu.contains(e.target)) {
+    closeSystemViewsMenu();
+  }
+});
 
 function setFilter(filter) {
   currentFilter = filter;
@@ -1358,13 +1401,31 @@ function setFilter(filter) {
     logs: 'fBtnLogs'
   };
 
+  const sysTabs = ['issues', 'admins', 'logs'];
+  const sysBtn = document.getElementById('fBtnSystemViews');
+  if (sysBtn) {
+    if (sysTabs.includes(filter)) {
+      sysBtn.className = 'px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold shadow-sm transition flex items-center gap-1 cursor-pointer whitespace-nowrap border-l border-slate-800 pl-2 ml-1';
+    } else {
+      sysBtn.className = 'px-3 py-1.5 rounded-xl text-slate-400 hover:text-indigo-300 transition flex items-center gap-1 cursor-pointer whitespace-nowrap border-l border-slate-800 pl-2 ml-1';
+    }
+  }
+
   Object.keys(btnMap).forEach(key => {
     const el = document.getElementById(btnMap[key]);
     if (!el) return;
     if (key === filter) {
-      el.className = 'px-3.5 py-2 rounded-xl bg-orange-600 text-white font-bold shadow-sm transition flex items-center gap-1 cursor-pointer';
+      if (sysTabs.includes(key)) {
+        el.className = 'w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-800 text-orange-400 font-bold transition text-left cursor-pointer';
+      } else {
+        el.className = 'px-3 py-1.5 rounded-xl bg-orange-600 text-white font-bold shadow-sm transition flex items-center gap-1 cursor-pointer whitespace-nowrap';
+      }
     } else {
-      el.className = 'px-3.5 py-2 rounded-xl text-slate-400 hover:text-slate-200 transition flex items-center gap-1 cursor-pointer';
+      if (sysTabs.includes(key)) {
+        el.className = 'w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 transition text-left cursor-pointer';
+      } else {
+        el.className = 'px-3 py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition flex items-center gap-1 cursor-pointer whitespace-nowrap';
+      }
     }
   });
 
@@ -1625,27 +1686,30 @@ function renderAdminTable() {
         <td class="p-4 text-center">
           ${statusHtml}
         </td>
-        <td class="p-4 text-center">
+        <td class="p-3 text-center">
           ${isPaid && slipUrl
-        ? `<div class="space-y-1">
-             <button onclick="inspectSlip('${st.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto border border-slate-700 cursor-pointer">
-               <i data-lucide="image" class="w-3.5 h-3.5"></i> ดูสลิป
+        ? `<div class="inline-flex flex-col items-center gap-1">
+             <button onclick="inspectSlip('${st.id}')" class="px-2.5 py-1 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 text-xs font-bold rounded-lg transition flex items-center gap-1 border border-sky-500/25 cursor-pointer">
+               <i data-lucide="image" class="w-3.5 h-3.5"></i>
+               <span>สลิป</span>
              </button>
-             <span class="inline-block text-[9px] font-mono px-2 py-0.2 rounded-md bg-slate-900 text-slate-400 border border-slate-800">
+             <span class="text-[9px] font-mono text-slate-500">
                ${window.MultiCloudUploader ? window.MultiCloudUploader.getProviderName(record.slipProvider || (slipUrl.includes('cloudinary') ? 'cloudinary' : (slipUrl.includes('catbox') ? 'catbox' : (slipUrl.includes('ibb.co') ? 'imgbb' : 'Cloud')))) : 'Cloud'}
              </span>
            </div>`
         : '<span class="text-xs text-slate-600">-</span>'
       }
         </td>
-        <td class="p-4 text-center">
+        <td class="p-3 text-center">
           ${isPaid
-        ? `<button onclick="adminMoveToTrash('${st.id}')" class="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto cursor-pointer">
-                <i data-lucide="trash-2" class="w-3 h-3"></i> ย้ายไปถังขยะ
-               </button>`
-        : `<button onclick="openAdminUploadModal('${st.id}')" class="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto cursor-pointer">
-                <i data-lucide="upload" class="w-3 h-3"></i> ยืนยันชำระ (แนบสลิป)
-               </button>`
+        ? `<button onclick="adminMoveToTrash('${st.id}')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-rose-500/15 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-500/30 text-xs font-bold rounded-xl transition inline-flex items-center gap-1 cursor-pointer" title="ยกเลิก / ย้ายไปถังขยะ">
+             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+             <span>ลบ</span>
+           </button>`
+        : `<button onclick="openAdminUploadModal('${st.id}')" class="px-2.5 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold rounded-xl transition inline-flex items-center gap-1 cursor-pointer" title="แอดมินแนบสลิปยืนยัน">
+             <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+             <span>ชำระ</span>
+           </button>`
       }
         </td>
       </tr>
