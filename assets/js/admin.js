@@ -507,7 +507,8 @@ function renderAdminCampaignsNav() {
       statusDot = '<span class="w-2 h-2 rounded-full bg-slate-500" title="ปิดชั่วคราว"></span>';
     }
 
-    const adminLink = `payment-admin.html?camp=${encodeURIComponent(camp.id)}`;
+    const cleanAdminPath = window.location.pathname.replace(/\.html$/, '');
+    const adminLink = `${cleanAdminPath}?camp=${encodeURIComponent(camp.id)}`;
 
     return `
       <div class="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-2xl transition-all ${
@@ -994,7 +995,8 @@ async function executeDeleteCampaign() {
   // 4. Redirect to remaining campaign
   const remaining = window.ComedCampaignManager.getAllCampaigns();
   const nextCampId = remaining[0]?.id || 'paimai69';
-  window.location.href = `payment-admin.html?camp=${encodeURIComponent(nextCampId)}`;
+  const cleanAdminPath = window.location.pathname.replace(/\.html$/, '');
+  window.location.href = `${cleanAdminPath}?camp=${encodeURIComponent(nextCampId)}`;
 }
 
 function closeCreateCampaignModal() {
@@ -1153,6 +1155,9 @@ async function handleSaveCampaignSubmit(e) {
     qrImage: qrImage,
     bannerImage: bannerImage,
     shirtSizes: isShirtChecked ? (existingCampaign?.shirtSizes || ['S', 'M', 'L', 'XL', '2XL', '3XL']) : [],
+    targetMode: existingCampaign?.targetMode || 'all',
+    eligibleStudentIds: existingCampaign?.eligibleStudentIds || [],
+    exemptedStudentIds: existingCampaign?.exemptedStudentIds || [],
     bgImage: bgImage,
     slipProvider: slipProvider,
     slipProviders: slipProviders,
@@ -1187,8 +1192,9 @@ async function handleSaveCampaignSubmit(e) {
     closeCreateCampaignModal();
     alert(`✨ บันทึกรายการ "${title}" เรียบร้อยแล้ว!`);
 
-    // Redirect / reload to the newly created / updated campaign
-    window.location.href = `payment-admin.html?camp=${encodeURIComponent(code)}`;
+    // Redirect / reload to the newly created / updated campaign using clean route
+    const cleanAdminPath = window.location.pathname.replace(/\.html$/, '');
+    window.location.href = `${cleanAdminPath}?camp=${encodeURIComponent(code)}`;
   } catch(err) {
     console.error("Save campaign error:", err);
     showCampaignFormError("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + (err.message || String(err)));
