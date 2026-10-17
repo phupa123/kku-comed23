@@ -74,22 +74,28 @@
   <!-- ================= 1. ULTRA-PREMIUM MODERN LOGIN SCREEN ================= -->
   <div id="loginScreen"
     class="fixed inset-0 z-40 flex items-center justify-center p-4 sm:p-6 bg-slate-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.15),rgba(255,255,255,0))]">
-    
-    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div
+      class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none">
+    </div>
     <div class="absolute bottom-10 right-10 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
     <div
       class="relative max-w-md w-full bg-slate-900/80 backdrop-blur-2xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80 space-y-6 text-center">
-      
+
       <div class="space-y-3">
         <div class="relative w-20 h-20 mx-auto">
-          <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 blur-lg opacity-40 animate-pulse"></div>
-          <div class="relative w-full h-full rounded-3xl bg-slate-900 border border-slate-700/80 p-2.5 flex items-center justify-center shadow-xl">
+          <div
+            class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 blur-lg opacity-40 animate-pulse">
+          </div>
+          <div
+            class="relative w-full h-full rounded-3xl bg-slate-900 border border-slate-700/80 p-2.5 flex items-center justify-center shadow-xl">
             <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
           </div>
         </div>
         <div>
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-black tracking-widest uppercase mb-1">
+          <div
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-black tracking-widest uppercase mb-1">
             <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
             <span>HOST ADMIN PORTAL</span>
           </div>
@@ -103,10 +109,14 @@
         <button type="button" id="tabModeGoogle" onclick="switchLoginMode('google')"
           class="py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md cursor-pointer">
           <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            <path fill="#4285F4"
+              d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" />
+            <path fill="#34A853"
+              d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z" />
+            <path fill="#FBBC05"
+              d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z" />
+            <path fill="#EA4335"
+              d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
           </svg>
           <span>Login with Google</span>
         </button>
@@ -120,13 +130,15 @@
       <!-- VIEW 1: GOOGLE ONE-TAP LOGIN -->
       <div id="viewModeGoogle" class="space-y-4 pt-1">
         <p class="text-xs text-slate-400 leading-relaxed">
-          เข้าสู่ระบบด่วนด้วยบัญชี Google มหาวิทยาลัยขอนแก่น (<strong class="text-amber-300">@kkumail.com</strong>) ที่ได้รับอนุญาต
+          เข้าสู่ระบบด่วนด้วยบัญชี Google มหาวิทยาลัยขอนแก่น (<strong class="text-amber-300">@kkumail.com</strong>)
+          ที่ได้รับอนุญาต
         </p>
 
         <!-- Container สำหรับปุ่ม Google อย่างเป็นทางการ (GSI) -->
         <div id="googleAdminButtonWrapper" class="flex justify-center min-h-[44px]"></div>
 
-        <div class="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 text-[11px] text-slate-400 text-left space-y-1">
+        <div
+          class="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 text-[11px] text-slate-400 text-left space-y-1">
           <div class="font-bold text-amber-400 flex items-center gap-1">
             <i data-lucide="info" class="w-3.5 h-3.5"></i>
             <span>หมายเหตุความปลอดภัย:</span>
@@ -188,16 +200,21 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
         <!-- Brand & Current Context -->
         <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center flex-shrink-0">
+          <div
+            class="w-10 h-10 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center flex-shrink-0">
             <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-[10px] font-black text-orange-400 uppercase tracking-wider">COMED23</span>
-              <span class="px-1.5 py-0.2 rounded-md text-[9px] font-mono font-bold bg-orange-950/60 text-orange-300 border border-orange-500/30">KKU63</span>
-              <span id="currentCampaignBadgeMini" class="px-1.5 py-0.2 rounded-md text-[9px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 truncate max-w-[120px] sm:max-w-none">Live Hub</span>
+              <span
+                class="px-1.5 py-0.2 rounded-md text-[9px] font-mono font-bold bg-orange-950/60 text-orange-300 border border-orange-500/30">KKU63</span>
+              <span id="currentCampaignBadgeMini"
+                class="px-1.5 py-0.2 rounded-md text-[9px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 truncate max-w-[120px] sm:max-w-none">Live
+                Hub</span>
             </div>
-            <h1 class="text-sm sm:text-base font-black text-white truncate max-w-[200px] sm:max-w-md" id="adminHeaderCampaignTitle">
+            <h1 class="text-sm sm:text-base font-black text-white truncate max-w-[200px] sm:max-w-md"
+              id="adminHeaderCampaignTitle">
               ระบบจัดการหลังบ้าน: ค่าทำป้ายสาขาวิชาเอก
             </h1>
           </div>
@@ -207,13 +224,15 @@
         <div class="flex items-center gap-2">
           <!-- Primary Actions -->
           <button onclick="refreshDataFromCloud()"
-            class="p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold text-sky-400 bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 transition shadow-sm flex items-center gap-1.5 cursor-pointer" title="รีเฟรชข้อมูล">
+            class="p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold text-sky-400 bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            title="รีเฟรชข้อมูล">
             <i data-lucide="rotate-cw" id="adminRefreshIcon" class="w-4 h-4"></i>
             <span class="hidden sm:inline">รีเฟรช</span>
           </button>
 
           <button onclick="openExportModal()"
-            class="p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm flex items-center gap-1.5 cursor-pointer" title="ส่งออก Excel">
+            class="p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            title="ส่งออก Excel">
             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
             <span class="hidden sm:inline">Export Excel</span>
           </button>
@@ -228,16 +247,19 @@
             </button>
 
             <!-- Dropdown Menu Content -->
-            <div id="adminToolsMenuContent" class="hidden absolute right-0 mt-2 w-64 bg-slate-900/95 backdrop-blur-2xl border border-slate-700/80 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
+            <div id="adminToolsMenuContent"
+              class="hidden absolute right-0 mt-2 w-64 bg-slate-900/95 backdrop-blur-2xl border border-slate-700/80 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
               <div class="px-2.5 py-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
                 เครื่องมือ & ตั้งค่า
               </div>
-              <button onclick="closeAdminToolsMenu(); window.QRSuite.openScannerModal({ title: 'สแกน QR Code ตรวจสอบสลิป / ค้นหาข้อมูล' })"
+              <button
+                onclick="closeAdminToolsMenu(); window.QRSuite.openScannerModal({ title: 'สแกน QR Code ตรวจสอบสลิป / ค้นหาข้อมูล' })"
                 class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-emerald-400 transition text-left cursor-pointer">
                 <i data-lucide="scan-line" class="w-4 h-4 text-emerald-400"></i>
                 <span>สแกน QR Code ตรวจสลิป</span>
               </button>
-              <button onclick="closeAdminToolsMenu(); window.QRSuite.openPageQrModal({ title: 'ระบบชำระเงินค่าป้ายเอก (payment.html)', userUrl: `${window.location.origin}/payment.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้ารับชำระเงินสำหรับเพื่อนนักศึกษา' })"
+              <button
+                onclick="closeAdminToolsMenu(); window.QRSuite.openPageQrModal({ title: 'ระบบชำระเงินค่าป้ายเอก (payment.html)', userUrl: `${window.location.origin}/payment.html`, adminUrl: window.location.href, defaultMode: 'user', subtitle: 'สแกนเพื่อเปิดหน้ารับชำระเงินสำหรับเพื่อนนักศึกษา' })"
                 class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-orange-400 transition text-left cursor-pointer">
                 <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
                 <span>เปิด QR ให้เพื่อนสแกน</span>
@@ -248,7 +270,8 @@
                   <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i>
                   <span>ตรวจสลิป & โควตา</span>
                 </div>
-                <span id="adminSlipModeBadge" class="px-1.5 py-0.2 rounded text-[9px] bg-slate-950 text-slate-300 font-mono">Manual</span>
+                <span id="adminSlipModeBadge"
+                  class="px-1.5 py-0.2 rounded text-[9px] bg-slate-950 text-slate-300 font-mono">Manual</span>
               </button>
 
               <div class="my-1 border-t border-slate-800"></div>
@@ -288,33 +311,38 @@
     <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 flex-grow">
 
       <!-- ================= 0. CAMPAIGN MANAGER HUB (SLIM & CLEAN) ================= -->
-      <div class="bg-slate-900/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-800/80 shadow-xl space-y-3.5">
+      <div
+        class="bg-slate-900/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-800/80 shadow-xl space-y-3.5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center border border-orange-500/30 flex-shrink-0">
+            <div
+              class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center border border-orange-500/30 flex-shrink-0">
               <i data-lucide="layers" class="w-4 h-4"></i>
             </div>
             <div>
               <div class="flex items-center gap-2">
                 <h2 class="text-sm sm:text-base font-black text-white">รายการชำระเงิน (Campaigns)</h2>
-                <span id="adminCampaignCountBadge" class="px-2 py-0.2 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">1 รายการ</span>
+                <span id="adminCampaignCountBadge"
+                  class="px-2 py-0.2 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">1
+                  รายการ</span>
               </div>
-              <p class="text-[11px] text-slate-400 hidden sm:block">คลิกสลับรายการชำระเงิน หรือจัดการสิทธิ์ผู้ชำระได้ทันที</p>
+              <p class="text-[11px] text-slate-400 hidden sm:block">คลิกสลับรายการชำระเงิน
+                หรือจัดการสิทธิ์ผู้ชำระได้ทันที</p>
             </div>
           </div>
 
           <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-            <button onclick="openCurrentCampaignAudienceModal()" 
+            <button onclick="openCurrentCampaignAudienceModal()"
               class="px-3 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 font-bold text-xs border border-indigo-500/30 transition flex items-center gap-1.5 cursor-pointer">
               <i data-lucide="users" class="w-3.5 h-3.5"></i>
               <span>กำหนดสิทธิ์คนชำระ</span>
             </button>
-            <button onclick="openEditCurrentCampaignModal()" 
+            <button onclick="openEditCurrentCampaignModal()"
               class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
               <i data-lucide="settings" class="w-3.5 h-3.5 text-orange-400"></i>
               <span>แก้ไขแคมเปญนี้</span>
             </button>
-            <button onclick="openCreateCampaignModal()" 
+            <button onclick="openCreateCampaignModal()"
               class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
               <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
               <span>+ สร้างรายการใหม่</span>
@@ -323,7 +351,8 @@
         </div>
 
         <!-- Active Campaigns Segmented Nav (Horizontal Scroll or Compact Grid) -->
-        <div id="adminCampaignsNav" class="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-slate-800">
+        <div id="adminCampaignsNav"
+          class="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-slate-800">
           <!-- Rendered via JS in compact pill style -->
         </div>
       </div>
@@ -332,7 +361,8 @@
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 
         <!-- 1. Total Received Money -->
-        <div class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80">
+        <div
+          class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80">
           <div class="flex items-center justify-between text-xs text-slate-400 mb-1.5">
             <span class="font-bold">ยอดเงินที่ได้รับ</span>
             <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
@@ -347,7 +377,8 @@
         </div>
 
         <!-- 2. Paid Count -->
-        <div class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80">
+        <div
+          class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80">
           <div class="flex items-center justify-between text-xs text-slate-400 mb-1.5">
             <span class="font-bold">ชำระเงินแล้ว</span>
             <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
@@ -363,7 +394,8 @@
         </div>
 
         <!-- 3. Unpaid Count -->
-        <div class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80">
+        <div
+          class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80">
           <div class="flex items-center justify-between text-xs text-slate-400 mb-1.5">
             <span class="font-bold">ยังไม่ชำระเงิน</span>
             <div class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
@@ -379,7 +411,8 @@
         </div>
 
         <!-- 4. Exempted / Cloud Sync Status -->
-        <div class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80 flex flex-col justify-between">
+        <div
+          class="admin-stat-card bg-slate-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800/80 flex flex-col justify-between">
           <div class="flex items-center justify-between text-xs text-slate-400 mb-1.5">
             <span class="font-bold">ได้รับการยกเว้น</span>
             <div class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
@@ -393,7 +426,8 @@
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               2-Way Sync
             </span>
-            <button onclick="refreshDataFromCloud()" class="text-sky-400 hover:text-sky-300 text-[10px] font-bold cursor-pointer">ซิงค์</button>
+            <button onclick="refreshDataFromCloud()"
+              class="text-sky-400 hover:text-sky-300 text-[10px] font-bold cursor-pointer">ซิงค์</button>
           </div>
         </div>
 
@@ -410,11 +444,13 @@
               <i data-lucide="users" class="w-5 h-5 text-orange-500"></i>
               <span>รายชื่อนักศึกษา</span>
             </h2>
-            <span id="adminTableCountBadge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-300">60 คน</span>
+            <span id="adminTableCountBadge"
+              class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-300">60 คน</span>
           </div>
 
           <!-- Status Filters: Primary 4 Tabs + More Tab -->
-          <div class="flex items-center gap-1 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs font-bold overflow-x-auto">
+          <div
+            class="flex items-center gap-1 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs font-bold overflow-x-auto">
             <button onclick="setFilter('all')" id="fBtnAll"
               class="px-3 py-1.5 rounded-xl bg-orange-600 text-white shadow-sm transition flex items-center gap-1 cursor-pointer whitespace-nowrap">
               ทั้งหมด (<span id="countFAll">60</span>)
@@ -441,14 +477,16 @@
                 <span>ระบบ & Logs</span>
                 <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
               </button>
-              <div id="systemViewsMenuContent" class="hidden absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-2xl shadow-xl p-1.5 z-40 space-y-1 text-xs">
+              <div id="systemViewsMenuContent"
+                class="hidden absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-2xl shadow-xl p-1.5 z-40 space-y-1 text-xs">
                 <button onclick="closeSystemViewsMenu(); setFilter('issues')" id="fBtnIssues"
                   class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-pink-400 transition text-left cursor-pointer">
                   <div class="flex items-center gap-2">
                     <i data-lucide="help-circle" class="w-3.5 h-3.5 text-pink-400"></i>
                     <span>ปัญหาผู้ใช้</span>
                   </div>
-                  <span id="countFIssues" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-pink-500/10 text-pink-400">0</span>
+                  <span id="countFIssues"
+                    class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-pink-500/10 text-pink-400">0</span>
                 </button>
                 <button onclick="closeSystemViewsMenu(); setFilter('admins')" id="fBtnAdmins"
                   class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-indigo-400 transition text-left cursor-pointer">
@@ -503,7 +541,8 @@
   <!-- ================= 3. MODAL: SLIP INSPECTOR & STATUS CHANGER ================= -->
   <div id="modalSlipInspector"
     class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 shadow-2xl">
+    <div
+      class="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <h3 class="text-base font-black text-white flex items-center gap-2">
           <i data-lucide="receipt" class="w-5 h-5 text-orange-500"></i>
@@ -655,10 +694,11 @@
     class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
     <div id="exportModalCard"
       class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-6">
-      
+
       <div class="flex items-center justify-between border-b border-slate-800 pb-4">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-md border border-emerald-500/30">
+          <div
+            class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-md border border-emerald-500/30">
             <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
           </div>
           <div>
@@ -673,44 +713,53 @@
       </div>
 
       <div class="space-y-4 text-xs">
-        
+
         <!-- 1. Data Filter & Sorting Option -->
         <div class="space-y-1.5">
           <label class="block font-bold text-slate-200">รูปแบบการจัดเรียงและกลุ่มข้อมูล (Custom Sort & Filter)</label>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-orange-500/50 cursor-pointer transition">
-              <input type="radio" name="exportSortOption" value="default" checked class="text-orange-500 focus:ring-orange-500">
+            <label
+              class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-orange-500/50 cursor-pointer transition">
+              <input type="radio" name="exportSortOption" value="default" checked
+                class="text-orange-500 focus:ring-orange-500">
               <div>
                 <span class="font-bold text-white block">1. ปกติ (ตามรหัสนักศึกษา)</span>
                 <span class="text-[10px] text-slate-400">เรียงตามรหัส นศ. 60 คน</span>
               </div>
             </label>
 
-            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition">
-              <input type="radio" name="exportSortOption" value="paid_top" class="text-emerald-500 focus:ring-emerald-500">
+            <label
+              class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition">
+              <input type="radio" name="exportSortOption" value="paid_top"
+                class="text-emerald-500 focus:ring-emerald-500">
               <div>
                 <span class="font-bold text-emerald-400 block">2. เรียงคนที่จ่ายไว้บน</span>
                 <span class="text-[10px] text-slate-400">จ่ายแล้วอยู่บนสุด</span>
               </div>
             </label>
 
-            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/50 cursor-pointer transition">
-              <input type="radio" name="exportSortOption" value="paid_bottom" class="text-amber-500 focus:ring-amber-500">
+            <label
+              class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/50 cursor-pointer transition">
+              <input type="radio" name="exportSortOption" value="paid_bottom"
+                class="text-amber-500 focus:ring-amber-500">
               <div>
                 <span class="font-bold text-amber-400 block">3. เรียงคนที่จ่ายไว้ล่าง</span>
                 <span class="text-[10px] text-slate-400">ยังไม่จ่ายอยู่บน</span>
               </div>
             </label>
 
-            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition">
-              <input type="radio" name="exportSortOption" value="paid_only" class="text-emerald-500 focus:ring-emerald-500">
+            <label
+              class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition">
+              <input type="radio" name="exportSortOption" value="paid_only"
+                class="text-emerald-500 focus:ring-emerald-500">
               <div>
                 <span class="font-bold text-emerald-400 block">4. เอาเฉพาะคนจ่าย</span>
                 <span class="text-[10px] text-slate-400">เฉพาะผู้ที่ชำระแล้ว</span>
               </div>
             </label>
 
-            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-rose-500/50 cursor-pointer transition col-span-1 sm:col-span-2">
+            <label
+              class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-rose-500/50 cursor-pointer transition col-span-1 sm:col-span-2">
               <input type="radio" name="exportSortOption" value="unpaid_only" class="text-rose-500 focus:ring-rose-500">
               <div>
                 <span class="font-bold text-rose-400 block">5. เอาเฉพาะคนยังไม่จ่าย</span>
@@ -724,15 +773,18 @@
         <div class="space-y-1.5 pt-2 border-t border-slate-800">
           <label class="block font-bold text-slate-200">รูปแบบการแสดงสี (Highlight & Colors)</label>
           <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition">
-              <input type="radio" name="exportColorStyle" value="highlight" checked class="text-emerald-500 focus:ring-emerald-500">
+            <label
+              class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition">
+              <input type="radio" name="exportColorStyle" value="highlight" checked
+                class="text-emerald-500 focus:ring-emerald-500">
               <div>
                 <span class="font-bold text-emerald-400 block">✨ แบบ Highlight สี</span>
                 <span class="text-[10px] text-slate-400">จ่ายแล้ว = เขียว, ยังไม่จ่าย = แดง</span>
               </div>
             </label>
 
-            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-600 cursor-pointer transition">
+            <label
+              class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-600 cursor-pointer transition">
               <input type="radio" name="exportColorStyle" value="plain" class="text-slate-400 focus:ring-slate-400">
               <div>
                 <span class="font-bold text-white block">📄 แบบปกติ (Clean)</span>
@@ -761,14 +813,17 @@
   </div>
 
   <!-- ================= 6. MODAL: CREATE / EDIT PAYMENT CAMPAIGN ================= -->
-  <div id="modalCreateCampaign" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
-    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5">
+  <div id="modalCreateCampaign"
+    class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
+    <div
+      class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 id="modalCampaignTitle" class="text-base font-black text-white flex items-center gap-2">
           <i data-lucide="plus-circle" class="w-5 h-5 text-orange-400"></i>
           <span>สร้างรายการเก็บเงินใหม่ (New Campaign)</span>
         </h3>
-        <button onclick="closeCreateCampaignModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer">
+        <button onclick="closeCreateCampaignModal()"
+          class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -777,13 +832,15 @@
         <input type="hidden" id="campEditId">
 
         <!-- Error Feedback Box -->
-        <div id="campFormErrorBox" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2.5 animate-pulse">
+        <div id="campFormErrorBox"
+          class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2.5 animate-pulse">
           <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5"></i>
           <span id="campFormErrorText" class="font-medium"></span>
         </div>
 
         <!-- Clean Tab Nav inside Modal -->
-        <div class="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs font-bold overflow-x-auto">
+        <div
+          class="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs font-bold overflow-x-auto">
           <button type="button" id="tabCampBasic" onclick="switchCampaignModalTab('basic')"
             class="px-3 py-1.5 rounded-xl bg-orange-600 text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
             <i data-lucide="info" class="w-3.5 h-3.5"></i>
@@ -822,7 +879,8 @@
               <span class="text-[10px] text-slate-500 block">ปล่อยว่างได้ ระบบจะสร้างรหัสให้โดยอัตโนมัติ</span>
             </div>
             <div class="space-y-1">
-              <label class="font-bold text-slate-300">ยอดเงินที่ต้องชำระ (บาท/คน) <span class="text-rose-400">*</span></label>
+              <label class="font-bold text-slate-300">ยอดเงินที่ต้องชำระ (บาท/คน) <span
+                  class="text-rose-400">*</span></label>
               <input type="number" id="campAmountInput" min="0" step="0.01" placeholder="เช่น 190.00"
                 class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500 transition">
             </div>
@@ -858,27 +916,22 @@
         <!-- ================= TAB 2: BANK & QR CODE ================= -->
         <div id="viewCampTabBank" class="hidden space-y-3.5">
           <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-orange-400 block text-xs">ข้อมูลบัญชีผู้รับเงิน / พร้อมเพย์</span>
-              <span class="text-[10px] text-teal-400 font-bold bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/20">รองรับ เบอร์โทร / บัตร ปชช. / เลขบัญชี</span>
-            </div>
+            <span class="font-bold text-orange-400 block text-xs">ข้อมูลบัญชีธนาคาร</span>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อธนาคาร / บริการ</label>
-                <input type="text" id="campBankNameInput" placeholder="เช่น พร้อมเพย์ / กสิกรไทย"
+                <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อธนาคาร</label>
+                <input type="text" id="campBankNameInput" placeholder="เช่น ธนาคารกสิกรไทย"
                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
               </div>
               <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1">เบอร์พร้อมเพย์ / เลขบัตร ปชช. / เลขบัญชี</label>
-                <input type="text" id="campAccountNumInput" placeholder="เช่น 0812345678 หรือ 1409900..."
-                  oninput="if(window.previewAdminGeneratedQr) previewAdminGeneratedQr()"
+                <label class="block text-[11px] font-bold text-slate-400 mb-1">เลขที่บัญชี</label>
+                <input type="text" id="campAccountNumInput" placeholder="เช่น 236-2-47817-3"
                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อเจ้าของบัญชี / ผู้รับเงิน</label>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อเจ้าของบัญชี</label>
               <input type="text" id="campAccountNameInput" placeholder="เช่น น.ส. พิชามญธุ์ สามสี"
-                oninput="if(window.previewAdminGeneratedQr) previewAdminGeneratedQr()"
                 class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
             </div>
           </div>
@@ -890,23 +943,31 @@
                 <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
                 <span>รูปแบบ QR Code รับชำระเงิน</span>
               </span>
-              <span class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">รองรับ PromptPay EMVCo</span>
+              <span
+                class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">รองรับ
+                PromptPay EMVCo</span>
             </div>
 
             <!-- Choice Selector: Auto PromptPay vs Custom Image -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <label class="p-3 rounded-xl border border-slate-700 hover:border-orange-500/60 bg-slate-900/80 cursor-pointer flex items-start gap-2.5 transition">
-                <input type="radio" name="campQrTypeChoice" id="campQrTypeAuto" value="auto" checked onchange="toggleQrModeFields('auto')" class="mt-0.5 accent-orange-500">
+              <label
+                class="p-3 rounded-xl border border-slate-700 hover:border-orange-500/60 bg-slate-900/80 cursor-pointer flex items-start gap-2.5 transition">
+                <input type="radio" name="campQrTypeChoice" id="campQrTypeAuto" value="auto" checked
+                  onchange="toggleQrModeFields('auto')" class="mt-0.5 accent-orange-500">
                 <div class="space-y-0.5">
-                  <span class="text-xs font-black text-white block">1. สร้าง QR PromptPay ล็อคยอดอัตโนมัติ (แนะนำ)</span>
+                  <span class="text-xs font-black text-white block">1. สร้าง QR PromptPay ล็อคยอดอัตโนมัติ
+                    (แนะนำ)</span>
                   <p class="text-[10px] text-slate-400 leading-relaxed">
-                    ระบบจะสร้างภาพสลิปการ์ดมาตรฐาน Thai QR พร้อมเพย์ เมื่อกำหนดจำนวนเงินใหม่ QR จะล็อคยอดเงินตามนั้นทันที
+                    ระบบจะสร้างภาพสลิปการ์ดมาตรฐาน Thai QR พร้อมเพย์ เมื่อกำหนดจำนวนเงินใหม่ QR
+                    จะล็อคยอดเงินตามนั้นทันที
                   </p>
                 </div>
               </label>
 
-              <label class="p-3 rounded-xl border border-slate-700 hover:border-orange-500/60 bg-slate-900/80 cursor-pointer flex items-start gap-2.5 transition">
-                <input type="radio" name="campQrTypeChoice" id="campQrTypeCustom" value="custom" onchange="toggleQrModeFields('custom')" class="mt-0.5 accent-orange-500">
+              <label
+                class="p-3 rounded-xl border border-slate-700 hover:border-orange-500/60 bg-slate-900/80 cursor-pointer flex items-start gap-2.5 transition">
+                <input type="radio" name="campQrTypeChoice" id="campQrTypeCustom" value="custom"
+                  onchange="toggleQrModeFields('custom')" class="mt-0.5 accent-orange-500">
                 <div class="space-y-0.5">
                   <span class="text-xs font-black text-white block">2. ใช้วิธีอัปโหลดรูปภาพ QR Code เอง</span>
                   <p class="text-[10px] text-slate-400 leading-relaxed">
@@ -922,7 +983,8 @@
                 <span class="text-[11px] font-bold text-slate-300">ตั้งค่ารูปภาพ QR Code ที่อัปโหลดเอง</span>
                 <div class="flex items-center gap-1 text-[11px]">
                   <span class="text-slate-500">บันทึกที่:</span>
-                  <select id="campQrProviderSelect" class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-[11px] outline-none">
+                  <select id="campQrProviderSelect"
+                    class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-[11px] outline-none">
                     <option value="cloudinary">Cloudinary</option>
                     <option value="catbox">Catbox</option>
                     <option value="imgbb">ImgBB</option>
@@ -933,12 +995,14 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
                 <div>
                   <label class="block text-[11px] font-bold text-slate-400 mb-1">1. อัปโหลดภาพ QR จากเครื่อง:</label>
-                  <input type="file" id="campQrFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campQrPreviewImg', 'campQrImageInput')"
+                  <input type="file" id="campQrFileInput" accept="image/*"
+                    onchange="handleQrFileUpload(event, 'campQrPreviewImg', 'campQrImageInput')"
                     class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-500/20 file:text-orange-300 hover:file:bg-orange-500/30 cursor-pointer">
                 </div>
                 <div>
                   <label class="block text-[11px] font-bold text-slate-400 mb-1">2. หรือวาง Direct URL:</label>
-                  <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="https://..."
+                  <input type="text" id="campQrImageInput"
+                    oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="https://..."
                     class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
                 </div>
               </div>
@@ -947,12 +1011,15 @@
             <!-- Preview QR Section -->
             <div class="flex items-center justify-between gap-3 pt-3 border-t border-slate-800">
               <div class="flex items-center gap-3">
-                <div class="w-16 h-20 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
+                <div
+                  class="w-16 h-20 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
                   <img id="campQrPreviewImg" src="qr_payment.png" alt="QR Preview" class="w-full h-full object-contain">
                 </div>
                 <div>
-                  <span id="campQrPreviewNotice" class="text-xs font-bold text-emerald-400 block">กำลังใช้: ระบบสร้าง QR PromptPay ล็อคยอดอัตโนมัติ</span>
-                  <span class="text-[11px] text-slate-400 block mt-0.5">ภาพพรีวิวที่จะแสดงให้เพื่อนนักศึกษาเห็นและสแกนชำระเงิน</span>
+                  <span id="campQrPreviewNotice" class="text-xs font-bold text-emerald-400 block">กำลังใช้: ระบบสร้าง QR
+                    PromptPay ล็อคยอดอัตโนมัติ</span>
+                  <span
+                    class="text-[11px] text-slate-400 block mt-0.5">ภาพพรีวิวที่จะแสดงให้เพื่อนนักศึกษาเห็นและสแกนชำระเงิน</span>
                 </div>
               </div>
               <button type="button" onclick="previewAdminGeneratedQr()"
@@ -969,13 +1036,15 @@
           <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
             <div class="flex items-center justify-between">
               <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-slate-200 font-bold">
-                <input type="checkbox" id="campIsShirtCheckbox" onchange="toggleShirtConfigFields(this.checked)" class="rounded accent-orange-500 w-4 h-4">
+                <input type="checkbox" id="campIsShirtCheckbox" onchange="toggleShirtConfigFields(this.checked)"
+                  class="rounded accent-orange-500 w-4 h-4">
                 <span>เปิดใช้งานตัวเลือกไซส์เสื้อ / สินค้าสาขา</span>
               </label>
               <span class="text-[10px] text-slate-500">เปิดเฉพาะรายการที่เป็นการสั่งเสื้อ</span>
             </div>
             <p class="text-[11px] text-slate-400">
-              หากเปิดใช้งาน หน้ารับชำระเงินจะแสดงส่วนเลือกไซส์เสื้อ (S, M, L, XL, 2XL ฯลฯ) และการ์ดแสดงดีไซน์เสื้อให้อัตโนมัติ หากไม่ใช่รายการสั่งเสื้อให้ปิดส่วนนี้ไว้
+              หากเปิดใช้งาน หน้ารับชำระเงินจะแสดงส่วนเลือกไซส์เสื้อ (S, M, L, XL, 2XL ฯลฯ)
+              และการ์ดแสดงดีไซน์เสื้อให้อัตโนมัติ หากไม่ใช่รายการสั่งเสื้อให้ปิดส่วนนี้ไว้
             </p>
           </div>
 
@@ -985,19 +1054,23 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
                 <div>
                   <label class="block text-[11px] font-bold text-slate-400 mb-1">อัปโหลดรูปเสื้อ:</label>
-                  <input type="file" id="campBannerFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campBannerPreviewImg', 'campBannerImageInput')"
+                  <input type="file" id="campBannerFileInput" accept="image/*"
+                    onchange="handleQrFileUpload(event, 'campBannerPreviewImg', 'campBannerImageInput')"
                     class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-500/20 file:text-sky-300 hover:file:bg-sky-500/30 cursor-pointer">
                 </div>
                 <div>
                   <label class="block text-[11px] font-bold text-slate-400 mb-1">หรือวางลิงก์รูปภาพตรง:</label>
-                  <input type="text" id="campBannerImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campBannerPreviewImg')" placeholder="https://..."
+                  <input type="text" id="campBannerImageInput"
+                    oninput="updateQrPreviewFromUrl(this.value, 'campBannerPreviewImg')" placeholder="https://..."
                     class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-sky-500">
                 </div>
               </div>
 
               <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
-                <div class="w-16 h-12 rounded-xl bg-slate-950 p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
-                  <img id="campBannerPreviewImg" src="" alt="Banner Preview" class="w-full h-full object-cover rounded-lg">
+                <div
+                  class="w-16 h-12 rounded-xl bg-slate-950 p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
+                  <img id="campBannerPreviewImg" src="" alt="Banner Preview"
+                    class="w-full h-full object-cover rounded-lg">
                 </div>
                 <span class="text-[11px] text-slate-400">พรีวิวรูปภาพเสื้อที่จะแสดงให้นักศึกษาเห็น</span>
               </div>
@@ -1006,7 +1079,8 @@
             <!-- Optional Custom Background Wallpaper -->
             <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
               <span class="font-bold text-purple-400 block text-xs">ภาพพื้นหลังเฉพาะกิจกรรม (ไม่บังคับ)</span>
-              <input type="text" id="campBgImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campBgPreviewImg')" placeholder="วาง Direct URL ภาพพื้นหลัง (หรือเว้นว่างเพื่อใช้ดีไซน์มาตรฐาน)"
+              <input type="text" id="campBgImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campBgPreviewImg')"
+                placeholder="วาง Direct URL ภาพพื้นหลัง (หรือเว้นว่างเพื่อใช้ดีไซน์มาตรฐาน)"
                 class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-purple-500">
               <img id="campBgPreviewImg" src="logo.png" class="hidden">
             </div>
@@ -1018,13 +1092,17 @@
           <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2">
               <span class="font-bold text-slate-200 text-xs">บริการคลาวด์สำหรับจัดเก็บไฟล์สลิป</span>
-              <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800">Smart Failover</span>
+              <span
+                class="text-[10px] text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800">Smart
+                Failover</span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="campSlipProvidersGrid">
               <!-- 1. Cloudinary -->
-              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
-                <input type="checkbox" name="campSlipProviderOption" value="cloudinary" checked class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+              <label
+                class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+                <input type="checkbox" name="campSlipProviderOption" value="cloudinary" checked
+                  class="mt-0.5 rounded accent-orange-500 w-4 h-4">
                 <div>
                   <span class="font-bold text-white text-xs block">⚡ Cloudinary CDN</span>
                   <span class="text-[10px] text-slate-400 block">โหลดเร็ว สลิปคมชัด ตรวจสอบง่าย</span>
@@ -1032,8 +1110,10 @@
               </label>
 
               <!-- 2. Catbox.moe -->
-              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
-                <input type="checkbox" name="campSlipProviderOption" value="catbox" checked class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+              <label
+                class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+                <input type="checkbox" name="campSlipProviderOption" value="catbox" checked
+                  class="mt-0.5 rounded accent-orange-500 w-4 h-4">
                 <div>
                   <span class="font-bold text-white text-xs block">🚀 Catbox.moe</span>
                   <span class="text-[10px] text-slate-400 block">ฟรีถาวร ไม่จำกัดจำนวนสลิป</span>
@@ -1041,8 +1121,10 @@
               </label>
 
               <!-- 3. ImgBB -->
-              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
-                <input type="checkbox" name="campSlipProviderOption" value="imgbb" class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+              <label
+                class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+                <input type="checkbox" name="campSlipProviderOption" value="imgbb"
+                  class="mt-0.5 rounded accent-orange-500 w-4 h-4">
                 <div>
                   <span class="font-bold text-white text-xs block">🖼️ ImgBB API</span>
                   <span class="text-[10px] text-slate-400 block">ฟรี 32MB/รูป ลิงก์ตรงแสดงสลิปทันที</span>
@@ -1050,8 +1132,10 @@
               </label>
 
               <!-- 4. FreeImage -->
-              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
-                <input type="checkbox" name="campSlipProviderOption" value="freeimage" class="mt-0.5 rounded accent-orange-500 w-4 h-4">
+              <label
+                class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-orange-500/40 cursor-pointer transition">
+                <input type="checkbox" name="campSlipProviderOption" value="freeimage"
+                  class="mt-0.5 rounded accent-orange-500 w-4 h-4">
                 <div>
                   <span class="font-bold text-white text-xs block">📦 FreeImage.host</span>
                   <span class="text-[10px] text-slate-400 block">สำรองฉุกเฉิน มั่นใจสลิปไม่หาย</span>
@@ -1060,7 +1144,8 @@
             </div>
 
             <p class="text-[11px] text-slate-400">
-              💡 <strong>Smart Failover:</strong> ระบบจะใช้ตัวแรกที่เปิดไว้ หากติดปัญหาหรือโควตาเต็ม ระบบจะสลับไปบันทึกยังคลาวด์ถัดไปให้อัตโนมัติ
+              💡 <strong>Smart Failover:</strong> ระบบจะใช้ตัวแรกที่เปิดไว้ หากติดปัญหาหรือโควตาเต็ม
+              ระบบจะสลับไปบันทึกยังคลาวด์ถัดไปให้อัตโนมัติ
             </p>
           </div>
         </div>
@@ -1089,10 +1174,12 @@
   </div>
 
   <!-- ================= MODAL: DELETE CAMPAIGN CONFIRMATION (TYPED VERIFICATION) ================= -->
-  <div id="modalDeleteCampaign" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="modalDeleteCampaign"
+    class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
     <div class="cyber-glass rounded-3xl max-w-md w-full p-6 border border-rose-500/50 shadow-2xl space-y-4">
       <div class="flex items-start gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center border border-rose-500/30 flex-shrink-0">
+        <div
+          class="w-11 h-11 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center border border-rose-500/30 flex-shrink-0">
           <i data-lucide="alert-triangle" class="w-6 h-6"></i>
         </div>
         <div>
@@ -1108,9 +1195,12 @@
 
       <div class="space-y-2">
         <label class="block text-xs font-bold text-slate-300">
-          กรุณาพิมพ์ <span id="deleteCampMatchPhrase" class="text-rose-400 font-mono font-bold select-all bg-rose-950/80 px-1.5 py-0.5 rounded border border-rose-800">ยืนยันลบ</span> เพื่อยืนยัน:
+          กรุณาพิมพ์ <span id="deleteCampMatchPhrase"
+            class="text-rose-400 font-mono font-bold select-all bg-rose-950/80 px-1.5 py-0.5 rounded border border-rose-800">ยืนยันลบ</span>
+          เพื่อยืนยัน:
         </label>
-        <input type="text" id="deleteCampInputMatch" oninput="checkDeleteCampInputMatch()" placeholder="พิมพ์ข้อความด้านบนเพื่อยืนยัน"
+        <input type="text" id="deleteCampInputMatch" oninput="checkDeleteCampInputMatch()"
+          placeholder="พิมพ์ข้อความด้านบนเพื่อยืนยัน"
           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-rose-500 font-mono transition">
       </div>
 
@@ -1131,23 +1221,29 @@
   </div>
 
   <!-- MODAL: AUDIENCE & ELIGIBILITY MANAGER (กำหนดผู้มีสิทธิ์ชำระ / ยกเว้นรายบุคคล) -->
-  <div id="modalAudienceManager" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
-    <div class="cyber-glass bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl relative max-h-[92vh] flex flex-col">
+  <div id="modalAudienceManager"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
+    <div
+      class="cyber-glass bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl relative max-h-[92vh] flex flex-col">
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-4 border-b border-slate-800 flex-shrink-0">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+          <div
+            class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
             <i data-lucide="users" class="w-5 h-5"></i>
           </div>
           <div>
             <h3 class="text-base font-black text-white flex items-center gap-2">
               <span>กำหนดผู้มีสิทธิ์ชำระ / ยกเว้นรายบุคคล</span>
-              <span id="audTargetCampBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono"></span>
+              <span id="audTargetCampBadge"
+                class="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono"></span>
             </h3>
-            <p id="audTargetCampTitle" class="text-xs text-slate-400 line-clamp-1">เลือกนักศึกษาที่ต้องชำระ หรือเลือกคนที่ไม่ต้องชำระเงินสำหรับรายการนี้</p>
+            <p id="audTargetCampTitle" class="text-xs text-slate-400 line-clamp-1">เลือกนักศึกษาที่ต้องชำระ
+              หรือเลือกคนที่ไม่ต้องชำระเงินสำหรับรายการนี้</p>
           </div>
         </div>
-        <button onclick="closeAudienceModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer">
+        <button onclick="closeAudienceModal()"
+          class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1160,7 +1256,8 @@
         </div>
         <div class="p-2.5 rounded-2xl bg-emerald-950/30 border border-emerald-900/50 text-center">
           <div class="text-[10px] font-bold text-emerald-400 uppercase">ต้องชำระเงิน</div>
-          <div id="audEligibleCount" class="text-sm sm:text-base font-black text-emerald-300 font-mono mt-0.5">0 คน</div>
+          <div id="audEligibleCount" class="text-sm sm:text-base font-black text-emerald-300 font-mono mt-0.5">0 คน
+          </div>
         </div>
         <div class="p-2.5 rounded-2xl bg-amber-950/30 border border-amber-900/50 text-center">
           <div class="text-[10px] font-bold text-amber-400 uppercase">ได้รับการยกเว้น</div>
@@ -1172,21 +1269,25 @@
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pb-3 flex-shrink-0">
         <div class="relative flex-1">
           <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
-          <input type="text" id="audSearchInput" oninput="renderAudienceList()" placeholder="ค้นหารหัส, ชื่อ, ชื่อเล่น..." 
+          <input type="text" id="audSearchInput" oninput="renderAudienceList()"
+            placeholder="ค้นหารหัส, ชื่อ, ชื่อเล่น..."
             class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-xs outline-none focus:border-indigo-500 transition">
         </div>
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          <button type="button" onclick="bulkSetAudience(true)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <button type="button" onclick="bulkSetAudience(true)"
+            class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
             <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-400"></i> เลือกทุกคน
           </button>
-          <button type="button" onclick="bulkSetAudience(false)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <button type="button" onclick="bulkSetAudience(false)"
+            class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
             <i data-lucide="slash" class="w-3.5 h-3.5 text-amber-400"></i> ยกเว้นทุกคน
           </button>
         </div>
       </div>
 
       <!-- Students List (Scrollable) -->
-      <div class="overflow-y-auto flex-1 pr-1 space-y-1.5 divide-y divide-slate-800/60" id="audienceStudentsListContainer">
+      <div class="overflow-y-auto flex-1 pr-1 space-y-1.5 divide-y divide-slate-800/60"
+        id="audienceStudentsListContainer">
         <!-- Rendered via JS -->
       </div>
 
@@ -1196,10 +1297,12 @@
           💡 นักศึกษาที่ยกเว้น จะไม่ถูกนำไปคิดยอดค้างชำระ
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" onclick="closeAudienceModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition cursor-pointer">
+          <button type="button" onclick="closeAudienceModal()"
+            class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition cursor-pointer">
             ยกเลิก
           </button>
-          <button type="button" onclick="saveAudienceSettings()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-extrabold text-xs shadow-lg shadow-indigo-500/25 transition flex items-center gap-1.5 cursor-pointer">
+          <button type="button" onclick="saveAudienceSettings()"
+            class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-extrabold text-xs shadow-lg shadow-indigo-500/25 transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="save" class="w-4 h-4"></i>
             <span>บันทึกการตั้งค่า</span>
           </button>
@@ -1209,30 +1312,36 @@
   </div>
 
   <!-- MODAL: SLIP VERIFICATION & QUOTA MANAGEMENT (ตรวจสลิปอัตโนมัติ / สลับโควตา) -->
-  <div id="modalSlipVerificationConfig" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
-    <div class="cyber-glass bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl relative max-h-[92vh] flex flex-col space-y-4">
-      
+  <div id="modalSlipVerificationConfig"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
+    <div
+      class="cyber-glass bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl relative max-h-[92vh] flex flex-col space-y-4">
+
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 flex-shrink-0">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+          <div
+            class="w-10 h-10 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
             <i data-lucide="scan-line" class="w-5 h-5"></i>
           </div>
           <div>
             <h3 class="text-base font-black text-white flex items-center gap-2">
               <span>ตั้งค่าระบบตรวจสลิป & จัดการโควตา</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Auto Slip Verification</span>
+              <span
+                class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Auto
+                Slip Verification</span>
             </h3>
             <p class="text-xs text-slate-400">ควบคุมโหมดการตรวจสลิป ดูโควตาคงเหลือ และสลับ Token บัญชีสำรอง</p>
           </div>
         </div>
-        <button onclick="closeSlipVerificationConfigModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer">
+        <button onclick="closeSlipVerificationConfigModal()"
+          class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <div class="overflow-y-auto flex-1 pr-1 space-y-4">
-        
+
         <!-- 1. Mode Selector: Manual (Default) vs Auto Verify -->
         <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
           <label class="text-xs font-bold text-white flex items-center justify-between">
@@ -1245,31 +1354,37 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label class="p-3 rounded-xl border cursor-pointer transition flex items-start gap-3" id="labelModeManual">
-              <input type="radio" name="slipVerificationMode" value="manual" checked onchange="handleSlipModeChange()" class="mt-1 accent-orange-500">
+              <input type="radio" name="slipVerificationMode" value="manual" checked onchange="handleSlipModeChange()"
+                class="mt-1 accent-orange-500">
               <div class="space-y-0.5">
                 <span class="font-extrabold text-xs text-white block">📁 โหมดอัปโหลดสลิปปกติ (Manual)</span>
-                <span class="text-[11px] text-slate-400 block leading-tight">ตั้งเป็นค่าเริ่มต้น ไม่ใช้โควตา API ฟรีตลอดกาล บันทึกสลิปขึ้น Cloud ทันทีและให้แอดมินตรวจสอบ</span>
+                <span class="text-[11px] text-slate-400 block leading-tight">ตั้งเป็นค่าเริ่มต้น ไม่ใช้โควตา API
+                  ฟรีตลอดกาล บันทึกสลิปขึ้น Cloud ทันทีและให้แอดมินตรวจสอบ</span>
               </div>
             </label>
 
             <label class="p-3 rounded-xl border cursor-pointer transition flex items-start gap-3" id="labelModeAuto">
-              <input type="radio" name="slipVerificationMode" value="auto" onchange="handleSlipModeChange()" class="mt-1 accent-cyan-500">
+              <input type="radio" name="slipVerificationMode" value="auto" onchange="handleSlipModeChange()"
+                class="mt-1 accent-cyan-500">
               <div class="space-y-0.5">
                 <span class="font-extrabold text-xs text-white block">⚡ โหมดสแกนตรวจยอดเงินอัตโนมัติ (Auto)</span>
-                <span class="text-[11px] text-slate-400 block leading-tight">ตรวจ Mini-QR ยอดเงินเข้าจริง 100% สลิปแท้ ป้องกันสลิปซ้ำ และอนุมัติสถานะชำระเงินทันที</span>
+                <span class="text-[11px] text-slate-400 block leading-tight">ตรวจ Mini-QR ยอดเงินเข้าจริง 100% สลิปแท้
+                  ป้องกันสลิปซ้ำ และอนุมัติสถานะชำระเงินทันที</span>
               </div>
             </label>
           </div>
         </div>
 
         <!-- 2. Quota Overview Card -->
-        <div class="p-4 rounded-2xl bg-gradient-to-br from-cyan-950/30 to-slate-950 border border-cyan-800/40 space-y-3">
+        <div
+          class="p-4 rounded-2xl bg-gradient-to-br from-cyan-950/30 to-slate-950 border border-cyan-800/40 space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-xs font-black text-cyan-300 flex items-center gap-1.5">
               <i data-lucide="gauge" class="w-4 h-4 text-cyan-400"></i>
               <span>ภาพรวมโควตาตรวจสลิป (Quota Monitor)</span>
             </span>
-            <button type="button" onclick="resetQuotaCounter()" class="text-[10px] text-slate-400 hover:text-cyan-300 underline">
+            <button type="button" onclick="resetQuotaCounter()"
+              class="text-[10px] text-slate-400 hover:text-cyan-300 underline">
               รีเซ็ตตัวนับ
             </button>
           </div>
@@ -1277,15 +1392,18 @@
           <div class="grid grid-cols-3 gap-2 text-center">
             <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
               <div class="text-[10px] text-slate-400 font-bold">ใช้ไปแล้ว</div>
-              <div id="quotaUsedDisplay" class="text-base sm:text-lg font-black text-white font-mono mt-0.5">0 ครั้ง</div>
+              <div id="quotaUsedDisplay" class="text-base sm:text-lg font-black text-white font-mono mt-0.5">0 ครั้ง
+              </div>
             </div>
             <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
               <div class="text-[10px] text-slate-400 font-bold">โควตาทั้งหมด</div>
-              <div id="quotaTotalDisplay" class="text-base sm:text-lg font-black text-cyan-300 font-mono mt-0.5">100 ครั้ง</div>
+              <div id="quotaTotalDisplay" class="text-base sm:text-lg font-black text-cyan-300 font-mono mt-0.5">100
+                ครั้ง</div>
             </div>
             <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
               <div class="text-[10px] text-slate-400 font-bold">คงเหลือ</div>
-              <div id="quotaRemainingDisplay" class="text-base sm:text-lg font-black text-emerald-400 font-mono mt-0.5">100 ครั้ง</div>
+              <div id="quotaRemainingDisplay" class="text-base sm:text-lg font-black text-emerald-400 font-mono mt-0.5">
+                100 ครั้ง</div>
             </div>
           </div>
         </div>
@@ -1343,7 +1461,8 @@
             <span>ระบบบันทึกเวลาโซนไทย (Asia/Bangkok • GMT+7):</span>
           </div>
           <p class="leading-relaxed">
-            ระบบจะแปลงวันเวลาที่อัปโหลดและเวลาที่สแกนสลิปเป็นเวลาประเทศไทย พ.ศ. (เช่น <span id="currentThaiTimeSample" class="text-white font-mono font-bold"></span>) อัตโนมัติทุกรายการ
+            ระบบจะแปลงวันเวลาที่อัปโหลดและเวลาที่สแกนสลิปเป็นเวลาประเทศไทย พ.ศ. (เช่น <span id="currentThaiTimeSample"
+              class="text-white font-mono font-bold"></span>) อัตโนมัติทุกรายการ
           </p>
         </div>
 
@@ -1351,16 +1470,19 @@
 
       <!-- Modal Footer -->
       <div class="flex items-center justify-between pt-3 border-t border-slate-800 flex-shrink-0">
-        <button type="button" onclick="testSlipQuotaConnection()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+        <button type="button" onclick="testSlipQuotaConnection()"
+          class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span>ทดสอบการเชื่อมต่อ</span>
         </button>
 
         <div class="flex items-center gap-2">
-          <button type="button" onclick="closeSlipVerificationConfigModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition cursor-pointer">
+          <button type="button" onclick="closeSlipVerificationConfigModal()"
+            class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition cursor-pointer">
             ยกเลิก
           </button>
-          <button type="button" onclick="saveSlipVerificationConfig()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-extrabold text-xs shadow-lg shadow-cyan-500/25 transition flex items-center gap-1.5 cursor-pointer">
+          <button type="button" onclick="saveSlipVerificationConfig()"
+            class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-extrabold text-xs shadow-lg shadow-cyan-500/25 transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="save" class="w-4 h-4"></i>
             <span>บันทึกการตั้งค่า</span>
           </button>
@@ -1378,4 +1500,5 @@
   <!-- Admin Dashboard Logic -->
   <script src="assets/js/admin.js?v=20261017_1510"></script>
 </body>
+
 </html>

@@ -473,8 +473,9 @@ async function renderCurrentCampaignQrCode(amountOverride) {
   if (bQr) bQr.classList.add('hidden');
   if (spinner) spinner.classList.remove('hidden');
 
-  // If campaign specifies qrType === 'custom' and has a custom image, use that image
-  if (c.qrType === 'custom' && c.qrImage && c.qrImage.trim()) {
+  // If campaign specifies qrType === 'custom' OR has an uploaded custom image (not default qr_payment.png)
+  const isCustomImage = (c.qrType === 'custom') || (c.qrImage && c.qrImage.trim() && !c.qrImage.includes('qr_payment.png'));
+  if (isCustomImage && c.qrImage && c.qrImage.trim()) {
     currentGeneratedDynamicQrDataUrl = c.qrImage;
     showQrImg(c.qrImage);
     return;
@@ -513,13 +514,10 @@ function renderShirtShowcaseUI(campaign) {
   const showcaseSection = document.getElementById('campaignShirtShowcaseSection');
   if (!showcaseSection) return;
 
-  const hasBanner = !!(campaign.bannerImage && campaign.bannerImage.trim());
   const hasSizes = Array.isArray(campaign.shirtSizes) && campaign.shirtSizes.length > 0;
-  const isShirtCampaign = campaign.id.toLowerCase().includes('shirt') || 
-                          campaign.title.toLowerCase().includes('เสื้อ') || 
-                          hasBanner || hasSizes;
 
-  if (!isShirtCampaign) {
+  // If campaign does not have sizes configured, hide all shirt showcase and student shirt size selector!
+  if (!hasSizes) {
     showcaseSection.classList.add('hidden');
     const studentShirtBox = document.getElementById('studentShirtSizeCard');
     if (studentShirtBox) studentShirtBox.classList.add('hidden');
