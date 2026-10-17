@@ -1027,6 +1027,8 @@ async function handleSaveCampaignSubmit(e) {
   
   const qrInputVal = document.getElementById('campQrImageInput')?.value.trim();
   const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || 'qr_payment.png';
+  const qrImage = qrInputVal || qrPreviewSrc;
+
   const isShirtChecked = !!document.getElementById('campIsShirtCheckbox')?.checked;
   const bannerInputVal = document.getElementById('campBannerImageInput')?.value.trim();
   const bannerPreviewSrc = document.getElementById('campBannerPreviewImg')?.src || '';
