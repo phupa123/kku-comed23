@@ -223,21 +223,21 @@
     ctx.textBaseline = 'middle';
     ctx.fillText('QR', 377, qrY + (qrSize / 2));
 
-    // 5. Text Section Below QR (y: 650+)
+    // 5. Account Details & Context (y: 648+)
     ctx.textBaseline = 'alphabetic';
 
-    // Teal Title: สแกน QR เพื่อโอนเข้าบัญชี
-    ctx.fillStyle = '#1eb19f';
-    ctx.font = 'bold 30px "Prompt", "Plus Jakarta Sans", sans-serif';
+    // Teal Subtitle: สแกน QR เพื่อโอนเข้าบัญชี
+    ctx.fillStyle = '#0d9488';
+    ctx.font = 'bold 26px "Prompt", "Plus Jakarta Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('สแกน QR เพื่อโอนเข้าบัญชี', 377, 658);
+    ctx.fillText('สแกน QR เพื่อโอนเข้าบัญชี', 377, 652);
 
-    // Account Name: ชื่อ: ...
-    ctx.fillStyle = '#1e293b';
-    ctx.font = 'bold 30px "Prompt", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`ชื่อ: ${accountName}`, 377, 702);
+    // Account Name: น.ส. ...
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 28px "Prompt", "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`ชื่อบัญชี: ${accountName}`, 377, 692);
 
-    // Masked Account: บัญชี: xxx-x-x...
+    // Masked Account: xxx-x-x...
     let maskedAcc = accountNumber;
     if (accountNumber && accountNumber.length >= 9) {
       const clean = accountNumber.replace(/[^0-9]/g, '');
@@ -245,49 +245,66 @@
       maskedAcc = `xxx-x-x${last4.slice(0, 3)}-${last4.slice(3)}`;
     }
     ctx.fillStyle = '#475569';
-    ctx.font = 'bold 28px "Prompt", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`บัญชี: ${maskedAcc}`, 377, 744);
+    ctx.font = '600 24px "Prompt", "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`เลขที่บัญชี: ${maskedAcc}`, 377, 728);
 
-    // Reference Code: เลขที่อ้างอิง: ...
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 21px "Prompt", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`เลขที่อ้างอิง: ${refCode}`, 377, 780);
-
-    // 6. Premium Highlighted Locked Amount Card (y: 808 - 898)
+    // 6. Modern Authentic Locked-Amount Card (y: 752 - 862)
     if (amount !== undefined && amount !== null && Number(amount) > 0) {
-      const badgeW = 635;
-      const badgeH = 88;
-      const badgeX = (755 - badgeW) / 2;
-      const badgeY = 806;
-
-      // Soft green background
-      ctx.fillStyle = '#f0fdf4';
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 18, true, false);
-
-      // Emerald border
-      ctx.strokeStyle = '#86efac';
-      ctx.lineWidth = 2;
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 18, false, true);
-
-      // Badge Label: "ยอดชำระที่ล็อคไว้"
-      ctx.fillStyle = '#15803d';
-      ctx.font = 'bold 19px "Prompt", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('🔒 ล็อคยอดชำระเงินอัตโนมัติ (ไม่ต้องระบุจำนวนเงินเอง)', 377, badgeY + 34);
-
-      // Amount Number: "฿190.00 บาท"
       const formattedAmt = Number(amount).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      ctx.fillStyle = '#047857';
-      ctx.font = 'bold 36px "Prompt", sans-serif';
-      ctx.fillText(`฿${formattedAmt} บาท`, 377, badgeY + 74);
+      const badgeW = 650;
+      const badgeH = 105;
+      const badgeX = (755 - badgeW) / 2;
+      const badgeY = 752;
+
+      // Soft emerald gradient background
+      ctx.save();
+      const grad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY + badgeH);
+      grad.addColorStop(0, '#f0fdf4');
+      grad.addColorStop(1, '#ecfdf5');
+      ctx.fillStyle = grad;
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 20, true, false);
+
+      // Subtle border
+      ctx.strokeStyle = '#a7f3d0';
+      ctx.lineWidth = 2;
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 20, false, true);
+
+      // Inner subtle pill badge for "จำนวนเงินที่ต้องชำระ (ล็อคยอดอัตโนมัติ)"
+      const pillW = 340;
+      const pillH = 28;
+      const pillX = (755 - pillW) / 2;
+      const pillY = badgeY + 14;
+      ctx.fillStyle = '#dcfce7';
+      roundRect(ctx, pillX, pillY, pillW, pillH, 14, true, false);
+      ctx.strokeStyle = '#86efac';
+      ctx.lineWidth = 1;
+      roundRect(ctx, pillX, pillY, pillW, pillH, 14, false, true);
+
+      ctx.fillStyle = '#166534';
+      ctx.font = 'bold 16px "Prompt", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🔒 จำนวนเงินที่ต้องชำระ (ล็อคยอดอัตโนมัติ)', 377, pillY + 19);
+
+      // Amount Display: "฿ 190.00 บาท"
+      ctx.fillStyle = '#065f46';
+      ctx.font = 'bold 44px "Prompt", "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`฿ ${formattedAmt}`, 377, badgeY + 84);
+      ctx.restore();
     }
 
+    // Reference Code: เลขที่อ้างอิง
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '500 18px "Prompt", "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`รหัสอ้างอิง: ${refCode}`, 377, 892);
+
     // 7. Divider Line above footer
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(35, 922);
-    ctx.lineTo(720, 922);
+    ctx.moveTo(35, 915);
+    ctx.lineTo(720, 915);
     ctx.stroke();
 
     // 8. Footer: K+ Accepts all banks | รับเงินได้จากทุกธนาคาร
