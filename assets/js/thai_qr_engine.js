@@ -42,15 +42,17 @@
     let t = String(target).replace(/[^0-9]/g, '');
     let tag29_sub;
 
-    if (t.length >= 13) {
-      // National ID / Tax ID (13 digits)
+    if (t.length === 13) {
+      // National Citizen ID / Tax ID (13 digits)
       tag29_sub = f('00', 'A000000677010111') + f('02', t);
-    } else if (t.length >= 10 && (t.startsWith('0') || t.startsWith('66'))) {
-      // Mobile Phone
-      if (t.startsWith('0')) t = '66' + t.substring(1);
-      t = '00' + t;
-      t = t.padStart(13, '0');
-      tag29_sub = f('00', 'A000000677010111') + f('01', t);
+    } else if (t.length === 10 && t.startsWith('0')) {
+      // Mobile Phone 10 digits (e.g. 0812345678 -> 0066812345678)
+      const intlPhone = '0066' + t.substring(1);
+      tag29_sub = f('00', 'A000000677010111') + f('01', intlPhone.padStart(13, '0'));
+    } else if (t.length >= 11 && (t.startsWith('66') || t.startsWith('0066'))) {
+      // Mobile Phone already with country code
+      const cleanPhone = t.startsWith('00') ? t : ('00' + t);
+      tag29_sub = f('00', 'A000000677010111') + f('01', cleanPhone.padStart(13, '0'));
     } else {
       // Bank Account / E-Wallet ID fallback (10-15 digits)
       tag29_sub = f('00', 'A000000677010111') + f('03', t.padStart(15, '0'));
@@ -75,12 +77,35 @@
   }
 
   /**
+   * Helper to format and mask PromptPay target string
+   */
+  function formatPromptPayDisplay(target) {
+    if (!target) return { label: 'บัญชี / พร้อมเพย์', display: '-' };
+    const clean = String(target).replace(/[^0-9]/g, '');
+    if (clean.length === 13) {
+      // Citizen ID Card 13 digits
+      const masked = `${clean[0]}-xxxx-xxxxx-${clean.slice(10, 12)}-${clean[12]}`;
+      return { label: 'เลขประจำตัว ปชช.', display: masked };
+    } else if (clean.length === 10 && clean.startsWith('0')) {
+      // Mobile phone 10 digits
+      const masked = `${clean.slice(0, 3)}-xxx-${clean.slice(6)}`;
+      return { label: 'เบอร์พร้อมเพย์', display: masked };
+    } else if (clean.length >= 8) {
+      // Bank account
+      const last4 = clean.slice(-4);
+      const masked = `xxx-x-x${last4.slice(0, 3)}-${last4.slice(3)}`;
+      return { label: 'เลขที่บัญชี', display: masked };
+    }
+    return { label: 'พร้อมเพย์', display: String(target) };
+  }
+
+  /**
    * Builds high-resolution Thai QR Payment Slip Card Canvas matching KBank/PromptPay official standard
    * @param {Object} options
-   * @param {string} options.target - PromptPay ID / Account Number
+   * @param {string} options.target - PromptPay ID / Phone / ID card / Bank Account
    * @param {number} options.amount - Locked amount (e.g. 190.00)
    * @param {string} [options.accountName] - Owner name (e.g. "น.ส. พิชามญธุ์ สามสี")
-   * @param {string} [options.accountNumber] - Formatted account number (e.g. "236-2-47817-3")
+   * @param {string} [options.accountNumber] - Formatted account number / phone / ID
    * @param {string} [options.refCode] - Reference code (e.g. "004999250006870")
    * @returns {Promise<string>} Data URL PNG of the full slip card
    */
@@ -93,7 +118,8 @@
       refCode = '004999250006870'
     } = options || {};
 
-    const payload = generatePromptPayPayload(target, amount);
+    const effectiveTarget = target || accountNumber || '2362478173';
+    const payload = generatePromptPayPayload(effectiveTarget, amount);
 
     // 1. Fetch QR Code image from external API (ส่ง EMVCo payload → รับรูป QR PNG กลับ)
     //    api.qrserver.com รองรับ Thai QR / PromptPay payload โดยตรง — ไม่ต้องใช้ QRCode.js
@@ -196,25 +222,25 @@
       ppImg.src = 'assets/images/promptpay_logo.png';
     });
 
-    // E. QR Code card with shadow
-    const qrSize = 400;
+    // E. QR Code card with clean shadow
+    const qrSize = 390;
     const qrX = (755 - qrSize) / 2;
     const qrY = 236;
-    const cardPad = 18;
+    const cardPad = 16;
 
     // Drop shadow
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.10)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetY = 6;
+    ctx.shadowColor = 'rgba(0,0,0,0.08)';
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 5;
     ctx.fillStyle = '#ffffff';
-    roundRect(ctx, qrX - cardPad, qrY - cardPad, qrSize + cardPad * 2, qrSize + cardPad * 2, 24, true, false);
+    roundRect(ctx, qrX - cardPad, qrY - cardPad, qrSize + cardPad * 2, qrSize + cardPad * 2, 22, true, false);
     ctx.restore();
-    ctx.strokeStyle = '#e8edf3';
+    ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1.5;
-    roundRect(ctx, qrX - cardPad, qrY - cardPad, qrSize + cardPad * 2, qrSize + cardPad * 2, 24, false, true);
+    roundRect(ctx, qrX - cardPad, qrY - cardPad, qrSize + cardPad * 2, qrSize + cardPad * 2, 22, false, true);
 
-    // Draw QR (img element from hidden div)
+    // Draw QR image directly in center
     if (qrImgEl) {
       if (qrImgEl.tagName === 'IMG' && (!qrImgEl.complete || qrImgEl.naturalWidth === 0)) {
         await new Promise(r => { qrImgEl.onload = r; qrImgEl.onerror = r; });
@@ -230,53 +256,51 @@
       ctx.textBaseline = 'alphabetic';
     }
 
-    // F. Account info (positions relative to QR card bottom)
-    const textTop = qrY + qrSize + cardPad + 26; // dynamic, ~686
+    // F. Account info (perfectly calculated positions)
+    const cardBottom = qrY + qrSize + cardPad;
+    const textTop = cardBottom + 28; // ~670
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'center';
 
-    // "สแกน QR เพื่อโอนเข้าบัญชี" – teal
+    // 1. "สแกน QR เพื่อโอนเข้าบัญชี" – teal
     ctx.fillStyle = '#0d9488';
-    ctx.font = 'bold 26px "Prompt", "Sarabun", sans-serif';
+    ctx.font = 'bold 24px "Prompt", "Sarabun", sans-serif';
     ctx.fillText('สแกน QR เพื่อโอนเข้าบัญชี', 377, textTop);
 
-    // Account name – dark
+    // 2. Account name – prominent dark slate
     ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 28px "Prompt", "Sarabun", sans-serif';
-    ctx.fillText(`ชื่อบัญชี: ${accountName}`, 377, textTop + 44);
+    ctx.fillText(`ชื่อบัญชี: ${accountName}`, 377, textTop + 40);
 
-    // Masked account – slate
-    let maskedAcc = accountNumber;
-    if (accountNumber && accountNumber.replace(/[^0-9]/g, '').length >= 8) {
-      const clean = accountNumber.replace(/[^0-9]/g, '');
-      const last4 = clean.slice(-4);
-      maskedAcc = `xxx-x-x${last4.slice(0, 3)}-${last4.slice(3)}`;
-    }
+    // 3. Masked target (supports Phone / Citizen ID / Bank Account)
+    const targetInfo = formatPromptPayDisplay(effectiveTarget);
     ctx.fillStyle = '#64748b';
-    ctx.font = '600 24px "Prompt", "Sarabun", sans-serif';
-    ctx.fillText(`เลขที่บัญชี: ${maskedAcc}`, 377, textTop + 84);
+    ctx.font = '600 23px "Prompt", "Sarabun", sans-serif';
+    ctx.fillText(`${targetInfo.label}: ${targetInfo.display}`, 377, textTop + 78);
 
-    // G. Locked-amount badge
+    // G. Locked-amount badge (Dynamic height & clean spacing)
+    const badgeW = 660;
+    const badgeH = 126;
+    const badgeX = (755 - badgeW) / 2;
+    const badgeY = textTop + 98; // ~768
+
     if (amount !== undefined && amount !== null && Number(amount) > 0) {
       const formattedAmt = Number(amount).toLocaleString('th-TH', {
         minimumFractionDigits: 2, maximumFractionDigits: 2
       });
-      const badgeW = 660; const badgeH = 128;
-      const badgeX = (755 - badgeW) / 2;
-      const badgeY = textTop + 106;
 
       ctx.save();
       const grad = ctx.createLinearGradient(badgeX, badgeY, badgeX, badgeY + badgeH);
       grad.addColorStop(0, '#f0fdf4');
       grad.addColorStop(1, '#d1fae5');
       ctx.fillStyle = grad;
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 22, true, false);
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 20, true, false);
       ctx.strokeStyle = '#6ee7b7';
       ctx.lineWidth = 2;
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 22, false, true);
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 20, false, true);
 
-      // Pill label
-      const pillW = 380; const pillH = 32;
+      // Pill label inside amount card
+      const pillW = 390; const pillH = 32;
       const pillX = (755 - pillW) / 2; const pillY = badgeY + 12;
       ctx.fillStyle = '#a7f3d0';
       roundRect(ctx, pillX, pillY, pillW, pillH, 16, true, false);
@@ -285,23 +309,23 @@
       ctx.textAlign = 'center';
       ctx.fillText('🔒 จำนวนเงินที่ต้องชำระ (ล็อคยอดอัตโนมัติ)', 377, pillY + 21);
 
-      // Big amount number
+      // Big amount number centered
       ctx.fillStyle = '#064e3b';
-      ctx.font = 'bold 58px "Prompt", "Sarabun", sans-serif';
+      ctx.font = 'bold 56px "Prompt", "Sarabun", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`฿ ${formattedAmt}`, 377, badgeY + 114);
+      ctx.fillText(`฿ ${formattedAmt}`, 377, badgeY + 110);
       ctx.restore();
     }
 
     // H. Reference code
-    const refY = textTop + 106 + 128 + 22;
+    const refY = badgeY + badgeH + 26; // ~920
     ctx.fillStyle = '#94a3b8';
     ctx.font = '500 18px "Prompt", "Sarabun", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`รหัสอ้างอิง: ${refCode}`, 377, refY);
 
     // I. Thin divider
-    const divY = refY + 24;
+    const divY = refY + 20; // ~940
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -312,7 +336,7 @@
     await new Promise(resolve => {
       const fImg = new Image();
       fImg.crossOrigin = 'anonymous';
-      fImg.onload = () => { ctx.drawImage(fImg, 0, divY + 6, 755, 90); resolve(); };
+      fImg.onload = () => { ctx.drawImage(fImg, 0, divY + 8, 755, 90); resolve(); };
       fImg.onerror = () => {
         ctx.fillStyle = '#0d9488';
         ctx.font = 'bold 21px "Prompt", sans-serif';
@@ -331,6 +355,7 @@
   window.ThaiQrEngine = {
     generatePromptPayPayload,
     generatePromptPaySlipCard,
+    formatPromptPayDisplay,
     crc16
   };
 

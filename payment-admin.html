@@ -858,22 +858,27 @@
         <!-- ================= TAB 2: BANK & QR CODE ================= -->
         <div id="viewCampTabBank" class="hidden space-y-3.5">
           <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
-            <span class="font-bold text-orange-400 block text-xs">ข้อมูลบัญชีธนาคาร</span>
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-orange-400 block text-xs">ข้อมูลบัญชีผู้รับเงิน / พร้อมเพย์</span>
+              <span class="text-[10px] text-teal-400 font-bold bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/20">รองรับ เบอร์โทร / บัตร ปชช. / เลขบัญชี</span>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อธนาคาร</label>
-                <input type="text" id="campBankNameInput" placeholder="เช่น ธนาคารกสิกรไทย"
+                <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อธนาคาร / บริการ</label>
+                <input type="text" id="campBankNameInput" placeholder="เช่น พร้อมเพย์ / กสิกรไทย"
                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
               </div>
               <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1">เลขที่บัญชี</label>
-                <input type="text" id="campAccountNumInput" placeholder="เช่น 236-2-47817-3"
+                <label class="block text-[11px] font-bold text-slate-400 mb-1">เบอร์พร้อมเพย์ / เลขบัตร ปชช. / เลขบัญชี</label>
+                <input type="text" id="campAccountNumInput" placeholder="เช่น 0812345678 หรือ 1409900..."
+                  oninput="if(window.previewAdminGeneratedQr) previewAdminGeneratedQr()"
                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อเจ้าของบัญชี</label>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">ชื่อเจ้าของบัญชี / ผู้รับเงิน</label>
               <input type="text" id="campAccountNameInput" placeholder="เช่น น.ส. พิชามญธุ์ สามสี"
+                oninput="if(window.previewAdminGeneratedQr) previewAdminGeneratedQr()"
                 class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
             </div>
           </div>

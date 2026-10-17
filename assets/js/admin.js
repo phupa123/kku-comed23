@@ -2151,38 +2151,47 @@ async function adminMoveToTrash(studentId) {
     if (sb && currentAdminCampaign && currentAdminCampaign.id) {
       try {
         await sb.from('payments').delete().match({
-          campaign_    const isDirectImage = rawUrl.startsWith('data:image') ||
-      rawUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) ||
-      rawUrl.includes('cloudinary') ||
-      rawUrl.includes('catbox') ||
-      rawUrl.includes('ibb.co');
+          campaign_id: currentAdminCampaign.id,
+          student_id: studentId
+        });
+      } catch (sbErr) {
+        console.warn("Supabase delete payment notice:", sbErr);
+      }
+    }
 
-    // Safe CDN URL in case files.catbox.moe is blocked by local ISP/DNS
-    const safeDisplayUrl = (rawUrl.includes('files.catbox.moe') || rawUrl.includes('catbox.moe'))
-      ? `https://wsrv.nl/?url=${encodeURIComponent(rawUrl)}&output=webp&q=85`
-      : rawUrl;
+    // Clean up local student storage caches so it doesn't bounce back
+    try {
+      const localPay = JSON.parse(localStorage.getItem('COMED_LOCAL_PAYMENTS') || '{}');
+      const cleanId = studentId.replace(/-/g, '').trim();
+      delete localPay[studentId];
+      if (cleanId) delete localPay[cleanId];
+      localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localPay));
+    } catch(e) {}
 
-    return `
-      <div class="bg-slate-950/90 rounded-2xl border border-slate-800 p-4 space-y-3 relative">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg bg-orange-500/20 text-orange-400 font-bold text-xs flex items-center justify-center border border-orange-500/30">
-              #${idx + 1}
-            </span>
-            <span class="text-xs font-bold text-white">สลิปใบที่ ${idx + 1}</span>
-            ${slipAmt ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-mono text-[11px] font-bold">฿${Number(slipAmt).toLocaleString()}</span>` : ''}
-          </div>
-          <div class="text-[11px] text-slate-400 font-mono">
-            ${slipTime}
-          </div>
-        </div>
+    if (googleAppsScriptUrl) {
+      try {
+        fetch(googleAppsScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: "move_to_trash",
+            studentId: studentId,
+            name: st?.name || '',
+            nickname: st?.nickname || '',
+            email: st?.email || '',
+            slipUrl: slipUrl
+          })
+        });
+      } catch (e) { }
+    }
 
-        <div class="w-full h-72 sm:h-80 rounded-xl bg-slate-900 border border-slate-800/80 overflow-hidden flex items-center justify-center relative">
-          ${isDirectImage
-            ? `<img src="${safeDisplayUrl}" alt="สลิป ${idx + 1}" class="max-h-full max-w-full object-contain mx-auto rounded-lg">`
-            : `<iframe src="${drivePreview}" class="w-full h-full border-0 rounded-xl" allow="autoplay" loading="lazy"></iframe>`
-          }
-        </div>�ปถังขยะเรียบร้อย (สถานะกลับเป็นยังไม่ชำระ)`);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+    localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
+    logAdminAction("ย้ายไปถังขยะ", `ย้ายข้อมูลของ ${name} (${studentId}) ไปถังขยะ`);
+    renderStats();
+    renderAdminTable();
+    showToastNotification(`ย้ายข้อมูลของ ${name} ไปถังขยะเรียบร้อย (สถานะกลับเป็นยังไม่ชำระ)`);
   }
 }
 
