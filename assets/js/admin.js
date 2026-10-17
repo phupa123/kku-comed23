@@ -16,7 +16,7 @@ let currentAdminCampaign = (window.ComedCampaignManager ? window.ComedCampaignMa
   gasApiUrl: "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec"
 };
 
-const STORAGE_KEY = `COMED_KKU69_PAYMENT_DATA_${currentAdminCampaign.id.toUpperCase()}`;
+let STORAGE_KEY = `COMED_PAYMENT_DATA_${currentAdminCampaign.id.toUpperCase()}`;
 const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_LOGGED_USER';
 const ADMIN_ACCOUNTS_KEY = 'COMED_KKU69_ADMIN_ACCOUNTS_V2';
 const ADMIN_LOGS_KEY = 'COMED_KKU69_ADMIN_LOGS_V2';
@@ -356,7 +356,8 @@ async function showDashboard() {
   if (window.ComedCampaignManager && typeof window.ComedCampaignManager.fetchFromCloud === 'function') {
     try {
       await window.ComedCampaignManager.fetchFromCloud();
-      currentAdminCampaign = window.ComedCampaignManager.getCampaignById(currentCampaignId);
+      currentAdminCampaign = window.ComedCampaignManager.getCampaignById(currentCampaignId) || currentAdminCampaign;
+      STORAGE_KEY = `COMED_PAYMENT_DATA_${currentAdminCampaign.id.toUpperCase()}`;
     } catch (e) {}
   }
 
@@ -365,7 +366,7 @@ async function showDashboard() {
 
   studentDatabase = (typeof window.STUDENTS_DATA !== 'undefined' && window.STUDENTS_DATA.length > 0) ? window.STUDENTS_DATA : DEFAULT_STUDENTS;
   
-  const local = localStorage.getItem(STORAGE_KEY);
+  const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(`COMED_KKU69_PAYMENT_DATA_${currentAdminCampaign.id.toUpperCase()}`);
   if (local) {
     try { paymentRecords = JSON.parse(local); } catch(e) {}
   }
@@ -2540,8 +2541,7 @@ async function adminDeleteSingleSlip(studentId, slipIndex) {
       await sb.from('payments').upsert({
         campaign_id: currentAdminCampaign.id,
         student_id: studentId,
-        slip_url: record.slipUrl,
-        slips: JSON.stringify(record.slips),
+        slip_url: (Array.isArray(record.slips) && record.slips.length > 0) ? JSON.stringify(record.slips) : (record.slipUrl || ''),
         amount: record.amount,
         timestamp: record.timestamp,
         paid: true,

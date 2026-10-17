@@ -1668,7 +1668,9 @@ async function executeSlipSubmission() {
   const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
   if (sb) {
     try {
-      const { error: sbErr } = await sb.from('payments').upsert({
+      // Primary payload: store serialized updatedSlips directly inside slip_url so that
+      // even if Supabase table schema lacks a dedicated 'slips' column, all multi-slips are 100% preserved
+      const payloadWithAllSlips = {
         campaign_id: currentCampaign.id,
         student_id: studentId,
         student_name: currentSelectedStudent.name,
@@ -1677,13 +1679,19 @@ async function executeSlipSubmission() {
         amount: finalAmount,
         paid: true,
         timestamp: thaiTimestamp,
-        slip_url: uploadedSlipUrl,
-        slips: JSON.stringify(updatedSlips),
+        slip_url: JSON.stringify(updatedSlips),
         ref_code: refCode,
         verified: isVerifiedAuto
-      }, { onConflict: 'campaign_id,student_id' });
+      };
+
+      const { error: sbErr } = await sb.from('payments').upsert(payloadWithAllSlips, { onConflict: 'campaign_id,student_id' });
       if (sbErr) {
-        console.warn("Supabase upsert payment notice:", sbErr);
+        console.warn("Supabase upsert payment notice, attempting simple slip_url fallback:", sbErr);
+        // Fallback: simple primary string url
+        await sb.from('payments').upsert({
+          ...payloadWithAllSlips,
+          slip_url: uploadedSlipUrl
+        }, { onConflict: 'campaign_id,student_id' });
       }
     } catch(err) {
       console.warn("Supabase insert payment warning:", err);

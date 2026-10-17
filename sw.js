@@ -152,10 +152,16 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       })
       .catch(async () => {
-        const cached = await caches.match(req);
+        // Match with ignoreSearch so /payment.html?camp=shirt69 matches cached /payment.html
+        const cached = await caches.match(req, { ignoreSearch: true });
         if (cached) return cached;
-        if (req.headers.get('accept')?.includes('text/html')) {
-          return caches.match('/index.html');
+        if (req.headers.get('accept')?.includes('text/html') || url.pathname.endsWith('.html') || !url.pathname.includes('.')) {
+          if (url.pathname.includes('payment')) {
+            const cachedPayment = await caches.match('/payment.html');
+            if (cachedPayment) return cachedPayment;
+          }
+          const cachedIndex = await caches.match('/index.html');
+          if (cachedIndex) return cachedIndex;
         }
         return new Response('Offline', { status: 503, statusText: 'Offline' });
       })
