@@ -298,6 +298,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
+  updateAdminSlipModeBadge();
 
   // Silent Auto-refresh background polling every 20s
   setInterval(async () => {
@@ -1729,7 +1730,9 @@ async function submitAdminManualPayment() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
   const studentId = currentAdminTargetStudent.id;
-  const timestamp = new Date().toLocaleString('th-TH');
+  const timestamp = window.SlipVerificationEngine
+    ? window.SlipVerificationEngine.formatThaiDateTime(new Date())
+    : new Date().toLocaleString('th-TH');
   const refCode = "ADMIN-VERIFIED-" + Date.now();
 
   paymentRecords[studentId] = {
@@ -1737,7 +1740,7 @@ async function submitAdminManualPayment() {
     timestamp: timestamp,
     slipUrl: adminTempSlipBase64,
     refCode: refCode,
-    amount: 190
+    amount: currentAdminCampaign.amount || 190
   };
 
   // 1. Send to Supabase Database
@@ -2463,4 +2466,218 @@ function getExportModeTitle(opt) {
 // Default fallback
 async function exportToExcel() {
   openExportModal();
+}
+
+// =========================================================================
+// SLIP VERIFICATION & QUOTA MANAGEMENT CONTROLLER (SLIPOK / MULTI-PROVIDER)
+// =========================================================================
+
+function updateAdminSlipModeBadge() {
+  const badge = document.getElementById('adminSlipModeBadge');
+  if (!badge) return;
+  const engine = window.SlipVerificationEngine;
+  if (!engine) return;
+
+  const mode = engine.config.mode || 'manual';
+  if (mode === 'auto') {
+    badge.textContent = 'Auto Verify';
+    badge.className = 'px-1.5 py-0.5 rounded text-[9px] bg-cyan-500 text-slate-950 font-extrabold font-mono shadow-sm';
+  } else {
+    badge.textContent = 'Manual';
+    badge.className = 'px-1.5 py-0.5 rounded text-[9px] bg-slate-900 text-slate-300 font-mono border border-slate-700';
+  }
+}
+
+function openSlipVerificationConfigModal() {
+  const modal = document.getElementById('modalSlipVerificationConfig');
+  if (!modal) return;
+
+  const engine = window.SlipVerificationEngine;
+  if (!engine) {
+    alert("⚠️ SlipVerificationEngine ยังไม่พร้อมใช้งาน");
+    return;
+  }
+
+  const cfg = engine.config;
+
+  // Set Radio Mode
+  const radios = document.getElementsByName('slipVerificationMode');
+  radios.forEach(r => {
+    r.checked = (r.value === (cfg.mode || 'manual'));
+  });
+  handleSlipModeChange();
+
+  // Set Inputs
+  const branchInput = document.getElementById('slipokBranchIdInput');
+  const apiInput = document.getElementById('slipokApiKeyInput');
+  const backupBranchInput = document.getElementById('backupBranchIdInput');
+  const backupApiInput = document.getElementById('backupApiKeyInput');
+
+  if (branchInput) branchInput.value = cfg.slipokBranchId || '';
+  if (apiInput) apiInput.value = cfg.slipokApiKey || '';
+
+  const backup = (cfg.backupAccounts && cfg.backupAccounts[0]) || {};
+  if (backupBranchInput) backupBranchInput.value = backup.branchId || '';
+  if (backupApiInput) backupApiInput.value = backup.apiKey || '';
+
+  // Update Quota Display
+  updateSlipQuotaDisplay();
+
+  // Current Thai Time Sample
+  const timeSample = document.getElementById('currentThaiTimeSample');
+  if (timeSample) {
+    timeSample.textContent = engine.formatThaiDateTime(new Date(), 'fullThai');
+  }
+
+  modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeSlipVerificationConfigModal() {
+  const modal = document.getElementById('modalSlipVerificationConfig');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleSlipModeChange() {
+  const radios = document.getElementsByName('slipVerificationMode');
+  let selectedMode = 'manual';
+  radios.forEach(r => {
+    if (r.checked) selectedMode = r.value;
+  });
+
+  const labelManual = document.getElementById('labelModeManual');
+  const labelAuto = document.getElementById('labelModeAuto');
+
+  if (labelManual) {
+    if (selectedMode === 'manual') {
+      labelManual.className = 'p-3 rounded-xl border border-orange-500/80 bg-orange-950/25 cursor-pointer transition flex items-start gap-3 shadow-md shadow-orange-500/10';
+    } else {
+      labelManual.className = 'p-3 rounded-xl border border-slate-800 bg-slate-900/60 hover:border-slate-700 cursor-pointer transition flex items-start gap-3';
+    }
+  }
+
+  if (labelAuto) {
+    if (selectedMode === 'auto') {
+      labelAuto.className = 'p-3 rounded-xl border border-cyan-500/80 bg-cyan-950/25 cursor-pointer transition flex items-start gap-3 shadow-md shadow-cyan-500/10';
+    } else {
+      labelAuto.className = 'p-3 rounded-xl border border-slate-800 bg-slate-900/60 hover:border-slate-700 cursor-pointer transition flex items-start gap-3';
+    }
+  }
+}
+
+function updateSlipQuotaDisplay() {
+  const engine = window.SlipVerificationEngine;
+  if (!engine) return;
+
+  const used = engine.config.quotaUsed || 0;
+  const total = engine.config.quotaTotal || 100;
+  const remaining = Math.max(0, total - used);
+
+  const usedEl = document.getElementById('quotaUsedDisplay');
+  const totalEl = document.getElementById('quotaTotalDisplay');
+  const remEl = document.getElementById('quotaRemainingDisplay');
+
+  if (usedEl) usedEl.textContent = `${used.toLocaleString()} ครั้ง`;
+  if (totalEl) totalEl.textContent = `${total.toLocaleString()} ครั้ง`;
+  if (remEl) {
+    remEl.textContent = `${remaining.toLocaleString()} ครั้ง`;
+    if (remaining <= 5) {
+      remEl.className = 'text-base sm:text-lg font-black text-rose-400 font-mono mt-0.5 animate-pulse';
+    } else {
+      remEl.className = 'text-base sm:text-lg font-black text-emerald-400 font-mono mt-0.5';
+    }
+  }
+}
+
+function resetQuotaCounter() {
+  if (!confirm("ต้องการรีเซ็ตตัวนับจำนวนครั้งที่ใช้โควตาตรวจสลิปเป็น 0 ใช่หรือไม่?")) return;
+  const engine = window.SlipVerificationEngine;
+  if (!engine) return;
+
+  engine.saveConfig({ quotaUsed: 0 });
+  updateSlipQuotaDisplay();
+  if (typeof showToastNotification === 'function') {
+    showToastNotification("🔄 รีเซ็ตตัวนับโควตาเป็น 0 เรียบร้อยแล้ว");
+  }
+}
+
+function saveSlipVerificationConfig() {
+  const engine = window.SlipVerificationEngine;
+  if (!engine) return;
+
+  const radios = document.getElementsByName('slipVerificationMode');
+  let selectedMode = 'manual';
+  radios.forEach(r => {
+    if (r.checked) selectedMode = r.value;
+  });
+
+  const branchId = (document.getElementById('slipokBranchIdInput')?.value || '').trim();
+  const apiKey = (document.getElementById('slipokApiKeyInput')?.value || '').trim();
+  const backupBranchId = (document.getElementById('backupBranchIdInput')?.value || '').trim();
+  const backupApiKey = (document.getElementById('backupApiKeyInput')?.value || '').trim();
+
+  const backupAccounts = [];
+  if (backupBranchId || backupApiKey) {
+    backupAccounts.push({
+      id: 'backup_1',
+      name: 'SlipOK Token สำรอง',
+      provider: 'slipok',
+      branchId: backupBranchId,
+      apiKey: backupApiKey
+    });
+  }
+
+  // Persist into localStorage & Engine
+  engine.saveConfig({
+    mode: selectedMode,
+    slipokBranchId: branchId,
+    slipokApiKey: apiKey,
+    backupAccounts: backupAccounts
+  });
+
+  // Save explicit keys for backward compatibility
+  localStorage.setItem('COMED_SLIPOK_BRANCH_ID', branchId);
+  localStorage.setItem('COMED_SLIPOK_API_KEY', apiKey);
+
+  updateAdminSlipModeBadge();
+  closeSlipVerificationConfigModal();
+
+  if (typeof showToastNotification === 'function') {
+    const modeName = selectedMode === 'auto' ? '⚡ ตรวจสลิปอัตโนมัติ (Auto)' : '📁 อัปโหลดปกติ (Manual)';
+    showToastNotification(`✅ บันทึกการตั้งค่าสลิปเรียบร้อย (${modeName})`);
+  }
+}
+
+async function testSlipQuotaConnection() {
+  const branchId = (document.getElementById('slipokBranchIdInput')?.value || '').trim();
+  const apiKey = (document.getElementById('slipokApiKeyInput')?.value || '').trim();
+
+  if (!branchId || !apiKey) {
+    alert("⚠️ กรุณาระบุ Branch ID และ API Key ของ SlipOK ก่อนทำการทดสอบ");
+    return;
+  }
+
+  if (typeof showToastNotification === 'function') {
+    showToastNotification("⏳ กำลังทดสอบเชื่อมต่อไปยัง SlipOK Endpoint...");
+  }
+
+  try {
+    // Quick quota ping to SlipOK endpoint
+    const endpoint = `https://api.slipok.com/api/line/apikey/${branchId}`;
+    const res = await fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        'x-authorization': apiKey
+      }
+    });
+
+    if (res.status === 404 || res.status === 200 || res.status === 400) {
+      alert(`✅ เชื่อมต่อ SlipOK Endpoint สำเร็จ!\nBranch ID: ${branchId}\n(HTTP Status: ${res.status})`);
+    } else {
+      alert(`⚠️ ได้รับสถานะ HTTP ${res.status} จาก SlipOK กรุณาตรวจสอบ Branch ID และ API Key อีกครั้ง`);
+    }
+  } catch (err) {
+    console.warn("SlipOK Test Ping:", err);
+    alert("ℹ️ ได้ส่งคำสั่งทดสอบเชื่อมต่อไปยัง SlipOK แล้ว (หากมีข้อจำกัด CORS ในเบราว์เซอร์ การส่งรูปสลิปตอนอัปโหลดจริงจะทำงานแบบ multipart/form-data)");
+  }
 }

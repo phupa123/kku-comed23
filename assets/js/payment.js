@@ -1284,13 +1284,44 @@ async function executeSlipSubmission() {
   if (bar) bar.style.width = '35%';
 
   const studentId = currentSelectedStudent.id;
-  const timestamp = new Date().toLocaleString('th-TH');
-  const refCode = "TXN-COMED-" + Math.floor(100000 + Math.random() * 900000);
-
   const finalAmount = currentSelectedShirtSize && currentSelectedShirtSize.price
     ? currentSelectedShirtSize.price
     : (currentCampaign.amount || 190);
   const selectedShirtSizeStr = currentSelectedShirtSize ? currentSelectedShirtSize.size : null;
+
+  // Use Thai Timezone Formatting
+  let thaiTimestamp = window.SlipVerificationEngine
+    ? window.SlipVerificationEngine.formatThaiDateTime(new Date())
+    : new Date().toLocaleString('th-TH');
+  let refCode = "TXN-COMED-" + Math.floor(100000 + Math.random() * 900000);
+  let isVerifiedAuto = false;
+
+  // 1. Slip Verification (SlipOK / Multi-provider auto scan or manual mode)
+  if (window.SlipVerificationEngine) {
+    if (title) title.textContent = '🔍 กำลังตรวจสอบสลิปและยอดเงิน...';
+    if (subtitle) subtitle.textContent = 'ระบบกำลังวิเคราะห์ QR Code และยอดเงินในสลิป';
+    if (bar) bar.style.width = '25%';
+
+    try {
+      const verifyRes = await window.SlipVerificationEngine.verifySlip(tempSlipDataUrl, finalAmount, currentSelectedStudent);
+      if (!verifyRes.success) {
+        // Verification failed (Amount Mismatch or Duplicate Slip)
+        if (progressState) progressState.classList.add('hidden');
+        if (actionArea) actionArea.classList.remove('hidden');
+        if (bar) bar.style.width = '0%';
+        alert(`❌ การตรวจสอบสลิปล้มเหลว!\n\n${verifyRes.message || 'สลิปไม่ถูกต้องหรือยอดเงินไม่ตรง'}\n\nกรุณาตรวจสอบสลิปโอนเงิน หรือติดต่อแอดมินสาขา`);
+        return;
+      }
+
+      if (verifyRes.verified) {
+        isVerifiedAuto = true;
+        if (verifyRes.transRef) refCode = verifyRes.transRef;
+        if (verifyRes.timestamp) thaiTimestamp = verifyRes.timestamp;
+      }
+    } catch (vErr) {
+      console.warn("Slip verification warning, falling back to manual:", vErr);
+    }
+  }
 
   const payload = {
     studentId: studentId,
@@ -1298,10 +1329,11 @@ async function executeSlipSubmission() {
     nickname: currentSelectedStudent.nickname,
     email: currentSelectedStudent.email,
     slipBase64: tempSlipDataUrl,
-    timestamp: timestamp,
+    timestamp: thaiTimestamp,
     refCode: refCode,
     shirtSize: selectedShirtSizeStr,
-    amount: finalAmount
+    amount: finalAmount,
+    autoVerified: isVerifiedAuto
   };
 
   let uploadedSlipUrl = tempSlipDataUrl;
@@ -1347,12 +1379,13 @@ async function executeSlipSubmission() {
     nickname: currentSelectedStudent.nickname,
     email: currentSelectedStudent.email,
     paid: true,
-    timestamp: timestamp,
+    timestamp: thaiTimestamp,
     slipUrl: uploadedSlipUrl,
     slipProvider: resolvedSlipProvider,
     refCode: refCode,
     shirtSize: selectedShirtSizeStr,
-    amount: finalAmount
+    amount: finalAmount,
+    autoVerified: isVerifiedAuto
   };
 
   paymentRecords[studentId] = recordData;
@@ -1381,10 +1414,10 @@ async function executeSlipSubmission() {
         student_email: currentSelectedStudent.email,
         amount: finalAmount,
         paid: true,
-        timestamp: timestamp,
+        timestamp: thaiTimestamp,
         slip_url: uploadedSlipUrl,
         ref_code: refCode,
-        verified: true
+        verified: isVerifiedAuto
       }, { onConflict: 'campaign_id,student_id' });
       if (sbErr) {
         console.warn("Supabase upsert payment notice:", sbErr);

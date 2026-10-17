@@ -256,6 +256,13 @@
             <i data-lucide="external-link" class="w-4 h-4"></i>
             <span>หน้าหลักสาขา</span>
           </a>
+          <button onclick="openSlipVerificationConfigModal()"
+            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-cyan-300 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-700/60 transition shadow-sm cursor-pointer"
+            title="ตั้งค่าตรวจสลิปอัตโนมัติ / สลับโควตา">
+            <i data-lucide="scan-line" class="w-4 h-4 text-cyan-400"></i>
+            <span>ตรวจสลิป & โควตา</span>
+            <span id="adminSlipModeBadge" class="px-1.5 py-0.2 rounded text-[9px] bg-slate-900 text-slate-300 font-mono">Manual</span>
+          </button>
           <button onclick="openExportModal()"
             class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm cursor-pointer">
             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
@@ -1134,10 +1141,173 @@
     </div>
   </div>
 
+  <!-- MODAL: SLIP VERIFICATION & QUOTA MANAGEMENT (ตรวจสลิปอัตโนมัติ / สลับโควตา) -->
+  <div id="modalSlipVerificationConfig" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
+    <div class="cyber-glass bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl relative max-h-[92vh] flex flex-col space-y-4">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+            <i data-lucide="scan-line" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white flex items-center gap-2">
+              <span>ตั้งค่าระบบตรวจสลิป & จัดการโควตา</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Auto Slip Verification</span>
+            </h3>
+            <p class="text-xs text-slate-400">ควบคุมโหมดการตรวจสลิป ดูโควตาคงเหลือ และสลับ Token บัญชีสำรอง</p>
+          </div>
+        </div>
+        <button onclick="closeSlipVerificationConfigModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 pr-1 space-y-4">
+        
+        <!-- 1. Mode Selector: Manual (Default) vs Auto Verify -->
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
+          <label class="text-xs font-bold text-white flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <i data-lucide="toggle-left" class="w-4 h-4 text-orange-400"></i>
+              <span>โหมดการทำงานของระบบสลิป:</span>
+            </span>
+            <span class="text-[10px] text-amber-400">ประหยัดโควตา</span>
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="p-3 rounded-xl border cursor-pointer transition flex items-start gap-3" id="labelModeManual">
+              <input type="radio" name="slipVerificationMode" value="manual" checked onchange="handleSlipModeChange()" class="mt-1 accent-orange-500">
+              <div class="space-y-0.5">
+                <span class="font-extrabold text-xs text-white block">📁 โหมดอัปโหลดสลิปปกติ (Manual)</span>
+                <span class="text-[11px] text-slate-400 block leading-tight">ตั้งเป็นค่าเริ่มต้น ไม่ใช้โควตา API ฟรีตลอดกาล บันทึกสลิปขึ้น Cloud ทันทีและให้แอดมินตรวจสอบ</span>
+              </div>
+            </label>
+
+            <label class="p-3 rounded-xl border cursor-pointer transition flex items-start gap-3" id="labelModeAuto">
+              <input type="radio" name="slipVerificationMode" value="auto" onchange="handleSlipModeChange()" class="mt-1 accent-cyan-500">
+              <div class="space-y-0.5">
+                <span class="font-extrabold text-xs text-white block">⚡ โหมดสแกนตรวจยอดเงินอัตโนมัติ (Auto)</span>
+                <span class="text-[11px] text-slate-400 block leading-tight">ตรวจ Mini-QR ยอดเงินเข้าจริง 100% สลิปแท้ ป้องกันสลิปซ้ำ และอนุมัติสถานะชำระเงินทันที</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Quota Overview Card -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-cyan-950/30 to-slate-950 border border-cyan-800/40 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-cyan-300 flex items-center gap-1.5">
+              <i data-lucide="gauge" class="w-4 h-4 text-cyan-400"></i>
+              <span>ภาพรวมโควตาตรวจสลิป (Quota Monitor)</span>
+            </span>
+            <button type="button" onclick="resetQuotaCounter()" class="text-[10px] text-slate-400 hover:text-cyan-300 underline">
+              รีเซ็ตตัวนับ
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+              <div class="text-[10px] text-slate-400 font-bold">ใช้ไปแล้ว</div>
+              <div id="quotaUsedDisplay" class="text-base sm:text-lg font-black text-white font-mono mt-0.5">0 ครั้ง</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+              <div class="text-[10px] text-slate-400 font-bold">โควตาทั้งหมด</div>
+              <div id="quotaTotalDisplay" class="text-base sm:text-lg font-black text-cyan-300 font-mono mt-0.5">100 ครั้ง</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+              <div class="text-[10px] text-slate-400 font-bold">คงเหลือ</div>
+              <div id="quotaRemainingDisplay" class="text-base sm:text-lg font-black text-emerald-400 font-mono mt-0.5">100 ครั้ง</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. SlipOK Credentials & Backup Quota Swapper -->
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-white flex items-center gap-1.5">
+              <i data-lucide="key" class="w-4 h-4 text-amber-400"></i>
+              <span>บัญชีหลัก: SlipOK Primary Token</span>
+            </span>
+            <span class="text-[10px] text-slate-400">ผู้ให้บริการตรวจสลิป</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">SlipOK Branch ID:</label>
+              <input type="text" id="slipokBranchIdInput" placeholder="เช่น 12345"
+                class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono outline-none focus:border-cyan-500 transition">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">SlipOK API Key:</label>
+              <input type="password" id="slipokApiKeyInput" placeholder="เช่น eyJhbGciOiJIUz..."
+                class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono outline-none focus:border-cyan-500 transition">
+            </div>
+          </div>
+
+          <!-- Backup Accounts (สลับโควตาตัวอื่น) -->
+          <div class="pt-2 border-t border-slate-800/80 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1">
+                <i data-lucide="shuffle" class="w-3.5 h-3.5 text-cyan-400"></i>
+                <span>บัญชีสำรองสำหรับสลับโควตา (Failover Quota):</span>
+              </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 mb-1">Backup Branch ID:</label>
+                <input type="text" id="backupBranchIdInput" placeholder="Branch ID สำรอง"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono outline-none focus:border-cyan-500 transition">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 mb-1">Backup API Key:</label>
+                <input type="password" id="backupApiKeyInput" placeholder="API Key สำรอง"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono outline-none focus:border-cyan-500 transition">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Thai Timezone & Storage Details -->
+        <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400 space-y-1.5">
+          <div class="flex items-center gap-1.5 text-slate-300 font-bold">
+            <i data-lucide="clock" class="w-4 h-4 text-emerald-400"></i>
+            <span>ระบบบันทึกเวลาโซนไทย (Asia/Bangkok • GMT+7):</span>
+          </div>
+          <p class="leading-relaxed">
+            ระบบจะแปลงวันเวลาที่อัปโหลดและเวลาที่สแกนสลิปเป็นเวลาประเทศไทย พ.ศ. (เช่น <span id="currentThaiTimeSample" class="text-white font-mono font-bold"></span>) อัตโนมัติทุกรายการ
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800 flex-shrink-0">
+        <button type="button" onclick="testSlipQuotaConnection()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>ทดสอบการเชื่อมต่อ</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeSlipVerificationConfigModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition cursor-pointer">
+            ยกเลิก
+          </button>
+          <button type="button" onclick="saveSlipVerificationConfig()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-extrabold text-xs shadow-lg shadow-cyan-500/25 transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>บันทึกการตั้งค่า</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Load Student Database -->
   <script src="students_data.js"></script>
   <!-- Multi-Cloud File Uploader (Cloudinary, ImgBB, FreeImage, Catbox) -->
   <script src="assets/js/multi_uploader.js"></script>
+  <!-- Slip Verification Engine (SlipOK / Multi-Provider / Thai Timezone) -->
+  <script src="assets/js/slip_verifier.js"></script>
   <!-- Admin Dashboard Logic -->
   <script src="assets/js/admin.js"></script>
 </body>
