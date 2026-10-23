@@ -443,16 +443,23 @@
         </div>
 
         <!-- User Profile Avatar Pill -->
-        <div id="userProfileBtnWrap">
-          <button onclick="openGoogleLoginModal()" id="loginBtnTrigger" class="hidden px-3 py-1.5 rounded-full bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white text-xs font-bold font-mono transition shadow-sm hover:scale-105">
-            เข้าสู่ระบบ
+        <div id="userProfileBtnWrap" class="flex items-center">
+          <!-- Guest State: Login Button -->
+          <button onclick="openGoogleLoginModal()" id="navUserGuest" class="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white text-xs font-bold font-mono transition shadow-sm hover:scale-105 flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+            <span>เข้าสู่ระบบ</span>
           </button>
-          <a href="settings.html" id="userProfilePill" class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-slate-500 transition group">
+
+          <!-- Logged In State: User Pill -->
+          <a href="settings.html" id="navUserLoggedIn" class="hidden items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19]/50 transition group">
             <div class="relative w-7 h-7 rounded-full overflow-hidden border border-white/20">
-              <img id="navAvatarImg" src="logo.png" alt="User Profile" class="w-full h-full object-cover">
+              <img id="navUserAvatar" src="logo.png" alt="User Profile" class="w-full h-full object-cover">
               <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#070914] shadow-[0_0_6px_#34d399]"></span>
             </div>
-            <span id="navUserName" class="text-xs font-mono font-medium text-slate-200 group-hover:text-white hidden sm:inline truncate max-w-[90px]">P. Jittara</span>
+            <div class="flex flex-col text-left hidden sm:flex">
+              <span id="navUserName" class="text-xs font-mono font-bold text-slate-200 group-hover:text-white truncate max-w-[95px]">Guest</span>
+              <span id="navUserEmail" class="text-[9px] font-mono text-slate-500 truncate max-w-[95px] hidden"></span>
+            </div>
           </a>
         </div>
 
@@ -763,13 +770,13 @@
           <p class="text-xs sm:text-sm text-slate-400 mt-1">รายชื่อนักศึกษา สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 23 มหาวิทยาลัยขอนแก่น (คลิกเพื่อดูโปรไฟล์)</p>
         </div>
         <div class="flex items-center gap-2">
-          <input type="text" id="studentSearchInput" placeholder="ค้นหาชื่อหรือรหัสนักศึกษา..." 
+          <input type="text" id="rosterSearchInput" placeholder="ค้นหาชื่อหรือรหัสนักศึกษา..." 
             class="px-4 py-2 rounded-xl bg-[#12162A] border border-[#242A4A] text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E65A19] w-64">
         </div>
       </div>
 
       <!-- Students Grid Container -->
-      <div id="studentsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div id="rosterGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         <!-- Rendered by students_data.js & index.js -->
       </div>
 
