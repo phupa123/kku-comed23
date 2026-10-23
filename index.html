@@ -473,7 +473,7 @@
     </div>
   </header>
 
-  <!-- ================= MAIN HERO SECTION (01 // HOME) ================= -->
+  <!-- ================= MAIN HERO SECTION (01 / INDEX) ================= -->
   <section id="hero" class="relative min-h-[calc(100vh-64px)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10 lg:py-16 overflow-hidden">
     
     <!-- Left Timeline Indicator -->
@@ -490,24 +490,23 @@
         
         <!-- Top Sub-badges -->
         <div class="flex flex-wrap items-center gap-2">
-          <span class="px-2.5 py-1 rounded-full bg-[#161B33] border border-[#242A4A] text-[10px] font-mono font-bold tracking-wider text-slate-300 uppercase">
-            STUDENTS / BATCH 23
-          </span>
-          <span class="px-2.5 py-1 rounded-full bg-[#B32B19]/20 border border-[#B32B19]/40 text-[10px] font-mono font-bold tracking-wider text-[#FF7A29] uppercase">
+          <span class="px-3 py-1 rounded-full bg-gradient-to-r from-[#B32B19]/30 to-[#E65A19]/30 border border-[#E65A19]/50 text-[10px] font-mono font-bold tracking-wider text-[#FF7A29] uppercase">
             CLASS OF 2023 - 2027
           </span>
-          <span class="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-sans font-medium text-slate-300">
-            คอมพิวเตอร์ศึกษา รุ่น 23
+          <span class="px-3 py-1 rounded-full bg-[#161B33] border border-[#242A4A] text-[10px] font-mono font-bold tracking-wider text-slate-300 uppercase">
+            STUDENTS / BATCH 23
+          </span>
+          <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-sans font-medium text-slate-300">
+            สาขาวิชาคอมพิวเตอร์ศึกษา
           </span>
         </div>
 
         <!-- Large-sized Kinetic Typography Title -->
         <div class="space-y-1">
-          <h1 id="kineticTitle" class="title-kinetic font-display text-4xl sm:text-6xl md:text-7xl lg:text-[76px] tracking-tight leading-[0.98]">
-            COMED 23:<br>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400">CONNECTING</span><br>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A29] via-[#E65A19] to-[#B32B19]">EDUCATION &amp;</span><br>
-            <span class="text-white">TECHNOLOGY</span>
+          <h1 id="kineticTitle" class="title-kinetic font-display text-4xl sm:text-6xl md:text-7xl lg:text-[78px] tracking-tight leading-[0.95]">
+            THE HUB OF<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-300">COMED 23</span><br>
+            <span class="text-2xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A29] via-[#E65A19] to-[#B32B19] block mt-1">CONNECTING EDUCATION<br class="hidden sm:inline"> &amp; TECHNOLOGY</span>
           </h1>
         </div>
 
@@ -523,10 +522,11 @@
             <span class="group-hover:translate-x-1 transition-transform">→</span>
           </a>
 
-          <a href="Calendar.html" class="px-5 py-3 rounded-full bg-[#12162A] border border-[#242A4A] text-slate-300 hover:text-white hover:border-[#E65A19]/50 font-mono text-xs transition flex items-center gap-2">
-            <i data-lucide="calendar" class="w-3.5 h-3.5 text-[#E65A19]"></i>
-            <span>SCHEDULE &amp; DUES</span>
-          </a>
+          <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
+            <a href="storage.html" class="hover:text-white underline underline-offset-4 decoration-slate-600 transition">Secondary portals</a>
+            <span class="text-slate-600">•</span>
+            <a href="Plans.html" class="hover:text-white underline underline-offset-4 decoration-slate-600 transition">Navigation index</a>
+          </div>
         </div>
 
         <!-- Scroll Discover Prompt -->
@@ -1058,207 +1058,184 @@
       const width = container.clientWidth || 450;
       const height = container.clientHeight || 450;
 
-      // Scene, Camera, Renderer
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-      camera.position.z = 4.2;
+      const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
+      camera.position.set(0, 0.4, 4.4);
 
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.25;
+      renderer.toneMappingExposure = 1.3;
       container.appendChild(renderer.domElement);
 
-      // Environment Lights
-      const ambientLight = new THREE.AmbientLight(0x0C1030, 2.5);
+      const ambientLight = new THREE.AmbientLight(0x0C1030, 2.8);
       scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 2.8);
-      directionalLight.position.set(4, 5, 4);
-      scene.add(directionalLight);
+      const dirLight = new THREE.DirectionalLight(0xFFFFFF, 3.0);
+      dirLight.position.set(5, 6, 4);
+      scene.add(dirLight);
 
-      // Dynamic Brick-Red / Orange Point Lights for reflection
-      const redLight = new THREE.PointLight(0xE65A19, 5, 12);
-      redLight.position.set(-2, 1, 3);
-      scene.add(redLight);
+      const orangeLight = new THREE.PointLight(0xE65A19, 6, 12);
+      orangeLight.position.set(-2.5, 1, 2.5);
+      scene.add(orangeLight);
 
-      const deepRedLight = new THREE.PointLight(0xB32B19, 4, 10);
-      deepRedLight.position.set(2, -2, 2);
-      scene.add(deepRedLight);
+      const blueLight = new THREE.PointLight(0x38BDF8, 5, 12);
+      blueLight.position.set(2.5, -1, 2.5);
+      scene.add(blueLight);
 
-      // Group for zero-gravity floating
-      const floatGroup = new THREE.Group();
-      scene.add(floatGroup);
+      const laptopGroup = new THREE.Group();
+      scene.add(laptopGroup);
 
-      // 1. Inner Metallic Chrome & Red Core
-      const coreGeo = new THREE.SphereGeometry(1.05, 64, 64);
-      const coreMat = new THREE.MeshPhysicalMaterial({
-        color: 0xB32B19,
-        emissive: 0x4a0e05,
-        metalness: 0.95,
-        roughness: 0.12,
+      // Laptop Base
+      const baseGeo = new THREE.BoxGeometry(2.4, 0.08, 1.6);
+      const baseMat = new THREE.MeshPhysicalMaterial({
+        color: 0x0C1030,
+        metalness: 0.85,
+        roughness: 0.15,
+        transparent: true,
+        opacity: 0.88,
         clearcoat: 1.0,
-        clearcoatRoughness: 0.1,
-        reflectivity: 1.0
+        reflectivity: 0.9
       });
-      const coreMesh = new THREE.Mesh(coreGeo, coreMat);
-      floatGroup.add(coreMesh);
+      const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+      baseMesh.position.y = -0.55;
+      baseMesh.position.z = 0.3;
+      laptopGroup.add(baseMesh);
 
-      // 2. Metallic Mesh Lattice Cage
-      const cageGeo = new THREE.SphereGeometry(1.22, 32, 24);
-      const cageMat = new THREE.MeshStandardMaterial({
-        color: 0xEAEAEA,
+      // Screen Lid
+      const screenLid = new THREE.Group();
+      screenLid.position.set(0, -0.51, -0.5);
+      screenLid.rotation.x = -0.22;
+      laptopGroup.add(screenLid);
+
+      const lidBackGeo = new THREE.BoxGeometry(2.4, 1.55, 0.06);
+      const lidBackMat = new THREE.MeshPhysicalMaterial({
+        color: 0x080B1E,
         metalness: 0.9,
-        roughness: 0.25,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.35
+        roughness: 0.1,
+        clearcoat: 1.0
       });
-      const cageMesh = new THREE.Mesh(cageGeo, cageMat);
-      floatGroup.add(cageMesh);
+      const lidBack = new THREE.Mesh(lidBackGeo, lidBackMat);
+      lidBack.position.y = 0.775;
+      screenLid.add(lidBack);
 
-      // 3. Outer Translucent Liquid-Glass Shell
-      const glassGeo = new THREE.SphereGeometry(1.35, 64, 64);
-      const glassMat = new THREE.MeshPhysicalMaterial({
-        color: 0xFFFFFF,
-        transparent: true,
-        opacity: 0.55,
-        roughness: 0.05,
-        metalness: 0.1,
-        transmission: 0.9,
-        ior: 1.5,
-        thickness: 0.8,
-        specularIntensity: 1.0,
-        specularColor: 0xffffff
-      });
-      const glassMesh = new THREE.Mesh(glassGeo, glassMat);
-      floatGroup.add(glassMesh);
-
-      // 4. Dashed Orbit Rings (Orbit Trails)
-      function createOrbitRing(radius, rotX, rotY) {
-        const curve = new THREE.EllipseCurve(0, 0, radius, radius, 0, 2 * Math.PI, false, 0);
-        const points = curve.getPoints(100);
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        const material = new THREE.LineDashedMaterial({
-          color: 0x7E859E,
-          dashSize: 0.08,
-          gapSize: 0.05,
+      // Golden Stupa Emblem Screen Texture
+      const emblemTexLoader = new THREE.TextureLoader();
+      emblemTexLoader.load('assets/images/kku_comed_emblem_reference.jpg', (tex) => {
+        tex.generateMipmaps = true;
+        const emblemPlaneGeo = new THREE.PlaneGeometry(1.9, 1.25);
+        const emblemPlaneMat = new THREE.MeshBasicMaterial({
+          map: tex,
           transparent: true,
-          opacity: 0.6
+          opacity: 0.96,
+          blending: THREE.AdditiveBlending
         });
-        const line = new THREE.Line(geometry, material);
-        line.computeLineDistances();
-        line.rotation.x = rotX;
-        line.rotation.y = rotY;
-        return line;
-      }
+        const emblemPlane = new THREE.Mesh(emblemPlaneGeo, emblemPlaneMat);
+        emblemPlane.position.set(0, 0.78, 0.045);
+        screenLid.add(emblemPlane);
+      });
 
-      const ring1 = createOrbitRing(1.85, Math.PI / 3, Math.PI / 6);
-      const ring2 = createOrbitRing(2.1, -Math.PI / 4, Math.PI / 4);
-      floatGroup.add(ring1);
-      floatGroup.add(ring2);
+      // Fire Orange Glowing Orbit Ring
+      const curve = new THREE.EllipseCurve(0, 0, 2.1, 1.5, 0, 2 * Math.PI, false, 0);
+      const pts = curve.getPoints(120);
+      const orbitGeo = new THREE.BufferGeometry().setFromPoints(pts);
+      const orbitMat = new THREE.LineBasicMaterial({ color: 0xFF7A29, transparent: true, opacity: 0.85 });
+      const orbitRing = new THREE.Line(orbitGeo, orbitMat);
+      orbitRing.rotation.x = Math.PI / 3;
+      orbitRing.rotation.y = -Math.PI / 6;
+      laptopGroup.add(orbitRing);
 
-      // 5. Drifting Micro-particles
-      const particleCount = 70;
-      const particleGeo = new THREE.BufferGeometry();
-      const positions = new Float32Array(particleCount * 3);
-      for (let i = 0; i < particleCount * 3; i += 3) {
-        positions[i] = (Math.random() - 0.5) * 5;
-        positions[i + 1] = (Math.random() - 0.5) * 5;
-        positions[i + 2] = (Math.random() - 0.5) * 5;
+      // Spark particles
+      const sparkCount = 80;
+      const sparkGeo = new THREE.BufferGeometry();
+      const sparkPos = new Float32Array(sparkCount * 3);
+      for (let i = 0; i < sparkCount * 3; i += 3) {
+        sparkPos[i] = (Math.random() - 0.5) * 4.5;
+        sparkPos[i + 1] = (Math.random() - 0.5) * 3.5;
+        sparkPos[i + 2] = (Math.random() - 0.5) * 3;
       }
-      particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const particleMat = new THREE.PointsMaterial({
-        color: 0xE65A19,
-        size: 0.035,
+      sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
+      const sparkMat = new THREE.PointsMaterial({
+        color: 0xFF7A29,
+        size: 0.04,
         transparent: true,
-        opacity: 0.75,
+        opacity: 0.85,
         blending: THREE.AdditiveBlending
       });
-      const particleSystem = new THREE.Points(particleGeo, particleMat);
-      scene.add(particleSystem);
+      const sparks = new THREE.Points(sparkGeo, sparkMat);
+      laptopGroup.add(sparks);
 
-      // Mouse drag and cursor interaction
+      // Drag interaction
       let mouseX = 0, mouseY = 0;
-      let targetRotX = 0, targetRotY = 0;
+      let targetRotY = 0.25, targetRotX = 0.15;
       let isDragging = false;
-      let prevMouseX = 0, prevMouseY = 0;
+      let prevX = 0, prevY = 0;
 
       container.addEventListener('mousedown', (e) => {
         isDragging = true;
-        prevMouseX = e.clientX;
-        prevMouseY = e.clientY;
+        prevX = e.clientX;
+        prevY = e.clientY;
       });
-
       window.addEventListener('mouseup', () => { isDragging = false; });
-
       window.addEventListener('mousemove', (e) => {
-        const rect = container.getBoundingClientRect();
-        mouseX = ((e.clientX - rect.left) / width) * 2 - 1;
-        mouseY = -(((e.clientY - rect.top) / height) * 2 - 1);
+        const r = container.getBoundingClientRect();
+        mouseX = ((e.clientX - r.left) / width) * 2 - 1;
+        mouseY = -(((e.clientY - r.top) / height) * 2 - 1);
 
         if (isDragging) {
-          const deltaX = e.clientX - prevMouseX;
-          const deltaY = e.clientY - prevMouseY;
-          targetRotY += deltaX * 0.008;
-          targetRotX += deltaY * 0.008;
-          prevMouseX = e.clientX;
-          prevMouseY = e.clientY;
+          targetRotY += (e.clientX - prevX) * 0.008;
+          targetRotX += (e.clientY - prevY) * 0.008;
+          prevX = e.clientX;
+          prevY = e.clientY;
         }
       });
 
-      // Viewport Visibility Detection
-      let isInView = true;
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => { isInView = entry.isIntersecting; });
-      }, { threshold: 0.1 });
-      observer.observe(container);
+      // Touch for mobile
+      container.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          prevX = e.touches[0].clientX;
+          prevY = e.touches[0].clientY;
+        }
+      });
+      window.addEventListener('touchend', () => { isDragging = false; });
+      window.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches.length === 1) {
+          targetRotY += (e.touches[0].clientX - prevX) * 0.008;
+          targetRotX += (e.touches[0].clientY - prevY) * 0.008;
+          prevX = e.touches[0].clientX;
+          prevY = e.touches[0].clientY;
+        }
+      });
 
-      // Animation Loop
-      let clock = new THREE.Clock();
-
+      const clock = new THREE.Clock();
       function animate() {
         requestAnimationFrame(animate);
-        if (!isInView) return;
+        const t = clock.getElapsedTime();
 
-        const elapsedTime = clock.getElapsedTime();
+        laptopGroup.position.y = Math.sin(t * 1.3) * 0.08;
+        laptopGroup.position.x = Math.cos(t * 0.9) * 0.05;
 
-        floatGroup.position.y = Math.sin(elapsedTime * 1.2) * 0.12;
-        floatGroup.position.x = Math.cos(elapsedTime * 0.8) * 0.06;
+        laptopGroup.rotation.y += 0.003;
+        orbitRing.rotation.z += 0.006;
+        sparks.rotation.y = t * 0.04;
 
-        floatGroup.rotation.y += 0.005;
-        cageMesh.rotation.y -= 0.007;
-        cageMesh.rotation.x += 0.003;
-        ring1.rotation.z += 0.003;
-        ring2.rotation.z -= 0.004;
-
-        floatGroup.rotation.y += (targetRotY + mouseX * 0.3 - floatGroup.rotation.y) * 0.05;
-        floatGroup.rotation.x += (targetRotX - mouseY * 0.3 - floatGroup.rotation.x) * 0.05;
-
-        particleSystem.rotation.y = elapsedTime * 0.03;
+        laptopGroup.rotation.y += (targetRotY + mouseX * 0.2 - laptopGroup.rotation.y) * 0.06;
+        laptopGroup.rotation.x += (targetRotX - mouseY * 0.2 - laptopGroup.rotation.x) * 0.06;
 
         renderer.render(scene, camera);
       }
-
       animate();
 
       window.addEventListener('resize', () => {
-        if (!container) return;
-        const newW = container.clientWidth;
-        const newH = container.clientHeight;
-        camera.aspect = newW / newH;
+        if (!container || !camera || !renderer) return;
+        const nw = container.clientWidth;
+        const nh = container.clientHeight;
+        camera.aspect = nw / nh;
         camera.updateProjectionMatrix();
-        renderer.setSize(newW, newH);
+        renderer.setSize(nw, nh);
       });
-
-      // Interactive Hotspots
-      const h1 = document.getElementById('hotspot1');
-      if (h1) h1.addEventListener('click', () => { window.location.href = 'storage.html'; });
-      const h2 = document.getElementById('hotspot2');
-      if (h2) h2.addEventListener('click', () => { window.location.href = 'Plans.html'; });
-      const h3 = document.getElementById('hotspot3');
-      if (h3) h3.addEventListener('click', () => { window.location.href = 'Calendar.html'; });
     })();
   </script>
 
