@@ -375,13 +375,24 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-300 mb-1">ขอบเขต (Scope)</label>
-            <select id="newRoomScope" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-              <option value="department">🏛️ งานสาขา (ทุกคนเห็น)</option>
-              <option value="shared">👥 งานกลุ่มเพื่อน</option>
-              <option value="personal">🔒 ส่วนตัว (ฉันคนเดียว)</option>
+            <label class="block font-bold text-slate-300 mb-1">ประเภทรายการ</label>
+            <select id="newRoomType" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+              <option value="event">📅 กิจกรรม / นัดหมายทั่วไป (เหมือน Apple Calendar)</option>
+              <option value="reminder">🔔 งาน / เตือนความจำ (Reminders)</option>
+              <option value="project">📊 ห้องโปรเจกต์งาน (PlanToDo พร้อมกระดานงาน)</option>
             </select>
           </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ขอบเขต (Scope)</label>
+            <select id="newRoomScope" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+              <option value="personal">🔒 บันทึกส่วนตัว (ฉันคนเดียว)</option>
+              <option value="shared">👥 งานกลุ่มเพื่อน</option>
+              <option value="department">🏛️ งานสาขา (ทุกคนเห็น)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-300 mb-1">สีประจำกิจกรรม</label>
             <select id="newRoomColor" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
@@ -391,6 +402,10 @@
               <option value="#8b5cf6">🟣 ม่วง (Purple)</option>
               <option value="#ef4444">🔴 แดง (Red)</option>
             </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สถานที่ / ห้องเรียน</label>
+            <input type="text" id="newRoomLocation" placeholder="เช่น ED2104, ห้องประชุม 2 หรือ Meet" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
           </div>
         </div>
 
@@ -406,12 +421,7 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-300 mb-1">สถานที่ / ห้องประชุม</label>
-          <input type="text" id="newRoomLocation" placeholder="เช่น ห้องประชุม 2 คณะศึกษาศาสตร์ หรือ ลิงก์ Google Meet" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">รายละเอียดเพิ่มเติม</label>
+          <label class="block font-bold text-slate-300 mb-1">รายละเอียดเพิ่มเติม / บันทึกโน้ต</label>
           <textarea id="newRoomDesc" rows="3" placeholder="ระบุสิ่งที่ต้องเตรียม หรือกำหนดการย่อ..." class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
         </div>
 
@@ -1305,10 +1315,17 @@
           </div>
 
           <div class="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+            ${p.plan_type === 'project' ? `
             <a href="Plans.html?plan=${p.id}" class="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-1.5 transition">
               <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
-              <span>เข้าห้องงาน (PlanToDo)</span>
+              <span>กระดานงาน (PlanToDo)</span>
             </a>
+            ` : `
+            <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>บันทึกบนปฏิทินแล้ว</span>
+            </span>
+            `}
             <div class="flex items-center gap-2">
               <button onclick="if(window.CalendarSync) window.CalendarSync.openGoogleCalendar(appState.plans.find(x=>x.id==='${p.id}'));" class="px-3 py-2 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-blue-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-blue-500/30 transition">
                 <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
@@ -1490,6 +1507,7 @@
       }
 
       const title = document.getElementById('newRoomTitle').value;
+      const planType = document.getElementById('newRoomType') ? document.getElementById('newRoomType').value : 'event';
       const scope = document.getElementById('newRoomScope').value;
       const color = document.getElementById('newRoomColor').value;
       const startDate = document.getElementById('newRoomStartDate').value;
@@ -1501,6 +1519,7 @@
 
       const payload = {
         title,
+        plan_type: planType,
         description: desc,
         scope,
         color,

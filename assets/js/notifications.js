@@ -263,7 +263,7 @@
     promptPermissionModal() {
       if (!('Notification' in window)) return;
       if (Notification.permission === 'granted') return;
-      if (sessionStorage.getItem(STORAGE_DISMISSED_PROMPT)) return;
+      if (localStorage.getItem(STORAGE_DISMISSED_PROMPT) || sessionStorage.getItem(STORAGE_DISMISSED_PROMPT)) return;
       if (document.getElementById('modalNotifPrompt')) return;
 
       const modal = document.createElement('div');
@@ -310,7 +310,7 @@
       }
 
       modal.querySelector('#btnNotifDismiss').onclick = () => {
-        sessionStorage.setItem(STORAGE_DISMISSED_PROMPT, 'true');
+        localStorage.setItem(STORAGE_DISMISSED_PROMPT, 'true'); sessionStorage.setItem(STORAGE_DISMISSED_PROMPT, 'true');
         modal.remove();
       };
 

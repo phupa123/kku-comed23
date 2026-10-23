@@ -9,9 +9,13 @@
   let deferredPrompt = null;
 
   const STORAGE_INSTALLED_FLAG = 'COMED23_APP_INSTALLED';
+  const STORAGE_DISMISSED_INSTALL = 'COMED23_APP_INSTALL_DISMISSED';
 
   // ตรวจสอบอย่างละเอียดว่าแอปถูกติดตั้งแล้ว หรือเปิดอยู่ในโหมด Standalone / Web App หรือ Native APK หรือไม่
   function isAppInstalled() {
+    // ถ้าผู้ใช้เคยปิดหรือปัดทิ้ง ไม่ต้องบังคับผู้ใช้อีก
+    if (localStorage.getItem(STORAGE_DISMISSED_INSTALL) === 'true') return true;
+
     // 0. ตรวจสอบโหมด Native App (Capacitor / Android WebView / Local Origin)
     const isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
     const isLocalOrigin = window.location.protocol === 'capacitor:' || window.location.hostname === 'localhost';
@@ -96,16 +100,26 @@
 
     const pill = document.createElement('div');
     pill.id = 'pwaInstallFloatingPill';
-    pill.className = 'fixed bottom-5 right-5 z-50 animate-bounce duration-1000';
+    pill.className = 'fixed bottom-5 right-5 z-40 flex items-center gap-1.5 transition duration-300';
     pill.innerHTML = `
-      <button onclick="window.triggerPwaInstall()" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-xs shadow-2xl shadow-orange-500/40 border border-white/20 flex items-center gap-2 transition transform active:scale-95 cursor-pointer backdrop-blur-xl">
-        <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-white"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
-        <span>ติดตั้งแอป COMED23</span>
-      </button>
+      <div class="flex items-center gap-1 p-1 bg-slate-900/95 border border-white/20 rounded-2xl shadow-xl backdrop-blur-xl">
+        <button onclick="window.triggerPwaInstall()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-white"><rect width="14" height="20" x="5" y="2" rx="2" rx="2"/><path d="M12 18h.01"/></svg>
+          <span>ติดตั้งแอป</span>
+        </button>
+        <button onclick="window.dismissPwaInstallPill()" title="ไม่ต้องแสดงอีก" class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
     `;
     document.body.appendChild(pill);
   }
+
+  window.dismissPwaInstallPill = function () {
+    localStorage.setItem(STORAGE_DISMISSED_INSTALL, 'true');
+    const pill = document.getElementById('pwaInstallFloatingPill');
+    if (pill) pill.remove();
+  };
 
   // Visual Interactive Install Guide Modal
   window.triggerPwaInstall = function () {

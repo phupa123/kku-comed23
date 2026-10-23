@@ -717,21 +717,21 @@
             <!-- 4 Service Cloud Bento Cards -->
             <div class="space-y-2.5 text-xs">
               
-              <!-- Plans Service Card (NEW) -->
-              <a href="Plans.html" class="p-3 rounded-2xl bg-gradient-to-r from-orange-950/60 to-slate-900 border border-orange-500/40 hover:border-orange-400 transition flex items-center justify-between group">
+              <!-- Calendar & Schedule Service Card -->
+              <a href="Calendar.html" class="p-3 rounded-2xl bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/30 hover:border-amber-400 transition flex items-center justify-between group">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold group-hover:scale-110 transition border border-orange-500/30">
-                    <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                  <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold group-hover:scale-110 transition border border-amber-500/30">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
                   </div>
                   <div>
                     <div class="flex items-center gap-1.5">
-                      <h4 class="font-bold text-orange-200 group-hover:text-white transition">COMED Plans & ปฏิทินงานสาขา</h4>
-                      <span class="px-1.5 py-0.2 rounded-md text-[9px] font-black bg-orange-500 text-white animate-pulse">ใหม่ล่าสุด</span>
+                      <h4 class="font-bold text-amber-200 group-hover:text-white transition">ปฏิทินกิจกรรม & ตารางงาน</h4>
+                      <span class="px-1.5 py-0.2 rounded-md text-[9px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Live Sync</span>
                     </div>
-                    <p class="text-[11px] text-slate-400">ปฏิทินงานกิจกรรม วางแผนงานกลุ่ม แชร์กับเพื่อน</p>
+                    <p class="text-[11px] text-slate-400">บันทึกนัดหมาย ซิงค์เข้า Apple / Google Calendar</p>
                   </div>
                 </div>
-                <i data-lucide="arrow-up-right" class="w-4 h-4 text-orange-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
+                <i data-lucide="arrow-up-right" class="w-4 h-4 text-amber-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
               </a>
 
               <!-- Cloud Drive Direct Service -->
@@ -826,35 +826,39 @@
       <!-- Section Header -->
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-md shadow-orange-500/20">
-            <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
-            <span>ปฏิทินงานสาขา & ติดตามความสำเร็จ Realtime</span>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-white/10 text-white text-[11px] sm:text-xs font-semibold tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span>กำหนดการกิจกรรม & ตารางงานสาขา (Live Calendar)</span>
           </div>
-          <h2 class="text-xl sm:text-3xl font-black text-white tracking-tight mt-2.5">
-            ตารางกิจกรรม & แผนงานสาขาคอมพิวเตอร์ศึกษา
+          <h2 class="text-xl sm:text-3xl font-bold text-white tracking-tight mt-2.5">
+            ปฏิทินกิจกรรมและการนัดหมาย
           </h2>
-          <p class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
-            ติดตามงานกิจกรรมสาขา แผนงานส่วนตัว และงานกลุ่มที่เพื่อนแชร์มา พร้อมแถบเปอร์เซ็นต์ความสำเร็จ %
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed max-w-2xl font-light">
+            บันทึกกำหนดการ วันสำคัญ นัดหมายส่งงาน และเชื่อมต่อเข้า Google Calendar หรือ Apple Calendar ได้โดยตรง
           </p>
         </div>
 
-        <div class="flex items-center gap-2.5 flex-shrink-0">
+        <div class="flex items-center gap-2 flex-shrink-0">
           <!-- Filter Tabs for Index Calendar -->
-          <div class="flex items-center bg-slate-950/80 border border-white/10 rounded-2xl p-1 text-xs font-bold">
-            <button onclick="setIndexPlansFilter('all')" id="idxTabAll" class="px-3 py-1.5 rounded-xl bg-orange-500 text-white transition">
+          <div class="flex items-center bg-slate-900/90 border border-white/10 rounded-xl p-1 text-xs font-medium">
+            <button onclick="setIndexPlansFilter('all')" id="idxTabAll" class="px-3 py-1.5 rounded-lg bg-white/15 text-white transition">
               ทั้งหมด
             </button>
-            <button onclick="setIndexPlansFilter('department')" id="idxTabDept" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition">
-              🏛️ งานสาขา
+            <button onclick="setIndexPlansFilter('department')" id="idxTabDept" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+              🏛️ สาขา
             </button>
-            <button onclick="setIndexPlansFilter('personal')" id="idxTabPersonal" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition">
+            <button onclick="setIndexPlansFilter('personal')" id="idxTabPersonal" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
               🔒 ส่วนตัว
             </button>
           </div>
 
-          <a href="Plans.html" class="inline-flex items-center gap-2 text-xs font-black text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 px-4 py-2.5 rounded-xl shadow-lg shadow-orange-500/25 transition transform active:scale-95">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>เปิดระบบ Plans เต็มรูปแบบ</span>
+          <a href="Calendar.html" class="inline-flex items-center gap-2 text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-white/10 px-3.5 py-2 rounded-xl transition">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>เปิดปฏิทินเต็ม</span>
+          </a>
+          <a href="Plans.html" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-3.5 py-2 rounded-xl transition">
+            <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>Plans กระดานงาน</span>
           </a>
         </div>
       </div>
