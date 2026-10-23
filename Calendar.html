@@ -97,6 +97,19 @@
       background: rgba(249, 115, 22, 0.35);
       border-radius: 999px;
     }
+    @media (max-width: 640px) {
+      .mobile-cal-cell {
+        min-height: 70px !important;
+        padding: 3px !important;
+      }
+      .mobile-badge {
+        font-size: 8.5px !important;
+        padding: 1.5px 3.5px !important;
+      }
+    }
+    .badge-urgent {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
   </style>
 </head>
 
@@ -259,6 +272,13 @@
           <option value="department">🏛️ เฉพาะงานสาขา</option>
           <option value="shared">👥 เฉพาะงานกลุ่ม</option>
           <option value="personal">🔒 เฉพาะงานส่วนตัว</option>
+        </select>
+
+        <select id="calendarUrgencyFilter" onchange="renderCalendarView()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-xs font-bold">
+          <option value="all">⚡ ลำดับทั้งหมด</option>
+          <option value="upcoming_soon">⏳ ใกล้เข้ามาถึง (7 วันข้างหน้า)</option>
+          <option value="today">🔥 ภายในวันนี้</option>
+          <option value="this_month">📅 ภายในเดือนนี้</option>
         </select>
       </div>
     </div>
@@ -750,6 +770,7 @@
 
     function getFilteredCalendarPlans() {
       const scopeFilter = document.getElementById('calendarScopeFilter') ? document.getElementById('calendarScopeFilter').value : 'all';
+      const urgencyFilter = document.getElementById('calendarUrgencyFilter') ? document.getElementById('calendarUrgencyFilter').value : 'all';
       let list = appState.plans || [];
 
       if (scopeFilter !== 'all') {
@@ -765,6 +786,41 @@
           (p.creator_name && p.creator_name.toLowerCase().includes(q))
         );
       }
+
+      // Filter by urgency / proximity
+      const now = new Date();
+      const nowMs = now.getTime();
+      const in7Days = new Date(nowMs + (7 * 24 * 60 * 60 * 1000));
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+      if (urgencyFilter === 'upcoming_soon') {
+        list = list.filter(p => {
+          if (!p.start_date) return false;
+          const s = new Date(p.start_date);
+          return s >= todayStart && s <= in7Days;
+        });
+      } else if (urgencyFilter === 'today') {
+        list = list.filter(p => {
+          if (!p.start_date) return false;
+          const s = new Date(p.start_date);
+          const e = p.end_date ? new Date(p.end_date) : s;
+          return s <= todayEnd && e >= todayStart;
+        });
+      } else if (urgencyFilter === 'this_month') {
+        list = list.filter(p => {
+          if (!p.start_date) return false;
+          const s = new Date(p.start_date);
+          return s.getMonth() === now.getMonth() && s.getFullYear() === now.getFullYear();
+        });
+      }
+
+      // เรียงลำดับความสำคัญ: นำกิจกรรมที่กำลังจะมาถึงเร็วที่สุดขึ้นก่อน (Upcoming proximity sorting)
+      list.sort((a, b) => {
+        const timeA = new Date(a.start_date).getTime();
+        const timeB = new Date(b.start_date).getTime();
+        return timeA - timeB;
+      });
 
       return list;
     }
@@ -849,9 +905,9 @@
 
         const cell = document.createElement('div');
         cell.setAttribute('data-date', dateIsoStr);
-        cell.className = `min-h-[90px] sm:min-h-[110px] p-1.5 sm:p-2 rounded-2xl border transition flex flex-col justify-between relative group ${
+        cell.className = `min-h-[75px] sm:min-h-[110px] p-1 sm:p-2 rounded-xl sm:rounded-2xl border transition flex flex-col justify-between relative group mobile-cal-cell ${
           isToday
-            ? 'bg-amber-500/10 border-amber-500/50 shadow-lg shadow-amber-500/10'
+            ? 'bg-amber-500/15 border-amber-500/60 shadow-lg shadow-amber-500/10'
             : 'bg-slate-900/60 border-white/10 hover:border-white/25 hover:bg-slate-900/90'
         }`;
 
@@ -1138,16 +1194,36 @@
         return;
       }
 
-      sorted.slice(0, 15).forEach(p => {
+      const nowMs = Date.now();
+      sorted.slice(0, 20).forEach(p => {
         const startDate = new Date(p.start_date);
+        const diffMs = startDate.getTime() - nowMs;
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        const isUrgent = diffDays >= 0 && diffDays <= 3;
+        const isPassed = diffDays < 0;
+
+        let countdownBadge = '';
+        if (isPassed) {
+          countdownBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-800 text-slate-400">สิ้นสุดแล้ว</span>';
+        } else if (diffDays === 0) {
+          countdownBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-500/25 text-rose-300 border border-rose-500/40 animate-pulse">🔥 จัดขึ้นวันนี้!</span>';
+        } else if (diffDays <= 3) {
+          countdownBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500/25 text-amber-300 border border-amber-500/40">⏳ อีก ${diffDays} วัน</span>`;
+        } else if (diffDays <= 7) {
+          countdownBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-sky-500/20 text-sky-300">อีก ${diffDays} วัน</span>`;
+        }
+
         const dateStr = startDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
         const timeStr = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
         const scopeBadge = p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
         const color = p.color || '#f97316';
         const isOfficial = p.is_official;
+        const canDelete = canUserManagePlan(p);
 
         const item = document.createElement('div');
-        item.className = 'p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-amber-500/40 hover:bg-white/[0.05] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 group';
+        item.className = `p-3.5 rounded-2xl bg-white/[0.02] border transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 group ${
+          isUrgent ? 'border-amber-500/40 bg-amber-500/[0.03]' : 'border-white/10 hover:border-amber-500/40 hover:bg-white/[0.05]'
+        }`;
         item.innerHTML = `
           <div class="flex items-start gap-3">
             <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center flex-shrink-0 text-white shadow-md font-mono" style="background-color: ${color}">
@@ -1155,7 +1231,8 @@
               <span class="text-base font-black leading-none mt-0.5">${startDate.getDate()}</span>
             </div>
             <div>
-              <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                ${countdownBadge}
                 <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/10 text-slate-300">${scopeBadge}</span>
                 ${isOfficial ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">⭐ ทางการ</span>' : ''}
                 <span class="text-xs font-mono text-amber-400 font-bold">${dateStr} • ${timeStr}</span>
@@ -1165,10 +1242,10 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-2 flex-shrink-0">
+          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap justify-end">
             <a href="Plans.html?plan=${p.id}" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white font-bold flex items-center gap-1 transition" title="เปิดบอร์ดห้องงาน">
               <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-400"></i>
-              <span>บอร์ดห้อง</span>
+              <span>บอร์ด</span>
             </a>
             <button onclick="if(window.CalendarSync) window.CalendarSync.openGoogleCalendar(appState.plans.find(x=>x.id==='${p.id}'));" class="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-xs text-blue-300 hover:text-white font-bold flex items-center gap-1 transition" title="เพิ่มใน Google Calendar">
               <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-blue-400"></i>
@@ -1177,6 +1254,11 @@
             <button onclick="if(window.CalendarSync) window.CalendarSync.downloadIcsFile(appState.plans.find(x=>x.id==='${p.id}'));" class="p-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-white transition" title="ดาวน์โหลดไฟล์ .ics สำหรับเปิดในเครื่อง">
               <i data-lucide="download" class="w-4 h-4"></i>
             </button>
+            ${canDelete ? `
+            <button onclick="handleDeleteCalendarPlan('${p.id}')" class="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition cursor-pointer" title="ลบกิจกรรมนี้ (เจ้าของ/แอดมิน)">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+            ` : ''}
           </div>
         `;
         container.appendChild(item);
@@ -1236,6 +1318,12 @@
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
                 <span>.ICS</span>
               </button>
+              ${isOwnerOrAdmin ? `
+              <button onclick="document.getElementById('calendarQuickModal').remove(); handleDeleteCalendarPlan('${p.id}');" class="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-rose-500/30 transition cursor-pointer" title="ลบกิจกรรมนี้ (ย้ายลงถังขยะ)">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>ลบ</span>
+              </button>
+              ` : ''}
             </div>
           </div>
         </div>
@@ -1347,6 +1435,29 @@
       const list = getFilteredCalendarPlans();
       if (window.CalendarSync) {
         window.CalendarSync.exportAllPlansIcs(list, 'COMED23 Calendar');
+      }
+    }
+
+    async function handleDeleteCalendarPlan(planId) {
+      const p = (appState.plans || []).find(x => x.id === planId);
+      if (!p) return;
+      if (!canUserManagePlan(p)) {
+        alert("🔒 คุณไม่มีสิทธิ์ลบกิจกรรมนี้ (เฉพาะผู้สร้างกิจกรรม หรือแอดมินเท่านั้น)");
+        return;
+      }
+
+      if (!confirm(`⚠️ ยืนยันการย้ายกิจกรรม "${p.title}" ลงถังขยะหรือไม่?\n(คุณสามารถกู้คืนได้จากหน้า Plans > ถังขยะ)`)) {
+        return;
+      }
+
+      try {
+        const email = appState.user ? appState.user.email : null;
+        const isAdmin = appState.user && (appState.user.isAdmin || (window.PlansRepo && window.PlansRepo.isAdminUser(email)));
+        await window.PlansRepo.moveToTrashPlan(planId, email, isAdmin ? 'admin' : 'owner');
+        await refreshCalendarData();
+        alert(`🗑️ ย้ายกิจกรรม "${p.title}" ลงถังขยะเรียบร้อยแล้ว`);
+      } catch (err) {
+        alert("ลบกิจกรรมไม่สำเร็จ: " + err.message);
       }
     }
 

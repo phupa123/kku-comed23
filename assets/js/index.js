@@ -2075,6 +2075,13 @@ function renderIndexPlans() {
     list = list.filter(p => p.scope === 'personal');
   }
 
+  // Sort by upcoming urgency / proximity first
+  list.sort((a, b) => {
+    const timeA = new Date(a.start_date).getTime();
+    const timeB = new Date(b.start_date).getTime();
+    return timeA - timeB;
+  });
+
   container.innerHTML = '';
   if (list.length === 0) {
     container.innerHTML = `
@@ -2090,11 +2097,21 @@ function renderIndexPlans() {
     return;
   }
 
+  const nowMs = Date.now();
   list.slice(0, 6).forEach(p => {
     const pct = Math.round(p.progress_percentage || 0);
     const startDate = new Date(p.start_date);
     const dateText = startDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
     const timeText = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+    // Proximity Badge
+    const diffDays = Math.ceil((startDate.getTime() - nowMs) / (1000 * 60 * 60 * 24));
+    let proximityBadge = '';
+    if (diffDays >= 0 && diffDays <= 3) {
+      proximityBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">🔥 ${diffDays === 0 ? 'วันนี้' : 'อีก ' + diffDays + ' วัน'}</span>`;
+    } else if (diffDays > 3 && diffDays <= 7) {
+      proximityBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⏳ อีก ${diffDays} วัน</span>`;
+    }
 
     const card = document.createElement('a');
     card.href = `Plans.html?plan=${p.id}`;
@@ -2105,8 +2122,11 @@ function renderIndexPlans() {
 
     card.innerHTML = `
       <div class="space-y-2.5">
-        <div class="flex items-center justify-between">
-          <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${scopeColor}">${scopeBadge}</span>
+        <div class="flex items-center justify-between gap-1 flex-wrap">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${scopeColor}">${scopeBadge}</span>
+            ${proximityBadge}
+          </div>
           <span class="text-xs font-black font-mono ${pct === 100 ? 'text-emerald-400' : 'text-orange-400'}">${pct}% สำเร็จ</span>
         </div>
         <div>

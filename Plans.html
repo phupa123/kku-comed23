@@ -236,9 +236,20 @@
           </button>
         </div>
 
-        <div class="relative">
-          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-          <input type="text" id="roomSearchInput" oninput="handleRoomSearch(this.value)" placeholder="ค้นหาห้องงาน / โปรเจกต์..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-56">
+        <div class="flex items-center gap-2 flex-wrap text-xs w-full sm:w-auto">
+          <!-- Sort / Urgency Selector -->
+          <select id="roomUrgencySort" onchange="renderRoomsGrid()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-xs font-bold focus:outline-hidden">
+            <option value="nearest">⚡ ใกล้ถึงกำหนดที่สุด (Proximity First)</option>
+            <option value="urgent_only">⏳ ใกล้ถึงใน 7 วัน</option>
+            <option value="newest">🕒 สร้างล่าสุด</option>
+            <option value="progress_asc">📊 ค้างส่ง / คืบหน้าน้อยสุด</option>
+            <option value="progress_desc">✅ เสร็จแล้ว 100%</option>
+          </select>
+
+          <div class="relative flex-1 sm:flex-initial">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            <input type="text" id="roomSearchInput" oninput="handleRoomSearch(this.value)" placeholder="ค้นหาห้องงาน / โปรเจกต์..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-full sm:w-52">
+          </div>
         </div>
       </div>
 
@@ -1038,6 +1049,32 @@
         list = list.filter(p => (p.title && p.title.toLowerCase().includes(q)) || (p.description && p.description.toLowerCase().includes(q)));
       }
 
+      // Sort / Urgency Proximity Filter
+      const sortMode = document.getElementById('roomUrgencySort') ? document.getElementById('roomUrgencySort').value : 'nearest';
+      const nowMs = Date.now();
+      const in7Days = nowMs + (7 * 24 * 60 * 60 * 1000);
+
+      if (sortMode === 'urgent_only') {
+        list = list.filter(p => {
+          if (!p.start_date) return false;
+          const s = new Date(p.start_date).getTime();
+          return s >= (nowMs - 86400000) && s <= in7Days;
+        });
+      } else if (sortMode === 'progress_asc') {
+        list.sort((a, b) => (a.progress_percentage || 0) - (b.progress_percentage || 0));
+      } else if (sortMode === 'progress_desc') {
+        list = list.filter(p => Math.round(p.progress_percentage || 0) === 100);
+      } else if (sortMode === 'newest') {
+        list.sort((a, b) => new Date(b.created_at || b.start_date).getTime() - new Date(a.created_at || a.start_date).getTime());
+      } else {
+        // 'nearest' - ให้ความสำคัญกับงานที่ใกล้เข้ามาถึงที่สุด (Proximity First)
+        list.sort((a, b) => {
+          const timeA = new Date(a.start_date).getTime();
+          const timeB = new Date(b.start_date).getTime();
+          return timeA - timeB;
+        });
+      }
+
       container.innerHTML = '';
       if (list.length === 0) {
         container.innerHTML = `
@@ -1056,7 +1093,7 @@
       list.forEach(p => {
         const pct = Math.round(p.progress_percentage || 0);
         const card = document.createElement('div');
-        card.className = 'glass-card rounded-3xl p-5 border border-white/10 hover:border-orange-500/50 transition cursor-pointer flex flex-col justify-between space-y-4 group select-none relative';
+        card.className = 'glass-card rounded-3xl p-4 sm:p-5 border border-white/10 hover:border-orange-500/50 transition cursor-pointer flex flex-col justify-between space-y-3.5 sm:space-y-4 group select-none relative';
         card.onclick = (e) => {
           if (longPressTriggered) return;
           openRoomBoard(p);
@@ -1068,19 +1105,41 @@
 
         const scopeLabel = p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
         const scopeClass = p.scope === 'department' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : p.scope === 'shared' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+        
+        // Check Proximity badge
+        const sTime = new Date(p.start_date).getTime();
+        const diffDays = Math.ceil((sTime - nowMs) / (1000 * 60 * 60 * 24));
+        let urgencyBadge = '';
+        if (diffDays >= 0 && diffDays <= 3) {
+          urgencyBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">🔥 ใกล้ถึง (${diffDays === 0 ? 'วันนี้' : 'อีก ' + diffDays + ' วัน'})</span>`;
+        } else if (diffDays > 3 && diffDays <= 7) {
+          urgencyBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⏳ อีก ${diffDays} วัน</span>`;
+        }
+
+        const canDelete = canManagePlan(p);
 
         card.innerHTML = `
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${scopeClass}">
-                ${scopeLabel}
-              </span>
-              <span class="text-sm font-black font-mono ${pct === 100 ? 'text-emerald-400' : 'text-orange-400'}">${pct}%</span>
+          <div class="space-y-2.5 sm:space-y-3">
+            <div class="flex items-center justify-between gap-1 flex-wrap">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${scopeClass}">
+                  ${scopeLabel}
+                </span>
+                ${urgencyBadge}
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-black font-mono ${pct === 100 ? 'text-emerald-400' : 'text-orange-400'}">${pct}%</span>
+                ${canDelete ? `
+                <button onclick="event.stopPropagation(); quickDeletePlanConfirm('${p.id}');" class="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition" title="ย้ายลงถังขยะ">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+                ` : ''}
+              </div>
             </div>
 
             <div>
-              <h3 class="text-base font-black text-white group-hover:text-orange-400 transition line-clamp-1">${p.title}</h3>
-              <p class="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">${p.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+              <h3 class="text-base font-black text-white group-hover:text-orange-400 transition line-clamp-1">${escapeHtml(p.title)}</h3>
+              <p class="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">${escapeHtml(p.description || 'ไม่มีรายละเอียดเพิ่มเติม')}</p>
             </div>
 
             <!-- Progress Bar -->
@@ -1093,7 +1152,7 @@
           <div class="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
             <div class="flex items-center gap-1.5 truncate max-w-[170px]">
               <img src="${p.creator_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>"}" class="w-4 h-4 rounded-full flex-shrink-0">
-              <span class="truncate font-bold text-slate-300">${p.creator_name || 'สมาชิก'}</span>
+              <span class="truncate font-bold text-slate-300">${escapeHtml(p.creator_name || 'สมาชิก')}</span>
             </div>
             <span class="text-[10px] font-mono text-slate-500">${new Date(p.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}</span>
           </div>
