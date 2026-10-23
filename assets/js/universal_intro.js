@@ -778,7 +778,7 @@
 
     const pageName = getCurrentPageName();
     // storage.html already has its custom inline intro, skip intro overlay to avoid double loading
-    if (pageName === 'storage.html') return;
+    if (pageName === 'storage.html' || pageName === 'index.html' || pageName === '') return;
 
     const cfg = PAGE_CONFIGS[pageName];
     if (!cfg) return;

@@ -12,8 +12,16 @@
   // Check if skipped in this session (unless forced via URL ?intro=1)
   const urlParams = new URLSearchParams(window.location.search);
   const forceIntro = urlParams.get('intro') === '1';
+  // Check if page was reloaded (F5) or first opened
+  const navEntries = performance.getEntriesByType('navigation');
+  const isReload = navEntries.length > 0 && navEntries[0].type === 'reload' ||
+                   (window.performance && window.performance.navigation && window.performance.navigation.type === 1);
   const hasSeen = sessionStorage.getItem('kku_comed23_intro_seen');
-  if (hasSeen && !forceIntro) return;
+  
+  // Allow intro on reload or first visit in this session
+  if (!isReload && hasSeen && !forceIntro) {
+    return;
+  }
 
   // Inject Styles
   const styleEl = document.createElement('style');
