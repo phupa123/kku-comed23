@@ -1,955 +1,472 @@
 <!DOCTYPE html>
-<html lang="th" class="scroll-smooth">
-
+<html lang="th" class="scroll-smooth dark">
 <head>
-  <!-- Site Maintenance & Access Guard -->
-  <script src="assets/js/maintenance-guard.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>สาขาวิชาคอมพิวเตอร์ศึกษา (Computer Education) | คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>KKU COMED 23 — Connecting Education & Technology</title>
+  
+  <meta name="description" content="COMED 23: Connecting Education & Technology. The academic portal for Computer Education Batch 23, Khon Kaen University (KKU).">
+  <meta name="theme-color" content="#0C1030">
+
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="logo.png">
-
-  <!-- PWA (Progressive Web App) Meta & Mobile App Support -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ea580c">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="COMED23">
   <link rel="apple-touch-icon" href="logo.png">
-  <script src="assets/js/pwa-installer.js" defer></script>
 
-  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <!-- Preconnect Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap"
-    rel="stylesheet">
-
-  <!-- Tailwind CSS CDN -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 Pro / Free -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'Prompt', 'sans-serif'], serif: ['Newsreader', 'Georgia', 'serif'],
-            mono: ['Plus Jakarta Sans', 'monospace']
-          },
           colors: {
-            brand: {
-              50: '#FAF8F5',
-              100: '#F4EFEA',
-              200: '#E8DFD8',
-              300: '#D8C8BC',
-              400: '#C2A792',
-              500: '#CC785C',
-              600: '#B85E42',
-              700: '#9E4A32',
-              800: '#7E3824',
-              900: '#5F2718',
-              claude: '#D97757',
-              sand: '#FAF8F5',
-              charcoal: '#1E1E1E',
-              kku: '#A73B24'
+            kku: {
+              navy: '#0C1030',
+              deep: '#070914',
+              surface: '#12162A',
+              card: '#161B33',
+              border: '#242A4A',
+              red: '#B32B19',
+              orange: '#E65A19',
+              amber: '#FF7A29',
+              chrome: '#EAEAEA'
             }
           },
-          boxShadow: {
-            'glow-orange': '0 0 40px -5px rgba(249, 115, 22, 0.45)',
-            'glow-cyan': '0 0 40px -5px rgba(6, 182, 212, 0.4)',
-            'card-premium': '0 20px 40px -15px rgba(0, 0, 0, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.04)',
-            'card-hover': '0 25px 50px -12px rgba(249, 115, 22, 0.25)'
-          },
-          backgroundImage: {
-            'mesh-dark': 'radial-gradient(at 10% 20%, rgba(249, 115, 22, 0.18) 0px, transparent 50%), radial-gradient(at 90% 10%, rgba(6, 182, 212, 0.18) 0px, transparent 50%), radial-gradient(at 50% 90%, rgba(234, 88, 12, 0.12) 0px, transparent 50%)',
-            'mesh-light': 'radial-gradient(at 0% 0%, rgba(255, 237, 213, 0.6) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(224, 242, 254, 0.6) 0px, transparent 50%)'
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Sarabun"', 'sans-serif'],
+            display: ['"Space Grotesk"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
           }
         }
       }
     }
   </script>
 
-  <!-- OneSignal Web Push SDK (Disabled temporarily) -->
-  <!--
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "0bb74e88-0d82-463b-bc8d-ae5a27f659c3",
-      });
-    });
-  </script>
-  -->
-  <!-- Google Identity Services (Sign in with Google) -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- GSAP Animation -->
+  <!-- Three.js + GSAP + Lenis -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <!-- Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Supabase JS Client -->
+  <!-- Supabase & App Configs -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
-  <!-- Custom Index CSS & Master Admin CSS (Avatar Frames & Animation) -->
-  <link rel="stylesheet" href="assets/css/index.css">
-  <link rel="stylesheet" href="assets/css/master-admin.css">
-  <!-- Global Theme Manager Engine -->
-  <script src="assets/js/theme-manager.js"></script>
   <script src="config/campaigns_repo.js"></script>
-  <!-- Universal Themed Intro Loader -->
-  <script src="assets/js/universal_intro.js"></script>
+  <script src="assets/js/plans_repo.js"></script>
+  <script src="students_data.js"></script>
+
+  <style>
+    /* Noise texture overlay */
+    .bg-noise {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+    }
+
+    /* Kinetic typography outline & distortion */
+    .title-kinetic {
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #FFFFFF;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), letter-spacing 0.25s ease;
+    }
+
+    /* Hotspot Pulse */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(230, 90, 25, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(230, 90, 25, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(230, 90, 25, 0); }
+    }
+    .hotspot-pulse {
+      animation: pulse-ring 2.5s infinite;
+    }
+
+    /* Micro-reflective border */
+    .chrome-border {
+      position: relative;
+    }
+    .chrome-border::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(230,90,25,0.3) 50%, rgba(255,255,255,0.05) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070914;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #242A4A;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #E65A19;
+    }
+  </style>
 </head>
 
-<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-orange-500 selection:text-white overflow-x-hidden" id="mainBody">
-
-  <!-- ================= TOP SLIM SCROLL PROGRESS BAR ================= -->
-  <div id="topScrollProgressBar"></div>
-
-  <!-- ================= ULTRA-LUXURY RIGHT FLOATING HUD TRACKER ================= -->
-  <aside id="rightScrollTracker" aria-label="แถบสถานะการนำทางและเปอร์เซ็นต์หน้าเว็บ">
-    <!-- Top Back to Top Action button -->
-    <button onclick="scrollToTopSmooth()" class="scroll-hud-action-btn" title="เลื่อนขึ้นบนสุด">
-      <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
-    </button>
-
-    <!-- Main Vertical Tube Track with Glowing Core -->
-    <div class="scroll-progress-vertical-track" title="ความคืบหน้าการอ่านหน้าเว็บ">
-      <div id="rightScrollProgressBar" class="scroll-progress-vertical-bar">
-        <span class="scroll-bar-glow-head"></span>
-      </div>
-
-      <!-- Interactive Waypoints / Section Dots -->
-      <a href="#mainNavbar" class="scroll-waypoint top-[5%]" title="ด้านบนสุด (Top)"></a>
-      <a href="#quick-services" class="scroll-waypoint top-[25%]" title="บริการด่วน (Services)"></a>
-      <a href="#payments-list" class="scroll-waypoint top-[45%]" title="รายการต้องชำระ (Dues)"></a>
-      <a href="#about" class="scroll-waypoint top-[62%]" title="เกี่ยวกับสาขา (About)"></a>
-      <a href="#curriculum" class="scroll-waypoint top-[78%]" title="หลักสูตร (Curriculum)"></a>
-      <a href="#students" class="scroll-waypoint top-[95%]" title="ทำเนียบรุ่น (Roster)"></a>
-    </div>
-
-    <!-- Futuristic Percentage Badge -->
-    <button id="rightScrollBadge" onclick="scrollToTopSmooth()" class="scroll-progress-badge" title="คลิกเพื่อกลับขึ้นด้านบนสุด">0%</button>
-  </aside>
-
-  <!-- ================= LUXURY WELCOME LOGIN SUCCESS POPUP ================= -->
-  <div id="modalLoginSuccess" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4">
-    <div id="loginSuccessCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-orange-200/80 text-center space-y-6 overflow-hidden">
-      
-      <!-- Top Decorative Glow bar -->
-      <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400"></div>
-
-      <!-- User Avatar with Rotating Glow Ring -->
-      <div class="relative w-24 h-24 mx-auto mt-2">
-        <div class="absolute -inset-2 rounded-full bg-gradient-to-tr from-orange-500 via-amber-400 to-emerald-400 blur-md opacity-70 animate-spin" style="animation-duration: 4s;"></div>
-        <img id="welcomeSuccessAvatar" src="" alt="User Avatar" class="relative w-full h-full rounded-full object-cover border-4 border-white shadow-xl">
-        <div class="absolute bottom-0 right-0 w-7 h-7 bg-emerald-500 text-white rounded-full flex items-center justify-center border-2 border-white shadow-md">
-          <i data-lucide="check" class="w-4 h-4"></i>
-        </div>
-      </div>
-
-      <!-- Text Details -->
-      <div class="space-y-2">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-black uppercase tracking-wider">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          <span>เข้าสู่ระบบสำเร็จ</span>
-        </span>
-        <h3 id="welcomeSuccessName" class="text-2xl font-black text-slate-900 tracking-tight">ยินดีต้อนรับ</h3>
-        <p id="welcomeSuccessEmail" class="text-xs text-orange-600 font-mono font-bold">user@kkumail.com</p>
-        <p class="text-xs text-slate-400 pt-1">
-          สาขาวิชาคอมพิวเตอร์ศึกษา (COMED23 • KKU63)
-        </p>
-      </div>
-
-      <!-- Action CTA -->
-      <div class="pt-2 space-y-2">
-        <button onclick="closeLoginSuccessModal()" class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-orange-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
-          <span>เข้าสู่หน้าเว็บไซต์</span>
-        </button>
-        <a href="settings.html" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5">
-          <i data-lucide="palette" class="w-3.5 h-3.5 text-orange-500"></i>
-          <span>ตกแต่งโปรไฟล์ / เปลี่ยน Avatar</span>
-        </a>
-      </div>
-
-    </div>
-  </div>
-
+<body class="bg-[#070914] text-slate-100 antialiased selection:bg-[#E65A19] selection:text-white relative overflow-x-hidden">
   
-  <!-- ================= LUXURY ERROR POPUP: NOT KKUMAIL ================= -->
-  <div id="modalAuthErrorPopup" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4">
-    <div id="authErrorCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-rose-200 text-center space-y-6 overflow-hidden">
+  <!-- Noise Overlay Across Whole Screen -->
+  <div class="fixed inset-0 pointer-events-none z-50 bg-noise"></div>
+
+  <!-- Ambient Glow Gradients (Navy to Red-Orange) -->
+  <div class="fixed top-[-15%] right-[-10%] w-[650px] h-[650px] rounded-full bg-gradient-to-br from-[#E65A19]/15 to-[#B32B19]/5 blur-[140px] pointer-events-none z-0"></div>
+  <div class="fixed top-[20%] left-[-15%] w-[600px] h-[600px] rounded-full bg-[#0C1030]/80 blur-[150px] pointer-events-none z-0"></div>
+
+  <!-- ================= TOP STICKY NAVIGATION (64PX) ================= -->
+  <header id="mainNavbar" class="sticky top-0 z-40 w-full h-16 bg-[#070914]/80 backdrop-blur-xl border-b border-[#242A4A] transition-all duration-300">
+    <div class="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       
-      <!-- Top Glow Line -->
-      <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-rose-500 via-amber-500 to-red-600 animate-pulse"></div>
-
-      <!-- Error Icon Badge -->
-      <div class="relative w-20 h-20 mx-auto mt-2 flex items-center justify-center">
-        <div class="absolute inset-0 rounded-full bg-rose-500/20 blur-xl animate-pulse"></div>
-        <div class="relative w-16 h-16 rounded-3xl bg-rose-50 border-2 border-rose-200 text-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/10">
-          <i data-lucide="shield-alert" class="w-8 h-8"></i>
-        </div>
-      </div>
-
-      <!-- Text Details -->
-      <div class="space-y-2">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black uppercase tracking-wider">
-          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-          <span>สิทธิ์การเข้าถึงถูกปฏิเสธ</span>
-        </span>
-        <h3 class="text-2xl font-black text-slate-900 tracking-tight">ไม่ใช่เมล @kkumail.com</h3>
-        <p id="authErrorPopupEmail" class="text-xs text-rose-600 font-mono font-bold break-all px-2">user@gmail.com</p>
-        <p class="text-xs text-slate-500 pt-1 leading-relaxed">
-          ระบบนี้สงวนสิทธิ์เฉพาะนักศึกษาสาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น ที่ใช้อีเมลสถาบัน <strong class="text-slate-800 font-bold">@kkumail.com</strong> เท่านั้น
-        </p>
-      </div>
-
-      <!-- Action Button to Try Again -->
-      <div class="pt-2">
-        <button onclick="retryGoogleLoginWithKku()" class="w-full py-3.5 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-rose-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-          <span>ลองใหม่อีกครั้งด้วยเมล KKU</span>
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ================= LUXURY LOGOUT CONFIRMATION POPUP MODAL ================= -->
-  <div id="modalLogoutConfirm" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
-    <div id="logoutConfirmCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-rose-100 text-center space-y-6 overflow-hidden">
-      
-      <!-- Glow Bar -->
-      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-rose-500 to-amber-500"></div>
-
-      <!-- Icon -->
-      <div class="w-20 h-20 mx-auto rounded-3xl bg-rose-50 border-2 border-rose-200 text-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/10">
-        <i data-lucide="log-out" class="w-10 h-10"></i>
-      </div>
-
-      <div class="space-y-2">
-        <h3 class="text-2xl font-black text-slate-900">ออกจากระบบ?</h3>
-        <p class="text-xs text-slate-500 leading-relaxed">
-          คุณต้องการออกจากระบบ KKU Mail หรือไม่? คุณสามารถเข้าสู่ระบบใหม่อีกครั้งได้ตลอดเวลา
-        </p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3 pt-2">
-        <button onclick="closeLogoutModal()" class="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
-          ยกเลิก
-        </button>
-        <button onclick="confirmGoogleLogoutAction()" class="py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-md shadow-rose-600/30 transition transform active:scale-95">
-          ออกจากระบบ
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= PAYMENT DETAILS POPUP MODAL ================= -->
-  <div id="modalPaymentDetails" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
-    <div id="paymentDetailsCard" class="relative bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-emerald-200 text-center space-y-6 overflow-hidden">
-      
-      <!-- Top Glow -->
-      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500"></div>
-
-      <div class="flex justify-between items-center -mt-2">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-black border border-emerald-200">
-          <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i>
-          <span>สถานะ: ชำระเงินเรียบร้อยแล้ว</span>
-        </span>
-        <button onclick="closePaymentDetailsModal()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 rounded-xl transition">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3">
-        <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-md">
-          <i data-lucide="receipt" class="w-8 h-8"></i>
-        </div>
-        <h3 class="text-xl font-black text-slate-900">รายละเอียดการชำระเงิน</h3>
-        <p class="text-xs text-slate-500">ค่าทำป้ายสาขาวิชาเอก (COMED23 KKU63)</p>
-      </div>
-
-      <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 border border-slate-200 text-left">
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500">ชื่อนักศึกษา:</span>
-          <span id="detailStudentName" class="font-bold text-slate-900">-</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500">รหัสนักศึกษา:</span>
-          <span id="detailStudentID" class="font-mono font-bold text-slate-800">-</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500">อีเมล KKU:</span>
-          <span id="detailStudentEmail" class="font-mono text-orange-600">-</span>
-        </div>
-        <div class="border-t border-slate-200 pt-2 flex justify-between items-center">
-          <span class="text-slate-500">ยอดเงินที่ชำระ:</span>
-          <span class="font-black text-emerald-600 text-sm">฿190.00 บาท</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500">เวลาที่บันทึกข้อมูล:</span>
-          <span id="detailPayTime" class="text-slate-600 font-mono text-[11px]">-</span>
-        </div>
-      </div>
-
-      <div class="pt-1 flex gap-2">
-        <a href="payment.html" class="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5">
-          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-          <span>ดูตารางรวมในหน้าระบบ</span>
-        </a>
-        <button onclick="closePaymentDetailsModal()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition">
-          ปิด
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ================= MODERN STICKY NAVIGATION BAR ================= -->
-  <header id="mainNavbar" class="sticky top-0 z-50 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#E8DFD8] transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-3">
-      
-      <!-- 1. Logo on the Left -->
-      <a href="index.html" class="flex items-center gap-3 group flex-shrink-0 min-w-0">
-        <div class="relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-orange-100 via-white to-amber-50 p-1.5 border border-orange-200 shadow-md group-hover:scale-105 transition-all flex-shrink-0">
-          <img src="logo.png" alt="โลโก้สาขาคอมพิวเตอร์ศึกษา" class="w-full h-full object-contain">
-          <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
-        </div>
-        <div class="min-w-0">
-          <div class="flex items-center gap-1.5">
-            <span class="text-[10px] sm:text-[11px] font-black tracking-wider text-orange-600 uppercase">COMED23</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-100 text-orange-800">KKU63</span>
+      <!-- 1. BRANDING & IDENTIFICATION (Top-Left) -->
+      <a href="index.html" class="flex items-center gap-3 group flex-shrink-0">
+        <div class="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#B32B19] to-[#E65A19] p-0.5 shadow-[0_0_20px_rgba(230,90,25,0.35)] group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-[#0C1030] rounded-[10px] flex items-center justify-center p-1 overflow-hidden">
+            <img src="logo.png" alt="KKU COMED" class="w-full h-full object-contain filter drop-shadow">
           </div>
-          <h1 class="text-xs sm:text-base font-black text-slate-900 leading-tight truncate">สาขาวิชาคอมพิวเตอร์ศึกษา</h1>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[12px] font-black tracking-wider text-white font-display">KKU</span>
+            <span class="text-[11px] font-bold text-slate-400 font-mono tracking-tight">COMED 23</span>
+          </div>
+          <span class="text-[9px] font-mono uppercase tracking-widest text-slate-400 hidden sm:inline">Khon Kaen University</span>
         </div>
       </a>
 
-      <!-- 2. Navigation Links in the Center (with Smooth Hover Underline Animation) -->
-      <nav class="hidden xl:flex items-center gap-1">
-        <a href="#payments-list" class="nav-link-modern active text-xs font-bold">
-          <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse mr-1"></span>
-          <span>รายการต้องชำระ</span>
+      <!-- 2. GLOBAL MENU (Middle - Desktop) -->
+      <nav class="hidden lg:flex items-center gap-1">
+        <a href="#hero" class="relative px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-white hover:text-white transition flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#E65A19] shadow-[0_0_8px_#E65A19]"></span>
+          <span>HOME</span>
         </a>
-        <a href="#quick-services" class="nav-link-modern text-xs font-bold">บริการด่วน</a>
-        <a href="Calendar.html" class="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 font-extrabold text-xs transition flex items-center gap-1.5 border border-amber-200">
-          <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-600"></i>
-          <span>ปฏิทิน (Calendar)</span>
+        <a href="#about" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-400 hover:text-white transition">ACADEMICS</a>
+        <a href="Calendar.html" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <span>CALENDAR</span>
         </a>
-        <a href="Plans.html" class="px-2.5 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-700 font-extrabold text-xs transition flex items-center gap-1.5 border border-orange-200">
-          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-600"></i>
-          <span>ห้องงาน (Plans)</span>
-        </a>
-        <a href="storage.html" class="px-2.5 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 font-extrabold text-xs transition flex items-center gap-1 border border-sky-200">
-          <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-600"></i>
-          <span>Cloud Drive</span>
-        </a>
-        
-        <!-- 9-Dot App Launcher Dropdown -->
-        <div class="relative group">
-          <button class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition flex items-center gap-1 border border-slate-200 cursor-pointer">
-            <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-slate-700"></i>
-            <span>รวมบริการ</span>
-            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500 group-hover:rotate-180 transition"></i>
-          </button>
-          
-          <!-- Dropdown Popover -->
-          <div class="absolute left-0 top-full mt-2 w-72 p-3 bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-slate-200 hidden group-hover:block z-50 animate-in fade-in slide-in-from-top-2">
-            <div class="text-[10px] font-black uppercase text-slate-400 px-2 pb-1.5 tracking-wider">แอปพลิเคชัน & กิจกรรมสาขา</div>
-            <div class="grid grid-cols-1 gap-1">
-              <a href="Calendar.html" class="p-2 rounded-xl hover:bg-amber-50 transition flex items-center gap-2.5 text-slate-700 hover:text-amber-800">
-                <div class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-600 flex items-center justify-center font-bold">
-                  <i data-lucide="calendar" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-bold text-xs flex items-center gap-1">Calendar Hub <span class="px-1 text-[8px] bg-amber-500 text-white rounded-md">ซิงค์ได้</span></div>
-                  <div class="text-[10px] text-slate-400">ปฏิทินสาขา & ซิงค์เข้า Google Calendar</div>
-                </div>
-              </a>
-              <a href="Plans.html" class="p-2 rounded-xl hover:bg-orange-50 transition flex items-center gap-2.5 text-slate-700 hover:text-orange-700">
-                <div class="w-7 h-7 rounded-lg bg-orange-500/15 text-orange-600 flex items-center justify-center font-bold">
-                  <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-bold text-xs flex items-center gap-1">Plans ห้องงาน & ToDo</div>
-                  <div class="text-[10px] text-slate-400">วางแผนงาน บอร์ดการ์ด และวัด % สำเร็จ</div>
-                </div>
-              </a>
-              <a href="event.html" class="p-2 rounded-xl hover:bg-orange-50 transition flex items-center gap-2.5 text-slate-700 hover:text-orange-700">
-                <div class="w-7 h-7 rounded-lg bg-orange-500/15 text-orange-600 flex items-center justify-center font-bold">
-                  <i data-lucide="award" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-bold text-xs">เลือกฝ่ายห้อง</div>
-                  <div class="text-[10px] text-slate-400">ลงชื่อฝ่ายงานและหน้าที่รับผิดชอบ</div>
-                </div>
-              </a>
-              <a href="eventclass.html" class="p-2 rounded-xl hover:bg-purple-50 transition flex items-center gap-2.5 text-slate-700 hover:text-purple-700">
-                <div class="w-7 h-7 rounded-lg bg-purple-500/15 text-purple-600 flex items-center justify-center font-bold">
-                  <i data-lucide="sparkles" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-bold text-xs">ซุ้มบัณฑิต & วันเด็ก</div>
-                  <div class="text-[10px] text-slate-400">2 งานใหญ่ประจำปีการศึกษา</div>
-                </div>
-              </a>
-              <a href="storage.html" class="p-2 rounded-xl hover:bg-sky-50 transition flex items-center gap-2.5 text-slate-700 hover:text-sky-700">
-                <div class="w-7 h-7 rounded-lg bg-sky-500/15 text-sky-600 flex items-center justify-center font-bold">
-                  <i data-lucide="cloud" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-bold text-xs">Cloud Drive</div>
-                  <div class="text-[10px] text-slate-400">จัดเก็บไฟล์ โฟลเดอร์งาน 5GB ฟรี</div>
-                </div>
-              </a>
-              <a href="shortlink.html" class="p-2 rounded-xl hover:bg-amber-50 transition flex items-center gap-2.5 text-slate-700 hover:text-amber-700">
-                <div class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-600 flex items-center justify-center font-bold">
-                  <i data-lucide="link-2" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-bold text-xs">ย่อลิงก์ & QR Code</div>
-                  <div class="text-[10px] text-slate-400">สร้างลิงก์สั้นและวิเคราะห์ยอดคลิก</div>
-                </div>
-              </a>
-              <a href="upload.html" class="p-2 rounded-xl hover:bg-emerald-50 transition flex items-center gap-2.5 text-slate-700 hover:text-emerald-700">
-                <div class="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-600 flex items-center justify-center font-bold">
-                  <i data-lucide="cloud-upload" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-bold text-xs">ฝากไฟล์ด่วน</div>
-                  <div class="text-[10px] text-slate-400">อัปโหลดไฟล์ขนาดใหญ่แบบทันใจ</div>
-                </div>
-              <a href="fastshare.html" class="p-2 rounded-xl hover:bg-cyan-50 transition flex items-center gap-2.5 text-slate-700 hover:text-cyan-700">
-                <div class="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-600 flex items-center justify-center font-bold">
-                  <i data-lucide="zap" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-bold text-xs flex items-center gap-1.5">
-                    <span>FastShare</span>
-                    <span class="px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 text-[9px] font-black uppercase">AirDrop</span>
-                  </div>
-                  <div class="text-[10px] text-slate-400">ส่งไฟล์ไร้สายข้ามเครื่องด้วย QR Code ทันใจ</div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
+        <a href="Plans.html" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-400 hover:text-white transition">ACTIVITIES</a>
+        <a href="storage.html" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-400 hover:text-white transition">RESOURCES</a>
       </nav>
 
+      <!-- Search Bar (Desktop) -->
+      <div class="hidden md:flex items-center relative w-48 xl:w-60">
+        <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 pointer-events-none"></i>
+        <input type="text" id="globalSearch" placeholder="Search resources..." 
+          class="w-full pl-8 pr-3 py-1.5 rounded-full bg-[#12162A]/90 border border-[#242A4A] text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E65A19] focus:ring-1 focus:ring-[#E65A19] transition">
+      </div>
 
-      <!-- 3. Prominent CTA Button & Auth on the Right -->
-      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+      <!-- 3. USER PROFILE & SECURITY SYSTEM (Top-Right) -->
+      <div class="flex items-center gap-3">
         
-        <!-- PWA / Direct APK Download Link in Navbar (ซ่อนบนหน้าจอเล็กเพื่อลดความรก ป้องกัน UI ล้นขอบ และคงไว้ใน Drawer Menu) -->
-        <a href="download.html" class="hidden 2xl:flex px-2.5 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-700 text-xs font-bold border border-orange-500/25 transition items-center gap-1.5 cursor-pointer" title="ติดตั้งแอปหรือดาวน์โหลด APK">
-          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
-          <span>แอปพลิเคชัน</span>
-        </a>
-
-        <!-- Not Logged In State (Default) -->
-        <div id="navUserGuest" class="flex items-center gap-2">
-          <button onclick="openGoogleLoginModal()" class="flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-2xl bg-white border border-slate-300 hover:border-orange-500 text-slate-800 font-bold text-xs shadow-xs hover:shadow-md transition transform active:scale-95 cursor-pointer">
-            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-            </svg>
-            <span class="hidden sm:inline">เข้าสู่ระบบ KKU</span>
-            <span class="sm:hidden">เข้าสู่ระบบ</span>
+        <!-- Bell Notification with Dropdown Overlay -->
+        <div class="relative group">
+          <button id="notifBellBtn" aria-label="Notifications" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19]/50 flex items-center justify-center text-slate-300 hover:text-white transition">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+            <span class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#E65A19] border-2 border-[#070914] shadow-[0_0_8px_#E65A19]"></span>
           </button>
-        </div>
-
-        <!-- Logged In State (When authenticated) -->
-        <div id="navUserLoggedIn" class="hidden items-center gap-2">
-          <div class="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 pr-2 sm:pr-2.5 rounded-2xl bg-orange-50/90 border border-orange-200 shadow-xs">
-            <a href="settings.html" class="flex items-center gap-1.5 group cursor-pointer" title="คลิกเพื่อเปลี่ยนรูป Avatar หรือตกแต่งโปรไฟล์">
-              <div class="relative">
-                <img id="navUserAvatar" src="" alt="Avatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl object-cover border border-orange-300 group-hover:scale-110 group-hover:shadow-md transition">
-                <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-white"></span>
+          
+          <!-- Glassmorphic Overlay: 📣 แจ้งเตือนการเรียน -->
+          <div class="absolute right-0 top-full mt-2 w-72 sm:w-80 p-3 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl shadow-2xl hidden group-hover:block z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#242A4A]">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Notifications</span>
+              <span class="text-[10px] font-mono text-[#E65A19] font-bold">1 NEW</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-[#12162A]/80 border border-[#242A4A] text-xs text-slate-200 flex items-start gap-2.5">
+              <span class="text-base leading-none">📣</span>
+              <div class="space-y-1">
+                <p class="font-bold text-white text-[11px] leading-tight">แจ้งเตือนการเรียน</p>
+                <p class="text-[11px] text-slate-400 leading-normal">มีการอัปเดตแบบฝึกหัดใหม่ (New Assignment) ในระบบวิชา</p>
+                <div class="text-[10px] font-mono text-slate-500">10m ago • Academic Portal</div>
               </div>
-              <span id="navUserName" class="text-xs font-bold text-slate-800 max-w-[90px] sm:max-w-[120px] truncate group-hover:text-orange-600 transition">ชื่อผู้ใช้</span>
+            </div>
+            <a href="Plans.html" class="mt-2.5 block text-center py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[11px] font-mono text-slate-300 hover:text-white transition">
+              View All Activities →
             </a>
-            <a href="settings.html" class="p-1 text-slate-400 hover:text-sky-600 rounded-lg hover:bg-white transition" title="ตกแต่ง Avatar & โปรไฟล์">
-              <i data-lucide="palette" class="w-3.5 h-3.5 text-orange-500"></i>
-            </a>
-            <button onclick="handleGoogleLogout()" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition" title="ออกจากระบบ">
-              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            </button>
           </div>
         </div>
 
-        <!-- Prominent CTA Button: ชำระเงิน -->
-        <a href="payment.html?auto=pay" class="flex items-center gap-1 sm:gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-md shadow-orange-500/25 transition transform active:scale-95 cursor-pointer">
-          <i data-lucide="credit-card" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
-          <span>ชำระเงิน</span>
+        <!-- User Profile Avatar -->
+        <a href="settings.html" class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-slate-500 transition group">
+          <div class="relative w-7 h-7 rounded-full overflow-hidden border border-white/20">
+            <img id="navAvatarImg" src="logo.png" alt="User Profile" class="w-full h-full object-cover">
+            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#070914] shadow-[0_0_6px_#34d399]"></span>
+          </div>
+          <span id="navUserName" class="text-xs font-mono font-medium text-slate-200 group-hover:text-white hidden sm:inline truncate max-w-[90px]">P. Jittara</span>
         </a>
 
-        <!-- Hamburger Toggle Button for Mobile Screen -->
-        <button id="hamburgerBtn" onclick="toggleMobileNavMenu()" class="xl:hidden p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer" aria-label="Toggle Menu">
-          <i data-lucide="menu" id="hamburgerIcon" class="w-5 h-5"></i>
+        <!-- Stark LOGOUT Button -->
+        <button id="logoutBtn" onclick="handleAuthAction()" class="chrome-border px-3 py-1.5 rounded-full bg-[#0C1030] text-[11px] font-mono font-bold text-slate-300 hover:text-white hover:bg-[#161B33] transition flex items-center gap-1.5 shadow-sm">
+          <span>LOGOUT</span>
+          <span class="text-xs">↩</span>
         </button>
-      </div>
 
-    </div>
-
-    <!-- Responsive Mobile Hamburger Drawer Menu -->
-    <div id="mobileMenuDrawer" class="hidden xl:hidden bg-white/98 backdrop-blur-2xl border-b border-slate-200 shadow-2xl px-4 pt-2 pb-6 space-y-2 max-h-[85vh] overflow-y-auto">
-      <div class="grid grid-cols-2 gap-2 pt-1 pb-2">
-        <a href="event.html" onclick="toggleMobileNavMenu()" class="p-3 rounded-2xl bg-orange-50 border border-orange-200 text-orange-800 font-black text-xs flex items-center gap-2">
-          <i data-lucide="award" class="w-4 h-4 text-orange-600"></i>
-          <span>เลือกฝ่ายห้อง</span>
-        </a>
-        <a href="eventclass.html" onclick="toggleMobileNavMenu()" class="p-3 rounded-2xl bg-purple-50 border border-purple-200 text-purple-800 font-black text-xs flex items-center gap-2">
-          <i data-lucide="sparkles" class="w-4 h-4 text-purple-600"></i>
-          <span>ซุ้มบัณฑิต & วันเด็ก</span>
-        </a>
-      </div>
-
-      <a href="#payments-list" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-orange-500/10 text-orange-700 font-bold text-xs">
-        <i data-lucide="bell-ring" class="w-4 h-4 text-orange-600"></i>
-        <span>รายการที่ต้องชำระ (Active Dues)</span>
-      </a>
-      <a href="#about" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-slate-700 hover:bg-slate-50 font-medium text-xs">
-        <i data-lucide="info" class="w-4 h-4 text-slate-400"></i>
-        <span>เกี่ยวกับสาขาวิชา</span>
-      </a>
-      <a href="#curriculum" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-slate-700 hover:bg-slate-50 font-medium text-xs">
-        <i data-lucide="book-open" class="w-4 h-4 text-slate-400"></i>
-        <span>โครงสร้างหลักสูตร 4 ปี</span>
-      </a>
-      <a href="#careers" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-slate-700 hover:bg-slate-50 font-medium text-xs">
-        <i data-lucide="briefcase" class="w-4 h-4 text-slate-400"></i>
-        <span>อาชีพในอนาคต</span>
-      </a>
-      <a href="#students" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-slate-700 hover:bg-slate-50 font-medium text-xs">
-        <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
-        <span>ทำเนียบ COMED23 (60 คน)</span>
-      </a>
-      <a href="storage.html" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-sky-500/10 text-sky-700 font-bold text-xs">
-        <i data-lucide="cloud" class="w-4 h-4 text-sky-600"></i>
-        <span>ระบบ Cloud Drive 5GB (แฟ้มงาน & โฟลเดอร์)</span>
-      </a>
-      <a href="settings.html" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs">
-        <i data-lucide="settings" class="w-4 h-4 text-slate-600"></i>
-        <span>ตั้งค่าโปรไฟล์ส่วนตัว (Settings)</span>
-      </a>
-      <a href="fastshare.html" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-cyan-500/10 text-cyan-700 font-bold text-xs">
-        <i data-lucide="zap" class="w-4 h-4 text-cyan-600"></i>
-        <span>FastShare (ส่งไฟล์ไร้สายแบบ AirDrop)</span>
-      </a>
-      <a href="upload.html" target="_blank" class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-slate-700 hover:bg-slate-50 font-medium text-xs">
-        <i data-lucide="cloud-upload" class="w-4 h-4 text-sky-500"></i>
-        <span>ฝากไฟล์ขนาดใหญ่ 5GB</span>
-      </a>
-
-      <div class="grid grid-cols-2 gap-2 pt-1 pb-1">
-        <button onclick="toggleMobileNavMenu(); if(window.AppUpdater) window.AppUpdater.checkUpdate(true);" class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 font-bold text-xs border border-orange-500/25 cursor-pointer">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-          <span>เช็กอัปเดตแอป</span>
-        </button>
-        <a href="download.html" onclick="toggleMobileNavMenu()" class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 font-bold text-xs border border-emerald-500/25">
-          <i data-lucide="download" class="w-3.5 h-3.5"></i>
-          <span>ดาวน์โหลด APK</span>
-        </a>
-      </div>
-
-      <div class="pt-2 border-t border-slate-100">
-        <button onclick="toggleMobileNavMenu(); openGoogleLoginModal();" class="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 text-white rounded-2xl font-bold text-xs shadow-md">
-          <i data-lucide="log-in" class="w-4 h-4 text-orange-400"></i>
-          <span>เข้าสู่ระบบด้วย KKU Mail</span>
-        </button>
       </div>
     </div>
   </header>
 
-  <!-- ================= MOBILE BOTTOM FLOATING NAVIGATION DOCK ================= -->
-  <div class="xl:hidden fixed bottom-3 left-3 right-3 z-40 bg-slate-900/90 backdrop-blur-2xl border border-white/20 rounded-3xl p-1.5 flex items-center justify-around shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
-    <a href="#payments-list" class="flex-1 py-1.5 px-1 rounded-2xl text-orange-400 font-bold text-[11px] transition-all flex flex-col items-center gap-0.5 hover:text-white">
-      <div class="w-7 h-7 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
-        <i data-lucide="bell-ring" class="w-3.5 h-3.5"></i>
-      </div>
-      <span>ต้องชำระ</span>
-    </a>
-
-    <a href="Plans.html" class="flex-1 py-1.5 px-1 rounded-2xl text-orange-400 font-bold text-[11px] transition-all flex flex-col items-center gap-0.5 hover:text-white">
-      <div class="w-7 h-7 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
-        <i data-lucide="calendar-range" class="w-3.5 h-3.5"></i>
-      </div>
-      <span>Plans ปฏิทิน</span>
-    </a>
-
-    <a href="storage.html" class="flex-1 py-1.5 px-1 rounded-2xl text-sky-400 font-bold text-[11px] transition-all flex flex-col items-center gap-0.5 hover:text-white">
-      <div class="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
-        <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
-      </div>
-      <span>ไดรฟ์</span>
-    </a>
-
-    <a href="payment.html?auto=pay" class="flex-1 py-1.5 px-1 rounded-2xl text-orange-400 bg-orange-500/15 font-black text-[11px] transition-all flex flex-col items-center gap-0.5">
-      <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-md shadow-orange-500/30">
-        <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
-      </div>
-      <span>ชำระเงิน</span>
-    </a>
-
-    <button onclick="toggleMobileNavMenu()" class="flex-1 py-1.5 px-1 rounded-2xl text-slate-400 font-bold text-[11px] transition-all flex flex-col items-center gap-0.5 hover:text-white cursor-pointer">
-      <div class="w-7 h-7 rounded-xl bg-white/5 text-slate-300 flex items-center justify-center">
-        <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
-      </div>
-      <span>รวมเมนู</span>
-    </button>
-  </div>
-
-  <!-- ================= HERO SECTION (CLAUDE MINIMALIST EDITORIAL) ================= -->
-  <section class="relative overflow-hidden bg-[#FAF8F5] text-slate-900 pt-16 sm:pt-24 pb-20 sm:pb-28 px-4 sm:px-6 lg:px-8 border-b border-[#E8DFD8]">
+  <!-- ================= MAIN HERO SECTION (01 // HOME) ================= -->
+  <section id="hero" class="relative min-h-[calc(100vh-64px)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10 lg:py-16 overflow-hidden">
     
-    <!-- Subtle Editorial Grid & Accent Lines -->
-    <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#1E1E1E 1px, transparent 1px); background-size: 24px 24px;"></div>
-    <div class="absolute top-0 right-1/4 w-96 h-96 bg-[#CC785C]/5 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Left Timeline Indicator -->
+    <div class="hidden xl:flex fixed left-8 top-1/2 -translate-y-1/2 flex-col items-center gap-3 z-30 pointer-events-none">
+      <div class="w-px h-16 bg-gradient-to-b from-transparent to-[#E65A19]"></div>
+      <div class="font-mono text-[11px] text-[#E65A19] tracking-widest -rotate-90 origin-center font-bold">01 // HOME</div>
+      <div class="w-px h-16 bg-gradient-to-b from-[#E65A19] to-transparent"></div>
+    </div>
 
-    <div class="relative max-w-6xl mx-auto space-y-12 z-10">
+    <div class="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
       
-      <!-- Top Meta Eyebrow -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E8DFD8] pb-4 text-xs">
-        <div class="flex items-center gap-2.5">
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#F4EFEA] border border-[#E8DFD8] text-[#9E4A32] font-mono text-[11px] font-semibold tracking-wide">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#CC785C]"></span>
-            <span>COMED23 • KKU63</span>
-          </span>
-          <span class="text-slate-500 font-mono text-[11px]">STUDENT PORTAL & DIGITAL SUITE</span>
-        </div>
-        <div class="flex items-center gap-3 text-slate-500 font-mono text-[11px]">
-          <span>ขอนแก่น, ประเทศไทย</span>
-          <span class="text-slate-300">•</span>
-          <span class="text-emerald-700 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live System</span>
-        </div>
-      </div>
-
-      <!-- Main Headline in Editorial Serif Typography -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
-        <div class="lg:col-span-8 space-y-5">
-          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-normal tracking-tight font-serif text-slate-900 leading-[1.12]">
-            ศูนย์กลางการเรียนรู้ & <br>
-            <span class="italic text-[#B85E42] font-serif">กำหนดการกิจกรรม</span> สาขาคอมพิวเตอร์ศึกษา
-          </h1>
-          <p class="text-sm sm:text-base text-slate-600 font-light leading-relaxed max-w-2xl font-sans">
-            ระบบพื้นที่ทำงานร่วมกันสำหรับนักศึกษาและคณาจารย์ รวบรวมปฏิทินงานกิจกรรม คลาวด์เก็บแฟ้มรายวิชา 5GB และระบบติดตามภาระงานดิจิทัลตลอด 24 ชั่วโมง
-          </p>
-        </div>
-
-        <!-- Quick Entry Actions in Claude Style -->
-        <div class="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-2.5">
-          <a href="Calendar.html" class="px-5 py-3.5 rounded-2xl bg-[#CC785C] hover:bg-[#B85E42] text-white font-medium text-xs sm:text-sm flex items-center justify-between shadow-sm transition group">
-            <div class="flex items-center gap-2.5">
-              <i data-lucide="calendar" class="w-4 h-4 text-white"></i>
-              <span>เปิดดูปฏิทิน & กิจกรรม</span>
-            </div>
-            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
-          </a>
-          <a href="payment.html?auto=pay" class="px-5 py-3.5 rounded-2xl bg-white hover:bg-[#F4EFEA] border border-[#E8DFD8] text-slate-800 font-medium text-xs sm:text-sm flex items-center justify-between transition group">
-            <div class="flex items-center gap-2.5">
-              <i data-lucide="credit-card" class="w-4 h-4 text-[#CC785C]"></i>
-              <span>ระบบชำระเงินค่ากิจกรรม</span>
-            </div>
-            <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition"></i>
-          </a>
-          <a href="storage.html" class="px-5 py-3 rounded-2xl bg-[#F4EFEA] hover:bg-[#E8DFD8] border border-[#E8DFD8] text-slate-700 font-medium text-xs flex items-center justify-between transition">
-            <div class="flex items-center gap-2">
-              <i data-lucide="cloud" class="w-3.5 h-3.5 text-slate-500"></i>
-              <span>คลาวด์ไดรฟ์ส่วนตัว (5GB)</span>
-            </div>
-            <span class="text-[10px] font-mono text-slate-400">Cloud Drive</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- Editorial 4-Card Service Showcase -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-[#E8DFD8]">
+      <!-- LEFT-CENTER (The Brand & Mission Statement) -->
+      <div class="lg:col-span-7 flex flex-col justify-center space-y-6 sm:space-y-8 text-left">
         
-        <!-- Card 1: Calendar & Live Sync -->
-        <a href="Calendar.html" class="p-5 rounded-2xl bg-white border border-[#E8DFD8] hover:border-[#CC785C] hover:shadow-sm transition space-y-3 group flex flex-col justify-between">
-          <div class="space-y-2">
-            <div class="w-8 h-8 rounded-xl bg-[#F4EFEA] text-[#CC785C] flex items-center justify-center font-bold">
-              <i data-lucide="calendar-days" class="w-4 h-4"></i>
-            </div>
-            <h3 class="text-sm font-semibold text-slate-900 group-hover:text-[#CC785C] transition">ปฏิทินงาน & นัดหมาย</h3>
-            <p class="text-xs text-slate-500 font-light leading-relaxed">ซิงค์กิจกรรมเข้า Apple Calendar และ Google Calendar ได้ทันที</p>
-          </div>
-          <span class="text-[11px] font-mono font-medium text-[#CC785C] flex items-center gap-1 pt-1">
-            <span>เข้าสู่ปฏิทิน</span>
-            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+        <!-- Top Sub-badges -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="px-2.5 py-1 rounded-full bg-[#161B33] border border-[#242A4A] text-[10px] font-mono font-bold tracking-wider text-slate-300 uppercase">
+            STUDENTS / BATCH 23
           </span>
-        </a>
+          <span class="px-2.5 py-1 rounded-full bg-[#B32B19]/20 border border-[#B32B19]/40 text-[10px] font-mono font-bold tracking-wider text-[#FF7A29] uppercase">
+            CLASS OF 2023 - 2027
+          </span>
+          <span class="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-sans font-medium text-slate-300">
+            คอมพิวเตอร์ศึกษา รุ่น 23
+          </span>
+        </div>
 
-        <!-- Card 2: Plans & Projects -->
-        <a href="Plans.html" class="p-5 rounded-2xl bg-white border border-[#E8DFD8] hover:border-[#CC785C] hover:shadow-sm transition space-y-3 group flex flex-col justify-between">
-          <div class="space-y-2">
-            <div class="w-8 h-8 rounded-xl bg-[#F4EFEA] text-[#CC785C] flex items-center justify-center font-bold">
-              <i data-lucide="kanban" class="w-4 h-4"></i>
-            </div>
-            <h3 class="text-sm font-semibold text-slate-900 group-hover:text-[#CC785C] transition">บอร์ดบริหารงาน (Plans)</h3>
-            <p class="text-xs text-slate-500 font-light leading-relaxed">กระดานติดตามงานกลุ่ม วางแผนขั้นตอน และคำนวณ % ความคืบหน้า</p>
-          </div>
-          <span class="text-[11px] font-mono font-medium text-[#CC785C] flex items-center gap-1 pt-1">
-            <span>เปิดบอร์ด Plans</span>
-            <i data-lucide="chevron-right" class="w-3 h-3"></i>
-          </span>
-        </a>
+        <!-- Large-sized Kinetic Typography Title -->
+        <div class="space-y-1">
+          <h1 id="kineticTitle" class="title-kinetic font-display text-4xl sm:text-6xl md:text-7xl lg:text-[76px] tracking-tight leading-[0.98]">
+            COMED 23:<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400">CONNECTING</span><br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A29] via-[#E65A19] to-[#B32B19]">EDUCATION &amp;</span><br>
+            <span class="text-white">TECHNOLOGY</span>
+          </h1>
+        </div>
 
-        <!-- Card 3: Cloud Drive -->
-        <a href="storage.html" class="p-5 rounded-2xl bg-white border border-[#E8DFD8] hover:border-[#CC785C] hover:shadow-sm transition space-y-3 group flex flex-col justify-between">
-          <div class="space-y-2">
-            <div class="w-8 h-8 rounded-xl bg-[#F4EFEA] text-sky-700 flex items-center justify-center font-bold">
-              <i data-lucide="hard-drive" class="w-4 h-4"></i>
-            </div>
-            <h3 class="text-sm font-semibold text-slate-900 group-hover:text-sky-700 transition">Cloud Storage (5GB)</h3>
-            <p class="text-xs text-slate-500 font-light leading-relaxed">พื้นที่เก็บแฟ้มงาน โฟลเดอร์การเรียน และแชร์ไฟล์ขนาดใหญ่</p>
-          </div>
-          <span class="text-[11px] font-mono font-medium text-sky-700 flex items-center gap-1 pt-1">
-            <span>ไปยังไดรฟ์</span>
-            <i data-lucide="chevron-right" class="w-3 h-3"></i>
-          </span>
-        </a>
+        <!-- Mission Statement Paragraph -->
+        <p class="text-xs sm:text-sm md:text-base font-sans text-slate-400 font-light leading-relaxed max-w-xl">
+          The academic portal for the Computer Education program at Khon Kaen University (Faculty of Education). Navigating the future of digital teaching, creative computing, and educational technology.
+        </p>
 
-        <!-- Card 4: Event Class (ซุ้มบัณฑิต) -->
-        <a href="eventclass.html" class="p-5 rounded-2xl bg-white border border-[#E8DFD8] hover:border-[#CC785C] hover:shadow-sm transition space-y-3 group flex flex-col justify-between">
-          <div class="space-y-2">
-            <div class="w-8 h-8 rounded-xl bg-[#F4EFEA] text-purple-700 flex items-center justify-center font-bold">
-              <i data-lucide="sparkles" class="w-4 h-4"></i>
-            </div>
-            <h3 class="text-sm font-semibold text-slate-900 group-hover:text-purple-700 transition">งานซุ้มบัณฑิต & วันเด็ก</h3>
-            <p class="text-xs text-slate-500 font-light leading-relaxed">ลงชื่อเลือกฝ่ายกิจกรรมประจำปี และจัดการโควตาสมาชิก</p>
+        <!-- Elastic-animated CTA Button -->
+        <div class="flex flex-wrap items-center gap-4 pt-2">
+          <a href="#quick-hub" id="explorePortalBtn" class="chrome-border group relative px-7 py-3.5 rounded-full bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white font-mono font-bold text-xs tracking-wider uppercase transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(230,90,25,0.5)] flex items-center gap-2.5 cursor-pointer">
+            <span>[ EXPLORE PORTAL ]</span>
+            <span class="group-hover:translate-x-1 transition-transform">→</span>
+          </a>
+
+          <a href="Calendar.html" class="px-5 py-3 rounded-full bg-[#12162A] border border-[#242A4A] text-slate-300 hover:text-white hover:border-[#E65A19]/50 font-mono text-xs transition flex items-center gap-2">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-[#E65A19]"></i>
+            <span>SCHEDULE &amp; DUES</span>
+          </a>
+        </div>
+
+        <!-- Scroll Discover Prompt -->
+        <div class="pt-4 flex items-center gap-2 text-slate-500 font-mono text-[10px] tracking-widest uppercase">
+          <span class="animate-bounce">↓</span>
+          <span>SCROLL TO DISCOVER</span>
+        </div>
+
+      </div>
+
+      <!-- RIGHT-CENTER (3D "Zero-Gravity" WebGL Engine) -->
+      <div class="lg:col-span-5 relative flex items-center justify-center min-h-[360px] sm:min-h-[460px] lg:min-h-[560px]">
+        
+        <!-- Interactive 3D WebGL Canvas Container -->
+        <div id="webglContainer" class="relative w-full h-[360px] sm:h-[460px] lg:h-[560px] flex items-center justify-center cursor-grab active:cursor-grabbing">
+          <!-- Canvas injected here via Three.js -->
+        </div>
+
+        <!-- Hotspot 01: DIGITAL LAB -->
+        <div id="hotspot1" class="absolute top-[28%] left-[10%] sm:left-[12%] z-20 pointer-events-auto cursor-pointer group">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0C1030]/90 backdrop-blur-md border border-[#242A4A] hover:border-[#E65A19] shadow-lg transition-transform group-hover:scale-105">
+            <span class="w-2 h-2 rounded-full bg-[#E65A19] hotspot-pulse"></span>
+            <span class="text-[10px] font-mono font-bold text-slate-200 group-hover:text-white">01 // DIGITAL LAB</span>
           </div>
-          <span class="text-[11px] font-mono font-medium text-purple-700 flex items-center gap-1 pt-1">
-            <span>เลือกลงฝ่ายงาน</span>
-            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+        </div>
+
+        <!-- Hotspot 02: RESEARCH -->
+        <div id="hotspot2" class="absolute bottom-[28%] right-[10%] sm:right-[12%] z-20 pointer-events-auto cursor-pointer group">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0C1030]/90 backdrop-blur-md border border-[#242A4A] hover:border-[#E65A19] shadow-lg transition-transform group-hover:scale-105">
+            <span class="w-2 h-2 rounded-full bg-slate-400 group-hover:bg-[#E65A19] transition"></span>
+            <span class="text-[10px] font-mono font-bold text-slate-300 group-hover:text-white">02 // RESEARCH</span>
+          </div>
+        </div>
+
+        <!-- Hotspot 03: INNOVATION -->
+        <div id="hotspot3" class="absolute top-[18%] right-[15%] z-20 pointer-events-auto cursor-pointer group hidden sm:block">
+          <div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#0C1030]/80 backdrop-blur-md border border-[#242A4A] hover:border-slate-400 shadow-md transition-transform group-hover:scale-105">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            <span class="text-[9px] font-mono text-slate-400 group-hover:text-white">03 // INNOVATION</span>
+          </div>
+        </div>
+
+        <!-- Technical Badges Under 3D Object -->
+        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10 pointer-events-none">
+          <span class="px-2.5 py-0.5 rounded-full bg-[#0C1030]/80 border border-[#242A4A] text-[9px] font-mono text-slate-400">
+            anti-gravity liquid-glass
           </span>
-        </a>
+          <span class="px-2.5 py-0.5 rounded-full bg-[#0C1030]/80 border border-[#242A4A] text-[9px] font-mono text-slate-400">
+            mesh physics
+          </span>
+        </div>
 
       </div>
 
     </div>
   </section>
 
-  <!-- ================= SECTION: PLANS & ACTIVITY CALENDAR (LIVE SUPABASE SYNC) ================= -->
-  <section id="comed-plans-widget" class="relative bg-gradient-to-b from-[#090D16] via-[#0d1424] to-slate-900 text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8 border-b border-sky-900/40 overflow-hidden">
-    <!-- Ambient Light Glows -->
-    <div class="absolute -top-10 left-1/3 w-96 h-96 bg-orange-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-    <div class="absolute bottom-0 right-10 w-80 h-80 bg-sky-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-
-    <div class="max-w-7xl mx-auto space-y-8 relative z-10">
+  <!-- ================= QUICK HUB & LIVE SERVICES ================= -->
+  <section id="quick-hub" class="relative py-16 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#0C1030]/60 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto space-y-8">
       
-      <!-- Section Header -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-5">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-4">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-white/10 text-white text-[11px] sm:text-xs font-semibold tracking-wide">
-            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span>กำหนดการกิจกรรม & ตารางงานสาขา (Live Calendar)</span>
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#161B33] border border-[#242A4A] text-[10px] font-mono text-[#FF7A29] uppercase mb-2">
+            ● PORTAL SUITE &amp; CORE APPS
           </div>
-          <h2 class="text-xl sm:text-3xl font-bold text-white tracking-tight mt-2.5">
-            ปฏิทินกิจกรรมและการนัดหมาย
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed max-w-2xl font-light">
-            บันทึกกำหนดการ วันสำคัญ นัดหมายส่งงาน และเชื่อมต่อเข้า Google Calendar หรือ Apple Calendar ได้โดยตรง
-          </p>
+          <h2 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">ศูนย์บริการนักศึกษา COMED23</h2>
         </div>
-
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <!-- Filter Tabs for Index Calendar -->
-          <div class="flex items-center bg-slate-900/90 border border-white/10 rounded-xl p-1 text-xs font-medium">
-            <button onclick="setIndexPlansFilter('all')" id="idxTabAll" class="px-3 py-1.5 rounded-lg bg-white/15 text-white transition">
-              ทั้งหมด
-            </button>
-            <button onclick="setIndexPlansFilter('department')" id="idxTabDept" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
-              🏛️ สาขา
-            </button>
-            <button onclick="setIndexPlansFilter('personal')" id="idxTabPersonal" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
-              🔒 ส่วนตัว
-            </button>
-          </div>
-
-          <a href="Calendar.html" class="inline-flex items-center gap-2 text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-white/10 px-3.5 py-2 rounded-xl transition">
-            <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span>เปิดปฏิทินเต็ม</span>
-          </a>
-          <a href="Plans.html" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-3.5 py-2 rounded-xl transition">
-            <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-400"></i>
-            <span>Plans กระดานงาน</span>
-          </a>
+        <div class="text-xs font-mono text-slate-400">
+          Faculty of Education, Khon Kaen University
         </div>
       </div>
 
-      <!-- Live Plans Mini Grid for Index -->
-      <div id="indexPlansContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div class="col-span-full py-12 text-center text-slate-400 text-xs flex items-center justify-center gap-2">
-          <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
-          <span>กำลังเชื่อมต่อปฏิทินงานล่าสุดจาก Supabase...</span>
-        </div>
+      <!-- Bento Grid of Services -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- App 1: Calendar -->
+        <a href="Calendar.html" class="p-5 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19] transition-all group flex flex-col justify-between min-h-[170px] shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="w-10 h-10 rounded-xl bg-[#E65A19]/15 text-[#FF7A29] flex items-center justify-center font-bold">
+              <i data-lucide="calendar" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] font-mono text-slate-400 group-hover:text-white transition">01 ↗</span>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-white text-base group-hover:text-[#FF7A29] transition">ปฏิทินงาน &amp; กิจกรรม</h3>
+            <p class="text-xs text-slate-400 mt-1">Calendar บันทึกกำหนดการและนัดหมายสำคัญ</p>
+          </div>
+        </a>
+
+        <!-- App 2: Plans -->
+        <a href="Plans.html" class="p-5 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19] transition-all group flex flex-col justify-between min-h-[170px] shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="w-10 h-10 rounded-xl bg-[#B32B19]/20 text-[#FF7A29] flex items-center justify-center font-bold">
+              <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] font-mono text-slate-400 group-hover:text-white transition">02 ↗</span>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-white text-base group-hover:text-[#FF7A29] transition">ห้องงาน Plans</h3>
+            <p class="text-xs text-slate-400 mt-1">ติดตาม Task และกำหนดส่งงานโปรเจกต์รายวิชา</p>
+          </div>
+        </a>
+
+        <!-- App 3: Cloud Drive -->
+        <a href="storage.html" class="p-5 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-sky-500 transition-all group flex flex-col justify-between min-h-[170px] shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center font-bold">
+              <i data-lucide="cloud" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] font-mono text-slate-400 group-hover:text-white transition">03 ↗</span>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-white text-base group-hover:text-sky-400 transition">Cloud Storage 5GB</h3>
+            <p class="text-xs text-slate-400 mt-1">คลังชีทเรียน สไลด์สอน และโฟลเดอร์งานวิชาชีพ</p>
+          </div>
+        </a>
+
+        <!-- App 4: Payment -->
+        <a href="payment.html" class="p-5 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-emerald-500 transition-all group flex flex-col justify-between min-h-[170px] shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-bold">
+              <i data-lucide="credit-card" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] font-mono text-slate-400 group-hover:text-white transition">04 ↗</span>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-white text-base group-hover:text-emerald-400 transition">ระบบชำระเงินกองทุน</h3>
+            <p class="text-xs text-slate-400 mt-1">สแกน QR Code ตรวจสลิปอัตโนมัติ Real-time</p>
+          </div>
+        </a>
+
       </div>
 
     </div>
   </section>
 
-  <!-- ================= SECTION 0: ACTIVE PAYMENTS (MINIMAL EDITORIAL) ================= -->
-  <section id="payments-list" class="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-[#E8DFD8]">
-    <div class="max-w-6xl mx-auto space-y-8">
-      
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#E8DFD8] pb-5">
-        <div class="space-y-1.5">
-          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[#F4EFEA] text-[#9E4A32] text-xs font-mono font-medium">
-            <span>● รายการต้องชำระในขณะนี้</span>
-          </div>
-          <h2 class="text-2xl sm:text-4xl font-normal font-serif text-slate-900 tracking-tight">
-            ติดตามและชำระเงิน <span class="italic text-[#CC785C]">ค่ากิจกรรมรุ่น</span>
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-500 font-light max-w-xl">
-            ตรวจสอบกำหนดการ ยอดชำระ และแนบสลิปผ่านระบบออนไลน์ เพื่อความโปร่งใสและตรวจสอบได้ 24 ชั่วโมง
-          </p>
-        </div>
-
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <a href="payment.html" class="inline-flex items-center gap-2 text-xs font-medium text-slate-800 bg-[#FAF8F5] hover:bg-[#F4EFEA] border border-[#E8DFD8] px-4 py-2.5 rounded-xl transition">
-            <i data-lucide="table-2" class="w-4 h-4 text-[#CC785C]"></i>
-            <span>ตรวจสอบสถานะ 60 คน</span>
-          </a>
-        </div>
+  <!-- ================= SECTION: ACTIVE DUES & PLANS (SUPABASE SYNC) ================= -->
+  <section id="payments-list" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
+      <div>
+        <span class="text-xs font-mono text-[#FF7A29] uppercase tracking-wider">● ACTIVE DUES</span>
+        <h2 class="text-2xl sm:text-4xl font-display font-bold text-white mt-1">รายการที่ต้องชำระในขณะนี้</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">ระบบตรวจสอบสถานะการชำระเงินของนักศึกษาแต่ละบุคคล</p>
       </div>
+      <a href="payment.html" class="px-4 py-2 rounded-xl bg-[#E65A19] text-white text-xs font-mono font-bold hover:bg-[#B32B19] transition flex items-center gap-1.5 self-start sm:self-auto">
+        <span>เปิดหน้าชำระเงินเต็มจอ</span>
+        <span>→</span>
+      </a>
+    </div>
 
-      <!-- Dynamic Payment Campaigns Grid -->
-      <div id="indexCampaignsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div class="col-span-full py-12 text-center text-slate-400 text-xs flex items-center justify-center gap-2">
-          <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-[#CC785C]"></i>
-          <span>กำลังโหลดรายการรับชำระเงินล่าสุด...</span>
-        </div>
+    <!-- Live Campaigns Injected Container -->
+    <div id="indexCampaignsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="col-span-full py-12 text-center text-slate-500 text-xs flex items-center justify-center gap-2">
+        <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-[#E65A19]"></i>
+        <span>กำลังเชื่อมต่อฐานข้อมูลกองทุนสาขา...</span>
       </div>
-
     </div>
   </section>
 
-  <!-- ================= SECTION 1: ABOUT & PHILOSOPHY (EDITORIAL STUDIO) ================= -->
-  <section id="about" class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-16">
-    
-    <div class="space-y-4 max-w-3xl">
-      <span class="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-[#9E4A32] uppercase tracking-wider">
-        <span>01</span>
-        <span>•</span>
-        <span>ปรัชญาและวิสัยทัศน์</span>
-      </span>
-      <h2 class="text-3xl sm:text-5xl font-normal font-serif text-slate-900 tracking-tight leading-tight">
-        ผลิตครูคอมพิวเตอร์มืออาชีพ <br>
-        <span class="italic text-[#CC785C]">ผสานวิทยาการดิจิทัลกับศาสตร์การสอน</span>
-      </h2>
-      <p class="text-sm sm:text-base text-slate-600 font-light leading-relaxed">
-        สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น บ่มเพาะบัณฑิตครูที่มีความเชี่ยวชาญทั้งการพัฒนาซอฟต์แวร์ ปัญญาประดิษฐ์ และเทคนิคการสอนยุคใหม่เพื่อยกระดับการศึกษาไทย
-      </p>
-    </div>
-
-    <!-- 3 Core Pillars Minimal Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <!-- ================= SECTION: ACADEMICS & CURRICULUM ================= -->
+  <section id="about" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#0C1030]/30">
+    <div class="max-w-7xl mx-auto space-y-12">
       
-      <div class="p-8 rounded-3xl bg-[#FAF8F5] border border-[#E8DFD8] space-y-4 hover:border-[#CC785C] transition">
-        <div class="w-10 h-10 rounded-2xl bg-[#F4EFEA] text-[#CC785C] flex items-center justify-center font-bold">
-          <i data-lucide="binary" class="w-5 h-5"></i>
-        </div>
-        <div class="space-y-2">
-          <h3 class="text-lg font-semibold text-slate-900">วิทยาการคอมพิวเตอร์เข้มข้น</h3>
-          <p class="text-xs text-slate-600 font-light leading-relaxed">
-            เรียนรู้การเขียนโปรแกรม (Coding), ซอฟต์แวร์, เว็บแอปพลิเคชัน, ปัญญาประดิษฐ์ (AI), IoT และระบบความปลอดภัยไซเบอร์
-          </p>
-        </div>
-      </div>
-
-      <div class="p-8 rounded-3xl bg-[#FAF8F5] border border-[#E8DFD8] space-y-4 hover:border-[#CC785C] transition">
-        <div class="w-10 h-10 rounded-2xl bg-[#F4EFEA] text-sky-700 flex items-center justify-center font-bold">
-          <i data-lucide="sparkles" class="w-5 h-5"></i>
-        </div>
-        <div class="space-y-2">
-          <h3 class="text-lg font-semibold text-slate-900">นวัตกรรมสื่อการเรียนรู้</h3>
-          <p class="text-xs text-slate-600 font-light leading-relaxed">
-            การออกแบบสื่อดิจิทัลเพื่อการศึกษา, Interactive Media, ระบบการจัดการเรียนรู้ (LMS) และเทคโนโลยีเสมือนจริง (AR/VR)
-          </p>
-        </div>
-      </div>
-
-      <div class="p-8 rounded-3xl bg-[#FAF8F5] border border-[#E8DFD8] space-y-4 hover:border-[#CC785C] transition">
-        <div class="w-10 h-10 rounded-2xl bg-[#F4EFEA] text-purple-700 flex items-center justify-center font-bold">
-          <i data-lucide="graduation-cap" class="w-5 h-5"></i>
-        </div>
-        <div class="space-y-2">
-          <h3 class="text-lg font-semibold text-slate-900">ศาสตร์การสอนยุคดิจิทัล</h3>
-          <p class="text-xs text-slate-600 font-light leading-relaxed">
-            จิตวิทยาการศึกษา, การวัดผลประเมินผล, การจัดการเรียนรู้แบบ Active Learning และเทคนิคกระตุ้นความคิดเชิงคำนวณ
-          </p>
-        </div>
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- ================= SECTION 2: CURRICULUM (CLEAN 4-YEAR PROGRESSION) ================= -->
-  <section id="curriculum" class="py-20 sm:py-24 bg-[#F4EFEA] border-y border-[#E8DFD8] px-4 sm:px-6 lg:px-8">
-    <div class="max-w-6xl mx-auto space-y-12">
-      
-      <div class="space-y-2 max-w-2xl">
-        <span class="text-xs font-mono font-medium text-[#9E4A32] uppercase">02 • แผนการศึกษา</span>
-        <h2 class="text-2xl sm:text-4xl font-normal font-serif text-slate-900 tracking-tight">
-          โครงสร้างหลักสูตร 4 ชั้นปี
-        </h2>
-        <p class="text-xs sm:text-sm text-slate-600 font-light">
-          ออกแบบการเรียนรู้แบบ Step-by-Step ตั้งแต่พื้นฐานวิทยาการคอมพิวเตอร์ สู่นวัตกรรมและประสบการณ์วิชาชีพครูจริง
+      <div class="max-w-3xl space-y-3">
+        <span class="text-xs font-mono text-[#FF7A29] uppercase tracking-widest">01 // ACADEMICS</span>
+        <h2 class="text-3xl sm:text-5xl font-display font-bold text-white">โครงสร้างวิชาชีพและเทคโนโลยี</h2>
+        <p class="text-sm sm:text-base text-slate-400 font-light leading-relaxed">
+          หลักสูตรการศึกษาบัณฑิต สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น บูรณาการศาสตร์การสอนและวิทยาการคอมพิวเตอร์ยุคใหม่
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-3">
-          <span class="text-xs font-mono font-bold text-[#CC785C]">ปีที่ 1 • Foundation</span>
-          <h4 class="text-base font-semibold text-slate-900">ปูพื้นฐานคอมพิวเตอร์</h4>
-          <ul class="space-y-2 text-xs text-slate-600 font-light pt-2 border-t border-[#F4EFEA]">
-            <li>• วิทยาการคอมพิวเตอร์เบื้องต้น</li>
-            <li>• การเขียนโปรแกรมเชิงโครงสร้าง</li>
-            <li>• คณิตศาสตร์คอมพิวเตอร์</li>
-            <li>• จิตวิทยาสำหรับครู</li>
-          </ul>
+        <div class="p-6 rounded-2xl bg-[#12162A] border border-[#242A4A] space-y-3">
+          <div class="text-[#FF7A29] font-mono text-xs font-bold">01 • COMPUTER SCIENCE</div>
+          <h3 class="text-lg font-bold text-white font-display">วิทยาการคอมพิวเตอร์</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">การพัฒนาเว็บ แอปพลิเคชัน ปัญญาประดิษฐ์ (AI) ฐานข้อมูล และวิทยาการข้อมูลขั้นสูงเพื่อการศึกษา</p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-3">
-          <span class="text-xs font-mono font-bold text-sky-700">ปีที่ 2 • Software & Web</span>
-          <h4 class="text-base font-semibold text-slate-900">พัฒนาระบบซอฟต์แวร์</h4>
-          <ul class="space-y-2 text-xs text-slate-600 font-light pt-2 border-t border-[#F4EFEA]">
-            <li>• การโปรแกรมเชิงวัตถุ (OOP)</li>
-            <li>• โครงสร้างข้อมูลและอัลกอริทึม</li>
-            <li>• ระบบฐานข้อมูลและเว็บแอพ</li>
-            <li>• สื่อนวัตกรรมการศึกษา</li>
-          </ul>
+        <div class="p-6 rounded-2xl bg-[#12162A] border border-[#242A4A] space-y-3">
+          <div class="text-[#FF7A29] font-mono text-xs font-bold">02 • EDTECH & INNOVATION</div>
+          <h3 class="text-lg font-bold text-white font-display">นวัตกรรมการศึกษา</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">การออกแบบสื่อปฏิสัมพันธ์ Gamification การจัดการห้องเรียนดิจิทัล และระบบการเรียนรู้เสมือนจริง (VR/AR)</p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-3">
-          <span class="text-xs font-mono font-bold text-purple-700">ปีที่ 3 • Innovation & AI</span>
-          <h4 class="text-base font-semibold text-slate-900">ปัญญาประดิษฐ์และการสอน</h4>
-          <ul class="space-y-2 text-xs text-slate-600 font-light pt-2 border-t border-[#F4EFEA]">
-            <li>• ปัญญาประดิษฐ์และการเรียนรู้ของเครื่อง</li>
-            <li>• ความมั่นคงปลอดภัยไซเบอร์</li>
-            <li>• วิธีการสอนวิทยาการคำนวณ</li>
-            <li>• โครงงานนวัตกรรม EdTech</li>
-          </ul>
-        </div>
-
-        <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-3">
-          <span class="text-xs font-mono font-bold text-emerald-700">ปีที่ 4 • Internship</span>
-          <h4 class="text-base font-semibold text-slate-900">ฝึกประสบการณ์วิชาชีพ</h4>
-          <ul class="space-y-2 text-xs text-slate-600 font-light pt-2 border-t border-[#F4EFEA]">
-            <li>• ปฏิบัติการสอนในสถานศึกษา 1 ปี</li>
-            <li>• การวิจัยปฏิบัติการในชั้นเรียน</li>
-            <li>• สัมมนาวิชาชีพครูคอมพิวเตอร์</li>
-            <li>• เตรียมพร้อมก้าวสู่ครูมืออาชีพ</li>
-          </ul>
+        <div class="p-6 rounded-2xl bg-[#12162A] border border-[#242A4A] space-y-3">
+          <div class="text-[#FF7A29] font-mono text-xs font-bold">03 • PEDAGOGY & LEADERSHIP</div>
+          <h3 class="text-lg font-bold text-white font-display">วิชาชีพครูและภาวะผู้นำ</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">จิตวิทยาการเรียนรู้ จรรยาบรรณวิชาชีพครู การวิจัยในชั้นเรียน และการเป็นผู้นำการเปลี่ยนแปลงทางเทคโนโลยี</p>
         </div>
 
       </div>
@@ -957,294 +474,412 @@
     </div>
   </section>
 
-  <!-- ================= SECTION 3: CAREER PATHS (EDITORIAL LIST) ================= -->
-  <section id="careers" class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-12">
-    
-    <div class="space-y-2 max-w-2xl">
-      <span class="text-xs font-mono font-medium text-[#9E4A32] uppercase">03 • เส้นทางอาชีพ</span>
-      <h2 class="text-2xl sm:text-4xl font-normal font-serif text-slate-900 tracking-tight">
-        โอกาสทางอาชีพในอนาคต
-      </h2>
-      <p class="text-xs sm:text-sm text-slate-600 font-light">
-        บัณฑิตคอมพิวเตอร์ศึกษาตอบโจทย์ทั้งสายวิชาชีพครู และสายงานเทคโนโลยีสารสนเทศระดับสากล
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-2.5">
-        <span class="text-lg">👨‍🏫</span>
-        <h4 class="text-sm font-semibold text-slate-900">ครูวิทยาการคำนวณ / คอมพิวเตอร์</h4>
-        <p class="text-xs text-slate-500 font-light leading-relaxed">ครูผู้สอนในสถานศึกษาขั้นพื้นฐานและอาชีวศึกษา ทั้งภาครัฐและเอกชน</p>
-      </div>
-      <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-2.5">
-        <span class="text-lg">💻</span>
-        <h4 class="text-sm font-semibold text-slate-900">นักพัฒนาเว็บ & ซอฟต์แวร์</h4>
-        <p class="text-xs text-slate-500 font-light leading-relaxed">Frontend, Backend และผู้พัฒนาระบบซอฟต์แวร์การศึกษา</p>
-      </div>
-      <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-2.5">
-        <span class="text-lg">🎨</span>
-        <h4 class="text-sm font-semibold text-slate-900">นักออกแบบสื่อและนวัตกรรม (ID)</h4>
-        <p class="text-xs text-slate-500 font-light leading-relaxed">ผู้ออกแบบหลักสูตรดิจิทัล คอนเทนต์การศึกษา และเทคโนโลยีการเรียนรู้</p>
-      </div>
-      <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-2.5">
-        <span class="text-lg">🛡️</span>
-        <h4 class="text-sm font-semibold text-slate-900">นักวิชาการคอมพิวเตอร์</h4>
-        <p class="text-xs text-slate-500 font-light leading-relaxed">ผู้เชี่ยวชาญด้านระบบสารสนเทศ เครือข่าย และไอทีในองค์กร</p>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- ================= SECTION 4: STUDENT ROSTER (COMED KKU) ================= -->
-  <section id="students" class="py-24 bg-[#FAF8F5] text-[#1E1E1E] border-t border-[#E8DFD8] px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-    
-    <div class="absolute inset-0 bg-mesh-dark opacity-75 pointer-events-none"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-    <div class="relative max-w-7xl mx-auto space-y-10">
+  <!-- ================= SECTION: STUDENTS ROSTER (60 STUDENTS) ================= -->
+  <section id="students" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#070914]">
+    <div class="max-w-7xl mx-auto space-y-8">
       
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-800 pb-6 scroll-reveal">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
         <div>
-          <div class="flex items-center gap-2 flex-wrap mb-2">
-            <span class="px-3.5 py-1 rounded-full text-xs font-black bg-orange-500/20 text-orange-400 uppercase tracking-wider border border-orange-500/30">
-              COMED23 • KKU63
-            </span>
-            <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800/90 text-slate-300 border border-slate-700">
-              60 คนครบทั้งสาขา
-            </span>
-          </div>
-          <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
-            ทำเนียบเพื่อนร่วมรุ่น COMED23 (KKU63)
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-400 mt-1.5">
-            นักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
-          </p>
+          <span class="text-xs font-mono text-[#FF7A29] uppercase tracking-wider">02 // ROSTER</span>
+          <h2 class="text-2xl sm:text-4xl font-display font-bold text-white mt-1">ทำเนียบรุ่น COMED 23 (60 คน)</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">รายชื่อนักศึกษา สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 23 มหาวิทยาลัยขอนแก่น</p>
         </div>
-
-        <!-- Quick Search -->
-        <div class="w-full md:w-80">
-          <div class="relative">
-            <i data-lucide="search" class="w-4 h-4 text-orange-400 absolute left-4 top-3.5"></i>
-            <input type="text" id="rosterSearchInput" oninput="filterRoster()" placeholder="ค้นหาชื่อ, รหัส หรือชื่อเล่น..."
-              class="w-full pl-11 pr-4 py-3 bg-slate-900/90 border border-slate-700/80 rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition shadow-inner">
-          </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="studentSearchInput" placeholder="ค้นหาชื่อหรือรหัสนักศึกษา..." 
+            class="px-4 py-2 rounded-xl bg-[#12162A] border border-[#242A4A] text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E65A19] w-64">
         </div>
       </div>
 
       <!-- Students Grid Container -->
-      <div id="rosterGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[640px] overflow-y-auto pr-2 custom-scrollbar scroll-reveal delay-100">
-        <!-- Rendered via JS -->
-      </div>
-
-      <div class="pt-6 text-center border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-center gap-3 scroll-reveal delay-200">
-        <a href="payment.html" class="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs sm:text-sm shadow-xl shadow-orange-600/25 transition transform active:scale-95 cursor-pointer">
-          <i data-lucide="credit-card" class="w-4 h-4"></i>
-          <span>ไปที่หน้าระบบชำระเงินค่าป้ายเอก ฿190</span>
-        </a>
-        <a href="event.html" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs sm:text-sm border border-slate-800 transition">
-          <i data-lucide="award" class="w-4 h-4 text-orange-400"></i>
-          <span>เลือกลงฝ่ายกิจกรรมห้อง</span>
-        </a>
-        <a href="settings.html" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 font-bold text-xs sm:text-sm border border-sky-500/30 transition">
-          <i data-lucide="user-cog" class="w-4 h-4 text-sky-400"></i>
-          <span>ตกแต่งโปรไฟล์ของฉัน</span>
-        </a>
+      <div id="studentsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <!-- Rendered by students_data.js -->
       </div>
 
     </div>
   </section>
 
-  <!-- ================= STUDENT PROFILE MODAL ================= -->
-  <div id="modalStudentProfile" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300" onclick="closeStudentProfileModal(event)">
-    <div id="studentProfileCard" onclick="event.stopPropagation()" class="relative bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl max-w-sm w-full p-6 sm:p-7 shadow-[0_25px_80px_rgba(0,0,0,0.8)] text-center space-y-5 overflow-hidden">
-      
-      <!-- Top Glow Accent -->
-      <div class="absolute -top-12 -right-12 w-36 h-36 bg-orange-500/15 rounded-full blur-2xl pointer-events-none"></div>
-      <div class="absolute -bottom-12 -left-12 w-36 h-36 bg-sky-500/15 rounded-full blur-2xl pointer-events-none"></div>
-
-      <!-- Close Button -->
-      <button type="button" onclick="closeStudentProfileModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer z-10" title="ปิดหน้าต่าง">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-
-      <!-- Avatar Showcase with Frame & Animation Support -->
-      <div class="py-2 flex flex-col items-center justify-center">
-        <div id="modalStudentAvatarFrame" class="w-28 h-28 rounded-3xl bg-slate-900 p-1 border-2 border-orange-500/40 shadow-2xl overflow-hidden relative">
-          <!-- Skeleton shimmer overlay -->
-          <div id="modalStudentAvatarSkeleton" class="avatar-loading-skeleton"></div>
-          <div id="modalStudentAvatarAnimWrapper" class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center relative">
-            <img id="modalStudentAvatar" src="" alt="Avatar" class="w-full h-full object-cover rounded-2xl transition-transform duration-200 avatar-blur-img" onload="handleAvatarImageLoaded(this)">
-          </div>
-        </div>
-        <div class="mt-3">
-          <span id="modalStudentBadge" class="text-[10px] font-black px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">นักศึกษา COMED23</span>
-        </div>
-      </div>
-
-      <!-- Info Details -->
-      <div class="space-y-1">
-        <h3 id="modalStudentName" class="text-lg font-black text-white">ชื่อ - สกุล</h3>
-        <p id="modalStudentNickname" class="text-xs font-bold text-amber-400 font-mono">น้องชื่อเล่น</p>
-        <p id="modalStudentId" class="text-xs text-slate-400 font-mono flex items-center justify-center gap-1">
-          <i data-lucide="hash" class="w-3.5 h-3.5 text-slate-500"></i>
-          <span>รหัสนักศึกษา</span>
-        </p>
-      </div>
-
-      <!-- Bio Quote Box -->
-      <div id="modalStudentBioWrap" class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 italic text-center">
-        <span id="modalStudentBio">"ยินดีที่ได้รู้จักเพื่อนๆ ทุกคนครับ!"</span>
-      </div>
-
-      <!-- Social Media & Contact Links -->
-      <div id="modalStudentSocialWrap" class="flex items-center justify-center gap-2 flex-wrap pt-1">
-        <a id="modalStudentLineBtn" href="#" target="_blank" class="hidden px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5" title="ติดต่อทาง LINE">
-          <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-          <span id="modalStudentLineText">LINE</span>
-        </a>
-        <a id="modalStudentIgBtn" href="#" target="_blank" class="hidden px-3 py-1.5 rounded-xl bg-pink-500/15 hover:bg-pink-500/25 text-pink-400 border border-pink-500/30 text-xs font-bold transition flex items-center gap-1.5" title="ดู Instagram">
-          <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
-          <span id="modalStudentIgText">Instagram</span>
-        </a>
-        <a id="modalStudentFbBtn" href="#" target="_blank" class="hidden px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 text-xs font-bold transition flex items-center gap-1.5" title="เปิด Facebook Profile">
-          <i data-lucide="facebook" class="w-3.5 h-3.5"></i>
-          <span>Facebook</span>
-        </a>
-        <a id="modalStudentPhoneBtn" href="#" class="hidden px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1.5" title="โทรติดต่อ">
-          <i data-lucide="phone" class="w-3.5 h-3.5"></i>
-          <span id="modalStudentPhoneText">โทร</span>
-        </a>
-      </div>
-
-      <!-- Student Email Contact & Profile Link -->
-      <div class="space-y-2 pt-2 border-t border-slate-800/80">
-        <div class="flex items-center justify-between text-xs px-2 py-1 text-slate-400">
-          <span>อีเมลสถาบัน:</span>
-          <a id="modalStudentEmail" href="#" class="text-sky-400 hover:underline font-mono truncate max-w-[180px]">student@kkumail.com</a>
-        </div>
-        <button type="button" onclick="closeStudentProfileModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition">
-          ปิดหน้าต่าง
-        </button>
-      </div>
-
-    </div>
-  </div>
+  <!-- ================= THUMB-ACCESSIBLE FLOATING BOTTOM NAVIGATION (MOBILE) ================= -->
+  <nav class="lg:hidden fixed bottom-3 left-3 right-3 z-50 bg-[#0C1030]/90 backdrop-blur-2xl border border-[#242A4A] rounded-2xl p-2 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
+    <a href="#hero" class="flex-1 py-1 flex flex-col items-center gap-1 text-[#FF7A29]">
+      <i data-lucide="home" class="w-4 h-4"></i>
+      <span class="text-[10px] font-mono font-bold">Home</span>
+    </a>
+    <a href="#about" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+      <i data-lucide="book-open" class="w-4 h-4"></i>
+      <span class="text-[10px] font-mono">Course</span>
+    </a>
+    <a href="Calendar.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+      <i data-lucide="calendar" class="w-4 h-4"></i>
+      <span class="text-[10px] font-mono">Activity</span>
+    </a>
+    <a href="#payments-list" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white relative">
+      <i data-lucide="bell" class="w-4 h-4"></i>
+      <span class="absolute top-0 right-1/4 w-1.5 h-1.5 rounded-full bg-[#E65A19]"></span>
+      <span class="text-[10px] font-mono">Notif.</span>
+    </a>
+    <a href="settings.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+      <i data-lucide="user" class="w-4 h-4"></i>
+      <span class="text-[10px] font-mono">Profile</span>
+    </a>
+  </nav>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 pt-12 pb-24 xl:pb-12 px-4 sm:px-6 lg:px-8 text-xs">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-      
-      <div class="flex items-center gap-3 text-white">
-        <img src="logo.png" alt="Logo" class="w-8 h-8 object-contain">
-        <div>
-          <span class="font-black text-sm block">สาขาวิชาคอมพิวเตอร์ศึกษา (COMED KKU)</span>
-          <span class="text-slate-400 text-[11px]">คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</span>
-        </div>
+  <footer class="py-12 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#070914] pb-24 lg:pb-12 text-center text-xs font-mono text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        COMED 23 — Khon Kaen University (Faculty of Education)
       </div>
-
-      <div class="flex items-center gap-4 flex-wrap text-[11px]">
-        <a href="index.html" class="text-white hover:text-orange-400 transition font-semibold">หน้าหลัก</a>
-        <span>•</span>
-        <a href="payment.html" class="text-white hover:text-orange-400 transition font-semibold">ระบบชำระเงิน</a>
-        <span>•</span>
-        <a href="admin.html" class="text-amber-400 hover:text-amber-300 transition font-black flex items-center gap-1">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          <span>ศูนย์ควบคุมแอดมิน (Admin Hub)</span>
-        </a>
-        <span>•</span>
-        <a href="https://www.instagram.com/thitiphaua/" target="_blank" class="text-orange-400 hover:underline">IG: Thitipha</a>
+      <div class="flex items-center gap-4 text-slate-400">
+        <a href="Calendar.html" class="hover:text-white transition">Calendar</a>
+        <a href="Plans.html" class="hover:text-white transition">Plans</a>
+        <a href="storage.html" class="hover:text-white transition">Drive</a>
+        <a href="admin.html" class="hover:text-white transition">Admin Portal</a>
       </div>
-
     </div>
   </footer>
 
-  <!-- ================= ULTRA-LUXURY POPUP MODAL: SIGN IN WITH GOOGLE ================= -->
-  <div id="modalGoogleLogin" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
-    
-    <!-- Animated Glow Background Orbs -->
-    <div class="absolute w-96 h-96 bg-orange-500/20 rounded-full blur-3xl pointer-events-none -top-20 -left-20 animate-pulse"></div>
-    <div class="absolute w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -bottom-20 -right-20 animate-pulse" style="animation-delay: 1.5s;"></div>
+  <!-- ================= INTERACTIVE THREE.JS ZERO-GRAVITY SPHERE & GSAP ================= -->
+  <script>
+    // 1. Initialize Lucide Icons
+    if (window.lucide) {
+      lucide.createIcons();
+    }
 
-    <div id="googleLoginCard"
-      class="relative bg-white/95 backdrop-blur-2xl rounded-[2.5rem] max-w-md w-full p-8 sm:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.35)] border-2 border-white/80 space-y-6 text-center overflow-hidden">
-      
-      <!-- Top Decorative Gradient Line -->
-      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 via-amber-400 to-cyan-500"></div>
+    // 2. Initialize Smooth Scroll with Lenis
+    let lenis;
+    try {
+      if (typeof Lenis !== 'undefined') {
+        lenis = new Lenis({
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          direction: 'vertical',
+          gestureDirection: 'vertical',
+          smooth: true,
+          smoothTouch: false,
+          touchMultiplier: 2,
+        });
 
-      <!-- Close Button -->
-      <div class="flex justify-end -mt-2">
-        <button onclick="closeGoogleLoginModal()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-2xl transition transform active:scale-90">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
+        function raf(time) {
+          lenis.raf(time);
+          requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+      }
+    } catch (e) {
+      console.warn('Lenis scroll init bypassed:', e);
+    }
 
-      <!-- Animated Icon & Branding -->
-      <div class="space-y-3 -mt-4">
-        <div class="relative w-20 h-20 mx-auto">
-          <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 blur-xl opacity-60 animate-pulse"></div>
-          <div class="relative w-full h-full rounded-3xl bg-gradient-to-tr from-orange-50 via-white to-amber-50 border-2 border-orange-200 p-2.5 flex items-center justify-center shadow-xl">
-            <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
+    // 3. Kinetic Typography Scroll Distortion with GSAP
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+
+      const kineticTitle = document.getElementById('kineticTitle');
+      if (kineticTitle) {
+        ScrollTrigger.create({
+          trigger: '#hero',
+          start: 'top top',
+          end: 'bottom top',
+          onUpdate: (self) => {
+            const vel = self.getVelocity() / 300;
+            const skew = Math.max(-8, Math.min(8, vel));
+            gsap.to(kineticTitle, {
+              skewX: skew,
+              letterSpacing: `${Math.abs(skew) * 0.5 - 2}px`,
+              duration: 0.2,
+              ease: 'power1.out',
+              overwrite: 'auto'
+            });
+          }
+        });
+      }
+    }
+
+    // 4. Zero-Gravity Interactive WebGL Liquid-Glass & Metallic Red-Chrome Engine
+    (function initZeroGravitySphere() {
+      const container = document.getElementById('webglContainer');
+      if (!container || typeof THREE === 'undefined') return;
+
+      const width = container.clientWidth || 450;
+      const height = container.clientHeight || 450;
+
+      // Scene, Camera, Renderer
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+      camera.position.z = 4.2;
+
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25;
+      container.appendChild(renderer.domElement);
+
+      // Environment Lights
+      const ambientLight = new THREE.AmbientLight(0x0C1030, 2.5);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 2.8);
+      directionalLight.position.set(4, 5, 4);
+      scene.add(directionalLight);
+
+      // Dynamic Brick-Red / Orange Point Lights for reflection
+      const redLight = new THREE.PointLight(0xE65A19, 5, 12);
+      redLight.position.set(-2, 1, 3);
+      scene.add(redLight);
+
+      const deepRedLight = new THREE.PointLight(0xB32B19, 4, 10);
+      deepRedLight.position.set(2, -2, 2);
+      scene.add(deepRedLight);
+
+      // Group for zero-gravity floating
+      const floatGroup = new THREE.Group();
+      scene.add(floatGroup);
+
+      // 1. Inner Metallic Chrome & Red Core
+      const coreGeo = new THREE.SphereGeometry(1.05, 64, 64);
+      const coreMat = new THREE.MeshPhysicalMaterial({
+        color: 0xB32B19,
+        emissive: 0x4a0e05,
+        metalness: 0.95,
+        roughness: 0.12,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1,
+        reflectivity: 1.0
+      });
+      const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+      floatGroup.add(coreMesh);
+
+      // 2. Metallic Mesh Lattice Cage
+      const cageGeo = new THREE.SphereGeometry(1.22, 32, 24);
+      const cageMat = new THREE.MeshStandardMaterial({
+        color: 0xEAEAEA,
+        metalness: 0.9,
+        roughness: 0.25,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.35
+      });
+      const cageMesh = new THREE.Mesh(cageGeo, cageMat);
+      floatGroup.add(cageMesh);
+
+      // 3. Outer Translucent Liquid-Glass Shell
+      const glassGeo = new THREE.SphereGeometry(1.35, 64, 64);
+      const glassMat = new THREE.MeshPhysicalMaterial({
+        color: 0xFFFFFF,
+        transparent: true,
+        opacity: 0.55,
+        roughness: 0.05,
+        metalness: 0.1,
+        transmission: 0.9,
+        ior: 1.5,
+        thickness: 0.8,
+        specularIntensity: 1.0,
+        specularColor: 0xffffff
+      });
+      const glassMesh = new THREE.Mesh(glassGeo, glassMat);
+      floatGroup.add(glassMesh);
+
+      // 4. Dashed Orbit Rings (Orbit Trails)
+      function createOrbitRing(radius, rotX, rotY) {
+        const curve = new THREE.EllipseCurve(0, 0, radius, radius, 0, 2 * Math.PI, false, 0);
+        const points = curve.getPoints(100);
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const material = new THREE.LineDashedMaterial({
+          color: 0x7E859E,
+          dashSize: 0.08,
+          gapSize: 0.05,
+          transparent: true,
+          opacity: 0.6
+        });
+        const line = new THREE.Line(geometry, material);
+        line.computeLineDistances();
+        line.rotation.x = rotX;
+        line.rotation.y = rotY;
+        return line;
+      }
+
+      const ring1 = createOrbitRing(1.85, Math.PI / 3, Math.PI / 6);
+      const ring2 = createOrbitRing(2.1, -Math.PI / 4, Math.PI / 4);
+      floatGroup.add(ring1);
+      floatGroup.add(ring2);
+
+      // 5. Drifting Micro-particles
+      const particleCount = 70;
+      const particleGeo = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 5;
+        positions[i + 1] = (Math.random() - 0.5) * 5;
+        positions[i + 2] = (Math.random() - 0.5) * 5;
+      }
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const particleMat = new THREE.PointsMaterial({
+        color: 0xE65A19,
+        size: 0.035,
+        transparent: true,
+        opacity: 0.75,
+        blending: THREE.AdditiveBlending
+      });
+      const particleSystem = new THREE.Points(particleGeo, particleMat);
+      scene.add(particleSystem);
+
+      // Mouse drag and cursor interaction
+      let mouseX = 0, mouseY = 0;
+      let targetRotX = 0, targetRotY = 0;
+      let isDragging = false;
+      let prevMouseX = 0, prevMouseY = 0;
+
+      container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      });
+
+      window.addEventListener('mouseup', () => { isDragging = false; });
+
+      window.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        mouseX = ((e.clientX - rect.left) / width) * 2 - 1;
+        mouseY = -(((e.clientY - rect.top) / height) * 2 - 1);
+
+        if (isDragging) {
+          const deltaX = e.clientX - prevMouseX;
+          const deltaY = e.clientY - prevMouseY;
+          targetRotY += deltaX * 0.008;
+          targetRotX += deltaY * 0.008;
+          prevMouseX = e.clientX;
+          prevMouseY = e.clientY;
+        }
+      });
+
+      // Viewport Visibility Detection (pause loop when out of viewport for max performance)
+      let isInView = true;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { isInView = entry.isIntersecting; });
+      }, { threshold: 0.1 });
+      observer.observe(container);
+
+      // Animation Loop with zero-gravity bobbing
+      let clock = new THREE.Clock();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        if (!isInView) return;
+
+        const elapsedTime = clock.getElapsedTime();
+
+        // Zero-gravity physics floating bob
+        floatGroup.position.y = Math.sin(elapsedTime * 1.2) * 0.12;
+        floatGroup.position.x = Math.cos(elapsedTime * 0.8) * 0.06;
+
+        // Subtle constant rotation
+        floatGroup.rotation.y += 0.005;
+        cageMesh.rotation.y -= 0.007;
+        cageMesh.rotation.x += 0.003;
+        ring1.rotation.z += 0.003;
+        ring2.rotation.z -= 0.004;
+
+        // Mouse influence
+        floatGroup.rotation.y += (targetRotY + mouseX * 0.3 - floatGroup.rotation.y) * 0.05;
+        floatGroup.rotation.x += (targetRotX - mouseY * 0.3 - floatGroup.rotation.x) * 0.05;
+
+        // Particles gentle float
+        particleSystem.rotation.y = elapsedTime * 0.03;
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      // Window resize handler
+      window.addEventListener('resize', () => {
+        if (!container) return;
+        const newW = container.clientWidth;
+        const newH = container.clientHeight;
+        camera.aspect = newW / newH;
+        camera.updateProjectionMatrix();
+        renderer.setSize(newW, newH);
+      });
+
+      // Interactive Hotspots clicks
+      const h1 = document.getElementById('hotspot1');
+      if (h1) h1.addEventListener('click', () => { window.location.href = 'storage.html'; });
+      const h2 = document.getElementById('hotspot2');
+      if (h2) h2.addEventListener('click', () => { window.location.href = 'Plans.html'; });
+      const h3 = document.getElementById('hotspot3');
+      if (h3) h3.addEventListener('click', () => { window.location.href = 'Calendar.html'; });
+    })();
+
+    // 5. Auth / User Session Display from LocalStorage / Supabase
+    function checkUserSession() {
+      try {
+        const userJson = localStorage.getItem('currentUser') || localStorage.getItem('supabase_user');
+        if (userJson) {
+          const user = JSON.parse(userJson);
+          const nameEl = document.getElementById('navUserName');
+          const avatarEl = document.getElementById('navAvatarImg');
+          if (nameEl && (user.name || user.full_name || user.email)) {
+            nameEl.textContent = (user.name || user.full_name || user.email).split(' ')[0];
+          }
+          if (avatarEl && (user.avatar_url || user.picture)) {
+            avatarEl.src = user.avatar_url || user.picture;
+          }
+        }
+      } catch (e) {
+        console.warn('Session parse error:', e);
+      }
+    }
+    checkUserSession();
+
+    function handleAuthAction() {
+      if (confirm('คุณต้องการออกจากระบบหรือไม่? (Logout)')) {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('supabase_user');
+        window.location.reload();
+      }
+    }
+
+    // 6. Render Student Roster from students_data.js
+    function renderStudentRoster() {
+      const container = document.getElementById('studentsGrid');
+      if (!container || !window.COMED_STUDENTS || !Array.isArray(window.COMED_STUDENTS)) return;
+
+      const input = document.getElementById('studentSearchInput');
+      const query = (input ? input.value : '').toLowerCase().trim();
+
+      const filtered = window.COMED_STUDENTS.filter(s => {
+        if (!query) return true;
+        const name = (s.name || '').toLowerCase();
+        const id = (s.student_id || s.id || '').toString();
+        const nick = (s.nickname || '').toLowerCase();
+        return name.includes(query) || id.includes(query) || nick.includes(query);
+      });
+
+      container.innerHTML = filtered.map((s, idx) => `
+        <div class="p-3 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19] transition-all group flex flex-col items-center text-center">
+          <div class="w-14 h-14 rounded-full overflow-hidden bg-[#161B33] border border-white/10 group-hover:border-[#E65A19] transition mb-2">
+            <img src="${s.image || s.avatar || 'logo.png'}" alt="${s.name}" class="w-full h-full object-cover" onerror="this.src='logo.png'">
           </div>
+          <span class="text-[10px] font-mono text-[#FF7A29] font-bold">#${s.no || idx + 1}</span>
+          <h4 class="text-xs font-bold text-white group-hover:text-[#FF7A29] transition line-clamp-1 mt-0.5">${s.nickname ? s.nickname + ' - ' : ''}${s.name}</h4>
+          <span class="text-[10px] font-mono text-slate-500 mt-0.5">${s.student_id || ''}</span>
         </div>
+      `).join('');
+    }
 
-        <div>
-          <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-[11px] font-black tracking-wider uppercase mb-2 shadow-sm">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-orange-500"></i>
-            <span>KKU AUTHENTICATION</span>
-          </div>
-          <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">เข้าสู่ระบบนักศึกษา</h3>
-          <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto leading-relaxed">
-            สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มข.
-          </p>
-        </div>
-      </div>
+    if (window.COMED_STUDENTS) {
+      renderStudentRoster();
+      const sInput = document.getElementById('studentSearchInput');
+      if (sInput) sInput.addEventListener('input', renderStudentRoster);
+    } else {
+      window.addEventListener('DOMContentLoaded', () => {
+        if (window.COMED_STUDENTS) renderStudentRoster();
+      });
+    }
+  </script>
 
-      <!-- Permission Guarantee Box -->
-      <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50/60 border border-amber-200/80 text-left text-xs space-y-1.5 shadow-sm">
-        <div class="font-black text-amber-900 flex items-center gap-1.5">
-          <i data-lucide="lock" class="w-4 h-4 text-orange-600 flex-shrink-0"></i>
-          <span>ระบบรักษาความปลอดภัย:</span>
-        </div>
-        <p class="text-[11px] text-amber-800 leading-relaxed">
-          อนุญาตเฉพาะบัญชีอีเมล <strong class="text-orange-700 font-bold">@kkumail.com</strong> เท่านั้น บัญชีบุคคลภายนอกจะไม่สามารถเข้าถึงข้อมูลได้
-        </p>
-      </div>
-
-      <!-- Official Google Sign-in Interactive Button Container -->
-      <div class="pt-2 pb-1 space-y-3">
-        <div id="googleButtonWrapper" class="flex justify-center min-h-[50px] items-center scale-105 hover:scale-110 transition-transform"></div>
-        <p class="text-[10px] text-slate-400 flex items-center justify-center gap-1">
-          <i data-lucide="info" class="w-3 h-3 text-slate-400"></i>
-          <span>คลิกปุ่มด้านบนเพื่อเลือกบัญชี Google ของมหาวิทยาลัย</span>
-        </p>
-      </div>
-
-      <!-- Error Box -->
-      <div id="googleAuthError" class="hidden p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold flex items-center gap-2 text-left">
-        <i data-lucide="x-circle" class="w-5 h-5 flex-shrink-0 text-rose-500"></i>
-        <span id="googleAuthErrorText">อีเมลนี้ไม่ใช่ @kkumail.com จึงไม่สามารถเข้าสู่ระบบได้</span>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Include Students Database Script -->
-  <script src="students_data.js"></script>
-  <!-- MultiCloud Uploader & Quota Sync -->
-  <script src="assets/js/background_uploader.js"></script>
-  <script src="assets/js/multi_uploader.js"></script>
-  <!-- QR Code Generator & Universal QR Suite -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="assets/js/qr_suite.js"></script>
-  <!-- Plans Supabase Repository for Index Calendar Widget -->
-  <script src="assets/js/plans_repo.js"></script>
-  <!-- Real-Time Push Notification Engine -->
+  <!-- PWA & Update Services Integration -->
+  <script src="assets/js/pwa-installer.js"></script>
   <script src="assets/js/notifications.js"></script>
-  <!-- In-App Direct APK & PWA Auto Updater -->
-  <script src="assets/js/app-updater.js"></script>
-  <!-- Platform Runtime & Version Badge (V_W, V_A, V_I) -->
-  <script src="assets/js/version-badge.js"></script>
-  <!-- Main Index Page Logic -->
-  <script src="assets/js/index.js"></script>
 </body>
 </html>
