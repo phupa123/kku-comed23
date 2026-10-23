@@ -3,25 +3,8 @@
  * Inspired by Google Antigravity & High-End Sci-Fi Production
  * Built with Three.js WebGL, GSAP, Custom Shaders & Interactive Cursor Target
  */
-(function initZeroGravityIntroScreen() {
-  // Only execute on index.html (or root)
-  const pathname = window.location.pathname.toLowerCase();
-  const isIndex = pathname.endsWith('index.html') || pathname.endsWith('/') || pathname === '';
-  if (!isIndex) return;
-
-  // Check if skipped in this session (unless forced via URL ?intro=1)
-  const urlParams = new URLSearchParams(window.location.search);
-  const forceIntro = urlParams.get('intro') === '1';
-  // Check if page was reloaded (F5) or first opened
-  const navEntries = performance.getEntriesByType('navigation');
-  const isReload = navEntries.length > 0 && navEntries[0].type === 'reload' ||
-                   (window.performance && window.performance.navigation && window.performance.navigation.type === 1);
-  const hasSeen = sessionStorage.getItem('kku_comed23_intro_seen');
-  
-  // Allow intro on reload or first visit in this session
-  if (!isReload && hasSeen && !forceIntro) {
-    return;
-  }
+function runZeroGravityIntro() {
+  if (document.getElementById('zeroGravityIntroOverlay')) return;
 
   // Inject Styles
   const styleEl = document.createElement('style');
@@ -600,5 +583,11 @@
       pulsingAnchor.classList.add('text-[#FF7A29]');
     }
   }
+}
 
-})();
+// Ensure execution as soon as document body is accessible
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', runZeroGravityIntro);
+} else {
+  runZeroGravityIntro();
+}
