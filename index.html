@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap"
     rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
@@ -34,21 +34,24 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'Prompt', 'sans-serif'], serif: ['Newsreader', 'Georgia', 'serif'],
             mono: ['Plus Jakarta Sans', 'monospace']
           },
           colors: {
             brand: {
-              50: '#fff7ed',
-              100: '#ffedd5',
-              200: '#fed7aa',
-              300: '#fdba74',
-              400: '#fb923c',
-              500: '#f97316',
-              600: '#ea580c',
-              700: '#c2410c',
-              800: '#9a3412',
-              900: '#7c2d12',
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#E8DFD8',
+              300: '#D8C8BC',
+              400: '#C2A792',
+              500: '#CC785C',
+              600: '#B85E42',
+              700: '#9E4A32',
+              800: '#7E3824',
+              900: '#5F2718',
+              claude: '#D97757',
+              sand: '#FAF8F5',
+              charcoal: '#1E1E1E',
               kku: '#A73B24'
             }
           },
@@ -308,7 +311,7 @@
   </div>
 
   <!-- ================= MODERN STICKY NAVIGATION BAR ================= -->
-  <header id="mainNavbar" class="sticky top-0 z-50 transparent-top backdrop-blur-xl border-b border-transparent transition-all duration-300">
+  <header id="mainNavbar" class="sticky top-0 z-50 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#E8DFD8] transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-3">
       
       <!-- 1. Logo on the Left -->
@@ -602,214 +605,132 @@
     </button>
   </div>
 
-  <!-- ================= HERO SECTION (CLOUD ECOSYSTEM) ================= -->
-  <section class="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-sky-950 text-white pt-12 sm:pt-20 pb-20 sm:pb-28 px-4 sm:px-6 lg:px-8 border-b border-sky-900/40">
+  <!-- ================= HERO SECTION (CLAUDE MINIMALIST EDITORIAL) ================= -->
+  <section class="relative overflow-hidden bg-[#FAF8F5] text-slate-900 pt-16 sm:pt-24 pb-20 sm:pb-28 px-4 sm:px-6 lg:px-8 border-b border-[#E8DFD8]">
     
-    <!-- Dynamic Glowing Cloud Mesh Background & Soft Sky Orbs -->
-    <div class="absolute inset-0 bg-mesh-dark opacity-90 pointer-events-none"></div>
-    <div class="absolute inset-0 grid-pattern opacity-30 pointer-events-none"></div>
+    <!-- Subtle Editorial Grid & Accent Lines -->
+    <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#1E1E1E 1px, transparent 1px); background-size: 24px 24px;"></div>
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-[#CC785C]/5 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Floating Cloud Orbs & Glow -->
-    <div class="absolute -top-16 left-1/4 w-[500px] h-[350px] bg-sky-500/20 rounded-full blur-[100px] pointer-events-none cloud-pulse"></div>
-    <div class="absolute top-1/3 -left-20 w-96 h-96 bg-orange-500/15 rounded-full blur-3xl pointer-events-none cloud-drift-1"></div>
-    <div class="absolute bottom-5 right-0 w-[550px] h-[350px] bg-cyan-400/15 rounded-full blur-[100px] pointer-events-none cloud-drift-2"></div>
-
-    <!-- Floating SVG Cloud Layer -->
-    <div class="absolute top-12 left-10 opacity-15 pointer-events-none cloud-drift-1 hidden lg:block">
-      <svg width="220" height="90" viewBox="0 0 24 24" fill="currentColor" class="text-sky-300">
-        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
-      </svg>
-    </div>
-    <div class="absolute bottom-16 right-16 opacity-10 pointer-events-none cloud-drift-2 hidden lg:block">
-      <svg width="280" height="120" viewBox="0 0 24 24" fill="currentColor" class="text-cyan-200">
-        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
-      </svg>
-    </div>
-
-    <div class="relative max-w-7xl mx-auto space-y-12 z-10">
+    <div class="relative max-w-6xl mx-auto space-y-12 z-10">
       
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-        <!-- Left Hero Content -->
-        <div class="lg:col-span-7 space-y-6 text-center lg:text-left scroll-reveal reveal-left">
-          
-          <!-- Cloud Ecosystem Badge -->
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 border border-sky-400/40 text-sky-200 text-xs font-bold shadow-xl shadow-sky-500/10 backdrop-blur-2xl">
-            <span class="flex h-2 w-2 relative">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
-            </span>
-            <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-400"></i>
-            <span>COMED Cloud Ecosystem • คณะศึกษาศาสตร์ มข. (COMED23 • KKU63)</span>
-          </div>
+      <!-- Top Meta Eyebrow -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E8DFD8] pb-4 text-xs">
+        <div class="flex items-center gap-2.5">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#F4EFEA] border border-[#E8DFD8] text-[#9E4A32] font-mono text-[11px] font-semibold tracking-wide">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#CC785C]"></span>
+            <span>COMED23 • KKU63</span>
+          </span>
+          <span class="text-slate-500 font-mono text-[11px]">STUDENT PORTAL & DIGITAL SUITE</span>
+        </div>
+        <div class="flex items-center gap-3 text-slate-500 font-mono text-[11px]">
+          <span>ขอนแก่น, ประเทศไทย</span>
+          <span class="text-slate-300">•</span>
+          <span class="text-emerald-700 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live System</span>
+        </div>
+      </div>
 
-          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.14]">
-            เชื่อมต่อ <span class="gradient-text-cyan">Cloud ยุคใหม่</span><br>
-            สร้างครูคอมพิวเตอร์ <span class="gradient-text-orange">สู่อนาคต EdTech</span>
+      <!-- Main Headline in Editorial Serif Typography -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
+        <div class="lg:col-span-8 space-y-5">
+          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-normal tracking-tight font-serif text-slate-900 leading-[1.12]">
+            ศูนย์กลางการเรียนรู้ & <br>
+            <span class="italic text-[#B85E42] font-serif">กำหนดการกิจกรรม</span> สาขาคอมพิวเตอร์ศึกษา
           </h1>
-
-          <p class="text-xs sm:text-base text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto lg:mx-0">
-            ระบบคลาวด์ศูนย์กลางข้อมูล กิจกรรมนักศึกษา และระบบรับชำระเงินดิจิทัล สาขาวิชาคอมพิวเตอร์ศึกษา รุ่น COMED23 (KKU63) เชื่อมต่อคลังไฟล์ Cloud Drive 5GB พร้อมติดตามสถานะ 24 ชั่วโมง
+          <p class="text-sm sm:text-base text-slate-600 font-light leading-relaxed max-w-2xl font-sans">
+            ระบบพื้นที่ทำงานร่วมกันสำหรับนักศึกษาและคณาจารย์ รวบรวมปฏิทินงานกิจกรรม คลาวด์เก็บแฟ้มรายวิชา 5GB และระบบติดตามภาระงานดิจิทัลตลอด 24 ชั่วโมง
           </p>
-
-          <!-- Hero CTA Buttons with Cloud Glass Accents -->
-          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-1">
-            <a href="payment.html?auto=pay" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2 transition transform active:scale-95 cursor-pointer card-shine">
-              <i data-lucide="credit-card" class="w-4 h-4"></i>
-              <span>เข้าสู่ระบบชำระเงินออนไลน์</span>
-            </a>
-            <a href="storage.html" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 font-black text-xs sm:text-sm border border-sky-400/40 flex items-center justify-center gap-2 transition backdrop-blur-xl shadow-lg shadow-sky-500/10">
-              <i data-lucide="cloud-lightning" class="w-4 h-4 text-sky-400"></i>
-              <span>เข้าสู่ Cloud Drive 5GB</span>
-            </a>
-            <a href="eventclass.html" class="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 font-black text-xs sm:text-sm border border-purple-500/40 flex items-center justify-center gap-2 transition backdrop-blur-xl">
-              <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
-              <span>ซุ้มบัณฑิต & วันเด็ก</span>
-            </a>
-          </div>
-
-          <!-- Stats Quick Pill with Cloud Theme -->
-          <div class="grid grid-cols-3 gap-3 pt-2 max-w-md mx-auto lg:mx-0">
-            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-sky-900/60 text-center backdrop-blur-xl">
-              <div class="text-xl sm:text-2xl font-black text-sky-400 font-mono flex items-center justify-center gap-1">
-                <i data-lucide="cloud" class="w-4 h-4 text-sky-400 opacity-80"></i>
-                <span id="heroQuotaBadge">5 GB</span>
-              </div>
-              <div class="text-[10px] sm:text-[11px] text-slate-400 font-bold" id="heroQuotaLabel">Cloud Quota /คน</div>
-            </div>
-            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-orange-950/60 text-center backdrop-blur-xl">
-              <div class="text-xl sm:text-2xl font-black text-orange-400 font-mono">60</div>
-              <div class="text-[10px] sm:text-[11px] text-slate-400 font-bold">บัญชีนักศึกษาปี 1</div>
-            </div>
-            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-emerald-950/60 text-center backdrop-blur-xl">
-              <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono">24/7</div>
-              <div class="text-[10px] sm:text-[11px] text-slate-400 font-bold">Cloud Sync ออนไลน์</div>
-            </div>
-          </div>
-
         </div>
 
-        <!-- Right Hero Interactive Bento Card / Cloud Services Hub -->
-        <div id="quick-services" class="lg:col-span-5 space-y-4 scroll-reveal reveal-right delay-200">
-          
-          <div class="cloud-dark-card rounded-3xl p-5 sm:p-6 border border-sky-500/20 space-y-4 shadow-2xl relative overflow-hidden backdrop-blur-2xl">
-            <!-- Subtle Cloud Top Glow -->
-            <div class="absolute -top-12 -right-12 w-40 h-40 bg-sky-500/20 rounded-full blur-2xl pointer-events-none"></div>
-
-            <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
-              <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500/30 to-blue-500/20 text-sky-300 flex items-center justify-center font-bold border border-sky-400/30 shadow-md">
-                  <i data-lucide="cloud-sun" class="w-5 h-5 text-sky-300"></i>
-                </div>
-                <div>
-                  <h3 class="text-sm font-black text-white flex items-center gap-1.5">
-                    <span>ศูนย์รวมบริการ Cloud & Web</span>
-                    <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
-                  </h3>
-                  <span class="text-[10px] text-sky-300/80 font-mono">Cloud Native • COMED KKU Portal</span>
-                </div>
-              </div>
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span>CLOUD LIVE</span>
-              </span>
+        <!-- Quick Entry Actions in Claude Style -->
+        <div class="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-2.5">
+          <a href="Calendar.html" class="px-5 py-3.5 rounded-2xl bg-[#CC785C] hover:bg-[#B85E42] text-white font-medium text-xs sm:text-sm flex items-center justify-between shadow-sm transition group">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="calendar" class="w-4 h-4 text-white"></i>
+              <span>เปิดดูปฏิทิน & กิจกรรม</span>
             </div>
-
-            <!-- 4 Service Cloud Bento Cards -->
-            <div class="space-y-2.5 text-xs">
-              
-              <!-- Calendar & Schedule Service Card -->
-              <a href="Calendar.html" class="p-3 rounded-2xl bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/30 hover:border-amber-400 transition flex items-center justify-between group">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold group-hover:scale-110 transition border border-amber-500/30">
-                    <i data-lucide="calendar" class="w-4 h-4"></i>
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-1.5">
-                      <h4 class="font-bold text-amber-200 group-hover:text-white transition">ปฏิทินกิจกรรม & ตารางงาน</h4>
-                      <span class="px-1.5 py-0.2 rounded-md text-[9px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Live Sync</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400">บันทึกนัดหมาย ซิงค์เข้า Apple / Google Calendar</p>
-                  </div>
-                </div>
-                <i data-lucide="arrow-up-right" class="w-4 h-4 text-amber-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
-              </a>
-
-              <!-- Cloud Drive Direct Service -->
-              <a href="storage.html" class="p-3 rounded-2xl bg-gradient-to-r from-sky-950/60 to-slate-900 border border-sky-500/30 hover:border-sky-400 transition flex items-center justify-between group">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center font-bold group-hover:scale-110 transition border border-sky-500/30">
-                    <i data-lucide="folder-git-2" class="w-4 h-4"></i>
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-1.5">
-                      <h4 class="font-bold text-sky-200 group-hover:text-white transition">COMED Cloud Drive & โฟลเดอร์</h4>
-                      <span class="px-1.5 py-0.2 rounded-md text-[9px] font-black bg-sky-500/30 text-sky-200">5GB ฟรี</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400">จัดเก็บไฟล์งาน โฟลเดอร์รายวิชา แชร์ลิงก์สะดวก</p>
-                  </div>
-                </div>
-                <i data-lucide="arrow-up-right" class="w-4 h-4 text-sky-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
-              </a>
-
-              <!-- Service 1: จ่ายเงิน -->
-              <a href="payment.html" class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-orange-500/50 transition flex items-center justify-between group">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold group-hover:scale-110 transition border border-orange-500/20">
-                    <i data-lucide="receipt" class="w-4 h-4"></i>
-                  </div>
-                  <div>
-                    <h4 class="font-bold text-white group-hover:text-orange-300 transition">ระบบชำระเงินค่ากิจกรรม</h4>
-                    <p class="text-[11px] text-slate-400">ตรวจสอบยอดเงิน แนบสลิป และเช็คสถานะ 60 คน</p>
-                  </div>
-                </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-white group-hover:translate-x-0.5 transition"></i>
-              </a>
-
-              <!-- Service 2: ซุ้มบัณฑิต & วันเด็ก (2 งานใหม่) -->
-              <a href="eventclass.html" class="p-3 rounded-2xl bg-slate-900/90 border border-purple-500/30 hover:border-purple-400 transition flex items-center justify-between group">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold group-hover:scale-110 transition border border-purple-500/20">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i>
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-1.5">
-                      <h4 class="font-bold text-purple-200 group-hover:text-white transition">ซุ้มบัณฑิต & วันเด็ก</h4>
-                      <span class="px-1.5 py-0.2 rounded-md text-[9px] font-black bg-purple-500/30 text-purple-300">2 งานใหญ่</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400">เลือกฝ่ายกิจกรรม โควตารายชื่อ 30+ คน</p>
-                  </div>
-                </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-purple-400 group-hover:text-white group-hover:translate-x-0.5 transition"></i>
-              </a>
-
-              <!-- Service 3: ฝากไฟล์ขนาดใหญ่ & ย่อลิงก์ -->
-              <div class="grid grid-cols-2 gap-2 pt-1">
-                <a href="upload.html" target="_blank" class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-sky-400/50 transition flex items-center gap-2 text-slate-300 hover:text-white">
-                  <i data-lucide="cloud-upload" class="w-4 h-4 text-sky-400 flex-shrink-0"></i>
-                  <span class="text-[11px] font-bold truncate" id="heroUploadPillText">ฝากไฟล์ด่วน (Cloud)</span>
-                </a>
-                <a href="shortlink.html" class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-amber-400/50 transition flex items-center gap-2 text-slate-300 hover:text-white">
-                  <i data-lucide="link-2" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
-                  <span class="text-[11px] font-bold truncate">ระบบย่อลิงก์</span>
-                </a>
-              </div>
-
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
+          </a>
+          <a href="payment.html?auto=pay" class="px-5 py-3.5 rounded-2xl bg-white hover:bg-[#F4EFEA] border border-[#E8DFD8] text-slate-800 font-medium text-xs sm:text-sm flex items-center justify-between transition group">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="credit-card" class="w-4 h-4 text-[#CC785C]"></i>
+              <span>ระบบชำระเงินค่ากิจกรรม</span>
             </div>
-
-            <!-- Cloud Health Footer Indicator -->
-            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
-              <span class="text-slate-400 flex items-center gap-1.5">
-                <i data-lucide="hard-drive-download" class="w-3.5 h-3.5 text-sky-400"></i>
-                <span>Cloud Storage Status:</span>
-              </span>
-              <span class="text-emerald-400 font-mono font-bold flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Active & Healthy</span>
-              </span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition"></i>
+          </a>
+          <a href="storage.html" class="px-5 py-3 rounded-2xl bg-[#F4EFEA] hover:bg-[#E8DFD8] border border-[#E8DFD8] text-slate-700 font-medium text-xs flex items-center justify-between transition">
+            <div class="flex items-center gap-2">
+              <i data-lucide="cloud" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>คลาวด์ไดรฟ์ส่วนตัว (5GB)</span>
             </div>
-          </div>
-
+            <span class="text-[10px] font-mono text-slate-400">Cloud Drive</span>
+          </a>
         </div>
+      </div>
+
+      <!-- Editorial 4-Card Service Showcase -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-[#E8DFD8]">
+        
+        <!-- Card 1: Calendar & Live Sync -->
+        <a href="Calendar.html" class="p-5 rounded-2xl bg-white border border-[#E8DFD8] hover:border-[#CC785C] hover:shadow-sm transition space-y-3 group flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="w-8 h-8 rounded-xl bg-[#F4EFEA] text-[#CC785C] flex items-center justify-center font-bold">
+              <i data-lucide="calendar-days" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900 group-hover:text-[#CC785C] transition">ปฏิทินงาน & นัดหมาย</h3>
+            <p class="text-xs text-slate-500 font-light leading-relaxed">ซิงค์กิจกรรมเข้า Apple Calendar และ Google Calendar ได้ทันที</p>
+          </div>
+          <span class="text-[11px] font-mono font-medium text-[#CC785C] flex items-center gap-1 pt-1">
+            <span>เข้าสู่ปฏิทิน</span>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+          </span>
+        </a>
+
+        <!-- Card 2: Plans & Projects -->
+        <a href="Plans.html" class="p-5 rounded-2xl bg-white border border-[#E8DFD8] hover:border-[#CC785C] hover:shadow-sm transition space-y-3 group flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="w-8 h-8 rounded-xl bg-[#F4EFEA] text-[#CC785C] flex items-center justify-center font-bold">
+              <i data-lucide="kanban" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900 group-hover:text-[#CC785C] transition">บอร์ดบริหารงาน (Plans)</h3>
+            <p class="text-xs text-slate-500 font-light leading-relaxed">กระดานติดตามงานกลุ่ม วางแผนขั้นตอน และคำนวณ % ความคืบหน้า</p>
+          </div>
+          <span class="text-[11px] font-mono font-medium text-[#CC785C] flex items-center gap-1 pt-1">
+            <span>เปิดบอร์ด Plans</span>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+          </span>
+        </a>
+
+        <!-- Card 3: Cloud Drive -->
+        <a href="storage.html" class="p-5 rounded-2xl bg-white border border-[#E8DFD8] hover:border-[#CC785C] hover:shadow-sm transition space-y-3 group flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="w-8 h-8 rounded-xl bg-[#F4EFEA] text-sky-700 flex items-center justify-center font-bold">
+              <i data-lucide="hard-drive" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900 group-hover:text-sky-700 transition">Cloud Storage (5GB)</h3>
+            <p class="text-xs text-slate-500 font-light leading-relaxed">พื้นที่เก็บแฟ้มงาน โฟลเดอร์การเรียน และแชร์ไฟล์ขนาดใหญ่</p>
+          </div>
+          <span class="text-[11px] font-mono font-medium text-sky-700 flex items-center gap-1 pt-1">
+            <span>ไปยังไดรฟ์</span>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+          </span>
+        </a>
+
+        <!-- Card 4: Event Class (ซุ้มบัณฑิต) -->
+        <a href="eventclass.html" class="p-5 rounded-2xl bg-white border border-[#E8DFD8] hover:border-[#CC785C] hover:shadow-sm transition space-y-3 group flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="w-8 h-8 rounded-xl bg-[#F4EFEA] text-purple-700 flex items-center justify-center font-bold">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900 group-hover:text-purple-700 transition">งานซุ้มบัณฑิต & วันเด็ก</h3>
+            <p class="text-xs text-slate-500 font-light leading-relaxed">ลงชื่อเลือกฝ่ายกิจกรรมประจำปี และจัดการโควตาสมาชิก</p>
+          </div>
+          <span class="text-[11px] font-mono font-medium text-purple-700 flex items-center gap-1 pt-1">
+            <span>เลือกลงฝ่ายงาน</span>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+          </span>
+        </a>
+
       </div>
 
     </div>
@@ -874,41 +795,35 @@
     </div>
   </section>
 
-  <!-- ================= SECTION 0: ACTIVE PAYMENTS (CLOUD SKY THEME) ================= -->
-  <section id="payments-list" class="relative bg-gradient-to-b from-sky-50/60 via-amber-50/30 to-slate-50 pt-10 sm:pt-14 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 border-b border-sky-100 overflow-hidden">
-    <!-- Subtle Ambient Cloud Glows -->
-    <div class="absolute -top-10 right-10 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none cloud-drift-1"></div>
-    <div class="absolute bottom-0 left-10 w-80 h-80 bg-orange-100/50 rounded-full blur-3xl pointer-events-none cloud-drift-2"></div>
-
-    <div class="relative max-w-7xl mx-auto space-y-6 sm:space-y-8 z-10">
+  <!-- ================= SECTION 0: ACTIVE PAYMENTS (MINIMAL EDITORIAL) ================= -->
+  <section id="payments-list" class="relative bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-[#E8DFD8]">
+    <div class="max-w-6xl mx-auto space-y-8">
       
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-orange-200/40 pb-5 scroll-reveal">
-        <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm">
-            <i data-lucide="bell-ring" class="w-3.5 h-3.5 animate-bounce"></i>
-            <span>รายการที่ต้องชำระเงินในขณะนี้ (Active Dues)</span>
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#E8DFD8] pb-5">
+        <div class="space-y-1.5">
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[#F4EFEA] text-[#9E4A32] text-xs font-mono font-medium">
+            <span>● รายการต้องชำระในขณะนี้</span>
           </div>
-          <h2 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2.5">
-            ติดตามและชำระเงินค่ากิจกรรมสาขาวิชา
+          <h2 class="text-2xl sm:text-4xl font-normal font-serif text-slate-900 tracking-tight">
+            ติดตามและชำระเงิน <span class="italic text-[#CC785C]">ค่ากิจกรรมรุ่น</span>
           </h2>
-          <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
-            โปรดตรวจสอบกำหนดการ ยอดชำระ และแนบสลิปผ่านระบบออนไลน์ เพื่อความสะดวกรวดเร็วและตรวจสอบได้ตลอด 24 ชม.
+          <p class="text-xs sm:text-sm text-slate-500 font-light max-w-xl">
+            ตรวจสอบกำหนดการ ยอดชำระ และแนบสลิปผ่านระบบออนไลน์ เพื่อความโปร่งใสและตรวจสอบได้ 24 ชั่วโมง
           </p>
         </div>
 
         <div class="flex items-center gap-2 flex-shrink-0">
-          <a href="payment.html" class="inline-flex items-center gap-2 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 px-4 py-2.5 rounded-xl shadow-md transition transform active:scale-95 cursor-pointer">
-            <i data-lucide="clipboard-list" class="w-4 h-4 text-orange-400"></i>
+          <a href="payment.html" class="inline-flex items-center gap-2 text-xs font-medium text-slate-800 bg-[#FAF8F5] hover:bg-[#F4EFEA] border border-[#E8DFD8] px-4 py-2.5 rounded-xl transition">
+            <i data-lucide="table-2" class="w-4 h-4 text-[#CC785C]"></i>
             <span>ตรวจสอบสถานะ 60 คน</span>
           </a>
         </div>
       </div>
 
       <!-- Dynamic Payment Campaigns Grid -->
-      <div id="indexCampaignsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 scroll-reveal delay-100">
-        <!-- Rendered dynamically by ComedCampaignManager from Supabase / localStorage -->
-        <div class="col-span-full py-12 text-center text-slate-400 text-sm flex items-center justify-center gap-2">
-          <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-500"></i>
+      <div id="indexCampaignsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="col-span-full py-12 text-center text-slate-400 text-xs flex items-center justify-center gap-2">
+          <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-[#CC785C]"></i>
           <span>กำลังโหลดรายการรับชำระเงินล่าสุด...</span>
         </div>
       </div>
@@ -916,61 +831,58 @@
     </div>
   </section>
 
-  <!-- ================= SECTION 1: ABOUT & PHILOSOPHY ================= -->
-  <section id="about" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-16">
+  <!-- ================= SECTION 1: ABOUT & PHILOSOPHY (EDITORIAL STUDIO) ================= -->
+  <section id="about" class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-16">
     
-    <div class="text-center max-w-3xl mx-auto space-y-4 scroll-reveal">
-      <span class="px-4 py-1.5 rounded-full text-xs font-black bg-orange-100/80 text-orange-700 tracking-wider uppercase border border-orange-200 shadow-xs">
-        ABOUT DEPARTMENT
+    <div class="space-y-4 max-w-3xl">
+      <span class="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-[#9E4A32] uppercase tracking-wider">
+        <span>01</span>
+        <span>•</span>
+        <span>ปรัชญาและวิสัยทัศน์</span>
       </span>
-      <h2 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-        มุ่งมั่นผลิตครูมืออาชีพ <span class="gradient-text-orange">พร้อมทักษะเทคโนโลยีระดับสากล</span>
+      <h2 class="text-3xl sm:text-5xl font-normal font-serif text-slate-900 tracking-tight leading-tight">
+        ผลิตครูคอมพิวเตอร์มืออาชีพ <br>
+        <span class="italic text-[#CC785C]">ผสานวิทยาการดิจิทัลกับศาสตร์การสอน</span>
       </h2>
-      <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
-        สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น บ่มเพาะบัณฑิตให้มีความเชี่ยวชาญทั้งด้านวิทยาการคอมพิวเตอร์และเทคนิคการสอนที่ทันสมัย
+      <p class="text-sm sm:text-base text-slate-600 font-light leading-relaxed">
+        สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น บ่มเพาะบัณฑิตครูที่มีความเชี่ยวชาญทั้งการพัฒนาซอฟต์แวร์ ปัญญาประดิษฐ์ และเทคนิคการสอนยุคใหม่เพื่อยกระดับการศึกษาไทย
       </p>
     </div>
 
-    <!-- 3 Core Pillars with Ultra-Modern Hover Effects -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- 3 Core Pillars Minimal Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       
-      <!-- Card 1 -->
-      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-orange-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden scroll-reveal delay-100">
-        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-orange-500/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all"></div>
-        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center shadow-lg shadow-orange-500/25 group-hover:scale-110 transition-transform">
-          <i data-lucide="cpu" class="w-8 h-8"></i>
+      <div class="p-8 rounded-3xl bg-[#FAF8F5] border border-[#E8DFD8] space-y-4 hover:border-[#CC785C] transition">
+        <div class="w-10 h-10 rounded-2xl bg-[#F4EFEA] text-[#CC785C] flex items-center justify-center font-bold">
+          <i data-lucide="binary" class="w-5 h-5"></i>
         </div>
         <div class="space-y-2">
-          <h3 class="text-xl font-black text-slate-900 group-hover:text-orange-600 transition-colors">วิทยาการคอมพิวเตอร์เข้มข้น</h3>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          <h3 class="text-lg font-semibold text-slate-900">วิทยาการคอมพิวเตอร์เข้มข้น</h3>
+          <p class="text-xs text-slate-600 font-light leading-relaxed">
             เรียนรู้การเขียนโปรแกรม (Coding), ซอฟต์แวร์, เว็บแอปพลิเคชัน, ปัญญาประดิษฐ์ (AI), IoT และระบบความปลอดภัยไซเบอร์
           </p>
         </div>
       </div>
 
-      <!-- Card 2 -->
-      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-cyan-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden scroll-reveal delay-200">
-        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-cyan-500/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all"></div>
-        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-cyan-500 to-blue-500 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 group-hover:scale-110 transition-transform">
-          <i data-lucide="sparkles" class="w-8 h-8"></i>
+      <div class="p-8 rounded-3xl bg-[#FAF8F5] border border-[#E8DFD8] space-y-4 hover:border-[#CC785C] transition">
+        <div class="w-10 h-10 rounded-2xl bg-[#F4EFEA] text-sky-700 flex items-center justify-center font-bold">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
         </div>
         <div class="space-y-2">
-          <h3 class="text-xl font-black text-slate-900 group-hover:text-cyan-600 transition-colors">นวัตกรรมสื่อการเรียนรู้</h3>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          <h3 class="text-lg font-semibold text-slate-900">นวัตกรรมสื่อการเรียนรู้</h3>
+          <p class="text-xs text-slate-600 font-light leading-relaxed">
             การออกแบบสื่อดิจิทัลเพื่อการศึกษา, Interactive Media, ระบบการจัดการเรียนรู้ (LMS) และเทคโนโลยีเสมือนจริง (AR/VR)
           </p>
         </div>
       </div>
 
-      <!-- Card 3 -->
-      <div class="bg-white/95 rounded-[2.5rem] p-8 sm:p-9 space-y-5 border-2 border-slate-100 shadow-xl hover:shadow-2xl hover:border-emerald-300 transition-all duration-300 group hover:-translate-y-1.5 relative overflow-hidden scroll-reveal delay-300">
-        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-emerald-500/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all"></div>
-        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:scale-110 transition-transform">
-          <i data-lucide="award" class="w-8 h-8"></i>
+      <div class="p-8 rounded-3xl bg-[#FAF8F5] border border-[#E8DFD8] space-y-4 hover:border-[#CC785C] transition">
+        <div class="w-10 h-10 rounded-2xl bg-[#F4EFEA] text-purple-700 flex items-center justify-center font-bold">
+          <i data-lucide="graduation-cap" class="w-5 h-5"></i>
         </div>
         <div class="space-y-2">
-          <h3 class="text-xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors">ศาสตร์การสอนยุคดิจิทัล</h3>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          <h3 class="text-lg font-semibold text-slate-900">ศาสตร์การสอนยุคดิจิทัล</h3>
+          <p class="text-xs text-slate-600 font-light leading-relaxed">
             จิตวิทยาการศึกษา, การวัดผลประเมินผล, การจัดการเรียนรู้แบบ Active Learning และเทคนิคกระตุ้นความคิดเชิงคำนวณ
           </p>
         </div>
@@ -980,89 +892,63 @@
 
   </section>
 
-  <!-- ================= SECTION 2: CURRICULUM ================= -->
-  <section id="curriculum" class="py-20 bg-slate-100/80 border-y border-slate-200 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto space-y-12">
+  <!-- ================= SECTION 2: CURRICULUM (CLEAN 4-YEAR PROGRESSION) ================= -->
+  <section id="curriculum" class="py-20 sm:py-24 bg-[#F4EFEA] border-y border-[#E8DFD8] px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto space-y-12">
       
-      <div class="text-center max-w-3xl mx-auto space-y-4 scroll-reveal">
-        <span class="px-3.5 py-1 rounded-full text-xs font-black bg-slate-900 text-white tracking-wider uppercase">
-          CURRICULUM STRUCTURE
-        </span>
-        <h2 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+      <div class="space-y-2 max-w-2xl">
+        <span class="text-xs font-mono font-medium text-[#9E4A32] uppercase">02 • แผนการศึกษา</span>
+        <h2 class="text-2xl sm:text-4xl font-normal font-serif text-slate-900 tracking-tight">
           โครงสร้างหลักสูตร 4 ชั้นปี
         </h2>
-        <p class="text-xs sm:text-sm text-slate-600">
+        <p class="text-xs sm:text-sm text-slate-600 font-light">
           ออกแบบการเรียนรู้แบบ Step-by-Step ตั้งแต่พื้นฐานวิทยาการคอมพิวเตอร์ สู่นวัตกรรมและประสบการณ์วิชาชีพครูจริง
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         
-        <!-- Year 1 -->
-        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-orange-100 hover:border-orange-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 scroll-reveal delay-100">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-orange-500/30">
-            01
-          </div>
-          <div>
-            <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 1: ปูพื้นฐาน</h3>
-            <p class="text-[11px] text-orange-600 font-extrabold uppercase tracking-wider">Foundation & Principles</p>
-          </div>
-          <ul class="space-y-2.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> พื้นฐานวิทยาการคอมพิวเตอร์</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การเขียนโปรแกรมเชิงโครงสร้าง</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> คณิตศาสตร์สำหรับวิทยาการคอมฯ</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> ความเป็นครูและจิตวิทยาการศึกษา</li>
+        <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-3">
+          <span class="text-xs font-mono font-bold text-[#CC785C]">ปีที่ 1 • Foundation</span>
+          <h4 class="text-base font-semibold text-slate-900">ปูพื้นฐานคอมพิวเตอร์</h4>
+          <ul class="space-y-2 text-xs text-slate-600 font-light pt-2 border-t border-[#F4EFEA]">
+            <li>• วิทยาการคอมพิวเตอร์เบื้องต้น</li>
+            <li>• การเขียนโปรแกรมเชิงโครงสร้าง</li>
+            <li>• คณิตศาสตร์คอมพิวเตอร์</li>
+            <li>• จิตวิทยาสำหรับครู</li>
           </ul>
         </div>
 
-        <!-- Year 2 -->
-        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-cyan-100 hover:border-cyan-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 scroll-reveal delay-200">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-cyan-500/30">
-            02
-          </div>
-          <div>
-            <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 2: พัฒนาระบบ</h3>
-            <p class="text-[11px] text-cyan-600 font-extrabold uppercase tracking-wider">Software & Web Tech</p>
-          </div>
-          <ul class="space-y-2.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การเขียนโปรแกรมเชิงวัตถุ (OOP)</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> ระบบฐานข้อมูลและเว็บเทคโนโลยี</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> โครงสร้างข้อมูลและอัลกอริทึม</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การออกแบบสื่อนวัตกรรมการศึกษา</li>
+        <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-3">
+          <span class="text-xs font-mono font-bold text-sky-700">ปีที่ 2 • Software & Web</span>
+          <h4 class="text-base font-semibold text-slate-900">พัฒนาระบบซอฟต์แวร์</h4>
+          <ul class="space-y-2 text-xs text-slate-600 font-light pt-2 border-t border-[#F4EFEA]">
+            <li>• การโปรแกรมเชิงวัตถุ (OOP)</li>
+            <li>• โครงสร้างข้อมูลและอัลกอริทึม</li>
+            <li>• ระบบฐานข้อมูลและเว็บแอพ</li>
+            <li>• สื่อนวัตกรรมการศึกษา</li>
           </ul>
         </div>
 
-        <!-- Year 3 -->
-        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-purple-100 hover:border-purple-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 scroll-reveal delay-300">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-purple-500/30">
-            03
-          </div>
-          <div>
-            <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 3: นวัตกรรม & AI</h3>
-            <p class="text-[11px] text-purple-600 font-extrabold uppercase tracking-wider">Innovation & Pedagogy</p>
-          </div>
-          <ul class="space-y-2.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> ปัญญาประดิษฐ์ (AI) & Data Science</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> เครือข่ายคอมฯ & Cyber Security</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> วิธีวิทยาการจัดการเรียนรู้คอมฯ</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> โครงงานนวัตกรรมการศึกษา</li>
+        <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-3">
+          <span class="text-xs font-mono font-bold text-purple-700">ปีที่ 3 • Innovation & AI</span>
+          <h4 class="text-base font-semibold text-slate-900">ปัญญาประดิษฐ์และการสอน</h4>
+          <ul class="space-y-2 text-xs text-slate-600 font-light pt-2 border-t border-[#F4EFEA]">
+            <li>• ปัญญาประดิษฐ์และการเรียนรู้ของเครื่อง</li>
+            <li>• ความมั่นคงปลอดภัยไซเบอร์</li>
+            <li>• วิธีการสอนวิทยาการคำนวณ</li>
+            <li>• โครงงานนวัตกรรม EdTech</li>
           </ul>
         </div>
 
-        <!-- Year 4 -->
-        <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-emerald-100 hover:border-emerald-400 shadow-lg hover:shadow-xl space-y-4 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 scroll-reveal delay-400">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-emerald-500/30">
-            04
-          </div>
-          <div>
-            <h3 class="text-lg font-black text-slate-900">ชั้นปีที่ 4: ประสบการณ์จริง</h3>
-            <p class="text-[11px] text-emerald-600 font-extrabold uppercase tracking-wider">Teaching Internship</p>
-          </div>
-          <ul class="space-y-2.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การปฏิบัติการสอนในสถานศึกษา 1 ปี</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> การวิจัยปฏิบัติการในชั้นเรียน (CAR)</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> สัมมนาวิชาชีพครูคอมพิวเตอร์</li>
-            <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i> พร้อมก้าวสู่การเป็นครูมืออาชีพ</li>
+        <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-3">
+          <span class="text-xs font-mono font-bold text-emerald-700">ปีที่ 4 • Internship</span>
+          <h4 class="text-base font-semibold text-slate-900">ฝึกประสบการณ์วิชาชีพ</h4>
+          <ul class="space-y-2 text-xs text-slate-600 font-light pt-2 border-t border-[#F4EFEA]">
+            <li>• ปฏิบัติการสอนในสถานศึกษา 1 ปี</li>
+            <li>• การวิจัยปฏิบัติการในชั้นเรียน</li>
+            <li>• สัมมนาวิชาชีพครูคอมพิวเตอร์</li>
+            <li>• เตรียมพร้อมก้าวสู่ครูมืออาชีพ</li>
           </ul>
         </div>
 
@@ -1071,77 +957,46 @@
     </div>
   </section>
 
-  <!-- ================= SECTION 3: CAREER PATHS ================= -->
-  <section id="careers" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-16">
+  <!-- ================= SECTION 3: CAREER PATHS (EDITORIAL LIST) ================= -->
+  <section id="careers" class="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-12">
     
-    <div class="text-center max-w-3xl mx-auto space-y-4 scroll-reveal">
-      <span class="px-4 py-1.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 tracking-wider uppercase border border-amber-200 shadow-xs">
-        FUTURE CAREERS
-      </span>
-      <h2 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-        จบไปทำอาชีพอะไรได้บ้าง?
+    <div class="space-y-2 max-w-2xl">
+      <span class="text-xs font-mono font-medium text-[#9E4A32] uppercase">03 • เส้นทางอาชีพ</span>
+      <h2 class="text-2xl sm:text-4xl font-normal font-serif text-slate-900 tracking-tight">
+        โอกาสทางอาชีพในอนาคต
       </h2>
-      <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
-        เส้นทางสายอาชีพเปิดกว้าง ทั้งในสายวิชาชีพครู สายเทคโนโลยี และอุตสาหกรรมดิจิทัลระดับสากล
+      <p class="text-xs sm:text-sm text-slate-600 font-light">
+        บัณฑิตคอมพิวเตอร์ศึกษาตอบโจทย์ทั้งสายวิชาชีพครู และสายงานเทคโนโลยีสารสนเทศระดับสากล
       </p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      
-      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-orange-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden scroll-reveal delay-100">
-        <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors shadow-md shadow-orange-500/10">
-          <i data-lucide="school" class="w-7 h-7"></i>
-        </div>
-        <div>
-          <h4 class="text-base font-black text-slate-900 group-hover:text-orange-600 transition-colors">ครูคอมพิวเตอร์ / วิทยาการคำนวณ</h4>
-          <p class="text-xs text-slate-500 leading-relaxed mt-2">
-            ครูผู้สอนระดับประถมฯ มัธยมฯ และอาชีวศึกษา ทั้งในโรงเรียนรัฐบาลและเอกชน
-          </p>
-        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-2.5">
+        <span class="text-lg">👨‍🏫</span>
+        <h4 class="text-sm font-semibold text-slate-900">ครูวิทยาการคำนวณ / คอมพิวเตอร์</h4>
+        <p class="text-xs text-slate-500 font-light leading-relaxed">ครูผู้สอนในสถานศึกษาขั้นพื้นฐานและอาชีวศึกษา ทั้งภาครัฐและเอกชน</p>
       </div>
-
-      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-cyan-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden scroll-reveal delay-200">
-        <div class="w-14 h-14 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:bg-cyan-600 group-hover:text-white transition-colors shadow-md shadow-cyan-500/10">
-          <i data-lucide="code" class="w-7 h-7"></i>
-        </div>
-        <div>
-          <h4 class="text-base font-black text-slate-900 group-hover:text-cyan-600 transition-colors">นักพัฒนาซอฟต์แวร์ & เว็บแอป</h4>
-          <p class="text-xs text-slate-500 leading-relaxed mt-2">
-            Frontend, Backend, Fullstack Developer และผู้พัฒนาระบบการเรียนรู้ออนไลน์ (LMS)
-          </p>
-        </div>
+      <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-2.5">
+        <span class="text-lg">💻</span>
+        <h4 class="text-sm font-semibold text-slate-900">นักพัฒนาเว็บ & ซอฟต์แวร์</h4>
+        <p class="text-xs text-slate-500 font-light leading-relaxed">Frontend, Backend และผู้พัฒนาระบบซอฟต์แวร์การศึกษา</p>
       </div>
-
-      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-purple-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden scroll-reveal delay-300">
-        <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors shadow-md shadow-purple-500/10">
-          <i data-lucide="palette" class="w-7 h-7"></i>
-        </div>
-        <div>
-          <h4 class="text-base font-black text-slate-900 group-hover:text-purple-600 transition-colors">นักออกแบบสื่อนวัตกรรม (ID)</h4>
-          <p class="text-xs text-slate-500 leading-relaxed mt-2">
-            ผู้ออกแบบหลักสูตรดิจิทัล นวัตกรรมการเรียนรู้ Interactive Media และคอนเทนต์ครีเอเตอร์
-          </p>
-        </div>
+      <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-2.5">
+        <span class="text-lg">🎨</span>
+        <h4 class="text-sm font-semibold text-slate-900">นักออกแบบสื่อและนวัตกรรม (ID)</h4>
+        <p class="text-xs text-slate-500 font-light leading-relaxed">ผู้ออกแบบหลักสูตรดิจิทัล คอนเทนต์การศึกษา และเทคโนโลยีการเรียนรู้</p>
       </div>
-
-      <div class="bg-white/95 rounded-[2.5rem] p-7 border-2 border-slate-100 hover:border-emerald-300 space-y-4 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden scroll-reveal delay-400">
-        <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors shadow-md shadow-emerald-500/10">
-          <i data-lucide="server" class="w-7 h-7"></i>
-        </div>
-        <div>
-          <h4 class="text-base font-black text-slate-900 group-hover:text-emerald-600 transition-colors">นักวิชาการคอมฯ & IT Support</h4>
-          <p class="text-xs text-slate-500 leading-relaxed mt-2">
-            ผู้เชี่ยวชาญด้านระบบสารสนเทศและการสื่อสาร ในหน่วยงานภาครัฐ มหาวิทยาลัย และเอกชน
-          </p>
-        </div>
+      <div class="p-6 rounded-2xl bg-white border border-[#E8DFD8] space-y-2.5">
+        <span class="text-lg">🛡️</span>
+        <h4 class="text-sm font-semibold text-slate-900">นักวิชาการคอมพิวเตอร์</h4>
+        <p class="text-xs text-slate-500 font-light leading-relaxed">ผู้เชี่ยวชาญด้านระบบสารสนเทศ เครือข่าย และไอทีในองค์กร</p>
       </div>
-
     </div>
 
   </section>
 
   <!-- ================= SECTION 4: STUDENT ROSTER (COMED KKU) ================= -->
-  <section id="students" class="py-24 bg-slate-950 text-white border-t border-slate-800/90 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+  <section id="students" class="py-24 bg-[#FAF8F5] text-[#1E1E1E] border-t border-[#E8DFD8] px-4 sm:px-6 lg:px-8 relative overflow-hidden">
     
     <div class="absolute inset-0 bg-mesh-dark opacity-75 pointer-events-none"></div>
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
