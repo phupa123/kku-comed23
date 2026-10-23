@@ -8,6 +8,10 @@
   <meta name="description" content="COMED 23: Connecting Education & Technology. The academic portal for Computer Education Batch 23, Khon Kaen University (KKU).">
   <meta name="theme-color" content="#0C1030">
 
+  <!-- Maintenance Guard & Core PWA -->
+  <script src="assets/js/maintenance-guard.js"></script>
+  <script src="assets/js/pwa-installer.js"></script>
+
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
@@ -50,19 +54,38 @@
     }
   </script>
 
-  <!-- Three.js + GSAP + Lenis -->
+  <!-- OneSignal Push SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "a09c2a29-eb74-4b95-a226-66385d85ec16",
+        safari_web_id: "web.onesignal.auto.16e7ddad-eac5-48fa-8919-e587ff7a9e69",
+        notifyButton: { enable: false }
+      });
+    });
+  </script>
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Three.js + GSAP + Lenis + Confetti -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <!-- Supabase & App Configs -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
+  <link rel="stylesheet" href="assets/css/index.css">
+  <link rel="stylesheet" href="assets/css/master-admin.css">
+  <script src="assets/js/theme-manager.js"></script>
   <script src="config/campaigns_repo.js"></script>
-  <script src="assets/js/plans_repo.js"></script>
-  <script src="students_data.js"></script>
+  <script src="assets/js/universal_intro.js"></script>
 
   <style>
     /* Noise texture overlay */
@@ -133,8 +156,194 @@
   <div class="fixed top-[-15%] right-[-10%] w-[650px] h-[650px] rounded-full bg-gradient-to-br from-[#E65A19]/15 to-[#B32B19]/5 blur-[140px] pointer-events-none z-0"></div>
   <div class="fixed top-[20%] left-[-15%] w-[600px] h-[600px] rounded-full bg-[#0C1030]/80 blur-[150px] pointer-events-none z-0"></div>
 
+  <!-- Top Announcement Bar (Dynamic CMS) -->
+  <div id="topAnnouncementWrap" class="hidden bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white py-1.5 px-4 text-xs font-medium text-center relative z-50">
+    <span id="topAnnouncementText">ประกาศสำคัญจากสาขาวิชา</span>
+  </div>
+
+  <!-- Progress bar -->
+  <div id="topScrollProgressBar" class="fixed top-0 left-0 h-1 bg-gradient-to-r from-[#B32B19] via-[#E65A19] to-[#FF7A29] z-50 transition-all duration-150" style="width: 0%"></div>
+
+  <!-- ================= LUXURY WELCOME LOGIN SUCCESS POPUP ================= -->
+  <div id="modalLoginSuccess" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4">
+    <div id="loginSuccessCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-orange-200/80 text-center space-y-6 overflow-hidden">
+      
+      <!-- Top Decorative Glow bar -->
+      <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400"></div>
+
+      <!-- User Avatar with Rotating Glow Ring -->
+      <div class="relative w-24 h-24 mx-auto mt-2">
+        <div class="absolute -inset-2 rounded-full bg-gradient-to-tr from-orange-500 via-amber-400 to-emerald-400 blur-md opacity-70 animate-spin" style="animation-duration: 4s;"></div>
+        <img id="welcomeSuccessAvatar" src="" alt="User Avatar" class="relative w-full h-full rounded-full object-cover border-4 border-white shadow-xl">
+        <div class="absolute bottom-0 right-0 w-7 h-7 bg-emerald-500 text-white rounded-full flex items-center justify-center border-2 border-white shadow-md">
+          <i data-lucide="check" class="w-4 h-4"></i>
+        </div>
+      </div>
+
+      <!-- Text Details -->
+      <div class="space-y-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-black uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span>เข้าสู่ระบบสำเร็จ</span>
+        </span>
+        <h3 id="welcomeSuccessName" class="text-2xl font-black text-slate-900 tracking-tight">ยินดีต้อนรับ</h3>
+        <p id="welcomeSuccessEmail" class="text-xs text-orange-600 font-mono font-bold">user@kkumail.com</p>
+        <p class="text-xs text-slate-400 pt-1">
+          สาขาวิชาคอมพิวเตอร์ศึกษา (COMED23 • KKU63)
+        </p>
+      </div>
+
+      <!-- Action CTA -->
+      <div class="pt-2 space-y-2">
+        <button onclick="closeLoginSuccessModal()" class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-orange-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>เข้าสู่หน้าเว็บไซต์</span>
+        </button>
+        <a href="settings.html" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5">
+          <i data-lucide="palette" class="w-3.5 h-3.5 text-orange-500"></i>
+          <span>ตกแต่งโปรไฟล์ / เปลี่ยน Avatar</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  
+  <!-- ================= LUXURY ERROR POPUP: NOT KKUMAIL ================= -->
+  <div id="modalAuthErrorPopup" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4">
+    <div id="authErrorCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-rose-200 text-center space-y-6 overflow-hidden">
+      
+      <!-- Top Glow Line -->
+      <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-rose-500 via-amber-500 to-red-600 animate-pulse"></div>
+
+      <!-- Error Icon Badge -->
+      <div class="relative w-20 h-20 mx-auto mt-2 flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full bg-rose-500/20 blur-xl animate-pulse"></div>
+        <div class="relative w-16 h-16 rounded-3xl bg-rose-50 border-2 border-rose-200 text-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/10">
+          <i data-lucide="shield-alert" class="w-8 h-8"></i>
+        </div>
+      </div>
+
+      <!-- Text Details -->
+      <div class="space-y-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <span>สิทธิ์การเข้าถึงถูกปฏิเสธ</span>
+        </span>
+        <h3 class="text-2xl font-black text-slate-900 tracking-tight">ไม่ใช่เมล @kkumail.com</h3>
+        <p id="authErrorPopupEmail" class="text-xs text-rose-600 font-mono font-bold break-all px-2">user@gmail.com</p>
+        <p class="text-xs text-slate-500 pt-1 leading-relaxed">
+          ระบบนี้สงวนสิทธิ์เฉพาะนักศึกษาสาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น ที่ใช้อีเมลสถาบัน <strong class="text-slate-800 font-bold">@kkumail.com</strong> เท่านั้น
+        </p>
+      </div>
+
+      <!-- Action Button to Try Again -->
+      <div class="pt-2">
+        <button onclick="retryGoogleLoginWithKku()" class="w-full py-3.5 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-rose-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          <span>ลองใหม่อีกครั้งด้วยเมล KKU</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= LUXURY LOGOUT CONFIRMATION POPUP MODAL ================= -->
+  <div id="modalLogoutConfirm" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
+    <div id="logoutConfirmCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-rose-100 text-center space-y-6 overflow-hidden">
+      
+      <!-- Glow Bar -->
+      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-rose-500 to-amber-500"></div>
+
+      <!-- Icon -->
+      <div class="w-20 h-20 mx-auto rounded-3xl bg-rose-50 border-2 border-rose-200 text-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/10">
+        <i data-lucide="log-out" class="w-10 h-10"></i>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-2xl font-black text-slate-900">ออกจากระบบ?</h3>
+        <p class="text-xs text-slate-500 leading-relaxed">
+          คุณต้องการออกจากระบบ KKU Mail หรือไม่? คุณสามารถเข้าสู่ระบบใหม่อีกครั้งได้ตลอดเวลา
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <button onclick="closeLogoutModal()" class="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+          ยกเลิก
+        </button>
+        <button onclick="confirmGoogleLogoutAction()" class="py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-md shadow-rose-600/30 transition transform active:scale-95">
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PAYMENT DETAILS POPUP MODAL ================= -->
+  <div id="modalPaymentDetails" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
+    <div id="paymentDetailsCard" class="relative bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-emerald-200 text-center space-y-6 overflow-hidden">
+      
+      <!-- Top Glow -->
+      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500"></div>
+
+      <div class="flex justify-between items-center -mt-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-black border border-emerald-200">
+          <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>สถานะ: ชำระเงินเรียบร้อยแล้ว</span>
+        </span>
+        <button onclick="closePaymentDetailsModal()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 rounded-xl transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-md">
+          <i data-lucide="receipt" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-xl font-black text-slate-900">รายละเอียดการชำระเงิน</h3>
+        <p class="text-xs text-slate-500">ค่าทำป้ายสาขาวิชาเอก (COMED23 KKU63)</p>
+      </div>
+
+      <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 border border-slate-200 text-left">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500">ชื่อนักศึกษา:</span>
+          <span id="detailStudentName" class="font-bold text-slate-900">-</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500">รหัสนักศึกษา:</span>
+          <span id="detailStudentID" class="font-mono font-bold text-slate-800">-</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500">อีเมล KKU:</span>
+          <span id="detailStudentEmail" class="font-mono text-orange-600">-</span>
+        </div>
+        <div class="border-t border-slate-200 pt-2 flex justify-between items-center">
+          <span class="text-slate-500">ยอดเงินที่ชำระ:</span>
+          <span class="font-black text-emerald-600 text-sm">฿190.00 บาท</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500">เวลาที่บันทึกข้อมูล:</span>
+          <span id="detailPayTime" class="text-slate-600 font-mono text-[11px]">-</span>
+        </div>
+      </div>
+
+      <div class="pt-1 flex gap-2">
+        <a href="payment.html" class="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>ดูตารางรวมในหน้าระบบ</span>
+        </a>
+        <button onclick="closePaymentDetailsModal()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition">
+          ปิด
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODERN STICKY NAVIGATION BAR ================= -->
+  
+
   <!-- ================= TOP STICKY NAVIGATION (64PX) ================= -->
-  <header id="mainNavbar" class="sticky top-0 z-40 w-full h-16 bg-[#070914]/80 backdrop-blur-xl border-b border-[#242A4A] transition-all duration-300">
+  <header id="mainNavbar" class="sticky top-0 z-40 w-full h-16 bg-[#070914]/85 backdrop-blur-xl border-b border-[#242A4A] transition-all duration-300">
     <div class="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       
       <!-- 1. BRANDING & IDENTIFICATION (Top-Left) -->
@@ -170,16 +379,16 @@
       <!-- Search Bar (Desktop) -->
       <div class="hidden md:flex items-center relative w-48 xl:w-60">
         <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 pointer-events-none"></i>
-        <input type="text" id="globalSearch" placeholder="Search resources..." 
+        <input type="text" id="globalSearch" placeholder="ค้นหาบริการหรือวิชา..." 
           class="w-full pl-8 pr-3 py-1.5 rounded-full bg-[#12162A]/90 border border-[#242A4A] text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E65A19] focus:ring-1 focus:ring-[#E65A19] transition">
       </div>
 
-      <!-- 3. USER PROFILE & SECURITY SYSTEM (Top-Right) -->
-      <div class="flex items-center gap-3">
+      <!-- 3. USER PROFILE & DUAL NOTIFICATION SYSTEM (Top-Right) -->
+      <div class="flex items-center gap-2 sm:gap-3">
         
-        <!-- Bell Notification with Dropdown Overlay -->
+        <!-- BUTTON 1: Academic & Homework Notification (🔔 การเรียน & การบ้าน) -->
         <div class="relative group">
-          <button id="notifBellBtn" aria-label="Notifications" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19]/50 flex items-center justify-center text-slate-300 hover:text-white transition">
+          <button id="notifBellBtn" title="แจ้งเตือนการเรียน & งานใหม่" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19]/50 flex items-center justify-center text-slate-300 hover:text-white transition">
             <i data-lucide="bell" class="w-4 h-4"></i>
             <span class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#E65A19] border-2 border-[#070914] shadow-[0_0_8px_#E65A19]"></span>
           </button>
@@ -187,7 +396,7 @@
           <!-- Glassmorphic Overlay: 📣 แจ้งเตือนการเรียน -->
           <div class="absolute right-0 top-full mt-2 w-72 sm:w-80 p-3 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl shadow-2xl hidden group-hover:block z-50 animate-in fade-in zoom-in-95 duration-150">
             <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#242A4A]">
-              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Notifications</span>
+              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">1. การเรียน &amp; การบ้าน</span>
               <span class="text-[10px] font-mono text-[#E65A19] font-bold">1 NEW</span>
             </div>
             <div class="p-2.5 rounded-xl bg-[#12162A]/80 border border-[#242A4A] text-xs text-slate-200 flex items-start gap-2.5">
@@ -199,22 +408,54 @@
               </div>
             </div>
             <a href="Plans.html" class="mt-2.5 block text-center py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[11px] font-mono text-slate-300 hover:text-white transition">
-              View All Activities →
+              ดูห้องงาน &amp; กิจกรรมทั้งหมด →
             </a>
           </div>
         </div>
 
-        <!-- User Profile Avatar -->
-        <a href="settings.html" class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-slate-500 transition group">
-          <div class="relative w-7 h-7 rounded-full overflow-hidden border border-white/20">
-            <img id="navAvatarImg" src="logo.png" alt="User Profile" class="w-full h-full object-cover">
-            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#070914] shadow-[0_0_6px_#34d399]"></span>
+        <!-- BUTTON 2: Payment Dues & Financial Notification (💳 ยอดเงินกองทุน & ชำระเงิน) -->
+        <div class="relative group">
+          <a href="#payments-list" title="แจ้งเตือนยอดเงินกองทุน & ชำระเงิน" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-emerald-500/50 flex items-center justify-center text-slate-300 hover:text-white transition">
+            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+            <span class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#070914] shadow-[0_0_8px_#10B981]"></span>
+          </a>
+          
+          <!-- Glassmorphic Overlay: 💳 ยอดเงินกองทุน & สลิป -->
+          <div class="absolute right-0 top-full mt-2 w-72 sm:w-80 p-3 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl shadow-2xl hidden group-hover:block z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#242A4A]">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">2. ยอดเงิน &amp; กองทุนรุ่น</span>
+              <span class="text-[10px] font-mono text-emerald-400 font-bold">ACTIVE</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-[#12162A]/80 border border-[#242A4A] text-xs text-slate-200 flex items-start gap-2.5">
+              <span class="text-base leading-none">💳</span>
+              <div class="space-y-1">
+                <p class="font-bold text-white text-[11px] leading-tight">กองทุนและเงินรุ่น COMED23</p>
+                <p class="text-[11px] text-slate-400 leading-normal">ตรวจสอบรายการค่ากิจกรรมรุ่น และประวัติสลิปของคุณ</p>
+                <div class="text-[10px] font-mono text-slate-500">Live Supabase Sync</div>
+              </div>
+            </div>
+            <a href="payment.html" class="mt-2.5 block text-center py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-[11px] font-mono text-emerald-300 transition">
+              เปิดระบบชำระเงินและตรวจสลิป →
+            </a>
           </div>
-          <span id="navUserName" class="text-xs font-mono font-medium text-slate-200 group-hover:text-white hidden sm:inline truncate max-w-[90px]">P. Jittara</span>
-        </a>
+        </div>
+
+        <!-- User Profile Avatar Pill -->
+        <div id="userProfileBtnWrap">
+          <button onclick="openGoogleLoginModal()" id="loginBtnTrigger" class="hidden px-3 py-1.5 rounded-full bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white text-xs font-bold font-mono transition shadow-sm hover:scale-105">
+            เข้าสู่ระบบ
+          </button>
+          <a href="settings.html" id="userProfilePill" class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-slate-500 transition group">
+            <div class="relative w-7 h-7 rounded-full overflow-hidden border border-white/20">
+              <img id="navAvatarImg" src="logo.png" alt="User Profile" class="w-full h-full object-cover">
+              <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#070914] shadow-[0_0_6px_#34d399]"></span>
+            </div>
+            <span id="navUserName" class="text-xs font-mono font-medium text-slate-200 group-hover:text-white hidden sm:inline truncate max-w-[90px]">P. Jittara</span>
+          </a>
+        </div>
 
         <!-- Stark LOGOUT Button -->
-        <button id="logoutBtn" onclick="handleAuthAction()" class="chrome-border px-3 py-1.5 rounded-full bg-[#0C1030] text-[11px] font-mono font-bold text-slate-300 hover:text-white hover:bg-[#161B33] transition flex items-center gap-1.5 shadow-sm">
+        <button id="logoutBtn" onclick="handleGoogleLogout()" class="chrome-border px-3 py-1.5 rounded-full bg-[#0C1030] text-[11px] font-mono font-bold text-slate-300 hover:text-white hover:bg-[#161B33] transition flex items-center gap-1.5 shadow-sm">
           <span>LOGOUT</span>
           <span class="text-xs">↩</span>
         </button>
@@ -414,31 +655,66 @@
     </div>
   </section>
 
-  <!-- ================= SECTION: ACTIVE DUES & PLANS (SUPABASE SYNC) ================= -->
-  <section id="payments-list" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
-      <div>
-        <span class="text-xs font-mono text-[#FF7A29] uppercase tracking-wider">● ACTIVE DUES</span>
-        <h2 class="text-2xl sm:text-4xl font-display font-bold text-white mt-1">รายการที่ต้องชำระในขณะนี้</h2>
-        <p class="text-xs sm:text-sm text-slate-400 mt-1">ระบบตรวจสอบสถานะการชำระเงินของนักศึกษาแต่ละบุคคล</p>
+  <!-- ================= SECTION: PLANS WIDGET (LIVE SUPABASE SYNC) ================= -->
+  <section id="comed-plans-widget" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#070914]">
+    <div class="max-w-7xl mx-auto space-y-8">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
+        <div>
+          <span class="text-xs font-mono text-[#FF7A29] uppercase tracking-wider">● REAL-TIME PLANS &amp; CALENDAR</span>
+          <h2 class="text-2xl sm:text-4xl font-display font-bold text-white mt-1">แผนงานและกำหนดการสำคัญ</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">ติดตาม Task และกำหนดการนัดหมายที่เชื่อมต่อตรงจากปฏิทิน</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="Calendar.html" class="px-4 py-2 rounded-xl bg-[#E65A19] text-white text-xs font-mono font-bold hover:bg-[#B32B19] transition flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            <span>เปิดปฏิทินเต็มจอ</span>
+          </a>
+          <a href="Plans.html" class="px-4 py-2 rounded-xl bg-[#12162A] border border-[#242A4A] text-slate-300 text-xs font-mono font-bold hover:text-white transition flex items-center gap-1.5">
+            <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>Plans กระดานงาน</span>
+          </a>
+        </div>
       </div>
-      <a href="payment.html" class="px-4 py-2 rounded-xl bg-[#E65A19] text-white text-xs font-mono font-bold hover:bg-[#B32B19] transition flex items-center gap-1.5 self-start sm:self-auto">
-        <span>เปิดหน้าชำระเงินเต็มจอ</span>
-        <span>→</span>
-      </a>
-    </div>
 
-    <!-- Live Campaigns Injected Container -->
-    <div id="indexCampaignsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="col-span-full py-12 text-center text-slate-500 text-xs flex items-center justify-center gap-2">
-        <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-[#E65A19]"></i>
-        <span>กำลังเชื่อมต่อฐานข้อมูลกองทุนสาขา...</span>
+      <!-- Live Plans Mini Grid for Index -->
+      <div id="indexPlansContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="col-span-full py-12 text-center text-slate-400 text-xs flex items-center justify-center gap-2">
+          <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
+          <span>กำลังเชื่อมต่อปฏิทินงานล่าสุดจาก Supabase...</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION: ACTIVE DUES & PAYMENTS (SUPABASE SYNC) ================= -->
+  <section id="payments-list" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#0C1030]/30">
+    <div class="max-w-7xl mx-auto space-y-10">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
+        <div>
+          <span class="text-xs font-mono text-[#FF7A29] uppercase tracking-wider">● ACTIVE DUES</span>
+          <h2 class="text-2xl sm:text-4xl font-display font-bold text-white mt-1">รายการที่ต้องชำระในขณะนี้</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">ระบบตรวจสอบสถานะการชำระเงินของนักศึกษาแต่ละบุคคลผ่าน Supabase</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="payment.html" class="px-4 py-2 rounded-xl bg-[#E65A19] text-white text-xs font-mono font-bold hover:bg-[#B32B19] transition flex items-center gap-1.5 self-start sm:self-auto">
+            <span>เปิดหน้าชำระเงินเต็มจอ</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Campaigns Injected Container -->
+      <div id="indexCampaignsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="col-span-full py-12 text-center text-slate-500 text-xs flex items-center justify-center gap-2">
+          <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-[#E65A19]"></i>
+          <span>กำลังเชื่อมต่อฐานข้อมูลกองทุนสาขา...</span>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ================= SECTION: ACADEMICS & CURRICULUM ================= -->
-  <section id="about" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#0C1030]/30">
+  <section id="about" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#070914]">
     <div class="max-w-7xl mx-auto space-y-12">
       
       <div class="max-w-3xl space-y-3">
@@ -475,14 +751,14 @@
   </section>
 
   <!-- ================= SECTION: STUDENTS ROSTER (60 STUDENTS) ================= -->
-  <section id="students" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#070914]">
+  <section id="students" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#0C1030]/30">
     <div class="max-w-7xl mx-auto space-y-8">
       
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
         <div>
           <span class="text-xs font-mono text-[#FF7A29] uppercase tracking-wider">02 // ROSTER</span>
           <h2 class="text-2xl sm:text-4xl font-display font-bold text-white mt-1">ทำเนียบรุ่น COMED 23 (60 คน)</h2>
-          <p class="text-xs sm:text-sm text-slate-400 mt-1">รายชื่อนักศึกษา สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 23 มหาวิทยาลัยขอนแก่น</p>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">รายชื่อนักศึกษา สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 23 มหาวิทยาลัยขอนแก่น (คลิกเพื่อดูโปรไฟล์)</p>
         </div>
         <div class="flex items-center gap-2">
           <input type="text" id="studentSearchInput" placeholder="ค้นหาชื่อหรือรหัสนักศึกษา..." 
@@ -492,7 +768,7 @@
 
       <!-- Students Grid Container -->
       <div id="studentsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        <!-- Rendered by students_data.js -->
+        <!-- Rendered by students_data.js & index.js -->
       </div>
 
     </div>
@@ -538,14 +814,185 @@
     </div>
   </footer>
 
+  <!-- ================= STUDENT PROFILE MODAL ================= -->
+  <div id="modalStudentProfile" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300" onclick="closeStudentProfileModal(event)">
+    <div id="studentProfileCard" onclick="event.stopPropagation()" class="relative bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-slate-800 rounded-3xl max-w-sm w-full p-6 sm:p-7 shadow-[0_25px_80px_rgba(0,0,0,0.8)] text-center space-y-5 overflow-hidden">
+      
+      <!-- Top Glow Accent -->
+      <div class="absolute -top-12 -right-12 w-36 h-36 bg-orange-500/15 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-12 -left-12 w-36 h-36 bg-sky-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Close Button -->
+      <button type="button" onclick="closeStudentProfileModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer z-10" title="ปิดหน้าต่าง">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Avatar Showcase with Frame & Animation Support -->
+      <div class="py-2 flex flex-col items-center justify-center">
+        <div id="modalStudentAvatarFrame" class="w-28 h-28 rounded-3xl bg-slate-900 p-1 border-2 border-orange-500/40 shadow-2xl overflow-hidden relative">
+          <!-- Skeleton shimmer overlay -->
+          <div id="modalStudentAvatarSkeleton" class="avatar-loading-skeleton"></div>
+          <div id="modalStudentAvatarAnimWrapper" class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center relative">
+            <img id="modalStudentAvatar" src="" alt="Avatar" class="w-full h-full object-cover rounded-2xl transition-transform duration-200 avatar-blur-img" onload="handleAvatarImageLoaded(this)">
+          </div>
+        </div>
+        <div class="mt-3">
+          <span id="modalStudentBadge" class="text-[10px] font-black px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">นักศึกษา COMED23</span>
+        </div>
+      </div>
+
+      <!-- Info Details -->
+      <div class="space-y-1">
+        <h3 id="modalStudentName" class="text-lg font-black text-white">ชื่อ - สกุล</h3>
+        <p id="modalStudentNickname" class="text-xs font-bold text-amber-400 font-mono">น้องชื่อเล่น</p>
+        <p id="modalStudentId" class="text-xs text-slate-400 font-mono flex items-center justify-center gap-1">
+          <i data-lucide="hash" class="w-3.5 h-3.5 text-slate-500"></i>
+          <span>รหัสนักศึกษา</span>
+        </p>
+      </div>
+
+      <!-- Bio Quote Box -->
+      <div id="modalStudentBioWrap" class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 italic text-center">
+        <span id="modalStudentBio">"ยินดีที่ได้รู้จักเพื่อนๆ ทุกคนครับ!"</span>
+      </div>
+
+      <!-- Social Media & Contact Links -->
+      <div id="modalStudentSocialWrap" class="flex items-center justify-center gap-2 flex-wrap pt-1">
+        <a id="modalStudentLineBtn" href="#" target="_blank" class="hidden px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5" title="ติดต่อทาง LINE">
+          <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+          <span id="modalStudentLineText">LINE</span>
+        </a>
+        <a id="modalStudentIgBtn" href="#" target="_blank" class="hidden px-3 py-1.5 rounded-xl bg-pink-500/15 hover:bg-pink-500/25 text-pink-400 border border-pink-500/30 text-xs font-bold transition flex items-center gap-1.5" title="ดู Instagram">
+          <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
+          <span id="modalStudentIgText">Instagram</span>
+        </a>
+        <a id="modalStudentFbBtn" href="#" target="_blank" class="hidden px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 text-xs font-bold transition flex items-center gap-1.5" title="เปิด Facebook Profile">
+          <i data-lucide="facebook" class="w-3.5 h-3.5"></i>
+          <span>Facebook</span>
+        </a>
+        <a id="modalStudentPhoneBtn" href="#" class="hidden px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1.5" title="โทรติดต่อ">
+          <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+          <span id="modalStudentPhoneText">โทร</span>
+        </a>
+      </div>
+
+      <!-- Student Email Contact & Profile Link -->
+      <div class="space-y-2 pt-2 border-t border-slate-800/80">
+        <div class="flex items-center justify-between text-xs px-2 py-1 text-slate-400">
+          <span>อีเมลสถาบัน:</span>
+          <a id="modalStudentEmail" href="#" class="text-sky-400 hover:underline font-mono truncate max-w-[180px]">student@kkumail.com</a>
+        </div>
+        <button type="button" onclick="closeStudentProfileModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 pt-12 pb-24 xl:pb-12 px-4 sm:px-6 lg:px-8 text-xs">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+      
+      <div class="flex items-center gap-3 text-white">
+        <img src="logo.png" alt="Logo" class="w-8 h-8 object-contain">
+        <div>
+          <span class="font-black text-sm block">สาขาวิชาคอมพิวเตอร์ศึกษา (COMED KKU)</span>
+          <span class="text-slate-400 text-[11px]">คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 flex-wrap text-[11px]">
+        <a href="index.html" class="text-white hover:text-orange-400 transition font-semibold">หน้าหลัก</a>
+        <span>•</span>
+        <a href="payment.html" class="text-white hover:text-orange-400 transition font-semibold">ระบบชำระเงิน</a>
+        <span>•</span>
+        <a href="admin.html" class="text-amber-400 hover:text-amber-300 transition font-black flex items-center gap-1">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>ศูนย์ควบคุมแอดมิน (Admin Hub)</span>
+        </a>
+        <span>•</span>
+        <a href="https://www.instagram.com/thitiphaua/" target="_blank" class="text-orange-400 hover:underline">IG: Thitipha</a>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ================= ULTRA-LUXURY POPUP MODAL: SIGN IN WITH GOOGLE ================= -->
+  <div id="modalGoogleLogin" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
+    
+    <!-- Animated Glow Background Orbs -->
+    <div class="absolute w-96 h-96 bg-orange-500/20 rounded-full blur-3xl pointer-events-none -top-20 -left-20 animate-pulse"></div>
+    <div class="absolute w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -bottom-20 -right-20 animate-pulse" style="animation-delay: 1.5s;"></div>
+
+    <div id="googleLoginCard"
+      class="relative bg-white/95 backdrop-blur-2xl rounded-[2.5rem] max-w-md w-full p-8 sm:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.35)] border-2 border-white/80 space-y-6 text-center overflow-hidden">
+      
+      <!-- Top Decorative Gradient Line -->
+      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 via-amber-400 to-cyan-500"></div>
+
+      <!-- Close Button -->
+      <div class="flex justify-end -mt-2">
+        <button onclick="closeGoogleLoginModal()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-2xl transition transform active:scale-90">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Animated Icon & Branding -->
+      <div class="space-y-3 -mt-4">
+        <div class="relative w-20 h-20 mx-auto">
+          <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 blur-xl opacity-60 animate-pulse"></div>
+          <div class="relative w-full h-full rounded-3xl bg-gradient-to-tr from-orange-50 via-white to-amber-50 border-2 border-orange-200 p-2.5 flex items-center justify-center shadow-xl">
+            <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
+          </div>
+        </div>
+
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-[11px] font-black tracking-wider uppercase mb-2 shadow-sm">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-orange-500"></i>
+            <span>KKU AUTHENTICATION</span>
+          </div>
+          <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">เข้าสู่ระบบนักศึกษา</h3>
+          <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto leading-relaxed">
+            สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มข.
+          </p>
+        </div>
+      </div>
+
+      <!-- Permission Guarantee Box -->
+      <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50/60 border border-amber-200/80 text-left text-xs space-y-1.5 shadow-sm">
+        <div class="font-black text-amber-900 flex items-center gap-1.5">
+          <i data-lucide="lock" class="w-4 h-4 text-orange-600 flex-shrink-0"></i>
+          <span>ระบบรักษาความปลอดภัย:</span>
+        </div>
+        <p class="text-[11px] text-amber-800 leading-relaxed">
+          อนุญาตเฉพาะบัญชีอีเมล <strong class="text-orange-700 font-bold">@kkumail.com</strong> เท่านั้น บัญชีบุคคลภายนอกจะไม่สามารถเข้าถึงข้อมูลได้
+        </p>
+      </div>
+
+      <!-- Official Google Sign-in Interactive Button Container -->
+      <div class="pt-2 pb-1 space-y-3">
+        <div id="googleButtonWrapper" class="flex justify-center min-h-[50px] items-center scale-105 hover:scale-110 transition-transform"></div>
+        <p class="text-[10px] text-slate-400 flex items-center justify-center gap-1">
+          <i data-lucide="info" class="w-3 h-3 text-slate-400"></i>
+          <span>คลิกปุ่มด้านบนเพื่อเลือกบัญชี Google ของมหาวิทยาลัย</span>
+        </p>
+      </div>
+
+      <!-- Error Box -->
+      <div id="googleAuthError" class="hidden p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold flex items-center gap-2 text-left">
+        <i data-lucide="x-circle" class="w-5 h-5 flex-shrink-0 text-rose-500"></i>
+        <span id="googleAuthErrorText">อีเมลนี้ไม่ใช่ @kkumail.com จึงไม่สามารถเข้าสู่ระบบได้</span>
+      </div>
+
+    </div>
+  </div>
+
+  
+
   <!-- ================= INTERACTIVE THREE.JS ZERO-GRAVITY SPHERE & GSAP ================= -->
   <script>
-    // 1. Initialize Lucide Icons
-    if (window.lucide) {
-      lucide.createIcons();
-    }
-
-    // 2. Initialize Smooth Scroll with Lenis
+    // 1. Initialize Smooth Scroll with Lenis
     let lenis;
     try {
       if (typeof Lenis !== 'undefined') {
@@ -569,7 +1016,7 @@
       console.warn('Lenis scroll init bypassed:', e);
     }
 
-    // 3. Kinetic Typography Scroll Distortion with GSAP
+    // 2. Kinetic Typography Scroll Distortion with GSAP
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
       gsap.registerPlugin(ScrollTrigger);
 
@@ -594,7 +1041,7 @@
       }
     }
 
-    // 4. Zero-Gravity Interactive WebGL Liquid-Glass & Metallic Red-Chrome Engine
+    // 3. Zero-Gravity Interactive WebGL Liquid-Glass & Metallic Red-Chrome Engine
     (function initZeroGravitySphere() {
       const container = document.getElementById('webglContainer');
       if (!container || typeof THREE === 'undefined') return;
@@ -752,14 +1199,14 @@
         }
       });
 
-      // Viewport Visibility Detection (pause loop when out of viewport for max performance)
+      // Viewport Visibility Detection
       let isInView = true;
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => { isInView = entry.isIntersecting; });
       }, { threshold: 0.1 });
       observer.observe(container);
 
-      // Animation Loop with zero-gravity bobbing
+      // Animation Loop
       let clock = new THREE.Clock();
 
       function animate() {
@@ -768,22 +1215,18 @@
 
         const elapsedTime = clock.getElapsedTime();
 
-        // Zero-gravity physics floating bob
         floatGroup.position.y = Math.sin(elapsedTime * 1.2) * 0.12;
         floatGroup.position.x = Math.cos(elapsedTime * 0.8) * 0.06;
 
-        // Subtle constant rotation
         floatGroup.rotation.y += 0.005;
         cageMesh.rotation.y -= 0.007;
         cageMesh.rotation.x += 0.003;
         ring1.rotation.z += 0.003;
         ring2.rotation.z -= 0.004;
 
-        // Mouse influence
         floatGroup.rotation.y += (targetRotY + mouseX * 0.3 - floatGroup.rotation.y) * 0.05;
         floatGroup.rotation.x += (targetRotX - mouseY * 0.3 - floatGroup.rotation.x) * 0.05;
 
-        // Particles gentle float
         particleSystem.rotation.y = elapsedTime * 0.03;
 
         renderer.render(scene, camera);
@@ -791,7 +1234,6 @@
 
       animate();
 
-      // Window resize handler
       window.addEventListener('resize', () => {
         if (!container) return;
         const newW = container.clientWidth;
@@ -801,7 +1243,7 @@
         renderer.setSize(newW, newH);
       });
 
-      // Interactive Hotspots clicks
+      // Interactive Hotspots
       const h1 = document.getElementById('hotspot1');
       if (h1) h1.addEventListener('click', () => { window.location.href = 'storage.html'; });
       const h2 = document.getElementById('hotspot2');
@@ -809,77 +1251,26 @@
       const h3 = document.getElementById('hotspot3');
       if (h3) h3.addEventListener('click', () => { window.location.href = 'Calendar.html'; });
     })();
-
-    // 5. Auth / User Session Display from LocalStorage / Supabase
-    function checkUserSession() {
-      try {
-        const userJson = localStorage.getItem('currentUser') || localStorage.getItem('supabase_user');
-        if (userJson) {
-          const user = JSON.parse(userJson);
-          const nameEl = document.getElementById('navUserName');
-          const avatarEl = document.getElementById('navAvatarImg');
-          if (nameEl && (user.name || user.full_name || user.email)) {
-            nameEl.textContent = (user.name || user.full_name || user.email).split(' ')[0];
-          }
-          if (avatarEl && (user.avatar_url || user.picture)) {
-            avatarEl.src = user.avatar_url || user.picture;
-          }
-        }
-      } catch (e) {
-        console.warn('Session parse error:', e);
-      }
-    }
-    checkUserSession();
-
-    function handleAuthAction() {
-      if (confirm('คุณต้องการออกจากระบบหรือไม่? (Logout)')) {
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('supabase_user');
-        window.location.reload();
-      }
-    }
-
-    // 6. Render Student Roster from students_data.js
-    function renderStudentRoster() {
-      const container = document.getElementById('studentsGrid');
-      if (!container || !window.COMED_STUDENTS || !Array.isArray(window.COMED_STUDENTS)) return;
-
-      const input = document.getElementById('studentSearchInput');
-      const query = (input ? input.value : '').toLowerCase().trim();
-
-      const filtered = window.COMED_STUDENTS.filter(s => {
-        if (!query) return true;
-        const name = (s.name || '').toLowerCase();
-        const id = (s.student_id || s.id || '').toString();
-        const nick = (s.nickname || '').toLowerCase();
-        return name.includes(query) || id.includes(query) || nick.includes(query);
-      });
-
-      container.innerHTML = filtered.map((s, idx) => `
-        <div class="p-3 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19] transition-all group flex flex-col items-center text-center">
-          <div class="w-14 h-14 rounded-full overflow-hidden bg-[#161B33] border border-white/10 group-hover:border-[#E65A19] transition mb-2">
-            <img src="${s.image || s.avatar || 'logo.png'}" alt="${s.name}" class="w-full h-full object-cover" onerror="this.src='logo.png'">
-          </div>
-          <span class="text-[10px] font-mono text-[#FF7A29] font-bold">#${s.no || idx + 1}</span>
-          <h4 class="text-xs font-bold text-white group-hover:text-[#FF7A29] transition line-clamp-1 mt-0.5">${s.nickname ? s.nickname + ' - ' : ''}${s.name}</h4>
-          <span class="text-[10px] font-mono text-slate-500 mt-0.5">${s.student_id || ''}</span>
-        </div>
-      `).join('');
-    }
-
-    if (window.COMED_STUDENTS) {
-      renderStudentRoster();
-      const sInput = document.getElementById('studentSearchInput');
-      if (sInput) sInput.addEventListener('input', renderStudentRoster);
-    } else {
-      window.addEventListener('DOMContentLoaded', () => {
-        if (window.COMED_STUDENTS) renderStudentRoster();
-      });
-    }
   </script>
 
-  <!-- PWA & Update Services Integration -->
-  <script src="assets/js/pwa-installer.js"></script>
+  <!-- Include Students Database Script -->
+  <script src="students_data.js"></script>
+  <!-- MultiCloud Uploader & Quota Sync -->
+  <script src="assets/js/background_uploader.js"></script>
+  <script src="assets/js/multi_uploader.js"></script>
+  <!-- QR Code Generator & Universal QR Suite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/js/qr_suite.js"></script>
+  <!-- Plans Supabase Repository for Index Calendar Widget -->
+  <script src="assets/js/plans_repo.js"></script>
+  <!-- Real-Time Push Notification Engine -->
   <script src="assets/js/notifications.js"></script>
+  <!-- In-App Direct APK & PWA Auto Updater -->
+  <script src="assets/js/app-updater.js"></script>
+  <!-- Platform Runtime & Version Badge (V_W, V_A, V_I) -->
+  <script src="assets/js/version-badge.js"></script>
+  <!-- Main Index Page Logic -->
+  <script src="assets/js/index.js"></script>
+
 </body>
 </html>
