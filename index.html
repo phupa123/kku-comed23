@@ -1120,21 +1120,116 @@
       lidBack.position.y = 0.775;
       screenLid.add(lidBack);
 
-      // Golden Stupa Emblem Screen Texture
-      const emblemTexLoader = new THREE.TextureLoader();
-      emblemTexLoader.load('assets/images/kku_comed_emblem_reference.jpg', (tex) => {
-        tex.generateMipmaps = true;
-        const emblemPlaneGeo = new THREE.PlaneGeometry(1.9, 1.25);
-        const emblemPlaneMat = new THREE.MeshBasicMaterial({
-          map: tex,
-          transparent: true,
-          opacity: 0.96,
-          blending: THREE.AdditiveBlending
-        });
-        const emblemPlane = new THREE.Mesh(emblemPlaneGeo, emblemPlaneMat);
-        emblemPlane.position.set(0, 0.78, 0.045);
-        screenLid.add(emblemPlane);
+      // ================= 3. AUTHENTIC 3D PROCEDURAL STUPA & COM (NO FLAT 2D) =================
+      const stupaGroup = new THREE.Group();
+      const goldMaterial = new THREE.MeshStandardMaterial({
+        color: 0xF5C542,
+        metalness: 0.95,
+        roughness: 0.16,
+        envMapIntensity: 2.2
       });
+      const darkGoldMaterial = new THREE.MeshStandardMaterial({
+        color: 0xC69214,
+        metalness: 0.9,
+        roughness: 0.28
+      });
+      const chromeDetailMat = new THREE.MeshStandardMaterial({
+        color: 0xEAEAEA,
+        metalness: 0.98,
+        roughness: 0.1
+      });
+
+      // Tiered Bases
+      const b1 = new THREE.Mesh(new THREE.BoxGeometry(0.74, 0.08, 0.74), darkGoldMaterial);
+      b1.position.y = 0.04;
+      stupaGroup.add(b1);
+      const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.08, 0.66), goldMaterial);
+      b2.position.y = 0.12;
+      stupaGroup.add(b2);
+      const b3 = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.1, 0.58), darkGoldMaterial);
+      b3.position.y = 0.21;
+      stupaGroup.add(b3);
+
+      // Body & Lotus Waist
+      const waist = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.31, 0.34, 4), goldMaterial);
+      waist.rotation.y = Math.PI / 4;
+      waist.position.y = 0.42;
+      stupaGroup.add(waist);
+      const ringMolding = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.04, 0.52), chromeDetailMat);
+      ringMolding.position.y = 0.60;
+      stupaGroup.add(ringMolding);
+
+      // Spire
+      const spireLower = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.23, 0.45, 4), goldMaterial);
+      spireLower.rotation.y = Math.PI / 4;
+      spireLower.position.y = 0.84;
+      stupaGroup.add(spireLower);
+      const spireMolding = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.03, 0.34), chromeDetailMat);
+      spireMolding.position.y = 1.08;
+      stupaGroup.add(spireMolding);
+      const spireUpper = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.65, 4), goldMaterial);
+      spireUpper.rotation.y = Math.PI / 4;
+      spireUpper.position.y = 1.42;
+      stupaGroup.add(spireUpper);
+
+      // Finial Needle
+      const finialSphere = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 16), goldMaterial);
+      finialSphere.position.y = 1.76;
+      stupaGroup.add(finialSphere);
+      const finialTip = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.15, 8), goldMaterial);
+      finialTip.position.y = 1.86;
+      stupaGroup.add(finialTip);
+
+      stupaGroup.position.set(0, -0.42, 0.08);
+      stupaGroup.scale.set(0.96, 0.96, 0.96);
+      laptopGroup.add(stupaGroup);
+
+      // 3D "COM" Letters
+      const comGroup = new THREE.Group();
+      comGroup.position.set(0, -0.06, 0.42);
+      comGroup.scale.set(0.85, 0.85, 0.85);
+
+      const chromeWordMat = new THREE.MeshStandardMaterial({ color: 0xF3C352, metalness: 0.95, roughness: 0.14 });
+      const sideTrimMat = new THREE.MeshStandardMaterial({ color: 0xE65A19, metalness: 0.92, roughness: 0.18 });
+
+      // 'C'
+      const cLetter = new THREE.Group();
+      cLetter.position.x = -0.56;
+      cLetter.add(new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.07, 16, 32, Math.PI * 1.55), chromeWordMat));
+      const c1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.07, 0.14), sideTrimMat);
+      c1.position.set(0.14, 0.17, 0);
+      cLetter.add(c1);
+      const c2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.07, 0.14), sideTrimMat);
+      c2.position.set(0.14, -0.17, 0);
+      cLetter.add(c2);
+      comGroup.add(cLetter);
+
+      // 'O'
+      const oLetter = new THREE.Group();
+      oLetter.position.x = 0;
+      oLetter.add(new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.07, 16, 32), chromeWordMat));
+      comGroup.add(oLetter);
+
+      // 'M'
+      const mLetter = new THREE.Group();
+      mLetter.position.x = 0.56;
+      const m1 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.52, 0.14), chromeWordMat);
+      m1.position.x = -0.18;
+      mLetter.add(m1);
+      const m2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.52, 0.14), chromeWordMat);
+      m2.position.x = 0.18;
+      mLetter.add(m2);
+      const m3 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.36, 0.14), sideTrimMat);
+      m3.rotation.z = -0.45;
+      m3.position.set(-0.09, 0.08, 0);
+      mLetter.add(m3);
+      const m4 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.36, 0.14), sideTrimMat);
+      m4.rotation.z = 0.45;
+      m4.position.set(0.09, 0.08, 0);
+      mLetter.add(m4);
+      comGroup.add(mLetter);
+
+      laptopGroup.add(comGroup);
 
       // Fire Orange Glowing Orbit Ring
       const curve = new THREE.EllipseCurve(0, 0, 2.1, 1.5, 0, 2 * Math.PI, false, 0);
