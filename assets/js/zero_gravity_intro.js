@@ -45,18 +45,13 @@ function runZeroGravityIntro() {
       letter-spacing: -0.04em;
       line-height: 0.95;
       background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 20%, #94A3B8 40%, #E65A19 70%, #B32B19 90%, #FFFFFF 100%);
-      background-size: 200% 200%;
+      background-size: 150% 150%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 35px rgba(230, 90, 25, 0.45));
-      animation: metallicShimmer 5s ease infinite alternate;
+      filter: drop-shadow(0 0 15px rgba(230, 90, 25, 0.35));
       display: inline-block;
       transition: transform 0.2s ease-out;
-    }
-
-    @keyframes metallicShimmer {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
+      will-change: transform;
     }
 
     .radar-arc-circle {
@@ -97,9 +92,9 @@ function runZeroGravityIntro() {
     <div class="absolute inset-0 intro-noise pointer-events-none"></div>
     <div class="absolute inset-0 opacity-[0.035] pointer-events-none" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 55px 55px;"></div>
 
-    <!-- Ambient Glows -->
-    <div class="absolute -top-32 -left-32 w-[650px] h-[650px] bg-[#B32B19]/15 rounded-full blur-[150px] pointer-events-none"></div>
-    <div class="absolute top-1/4 right-5 w-[750px] h-[750px] bg-[#E65A19]/20 rounded-full blur-[170px] pointer-events-none"></div>
+    <!-- Ambient Glows (Optimized CSS Hardware Accelerated Layer) -->
+    <div class="absolute -top-32 -left-32 w-[450px] h-[450px] bg-[#B32B19]/10 rounded-full blur-[80px] pointer-events-none transform-gpu"></div>
+    <div class="absolute top-1/4 right-5 w-[500px] h-[500px] bg-[#E65A19]/15 rounded-full blur-[90px] pointer-events-none transform-gpu"></div>
 
     <!-- UI Bounding Markers -->
     <div class="absolute top-5 left-5 w-4 h-4 border-t-2 border-l-2 border-white/30 pointer-events-none"></div>

@@ -940,30 +940,7 @@
         }
       }
 
-      // Check LocalStorage custom store
-      if (!profile) {
-        try {
-          const storedProfiles = JSON.parse(localStorage.getItem('COMED_CUSTOM_USERS_PROFILES_V1') || '{}');
-          const custom = storedProfiles[userEmail] || (user.studentId ? storedProfiles[user.studentId] : null);
-          if (custom) {
-            profile = {
-              id: user.id,
-              email: userEmail,
-              full_name: custom.name || user.user_metadata?.full_name || 'ผู้ใช้งาน',
-              avatar_url: custom.avatar || user.user_metadata?.avatar_url || 'assets/images/phupa_profile_preview.png',
-              role: user.role || 'STUDENT',
-              student_id: custom.studentId || user.studentId || '693050XXX-X',
-              nickname: custom.nickname || user.nickname || '',
-              line_id: custom.lineId || custom.line_id || user.line_id || '',
-              instagram: custom.instagram || user.instagram || '',
-              facebook_url: custom.facebookUrl || custom.facebook_url || user.facebook_url || '',
-              bio: custom.bio || user.bio || ''
-            };
-          }
-        } catch (e) {}
-      }
-
-      // Fallback from localStorage or screenshot defaults
+      // Fallback defaults if no cloud profile found yet
       if (!profile) {
         profile = {
           id: user.id,
@@ -1052,43 +1029,7 @@
         }
       }
 
-      // 2. Update LocalStorage COMED_CUSTOM_USERS_PROFILES_V1
-      try {
-        const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
-        const stored = JSON.parse(localStorage.getItem(profilesKey) || '{}');
-        stored[emailKey] = {
-          ...(stored[emailKey] || {}),
-          name: cachedProfile?.full_name,
-          studentId: cachedProfile?.student_id,
-          nickname: updates.nickname !== undefined ? updates.nickname : cachedProfile?.nickname,
-          lineId: updates.line_id !== undefined ? updates.line_id : cachedProfile?.line_id,
-          instagram: updates.instagram !== undefined ? updates.instagram : cachedProfile?.instagram,
-          facebookUrl: updates.facebook_url !== undefined ? updates.facebook_url : cachedProfile?.facebook_url,
-          bio: updates.bio !== undefined ? updates.bio : cachedProfile?.bio,
-          avatar: updates.avatar !== undefined ? updates.avatar : cachedProfile?.avatar_url,
-          updatedAt: new Date().toISOString()
-        };
-        localStorage.setItem(profilesKey, JSON.stringify(stored));
-      } catch (e) {}
-
-      // 3. Update Current User Session
-      try {
-        ['currentUser', 'COMED_USER_SESSION'].forEach(key => {
-          const userJson = localStorage.getItem(key);
-          if (userJson) {
-            const u = JSON.parse(userJson);
-            if (updates.nickname !== undefined) u.nickname = updates.nickname;
-            if (updates.line_id !== undefined) { u.lineId = updates.line_id; u.line_id = updates.line_id; }
-            if (updates.instagram !== undefined) u.instagram = updates.instagram;
-            if (updates.facebook_url !== undefined) { u.facebookUrl = updates.facebook_url; u.facebook_url = updates.facebook_url; }
-            if (updates.bio !== undefined) u.bio = updates.bio;
-            if (updates.avatar !== undefined) { u.avatar = updates.avatar; u.avatar_url = updates.avatar; }
-            localStorage.setItem(key, JSON.stringify(u));
-          }
-        });
-      } catch (e) {}
-
-      // Update cachedProfile
+      // Update cachedProfile in memory only (No localStorage write)
       if (cachedProfile) {
         Object.assign(cachedProfile, updates);
       }
@@ -1866,18 +1807,6 @@
           console.warn("Wardrobe save cloud notice:", e);
         }
       }
-
-      // Update LocalStorage
-      try {
-        const stored = JSON.parse(localStorage.getItem('COMED_CUSTOM_USERS_PROFILES_V1') || '{}');
-        stored[emailKey] = {
-          ...(stored[emailKey] || {}),
-          avatarFrame: currentDecoration.frame,
-          avatarAnim: currentDecoration.anim,
-          avatarTransform: currentDecoration
-        };
-        localStorage.setItem('COMED_CUSTOM_USERS_PROFILES_V1', JSON.stringify(stored));
-      } catch (e) {}
 
       btn.disabled = false;
       btn.innerHTML = orig;
