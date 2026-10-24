@@ -225,80 +225,79 @@ function runZeroGravityIntro() {
     camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 1000);
     camera.position.set(0, 0.2, 4.4);
 
-    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+    renderer = new THREE.WebGLRenderer({ 
+      alpha: true, 
+      antialias: false, // Turn off heavy multisample antialiasing on intro for stable 60-120fps
+      powerPreference: 'high-performance',
+      precision: 'mediump' // High efficiency GPU shading
+    });
     renderer.setSize(w, h);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.25;
     container.appendChild(renderer.domElement);
 
-    // Dynamic Lights
-    const ambientLight = new THREE.AmbientLight(0x0a1026, 2.8);
+    // Dynamic Lights (Simplified for max FPS)
+    const ambientLight = new THREE.AmbientLight(0x0a1026, 2.5);
     scene.add(ambientLight);
 
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 3.2);
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.8);
     dirLight1.position.set(5, 6, 5);
     scene.add(dirLight1);
 
-    const dirLight2 = new THREE.DirectionalLight(0xff6a28, 3.5);
+    const dirLight2 = new THREE.DirectionalLight(0xff6a28, 2.8);
     dirLight2.position.set(-5, -2, 3);
     scene.add(dirLight2);
 
-    const innerCoreLight = new THREE.PointLight(0xff5500, 8, 14);
+    const innerCoreLight = new THREE.PointLight(0xff5500, 5, 8);
     innerCoreLight.position.set(0, 0, 0);
     scene.add(innerCoreLight);
-
-    const cyanRimLight = new THREE.PointLight(0x38bdf8, 5, 12);
-    cyanRimLight.position.set(3, 3, -2);
-    scene.add(cyanRimLight);
 
     // Master Celestial Group
     const celestialGroup = new THREE.Group();
     scene.add(celestialGroup);
 
-    // 1. Central Plasma Core Sphere
-    const coreGeo = new THREE.SphereGeometry(0.78, 36, 36);
+    // 1. Central Plasma Core Sphere (Optimized segment count 24x24)
+    const coreGeo = new THREE.SphereGeometry(0.78, 24, 24);
     const coreMat = new THREE.MeshStandardMaterial({
       color: 0xb32b19,
       emissive: 0xff3b14,
-      emissiveIntensity: 1.25,
-      metalness: 0.92,
-      roughness: 0.18
+      emissiveIntensity: 1.1,
+      metalness: 0.85,
+      roughness: 0.25
     });
     const coreMesh = new THREE.Mesh(coreGeo, coreMat);
     celestialGroup.add(coreMesh);
 
     // 2. Quantum Geometric Exoskeleton (Wire Lattice Cage)
     const icoGeo = new THREE.IcosahedronGeometry(1.08, 1);
-    const icoMat = new THREE.MeshPhysicalMaterial({
+    const icoMat = new THREE.MeshStandardMaterial({
       color: 0x1a2444,
       emissive: 0x0c1533,
-      metalness: 0.95,
-      roughness: 0.12,
-      transparent: true,
-      opacity: 0.45,
+      metalness: 0.9,
+      roughness: 0.2,
       wireframe: true
     });
     const icoMesh = new THREE.Mesh(icoGeo, icoMat);
     celestialGroup.add(icoMesh);
 
-    // 3. Floating Quantum Prism Shards
+    // 3. Floating Quantum Prism Shards (Reduced count to 10)
     const shardsGroup = new THREE.Group();
-    const shardGeo = new THREE.OctahedronGeometry(0.13, 0);
+    const shardGeo = new THREE.OctahedronGeometry(0.12, 0);
     const shardMat = new THREE.MeshStandardMaterial({
       color: 0xf5c542,
       emissive: 0xe65a19,
-      emissiveIntensity: 0.6,
-      metalness: 0.98,
-      roughness: 0.15
+      emissiveIntensity: 0.5,
+      metalness: 0.9,
+      roughness: 0.2
     });
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 10; i++) {
       const shard = new THREE.Mesh(shardGeo, shardMat);
-      const angle = (i / 18) * Math.PI * 2;
-      const radius = 1.35 + (i % 3) * 0.15;
+      const angle = (i / 10) * Math.PI * 2;
+      const radius = 1.35 + (i % 2) * 0.15;
       shard.position.set(
         Math.cos(angle) * radius,
-        (Math.sin(angle * 2) * 0.35) + ((i % 4) - 1.5) * 0.12,
+        (Math.sin(angle * 2) * 0.3) + ((i % 3) - 1) * 0.1,
         Math.sin(angle) * radius
       );
       shard.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
@@ -306,15 +305,15 @@ function runZeroGravityIntro() {
     }
     celestialGroup.add(shardsGroup);
 
-    // 4. Triple Gyroscopic Chrono-Rings
+    // 4. Triple Gyroscopic Chrono-Rings (Optimized radial segments 12, 48)
     function createChronoRing(radius, tubeRadius, colorHex, tiltX, tiltY) {
-      const ringGeo = new THREE.TorusGeometry(radius, tubeRadius, 16, 72);
+      const ringGeo = new THREE.TorusGeometry(radius, tubeRadius, 12, 48);
       const ringMat = new THREE.MeshStandardMaterial({
         color: colorHex,
         emissive: colorHex,
         emissiveIntensity: 0.45,
-        metalness: 0.95,
-        roughness: 0.15
+        metalness: 0.9,
+        roughness: 0.2
       });
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
       ringMesh.rotation.x = tiltX;
@@ -329,8 +328,8 @@ function runZeroGravityIntro() {
     celestialGroup.add(ring2);
     celestialGroup.add(ring3);
 
-    // 5. Orbital Quantum Ion Particle Cloud
-    const particleCount = 160;
+    // 5. Orbital Quantum Ion Particle Cloud (Optimized 70 points)
+    const particleCount = 70;
     const particleGeo = new THREE.BufferGeometry();
     const particlePos = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount * 3; i += 3) {

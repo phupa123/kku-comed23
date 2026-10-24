@@ -1310,10 +1310,12 @@
         }
       });
 
-      // Viewport Visibility Detection
-      let isInView = true;
+      // Viewport Visibility Detection (Pause background scene while Intro overlay is active)
+      let isInView = false;
       const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => { isInView = entry.isIntersecting; });
+        entries.forEach(entry => { 
+          isInView = entry.isIntersecting && !document.getElementById('zeroGravityIntroOverlay'); 
+        });
       }, { threshold: 0.1 });
       observer.observe(container);
 
@@ -1321,6 +1323,8 @@
       const clock = new THREE.Clock();
       function animate() {
         requestAnimationFrame(animate);
+        // Do not render main scene while intro is active to prevent GPU lockup
+        if (document.getElementById('zeroGravityIntroOverlay')) return;
         if (!isInView) return;
 
         const t = clock.getElapsedTime();
