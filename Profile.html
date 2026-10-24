@@ -495,12 +495,19 @@
       // Check LocalStorage currentUser fallback
       if (!activeUser) {
         try {
-          const stored = localStorage.getItem('currentUser') || localStorage.getItem('supabase_user') || localStorage.getItem('COMED_USER_SESSION');
+          const stored = localStorage.getItem('currentUser') || localStorage.getItem('COMED_USER_SESSION') || localStorage.getItem('supabase_user');
           if (stored) {
             const parsed = JSON.parse(stored);
             activeUser = {
-              id: parsed.id || 'demo-admin-tester',
-              email: parsed.email || 'phupa5874@gmail.com',
+              id: parsed.id || parsed.studentId || parsed.student_id || 'admin-tester-id',
+              email: (parsed.email || 'phupa5874@gmail.com').toLowerCase().trim(),
+              studentId: parsed.studentId || parsed.student_id || 'ADMIN-TESTER',
+              nickname: parsed.nickname || 'ภู',
+              role: parsed.role || 'ADMIN-TESTER',
+              line_id: parsed.lineId || parsed.line_id || '_line_id_123',
+              instagram: parsed.instagram || '@your_instagram',
+              facebook_url: parsed.facebookUrl || parsed.facebook_url || 'https://www.facebook.com/username',
+              bio: parsed.bio || 'เขียนข้อความสั้นๆ ที่นี่...',
               user_metadata: {
                 full_name: parsed.name || parsed.full_name || 'ภูผา (ผู้ดูแลระบบ & ทดสอบระบบ)',
                 avatar_url: parsed.avatar || parsed.avatar_url || parsed.picture || 'assets/images/phupa_profile_preview.png'
@@ -515,6 +522,13 @@
         activeUser = {
           id: 'admin-tester-id',
           email: 'phupa5874@gmail.com',
+          studentId: 'ADMIN-TESTER',
+          nickname: 'ภู',
+          role: 'ADMIN-TESTER',
+          line_id: '_line_id_123',
+          instagram: '@your_instagram',
+          facebook_url: 'https://www.facebook.com/username',
+          bio: 'เขียนข้อความสั้นๆ ที่นี่...',
           user_metadata: {
             full_name: 'ภูผา (ผู้ดูแลระบบ & ทดสอบระบบ)',
             avatar_url: 'assets/images/phupa_profile_preview.png'
@@ -525,57 +539,96 @@
       await fetchAndPopulateProfile(activeUser);
     }
 
-    // 5. Fetch & Populate Data from Supabase 'profiles' table
+    // 5. Fetch & Populate Data from Supabase
+    // Supabase project uses 'user_profiles' table (keyed by email).
+    // Supports fallback to 'profiles' if configured.
     async function fetchAndPopulateProfile(user) {
       let profile = null;
+      const userEmail = (user.email || '').toLowerCase().trim();
 
-      if (supabaseClient && user && user.id && user.id !== 'admin-tester-id') {
+      if (supabaseClient && userEmail) {
+        // First try primary table in COMED schema: user_profiles (keyed by email)
         try {
           const { data, error } = await supabaseClient
-            .from('profiles')
+            .from('user_profiles')
             .select('*')
-            .eq('id', user.id)
-            .single();
+            .eq('email', userEmail)
+            .maybeSingle();
 
           if (!error && data) {
-            profile = data;
-          } else if (error && error.code === 'PGRST116') {
-            // Seed new record from OAuth metadata
-            const newProfile = {
+            profile = {
               id: user.id,
-              email: user.email,
-              full_name: user.user_metadata?.full_name || user.email.split('@')[0],
-              avatar_url: user.user_metadata?.avatar_url || 'assets/images/phupa_profile_preview.png',
-              role: 'STUDENT',
-              student_id: 'PENDING-VERIFY',
-              nickname: '',
-              line_id: '',
-              instagram: '',
-              facebook_url: '',
-              bio: ''
+              email: data.email || userEmail,
+              full_name: data.name || user.user_metadata?.full_name || user.name || 'ผู้ใช้งาน',
+              avatar_url: data.avatar || user.user_metadata?.avatar_url || 'assets/images/phupa_profile_preview.png',
+              role: user.role || 'STUDENT',
+              student_id: data.student_id || user.studentId || user.student_id || '693050XXX-X',
+              nickname: data.nickname || '',
+              line_id: data.line_id || '',
+              instagram: data.instagram || '',
+              facebook_url: data.facebook_url || '',
+              bio: data.bio || ''
             };
-            await supabaseClient.from('profiles').insert([newProfile]);
-            profile = newProfile;
           }
-        } catch (e) {
-          console.warn("Profile fetch fallback:", e);
+        } catch (err) {
+          console.warn("user_profiles fetch note:", err);
         }
+
+        // Second fallback: try 'profiles' table if it exists
+        if (!profile && user.id && user.id !== 'admin-tester-id' && !user.id.startsWith('demo-')) {
+          try {
+            const { data, error } = await supabaseClient
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .maybeSingle();
+
+            if (!error && data) {
+              profile = data;
+            }
+          } catch (e) {
+            // Suppress table not found errors
+          }
+        }
+      }
+
+      // Check LocalStorage custom store
+      if (!profile) {
+        try {
+          const storedProfiles = JSON.parse(localStorage.getItem('COMED_CUSTOM_USERS_PROFILES_V1') || '{}');
+          const custom = storedProfiles[userEmail] || (user.studentId ? storedProfiles[user.studentId] : null);
+          if (custom) {
+            profile = {
+              id: user.id,
+              email: userEmail,
+              full_name: custom.name || user.user_metadata?.full_name || 'ผู้ใช้งาน',
+              avatar_url: custom.avatar || user.user_metadata?.avatar_url || 'assets/images/phupa_profile_preview.png',
+              role: user.role || 'STUDENT',
+              student_id: custom.studentId || user.studentId || '693050XXX-X',
+              nickname: custom.nickname || user.nickname || '',
+              line_id: custom.lineId || custom.line_id || user.line_id || '',
+              instagram: custom.instagram || user.instagram || '',
+              facebook_url: custom.facebookUrl || custom.facebook_url || user.facebook_url || '',
+              bio: custom.bio || user.bio || ''
+            };
+          }
+        } catch (e) {}
       }
 
       // Fallback from localStorage or screenshot defaults
       if (!profile) {
         profile = {
           id: user.id,
-          email: user.email || 'phupa5874@gmail.com',
-          full_name: user.user_metadata?.full_name || 'ภูผา (ผู้ดูแลระบบ & ทดสอบระบบ)',
+          email: userEmail || 'phupa5874@gmail.com',
+          full_name: user.user_metadata?.full_name || user.name || 'ภูผา (ผู้ดูแลระบบ & ทดสอบระบบ)',
           avatar_url: user.user_metadata?.avatar_url || 'assets/images/phupa_profile_preview.png',
-          role: 'ADMIN-TESTER',
-          student_id: 'ADMIN-TESTER',
-          nickname: 'ภู',
-          line_id: '_line_id_123',
-          instagram: '@your_instagram',
-          facebook_url: 'https://www.facebook.com/username',
-          bio: 'เขียนข้อความสั้นๆ ที่นี่...'
+          role: user.role || 'ADMIN-TESTER',
+          student_id: user.studentId || user.student_id || 'ADMIN-TESTER',
+          nickname: user.nickname || 'ภู',
+          line_id: user.line_id || '_line_id_123',
+          instagram: user.instagram || '@your_instagram',
+          facebook_url: user.facebook_url || 'https://www.facebook.com/username',
+          bio: user.bio || 'เขียนข้อความสั้นๆ ที่นี่...'
         };
       }
 
@@ -604,7 +657,7 @@
       updateBioCounter();
     }
 
-    // 6. Form Submit Handler (Upsert into Supabase)
+    // 6. Form Submit Handler (Syncs into user_profiles & LocalStorage)
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
       profileForm.addEventListener('submit', async (e) => {
@@ -624,41 +677,92 @@
           updated_at: new Date().toISOString()
         };
 
-        let success = true;
+        let cloudSynced = false;
+        const emailKey = (cachedProfile?.email || '').toLowerCase().trim();
 
-        if (supabaseClient && cachedProfile && cachedProfile.id && cachedProfile.id !== 'admin-tester-id') {
+        // 1. Sync to Supabase user_profiles table (main COMED database)
+        if (supabaseClient && emailKey) {
           try {
-            const { error } = await supabaseClient
-              .from('profiles')
-              .upsert({ id: cachedProfile.id, ...updates });
-            if (error) {
-              console.error("Supabase upsert error:", error);
-              success = false;
+            const { error: upErr } = await supabaseClient
+              .from('user_profiles')
+              .upsert({
+                email: emailKey,
+                student_id: cachedProfile.student_id || null,
+                name: cachedProfile.full_name || null,
+                nickname: updates.nickname,
+                line_id: updates.line_id,
+                instagram: updates.instagram,
+                facebook_url: updates.facebook_url,
+                bio: updates.bio,
+                updated_at: updates.updated_at
+              }, { onConflict: 'email' });
+
+            if (!upErr) {
+              cloudSynced = true;
+            } else {
+              console.warn("user_profiles upsert notice:", upErr.message);
             }
           } catch (err) {
-            console.warn("Supabase upsert caught:", err);
+            console.warn("Supabase user_profiles upsert caught:", err);
+          }
+
+          // 2. Optional: also upsert to profiles table if it exists
+          if (cachedProfile.id && cachedProfile.id !== 'admin-tester-id' && !cachedProfile.id.startsWith('demo-')) {
+            try {
+              await supabaseClient
+                .from('profiles')
+                .upsert({ id: cachedProfile.id, ...updates });
+            } catch (_) {}
           }
         }
 
-        // Always update LocalStorage session as well
+        // 3. Update LocalStorage COMED_CUSTOM_USERS_PROFILES_V1 for ecosystem sync
         try {
-          const userJson = localStorage.getItem('currentUser') || localStorage.getItem('COMED_USER_SESSION');
-          if (userJson) {
-            const u = JSON.parse(userJson);
-            Object.assign(u, updates);
-            localStorage.setItem('currentUser', JSON.stringify(u));
-            localStorage.setItem('COMED_USER_SESSION', JSON.stringify(u));
-          }
+          const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
+          const stored = JSON.parse(localStorage.getItem(profilesKey) || '{}');
+          stored[emailKey] = {
+            ...(stored[emailKey] || {}),
+            name: cachedProfile.full_name,
+            studentId: cachedProfile.student_id,
+            nickname: updates.nickname,
+            lineId: updates.line_id,
+            instagram: updates.instagram,
+            facebookUrl: updates.facebook_url,
+            bio: updates.bio,
+            updatedAt: updates.updated_at
+          };
+          localStorage.setItem(profilesKey, JSON.stringify(stored));
         } catch (e) {}
+
+        // 4. Update Current User Session
+        try {
+          ['currentUser', 'COMED_USER_SESSION'].forEach(key => {
+            const userJson = localStorage.getItem(key);
+            if (userJson) {
+              const u = JSON.parse(userJson);
+              u.nickname = updates.nickname;
+              u.lineId = updates.line_id;
+              u.line_id = updates.line_id;
+              u.instagram = updates.instagram;
+              u.facebookUrl = updates.facebook_url;
+              u.facebook_url = updates.facebook_url;
+              u.bio = updates.bio;
+              localStorage.setItem(key, JSON.stringify(u));
+            }
+          });
+        } catch (e) {}
+
+        // Update cached profile
+        Object.assign(cachedProfile, updates);
 
         saveBtn.disabled = false;
         saveBtn.innerHTML = origHtml;
         if (window.lucide) lucide.createIcons();
 
-        if (success) {
-          showToast("บันทึกข้อมูลโปรไฟล์สำเร็จเรียบร้อย");
+        if (cloudSynced) {
+          showToast("บันทึกข้อมูลและซิงค์คลาวด์สำเร็จเรียบร้อย");
         } else {
-          showToast("บันทึกลงแคชสำเร็จ (รอเชื่อมต่อเครือข่าย Supabase)");
+          showToast("บันทึกข้อมูลเรียบร้อย (อัปเดตเครื่องและเซสชันแล้ว)");
         }
       });
     }
