@@ -49,6 +49,9 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Three.js CDN for 3D Holographic Avatar Studio -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   <!-- Official Supabase JS SDK via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
@@ -91,6 +94,51 @@
     .beacon-pulse {
       animation: beacon-glow 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
     }
+
+    /* Avatar Decorative Frames */
+    .avatar-frame-cyber {
+      border: 3px solid #38bdf8 !important;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.6), inset 0 0 10px rgba(56, 189, 248, 0.3) !important;
+    }
+    .avatar-frame-gold {
+      border: 3px solid #fbbf24 !important;
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.6), inset 0 0 10px rgba(251, 191, 36, 0.3) !important;
+    }
+    .avatar-frame-neon {
+      border: 3px solid #f43f5e !important;
+      box-shadow: 0 0 25px rgba(244, 63, 94, 0.6), inset 0 0 10px rgba(244, 63, 94, 0.3) !important;
+    }
+    .avatar-frame-emerald {
+      border: 3px solid #10b981 !important;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), inset 0 0 10px rgba(16, 185, 129, 0.3) !important;
+    }
+    .avatar-frame-galaxy {
+      border: 3px solid #a855f7 !important;
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.6), inset 0 0 12px rgba(230, 90, 25, 0.5) !important;
+    }
+
+    /* Avatar Animation Effects */
+    @keyframes anim-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes anim-bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    @keyframes anim-glow-pulse {
+      0%, 100% { filter: drop-shadow(0 0 5px rgba(230,90,25,0.4)); }
+      50% { filter: drop-shadow(0 0 18px rgba(230,90,25,0.9)); }
+    }
+    @keyframes anim-rainbow-hue {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+    .avatar-anim-float { animation: anim-float 3s ease-in-out infinite; }
+    .avatar-anim-pulse { animation: anim-bounce 2s ease-in-out infinite; }
+    .avatar-anim-glow { animation: anim-glow-pulse 2s ease-in-out infinite; }
+    .avatar-anim-bounce { animation: anim-bounce 1.2s ease-in-out infinite; }
+    .avatar-anim-rainbow { animation: anim-rainbow-hue 5s linear infinite; }
 
     /* Custom Form Input Styling matching screenshot */
     .comed-input {
@@ -255,9 +303,10 @@
         <div class="rounded-3xl bg-[#0D0F18]/90 backdrop-blur-xl border border-white/10 p-5 shadow-lg flex items-center gap-4">
           
           <!-- Mini 3D Holographic Wireframe Avatar Preview -->
-          <div class="w-16 h-20 rounded-2xl bg-[#06070A] border border-white/10 overflow-hidden flex-shrink-0 flex items-center justify-center relative group">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#E65A19]/25 to-transparent pointer-events-none"></div>
-            <img src="assets/images/phupa_profile_preview.png" alt="Avatar Studio 3D" class="w-full h-full object-cover filter contrast-125 opacity-80 group-hover:scale-110 transition-transform">
+          <div class="w-16 h-20 rounded-2xl bg-[#06070A] border border-white/10 overflow-hidden flex-shrink-0 flex items-center justify-center relative group cursor-pointer" onclick="openWardrobeDrawer()">
+            <div id="mini3dAvatarCanvas" class="w-full h-full"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#E65A19]/30 to-transparent pointer-events-none"></div>
+            <div class="absolute bottom-1 right-1 text-[8px] font-mono px-1 bg-black/70 text-[#FF7A29] rounded">3D</div>
           </div>
 
           <div class="flex-1 min-w-0 space-y-2">
@@ -462,6 +511,245 @@
       <span class="text-[9px] font-mono font-bold">โปรไฟล์</span>
     </a>
   </nav>
+
+  <!-- ================= AVATAR & 3D WARDROBE STUDIO DRAWER (SLIDE-OVER) ================= -->
+  <div id="wardrobeDrawerBackdrop" class="fixed inset-0 z-50 bg-[#06070A]/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex justify-end" onclick="closeWardrobeDrawer(event)">
+    
+    <!-- Slide-over Drawer Panel -->
+    <div id="wardrobeDrawerPanel" onclick="event.stopPropagation()" class="w-full max-w-3xl sm:max-w-4xl h-full bg-[#090B12]/95 border-l border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.9)] flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-hidden">
+      
+      <!-- Drawer Header -->
+      <div class="p-4 sm:p-5 border-b border-white/10 bg-[#0D0F18]/80 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#B32B19] via-[#E65A19] to-[#FF7A29] text-white flex items-center justify-center shadow-lg shadow-[#E65A19]/30">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2 font-mono">
+              <span>Avatar Wardrobe &amp; 3D Studio</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#E65A19]/20 text-[#FF7A29] border border-[#E65A19]/40">Live 3D WebGL</span>
+            </h3>
+            <p class="text-xs text-slate-400">ตกแต่งอวาตาร์ 2D/3D ปรับโมเดลดิจิทัล กรอบพรีเมียม และแสงสะท้อนนีออน</p>
+          </div>
+        </div>
+
+        <button type="button" onclick="closeWardrobeDrawer()" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer" title="ปิดหน้าต่าง">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Body: Split Layout (Left: Live 3D / 2D Mirror, Right: Wardrobe Controls) -->
+      <div class="flex-grow overflow-y-auto custom-scrollbar p-4 sm:p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- LEFT COLUMN: Live 3D / 2D Fitting Room Mirror -->
+          <div class="lg:col-span-5 sticky top-0 space-y-4">
+            <div class="p-5 rounded-3xl bg-gradient-to-b from-[#0D0F18] to-[#06070A] border border-[#E65A19]/30 shadow-2xl text-center space-y-4 relative overflow-hidden">
+              
+              <!-- Tab Switcher: 3D Model vs 2D Profile Frame -->
+              <div class="flex items-center p-1 rounded-xl bg-black/50 border border-white/10 text-xs font-mono">
+                <button type="button" id="btnMirror3D" onclick="switchMirrorView('3d')" class="flex-1 py-1.5 rounded-lg bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white font-bold flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="box" class="w-3.5 h-3.5"></i>
+                  <span>3D Avatar Model</span>
+                </button>
+                <button type="button" id="btnMirror2D" onclick="switchMirrorView('2d')" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white font-medium flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                  <span>2D กรอบโปรไฟล์</span>
+                </button>
+              </div>
+
+              <!-- VIEW 1: 3D Holographic Model Viewport -->
+              <div id="drawer3dViewportContainer" class="relative w-full h-56 sm:h-64 rounded-2xl bg-[#05060A] border border-white/10 overflow-hidden flex items-center justify-center">
+                <div id="wardrobe3dCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+                <div class="absolute bottom-2 left-2 text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/70 text-slate-400 border border-white/10 flex items-center gap-1 pointer-events-none">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>ลากเมาส์หมุนโมเดล 360°</span>
+                </div>
+              </div>
+
+              <!-- VIEW 2: 2D Photo & Frame Mirror -->
+              <div id="drawer2dViewportContainer" class="hidden relative w-full h-56 sm:h-64 rounded-2xl bg-[#05060A] border border-white/10 overflow-hidden flex flex-col items-center justify-center p-4">
+                <div id="drawer2dAvatarBox" class="w-32 h-32 rounded-full overflow-hidden p-1 flex items-center justify-center relative transition-all duration-300">
+                  <img id="drawer2dAvatarImg" src="assets/images/phupa_profile_preview.png" alt="Avatar Preview" class="w-full h-full object-cover rounded-full transition-transform duration-200">
+                </div>
+                <div id="drawerFrameBadge" class="mt-3 text-[11px] font-mono px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300">
+                  Frame: None
+                </div>
+              </div>
+
+              <div class="space-y-0.5 text-center">
+                <div id="drawerUserDisplayName" class="text-sm font-bold text-white font-mono">ภูผา (ผู้ดูแลระบบ)</div>
+                <div id="drawerUserRoleBadge" class="text-[11px] font-mono text-[#FF7A29]">BATCH 23 // COMED</div>
+              </div>
+
+              <!-- Mirror Controls -->
+              <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-xs font-mono">
+                <button type="button" onclick="randomize3dModelColors()" class="py-2 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="palette" class="w-3.5 h-3.5 text-[#FF7A29]"></i>
+                  <span>สุ่มสี 3D</span>
+                </button>
+                <button type="button" onclick="reset3dModelTransforms()" class="py-2 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>รีเซ็ตโมเดล</span>
+                </button>
+              </div>
+
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-[#E65A19]/10 border border-[#E65A19]/25 text-[11px] font-mono text-slate-300 flex items-start gap-2.5">
+              <i data-lucide="info" class="w-4 h-4 text-[#FF7A29] flex-shrink-0 mt-0.5"></i>
+              <span>การตกแต่งจะบันทึกเข้าสู่โปรไฟล์ของคุณ และเชื่อมต่อกับระบบคลาวด์ทันทีเมื่อกดยืนยัน</span>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Wardrobe & Decoration Accessories -->
+          <div class="lg:col-span-7 space-y-6">
+
+            <!-- 1. 3D Model Customization Panel -->
+            <div class="p-5 rounded-2xl bg-[#0D0F18]/90 border border-white/10 space-y-4">
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <span class="text-xs font-bold text-[#FF7A29] flex items-center gap-2 font-mono">
+                  <i data-lucide="box" class="w-4 h-4"></i>
+                  <span>ตกแต่ง 3D Avatar Model (Geometry &amp; Shaders)</span>
+                </span>
+                <span class="text-[10px] text-emerald-400 font-mono">WebGL Engine Active</span>
+              </div>
+
+              <!-- 3D Shape Preset -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-mono text-slate-400">รูปทรงโมเดล (Core Geometry):</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" onclick="change3dShape('celestial')" data-shape="celestial" class="btn-3d-shape py-2 px-2.5 rounded-xl bg-white/10 border border-[#E65A19] text-white text-xs font-mono font-bold text-center transition">
+                    🪐 Celestial Orb
+                  </button>
+                  <button type="button" onclick="change3dShape('icosahedron')" data-shape="icosahedron" class="btn-3d-shape py-2 px-2.5 rounded-xl bg-black/40 border border-white/10 text-slate-400 hover:text-white text-xs font-mono text-center transition">
+                    💎 Cyber Crystal
+                  </button>
+                  <button type="button" onclick="change3dShape('torus')" data-shape="torus" class="btn-3d-shape py-2 px-2.5 rounded-xl bg-black/40 border border-white/10 text-slate-400 hover:text-white text-xs font-mono text-center transition">
+                    ⭕ Quantum Ring
+                  </button>
+                </div>
+              </div>
+
+              <!-- 3D Material Color Theme -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-mono text-slate-400">ธีมสีแสงและ Shaders นีออน:</label>
+                <div class="grid grid-cols-4 gap-2">
+                  <button type="button" onclick="change3dTheme('kku')" class="py-2 px-2 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white text-[11px] font-mono font-bold text-center border border-[#FF7A29]/50">
+                    KKU Orange
+                  </button>
+                  <button type="button" onclick="change3dTheme('cyber')" class="py-2 px-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-500 text-white text-[11px] font-mono font-bold text-center border border-cyan-400/50">
+                    Cyber Blue
+                  </button>
+                  <button type="button" onclick="change3dTheme('emerald')" class="py-2 px-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-[11px] font-mono font-bold text-center border border-emerald-400/50">
+                    Emerald
+                  </button>
+                  <button type="button" onclick="change3dTheme('galaxy')" class="py-2 px-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white text-[11px] font-mono font-bold text-center border border-purple-400/50">
+                    Cosmic Gold
+                  </button>
+                </div>
+              </div>
+
+              <!-- 3D Aura & Particle Toggles -->
+              <div class="grid grid-cols-2 gap-3 pt-2">
+                <label class="p-3 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between cursor-pointer">
+                  <span class="text-xs font-mono text-slate-300">อนุภาคละอองดาว (Particles)</span>
+                  <input type="checkbox" id="chk3dParticles" checked onchange="toggle3dParticles(this.checked)" class="accent-[#E65A19] w-4 h-4 cursor-pointer">
+                </label>
+                <label class="p-3 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between cursor-pointer">
+                  <span class="text-xs font-mono text-slate-300">หมุนวนอัตโนมัติ (Auto-Spin)</span>
+                  <input type="checkbox" id="chk3dAutoSpin" checked onchange="toggle3dAutoSpin(this.checked)" class="accent-[#E65A19] w-4 h-4 cursor-pointer">
+                </label>
+              </div>
+
+            </div>
+
+            <!-- 2. Avatar Frames Wardrobe (2D) -->
+            <div class="p-5 rounded-2xl bg-[#0D0F18]/90 border border-white/10 space-y-3.5">
+              <span class="text-xs font-bold text-white flex items-center gap-2 font-mono">
+                <i data-lucide="frame" class="w-4 h-4 text-amber-400"></i>
+                <span>ตู้เสื้อผ้ากรอบรูปโปรไฟล์ (Avatar Frames)</span>
+              </span>
+              <div class="grid grid-cols-3 gap-2.5 font-mono text-xs">
+                <button type="button" onclick="applyFramePreset('none')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/15 text-center hover:border-[#E65A19] transition">
+                  <span class="font-bold text-slate-300 block">ไม่มีกรอบ</span>
+                  <span class="text-[10px] text-slate-500">Minimal Clean</span>
+                </button>
+                <button type="button" onclick="applyFramePreset('cyber')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-cyan-400 transition">
+                  <span class="font-bold text-cyan-400 block">Cyber Blue</span>
+                  <span class="text-[10px] text-slate-500">นีออนฟ้า</span>
+                </button>
+                <button type="button" onclick="applyFramePreset('gold')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-amber-400 transition">
+                  <span class="font-bold text-amber-400 block">Gold Royal</span>
+                  <span class="text-[10px] text-slate-500">ขอบทองคำหรู</span>
+                </button>
+                <button type="button" onclick="applyFramePreset('neon')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-rose-400 transition">
+                  <span class="font-bold text-rose-400 block">Neon Pink</span>
+                  <span class="text-[10px] text-slate-500">สตรีทชมพู</span>
+                </button>
+                <button type="button" onclick="applyFramePreset('emerald')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-emerald-400 transition">
+                  <span class="font-bold text-emerald-400 block">Emerald Live</span>
+                  <span class="text-[10px] text-slate-500">เขียวแอคทีฟ</span>
+                </button>
+                <button type="button" onclick="applyFramePreset('galaxy')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-purple-400 transition">
+                  <span class="font-bold text-purple-400 block">Galaxy Glow</span>
+                  <span class="text-[10px] text-slate-500">อวกาศนีออน</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Avatar Animation Effects -->
+            <div class="p-5 rounded-2xl bg-[#0D0F18]/90 border border-white/10 space-y-3.5">
+              <span class="text-xs font-bold text-white flex items-center gap-2 font-mono">
+                <i data-lucide="zap" class="w-4 h-4 text-[#FF7A29]"></i>
+                <span>เอฟเฟกต์แอนิเมชันขยับได้ (Avatar Animation Effects) ✨</span>
+              </span>
+              <div class="grid grid-cols-3 gap-2.5 font-mono text-xs">
+                <button type="button" onclick="applyAnimPreset('none')" class="btn-anim-item p-3 rounded-2xl bg-black/40 border border-white/15 text-center hover:border-[#E65A19] transition">
+                  <span class="font-bold text-slate-300 block">ภาพนิ่ง</span>
+                  <span class="text-[10px] text-slate-500">Static</span>
+                </button>
+                <button type="button" onclick="applyAnimPreset('pulse')" class="btn-anim-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-[#E65A19] transition">
+                  <span class="font-bold text-[#FF7A29] block">Pulse ขยาย</span>
+                  <span class="text-[10px] text-slate-500">ย่อขยายนุ่มนวล</span>
+                </button>
+                <button type="button" onclick="applyAnimPreset('glow')" class="btn-anim-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-[#E65A19] transition">
+                  <span class="font-bold text-amber-400 block">Glow เรืองแสง</span>
+                  <span class="text-[10px] text-slate-500">ออร่ารอบรูป</span>
+                </button>
+                <button type="button" onclick="applyAnimPreset('float')" class="btn-anim-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-[#E65A19] transition">
+                  <span class="font-bold text-cyan-400 block">Float ลอยน้ำ</span>
+                  <span class="text-[10px] text-slate-500">ลอยขึ้นลงช้าๆ</span>
+                </button>
+                <button type="button" onclick="applyAnimPreset('bounce')" class="btn-anim-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-[#E65A19] transition">
+                  <span class="font-bold text-emerald-400 block">Bounce เด้ง</span>
+                  <span class="text-[10px] text-slate-500">ขยับดุ๊กดิ๊ก</span>
+                </button>
+                <button type="button" onclick="applyAnimPreset('rainbow')" class="btn-anim-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-[#E65A19] transition">
+                  <span class="font-bold text-pink-400 block">Rainbow สายรุ้ง</span>
+                  <span class="text-[10px] text-slate-500">หมุนเวียนเฉดสี</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Bottom Save Trigger in Wardrobe -->
+            <div class="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+              <button type="button" onclick="closeWardrobeDrawer()" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white font-mono text-xs transition">
+                ปิด
+              </button>
+              <button type="button" id="btnSaveWardrobe" onclick="saveWardrobeSettings()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#B32B19] via-[#E65A19] to-[#FF7A29] text-white font-mono text-xs font-bold tracking-wider uppercase transition shadow-[0_0_20px_rgba(230,90,25,0.4)] flex items-center gap-2 cursor-pointer">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>บันทึกการตกแต่งทั้งหมด</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Toast Notification element -->
   <div id="profileToast" class="fixed top-20 right-5 z-50 bg-[#0C1030] border border-[#E65A19] text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-mono opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2">
@@ -925,8 +1213,496 @@
       showToast(`หมวดหมู่ "${tabName}" อยู่ในโหมดใช้งานด่วน`);
     }
 
+    // ================= 3D AVATAR & WARDROBE ENGINE =================
+    let wardrobe3d = {
+      scene: null,
+      camera: null,
+      renderer: null,
+      meshGroup: null,
+      coreMesh: null,
+      wireMesh: null,
+      particles: null,
+      animId: null,
+      autoSpin: true,
+      hasParticles: true,
+      theme: 'kku',
+      shape: 'celestial'
+    };
+
+    let mini3d = {
+      scene: null,
+      camera: null,
+      renderer: null,
+      mesh: null,
+      animId: null
+    };
+
+    // User's active wardrobe decorations
+    let currentDecoration = {
+      frame: 'none',
+      anim: 'none',
+      modelShape: 'celestial',
+      modelTheme: 'kku',
+      autoSpin: true,
+      particles: true
+    };
+
+    function initMini3dAvatar() {
+      const container = document.getElementById('mini3dAvatarCanvas');
+      if (!container || typeof THREE === 'undefined') return;
+
+      const w = container.clientWidth || 64;
+      const h = container.clientHeight || 80;
+
+      mini3d.scene = new THREE.Scene();
+      mini3d.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+      mini3d.camera.position.z = 2.4;
+
+      mini3d.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      mini3d.renderer.setSize(w, h);
+      mini3d.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.innerHTML = '';
+      container.appendChild(mini3d.renderer.domElement);
+
+      const light = new THREE.PointLight(0xE65A19, 3, 10);
+      light.position.set(2, 2, 2);
+      mini3d.scene.add(light);
+      mini3d.scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+
+      const geo = new THREE.IcosahedronGeometry(0.7, 1);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0xE65A19,
+        wireframe: true,
+        emissive: 0xB32B19,
+        emissiveIntensity: 0.6
+      });
+      mini3d.mesh = new THREE.Mesh(geo, mat);
+      mini3d.scene.add(mini3d.mesh);
+
+      function animateMini() {
+        mini3d.animId = requestAnimationFrame(animateMini);
+        if (mini3d.mesh) {
+          mini3d.mesh.rotation.y += 0.015;
+          mini3d.mesh.rotation.x += 0.008;
+        }
+        mini3d.renderer.render(mini3d.scene, mini3d.camera);
+      }
+      animateMini();
+    }
+
+    function initWardrobe3dScene() {
+      const container = document.getElementById('wardrobe3dCanvas');
+      if (!container || typeof THREE === 'undefined' || wardrobe3d.renderer) return;
+
+      const w = container.clientWidth || 300;
+      const h = container.clientHeight || 240;
+
+      wardrobe3d.scene = new THREE.Scene();
+      wardrobe3d.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+      wardrobe3d.camera.position.set(0, 0, 3.2);
+
+      wardrobe3d.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+      wardrobe3d.renderer.setSize(w, h);
+      wardrobe3d.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      wardrobe3d.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      container.innerHTML = '';
+      container.appendChild(wardrobe3d.renderer.domElement);
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0x0e1322, 2.5);
+      wardrobe3d.scene.add(ambientLight);
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.8);
+      keyLight.position.set(3, 4, 3);
+      wardrobe3d.scene.add(keyLight);
+
+      const rimLight = new THREE.PointLight(0xE65A19, 4, 10);
+      rimLight.position.set(-3, -2, -2);
+      wardrobe3d.scene.add(rimLight);
+
+      wardrobe3d.meshGroup = new THREE.Group();
+      wardrobe3d.scene.add(wardrobe3d.meshGroup);
+
+      // Build initial 3D model
+      rebuild3dModelGeometry();
+
+      // Mouse Drag Interaction for 3D rotation
+      let isDragging = false;
+      let prevMousePos = { x: 0, y: 0 };
+
+      container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        prevMousePos = { x: e.clientX, y: e.clientY };
+      });
+
+      window.addEventListener('mouseup', () => { isDragging = false; });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging || !wardrobe3d.meshGroup) return;
+        const deltaX = e.clientX - prevMousePos.x;
+        const deltaY = e.clientY - prevMousePos.y;
+        wardrobe3d.meshGroup.rotation.y += deltaX * 0.01;
+        wardrobe3d.meshGroup.rotation.x += deltaY * 0.01;
+        prevMousePos = { x: e.clientX, y: e.clientY };
+      });
+
+      // Touch drag for mobile
+      container.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchend', () => { isDragging = false; });
+      window.addEventListener('touchmove', (e) => {
+        if (!isDragging || !wardrobe3d.meshGroup || e.touches.length !== 1) return;
+        const deltaX = e.touches[0].clientX - prevMousePos.x;
+        const deltaY = e.touches[0].clientY - prevMousePos.y;
+        wardrobe3d.meshGroup.rotation.y += deltaX * 0.01;
+        wardrobe3d.meshGroup.rotation.x += deltaY * 0.01;
+        prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }, { passive: true });
+
+      // Animation Loop
+      function renderWardrobe3d() {
+        wardrobe3d.animId = requestAnimationFrame(renderWardrobe3d);
+        if (wardrobe3d.autoSpin && wardrobe3d.meshGroup && !isDragging) {
+          wardrobe3d.meshGroup.rotation.y += 0.008;
+          wardrobe3d.meshGroup.rotation.x += 0.003;
+        }
+        if (wardrobe3d.particles) {
+          wardrobe3d.particles.rotation.y -= 0.002;
+        }
+        wardrobe3d.renderer.render(wardrobe3d.scene, wardrobe3d.camera);
+      }
+      renderWardrobe3d();
+    }
+
+    function rebuild3dModelGeometry() {
+      if (!wardrobe3d.meshGroup || typeof THREE === 'undefined') return;
+
+      // Clear existing
+      while (wardrobe3d.meshGroup.children.length > 0) {
+        const obj = wardrobe3d.meshGroup.children[0];
+        wardrobe3d.meshGroup.remove(obj);
+      }
+
+      // Color Theme Configs
+      const themes = {
+        kku: { core: 0xB32B19, wire: 0xE65A19, glow: 0xFF7A29, particle: 0xFF944D },
+        cyber: { core: 0x0284c7, wire: 0x38bdf8, glow: 0x0ea5e9, particle: 0x7dd3fc },
+        emerald: { core: 0x059669, wire: 0x10b981, glow: 0x34d399, particle: 0x6ee7b7 },
+        galaxy: { core: 0x7c3aed, wire: 0xc084fc, glow: 0xe879f9, particle: 0xf472b6 }
+      };
+      const t = themes[wardrobe3d.theme] || themes.kku;
+
+      let coreGeo, wireGeo;
+      if (wardrobe3d.shape === 'icosahedron') {
+        coreGeo = new THREE.IcosahedronGeometry(0.72, 1);
+        wireGeo = new THREE.IcosahedronGeometry(0.92, 1);
+      } else if (wardrobe3d.shape === 'torus') {
+        coreGeo = new THREE.TorusGeometry(0.65, 0.22, 16, 64);
+        wireGeo = new THREE.TorusGeometry(0.85, 0.06, 12, 48);
+      } else {
+        // Celestial Sphere with surrounding rings
+        coreGeo = new THREE.SphereGeometry(0.68, 32, 32);
+        wireGeo = new THREE.IcosahedronGeometry(0.95, 1);
+      }
+
+      // Core Mesh
+      const coreMat = new THREE.MeshPhysicalMaterial({
+        color: t.core,
+        emissive: t.wire,
+        emissiveIntensity: 0.5,
+        roughness: 0.2,
+        metalness: 0.8,
+        clearcoat: 1.0
+      });
+      wardrobe3d.coreMesh = new THREE.Mesh(coreGeo, coreMat);
+      wardrobe3d.meshGroup.add(wardrobe3d.coreMesh);
+
+      // Outer Wireframe Hologram
+      const wireMat = new THREE.MeshStandardMaterial({
+        color: t.wire,
+        wireframe: true,
+        emissive: t.glow,
+        emissiveIntensity: 0.8
+      });
+      wardrobe3d.wireMesh = new THREE.Mesh(wireGeo, wireMat);
+      wardrobe3d.meshGroup.add(wardrobe3d.wireMesh);
+
+      // Extra Orbiting Rings for Celestial
+      if (wardrobe3d.shape === 'celestial') {
+        const ringGeo = new THREE.TorusGeometry(1.15, 0.02, 8, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: t.glow });
+        const ring1 = new THREE.Mesh(ringGeo, ringMat);
+        ring1.rotation.x = Math.PI / 3;
+        const ring2 = new THREE.Mesh(ringGeo, ringMat);
+        ring2.rotation.y = Math.PI / 4;
+        wardrobe3d.meshGroup.add(ring1);
+        wardrobe3d.meshGroup.add(ring2);
+      }
+
+      // Floating Particle Cloud
+      if (wardrobe3d.hasParticles) {
+        const pCount = 70;
+        const pPositions = new Float32Array(pCount * 3);
+        for (let i = 0; i < pCount; i++) {
+          const u = Math.random();
+          const v = Math.random();
+          const theta = u * 2.0 * Math.PI;
+          const phi = Math.acos(2.0 * v - 1.0);
+          const r = 1.35 + Math.random() * 0.45;
+          pPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+          pPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+          pPositions[i * 3 + 2] = r * Math.cos(phi);
+        }
+        const pGeo = new THREE.BufferGeometry();
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+        const pMat = new THREE.PointsMaterial({
+          color: t.particle,
+          size: 0.05,
+          transparent: true,
+          opacity: 0.85,
+          blending: THREE.AdditiveBlending
+        });
+        wardrobe3d.particles = new THREE.Points(pGeo, pMat);
+        wardrobe3d.meshGroup.add(wardrobe3d.particles);
+      }
+    }
+
+    // Controls for Wardrobe Drawer
     function openWardrobeDrawer() {
-      showToast("เปิด Avatar Wardrobe Studio สำเร็จ");
+      const backdrop = document.getElementById('wardrobeDrawerBackdrop');
+      const panel = document.getElementById('wardrobeDrawerPanel');
+      if (!backdrop || !panel) return;
+
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100');
+      panel.classList.remove('translate-x-full');
+      panel.classList.add('translate-x-0');
+
+      // Sync display names
+      const nameEl = document.getElementById('drawerUserDisplayName');
+      const roleEl = document.getElementById('drawerUserRoleBadge');
+      if (nameEl && cachedProfile) nameEl.textContent = cachedProfile.full_name || 'ผู้ใช้งาน';
+      if (roleEl && cachedProfile) roleEl.textContent = `${cachedProfile.role || 'STUDENT'} // COMED23`;
+
+      // Sync 2D Avatar Image
+      const img = document.getElementById('drawer2dAvatarImg');
+      if (img && cachedProfile) {
+        img.src = cachedProfile.avatar_url || 'assets/images/phupa_profile_preview.png';
+      }
+
+      setTimeout(() => {
+        initWardrobe3dScene();
+      }, 100);
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeWardrobeDrawer(e) {
+      if (e && e.target && e.target.id !== 'wardrobeDrawerBackdrop' && !e.target.closest('button')) return;
+      const backdrop = document.getElementById('wardrobeDrawerBackdrop');
+      const panel = document.getElementById('wardrobeDrawerPanel');
+      if (!backdrop || !panel) return;
+
+      panel.classList.remove('translate-x-0');
+      panel.classList.add('translate-x-full');
+      backdrop.classList.remove('opacity-100');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function switchMirrorView(view) {
+      const v3d = document.getElementById('drawer3dViewportContainer');
+      const v2d = document.getElementById('drawer2dViewportContainer');
+      const b3d = document.getElementById('btnMirror3D');
+      const b2d = document.getElementById('btnMirror2D');
+
+      if (view === '3d') {
+        v3d.classList.remove('hidden');
+        v2d.classList.add('hidden');
+        b3d.className = "flex-1 py-1.5 rounded-lg bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white font-bold flex items-center justify-center gap-1.5 transition";
+        b2d.className = "flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white font-medium flex items-center justify-center gap-1.5 transition";
+      } else {
+        v3d.classList.add('hidden');
+        v2d.classList.remove('hidden');
+        b2d.className = "flex-1 py-1.5 rounded-lg bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white font-bold flex items-center justify-center gap-1.5 transition";
+        b3d.className = "flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white font-medium flex items-center justify-center gap-1.5 transition";
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function change3dShape(shape) {
+      wardrobe3d.shape = shape;
+      currentDecoration.modelShape = shape;
+      rebuild3dModelGeometry();
+
+      document.querySelectorAll('.btn-3d-shape').forEach(btn => {
+        if (btn.dataset.shape === shape) {
+          btn.classList.add('bg-white/10', 'border-[#E65A19]', 'text-white', 'font-bold');
+          btn.classList.remove('bg-black/40', 'border-white/10', 'text-slate-400');
+        } else {
+          btn.classList.remove('bg-white/10', 'border-[#E65A19]', 'text-white', 'font-bold');
+          btn.classList.add('bg-black/40', 'border-white/10', 'text-slate-400');
+        }
+      });
+      showToast(`ปรับรูปทรงโมเดลเป็น: ${shape}`);
+    }
+
+    function change3dTheme(theme) {
+      wardrobe3d.theme = theme;
+      currentDecoration.modelTheme = theme;
+      rebuild3dModelGeometry();
+      showToast(`เปลี่ยนธีมสีแสง 3D เป็น: ${theme}`);
+    }
+
+    function toggle3dParticles(enabled) {
+      wardrobe3d.hasParticles = enabled;
+      currentDecoration.particles = enabled;
+      rebuild3dModelGeometry();
+    }
+
+    function toggle3dAutoSpin(enabled) {
+      wardrobe3d.autoSpin = enabled;
+      currentDecoration.autoSpin = enabled;
+    }
+
+    function randomize3dModelColors() {
+      const themes = ['kku', 'cyber', 'emerald', 'galaxy'];
+      const shapes = ['celestial', 'icosahedron', 'torus'];
+      const nextTheme = themes[Math.floor(Math.random() * themes.length)];
+      const nextShape = shapes[Math.floor(Math.random() * shapes.length)];
+      change3dShape(nextShape);
+      change3dTheme(nextTheme);
+    }
+
+    function reset3dModelTransforms() {
+      if (wardrobe3d.meshGroup) {
+        wardrobe3d.meshGroup.rotation.set(0, 0, 0);
+      }
+      change3dShape('celestial');
+      change3dTheme('kku');
+      showToast("รีเซ็ตโมเดล 3D เรียบร้อย");
+    }
+
+    // 2D Profile Frame & Animation handlers
+    function applyFramePreset(frame) {
+      currentDecoration.frame = frame;
+      const avatarBox = document.querySelector('.avatar-metallic-ring');
+      const drawerBox = document.getElementById('drawer2dAvatarBox');
+      const badge = document.getElementById('drawerFrameBadge');
+
+      const allFrames = ['avatar-frame-cyber', 'avatar-frame-gold', 'avatar-frame-neon', 'avatar-frame-emerald', 'avatar-frame-galaxy'];
+      
+      [avatarBox, drawerBox].forEach(el => {
+        if (!el) return;
+        allFrames.forEach(f => el.classList.remove(f));
+        if (frame !== 'none') {
+          el.classList.add(`avatar-frame-${frame}`);
+        }
+      });
+
+      if (badge) badge.textContent = `Frame: ${frame.toUpperCase()}`;
+      showToast(`เลือกกรอบ: ${frame}`);
+    }
+
+    function applyAnimPreset(anim) {
+      currentDecoration.anim = anim;
+      const userAvatarImg = document.getElementById('userAvatar');
+      const drawerAvatarImg = document.getElementById('drawer2dAvatarImg');
+
+      const allAnims = ['avatar-anim-float', 'avatar-anim-pulse', 'avatar-anim-glow', 'avatar-anim-bounce', 'avatar-anim-rainbow'];
+      
+      [userAvatarImg, drawerAvatarImg].forEach(el => {
+        if (!el) return;
+        allAnims.forEach(a => el.classList.remove(a));
+        if (anim !== 'none') {
+          el.classList.add(`avatar-anim-${anim}`);
+        }
+      });
+
+      showToast(`เลือกแอนิเมชัน: ${anim}`);
+    }
+
+    async function saveWardrobeSettings() {
+      const btn = document.getElementById('btnSaveWardrobe');
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>กำลังบันทึก...</span>`;
+      if (window.lucide) lucide.createIcons();
+
+      const emailKey = (cachedProfile?.email || '').toLowerCase().trim();
+
+      // Upsert to user_profiles table in Supabase
+      if (supabaseClient && emailKey) {
+        try {
+          await supabaseClient
+            .from('user_profiles')
+            .upsert({
+              email: emailKey,
+              avatar_frame: currentDecoration.frame,
+              avatar_anim: currentDecoration.anim,
+              avatar_transform: {
+                modelShape: currentDecoration.modelShape,
+                modelTheme: currentDecoration.modelTheme,
+                autoSpin: currentDecoration.autoSpin,
+                particles: currentDecoration.particles
+              },
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'email' });
+        } catch (e) {
+          console.warn("Wardrobe save cloud notice:", e);
+        }
+      }
+
+      // Update LocalStorage
+      try {
+        const stored = JSON.parse(localStorage.getItem('COMED_CUSTOM_USERS_PROFILES_V1') || '{}');
+        stored[emailKey] = {
+          ...(stored[emailKey] || {}),
+          avatarFrame: currentDecoration.frame,
+          avatarAnim: currentDecoration.anim,
+          avatarTransform: currentDecoration
+        };
+        localStorage.setItem('COMED_CUSTOM_USERS_PROFILES_V1', JSON.stringify(stored));
+      } catch (e) {}
+
+      btn.disabled = false;
+      btn.innerHTML = orig;
+      if (window.lucide) lucide.createIcons();
+
+      closeWardrobeDrawer();
+      showToast("บันทึกการตกแต่ง Avatar & โมเดล 3D สำเร็จเรียบร้อย!");
+    }
+
+    function openWardrobeDrawer() {
+      const backdrop = document.getElementById('wardrobeDrawerBackdrop');
+      const panel = document.getElementById('wardrobeDrawerPanel');
+      if (!backdrop || !panel) return;
+
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100');
+      panel.classList.remove('translate-x-full');
+      panel.classList.add('translate-x-0');
+
+      // Sync display names
+      const nameEl = document.getElementById('drawerUserDisplayName');
+      const roleEl = document.getElementById('drawerUserRoleBadge');
+      if (nameEl && cachedProfile) nameEl.textContent = cachedProfile.full_name || 'ผู้ใช้งาน';
+      if (roleEl && cachedProfile) roleEl.textContent = `${cachedProfile.role || 'STUDENT'} // COMED23`;
+
+      // Sync 2D Avatar Image
+      const img = document.getElementById('drawer2dAvatarImg');
+      if (img && cachedProfile) {
+        img.src = cachedProfile.avatar_url || 'assets/images/phupa_profile_preview.png';
+      }
+
+      setTimeout(() => {
+        initWardrobe3dScene();
+      }, 100);
+
+      if (window.lucide) lucide.createIcons();
     }
 
     // 7. Toast Notification Utility
@@ -965,6 +1741,9 @@
 
     // Bootstrap
     initSession();
+    setTimeout(() => {
+      initMini3dAvatar();
+    }, 200);
   </script>
 
 </body>
