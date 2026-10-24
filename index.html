@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" class="scroll-smooth dark">
+<html lang="th" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -1072,41 +1072,11 @@
 
   <!-- ================= INTERACTIVE THREE.JS ZERO-GRAVITY SPHERE & GSAP ================= -->
   <script>
-    // 1. Initialize Smooth Scroll with Lenis (Optimized for responsive wheel scrolling)
-    let lenis;
-    try {
-      if (typeof Lenis !== 'undefined') {
-        lenis = new Lenis({
-          duration: 0.8, // Shorter duration for immediate snappy wheel response
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          direction: 'vertical',
-          gestureDirection: 'vertical',
-          smooth: true,
-          smoothTouch: false,
-          wheelMultiplier: 1.2, // Boost desktop wheel responsiveness
-          touchMultiplier: 1.5,
-        });
+    // Native Smooth Scroll (Zero Conflict, Zero Jank)
+    // Disabled Lenis JS hijacker which causes scroll fight/bouncing on desktop mouse wheel
+    let lenis = null;
 
-        // Connect Lenis to GSAP ScrollTrigger so they do not fight each other
-        if (typeof ScrollTrigger !== 'undefined') {
-          lenis.on('scroll', ScrollTrigger.update);
-          gsap.ticker.add((time) => {
-            lenis.raf(time * 1000);
-          });
-          gsap.ticker.lagSmoothing(0);
-        } else {
-          function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-          }
-          requestAnimationFrame(raf);
-        }
-      }
-    } catch (e) {
-      console.warn('Lenis scroll init bypassed:', e);
-    }
-
-    // 2. Kinetic Typography Scroll Distortion with GSAP
+    // 2. Kinetic Typography Scroll Distortion with GSAP (Throttled)
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
       gsap.registerPlugin(ScrollTrigger);
 
@@ -1121,14 +1091,9 @@
             if (!isTicking) {
               isTicking = true;
               requestAnimationFrame(() => {
-                const vel = self.getVelocity() / 350;
-                const skew = Math.max(-5, Math.min(5, vel));
-                gsap.to(kineticTitle, {
-                  skewX: skew,
-                  duration: 0.25,
-                  ease: 'power1.out',
-                  overwrite: 'auto'
-                });
+                const vel = self.getVelocity() / 500;
+                const skew = Math.max(-4, Math.min(4, vel));
+                kineticTitle.style.transform = `skewX(${skew}deg)`;
                 isTicking = false;
               });
             }
