@@ -1072,25 +1072,35 @@
 
   <!-- ================= INTERACTIVE THREE.JS ZERO-GRAVITY SPHERE & GSAP ================= -->
   <script>
-    // 1. Initialize Smooth Scroll with Lenis
+    // 1. Initialize Smooth Scroll with Lenis (Optimized for responsive wheel scrolling)
     let lenis;
     try {
       if (typeof Lenis !== 'undefined') {
         lenis = new Lenis({
-          duration: 1.2,
+          duration: 0.8, // Shorter duration for immediate snappy wheel response
           easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
           direction: 'vertical',
           gestureDirection: 'vertical',
           smooth: true,
           smoothTouch: false,
-          touchMultiplier: 2,
+          wheelMultiplier: 1.2, // Boost desktop wheel responsiveness
+          touchMultiplier: 1.5,
         });
 
-        function raf(time) {
-          lenis.raf(time);
+        // Connect Lenis to GSAP ScrollTrigger so they do not fight each other
+        if (typeof ScrollTrigger !== 'undefined') {
+          lenis.on('scroll', ScrollTrigger.update);
+          gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+          });
+          gsap.ticker.lagSmoothing(0);
+        } else {
+          function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+          }
           requestAnimationFrame(raf);
         }
-        requestAnimationFrame(raf);
       }
     } catch (e) {
       console.warn('Lenis scroll init bypassed:', e);
