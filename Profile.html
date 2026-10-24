@@ -246,23 +246,28 @@
           <!-- Card Glow background -->
           <div class="absolute -top-16 -right-16 w-44 h-44 bg-[#E65A19]/15 rounded-full blur-2xl pointer-events-none"></div>
 
-          <!-- Avatar with Metallic Ring & Status Beacon -->
-          <div class="relative w-36 h-36 mx-auto mb-5 group">
-            <div class="avatar-metallic-ring w-full h-full rounded-full overflow-hidden p-1 flex items-center justify-center relative">
+          <!-- Avatar with Metallic Ring, 3D WebGL Frame Layer & Status Beacon -->
+          <div class="relative w-40 h-40 mx-auto mb-5 group flex items-center justify-center">
+            
+            <!-- 3D WebGL Interactive Halo/Particle Frame Canvas Layer -->
+            <div id="avatar3dFrameOverlay" class="absolute -inset-4 z-20 pointer-events-none w-48 h-48"></div>
+
+            <div id="avatarContainerBox" class="avatar-metallic-ring w-36 h-36 rounded-full overflow-hidden p-1 flex items-center justify-center relative z-10 transition-all duration-300">
               <img id="userAvatar" src="assets/images/phupa_profile_preview.png" alt="Student Avatar" class="w-full h-full object-cover rounded-full" onerror="this.src='logo.png'">
               
               <!-- Quick Avatar Upload Overlay Trigger -->
-              <label for="avatarUploadInput" class="absolute inset-1 rounded-full bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-mono gap-1">
+              <label for="avatarUploadInput" class="absolute inset-1 rounded-full bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-mono gap-1 z-20">
                 <i data-lucide="camera" class="w-5 h-5 text-[#FF7A29]"></i>
                 <span class="font-bold">เปลี่ยนรูป</span>
               </label>
               <input type="file" id="avatarUploadInput" accept="image/*" class="hidden">
             </div>
+
             <!-- Live Active Beacon Dot (top-right of ring) -->
-            <div class="absolute top-2 right-2 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#0D0F18] beacon-pulse flex items-center justify-center shadow-[0_0_10px_#34d399]" title="สถานะ: ออนไลน์พร้อมใช้งาน">
+            <div class="absolute top-1 right-2 z-30 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#0D0F18] beacon-pulse flex items-center justify-center shadow-[0_0_10px_#34d399]" title="สถานะ: ออนไลน์พร้อมใช้งาน">
             </div>
             <!-- Bottom Indicator Node -->
-            <div class="absolute bottom-1 right-5 w-3.5 h-3.5 rounded-full bg-emerald-500/80 border border-emerald-300"></div>
+            <div class="absolute bottom-1 right-5 z-30 w-3.5 h-3.5 rounded-full bg-emerald-500/80 border border-emerald-300"></div>
           </div>
 
           <!-- User Details -->
@@ -567,13 +572,18 @@
                 </div>
               </div>
 
-              <!-- VIEW 2: 2D Photo & Frame Mirror -->
+              <!-- VIEW 2: 2D Photo & Live 3D Overlay Frame Mirror -->
               <div id="drawer2dViewportContainer" class="hidden relative w-full h-56 sm:h-64 rounded-2xl bg-[#05060A] border border-white/10 overflow-hidden flex flex-col items-center justify-center p-4">
-                <div id="drawer2dAvatarBox" class="w-32 h-32 rounded-full overflow-hidden p-1 flex items-center justify-center relative transition-all duration-300">
-                  <img id="drawer2dAvatarImg" src="assets/images/phupa_profile_preview.png" alt="Avatar Preview" class="w-full h-full object-cover rounded-full transition-transform duration-200">
+                <div class="relative w-36 h-36 flex items-center justify-center">
+                  <!-- Live 3D Frame Canvas Preview for 2D Photo in drawer -->
+                  <div id="drawer3dFrameOverlay" class="absolute -inset-3 z-10 pointer-events-none w-42 h-42"></div>
+                  
+                  <div id="drawer2dAvatarBox" class="avatar-metallic-ring w-32 h-32 rounded-full overflow-hidden p-1 flex items-center justify-center relative z-0 transition-all duration-300">
+                    <img id="drawer2dAvatarImg" src="assets/images/phupa_profile_preview.png" alt="Avatar Preview" class="w-full h-full object-cover rounded-full transition-transform duration-200">
+                  </div>
                 </div>
                 <div id="drawerFrameBadge" class="mt-3 text-[11px] font-mono px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300">
-                  Frame: None
+                  3D Frame: None
                 </div>
               </div>
 
@@ -664,37 +674,58 @@
 
             </div>
 
-            <!-- 2. Avatar Frames Wardrobe (2D) -->
-            <div class="p-5 rounded-2xl bg-[#0D0F18]/90 border border-white/10 space-y-3.5">
-              <span class="text-xs font-bold text-white flex items-center gap-2 font-mono">
-                <i data-lucide="frame" class="w-4 h-4 text-amber-400"></i>
-                <span>ตู้เสื้อผ้ากรอบรูปโปรไฟล์ (Avatar Frames)</span>
-              </span>
-              <div class="grid grid-cols-3 gap-2.5 font-mono text-xs">
-                <button type="button" onclick="applyFramePreset('none')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/15 text-center hover:border-[#E65A19] transition">
-                  <span class="font-bold text-slate-300 block">ไม่มีกรอบ</span>
-                  <span class="text-[10px] text-slate-500">Minimal Clean</span>
-                </button>
-                <button type="button" onclick="applyFramePreset('cyber')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-cyan-400 transition">
-                  <span class="font-bold text-cyan-400 block">Cyber Blue</span>
-                  <span class="text-[10px] text-slate-500">นีออนฟ้า</span>
-                </button>
-                <button type="button" onclick="applyFramePreset('gold')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-amber-400 transition">
-                  <span class="font-bold text-amber-400 block">Gold Royal</span>
-                  <span class="text-[10px] text-slate-500">ขอบทองคำหรู</span>
-                </button>
-                <button type="button" onclick="applyFramePreset('neon')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-rose-400 transition">
-                  <span class="font-bold text-rose-400 block">Neon Pink</span>
-                  <span class="text-[10px] text-slate-500">สตรีทชมพู</span>
-                </button>
-                <button type="button" onclick="applyFramePreset('emerald')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-emerald-400 transition">
-                  <span class="font-bold text-emerald-400 block">Emerald Live</span>
-                  <span class="text-[10px] text-slate-500">เขียวแอคทีฟ</span>
-                </button>
-                <button type="button" onclick="applyFramePreset('galaxy')" class="btn-frame-item p-3 rounded-2xl bg-black/40 border border-white/10 text-center hover:border-purple-400 transition">
-                  <span class="font-bold text-purple-400 block">Galaxy Glow</span>
-                  <span class="text-[10px] text-slate-500">อวกาศนีออน</span>
-                </button>
+            <!-- 2. Avatar Frames & 3D Model Halo / Particle VFX Wardrobe -->
+            <div class="p-5 rounded-2xl bg-[#0D0F18]/90 border border-white/10 space-y-4">
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <span class="text-xs font-bold text-white flex items-center gap-2 font-mono">
+                  <i data-lucide="sparkle" class="w-4 h-4 text-[#FF7A29]"></i>
+                  <span>กรอบ 3D WebGL Model &amp; Particle VFX ซ้อนภาพ</span>
+                </span>
+                <span class="text-[10px] text-amber-400 font-mono">Real-time 3D Shader</span>
+              </div>
+
+              <!-- 3D Frame Preset Selector -->
+              <div class="space-y-2">
+                <label class="text-[11px] font-mono text-slate-400">เลือกกรอบ 3D รอบรูปโปรไฟล์ (3D WebGL Frame Mesh):</label>
+                <div class="grid grid-cols-3 gap-2.5 font-mono text-xs">
+                  <button type="button" onclick="apply3dFramePreset('none')" data-frame3d="none" class="btn-3d-frame-opt p-3 rounded-2xl bg-white/10 border border-[#E65A19] text-white text-center transition">
+                    <span class="font-bold block">ไม่มีกรอบ 3D</span>
+                    <span class="text-[10px] text-slate-400">Default Flat</span>
+                  </button>
+                  <button type="button" onclick="apply3dFramePreset('quantum-ring')" data-frame3d="quantum-ring" class="btn-3d-frame-opt p-3 rounded-2xl bg-black/40 border border-white/10 text-slate-400 hover:text-white text-center transition">
+                    <span class="font-bold text-[#FF7A29] block">🪐 Orbit Ring</span>
+                    <span class="text-[10px] text-slate-500">วงแหวน 3D หมุนวน</span>
+                  </button>
+                  <button type="button" onclick="apply3dFramePreset('cyber-poly')" data-frame3d="cyber-poly" class="btn-3d-frame-opt p-3 rounded-2xl bg-black/40 border border-white/10 text-slate-400 hover:text-white text-center transition">
+                    <span class="font-bold text-cyan-400 block">💎 Cyber Poly</span>
+                    <span class="text-[10px] text-slate-500">ผลึกแก้วหมุน 3 มิติ</span>
+                  </button>
+                  <button type="button" onclick="apply3dFramePreset('neon-torus')" data-frame3d="neon-torus" class="btn-3d-frame-opt p-3 rounded-2xl bg-black/40 border border-white/10 text-slate-400 hover:text-white text-center transition">
+                    <span class="font-bold text-emerald-400 block">⭕ Neon Torus</span>
+                    <span class="text-[10px] text-slate-500">โดนัทแสงนีออน</span>
+                  </button>
+                  <button type="button" onclick="apply3dFramePreset('starfield-vfx')" data-frame3d="starfield-vfx" class="btn-3d-frame-opt p-3 rounded-2xl bg-black/40 border border-white/10 text-slate-400 hover:text-white text-center transition">
+                    <span class="font-bold text-amber-400 block">✨ Starfield VFX</span>
+                    <span class="text-[10px] text-slate-500">ละอองดาวระยิบระยับ</span>
+                  </button>
+                  <button type="button" onclick="apply3dFramePreset('plasma-vortex')" data-frame3d="plasma-vortex" class="btn-3d-frame-opt p-3 rounded-2xl bg-black/40 border border-white/10 text-slate-400 hover:text-white text-center transition">
+                    <span class="font-bold text-purple-400 block">🌌 Cosmic Vortex</span>
+                    <span class="text-[10px] text-slate-500">พายุอวกาศคู่</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2D CSS Border Layer Styles -->
+              <div class="space-y-2 pt-2 border-t border-white/10">
+                <label class="text-[11px] font-mono text-slate-400">กรอบนีออน 2D CSS (เสริมแต่งชั้นใน):</label>
+                <div class="grid grid-cols-3 gap-2 font-mono text-xs">
+                  <button type="button" onclick="applyFramePreset('none')" class="btn-frame-item p-2 rounded-xl bg-black/40 border border-white/10 text-slate-300 hover:border-[#E65A19] text-center">None</button>
+                  <button type="button" onclick="applyFramePreset('cyber')" class="btn-frame-item p-2 rounded-xl bg-black/40 border border-white/10 text-cyan-400 hover:border-cyan-400 text-center">Cyber Blue</button>
+                  <button type="button" onclick="applyFramePreset('gold')" class="btn-frame-item p-2 rounded-xl bg-black/40 border border-white/10 text-amber-400 hover:border-amber-400 text-center">Gold Royal</button>
+                  <button type="button" onclick="applyFramePreset('neon')" class="btn-frame-item p-2 rounded-xl bg-black/40 border border-white/10 text-rose-400 hover:border-rose-400 text-center">Neon Pink</button>
+                  <button type="button" onclick="applyFramePreset('emerald')" class="btn-frame-item p-2 rounded-xl bg-black/40 border border-white/10 text-emerald-400 hover:border-emerald-400 text-center">Emerald</button>
+                  <button type="button" onclick="applyFramePreset('galaxy')" class="btn-frame-item p-2 rounded-xl bg-black/40 border border-white/10 text-purple-400 hover:border-purple-400 text-center">Galaxy Glow</button>
+                </div>
               </div>
             </div>
 
@@ -1240,12 +1271,185 @@
     // User's active wardrobe decorations
     let currentDecoration = {
       frame: 'none',
+      frame3d: 'none',
       anim: 'none',
       modelShape: 'celestial',
       modelTheme: 'kku',
       autoSpin: true,
       particles: true
     };
+
+    // 3D Avatar Halo/Particle Frame Engine for 2D Photo
+    let avatar3dFrame = {
+      scene: null,
+      camera: null,
+      renderer: null,
+      meshGroup: null,
+      particles: null,
+      animId: null
+    };
+
+    let drawer3dFrame = {
+      scene: null,
+      camera: null,
+      renderer: null,
+      meshGroup: null,
+      particles: null,
+      animId: null
+    };
+
+    // Setup 3D WebGL Frame Engine layered over 2D Avatar
+    function initAvatar3dFrameEngine(targetId, engineObj) {
+      const container = document.getElementById(targetId);
+      if (!container || typeof THREE === 'undefined') return;
+
+      const w = container.clientWidth || 192;
+      const h = container.clientHeight || 192;
+
+      engineObj.scene = new THREE.Scene();
+      engineObj.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+      engineObj.camera.position.z = 3.4;
+
+      engineObj.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+      engineObj.renderer.setSize(w, h);
+      engineObj.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.innerHTML = '';
+      container.appendChild(engineObj.renderer.domElement);
+
+      engineObj.meshGroup = new THREE.Group();
+      engineObj.scene.add(engineObj.meshGroup);
+
+      const amb = new THREE.AmbientLight(0xffffff, 1.2);
+      engineObj.scene.add(amb);
+
+      const pLight = new THREE.PointLight(0xFF7A29, 3, 10);
+      pLight.position.set(2, 2, 2);
+      engineObj.scene.add(pLight);
+
+      function animate() {
+        engineObj.animId = requestAnimationFrame(animate);
+        if (engineObj.meshGroup) {
+          engineObj.meshGroup.rotation.z += 0.012;
+          engineObj.meshGroup.rotation.y += 0.008;
+          engineObj.meshGroup.rotation.x += 0.005;
+        }
+        if (engineObj.particles) {
+          engineObj.particles.rotation.z -= 0.008;
+        }
+        engineObj.renderer.render(engineObj.scene, engineObj.camera);
+      }
+      animate();
+    }
+
+    function build3dFrameMeshes(engineObj, preset) {
+      if (!engineObj || !engineObj.meshGroup || typeof THREE === 'undefined') return;
+
+      // Clear existing
+      while (engineObj.meshGroup.children.length > 0) {
+        const obj = engineObj.meshGroup.children[0];
+        engineObj.meshGroup.remove(obj);
+      }
+      engineObj.particles = null;
+
+      if (!preset || preset === 'none') return;
+
+      const themes = {
+        'quantum-ring': { color: 0xE65A19, glow: 0xFF7A29, type: 'ring' },
+        'cyber-poly': { color: 0x0284c7, glow: 0x38bdf8, type: 'crystal' },
+        'neon-torus': { color: 0x059669, glow: 0x34d399, type: 'torus' },
+        'starfield-vfx': { color: 0xf59e0b, glow: 0xfde047, type: 'particles' },
+        'plasma-vortex': { color: 0x9333ea, glow: 0xe879f9, type: 'vortex' }
+      };
+
+      const cfg = themes[preset] || themes['quantum-ring'];
+
+      if (cfg.type === 'ring' || cfg.type === 'torus') {
+        const ringGeo = new THREE.TorusGeometry(1.22, 0.04, 12, 64);
+        const ringMat = new THREE.MeshStandardMaterial({
+          color: cfg.color,
+          emissive: cfg.glow,
+          emissiveIntensity: 0.9,
+          roughness: 0.2
+        });
+        const ring1 = new THREE.Mesh(ringGeo, ringMat);
+        ring1.rotation.x = Math.PI / 4;
+        engineObj.meshGroup.add(ring1);
+
+        const ring2Geo = new THREE.TorusGeometry(1.35, 0.02, 8, 48);
+        const ring2Mat = new THREE.MeshBasicMaterial({ color: cfg.glow });
+        const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+        ring2.rotation.y = Math.PI / 3;
+        engineObj.meshGroup.add(ring2);
+      } else if (cfg.type === 'crystal') {
+        const polyGeo = new THREE.IcosahedronGeometry(1.28, 1);
+        const polyMat = new THREE.MeshStandardMaterial({
+          color: cfg.color,
+          wireframe: true,
+          emissive: cfg.glow,
+          emissiveIntensity: 0.95
+        });
+        const poly = new THREE.Mesh(polyGeo, polyMat);
+        engineObj.meshGroup.add(poly);
+      } else if (cfg.type === 'vortex') {
+        // Dual crossed rings with neon nodes
+        const rGeo = new THREE.TorusGeometry(1.28, 0.05, 16, 64);
+        const rMat = new THREE.MeshStandardMaterial({
+          color: cfg.color,
+          emissive: cfg.glow,
+          emissiveIntensity: 0.8
+        });
+        const r1 = new THREE.Mesh(rGeo, rMat);
+        r1.rotation.x = Math.PI / 3;
+        const r2 = new THREE.Mesh(rGeo, rMat);
+        r2.rotation.y = -Math.PI / 3;
+        engineObj.meshGroup.add(r1);
+        engineObj.meshGroup.add(r2);
+      }
+
+      // Add Particle Starfield / Sparks VFX for all or dedicated starfield
+      const pCount = cfg.type === 'particles' ? 90 : 45;
+      const pPositions = new Float32Array(pCount * 3);
+      for (let i = 0; i < pCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 1.2 + Math.random() * 0.45;
+        pPositions[i * 3] = Math.cos(angle) * radius;
+        pPositions[i * 3 + 1] = Math.sin(angle) * radius;
+        pPositions[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
+      }
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+      const pMat = new THREE.PointsMaterial({
+        color: cfg.glow,
+        size: cfg.type === 'particles' ? 0.08 : 0.05,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending
+      });
+      engineObj.particles = new THREE.Points(pGeo, pMat);
+      engineObj.meshGroup.add(engineObj.particles);
+    }
+
+    function apply3dFramePreset(preset) {
+      currentDecoration.frame3d = preset;
+      build3dFrameMeshes(avatar3dFrame, preset);
+      build3dFrameMeshes(drawer3dFrame, preset);
+
+      // UI button active state
+      document.querySelectorAll('.btn-3d-frame-opt').forEach(btn => {
+        if (btn.dataset.frame3d === preset) {
+          btn.classList.add('bg-white/10', 'border-[#E65A19]', 'text-white');
+          btn.classList.remove('bg-black/40', 'border-white/10', 'text-slate-400');
+        } else {
+          btn.classList.remove('bg-white/10', 'border-[#E65A19]', 'text-white');
+          btn.classList.add('bg-black/40', 'border-white/10', 'text-slate-400');
+        }
+      });
+
+      const badge = document.getElementById('drawerFrameBadge');
+      if (badge) badge.textContent = `3D Frame: ${preset.toUpperCase()}`;
+
+      showToast(`เปิดใช้งานกรอบ 3D: ${preset}`);
+    }
 
     function initMini3dAvatar() {
       const container = document.getElementById('mini3dAvatarCanvas');
@@ -1496,6 +1700,12 @@
 
       setTimeout(() => {
         initWardrobe3dScene();
+        if (!drawer3dFrame.renderer) {
+          initAvatar3dFrameEngine('drawer3dFrameOverlay', drawer3dFrame);
+        }
+        if (currentDecoration.frame3d && currentDecoration.frame3d !== 'none') {
+          build3dFrameMeshes(drawer3dFrame, currentDecoration.frame3d);
+        }
       }, 100);
 
       if (window.lucide) lucide.createIcons();
@@ -1647,7 +1857,8 @@
                 modelShape: currentDecoration.modelShape,
                 modelTheme: currentDecoration.modelTheme,
                 autoSpin: currentDecoration.autoSpin,
-                particles: currentDecoration.particles
+                particles: currentDecoration.particles,
+                frame3d: currentDecoration.frame3d
               },
               updated_at: new Date().toISOString()
             }, { onConflict: 'email' });
@@ -1673,7 +1884,7 @@
       if (window.lucide) lucide.createIcons();
 
       closeWardrobeDrawer();
-      showToast("บันทึกการตกแต่ง Avatar & โมเดล 3D สำเร็จเรียบร้อย!");
+      showToast("บันทึกการตกแต่ง กรอบ 3D & Particle VFX สำเร็จเรียบร้อย!");
     }
 
     function openWardrobeDrawer() {
@@ -1700,6 +1911,12 @@
 
       setTimeout(() => {
         initWardrobe3dScene();
+        if (!drawer3dFrame.renderer) {
+          initAvatar3dFrameEngine('drawer3dFrameOverlay', drawer3dFrame);
+        }
+        if (currentDecoration.frame3d && currentDecoration.frame3d !== 'none') {
+          build3dFrameMeshes(drawer3dFrame, currentDecoration.frame3d);
+        }
       }, 100);
 
       if (window.lucide) lucide.createIcons();
@@ -1743,6 +1960,7 @@
     initSession();
     setTimeout(() => {
       initMini3dAvatar();
+      initAvatar3dFrameEngine('avatar3dFrameOverlay', avatar3dFrame);
     }, 200);
   </script>
 
