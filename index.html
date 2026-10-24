@@ -461,29 +461,79 @@
           </div>
         </div>
 
-        <!-- User Profile Avatar Pill -->
-        <div id="userProfileBtnWrap" class="flex items-center">
+        <!-- User Profile & Action System -->
+        <div id="userProfileBtnWrap" class="relative flex items-center gap-2">
           <!-- Guest State: Login Button -->
-          <button onclick="openGoogleLoginModal()" id="navUserGuest" class="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white text-xs font-bold font-mono transition shadow-sm hover:scale-105 flex items-center gap-1.5 cursor-pointer">
+          <button onclick="openGoogleLoginModal()" id="navUserGuest" class="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#B32B19] via-[#E65A19] to-[#FF7A29] text-white text-xs font-bold font-mono transition shadow-[0_0_20px_rgba(230,90,25,0.4)] hover:scale-105 flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
             <span>เข้าสู่ระบบ</span>
           </button>
 
-          <!-- Logged In State: User Pill -->
-          <a href="settings.html" id="navUserLoggedIn" class="hidden items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19]/50 transition group">
-            <div class="relative w-7 h-7 rounded-full overflow-hidden border border-white/20">
-              <img id="navUserAvatar" src="logo.png" alt="User Profile" class="w-full h-full object-cover">
-              <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#070914] shadow-[0_0_6px_#34d399]"></span>
+          <!-- Logged In State: Interactive Profile Pill with Dropdown Menu -->
+          <div id="navUserLoggedIn" class="relative hidden">
+            <button onclick="toggleProfileDropdown(event)" id="profilePillBtn" class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#0C1124] border border-white/15 hover:border-[#E65A19] shadow-sm transition group cursor-pointer">
+              <div class="relative w-7 h-7 rounded-full overflow-hidden border border-white/20">
+                <img id="navUserAvatar" src="logo.png" alt="User Profile" class="w-full h-full object-cover">
+                <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#070914] shadow-[0_0_6px_#34d399]"></span>
+              </div>
+              <div class="flex items-center gap-1.5 text-left">
+                <div class="flex flex-col hidden sm:flex">
+                  <span id="navUserName" class="text-xs font-mono font-bold text-slate-200 group-hover:text-white truncate max-w-[95px]">Guest</span>
+                  <span id="navUserEmail" class="text-[9px] font-mono text-slate-400 truncate max-w-[95px] hidden"></span>
+                </div>
+                <i data-lucide="chevron-down" id="profileDropdownChevron" class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-transform duration-200"></i>
+              </div>
+            </button>
+
+            <!-- Profile Dropdown Menu Card -->
+            <div id="profileDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-64 bg-[#0A0D1E]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <!-- User Info Header -->
+              <div class="px-3 py-2.5 border-b border-white/10 flex items-center gap-2.5 mb-1">
+                <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-800 border border-white/20 flex-shrink-0">
+                  <img id="menuUserAvatar" src="logo.png" alt="Avatar" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span id="menuUserName" class="text-xs font-bold text-white truncate">P. Jittara</span>
+                  <span id="menuUserEmail" class="text-[10px] font-mono text-slate-400 truncate">student@kkumail.com</span>
+                </div>
+              </div>
+
+              <!-- Menu Links -->
+              <div class="space-y-0.5 text-xs font-mono">
+                <a href="settings.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition">
+                  <i data-lucide="user" class="w-3.5 h-3.5 text-[#FF7A29]"></i>
+                  <span>โปรไฟล์ &amp; ตั้งค่า (Settings)</span>
+                </a>
+                <a href="payment.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition">
+                  <i data-lucide="wallet" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>สถานะกองทุน &amp; ชำระเงิน</span>
+                </a>
+                <a href="storage.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition">
+                  <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-400"></i>
+                  <span>Cloud Drive ส่วนตัว</span>
+                </a>
+                <a href="admin.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>Admin Dashboard</span>
+                </a>
+              </div>
+
+              <!-- Logout Button inside Menu -->
+              <div class="pt-1.5 mt-1 border-t border-white/10">
+                <button onclick="handleGoogleLogout()" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold text-rose-400 hover:text-white hover:bg-rose-500/20 transition cursor-pointer">
+                  <span class="flex items-center gap-2">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                    <span>ออกจากระบบ (Logout)</span>
+                  </span>
+                  <span class="text-xs">↩</span>
+                </button>
+              </div>
             </div>
-            <div class="flex flex-col text-left hidden sm:flex">
-              <span id="navUserName" class="text-xs font-mono font-bold text-slate-200 group-hover:text-white truncate max-w-[95px]">Guest</span>
-              <span id="navUserEmail" class="text-[9px] font-mono text-slate-500 truncate max-w-[95px] hidden"></span>
-            </div>
-          </a>
+          </div>
         </div>
 
-        <!-- Stark LOGOUT Button -->
-        <button id="logoutBtn" onclick="handleGoogleLogout()" class="chrome-border px-3 py-1.5 rounded-full bg-[#0C1030] text-[11px] font-mono font-bold text-slate-300 hover:text-white hover:bg-[#161B33] transition flex items-center gap-1.5 shadow-sm">
+        <!-- Standalone Logout Shortcut Button -->
+        <button id="logoutBtn" onclick="handleGoogleLogout()" class="hidden chrome-border px-3 py-1.5 rounded-full bg-[#0C1030] text-[11px] font-mono font-bold text-slate-300 hover:text-white hover:bg-[#161B33] transition flex items-center gap-1.5 shadow-sm cursor-pointer">
           <span>LOGOUT</span>
           <span class="text-xs">↩</span>
         </button>
@@ -1327,6 +1377,54 @@
   <script src="assets/js/version-badge.js"></script>
   <!-- Main Index Page Logic -->
   <script src="assets/js/index.js"></script>
+
+
+  <script>
+    function toggleProfileDropdown(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('profileDropdownMenu');
+      const chevron = document.getElementById('profileDropdownChevron');
+      if (!menu) return;
+
+      const isHidden = menu.classList.contains('hidden');
+      if (isHidden) {
+        // Sync menu details from currentUser
+        try {
+          const userJson = localStorage.getItem('currentUser') || localStorage.getItem('supabase_user');
+          if (userJson) {
+            const user = JSON.parse(userJson);
+            const mName = document.getElementById('menuUserName');
+            const mEmail = document.getElementById('menuUserEmail');
+            const mAvatar = document.getElementById('menuUserAvatar');
+            if (mName) mName.textContent = user.name || user.full_name || 'Student';
+            if (mEmail) mEmail.textContent = user.email || '';
+            if (mAvatar && (user.avatar || user.avatar_url || user.picture)) {
+              mAvatar.src = user.avatar || user.avatar_url || user.picture;
+            }
+          }
+        } catch(e) {}
+
+        menu.classList.remove('hidden');
+        if (chevron) chevron.classList.add('rotate-180');
+      } else {
+        menu.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180');
+      }
+    }
+
+    // Close dropdown on outside click
+    window.addEventListener('click', (e) => {
+      const menu = document.getElementById('profileDropdownMenu');
+      const btn = document.getElementById('profilePillBtn');
+      const chevron = document.getElementById('profileDropdownChevron');
+      if (menu && !menu.classList.contains('hidden')) {
+        if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
+          menu.classList.add('hidden');
+          if (chevron) chevron.classList.remove('rotate-180');
+        }
+      }
+    });
+  </script>
 
 </body>
 </html>
