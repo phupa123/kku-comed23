@@ -23,6 +23,8 @@
   
   <!-- Font Awesome 6 Pro / Free -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Bootstrap Icons CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -409,30 +411,60 @@
       <!-- 3. USER PROFILE & DUAL NOTIFICATION SYSTEM (Top-Right) -->
       <div class="flex items-center gap-2 sm:gap-3">
         
-        <!-- BUTTON 1: Academic & Homework Notification (🔔 การเรียน & การบ้าน) -->
-        <div class="relative group">
-          <button id="notifBellBtn" title="แจ้งเตือนการเรียน & งานใหม่" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-white/20 hover:border-[#E65A19] flex items-center justify-center text-white hover:text-white transition shadow-sm">
-            <i data-lucide="bell" class="w-4 h-4 text-slate-200"></i>
-            <span class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#E65A19] border-2 border-[#070914] shadow-[0_0_8px_#E65A19]"></span>
+        <!-- BUTTON 1: Real-time Notifications Hub (🔔 ศูนย์การแจ้งเตือนสด Supabase) -->
+        <div class="relative" id="mainNotifBellWrapper">
+          <button id="notifBellBtn" title="ศูนย์การแจ้งเตือนสด COMED23" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-white/20 hover:border-[#E65A19] flex items-center justify-center text-white hover:text-white transition shadow-sm cursor-pointer">
+            <i class="bi bi-bell-fill text-sm text-slate-200"></i>
+            <span id="notifUnreadBadge" class="notification-badge hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-red-500 to-[#E65A19] text-[10px] font-mono font-black text-white flex items-center justify-center border border-[#070914] shadow-[0_0_10px_rgba(230,90,25,0.8)]">
+              0
+            </span>
           </button>
           
-          <!-- Glassmorphic Overlay: 📣 แจ้งเตือนการเรียน -->
-          <div class="absolute right-0 top-full mt-2 w-72 sm:w-80 p-3 bg-[#0C1030]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl hidden group-hover:block z-50 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
-              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold">1. การเรียน &amp; การบ้าน</span>
-              <span class="text-[10px] font-mono text-[#E65A19] font-bold">1 NEW</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-[#12162A]/90 border border-white/10 text-xs text-slate-100 flex items-start gap-2.5">
-              <span class="text-base leading-none">📣</span>
-              <div class="space-y-1">
-                <p class="font-bold text-white text-[11px] leading-tight">แจ้งเตือนการเรียน</p>
-                <p class="text-[11px] text-slate-300 leading-normal">มีการอัปเดตแบบฝึกหัดใหม่ (New Assignment) ในระบบวิชา</p>
-                <div class="text-[10px] font-mono text-slate-400">10m ago • Academic Portal</div>
+          <!-- Dropdown Real-time Notification Center Panel -->
+          <div id="notifCenterDropdown" class="hidden absolute right-0 top-full mt-2 w-[340px] sm:w-[400px] max-w-[94vw] bg-[#0A0E24]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] z-50 flex flex-col max-h-[520px] overflow-hidden transform-gpu">
+            
+            <!-- Header -->
+            <div class="p-3.5 border-b border-white/10 flex items-center justify-between bg-black/40">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#B32B19] to-[#E65A19] text-white flex items-center justify-center shadow-md">
+                  <i class="bi bi-bell-fill text-xs"></i>
+                </div>
+                <div>
+                  <h3 class="text-xs font-black text-white tracking-wide">ศูนย์การแจ้งเตือน</h3>
+                  <p class="text-[9px] font-mono text-slate-400">COMED23 Live Alert Hub</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="window.NotificationEngine?.markAllRead()" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-mono text-slate-300 hover:text-white transition flex items-center gap-1 cursor-pointer">
+                  <i class="bi bi-check2-all text-xs text-[#FF7A29]"></i>
+                  <span>อ่านทั้งหมด</span>
+                </button>
+                <button type="button" onclick="window.NotificationEngine?.requestPermission()" title="เปิด Web Push" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-[#E65A19]/20 text-slate-300 hover:text-white transition flex items-center justify-center cursor-pointer">
+                  <i class="bi bi-broadcast text-xs"></i>
+                </button>
               </div>
             </div>
-            <a href="Plans.html" class="mt-2.5 block text-center py-1.5 rounded-lg bg-white/10 hover:bg-[#E65A19]/20 text-[11px] font-mono text-white transition">
-              ดูห้องงาน &amp; กิจกรรมทั้งหมด →
-            </a>
+
+            <!-- Body Notifications List Container -->
+            <div id="notificationItemsList" class="flex-grow overflow-y-auto divide-y divide-white/5 max-h-[380px] custom-scrollbar p-1">
+              <div class="p-8 text-center text-slate-400 text-xs space-y-2">
+                <i class="bi bi-arrow-repeat text-xl animate-spin text-[#E65A19] block"></i>
+                <span>กำลังโหลดการแจ้งเตือน...</span>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-2.5 border-t border-white/10 bg-black/50 flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <span class="flex items-center gap-1.5 text-[10px]">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Supabase Realtime</span>
+              </span>
+              <a href="notification-admin.html" id="linkNotifAdmin" class="text-[#FF7A29] hover:text-orange-300 font-bold flex items-center gap-1 transition">
+                <i class="bi bi-megaphone-fill text-xs"></i>
+                <span>ส่งแจ้งเตือน (Admin)</span>
+              </a>
+            </div>
+
           </div>
         </div>
 
@@ -599,6 +631,15 @@
         <a href="Profile.html" onclick="toggleMobileDrawer(false)" class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-[#B32B19]/30 to-[#E65A19]/30 border border-[#E65A19]/50 text-white font-mono text-sm font-bold transition">
           <i data-lucide="user" class="w-4 h-4 text-[#FF7A29]"></i>
           <span>โปรไฟล์นักศึกษา (Profile)</span>
+        </a>
+        <a href="javascript:void(0)" onclick="toggleMobileDrawer(false); window.NotificationEngine?.openMobileNotifModal();" class="flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white font-mono text-sm font-semibold transition">
+          <div class="flex items-center gap-3">
+            <i class="bi bi-bell-fill text-[#FF7A29]"></i>
+            <span>การแจ้งเตือนสด</span>
+          </div>
+          <span class="notification-badge hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-sm">
+            0
+          </span>
         </a>
       </div>
 

@@ -37,6 +37,9 @@
     }
   </script>
 
+  <!-- Bootstrap Icons & GSAP Animation Suite -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -279,6 +282,35 @@
               class="w-full px-4 py-3 rounded-2xl bg-slate-950/80 border border-white/15 text-white placeholder-slate-500 text-sm outline-none focus:border-amber-500 transition font-mono text-xs">
           </div>
 
+          <!-- Image URL & AI Smart Image Generator -->
+          <div class="space-y-2 p-4 rounded-2xl bg-slate-900/60 border border-white/10">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <i class="bi bi-image text-[#FF7A29]"></i>
+                <span>รูปภาพประกอบการแจ้งเตือน (Banner Image URL)</span>
+              </label>
+              <span class="text-[10px] font-mono text-slate-400">แนะนำ 16:9</span>
+            </div>
+            <div class="flex gap-2">
+              <input type="url" id="notifImageUrl" placeholder="ใส่ URL ภาพ หรือกดปุ่ม Gen ภาพด้านขวา..."
+                oninput="updateLivePreview()"
+                class="flex-grow px-4 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white placeholder-slate-500 text-xs outline-none focus:border-amber-500 transition font-mono">
+              <button type="button" onclick="generateNotificationBanner()" id="btnGenImage" class="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] hover:opacity-90 text-white text-xs font-bold font-mono transition flex items-center gap-1.5 shadow-md cursor-pointer whitespace-nowrap">
+                <i class="bi bi-stars"></i>
+                <span>Gen ภาพ AI</span>
+              </button>
+            </div>
+            <!-- Quick preset banners -->
+            <div class="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+              <span class="text-slate-400 text-[10px]">ภาพด่วน:</span>
+              <button type="button" onclick="setPresetImage('urgent')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-300 text-[10px] transition cursor-pointer">🚨 ด่วนพิเศษ</button>
+              <button type="button" onclick="setPresetImage('payment')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-emerald-300 text-[10px] transition cursor-pointer">💳 ยอดสลิป</button>
+              <button type="button" onclick="setPresetImage('event')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-sky-300 text-[10px] transition cursor-pointer">📅 กิจกรรม</button>
+              <button type="button" onclick="setPresetImage('study')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-purple-300 text-[10px] transition cursor-pointer">💻 การเรียน</button>
+              <button type="button" onclick="document.getElementById('notifImageUrl').value=''; updateLivePreview();" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] transition cursor-pointer">ล้างรูป</button>
+            </div>
+          </div>
+
           <!-- Options Checkboxes -->
           <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
             <label class="flex items-center gap-2.5 cursor-pointer text-xs text-slate-300">
@@ -374,6 +406,11 @@
                 <p id="previewMessage" class="text-[11px] text-slate-300 line-clamp-2 leading-relaxed">
                   ข้อความรายละเอียดจะปรากฏตรงนี้บนหน้าจอของผู้ใช้
                 </p>
+              </div>
+
+              <!-- Preview Image Banner -->
+              <div id="previewImageWrapper" class="hidden rounded-xl overflow-hidden bg-black/60 border border-white/10 max-h-36">
+                <img id="previewImage" src="" alt="Banner Preview" class="w-full h-full object-cover">
               </div>
 
               <div id="previewLinkRow" class="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] text-orange-400">
@@ -536,6 +573,66 @@
       } else {
         linkRow.classList.add('hidden');
       }
+
+      // Preview Image Handling
+      const imgUrl = (document.getElementById('notifImageUrl')?.value || '').trim();
+      const imgWrap = document.getElementById('previewImageWrapper');
+      const imgEl = document.getElementById('previewImage');
+      if (imgUrl && imgWrap && imgEl) {
+        imgEl.src = imgUrl;
+        imgWrap.classList.remove('hidden');
+      } else if (imgWrap) {
+        imgWrap.classList.add('hidden');
+      }
+    }
+
+    // AI Smart Image Generator (Pollinations AI with Cyber KKU aesthetic)
+    function generateNotificationBanner() {
+      const title = document.getElementById('notifTitle').value || 'Computer Education Announcement';
+      const type = document.getElementById('notifType').value || 'general';
+      const btn = document.getElementById('btnGenImage');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="bi bi-arrow-repeat animate-spin"></i> <span>กำลัง Gen...</span>`;
+      }
+
+      const promptKeywords = {
+        urgent: 'urgent emergency alert cyberpunk technology glowing neon red and orange warning banner abstract 3d 8k',
+        warning: 'important attention alert orange amber glowing futuristic technology digital interface 8k',
+        payment: 'fintech payment transaction crypto credit card digital wallet glowing emerald neon 3d 8k',
+        event: 'university celebration digital technology conference event stage lighting glowing neon 3d 8k',
+        info: 'computer science university student learning digital creative technology futuristic obsidian orange 8k'
+      };
+
+      const promptStr = encodeURIComponent(`high tech 3d banner ${promptKeywords[type] || promptKeywords.info} ${title.slice(0, 30)}`);
+      const generatedUrl = `https://image.pollinations.ai/prompt/${promptStr}?width=1280&height=720&nologo=true&seed=${Math.floor(Math.random() * 999999)}`;
+
+      const input = document.getElementById('notifImageUrl');
+      if (input) {
+        input.value = generatedUrl;
+        updateLivePreview();
+      }
+
+      setTimeout(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="bi bi-stars"></i> <span>Gen ภาพ AI</span>`;
+        }
+      }, 1200);
+    }
+
+    function setPresetImage(key) {
+      const presets = {
+        urgent: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=1280&auto=format&fit=crop',
+        payment: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=1280&auto=format&fit=crop',
+        event: 'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1280&auto=format&fit=crop',
+        study: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1280&auto=format&fit=crop'
+      };
+      if (presets[key]) {
+        document.getElementById('notifImageUrl').value = presets[key];
+        updateLivePreview();
+      }
     }
 
     let selectedStudents = []; // [{ id, name, nickname, email }]
@@ -676,12 +773,14 @@
       btnText.textContent = 'กำลังยิงกระจายข้อความ...';
 
       const targetEmails = audience === 'specific' ? selectedStudents.map(s => s.email.toLowerCase()) : null;
+      const imageUrl = (document.getElementById('notifImageUrl')?.value || '').trim() || null;
 
       const payload = {
         title,
         message,
         type,
         link: link || null,
+        image_url: imageUrl,
         target_audience: audience,
         target_users: targetEmails, // รายชื่ออีเมลผู้รับเฉพาะบุคคล
         sender_email: adminEmail,
@@ -697,10 +796,11 @@
           // พยายามบันทึกข้อมูลแจ้งเตือน
           let { data, error } = await client.from('notifications').insert([payload]);
           
-          // หากตารางใน Supabase ยังไม่ได้เพิ่มคอลัมน์ target_users ให้ตัดฟิลด์นี้ออกแล้วลอง insert อีกครั้ง
-          if (error && (error.message?.includes('target_users') || error.code === 'PGRST204' || error.message?.includes('column'))) {
+          // หากตารางใน Supabase ยังไม่ได้เพิ่มคอลัมน์ target_users หรือ image_url ให้ตัดฟิลด์ออกแล้ว retry
+          if (error && (error.message?.includes('target_users') || error.message?.includes('image_url') || error.code === 'PGRST204' || error.message?.includes('column'))) {
             const fallbackPayload = Object.assign({}, payload);
-            delete fallbackPayload.target_users;
+            if (error.message?.includes('target_users')) delete fallbackPayload.target_users;
+            if (error.message?.includes('image_url')) delete fallbackPayload.image_url;
             const retryRes = await client.from('notifications').insert([fallbackPayload]);
             error = retryRes.error;
           }
@@ -841,18 +941,29 @@
 
         const timeStr = item.created_at ? new Date(item.created_at).toLocaleString('th-TH') : '-';
 
+        const imgThumb = item.image_url ? `
+          <div class="w-10 h-10 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex-shrink-0 mt-1">
+            <img src="${item.image_url}" alt="thumb" class="w-full h-full object-cover">
+          </div>
+        ` : '';
+
         return `
           <tr class="hover:bg-white/5 transition">
             <td class="py-3 px-3 font-mono text-[11px] text-slate-400">${timeStr}</td>
             <td class="py-3 px-3">${typeBadge}</td>
             <td class="py-3 px-3">
-              <strong class="text-white block text-xs">${item.title || '-'}</strong>
-              <span class="text-slate-400 text-[11px] line-clamp-1">${item.message || '-'}</span>
+              <div class="flex items-start gap-2.5">
+                ${imgThumb}
+                <div class="min-w-0">
+                  <strong class="text-white block text-xs">${item.title || '-'}</strong>
+                  <span class="text-slate-400 text-[11px] line-clamp-1">${item.message || '-'}</span>
+                </div>
+              </div>
             </td>
             <td class="py-3 px-3 text-slate-400 text-[11px]">${item.target_audience || 'All'}</td>
             <td class="py-3 px-3 font-mono text-[11px] text-orange-400">${item.link ? `<a href="${item.link}" target="_blank" class="hover:underline">${item.link}</a>` : '-'}</td>
             <td class="py-3 px-3 text-right">
-              <button onclick="deleteNotification('${item.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[10px] font-bold transition">
+              <button onclick="deleteNotification('${item.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[10px] font-bold transition cursor-pointer">
                 ลบ
               </button>
             </td>
