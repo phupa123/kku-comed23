@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ตั้งค่าโปรไฟล์ส่วนตัว (Personal Settings) | COMED23 KKU63</title>
+  <title>โปรไฟล์ & ศูนย์ข้อมูลนักศึกษา (Student Profile & Settings) | COMED 23 KKU</title>
   <meta name="description" content="หน้าตั้งค่าโปรไฟล์ส่วนตัว ข้อมูลติดต่อ การแจ้งเตือน และประวัติกิจกรรมของนักศึกษา COMED23 KKU63">
 
   <!-- Google Fonts: Prompt, Plus Jakarta Sans, Poppins -->
@@ -56,45 +56,44 @@
   <script src="assets/js/universal_intro.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white overflow-x-hidden bg-mesh-dark">
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-gradient-to-r from-[#B32B19] to-[#E65A19] selection:text-white overflow-x-hidden bg-mesh-dark">
 
   <!-- Top Sticky Header -->
-  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-2xl border-b border-sky-900/30">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+  <header class="sticky top-0 z-40 w-full h-16 bg-[#060814]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-all duration-300">
+    <div class="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       
-      <!-- Left: Navigation Back to Home -->
-      <div class="flex items-center gap-3">
-        <a href="index.html" class="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-sky-500/20 to-blue-500/20 border border-sky-400/30 p-2 flex items-center justify-center text-sky-300 hover:scale-105 transition shadow-sm" title="กลับหน้าแรก">
-          <i data-lucide="arrow-left" class="w-5 h-5"></i>
-        </a>
+      <!-- Brand & Title -->
+      <a href="index.html" class="flex items-center gap-3 group min-w-0">
+        <div class="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#B32B19] to-[#E65A19] p-0.5 shadow-md shadow-[#E65A19]/30 group-hover:scale-105 transition-transform flex-shrink-0">
+          <div class="w-full h-full bg-[#0C1030] rounded-[10px] flex items-center justify-center p-1 overflow-hidden">
+            <img src="logo.png" alt="KKU COMED" class="w-full h-full object-contain">
+          </div>
+        </div>
         <div class="min-w-0">
-          <div class="flex items-center gap-1.5 sm:gap-2">
-            <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-sky-400">COMED23</span>
-            <span class="px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-mono font-bold bg-sky-950/60 text-sky-300 border border-sky-500/30">KKU63</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[12px] font-black tracking-wider text-white font-display">KKU</span>
+            <span class="text-[11px] font-bold text-slate-400 font-mono">/ STUDENT PROFILE</span>
           </div>
-          <h1 class="text-xs sm:text-lg font-black text-white leading-tight truncate">ตั้งค่าโปรไฟล์ส่วนตัว (Settings)</h1>
+          <span class="text-[9px] font-mono uppercase tracking-widest text-slate-500 hidden sm:inline">
+            Computer Education Batch 23
+          </span>
         </div>
-      </div>
+      </a>
 
-      <!-- Right: User Profile Quick Bar & Action Buttons -->
-      <div class="flex items-center gap-2">
-        <div id="userHeaderProfile" onclick="openAvatarDrawer()" class="hidden sm:flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 cursor-pointer transition group" title="คลิกเพื่อเปิดห้องแต่งตัว Avatar & กรอบรูป">
-          <img id="userHeaderAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar" class="w-7 h-7 rounded-xl object-cover border border-sky-500/30 group-hover:scale-105 transition">
-          <div class="text-left">
-            <span id="userHeaderName" class="text-xs font-bold text-white block leading-tight truncate max-w-[120px] group-hover:text-sky-300">ชื่อผู้ใช้</span>
-            <span id="userHeaderEmail" class="text-[9px] text-slate-400 font-mono block leading-tight truncate max-w-[120px]">email@kkumail.com</span>
-          </div>
-        </div>
-
-        <a href="index.html" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
-          <i data-lucide="home" class="w-4 h-4 text-sky-400"></i>
-          <span class="hidden sm:inline">หน้าแรก</span>
+      <!-- Quick Back & Navigation -->
+      <div class="flex items-center gap-2.5">
+        <a href="payment.html" class="px-3 py-1.5 rounded-full bg-[#12162A] border border-white/10 text-slate-300 hover:text-white hover:border-emerald-500 text-xs font-mono transition flex items-center gap-1.5">
+          <i data-lucide="wallet" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span class="hidden md:inline">กองทุน & สลิป</span>
         </a>
-
-        <button onclick="handleUserLogout()" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer" title="ออกจากระบบ">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">ออกจากระบบ</span>
-        </button>
+        <a href="storage.html" class="px-3 py-1.5 rounded-full bg-[#12162A] border border-white/10 text-slate-300 hover:text-white hover:border-sky-500 text-xs font-mono transition flex items-center gap-1.5">
+          <i data-lucide="cloud" class="w-3.5 h-3.5 text-[#FF7A29]"></i>
+          <span class="hidden md:inline">Drive</span>
+        </a>
+        <a href="index.html" class="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white text-xs font-mono font-bold transition shadow-sm hover:scale-105 flex items-center gap-1.5">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>กลับหน้าแรก</span>
+        </a>
       </div>
 
     </div>
@@ -105,15 +104,15 @@
 
     <!-- Guest Notice if Not Logged In -->
     <div id="userSettingsGuestNotice" class="hidden hub-glass p-8 sm:p-12 rounded-3xl border border-sky-900/40 text-center max-w-xl mx-auto space-y-4">
-      <div class="w-16 h-16 rounded-3xl bg-sky-500/20 text-sky-400 flex items-center justify-center mx-auto border border-sky-500/30">
+      <div class="w-16 h-16 rounded-3xl bg-[#E65A19]/20 text-[#FF7A29] flex items-center justify-center mx-auto border border-[#E65A19]/40">
         <i data-lucide="user-x" class="w-8 h-8"></i>
       </div>
       <h2 class="text-xl sm:text-2xl font-black text-white">คุณยังไม่ได้เข้าสู่ระบบ</h2>
       <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-        กรุณาเข้าสู่ระบบด้วยอีเมลสถาบัน <strong class="text-sky-300">@kkumail.com</strong> ในหน้าหลักก่อนเพื่อเปิดและจัดการข้อมูลโปรไฟล์ส่วนตัวของคุณ
+        กรุณาเข้าสู่ระบบด้วยอีเมลสถาบัน <strong class="text-orange-200">@kkumail.com</strong> ในหน้าหลักก่อนเพื่อเปิดและจัดการข้อมูลโปรไฟล์ส่วนตัวของคุณ
       </p>
       <div class="pt-2 flex justify-center gap-3">
-        <a href="index.html" class="px-6 py-3 rounded-2xl bg-sky-500 hover:bg-sky-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition">
+        <a href="index.html" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] hover:bg-sky-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition">
           ไปยังหน้าหลักเพื่อเข้าสู่ระบบ
         </a>
       </div>
@@ -123,34 +122,34 @@
     <div id="userSettingsMainContent" class="space-y-6">
 
       <!-- Hero Profile Header Card -->
-      <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-sky-900/40 relative overflow-hidden">
-        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative p-6 sm:p-8 rounded-3xl bg-[#0D1126]/90 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-gradient-to-r from-[#B32B19] to-[#E65A19]/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10 text-center sm:text-left">
           
           <!-- Avatar Frame & Quick Seed Switcher (Click opens Wardrobe Dressing Room Drawer) -->
           <div class="relative group cursor-pointer" onclick="openAvatarDrawer()" title="คลิกที่รูปโปรไฟล์เพื่อเปิดห้องแต่งตัว & ปรับแต่ง Avatar">
-            <div id="cardUserAvatarFrame" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-slate-900 p-1 border-2 border-sky-400/40 shadow-xl overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:border-sky-300">
+            <div id="cardUserAvatarFrame" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-slate-900 p-1 border-2 border-[#E65A19]/50 shadow-xl overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:border-sky-300">
               <div id="cardUserAvatarAnimWrapper" class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center">
                 <img id="cardUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar" class="w-full h-full object-cover rounded-2xl transition-transform duration-200">
               </div>
               <div class="absolute inset-0 bg-slate-950/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex flex-col items-center justify-center text-white text-[10px] font-bold gap-1 pointer-events-none">
-                <i class="bi bi-magic text-sky-300 text-lg animate-bounce"></i>
+                <i class="bi bi-magic text-orange-200 text-lg animate-bounce"></i>
                 <span>แต่งตัว / กรอบ</span>
               </div>
             </div>
-            <button type="button" onclick="event.stopPropagation(); generateRandomAvatar()" class="absolute -bottom-2 -right-2 p-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/30 transition transform hover:scale-110 cursor-pointer z-10" title="สุ่มรูปอวาตาร์">
+            <button type="button" onclick="event.stopPropagation(); generateRandomAvatar()" class="absolute -bottom-2 -right-2 p-2 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] hover:bg-sky-400 text-white shadow-lg shadow-sky-500/30 transition transform hover:scale-110 cursor-pointer z-10" title="สุ่มรูปอวาตาร์">
               <i data-lucide="refresh-cw" class="w-4 h-4"></i>
             </button>
           </div>
 
           <div class="flex-grow space-y-2">
             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <span id="cardUserBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">นักศึกษา COMED23</span>
+              <span id="cardUserBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#E65A19]/20 text-orange-200 border border-[#E65A19]/40">นักศึกษา COMED23</span>
               <span class="text-xs text-slate-400 font-mono" id="cardUserId">รหัสนักศึกษา</span>
             </div>
             <h2 id="cardUserName" class="text-2xl sm:text-3xl font-black text-white">ชื่อผู้ใช้งาน</h2>
-            <p id="cardUserEmail" class="text-xs sm:text-sm text-sky-400 font-mono">user@kkumail.com</p>
+            <p id="cardUserEmail" class="text-xs sm:text-sm text-[#FF7A29] font-mono">user@kkumail.com</p>
             <p class="text-xs text-slate-400 pt-1">
               สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
             </p>
@@ -162,7 +161,7 @@
               <i data-lucide="receipt" class="w-4 h-4"></i>
               <span>ตรวจสอบยอดชำระเงิน</span>
             </a>
-            <a href="storage.html" class="px-4 py-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-bold transition flex items-center justify-center gap-2">
+            <a href="storage.html" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19]/10 hover:bg-[#E65A19]/20 text-[#FF7A29] border border-[#E65A19]/40 text-xs font-bold transition flex items-center justify-center gap-2">
               <i data-lucide="cloud" class="w-4 h-4"></i>
               <span>Cloud Drive ของฉัน</span>
             </a>
@@ -173,7 +172,7 @@
 
       <!-- Settings Navigation Tabs -->
       <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        <button data-user-tab="profile" class="px-4 sm:px-5 py-2.5 rounded-2xl bg-sky-500 text-white font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-lg shadow-sky-500/25 flex-shrink-0 cursor-pointer">
+        <button data-user-tab="profile" class="px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-lg shadow-sky-500/25 flex-shrink-0 cursor-pointer">
           <i data-lucide="user" class="w-4 h-4"></i>
           <span>ข้อมูลโปรไฟล์</span>
         </button>
@@ -199,7 +198,7 @@
       <div id="tabPane-profile" class="user-tab-pane hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
         <div>
           <h3 class="text-lg font-black text-white flex items-center gap-2">
-            <i data-lucide="user-check" class="w-5 h-5 text-sky-400"></i>
+            <i data-lucide="user-check" class="w-5 h-5 text-[#FF7A29]"></i>
             <span>แก้ไขข้อมูลส่วนตัว</span>
           </h3>
           <p class="text-xs text-slate-400 mt-1">
@@ -249,7 +248,7 @@
 
             <div class="md:col-span-2 space-y-1.5">
               <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                <i class="bi bi-facebook text-sky-400"></i>
+                <i class="bi bi-facebook text-[#FF7A29]"></i>
                 <span>Facebook Profile URL</span>
               </label>
               <input type="url" id="prefFacebookUrl" class="w-full px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 focus:border-sky-500 text-white font-mono text-xs outline-none" placeholder="https://www.facebook.com/username">
@@ -270,7 +269,7 @@
           <!-- Avatar Quick Wardrobe Launcher Banner (Replaced on-page duplicate) -->
           <div class="p-5 rounded-3xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-purple-500/10 border border-sky-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3 text-center sm:text-left">
-              <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xl border border-sky-500/30 flex-shrink-0">
+              <div class="w-12 h-12 rounded-2xl bg-[#E65A19]/20 text-[#FF7A29] flex items-center justify-center font-bold text-xl border border-[#E65A19]/40 flex-shrink-0">
                 <i class="bi bi-magic"></i>
               </div>
               <div>
@@ -279,14 +278,14 @@
               </div>
             </div>
 
-            <button type="button" onclick="openAvatarDrawer()" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-sky-500/25 transition transform active:scale-95 flex items-center gap-2 cursor-pointer flex-shrink-0">
+            <button type="button" onclick="openAvatarDrawer()" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#B32B19] via-[#E65A19] to-[#FF7A29] hover:from-sky-400 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-sky-500/25 transition transform active:scale-95 flex items-center gap-2 cursor-pointer flex-shrink-0">
               <i class="bi bi-person-gear text-sm"></i>
               <span>เปิดห้องแต่งตัว Avatar</span>
             </button>
           </div>
 
           <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <button type="submit" id="btnSaveUserProfile" class="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition flex items-center gap-2 cursor-pointer">
+            <button type="submit" id="btnSaveUserProfile" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] hover:bg-sky-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition flex items-center gap-2 cursor-pointer">
               <i data-lucide="save" class="w-4 h-4"></i>
               <span>บันทึกการเปลี่ยนแปลง</span>
             </button>
@@ -299,7 +298,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 class="text-lg font-black text-white flex items-center gap-2">
-              <i data-lucide="palette" class="w-5 h-5 text-sky-400"></i>
+              <i data-lucide="palette" class="w-5 h-5 text-[#FF7A29]"></i>
               <span>ระบบธีม & การแสดงผล (Themes Ecosystem)</span>
             </h3>
             <p class="text-xs text-slate-400 mt-1">
@@ -307,7 +306,7 @@
             </p>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-[11px] font-mono font-bold px-2.5 py-1 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/30 flex items-center gap-1.5">
+            <span class="text-[11px] font-mono font-bold px-2.5 py-1 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19]/10 text-[#FF7A29] border border-[#E65A19]/40 flex items-center gap-1.5">
               <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
               <span>6 Signature Themes</span>
             </span>
@@ -326,13 +325,13 @@
                 </div>
                 <div class="flex items-center gap-1.5">
                   <span class="theme-status-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">เลือกใช้</span>
-                  <div class="theme-check-icon hidden w-5 h-5 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs">
+                  <div class="theme-check-icon hidden w-5 h-5 rounded-full bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white flex items-center justify-center text-xs">
                     <i data-lucide="check" class="w-3.5 h-3.5"></i>
                   </div>
                 </div>
               </div>
               <div>
-                <h4 class="text-sm font-black text-white group-hover:text-sky-300 transition">Midnight Cyber</h4>
+                <h4 class="text-sm font-black text-white group-hover:text-orange-200 transition">Midnight Cyber</h4>
                 <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">ครามดำลึก แสงไฟนีออนฟ้าไซเบอร์ ล้ำสมัยและคมชัด</p>
               </div>
             </div>
@@ -472,7 +471,7 @@
                 </div>
               </div>
               <div>
-                <h4 class="text-sm font-black text-white group-hover:text-sky-300 transition">Clean Platinum</h4>
+                <h4 class="text-sm font-black text-white group-hover:text-orange-200 transition">Clean Platinum</h4>
                 <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">สไตล์กระจกฝ้าสว่าง เรียบหรู Minimal Glass Light สบายตา</p>
               </div>
             </div>
@@ -492,7 +491,7 @@
       <div id="tabPane-notifications" class="user-tab-pane hidden hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
         <div>
           <h3 class="text-lg font-black text-white flex items-center gap-2">
-            <i data-lucide="bell" class="w-5 h-5 text-sky-400"></i>
+            <i data-lucide="bell" class="w-5 h-5 text-[#FF7A29]"></i>
             <span>การแจ้งเตือนและความเป็นส่วนตัว</span>
           </h3>
           <p class="text-xs text-slate-400 mt-1">
@@ -509,7 +508,7 @@
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="chkNotifyPayment" checked class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r from-[#B32B19] to-[#E65A19]"></div>
             </label>
           </div>
 
@@ -520,7 +519,7 @@
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="chkNotifyEvent" checked class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r from-[#B32B19] to-[#E65A19]"></div>
             </label>
           </div>
 
@@ -531,7 +530,7 @@
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="chkCloudAutoSave" checked class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r from-[#B32B19] to-[#E65A19]"></div>
             </label>
           </div>
 
@@ -542,7 +541,7 @@
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="chkPublicProfile" checked class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r from-[#B32B19] to-[#E65A19]"></div>
             </label>
           </div>
 
@@ -554,14 +553,14 @@
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-lg font-black text-white flex items-center gap-2">
-              <i data-lucide="history" class="w-5 h-5 text-sky-400"></i>
+              <i data-lucide="history" class="w-5 h-5 text-[#FF7A29]"></i>
               <span>ประวัติกิจกรรมล่าสุด</span>
             </h3>
             <p class="text-xs text-slate-400 mt-1">
               ตรวจสอบประวัติการเข้าใช้งานและธุรกรรมที่เกิดขึ้นในบัญชีของคุณ
             </p>
           </div>
-          <button onclick="loadUserActivity()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-sky-400 transition" title="รีเฟรช">
+          <button onclick="loadUserActivity()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-[#FF7A29] transition" title="รีเฟรช">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
           </button>
         </div>
@@ -575,7 +574,7 @@
       <div id="tabPane-support" class="user-tab-pane hidden hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
         <div>
           <h3 class="text-lg font-black text-white flex items-center gap-2">
-            <i data-lucide="message-square-plus" class="w-5 h-5 text-sky-400"></i>
+            <i data-lucide="message-square-plus" class="w-5 h-5 text-[#FF7A29]"></i>
             <span>แจ้งปัญหาการใช้งาน / ส่งข้อเสนอแนะ</span>
           </h3>
           <p class="text-xs text-slate-400 mt-1">
@@ -602,7 +601,7 @@
           </div>
 
           <div class="flex justify-end pt-2">
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition flex items-center gap-2 cursor-pointer">
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] hover:bg-sky-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition flex items-center gap-2 cursor-pointer">
               <i data-lucide="send" class="w-4 h-4"></i>
               <span>ส่งข้อความถึงผู้ดูแล</span>
             </button>
@@ -626,13 +625,13 @@
       <!-- Drawer Header -->
       <div class="p-4 sm:p-5 border-b border-slate-800/80 bg-slate-900/60 flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#B32B19] via-[#E65A19] to-[#FF7A29] text-white flex items-center justify-center shadow-lg shadow-sky-500/20">
             <i class="bi bi-magic text-lg"></i>
           </div>
           <div>
             <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
               <span>ห้องแต่งตัวโปรไฟล์ & กรอบรูป (Avatar Studio)</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">Live Dress-up</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#E65A19]/20 text-orange-200 border border-[#E65A19]/40">Live Dress-up</span>
             </h3>
             <p class="text-xs text-slate-400">เลือกกรอบ แอนิเมชัน หมุน/ย่อขยาย หรืออัปโหลดภาพของคุณเองได้ตามสไตล์</p>
           </div>
@@ -650,11 +649,11 @@
           <!-- LEFT COLUMN: Live Wardrobe Mirror / Fitting Showcase (เสมือนหน้าแต่งตัว) -->
           <div class="lg:col-span-5 sticky top-0 space-y-4">
             <div class="p-6 rounded-3xl bg-gradient-to-b from-slate-900/90 to-slate-950 border border-sky-500/20 shadow-xl text-center space-y-4 relative overflow-hidden">
-              <div class="absolute -top-12 -left-12 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              <div class="absolute -top-12 -left-12 w-32 h-32 bg-gradient-to-r from-[#B32B19] to-[#E65A19]/10 rounded-full blur-2xl pointer-events-none"></div>
               <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
               <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-800/80 pb-3">
-                <span class="font-bold flex items-center gap-1.5 text-sky-400">
+                <span class="font-bold flex items-center gap-1.5 text-[#FF7A29]">
                   <i class="bi bi-person-bounding-box"></i>
                   <span>กระจกจำลอง (Fitting Mirror)</span>
                 </span>
@@ -663,7 +662,7 @@
 
               <!-- Big Centered Live Avatar Showcase -->
               <div class="py-4 flex flex-col items-center justify-center">
-                <div id="drawerUserAvatarFrame" class="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-slate-900 p-1.5 border-2 border-sky-400/40 shadow-2xl overflow-hidden transition-all duration-300 relative group">
+                <div id="drawerUserAvatarFrame" class="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-slate-900 p-1.5 border-2 border-[#E65A19]/50 shadow-2xl overflow-hidden transition-all duration-300 relative group">
                   <div id="drawerUserAvatarAnimWrapper" class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center">
                     <img id="drawerUserAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=user" alt="Avatar Preview" class="w-full h-full object-cover rounded-2xl transition-transform duration-200">
                   </div>
@@ -671,14 +670,14 @@
 
                 <div class="mt-4 space-y-1">
                   <div class="text-sm font-black text-white" id="drawerUserName">ชื่อผู้ใช้</div>
-                  <div class="text-xs text-sky-400 font-mono" id="drawerUserEmail">user@kkumail.com</div>
+                  <div class="text-xs text-[#FF7A29] font-mono" id="drawerUserEmail">user@kkumail.com</div>
                 </div>
               </div>
 
               <!-- Quick Mirror Action Buttons -->
               <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-xs">
                 <button type="button" onclick="generateRandomAvatar()" class="py-2.5 px-3 rounded-xl bg-slate-850 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold flex items-center justify-center gap-1.5 transition cursor-pointer">
-                  <i class="bi bi-shuffle text-sky-400"></i>
+                  <i class="bi bi-shuffle text-[#FF7A29]"></i>
                   <span>สุ่ม Bottts</span>
                 </button>
                 <button type="button" onclick="resetAvatarTransforms()" class="py-2.5 px-3 rounded-xl bg-slate-850 hover:bg-slate-800 border border-slate-700 text-slate-300 font-bold flex items-center justify-center gap-1.5 transition cursor-pointer">
@@ -690,8 +689,8 @@
             </div>
 
             <!-- Hint Box -->
-            <div class="p-3.5 rounded-2xl bg-sky-500/5 border border-sky-500/20 text-[11px] text-slate-400 flex items-start gap-2.5">
-              <i class="bi bi-info-circle-fill text-sky-400 flex-shrink-0 mt-0.5"></i>
+            <div class="p-3.5 rounded-2xl bg-gradient-to-r from-[#B32B19] to-[#E65A19]/5 border border-sky-500/20 text-[11px] text-slate-400 flex items-start gap-2.5">
+              <i class="bi bi-info-circle-fill text-[#FF7A29] flex-shrink-0 mt-0.5"></i>
               <span>การปรับแต่งในกระจกนี้จะแสดงผลจริงแบบเรียลไทม์ และจะบันทึกพร้อมโปรไฟล์ของคุณอัตโนมัติ</span>
             </div>
           </div>
@@ -702,8 +701,8 @@
             <!-- 1. Transform Studio: Rotate, Zoom & Flip (Bootstrap UI) -->
             <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3.5">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
-                  <i class="bi bi-sliders2 text-sky-400"></i>
+                <span class="text-xs font-bold text-[#FF7A29] flex items-center gap-1.5">
+                  <i class="bi bi-sliders2 text-[#FF7A29]"></i>
                   <span>ปรับแต่งมิติรูปภาพ (Rotate, Zoom & Flip)</span>
                 </span>
                 <span class="text-[10px] text-slate-400 font-mono">Transform Matrix</span>
@@ -738,8 +737,8 @@
                 <div class="col-span-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800">
                   <i class="bi bi-zoom-out text-slate-400 text-xs"></i>
                   <input type="range" id="drawerZoomSlider" min="0.5" max="2.5" step="0.05" value="1" oninput="adjustAvatarTransform('scale', parseFloat(this.value))" class="flex-grow accent-sky-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-                  <i class="bi bi-zoom-in text-sky-400 text-xs"></i>
-                  <span id="drawerZoomValue" class="text-[11px] font-mono text-sky-300 w-10 text-right">100%</span>
+                  <i class="bi bi-zoom-in text-[#FF7A29] text-xs"></i>
+                  <span id="drawerZoomValue" class="text-[11px] font-mono text-orange-200 w-10 text-right">100%</span>
                 </div>
               </div>
             </div>
@@ -756,7 +755,7 @@
                   <span class="text-[10px] text-slate-500">แบบเรียบง่าย</span>
                 </button>
                 <button type="button" onclick="selectAvatarFrame('cyber')" data-frame-val="cyber" class="btn-frame-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-sky-400 block">Cyber Blue</span>
+                  <span class="font-bold text-xs text-[#FF7A29] block">Cyber Blue</span>
                   <span class="text-[10px] text-slate-500">นีออนฟ้าสดใส</span>
                 </button>
                 <button type="button" onclick="selectAvatarFrame('gold')" data-frame-val="gold" class="btn-frame-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
@@ -790,7 +789,7 @@
                   <span class="text-[10px] text-slate-500">Static</span>
                 </button>
                 <button type="button" onclick="selectAvatarAnim('pulse')" data-anim-val="pulse" class="btn-anim-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
-                  <span class="font-bold text-xs text-sky-400 block">Pulse ย่อขยาย</span>
+                  <span class="font-bold text-xs text-[#FF7A29] block">Pulse ย่อขยาย</span>
                   <span class="text-[10px] text-slate-500">หายใจนุ่มนวล</span>
                 </button>
                 <button type="button" onclick="selectAvatarAnim('glow')" data-anim-val="glow" class="btn-anim-opt p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center hover:border-sky-500 transition">
@@ -816,7 +815,7 @@
             <div class="space-y-4 pt-3 border-t border-slate-800/80">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-white flex items-center gap-1.5">
-                  <i class="bi bi-cloud-arrow-up text-sky-400"></i>
+                  <i class="bi bi-cloud-arrow-up text-[#FF7A29]"></i>
                   <span>อัปโหลดรูปตัวเอง (ลากไฟล์มาใส่ หรือคลิกเพื่อเลือก)</span>
                 </span>
                 <span class="text-[10px] text-slate-400">JPG, PNG, GIF, WebP</span>
@@ -824,9 +823,9 @@
 
               <!-- Provider Selector for Profile Upload -->
               <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                <i class="bi bi-hdd-network text-sky-400 text-xs"></i>
+                <i class="bi bi-hdd-network text-[#FF7A29] text-xs"></i>
                 <label for="userAvatarProviderSelect" class="text-xs text-slate-300 font-bold whitespace-nowrap">ผู้ให้บริการคลาวด์:</label>
-                <select id="userAvatarProviderSelect" class="bg-slate-950 text-sky-300 text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-700 focus:border-sky-500 outline-none w-full cursor-pointer">
+                <select id="userAvatarProviderSelect" class="bg-slate-950 text-orange-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-700 focus:border-sky-500 outline-none w-full cursor-pointer">
                   <option value="catbox" selected>🐱 Catbox.moe (แนะนำ - ฟรี ถาวร เสถียร)</option>
                   <option value="imgbb">🖼️ ImgBB (โหลดเร็ว ไม่มีหมดอายุ)</option>
                   <option value="cloudinary">⚡ Cloudinary CDN</option>
@@ -895,10 +894,10 @@
               <div class="space-y-2 pt-2">
                 <div class="flex items-center justify-between text-xs text-slate-300">
                   <span class="font-bold flex items-center gap-1.5">
-                    <i class="bi bi-robot text-sky-400"></i>
+                    <i class="bi bi-robot text-[#FF7A29]"></i>
                     <span>หรือเลือก Avatar Bottts สำเร็จรูป</span>
                   </span>
-                  <button type="button" onclick="generateRandomAvatar()" class="text-sky-400 hover:text-sky-300 text-[11px] font-bold flex items-center gap-1 cursor-pointer">
+                  <button type="button" onclick="generateRandomAvatar()" class="text-[#FF7A29] hover:text-orange-200 text-[11px] font-bold flex items-center gap-1 cursor-pointer">
                     <i class="bi bi-shuffle"></i>
                     <span>สุ่มใหม่</span>
                   </button>
@@ -968,7 +967,7 @@
 
         <!-- Header row -->
         <div class="w-full flex items-center justify-between">
-          <span id="uiverseModalTitle" class="text-[11px] font-black uppercase tracking-widest text-sky-400 flex items-center gap-1.5">
+          <span id="uiverseModalTitle" class="text-[11px] font-black uppercase tracking-widest text-[#FF7A29] flex items-center gap-1.5">
             <i class="bi bi-cloud-arrow-up-fill"></i>
             <span>กำลังประมวลผล...</span>
           </span>
@@ -1015,7 +1014,7 @@
             </div>
             <div class="flex justify-between text-[10px] text-slate-500 mt-1 px-0.5">
               <span>ถ่ายโอนข้อมูล...</span>
-              <span id="uiverseProgressBytes" class="font-mono text-sky-400"></span>
+              <span id="uiverseProgressBytes" class="font-mono text-[#FF7A29]"></span>
             </div>
           </div>
 
