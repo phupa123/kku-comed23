@@ -575,7 +575,13 @@
   }
 
   function renderBellButton() {
-    // หาจุดเชื่อมต่อใน Navbar (เช่น ข้างปุ่ม PWA หรือ Profile)
+    // ห้ามสร้างกระดิ่งซ้อนใน index.html เนื่องจากหน้า index.html มีปุ่ม Notification ของตัวเองอยู่แล้ว
+    const path = window.location.pathname.toLowerCase();
+    if (path.endsWith('index.html') || path === '/' || path.endsWith('/')) {
+      return;
+    }
+
+    // หาจุดเชื่อมต่อใน Navbar (สำหรับหน้าอื่นๆ เช่น Calendar, Plans)
     const targetAreas = [
       document.querySelector('#navRightActions'),
       document.querySelector('header .flex.items-center.gap-3:last-child'),

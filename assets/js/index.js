@@ -472,6 +472,14 @@ function updateUserUI(user) {
     if (nameEl) nameEl.textContent = user.nickname ? `${user.name} (${user.nickname})` : user.name;
     if (emailEl) emailEl.textContent = user.email;
 
+    // Sync Dropdown Card Elements with Logged-in User
+    const mName = document.getElementById('menuUserName');
+    const mEmail = document.getElementById('menuUserEmail');
+    const mAvatar = document.getElementById('menuUserAvatar');
+    if (mName) mName.textContent = user.nickname ? `${user.name} (${user.nickname})` : (user.name || 'Student');
+    if (mEmail) mEmail.textContent = user.email || '';
+    if (mAvatar && user.avatar) mAvatar.src = user.avatar;
+
     // Auto Enrich Student Info from window.STUDENTS_DATA if missing
     if (!user.studentId && window.STUDENTS_DATA) {
       const st = window.STUDENTS_DATA.find(s => s.email.toLowerCase() === user.email.toLowerCase());
