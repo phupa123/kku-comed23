@@ -107,19 +107,19 @@ html, body {
 }
 
 #mainNavbar.scrolled {
-  background-color: rgba(255, 255, 255, 0.88);
+  background-color: rgba(6, 8, 20, 0.96) !important;
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 10px 30px -10px rgba(14, 165, 233, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7) !important;
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
 }
 
 #mainNavbar.transparent-top {
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(6, 8, 20, 0.95) !important;
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(241, 245, 249, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: none;
 }
 
