@@ -435,7 +435,7 @@ function runZeroGravityIntro() {
       camera.updateProjectionMatrix();
       renderer.setSize(nw, nh);
     });
-  }
+  })();
 
   // Kinetic Typography Distortion on Mouse Move
   const kineticTitle = document.getElementById('introKineticTitle');
@@ -484,6 +484,26 @@ function runZeroGravityIntro() {
     if (pDigits) pDigits.textContent = curProgress + '%';
     if (pFill) pFill.style.width = curProgress + '%';
   }, 38);
+
+  function onLoadingReady() {
+    if (pStatus) {
+      pStatus.textContent = 'SYSTEM READY • LAUNCHING...';
+      pStatus.classList.add('text-emerald-400');
+    }
+    if (launchBtn) {
+      launchBtn.classList.remove('btn-disabled');
+      launchBtn.classList.add('shadow-[0_0_35px_rgba(230,90,25,0.6)]');
+    }
+    if (launchText) {
+      launchText.textContent = 'LAUNCHING...';
+      launchText.classList.add('text-white', 'font-black');
+    }
+
+    // Auto-launch into website after brief cinematic pause
+    setTimeout(() => {
+      dismissIntro();
+    }, 450);
+  }
 
   function dismissIntro() {
     if (!isIntroActive) return;
