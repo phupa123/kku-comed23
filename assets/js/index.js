@@ -810,9 +810,67 @@ function closeLogoutModal() {
 }
 
 function confirmGoogleLogoutAction() {
-  closeLogoutModal();
-  localStorage.removeItem('COMED_USER_SESSION');
-  updateUserUI(null);
+  const card = document.getElementById('logoutConfirmCard');
+  const modal = document.getElementById('modalLogoutConfirm');
+  
+  // Close profile dropdown menu immediately
+  const profileMenu = document.getElementById('profileDropdownMenu');
+  if (profileMenu) profileMenu.classList.add('hidden');
+
+  if (typeof gsap !== 'undefined' && card) {
+    // Stage 1: Card spin out + blast
+    gsap.to(card, {
+      scale: 0.75,
+      y: -30,
+      opacity: 0,
+      duration: 0.35,
+      ease: 'back.in(1.7)',
+      onComplete: () => {
+        if (modal) modal.classList.add('hidden');
+        
+        // Stage 2: Animate Navbar Profile pill collapsing & fading
+        const navPill = document.getElementById('navUserLoggedIn');
+        const guestBtn = document.getElementById('navUserGuest');
+        
+        if (navPill && guestBtn) {
+          gsap.to(navPill, {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.25,
+            onComplete: () => {
+              // Clear session keys
+              localStorage.removeItem('COMED_USER_SESSION');
+              localStorage.removeItem('currentUser');
+              localStorage.removeItem('supabase_user');
+              
+              navPill.classList.add('hidden');
+              navPill.style.transform = '';
+              navPill.style.opacity = '';
+              
+              guestBtn.classList.remove('hidden');
+              gsap.fromTo(guestBtn, 
+                { scale: 0.7, opacity: 0 }, 
+                { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(2)' }
+              );
+              
+              updateUserUI(null);
+            }
+          });
+        } else {
+          localStorage.removeItem('COMED_USER_SESSION');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('supabase_user');
+          updateUserUI(null);
+        }
+      }
+    });
+  } else {
+    closeLogoutModal();
+    localStorage.removeItem('COMED_USER_SESSION');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('supabase_user');
+    updateUserUI(null);
+  }
 }
 
 // Check existing session on load
