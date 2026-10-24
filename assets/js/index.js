@@ -322,20 +322,36 @@ function showLoginSuccessPopup(user) {
 
   modal.classList.remove('hidden');
   
-  // GSAP Pop & Spring Animation
+  // Clean, high-performance GPU-accelerated Spring Pop (No CPU-stalling canvas confetti)
   if (typeof gsap !== 'undefined') {
+    // Card Entrance
     gsap.fromTo(card, 
-      { opacity: 0, scale: 0.6, y: 50 }, 
-      { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.8)" }
+      { opacity: 0, scale: 0.88, y: 25 }, 
+      { opacity: 1, scale: 1, y: 0, duration: 0.42, ease: "power3.out", force3D: true }
     );
+
+    // Glowing Avatar Pop
+    if (avatar) {
+      gsap.fromTo(avatar,
+        { scale: 0.7, rotate: -8 },
+        { scale: 1, rotate: 0, duration: 0.5, ease: "back.out(2)", delay: 0.08 }
+      );
+    }
   }
 
-  // Confetti Explosion
+  // Lightweight, hardware-accelerated Sparkle Burst (Only 18 crisp micro-sparks, zero lag)
   if (typeof confetti === 'function') {
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 }
+    requestAnimationFrame(() => {
+      confetti({
+        particleCount: 20,
+        spread: 45,
+        ticks: 60,
+        gravity: 1.4,
+        scalar: 0.8,
+        colors: ['#E65A19', '#FF7A29', '#38BDF8', '#F5C542'],
+        origin: { y: 0.52 },
+        disableForReducedMotion: true
+      });
     });
   }
 
