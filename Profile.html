@@ -199,9 +199,16 @@
           <div class="absolute -top-16 -right-16 w-44 h-44 bg-[#E65A19]/15 rounded-full blur-2xl pointer-events-none"></div>
 
           <!-- Avatar with Metallic Ring & Status Beacon -->
-          <div class="relative w-36 h-36 mx-auto mb-5">
-            <div class="avatar-metallic-ring w-full h-full rounded-full overflow-hidden p-1 flex items-center justify-center">
+          <div class="relative w-36 h-36 mx-auto mb-5 group">
+            <div class="avatar-metallic-ring w-full h-full rounded-full overflow-hidden p-1 flex items-center justify-center relative">
               <img id="userAvatar" src="assets/images/phupa_profile_preview.png" alt="Student Avatar" class="w-full h-full object-cover rounded-full" onerror="this.src='logo.png'">
+              
+              <!-- Quick Avatar Upload Overlay Trigger -->
+              <label for="avatarUploadInput" class="absolute inset-1 rounded-full bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-mono gap-1">
+                <i data-lucide="camera" class="w-5 h-5 text-[#FF7A29]"></i>
+                <span class="font-bold">เปลี่ยนรูป</span>
+              </label>
+              <input type="file" id="avatarUploadInput" accept="image/*" class="hidden">
             </div>
             <!-- Live Active Beacon Dot (top-right of ring) -->
             <div class="absolute top-2 right-2 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#0D0F18] beacon-pulse flex items-center justify-center shadow-[0_0_10px_#34d399]" title="สถานะ: ออนไลน์พร้อมใช้งาน">
@@ -226,6 +233,14 @@
             <p id="userEmailSubtext" class="text-xs font-mono text-slate-400 truncate max-w-full pt-1">
               phupa5874@gmail.com
             </p>
+
+            <!-- Avatar Update Save Button (Shows when new avatar is chosen) -->
+            <div id="avatarSaveActionContainer" class="hidden pt-3">
+              <button type="button" id="btnSaveAvatarOnly" onclick="saveAvatarOnly()" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-mono text-xs font-bold tracking-wide shadow-md flex items-center justify-center gap-1.5 transition">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                <span>ยืนยันบันทึกรูปโปรไฟล์</span>
+              </button>
+            </div>
 
             <div class="pt-4 border-t border-white/10 flex items-center justify-center gap-2 text-[10px] font-mono text-slate-500 tracking-wider">
               <span>BATCH 23</span>
@@ -286,6 +301,20 @@
 
         <!-- The Profile Form Container -->
         <div class="rounded-3xl bg-[#0D0F18]/90 backdrop-blur-xl border border-white/10 p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          
+          <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+            <div>
+              <h3 class="text-sm font-bold font-mono text-white flex items-center gap-2">
+                <span>แก้ไขข้อมูลส่วนตัว</span>
+                <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-normal">● Autosave เปิดใช้งาน</span>
+              </h3>
+              <p class="text-[11px] font-mono text-slate-400">แก้ไขแล้วระบบจะบันทึกอัตโนมัติทันที หรือกดบันทึกเพื่อยืนยัน</p>
+            </div>
+            <div id="autoSaveIndicator" class="text-[11px] font-mono text-slate-400 flex items-center gap-1.5 transition-all">
+              <i data-lucide="cloud-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span id="autoSaveText">บันทึกข้อมูลแล้ว</span>
+            </div>
+          </div>
           
           <form id="profileForm" class="space-y-6">
             
@@ -655,13 +684,148 @@
       document.getElementById('inputFacebook').value = profile.facebook_url || '';
       document.getElementById('inputBio').value = profile.bio || '';
       updateBioCounter();
+
+      // Setup Autosave listeners on editable inputs
+      setupAutosaveListeners();
     }
 
-    // 6. Form Submit Handler (Syncs into user_profiles & LocalStorage)
+    // 6. Core Save & Sync Logic (shared by Autosave and Manual Submit)
+    async function performSaveUpdates(updates, isAuto = false) {
+      const emailKey = (cachedProfile?.email || '').toLowerCase().trim();
+      let cloudSynced = false;
+
+      // Update UI Indicator if autosave
+      const indicator = document.getElementById('autoSaveIndicator');
+      const indicatorText = document.getElementById('autoSaveText');
+      if (indicator && indicatorText) {
+        indicator.classList.remove('text-slate-400', 'text-emerald-400');
+        indicator.classList.add('text-amber-400');
+        indicatorText.textContent = isAuto ? "กำลังบันทึกอัตโนมัติ..." : "กำลังบันทึก...";
+      }
+
+      // 1. Sync to Supabase user_profiles table (main COMED database)
+      if (supabaseClient && emailKey) {
+        try {
+          const payload = {
+            email: emailKey,
+            student_id: cachedProfile?.student_id || null,
+            name: cachedProfile?.full_name || null,
+            updated_at: new Date().toISOString()
+          };
+          if (updates.nickname !== undefined) payload.nickname = updates.nickname;
+          if (updates.line_id !== undefined) payload.line_id = updates.line_id;
+          if (updates.instagram !== undefined) payload.instagram = updates.instagram;
+          if (updates.facebook_url !== undefined) payload.facebook_url = updates.facebook_url;
+          if (updates.bio !== undefined) payload.bio = updates.bio;
+          if (updates.avatar !== undefined) payload.avatar = updates.avatar;
+
+          const { error: upErr } = await supabaseClient
+            .from('user_profiles')
+            .upsert(payload, { onConflict: 'email' });
+
+          if (!upErr) {
+            cloudSynced = true;
+          } else {
+            console.warn("user_profiles upsert note:", upErr.message);
+          }
+        } catch (err) {
+          console.warn("user_profiles caught error:", err);
+        }
+      }
+
+      // 2. Update LocalStorage COMED_CUSTOM_USERS_PROFILES_V1
+      try {
+        const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
+        const stored = JSON.parse(localStorage.getItem(profilesKey) || '{}');
+        stored[emailKey] = {
+          ...(stored[emailKey] || {}),
+          name: cachedProfile?.full_name,
+          studentId: cachedProfile?.student_id,
+          nickname: updates.nickname !== undefined ? updates.nickname : cachedProfile?.nickname,
+          lineId: updates.line_id !== undefined ? updates.line_id : cachedProfile?.line_id,
+          instagram: updates.instagram !== undefined ? updates.instagram : cachedProfile?.instagram,
+          facebookUrl: updates.facebook_url !== undefined ? updates.facebook_url : cachedProfile?.facebook_url,
+          bio: updates.bio !== undefined ? updates.bio : cachedProfile?.bio,
+          avatar: updates.avatar !== undefined ? updates.avatar : cachedProfile?.avatar_url,
+          updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem(profilesKey, JSON.stringify(stored));
+      } catch (e) {}
+
+      // 3. Update Current User Session
+      try {
+        ['currentUser', 'COMED_USER_SESSION'].forEach(key => {
+          const userJson = localStorage.getItem(key);
+          if (userJson) {
+            const u = JSON.parse(userJson);
+            if (updates.nickname !== undefined) u.nickname = updates.nickname;
+            if (updates.line_id !== undefined) { u.lineId = updates.line_id; u.line_id = updates.line_id; }
+            if (updates.instagram !== undefined) u.instagram = updates.instagram;
+            if (updates.facebook_url !== undefined) { u.facebookUrl = updates.facebook_url; u.facebook_url = updates.facebook_url; }
+            if (updates.bio !== undefined) u.bio = updates.bio;
+            if (updates.avatar !== undefined) { u.avatar = updates.avatar; u.avatar_url = updates.avatar; }
+            localStorage.setItem(key, JSON.stringify(u));
+          }
+        });
+      } catch (e) {}
+
+      // Update cachedProfile
+      if (cachedProfile) {
+        Object.assign(cachedProfile, updates);
+      }
+
+      if (indicator && indicatorText) {
+        indicator.classList.remove('text-amber-400');
+        indicator.classList.add('text-emerald-400');
+        indicatorText.textContent = isAuto ? "บันทึกอัตโนมัติแล้ว" : "บันทึกข้อมูลเรียบร้อย";
+        if (window.lucide) lucide.createIcons();
+      }
+
+      return cloudSynced;
+    }
+
+    // 7. Debounced Autosave on Input Change
+    let autoSaveTimer = null;
+    function triggerDebouncedAutosave() {
+      const indicator = document.getElementById('autoSaveIndicator');
+      const indicatorText = document.getElementById('autoSaveText');
+      if (indicator && indicatorText) {
+        indicator.classList.remove('text-emerald-400', 'text-slate-400');
+        indicator.classList.add('text-amber-400');
+        indicatorText.textContent = "รอพักพิมพ์เพื่อบันทึก...";
+      }
+
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(async () => {
+        const updates = {
+          nickname: document.getElementById('inputNickname').value.trim(),
+          line_id: document.getElementById('inputLineId').value.trim(),
+          instagram: document.getElementById('inputInstagram').value.trim(),
+          facebook_url: document.getElementById('inputFacebook').value.trim(),
+          bio: document.getElementById('inputBio').value.trim()
+        };
+        await performSaveUpdates(updates, true);
+      }, 700);
+    }
+
+    function setupAutosaveListeners() {
+      const fields = ['inputNickname', 'inputLineId', 'inputInstagram', 'inputFacebook', 'inputBio'];
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && !el.dataset.autosaveBound) {
+          el.dataset.autosaveBound = "true";
+          el.addEventListener('input', triggerDebouncedAutosave);
+          el.addEventListener('change', triggerDebouncedAutosave);
+        }
+      });
+    }
+
+    // 8. Manual Form Submit Handler
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
       profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        clearTimeout(autoSaveTimer);
         const saveBtn = document.getElementById('btnSave');
         const origHtml = saveBtn.innerHTML;
         saveBtn.disabled = true;
@@ -673,98 +837,76 @@
           line_id: document.getElementById('inputLineId').value.trim(),
           instagram: document.getElementById('inputInstagram').value.trim(),
           facebook_url: document.getElementById('inputFacebook').value.trim(),
-          bio: document.getElementById('inputBio').value.trim(),
-          updated_at: new Date().toISOString()
+          bio: document.getElementById('inputBio').value.trim()
         };
 
-        let cloudSynced = false;
-        const emailKey = (cachedProfile?.email || '').toLowerCase().trim();
-
-        // 1. Sync to Supabase user_profiles table (main COMED database)
-        if (supabaseClient && emailKey) {
-          try {
-            const { error: upErr } = await supabaseClient
-              .from('user_profiles')
-              .upsert({
-                email: emailKey,
-                student_id: cachedProfile.student_id || null,
-                name: cachedProfile.full_name || null,
-                nickname: updates.nickname,
-                line_id: updates.line_id,
-                instagram: updates.instagram,
-                facebook_url: updates.facebook_url,
-                bio: updates.bio,
-                updated_at: updates.updated_at
-              }, { onConflict: 'email' });
-
-            if (!upErr) {
-              cloudSynced = true;
-            } else {
-              console.warn("user_profiles upsert notice:", upErr.message);
-            }
-          } catch (err) {
-            console.warn("Supabase user_profiles upsert caught:", err);
-          }
-
-          // 2. Optional: also upsert to profiles table if it exists
-          if (cachedProfile.id && cachedProfile.id !== 'admin-tester-id' && !cachedProfile.id.startsWith('demo-')) {
-            try {
-              await supabaseClient
-                .from('profiles')
-                .upsert({ id: cachedProfile.id, ...updates });
-            } catch (_) {}
-          }
-        }
-
-        // 3. Update LocalStorage COMED_CUSTOM_USERS_PROFILES_V1 for ecosystem sync
-        try {
-          const profilesKey = 'COMED_CUSTOM_USERS_PROFILES_V1';
-          const stored = JSON.parse(localStorage.getItem(profilesKey) || '{}');
-          stored[emailKey] = {
-            ...(stored[emailKey] || {}),
-            name: cachedProfile.full_name,
-            studentId: cachedProfile.student_id,
-            nickname: updates.nickname,
-            lineId: updates.line_id,
-            instagram: updates.instagram,
-            facebookUrl: updates.facebook_url,
-            bio: updates.bio,
-            updatedAt: updates.updated_at
-          };
-          localStorage.setItem(profilesKey, JSON.stringify(stored));
-        } catch (e) {}
-
-        // 4. Update Current User Session
-        try {
-          ['currentUser', 'COMED_USER_SESSION'].forEach(key => {
-            const userJson = localStorage.getItem(key);
-            if (userJson) {
-              const u = JSON.parse(userJson);
-              u.nickname = updates.nickname;
-              u.lineId = updates.line_id;
-              u.line_id = updates.line_id;
-              u.instagram = updates.instagram;
-              u.facebookUrl = updates.facebook_url;
-              u.facebook_url = updates.facebook_url;
-              u.bio = updates.bio;
-              localStorage.setItem(key, JSON.stringify(u));
-            }
-          });
-        } catch (e) {}
-
-        // Update cached profile
-        Object.assign(cachedProfile, updates);
+        const cloudSynced = await performSaveUpdates(updates, false);
 
         saveBtn.disabled = false;
         saveBtn.innerHTML = origHtml;
         if (window.lucide) lucide.createIcons();
 
         if (cloudSynced) {
-          showToast("บันทึกข้อมูลและซิงค์คลาวด์สำเร็จเรียบร้อย");
+          showToast("บันทึกการเปลี่ยนแปลงและซิงค์คลาวด์สำเร็จ");
         } else {
-          showToast("บันทึกข้อมูลเรียบร้อย (อัปเดตเครื่องและเซสชันแล้ว)");
+          showToast("บันทึกการเปลี่ยนแปลงลงเซสชันเรียบร้อย");
         }
       });
+    }
+
+    // 9. Dedicated Avatar Upload & Confirmation Flow
+    let pendingAvatarDataUrl = null;
+    const avatarUploadInput = document.getElementById('avatarUploadInput');
+    if (avatarUploadInput) {
+      avatarUploadInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+          showToast("ขนาดรูปภาพต้องไม่เกิน 5MB");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          pendingAvatarDataUrl = event.target.result;
+          const avatarEl = document.getElementById('userAvatar');
+          if (avatarEl) avatarEl.src = pendingAvatarDataUrl;
+
+          // Show Confirmation button
+          const actionBox = document.getElementById('avatarSaveActionContainer');
+          if (actionBox) {
+            actionBox.classList.remove('hidden');
+          }
+          showToast("เลือกรูปแล้ว! กดปุ่ม 'ยืนยันบันทึกรูปโปรไฟล์' เพื่อบันทึก");
+          if (window.lucide) lucide.createIcons();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function saveAvatarOnly() {
+      if (!pendingAvatarDataUrl) {
+        showToast("กรุณาเลือกรูปโปรไฟล์ก่อน");
+        return;
+      }
+
+      const btn = document.getElementById('btnSaveAvatarOnly');
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>กำลังบันทึกรูป...</span>`;
+      if (window.lucide) lucide.createIcons();
+
+      const cloudSynced = await performSaveUpdates({ avatar: pendingAvatarDataUrl }, false);
+
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+      const actionBox = document.getElementById('avatarSaveActionContainer');
+      if (actionBox) actionBox.classList.add('hidden');
+      pendingAvatarDataUrl = null;
+
+      if (window.lucide) lucide.createIcons();
+      showToast(cloudSynced ? "อัปเดตและบันทึกรูปโปรไฟล์สำเร็จ!" : "บันทึกรูปโปรไฟล์เรียบร้อย");
     }
 
     function resetFormToSaved() {
