@@ -221,236 +221,136 @@ function runZeroGravityIntro() {
 
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 1000);
-    camera.position.set(0, 0.4, 4.4);
+    camera.position.set(0, 0.2, 4.4);
 
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.3;
+    renderer.toneMappingExposure = 1.35;
     container.appendChild(renderer.domElement);
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0x0C1030, 2.8);
+    // Dynamic Lights
+    const ambientLight = new THREE.AmbientLight(0x0a1026, 2.8);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xFFFFFF, 3.0);
-    dirLight.position.set(5, 6, 4);
-    scene.add(dirLight);
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 3.2);
+    dirLight1.position.set(5, 6, 5);
+    scene.add(dirLight1);
 
-    const orangeLight = new THREE.PointLight(0xE65A19, 6, 12);
-    orangeLight.position.set(-2.5, 1, 2.5);
-    scene.add(orangeLight);
+    const dirLight2 = new THREE.DirectionalLight(0xff6a28, 3.5);
+    dirLight2.position.set(-5, -2, 3);
+    scene.add(dirLight2);
 
-    const blueLight = new THREE.PointLight(0x38BDF8, 5, 12);
-    blueLight.position.set(2.5, -1, 2.5);
-    scene.add(blueLight);
+    const innerCoreLight = new THREE.PointLight(0xff5500, 8, 14);
+    innerCoreLight.position.set(0, 0, 0);
+    scene.add(innerCoreLight);
 
-    laptopGroup = new THREE.Group();
-    scene.add(laptopGroup);
+    const cyanRimLight = new THREE.PointLight(0x38bdf8, 5, 12);
+    cyanRimLight.position.set(3, 3, -2);
+    scene.add(cyanRimLight);
 
-    // 1. Laptop Base (Translucent Glowing Navy Glass & Chrome Border)
-    const baseGeo = new THREE.BoxGeometry(2.4, 0.08, 1.6);
-    const baseMat = new THREE.MeshPhysicalMaterial({
-      color: 0x0C1030,
-      metalness: 0.85,
-      roughness: 0.15,
-      transparent: true,
-      opacity: 0.88,
-      clearcoat: 1.0,
-      reflectivity: 0.9
+    // Master Celestial Group
+    const celestialGroup = new THREE.Group();
+    scene.add(celestialGroup);
+
+    // 1. Central Plasma Core Sphere
+    const coreGeo = new THREE.SphereGeometry(0.78, 64, 64);
+    const coreMat = new THREE.MeshStandardMaterial({
+      color: 0xb32b19,
+      emissive: 0xff3b14,
+      emissiveIntensity: 1.25,
+      metalness: 0.92,
+      roughness: 0.18
     });
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-    baseMesh.position.y = -0.55;
-    baseMesh.position.z = 0.3;
-    laptopGroup.add(baseMesh);
+    const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+    celestialGroup.add(coreMesh);
 
-    // Keyboard & Trackpad highlights
-    const trackpadGeo = new THREE.PlaneGeometry(0.7, 0.45);
-    const trackpadMat = new THREE.MeshBasicMaterial({ color: 0x38BDF8, transparent: true, opacity: 0.25 });
-    const trackpad = new THREE.Mesh(trackpadGeo, trackpadMat);
-    trackpad.rotation.x = -Math.PI / 2;
-    trackpad.position.set(0, -0.505, 0.7);
-    laptopGroup.add(trackpad);
-
-    // 2. Laptop Screen Lid (Angled back)
-    const screenLid = new THREE.Group();
-    screenLid.position.set(0, -0.51, -0.5);
-    screenLid.rotation.x = -0.22; // angled 102 degrees
-    laptopGroup.add(screenLid);
-
-    const lidBackGeo = new THREE.BoxGeometry(2.4, 1.55, 0.06);
-    const lidBackMat = new THREE.MeshPhysicalMaterial({
-      color: 0x080B1E,
-      metalness: 0.9,
-      roughness: 0.1,
-      clearcoat: 1.0
-    });
-    const lidBack = new THREE.Mesh(lidBackGeo, lidBackMat);
-    lidBack.position.y = 0.775;
-    screenLid.add(lidBack);
-
-    // Screen Glass Inner Display with Cyan Circuit glow
-    const displayGeo = new THREE.PlaneGeometry(2.25, 1.4);
-    const displayMat = new THREE.MeshBasicMaterial({
-      color: 0x050C24,
-      transparent: true,
-      opacity: 0.95
-    });
-    const displayMesh = new THREE.Mesh(displayGeo, displayMat);
-    displayMesh.position.set(0, 0.775, 0.035);
-    screenLid.add(displayMesh);
-
-    // ================= 3. AUTHENTIC 3D PROCEDURAL STUPA & COM (NO FLAT 2D) =================
-    const stupaGroup = new THREE.Group();
-    const goldMaterial = new THREE.MeshStandardMaterial({
-      color: 0xF5C542,
+    // 2. Quantum Geometric Exoskeleton (Wire Lattice Cage)
+    const icoGeo = new THREE.IcosahedronGeometry(1.08, 1);
+    const icoMat = new THREE.MeshPhysicalMaterial({
+      color: 0x1a2444,
+      emissive: 0x0c1533,
       metalness: 0.95,
-      roughness: 0.16,
-      envMapIntensity: 2.2
-    });
-    const darkGoldMaterial = new THREE.MeshStandardMaterial({
-      color: 0xC69214,
-      metalness: 0.9,
-      roughness: 0.28
-    });
-    const chromeDetailMat = new THREE.MeshStandardMaterial({
-      color: 0xEAEAEA,
-      metalness: 0.98,
-      roughness: 0.1
-    });
-
-    // Tiered Bases
-    const b1 = new THREE.Mesh(new THREE.BoxGeometry(0.74, 0.08, 0.74), darkGoldMaterial);
-    b1.position.y = 0.04;
-    stupaGroup.add(b1);
-    const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.08, 0.66), goldMaterial);
-    b2.position.y = 0.12;
-    stupaGroup.add(b2);
-    const b3 = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.1, 0.58), darkGoldMaterial);
-    b3.position.y = 0.21;
-    stupaGroup.add(b3);
-
-    // Body & Lotus Waist
-    const waist = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.31, 0.34, 4), goldMaterial);
-    waist.rotation.y = Math.PI / 4;
-    waist.position.y = 0.42;
-    stupaGroup.add(waist);
-    const ringMolding = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.04, 0.52), chromeDetailMat);
-    ringMolding.position.y = 0.60;
-    stupaGroup.add(ringMolding);
-
-    // Spire
-    const spireLower = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.23, 0.45, 4), goldMaterial);
-    spireLower.rotation.y = Math.PI / 4;
-    spireLower.position.y = 0.84;
-    stupaGroup.add(spireLower);
-    const spireMolding = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.03, 0.34), chromeDetailMat);
-    spireMolding.position.y = 1.08;
-    stupaGroup.add(spireMolding);
-    const spireUpper = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.65, 4), goldMaterial);
-    spireUpper.rotation.y = Math.PI / 4;
-    spireUpper.position.y = 1.42;
-    stupaGroup.add(spireUpper);
-
-    // Finial Needle
-    const finialSphere = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 16), goldMaterial);
-    finialSphere.position.y = 1.76;
-    stupaGroup.add(finialSphere);
-    const finialTip = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.15, 8), goldMaterial);
-    finialTip.position.y = 1.86;
-    stupaGroup.add(finialTip);
-
-    stupaGroup.position.set(0, -0.42, 0.08);
-    stupaGroup.scale.set(0.96, 0.96, 0.96);
-    laptopGroup.add(stupaGroup);
-
-    // 3D "COM" Letters
-    const comGroup = new THREE.Group();
-    comGroup.position.set(0, -0.06, 0.42);
-    comGroup.scale.set(0.85, 0.85, 0.85);
-
-    const chromeWordMat = new THREE.MeshStandardMaterial({ color: 0xF3C352, metalness: 0.95, roughness: 0.14 });
-    const sideTrimMat = new THREE.MeshStandardMaterial({ color: 0xE65A19, metalness: 0.92, roughness: 0.18 });
-
-    // 'C'
-    const cLetter = new THREE.Group();
-    cLetter.position.x = -0.56;
-    cLetter.add(new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.07, 16, 32, Math.PI * 1.55), chromeWordMat));
-    const c1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.07, 0.14), sideTrimMat);
-    c1.position.set(0.14, 0.17, 0);
-    cLetter.add(c1);
-    const c2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.07, 0.14), sideTrimMat);
-    c2.position.set(0.14, -0.17, 0);
-    cLetter.add(c2);
-    comGroup.add(cLetter);
-
-    // 'O'
-    const oLetter = new THREE.Group();
-    oLetter.position.x = 0;
-    oLetter.add(new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.07, 16, 32), chromeWordMat));
-    comGroup.add(oLetter);
-
-    // 'M'
-    const mLetter = new THREE.Group();
-    mLetter.position.x = 0.56;
-    const m1 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.52, 0.14), chromeWordMat);
-    m1.position.x = -0.18;
-    mLetter.add(m1);
-    const m2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.52, 0.14), chromeWordMat);
-    m2.position.x = 0.18;
-    mLetter.add(m2);
-    const m3 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.36, 0.14), sideTrimMat);
-    m3.rotation.z = -0.45;
-    m3.position.set(-0.09, 0.08, 0);
-    mLetter.add(m3);
-    const m4 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.36, 0.14), sideTrimMat);
-    m4.rotation.z = 0.45;
-    m4.position.set(0.09, 0.08, 0);
-    mLetter.add(m4);
-    comGroup.add(mLetter);
-
-    laptopGroup.add(comGroup);
-
-    // 4. Glowing Fire-Orange/Red Orbit Ring around the laptop
-    function createGlowOrbit(radius, rotX, rotY) {
-      const curve = new THREE.EllipseCurve(0, 0, radius, radius * 0.72, 0, 2 * Math.PI, false, 0);
-      const pts = curve.getPoints(120);
-      const geo = new THREE.BufferGeometry().setFromPoints(pts);
-      const mat = new THREE.LineBasicMaterial({
-        color: 0xFF7A29,
-        transparent: true,
-        opacity: 0.85,
-        linewidth: 2
-      });
-      const line = new THREE.Line(geo, mat);
-      line.rotation.x = rotX;
-      line.rotation.y = rotY;
-      return line;
-    }
-
-    orbitRing = createGlowOrbit(2.1, Math.PI / 3, -Math.PI / 6);
-    laptopGroup.add(orbitRing);
-
-    // 5. Orbiting Micro Spark Particles
-    const sparkCount = 90;
-    const sparkGeo = new THREE.BufferGeometry();
-    const sparkPos = new Float32Array(sparkCount * 3);
-    for (let i = 0; i < sparkCount * 3; i += 3) {
-      sparkPos[i] = (Math.random() - 0.5) * 4.5;
-      sparkPos[i + 1] = (Math.random() - 0.5) * 3.5;
-      sparkPos[i + 2] = (Math.random() - 0.5) * 3;
-    }
-    sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
-    const sparkMat = new THREE.PointsMaterial({
-      color: 0xFF7A29,
-      size: 0.04,
+      roughness: 0.12,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.45,
+      wireframe: true
+    });
+    const icoMesh = new THREE.Mesh(icoGeo, icoMat);
+    celestialGroup.add(icoMesh);
+
+    // 3. Floating Quantum Prism Shards
+    const shardsGroup = new THREE.Group();
+    const shardGeo = new THREE.OctahedronGeometry(0.13, 0);
+    const shardMat = new THREE.MeshStandardMaterial({
+      color: 0xf5c542,
+      emissive: 0xe65a19,
+      emissiveIntensity: 0.6,
+      metalness: 0.98,
+      roughness: 0.15
+    });
+    for (let i = 0; i < 18; i++) {
+      const shard = new THREE.Mesh(shardGeo, shardMat);
+      const angle = (i / 18) * Math.PI * 2;
+      const radius = 1.35 + (i % 3) * 0.15;
+      shard.position.set(
+        Math.cos(angle) * radius,
+        (Math.sin(angle * 2) * 0.35) + ((i % 4) - 1.5) * 0.12,
+        Math.sin(angle) * radius
+      );
+      shard.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+      shardsGroup.add(shard);
+    }
+    celestialGroup.add(shardsGroup);
+
+    // 4. Triple Gyroscopic Chrono-Rings
+    function createChronoRing(radius, tubeRadius, colorHex, tiltX, tiltY) {
+      const ringGeo = new THREE.TorusGeometry(radius, tubeRadius, 24, 160);
+      const ringMat = new THREE.MeshStandardMaterial({
+        color: colorHex,
+        emissive: colorHex,
+        emissiveIntensity: 0.45,
+        metalness: 0.95,
+        roughness: 0.15
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = tiltX;
+      ringMesh.rotation.y = tiltY;
+      return ringMesh;
+    }
+
+    const ring1 = createChronoRing(1.72, 0.024, 0xff7a29, Math.PI / 3, 0.3);
+    const ring2 = createChronoRing(1.98, 0.018, 0x38bdf8, -Math.PI / 3.5, 0.45);
+    const ring3 = createChronoRing(2.22, 0.015, 0xf5c542, Math.PI / 2.2, -0.25);
+    celestialGroup.add(ring1);
+    celestialGroup.add(ring2);
+    celestialGroup.add(ring3);
+
+    // 5. Orbital Quantum Ion Particle Cloud
+    const particleCount = 240;
+    const particleGeo = new THREE.BufferGeometry();
+    const particlePos = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      const u = Math.random();
+      const v = Math.random();
+      const theta = u * 2.0 * Math.PI;
+      const phi = Math.acos(2.0 * v - 1.0);
+      const r = 1.25 + Math.random() * 1.85;
+      particlePos[i] = r * Math.sin(phi) * Math.cos(theta);
+      particlePos[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+      particlePos[i + 2] = r * Math.cos(phi);
+    }
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xff8c42,
+      size: 0.038,
+      transparent: true,
+      opacity: 0.9,
       blending: THREE.AdditiveBlending
     });
-    const sparks = new THREE.Points(sparkGeo, sparkMat);
-    laptopGroup.add(sparks);
+    const particleCloud = new THREE.Points(particleGeo, particleMat);
+    celestialGroup.add(particleCloud);
 
     // Interactive Dragging on mouse/touch
     let mouseX = 0, mouseY = 0;
@@ -477,7 +377,6 @@ function runZeroGravityIntro() {
       }
     });
 
-    // Touch support for mobile
     container.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
         isDragging = true;
@@ -503,18 +402,26 @@ function runZeroGravityIntro() {
 
       const t = clock.getElapsedTime();
 
-      // Zero gravity organic bobbing
-      laptopGroup.position.y = Math.sin(t * 1.3) * 0.08;
-      laptopGroup.position.x = Math.cos(t * 0.9) * 0.05;
+      // Zero gravity organic bobbing & pulsing
+      celestialGroup.position.y = Math.sin(t * 1.3) * 0.08;
+      celestialGroup.position.x = Math.cos(t * 0.9) * 0.05;
 
-      // Subtle auto rotation
-      laptopGroup.rotation.y += 0.003;
-      if (orbitRing) orbitRing.rotation.z += 0.006;
-      sparks.rotation.y = t * 0.04;
+      // Celestial Core rotation & breathing
+      coreMesh.rotation.y += 0.007;
+      icoMesh.rotation.y -= 0.005;
+      icoMesh.rotation.x += 0.003;
+
+      // Astrolabe Chrono-Rings Gyroscopic Multi-axis Rotations
+      ring1.rotation.z += 0.008;
+      ring2.rotation.z -= 0.006;
+      ring3.rotation.x += 0.005;
+
+      shardsGroup.rotation.y += 0.012;
+      particleCloud.rotation.y = t * 0.04;
 
       // Mouse drag damping
-      laptopGroup.rotation.y += (targetRotY + mouseX * 0.2 - laptopGroup.rotation.y) * 0.06;
-      laptopGroup.rotation.x += (targetRotX - mouseY * 0.2 - laptopGroup.rotation.x) * 0.06;
+      celestialGroup.rotation.y += (targetRotY + mouseX * 0.2 - celestialGroup.rotation.y) * 0.06;
+      celestialGroup.rotation.x += (targetRotX - mouseY * 0.2 - celestialGroup.rotation.x) * 0.06;
 
       renderer.render(scene, camera);
     }
@@ -528,7 +435,7 @@ function runZeroGravityIntro() {
       camera.updateProjectionMatrix();
       renderer.setSize(nw, nh);
     });
-  })();
+  }
 
   // Kinetic Typography Distortion on Mouse Move
   const kineticTitle = document.getElementById('introKineticTitle');
@@ -564,8 +471,7 @@ function runZeroGravityIntro() {
       curProgress += Math.floor(Math.random() * 5) + 3;
       if (curProgress > 87) curProgress = 87;
     } else if (curProgress === 87) {
-      // Natural cinematic pause at 87% exactly as in reference image
-      setTimeout(() => { curProgress = 88; }, 400);
+      setTimeout(() => { curProgress = 88; }, 320);
     } else {
       curProgress += Math.floor(Math.random() * 6) + 4;
       if (curProgress >= 100) {
@@ -577,24 +483,8 @@ function runZeroGravityIntro() {
 
     if (pDigits) pDigits.textContent = curProgress + '%';
     if (pFill) pFill.style.width = curProgress + '%';
-  }, 42);
+  }, 38);
 
-  function onLoadingReady() {
-    if (pStatus) {
-      pStatus.textContent = 'SYSTEM READY';
-      pStatus.classList.add('text-emerald-400');
-    }
-    if (launchBtn) {
-      launchBtn.classList.remove('btn-disabled');
-      launchBtn.classList.add('shadow-[0_0_35px_rgba(230,90,25,0.6)]');
-    }
-    if (launchText) {
-      launchText.textContent = 'CLICK TO LAUNCH';
-      launchText.classList.add('text-white', 'font-black');
-    }
-  }
-
-  // Transition Dismissal
   function dismissIntro() {
     if (!isIntroActive) return;
     isIntroActive = false;
