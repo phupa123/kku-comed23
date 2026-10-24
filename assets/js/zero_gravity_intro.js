@@ -330,7 +330,7 @@ function runZeroGravityIntro() {
     celestialGroup.add(ring3);
 
     // 5. Orbital Quantum Ion Particle Cloud
-    const particleCount = 240;
+    const particleCount = 160;
     const particleGeo = new THREE.BufferGeometry();
     const particlePos = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount * 3; i += 3) {
@@ -402,28 +402,29 @@ function runZeroGravityIntro() {
       if (!isIntroActive) return;
       animFrameId = requestAnimationFrame(animate);
 
+      const delta = Math.min(clock.getDelta(), 0.1);
       const t = clock.getElapsedTime();
 
       // Zero gravity organic bobbing & pulsing
-      celestialGroup.position.y = Math.sin(t * 1.3) * 0.08;
-      celestialGroup.position.x = Math.cos(t * 0.9) * 0.05;
+      celestialGroup.position.y = Math.sin(t * 1.3) * 0.07;
+      celestialGroup.position.x = Math.cos(t * 0.9) * 0.04;
 
-      // Celestial Core rotation & breathing
-      coreMesh.rotation.y += 0.007;
-      icoMesh.rotation.y -= 0.005;
-      icoMesh.rotation.x += 0.003;
+      // Frame-rate independent celestial core rotation
+      coreMesh.rotation.y += delta * 0.45;
+      icoMesh.rotation.y -= delta * 0.35;
+      icoMesh.rotation.x += delta * 0.2;
 
-      // Astrolabe Chrono-Rings Gyroscopic Multi-axis Rotations
-      ring1.rotation.z += 0.008;
-      ring2.rotation.z -= 0.006;
-      ring3.rotation.x += 0.005;
+      // Chrono-Rings Gyroscopic Multi-axis Rotations
+      ring1.rotation.z += delta * 0.5;
+      ring2.rotation.z -= delta * 0.4;
+      ring3.rotation.x += delta * 0.35;
 
-      shardsGroup.rotation.y += 0.012;
-      particleCloud.rotation.y = t * 0.04;
+      shardsGroup.rotation.y += delta * 0.75;
+      particleCloud.rotation.y += delta * 0.25;
 
-      // Mouse drag damping
-      celestialGroup.rotation.y += (targetRotY + mouseX * 0.2 - celestialGroup.rotation.y) * 0.06;
-      celestialGroup.rotation.x += (targetRotX - mouseY * 0.2 - celestialGroup.rotation.x) * 0.06;
+      // Mouse drag damping (smooth lerp)
+      celestialGroup.rotation.y += (targetRotY + mouseX * 0.2 - celestialGroup.rotation.y) * 0.08;
+      celestialGroup.rotation.x += (targetRotX - mouseY * 0.2 - celestialGroup.rotation.x) * 0.08;
 
       renderer.render(scene, camera);
     }
@@ -480,12 +481,13 @@ function runZeroGravityIntro() {
   let curProgress = 0;
   const pTimer = setInterval(() => {
     if (curProgress < 87) {
-      curProgress += Math.floor(Math.random() * 5) + 3;
+      curProgress += Math.floor(Math.random() * 4) + 3;
       if (curProgress > 87) curProgress = 87;
     } else if (curProgress === 87) {
-      setTimeout(() => { curProgress = 88; }, 320);
+      // Crisp 140ms cinematic heartbeat at 87%
+      setTimeout(() => { curProgress = 88; }, 140);
     } else {
-      curProgress += Math.floor(Math.random() * 6) + 4;
+      curProgress += Math.floor(Math.random() * 5) + 4;
       if (curProgress >= 100) {
         curProgress = 100;
         clearInterval(pTimer);
@@ -495,7 +497,7 @@ function runZeroGravityIntro() {
 
     if (pDigits) pDigits.textContent = curProgress + '%';
     if (pFill) pFill.style.width = curProgress + '%';
-  }, 38);
+  }, 22);
 
   function onLoadingReady() {
     if (pStatus) {
@@ -514,7 +516,7 @@ function runZeroGravityIntro() {
     // Auto-launch into website after brief cinematic pause
     setTimeout(() => {
       dismissIntro();
-    }, 450);
+    }, 220);
   }
 
   function dismissIntro() {
@@ -522,7 +524,7 @@ function runZeroGravityIntro() {
     isIntroActive = false;
 
     if (camera && typeof gsap !== 'undefined') {
-      gsap.to(camera.position, { z: 0.5, duration: 0.8, ease: 'power2.in' });
+      gsap.to(camera.position, { z: 0.2, duration: 0.5, ease: 'power3.in' });
     }
 
     overlay.classList.add('intro-launching');
@@ -535,7 +537,7 @@ function runZeroGravityIntro() {
       overlay.remove();
       const st = document.getElementById('zeroGravityIntroStyles');
       if (st) st.remove();
-    }, 800);
+    }, 500);
   }
 
   if (skipBtn) skipBtn.addEventListener('click', dismissIntro);
