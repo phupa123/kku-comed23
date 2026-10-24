@@ -25,6 +25,8 @@ function runZeroGravityIntro() {
       font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
       user-select: none;
       transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+      transform: translateZ(0);
     }
     #zeroGravityIntroOverlay.intro-launching {
       opacity: 0;
@@ -225,7 +227,7 @@ function runZeroGravityIntro() {
 
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(w, h);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.35;
     container.appendChild(renderer.domElement);
@@ -255,7 +257,7 @@ function runZeroGravityIntro() {
     scene.add(celestialGroup);
 
     // 1. Central Plasma Core Sphere
-    const coreGeo = new THREE.SphereGeometry(0.78, 64, 64);
+    const coreGeo = new THREE.SphereGeometry(0.78, 36, 36);
     const coreMat = new THREE.MeshStandardMaterial({
       color: 0xb32b19,
       emissive: 0xff3b14,
@@ -306,7 +308,7 @@ function runZeroGravityIntro() {
 
     // 4. Triple Gyroscopic Chrono-Rings
     function createChronoRing(radius, tubeRadius, colorHex, tiltX, tiltY) {
-      const ringGeo = new THREE.TorusGeometry(radius, tubeRadius, 24, 160);
+      const ringGeo = new THREE.TorusGeometry(radius, tubeRadius, 16, 72);
       const ringMat = new THREE.MeshStandardMaterial({
         color: colorHex,
         emissive: colorHex,
@@ -437,24 +439,34 @@ function runZeroGravityIntro() {
     });
   })();
 
-  // Kinetic Typography Distortion on Mouse Move
+  // Kinetic Typography Distortion on Mouse Move (RAF Throttled 60-120fps)
   const kineticTitle = document.getElementById('introKineticTitle');
   if (kineticTitle) {
-    let lastX = 0, lastTime = Date.now();
-    window.addEventListener('mousemove', (e) => {
-      const now = Date.now();
-      const dt = Math.max(1, now - lastTime);
-      const vx = Math.abs(e.clientX - lastX) / dt;
-      lastX = e.clientX;
-      lastTime = now;
+    let lastX = 0, lastTime = performance.now();
+    let isTicking = false;
+    let pendingClientX = 0;
 
-      const skew = Math.min(8, vx * 4);
-      kineticTitle.style.transform = `skewX(${(e.clientX > window.innerWidth / 2 ? -1 : 1) * skew}deg)`;
-      clearTimeout(kineticTitle._timer);
-      kineticTitle._timer = setTimeout(() => {
-        kineticTitle.style.transform = 'skewX(0deg)';
-      }, 150);
-    });
+    window.addEventListener('mousemove', (e) => {
+      pendingClientX = e.clientX;
+      if (!isTicking) {
+        isTicking = true;
+        requestAnimationFrame(() => {
+          const now = performance.now();
+          const dt = Math.max(1, now - lastTime);
+          const vx = Math.abs(pendingClientX - lastX) / dt;
+          lastX = pendingClientX;
+          lastTime = now;
+
+          const skew = Math.min(6, vx * 3.5);
+          kineticTitle.style.transform = `skewX(${(pendingClientX > window.innerWidth / 2 ? -1 : 1) * skew}deg)`;
+          clearTimeout(kineticTitle._timer);
+          kineticTitle._timer = setTimeout(() => {
+            kineticTitle.style.transform = 'skewX(0deg)';
+          }, 120);
+          isTicking = false;
+        });
+      }
+    }, { passive: true });
   }
 
   // Progress Loading Logic: 0% -> 87% (image_12.png) -> 100% READY
@@ -516,6 +528,10 @@ function runZeroGravityIntro() {
     overlay.classList.add('intro-launching');
     setTimeout(() => {
       if (animFrameId) cancelAnimationFrame(animFrameId);
+      if (renderer) {
+        renderer.dispose();
+        if (renderer.forceContextLoss) renderer.forceContextLoss();
+      }
       overlay.remove();
       const st = document.getElementById('zeroGravityIntroStyles');
       if (st) st.remove();

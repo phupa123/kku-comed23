@@ -1050,20 +1050,26 @@
 
       const kineticTitle = document.getElementById('kineticTitle');
       if (kineticTitle) {
+        let isTicking = false;
         ScrollTrigger.create({
           trigger: '#hero',
           start: 'top top',
           end: 'bottom top',
           onUpdate: (self) => {
-            const vel = self.getVelocity() / 300;
-            const skew = Math.max(-8, Math.min(8, vel));
-            gsap.to(kineticTitle, {
-              skewX: skew,
-              letterSpacing: `${Math.abs(skew) * 0.5 - 2}px`,
-              duration: 0.2,
-              ease: 'power1.out',
-              overwrite: 'auto'
-            });
+            if (!isTicking) {
+              isTicking = true;
+              requestAnimationFrame(() => {
+                const vel = self.getVelocity() / 350;
+                const skew = Math.max(-5, Math.min(5, vel));
+                gsap.to(kineticTitle, {
+                  skewX: skew,
+                  duration: 0.25,
+                  ease: 'power1.out',
+                  overwrite: 'auto'
+                });
+                isTicking = false;
+              });
+            }
           }
         });
       }
@@ -1083,7 +1089,7 @@
 
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
       renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.35;
       container.appendChild(renderer.domElement);
@@ -1113,7 +1119,7 @@
       scene.add(celestialGroup);
 
       // 1. Central Plasma Core Sphere
-      const coreGeo = new THREE.SphereGeometry(0.78, 64, 64);
+      const coreGeo = new THREE.SphereGeometry(0.78, 36, 36);
       const coreMat = new THREE.MeshStandardMaterial({
         color: 0xb32b19,
         emissive: 0xff3b14,
@@ -1164,7 +1170,7 @@
 
       // 4. Triple Gyroscopic Chrono-Rings
       function createChronoRing(radius, tubeRadius, colorHex, tiltX, tiltY) {
-        const ringGeo = new THREE.TorusGeometry(radius, tubeRadius, 24, 160);
+        const ringGeo = new THREE.TorusGeometry(radius, tubeRadius, 16, 72);
         const ringMat = new THREE.MeshStandardMaterial({
           color: colorHex,
           emissive: colorHex,
