@@ -216,7 +216,7 @@ html, body {
   inset: 0;
   background: linear-gradient(110deg, #0f172a 20%, #1e293b 40%, #334155 50%, #1e293b 60%, #0f172a 80%);
   background-size: 200% 100%;
-  animation: avatarShimmer 1.5s infinite linear;
+  
   border-radius: inherit;
   z-index: 1;
   transition: opacity 0.5s ease-out, visibility 0.5s;
@@ -235,14 +235,14 @@ html, body {
 
 /* Blur-up image transition */
 .avatar-blur-img {
-  filter: blur(12px) scale(1.08);
+  opacity: 0.2; transform: translateZ(0);
   opacity: 0.15;
   transition: filter 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease;
   will-change: filter, opacity, transform;
 }
 
 .avatar-blur-img.is-loaded {
-  filter: blur(0px) scale(1);
+  
   opacity: 1;
 }
 
@@ -455,4 +455,6 @@ html, body {
     height: 6px;
   }
 }
+
+
 

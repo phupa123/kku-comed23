@@ -365,8 +365,8 @@
   <!-- ================= MODERN STICKY NAVIGATION BAR ================= -->
   
 
-  <!-- ================= TOP STICKY NAVIGATION (64PX) ================= -->
-  <header id="mainNavbar" class="sticky top-0 z-40 w-full h-16 bg-[#060814]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-all duration-300">
+  <!-- ================= TOP SMART HIDE/SHOW NAVIGATION (64PX) ================= -->
+  <header id="mainNavbar" class="fixed top-0 left-0 right-0 z-40 w-full h-16 bg-[#060814]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-transform duration-300 ease-out will-change-transform">
     <div class="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       
       <!-- 1. BRANDING & IDENTIFICATION (Top-Left) -->
@@ -378,32 +378,32 @@
         </div>
         <div class="flex flex-col">
           <div class="flex items-center gap-1.5">
-            <span class="text-[12px] font-black tracking-wider text-white font-display">KKU</span>
-            <span class="text-[11px] font-bold text-slate-400 font-mono tracking-tight">COMED 23</span>
+            <span class="text-[13px] font-black tracking-wider text-white font-display">KKU</span>
+            <span class="text-[12px] font-bold text-white font-mono tracking-tight drop-shadow-sm">COMED 23</span>
           </div>
-          <span class="text-[9px] font-mono uppercase tracking-widest text-slate-400 hidden sm:inline">Khon Kaen University</span>
+          <span class="text-[9px] font-mono uppercase tracking-widest text-slate-300 font-semibold hidden sm:inline">Khon Kaen University</span>
         </div>
       </a>
 
       <!-- 2. GLOBAL MENU (Middle - Desktop) -->
-      <nav class="hidden lg:flex items-center gap-1">
-        <a href="#hero" class="relative px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-white hover:text-white transition flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#E65A19] shadow-[0_0_8px_#E65A19]"></span>
+      <nav class="hidden lg:flex items-center gap-1.5">
+        <a href="#hero" class="relative px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold text-white hover:text-white transition flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#E65A19] shadow-[0_0_10px_#E65A19]"></span>
           <span>HOME</span>
         </a>
-        <a href="#about" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-200 hover:text-[#FF7A29] transition">ACADEMICS</a>
-        <a href="Calendar.html" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-200 hover:text-[#FF7A29] transition flex items-center gap-1.5">
+        <a href="#about" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold text-slate-200 hover:text-[#FF7A29] transition">ACADEMICS</a>
+        <a href="Calendar.html" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold text-slate-200 hover:text-[#FF7A29] transition flex items-center gap-1.5">
           <span>CALENDAR</span>
         </a>
-        <a href="Plans.html" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-200 hover:text-[#FF7A29] transition">ACTIVITIES</a>
-        <a href="storage.html" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-slate-200 hover:text-[#FF7A29] transition">RESOURCES</a>
+        <a href="Plans.html" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold text-slate-200 hover:text-[#FF7A29] transition">ACTIVITIES</a>
+        <a href="storage.html" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold text-slate-200 hover:text-[#FF7A29] transition">RESOURCES</a>
       </nav>
 
       <!-- Search Bar (Desktop) -->
       <div class="hidden md:flex items-center relative w-48 xl:w-60">
-        <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 pointer-events-none"></i>
+        <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none"></i>
         <input type="text" id="globalSearch" placeholder="ค้นหาบริการหรือวิชา..." 
-          class="w-full pl-8 pr-3 py-1.5 rounded-full bg-[#0C1124] border border-white/15 text-xs font-mono text-white placeholder-slate-400 focus:outline-none focus:border-[#E65A19] focus:ring-1 focus:ring-[#E65A19] transition shadow-inner">
+          class="w-full pl-8 pr-3 py-1.5 rounded-full bg-[#0C1124] border border-white/20 text-xs font-mono text-white placeholder-slate-300 focus:outline-none focus:border-[#E65A19] focus:ring-1 focus:ring-[#E65A19] transition shadow-inner">
       </div>
 
       <!-- 3. USER PROFILE & DUAL NOTIFICATION SYSTEM (Top-Right) -->
@@ -411,26 +411,26 @@
         
         <!-- BUTTON 1: Academic & Homework Notification (🔔 การเรียน & การบ้าน) -->
         <div class="relative group">
-          <button id="notifBellBtn" title="แจ้งเตือนการเรียน & งานใหม่" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19]/50 flex items-center justify-center text-slate-300 hover:text-white transition">
-            <i data-lucide="bell" class="w-4 h-4"></i>
+          <button id="notifBellBtn" title="แจ้งเตือนการเรียน & งานใหม่" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-white/20 hover:border-[#E65A19] flex items-center justify-center text-white hover:text-white transition shadow-sm">
+            <i data-lucide="bell" class="w-4 h-4 text-slate-200"></i>
             <span class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#E65A19] border-2 border-[#070914] shadow-[0_0_8px_#E65A19]"></span>
           </button>
           
           <!-- Glassmorphic Overlay: 📣 แจ้งเตือนการเรียน -->
-          <div class="absolute right-0 top-full mt-2 w-72 sm:w-80 p-3 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl shadow-2xl hidden group-hover:block z-50 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#242A4A]">
-              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">1. การเรียน &amp; การบ้าน</span>
+          <div class="absolute right-0 top-full mt-2 w-72 sm:w-80 p-3 bg-[#0C1030]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl hidden group-hover:block z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold">1. การเรียน &amp; การบ้าน</span>
               <span class="text-[10px] font-mono text-[#E65A19] font-bold">1 NEW</span>
             </div>
-            <div class="p-2.5 rounded-xl bg-[#12162A]/80 border border-[#242A4A] text-xs text-slate-200 flex items-start gap-2.5">
+            <div class="p-2.5 rounded-xl bg-[#12162A]/90 border border-white/10 text-xs text-slate-100 flex items-start gap-2.5">
               <span class="text-base leading-none">📣</span>
               <div class="space-y-1">
                 <p class="font-bold text-white text-[11px] leading-tight">แจ้งเตือนการเรียน</p>
-                <p class="text-[11px] text-slate-400 leading-normal">มีการอัปเดตแบบฝึกหัดใหม่ (New Assignment) ในระบบวิชา</p>
-                <div class="text-[10px] font-mono text-slate-500">10m ago • Academic Portal</div>
+                <p class="text-[11px] text-slate-300 leading-normal">มีการอัปเดตแบบฝึกหัดใหม่ (New Assignment) ในระบบวิชา</p>
+                <div class="text-[10px] font-mono text-slate-400">10m ago • Academic Portal</div>
               </div>
             </div>
-            <a href="Plans.html" class="mt-2.5 block text-center py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[11px] font-mono text-slate-300 hover:text-white transition">
+            <a href="Plans.html" class="mt-2.5 block text-center py-1.5 rounded-lg bg-white/10 hover:bg-[#E65A19]/20 text-[11px] font-mono text-white transition">
               ดูห้องงาน &amp; กิจกรรมทั้งหมด →
             </a>
           </div>
@@ -438,26 +438,26 @@
 
         <!-- BUTTON 2: Payment Dues & Financial Notification (💳 ยอดเงินกองทุน & ชำระเงิน) -->
         <div class="relative group">
-          <a href="#payments-list" title="แจ้งเตือนยอดเงินกองทุน & ชำระเงิน" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-[#242A4A] hover:border-emerald-500/50 flex items-center justify-center text-slate-300 hover:text-white transition">
+          <a href="#payments-list" title="แจ้งเตือนยอดเงินกองทุน & ชำระเงิน" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-white/20 hover:border-emerald-500/80 flex items-center justify-center text-slate-200 hover:text-white transition shadow-sm">
             <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
             <span class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#070914] shadow-[0_0_8px_#10B981]"></span>
           </a>
           
           <!-- Glassmorphic Overlay: 💳 ยอดเงินกองทุน & สลิป -->
-          <div class="absolute right-0 top-full mt-2 w-72 sm:w-80 p-3 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl shadow-2xl hidden group-hover:block z-50 animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#242A4A]">
-              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">2. ยอดเงิน &amp; กองทุนรุ่น</span>
+          <div class="absolute right-0 top-full mt-2 w-72 sm:w-80 p-3 bg-[#0C1030]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl hidden group-hover:block z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-bold">2. ยอดเงิน &amp; กองทุนรุ่น</span>
               <span class="text-[10px] font-mono text-emerald-400 font-bold">ACTIVE</span>
             </div>
-            <div class="p-2.5 rounded-xl bg-[#12162A]/80 border border-[#242A4A] text-xs text-slate-200 flex items-start gap-2.5">
+            <div class="p-2.5 rounded-xl bg-[#12162A]/90 border border-white/10 text-xs text-slate-100 flex items-start gap-2.5">
               <span class="text-base leading-none">💳</span>
               <div class="space-y-1">
                 <p class="font-bold text-white text-[11px] leading-tight">กองทุนและเงินรุ่น COMED23</p>
-                <p class="text-[11px] text-slate-400 leading-normal">ตรวจสอบรายการค่ากิจกรรมรุ่น และประวัติสลิปของคุณ</p>
-                <div class="text-[10px] font-mono text-slate-500">Live Supabase Sync</div>
+                <p class="text-[11px] text-slate-300 leading-normal">ตรวจสอบรายการค่ากิจกรรมรุ่น และประวัติสลิปของคุณ</p>
+                <div class="text-[10px] font-mono text-slate-400">Live Supabase Sync</div>
               </div>
             </div>
-            <a href="payment.html" class="mt-2.5 block text-center py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-[11px] font-mono text-emerald-300 transition">
+            <a href="payment.html" class="mt-2.5 block text-center py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-[11px] font-mono text-emerald-300 transition">
               เปิดระบบชำระเงินและตรวจสลิป →
             </a>
           </div>
@@ -473,22 +473,22 @@
 
           <!-- Logged In State: Interactive Profile Pill with Dropdown Menu -->
           <div id="navUserLoggedIn" class="relative hidden">
-            <button onclick="toggleProfileDropdown(event)" id="profilePillBtn" class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#0C1124] border border-white/15 hover:border-[#E65A19] shadow-sm transition group cursor-pointer">
-              <div class="relative w-7 h-7 rounded-full overflow-hidden border border-white/20">
+            <button onclick="toggleProfileDropdown(event)" id="profilePillBtn" class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#0C1124] border border-white/20 hover:border-[#E65A19] shadow-sm transition group cursor-pointer">
+              <div class="relative w-7 h-7 rounded-full overflow-hidden border border-white/25">
                 <img id="navUserAvatar" src="logo.png" alt="User Profile" class="w-full h-full object-cover">
                 <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#070914] shadow-[0_0_6px_#34d399]"></span>
               </div>
               <div class="flex items-center gap-1.5 text-left">
                 <div class="flex flex-col hidden sm:flex">
-                  <span id="navUserName" class="text-xs font-mono font-bold text-slate-200 group-hover:text-white truncate max-w-[95px]">Guest</span>
-                  <span id="navUserEmail" class="text-[9px] font-mono text-slate-400 truncate max-w-[95px] hidden"></span>
+                  <span id="navUserName" class="text-xs font-mono font-bold text-white group-hover:text-[#FF7A29] truncate max-w-[95px]">Guest</span>
+                  <span id="navUserEmail" class="text-[9px] font-mono text-slate-300 truncate max-w-[95px] hidden"></span>
                 </div>
-                <i data-lucide="chevron-down" id="profileDropdownChevron" class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-transform duration-200"></i>
+                <i data-lucide="chevron-down" id="profileDropdownChevron" class="w-3.5 h-3.5 text-slate-300 group-hover:text-white transition-transform duration-200"></i>
               </div>
             </button>
 
             <!-- Profile Dropdown Menu Card -->
-            <div id="profileDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-64 bg-[#0A0D1E]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div id="profileDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-64 bg-[#0A0D1E]/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
               <!-- User Info Header -->
               <div class="px-3 py-2.5 border-b border-white/10 flex items-center gap-2.5 mb-1">
                 <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-800 border border-white/20 flex-shrink-0">
@@ -502,19 +502,19 @@
 
               <!-- Menu Links -->
               <div class="space-y-0.5 text-xs font-mono">
-                <a href="Profile.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition">
+                <a href="Profile.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition">
                   <i data-lucide="user" class="w-3.5 h-3.5 text-[#FF7A29]"></i>
                   <span>โปรไฟล์ &amp; ตั้งค่า (Settings)</span>
                 </a>
-                <a href="payment.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition">
+                <a href="payment.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition">
                   <i data-lucide="wallet" class="w-3.5 h-3.5 text-emerald-400"></i>
                   <span>สถานะกองทุน &amp; ชำระเงิน</span>
                 </a>
-                <a href="storage.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition">
+                <a href="storage.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition">
                   <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-400"></i>
                   <span>Cloud Drive ส่วนตัว</span>
                 </a>
-                <a href="admin.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition">
+                <a href="admin.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition">
                   <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
                   <span>Admin Dashboard</span>
                 </a>
@@ -535,14 +535,80 @@
         </div>
 
         <!-- Standalone Logout Shortcut Button -->
-        <button id="logoutBtn" onclick="handleGoogleLogout()" class="hidden chrome-border px-3 py-1.5 rounded-full bg-[#0C1030] text-[11px] font-mono font-bold text-slate-300 hover:text-white hover:bg-[#161B33] transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+        <button id="logoutBtn" onclick="handleGoogleLogout()" class="hidden chrome-border px-3 py-1.5 rounded-full bg-[#0C1030] text-[11px] font-mono font-bold text-slate-200 hover:text-white hover:bg-[#161B33] transition flex items-center gap-1.5 shadow-sm cursor-pointer">
           <span>LOGOUT</span>
           <span class="text-xs">↩</span>
+        </button>
+
+        <!-- Mobile 3-Bars Hamburger Button (3 ขีด) -->
+        <button id="mobileMenuBtn" onclick="toggleMobileDrawer(true)" class="lg:hidden w-9 h-9 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white flex items-center justify-center transition cursor-pointer">
+          <i data-lucide="menu" class="w-5 h-5 text-white"></i>
         </button>
 
       </div>
     </div>
   </header>
+
+  <!-- ================= MOBILE FULLSCREEN DRAWER OVERLAY (WITH SMOOTH SPRING ANIMATION) ================= -->
+  <div id="mobileDrawerBackdrop" onclick="toggleMobileDrawer(false)" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex justify-end lg:hidden">
+    
+    <!-- Mobile Drawer Panel (Slide from Right with Spring Animation) -->
+    <div id="mobileDrawerPanel" onclick="event.stopPropagation()" class="w-full max-w-xs sm:max-w-sm h-full bg-[#090C1B]/95 backdrop-blur-2xl border-l border-white/15 shadow-[0_0_80px_rgba(0,0,0,0.9)] flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-hidden">
+      
+      <!-- Drawer Top Bar -->
+      <div class="p-5 border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#B32B19] to-[#E65A19] p-0.5 shadow-md shadow-[#E65A19]/30">
+            <div class="w-full h-full bg-[#0C1030] rounded-[10px] flex items-center justify-center p-1">
+              <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
+            </div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white font-mono">COMED 23 MENU</div>
+            <div class="text-[9px] font-mono text-[#E65A19]">Khon Kaen University</div>
+          </div>
+        </div>
+        
+        <button onclick="toggleMobileDrawer(false)" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white flex items-center justify-center transition cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4 text-white"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Links Body -->
+      <div class="flex-grow p-5 space-y-2 overflow-y-auto">
+        <a href="#hero" onclick="toggleMobileDrawer(false)" class="flex items-center gap-3 p-3 rounded-2xl bg-white/10 border border-[#E65A19]/40 text-white font-mono text-sm font-bold shadow-sm">
+          <i data-lucide="home" class="w-4 h-4 text-[#FF7A29]"></i>
+          <span>หน้าแรก (Home)</span>
+        </a>
+        <a href="#about" onclick="toggleMobileDrawer(false)" class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white font-mono text-sm font-semibold transition">
+          <i data-lucide="book-open" class="w-4 h-4 text-sky-400"></i>
+          <span>หลักสูตร (Academics)</span>
+        </a>
+        <a href="Calendar.html" onclick="toggleMobileDrawer(false)" class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white font-mono text-sm font-semibold transition">
+          <i data-lucide="calendar" class="w-4 h-4 text-emerald-400"></i>
+          <span>ปฏิทินกิจกรรม (Calendar)</span>
+        </a>
+        <a href="Plans.html" onclick="toggleMobileDrawer(false)" class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white font-mono text-sm font-semibold transition">
+          <i data-lucide="activity" class="w-4 h-4 text-purple-400"></i>
+          <span>ฝ่ายกิจกรรม (Activities)</span>
+        </a>
+        <a href="storage.html" onclick="toggleMobileDrawer(false)" class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white font-mono text-sm font-semibold transition">
+          <i data-lucide="cloud" class="w-4 h-4 text-amber-400"></i>
+          <span>Cloud Drive ส่วนตัว</span>
+        </a>
+        <a href="Profile.html" onclick="toggleMobileDrawer(false)" class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-[#B32B19]/30 to-[#E65A19]/30 border border-[#E65A19]/50 text-white font-mono text-sm font-bold transition">
+          <i data-lucide="user" class="w-4 h-4 text-[#FF7A29]"></i>
+          <span>โปรไฟล์นักศึกษา (Profile)</span>
+        </a>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="p-5 border-t border-white/10 bg-black/40 text-center">
+        <p class="text-[10px] font-mono text-slate-400">COMED23 • Faculty of Education, KKU</p>
+      </div>
+
+    </div>
+  </div>
 
   <!-- ================= MAIN HERO SECTION (01 / INDEX) ================= -->
   <section id="hero" class="relative min-h-[calc(100vh-64px)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10 lg:py-16 overflow-hidden">

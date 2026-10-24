@@ -1762,42 +1762,86 @@ async function fetchIndexRealtimeStats() {
   }
 }
 
-// ================= MODERN STICKY NAVBAR CONTROLLER =================
+// ================= MODERN SMART HIDE/SHOW NAVBAR & MOBILE DRAWER CONTROLLER =================
 function initNavbarScrollEffect() {
   const navbar = document.getElementById('mainNavbar');
   if (!navbar) return;
 
-  function handleScroll() {
-    if (window.scrollY > 30) {
+  let lastScrollY = window.pageYOffset || document.documentElement.scrollTop;
+  let ticking = false;
+  const scrollThreshold = 10; // minimum scroll delta before triggering hide/show
+
+  function updateNavbar() {
+    const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Background style when scrolled
+    if (currentScrollY > 30) {
       navbar.classList.add('scrolled');
       navbar.classList.remove('transparent-top');
     } else {
       navbar.classList.remove('scrolled');
       navbar.classList.add('transparent-top');
     }
+
+    // Smart Hide on Scroll Down / Reveal on Scroll Up
+    const diff = currentScrollY - lastScrollY;
+    if (Math.abs(diff) > scrollThreshold) {
+      if (currentScrollY > 90 && diff > 0) {
+        // Scrolling DOWN -> Hide Navbar smoothly
+        navbar.style.transform = 'translateY(-100%)';
+      } else if (diff < 0) {
+        // Scrolling UP -> Reveal Navbar smoothly
+        navbar.style.transform = 'translateY(0)';
+      }
+      lastScrollY = currentScrollY;
+    }
+
+    // Always reveal at the very top of page
+    if (currentScrollY <= 20) {
+      navbar.style.transform = 'translateY(0)';
+      lastScrollY = currentScrollY;
+    }
+
+    ticking = false;
   }
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  handleScroll(); // Initial check
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateNavbar);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  updateNavbar(); // Initial check
 }
 
-function toggleMobileNavMenu() {
-  const drawer = document.getElementById('mobileMenuDrawer');
-  if (!drawer) return;
+// Global toggle for Mobile Drawer Menu
+window.toggleMobileDrawer = function(open) {
+  const backdrop = document.getElementById('mobileDrawerBackdrop');
+  const panel = document.getElementById('mobileDrawerPanel');
+  if (!backdrop || !panel) return;
 
-  const isHidden = drawer.classList.contains('hidden');
-  if (isHidden) {
-    drawer.classList.remove('hidden');
-    if (typeof gsap !== 'undefined') {
-      gsap.fromTo(drawer, 
-        { opacity: 0, y: -15 }, 
-        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
-      );
-    }
+  if (open) {
+    backdrop.classList.remove('opacity-0', 'pointer-events-none');
+    backdrop.classList.add('opacity-100');
+    panel.classList.remove('translate-x-full');
+    panel.classList.add('translate-x-0');
+    document.body.style.overflow = 'hidden'; // prevent background scrolling while drawer is open
   } else {
-    drawer.classList.add('hidden');
+    panel.classList.remove('translate-x-0');
+    panel.classList.add('translate-x-full');
+    backdrop.classList.remove('opacity-100');
+    backdrop.classList.add('opacity-0', 'pointer-events-none');
+    document.body.style.overflow = '';
   }
-  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+};
+
+function toggleMobileNavMenu() {
+  window.toggleMobileDrawer(true);
 }
 
 // ================= REVERSIBLE SCROLL ANIMATION & PROGRESS BAR =================
