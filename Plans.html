@@ -22,7 +22,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Sarabun:wght@400;600;700&family=Chakra+Petch:wght@400;600;700&family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -187,6 +187,50 @@
       background: rgba(249, 115, 22, 0.12) !important;
       border: 2px dashed rgba(249, 115, 22, 0.6) !important;
     }
+  
+    /* Rich Text Editor Styling */
+    .rich-editor-content {
+      min-height: 85px;
+      max-height: 220px;
+      overflow-y: auto;
+      outline: none;
+      word-break: break-word;
+      line-height: 1.6;
+    }
+    .rich-editor-content:empty:before {
+      content: attr(data-placeholder);
+      color: #64748b;
+      pointer-events: none;
+    }
+    .rich-toolbar-btn {
+      padding: 0.25rem 0.45rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .rich-toolbar-btn:hover {
+      background: rgba(230, 90, 25, 0.15);
+      color: #ffedd5;
+      border-color: rgba(230, 90, 25, 0.35);
+    }
+    .rich-rendered-html {
+      word-break: break-word;
+      line-height: 1.6;
+    }
+    .rich-rendered-html mark {
+      border-radius: 4px;
+      padding: 0 3px;
+    }
+
   </style>
 </head>
 
@@ -300,37 +344,39 @@
     <!-- VIEW 1: ROOMS LIST VIEW -->
     <div id="sectionRooms" class="space-y-6">
       
-      <!-- Filter Bar -->
-      <div class="glass-card rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-2 flex-wrap text-xs font-bold">
-          <button onclick="setRoomFilter('all')" class="room-filter-btn px-3 py-1.5 rounded-xl bg-orange-500 text-white transition" data-filter="all">
+      <!-- Filter Bar (100% Mobile Fluid & Responsive) -->
+      <div class="glass-card rounded-2xl p-3 sm:p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-3 max-w-full overflow-hidden">
+        <!-- Category Filter Pills (Mobile Scrollable) -->
+        <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scroll pb-1 sm:pb-0 text-xs font-bold max-w-full -mx-1 px-1">
+          <button onclick="setRoomFilter('all')" class="room-filter-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-orange-500 text-white transition flex-shrink-0 text-[11px] sm:text-xs" data-filter="all">
             ห้องงานทั้งหมด
           </button>
-          <button onclick="setRoomFilter('department')" class="room-filter-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition" data-filter="department">
-            🏛️ งานสาขา (ทุกคน)
+          <button onclick="setRoomFilter('department')" class="room-filter-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition flex-shrink-0 text-[11px] sm:text-xs" data-filter="department">
+            🏛️ งานสาขา
           </button>
-          <button onclick="setRoomFilter('shared')" class="room-filter-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition" data-filter="shared">
-            👥 แชร์กลุ่มเพื่อน
+          <button onclick="setRoomFilter('shared')" class="room-filter-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition flex-shrink-0 text-[11px] sm:text-xs" data-filter="shared">
+            👥 งานกลุ่ม
           </button>
-          <button onclick="setRoomFilter('personal')" class="room-filter-btn px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition" data-filter="personal">
+          <button onclick="setRoomFilter('personal')" class="room-filter-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-slate-400 hover:text-white transition flex-shrink-0 text-[11px] sm:text-xs" data-filter="personal">
             🔒 ส่วนตัว
           </button>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap text-xs w-full sm:w-auto">
+        <!-- Sort & Search Bar -->
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap text-xs w-full md:w-auto">
           <!-- Sort / Urgency Selector -->
-          <select id="roomUrgencySort" onchange="renderRoomsGrid()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-xs font-bold focus:outline-hidden">
-            <option value="nearest">⚡ ใกล้ถึงกำหนดที่สุด (Proximity First)</option>
-            <option value="priority_desc">🚨 เรียงตามความสำคัญ (Urgent &gt; High &gt; Normal)</option>
+          <select id="roomUrgencySort" onchange="renderRoomsGrid()" class="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-[11px] sm:text-xs font-bold focus:outline-hidden">
+            <option value="nearest">⚡ ใกล้ถึงกำหนดที่สุด</option>
+            <option value="priority_desc">🚨 เรียงตามความสำคัญ</option>
             <option value="urgent_only">⏳ ใกล้ถึงใน 7 วัน</option>
             <option value="newest">🕒 สร้างล่าสุด</option>
-            <option value="progress_asc">📊 ค้างส่ง / คืบหน้าน้อยสุด</option>
+            <option value="progress_asc">📊 ค้างส่ง / คืบหน้าน้อย</option>
             <option value="progress_desc">✅ เสร็จแล้ว 100%</option>
           </select>
 
-          <div class="relative flex-1 sm:flex-initial">
+          <div class="relative flex-1 w-full sm:w-48 md:w-56">
             <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-            <input type="text" id="roomSearchInput" oninput="handleRoomSearch(this.value)" placeholder="ค้นหาห้องงาน / โปรเจกต์..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-full sm:w-52">
+            <input type="text" id="roomSearchInput" oninput="handleRoomSearch(this.value)" placeholder="ค้นหาห้องงาน / โปรเจกต์..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-full">
           </div>
         </div>
       </div>
@@ -617,10 +663,80 @@
           </div>
         </div>
 
+
         <div>
-          <label class="block font-bold text-slate-300 mb-1">รายละเอียดงาน</label>
-          <textarea id="newRoomDesc" rows="3" placeholder="ระบุเป้าหมาย สมาชิก หรือโน้ตสำคัญ..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
+          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span>รายละเอียด / โน้ต (Rich Text Format)</span>
+            <span class="text-[10px] text-orange-400/90 font-mono flex items-center gap-1">
+              <i data-lucide="sparkles" class="w-3 h-3"></i> ปรับฟอนต์ ไฮไลต์ ตัวหนาได้
+            </span>
+          </label>
+          
+          <!-- Editor Wrapper -->
+          <div class="rounded-2xl bg-slate-900 border border-white/10 overflow-hidden focus-within:border-orange-500/80 transition shadow-inner">
+            <!-- Toolbar -->
+            <div class="flex items-center gap-1 p-1.5 bg-slate-950/70 border-b border-white/5 flex-wrap text-xs">
+              <!-- Bold -->
+              <button type="button" onclick="formatRichDoc('newRoomDescEditor', 'bold')" class="rich-toolbar-btn font-extrabold" title="ตัวหนา (Ctrl+B)">B</button>
+              <!-- Italic -->
+              <button type="button" onclick="formatRichDoc('newRoomDescEditor', 'italic')" class="rich-toolbar-btn italic" title="ตัวเอียง (Ctrl+I)">I</button>
+              <!-- Underline -->
+              <button type="button" onclick="formatRichDoc('newRoomDescEditor', 'underline')" class="rich-toolbar-btn underline" title="ขีดเส้นใต้ (Ctrl+U)">U</button>
+              <!-- Strikethrough -->
+              <button type="button" onclick="formatRichDoc('newRoomDescEditor', 'strikeThrough')" class="rich-toolbar-btn line-through" title="ขีดฆ่า">S</button>
+              
+              <span class="w-[1px] h-4 bg-white/10 mx-0.5"></span>
+
+              <!-- Font Family Selector -->
+              <select onchange="applyFontFamily('newRoomDescEditor', this.value); this.selectedIndex=0;" class="rich-toolbar-btn bg-slate-900 text-slate-300 text-[10px] py-1 cursor-pointer">
+                <option value="" disabled selected>🔤 ฟอนต์</option>
+                <option value="'Prompt', sans-serif">Prompt (ค่าเริ่มต้น)</option>
+                <option value="'Sarabun', sans-serif">Sarabun (ทางการ)</option>
+                <option value="'Chakra Petch', sans-serif">Chakra Petch (โมเดิร์น)</option>
+                <option value="'Mali', cursive">Mali (ลายมือวัยรุ่น)</option>
+              </select>
+
+              <!-- Font Size Selector -->
+              <select onchange="applyFontSize('newRoomDescEditor', this.value); this.selectedIndex=0;" class="rich-toolbar-btn bg-slate-900 text-slate-300 text-[10px] py-1 cursor-pointer">
+                <option value="" disabled selected>📏 ขนาด</option>
+                <option value="12px">เล็ก (12px)</option>
+                <option value="14px">ปกติ (14px)</option>
+                <option value="16px">ใหญ่ (16px)</option>
+                <option value="18px">หัวข้อ (18px)</option>
+              </select>
+
+              <span class="w-[1px] h-4 bg-white/10 mx-0.5"></span>
+
+              <!-- Highlight Color Palette -->
+              <div class="flex items-center gap-1">
+                <span class="text-[10px] text-slate-400 font-bold ml-0.5">🎨 ไฮไลต์:</span>
+                <button type="button" onclick="applyHighlightColor('newRoomDescEditor', '#fef08a')" class="w-4 h-4 rounded-full bg-yellow-300 hover:scale-110 transition shadow-sm border border-yellow-400" title="ไฮไลต์สีเหลือง"></button>
+                <button type="button" onclick="applyHighlightColor('newRoomDescEditor', '#fed7aa')" class="w-4 h-4 rounded-full bg-orange-300 hover:scale-110 transition shadow-sm border border-orange-400" title="ไฮไลต์สีส้ม KKU"></button>
+                <button type="button" onclick="applyHighlightColor('newRoomDescEditor', '#a7f3d0')" class="w-4 h-4 rounded-full bg-emerald-300 hover:scale-110 transition shadow-sm border border-emerald-400" title="ไฮไลต์สีเขียว"></button>
+                <button type="button" onclick="applyHighlightColor('newRoomDescEditor', '#bae6fd')" class="w-4 h-4 rounded-full bg-sky-300 hover:scale-110 transition shadow-sm border border-sky-400" title="ไฮไลต์สีฟ้า"></button>
+                <button type="button" onclick="applyHighlightColor('newRoomDescEditor', '#fbcfe8')" class="w-4 h-4 rounded-full bg-pink-300 hover:scale-110 transition shadow-sm border border-pink-400" title="ไฮไลต์สีชมพู"></button>
+                <button type="button" onclick="applyHighlightColor('newRoomDescEditor', 'transparent')" class="rich-toolbar-btn text-[9px] px-1 py-0.5 text-slate-400" title="ล้างไฮไลต์">ล้าง</button>
+              </div>
+
+              <span class="w-[1px] h-4 bg-white/10 mx-0.5"></span>
+
+              <!-- Bullet List -->
+              <button type="button" onclick="formatRichDoc('newRoomDescEditor', 'insertUnorderedList')" class="rich-toolbar-btn text-[10px]" title="รายการจุด (Bullet List)">• ลำดับ</button>
+              <button type="button" onclick="formatRichDoc('newRoomDescEditor', 'insertOrderedList')" class="rich-toolbar-btn text-[10px]" title="รายการเลข (1. 2. 3.)">1. ลำดับ</button>
+            </div>
+
+            <!-- Contenteditable Container -->
+            <div id="newRoomDescEditor"
+                 contenteditable="true"
+                 data-placeholder="ระบุเป้าหมาย สมาชิก หรือโน้ตสำคัญ สามารถตกแต่งข้อความได้..."
+                 oninput="syncRichEditorToTextarea('newRoomDescEditor', 'newRoomDesc')"
+                 class="rich-editor-content p-3 text-xs text-white"></div>
+          </div>
+
+          <!-- Hidden Textarea for Form Value Storage -->
+          <textarea id="newRoomDesc" name="newRoomDesc" class="hidden"></textarea>
         </div>
+
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
           <button type="button" onclick="closeCreatePlanModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold hover:bg-white/10 transition">ยกเลิก</button>
@@ -682,10 +798,80 @@
           </div>
         </div>
 
+
         <div>
-          <label class="block font-bold text-slate-300 mb-1">รายละเอียดงาน</label>
-          <textarea id="editRoomDesc" rows="3" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
+          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span>รายละเอียด / โน้ต (Rich Text Format)</span>
+            <span class="text-[10px] text-orange-400/90 font-mono flex items-center gap-1">
+              <i data-lucide="sparkles" class="w-3 h-3"></i> ปรับฟอนต์ ไฮไลต์ ตัวหนาได้
+            </span>
+          </label>
+          
+          <!-- Editor Wrapper -->
+          <div class="rounded-2xl bg-slate-900 border border-white/10 overflow-hidden focus-within:border-orange-500/80 transition shadow-inner">
+            <!-- Toolbar -->
+            <div class="flex items-center gap-1 p-1.5 bg-slate-950/70 border-b border-white/5 flex-wrap text-xs">
+              <!-- Bold -->
+              <button type="button" onclick="formatRichDoc('editRoomDescEditor', 'bold')" class="rich-toolbar-btn font-extrabold" title="ตัวหนา (Ctrl+B)">B</button>
+              <!-- Italic -->
+              <button type="button" onclick="formatRichDoc('editRoomDescEditor', 'italic')" class="rich-toolbar-btn italic" title="ตัวเอียง (Ctrl+I)">I</button>
+              <!-- Underline -->
+              <button type="button" onclick="formatRichDoc('editRoomDescEditor', 'underline')" class="rich-toolbar-btn underline" title="ขีดเส้นใต้ (Ctrl+U)">U</button>
+              <!-- Strikethrough -->
+              <button type="button" onclick="formatRichDoc('editRoomDescEditor', 'strikeThrough')" class="rich-toolbar-btn line-through" title="ขีดฆ่า">S</button>
+              
+              <span class="w-[1px] h-4 bg-white/10 mx-0.5"></span>
+
+              <!-- Font Family Selector -->
+              <select onchange="applyFontFamily('editRoomDescEditor', this.value); this.selectedIndex=0;" class="rich-toolbar-btn bg-slate-900 text-slate-300 text-[10px] py-1 cursor-pointer">
+                <option value="" disabled selected>🔤 ฟอนต์</option>
+                <option value="'Prompt', sans-serif">Prompt (ค่าเริ่มต้น)</option>
+                <option value="'Sarabun', sans-serif">Sarabun (ทางการ)</option>
+                <option value="'Chakra Petch', sans-serif">Chakra Petch (โมเดิร์น)</option>
+                <option value="'Mali', cursive">Mali (ลายมือวัยรุ่น)</option>
+              </select>
+
+              <!-- Font Size Selector -->
+              <select onchange="applyFontSize('editRoomDescEditor', this.value); this.selectedIndex=0;" class="rich-toolbar-btn bg-slate-900 text-slate-300 text-[10px] py-1 cursor-pointer">
+                <option value="" disabled selected>📏 ขนาด</option>
+                <option value="12px">เล็ก (12px)</option>
+                <option value="14px">ปกติ (14px)</option>
+                <option value="16px">ใหญ่ (16px)</option>
+                <option value="18px">หัวข้อ (18px)</option>
+              </select>
+
+              <span class="w-[1px] h-4 bg-white/10 mx-0.5"></span>
+
+              <!-- Highlight Color Palette -->
+              <div class="flex items-center gap-1">
+                <span class="text-[10px] text-slate-400 font-bold ml-0.5">🎨 ไฮไลต์:</span>
+                <button type="button" onclick="applyHighlightColor('editRoomDescEditor', '#fef08a')" class="w-4 h-4 rounded-full bg-yellow-300 hover:scale-110 transition shadow-sm border border-yellow-400" title="ไฮไลต์สีเหลือง"></button>
+                <button type="button" onclick="applyHighlightColor('editRoomDescEditor', '#fed7aa')" class="w-4 h-4 rounded-full bg-orange-300 hover:scale-110 transition shadow-sm border border-orange-400" title="ไฮไลต์สีส้ม KKU"></button>
+                <button type="button" onclick="applyHighlightColor('editRoomDescEditor', '#a7f3d0')" class="w-4 h-4 rounded-full bg-emerald-300 hover:scale-110 transition shadow-sm border border-emerald-400" title="ไฮไลต์สีเขียว"></button>
+                <button type="button" onclick="applyHighlightColor('editRoomDescEditor', '#bae6fd')" class="w-4 h-4 rounded-full bg-sky-300 hover:scale-110 transition shadow-sm border border-sky-400" title="ไฮไลต์สีฟ้า"></button>
+                <button type="button" onclick="applyHighlightColor('editRoomDescEditor', '#fbcfe8')" class="w-4 h-4 rounded-full bg-pink-300 hover:scale-110 transition shadow-sm border border-pink-400" title="ไฮไลต์สีชมพู"></button>
+                <button type="button" onclick="applyHighlightColor('editRoomDescEditor', 'transparent')" class="rich-toolbar-btn text-[9px] px-1 py-0.5 text-slate-400" title="ล้างไฮไลต์">ล้าง</button>
+              </div>
+
+              <span class="w-[1px] h-4 bg-white/10 mx-0.5"></span>
+
+              <!-- Bullet List -->
+              <button type="button" onclick="formatRichDoc('editRoomDescEditor', 'insertUnorderedList')" class="rich-toolbar-btn text-[10px]" title="รายการจุด (Bullet List)">• ลำดับ</button>
+              <button type="button" onclick="formatRichDoc('editRoomDescEditor', 'insertOrderedList')" class="rich-toolbar-btn text-[10px]" title="รายการเลข (1. 2. 3.)">1. ลำดับ</button>
+            </div>
+
+            <!-- Contenteditable Container -->
+            <div id="editRoomDescEditor"
+                 contenteditable="true"
+                 data-placeholder="แก้ไขรายละเอียดงาน หรือโน้ตสำคัญ..."
+                 oninput="syncRichEditorToTextarea('editRoomDescEditor', 'editRoomDesc')"
+                 class="rich-editor-content p-3 text-xs text-white"></div>
+          </div>
+
+          <!-- Hidden Textarea for Form Value Storage -->
+          <textarea id="editRoomDesc" name="editRoomDesc" class="hidden"></textarea>
         </div>
+
 
         <div class="flex items-center justify-between pt-3 border-t border-white/10">
           <button type="button" onclick="handleDeleteCurrentRoom()" class="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white font-bold transition flex items-center gap-1 cursor-pointer">
@@ -766,10 +952,80 @@
           <input type="url" id="taskFormAttachmentUrl" placeholder="https://drive.google.com/... หรือ ลิงก์รูปภาพ" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
         </div>
 
+
         <div>
-          <label class="block font-bold text-slate-300 mb-1">รายละเอียดเพิ่มเติม</label>
-          <textarea id="taskFormDesc" rows="3" placeholder="ระบุสิ่งที่ต้องทำ ลำดับขั้นตอน..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
+          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span>รายละเอียด / โน้ต (Rich Text Format)</span>
+            <span class="text-[10px] text-orange-400/90 font-mono flex items-center gap-1">
+              <i data-lucide="sparkles" class="w-3 h-3"></i> ปรับฟอนต์ ไฮไลต์ ตัวหนาได้
+            </span>
+          </label>
+          
+          <!-- Editor Wrapper -->
+          <div class="rounded-2xl bg-slate-900 border border-white/10 overflow-hidden focus-within:border-orange-500/80 transition shadow-inner">
+            <!-- Toolbar -->
+            <div class="flex items-center gap-1 p-1.5 bg-slate-950/70 border-b border-white/5 flex-wrap text-xs">
+              <!-- Bold -->
+              <button type="button" onclick="formatRichDoc('taskFormDescEditor', 'bold')" class="rich-toolbar-btn font-extrabold" title="ตัวหนา (Ctrl+B)">B</button>
+              <!-- Italic -->
+              <button type="button" onclick="formatRichDoc('taskFormDescEditor', 'italic')" class="rich-toolbar-btn italic" title="ตัวเอียง (Ctrl+I)">I</button>
+              <!-- Underline -->
+              <button type="button" onclick="formatRichDoc('taskFormDescEditor', 'underline')" class="rich-toolbar-btn underline" title="ขีดเส้นใต้ (Ctrl+U)">U</button>
+              <!-- Strikethrough -->
+              <button type="button" onclick="formatRichDoc('taskFormDescEditor', 'strikeThrough')" class="rich-toolbar-btn line-through" title="ขีดฆ่า">S</button>
+              
+              <span class="w-[1px] h-4 bg-white/10 mx-0.5"></span>
+
+              <!-- Font Family Selector -->
+              <select onchange="applyFontFamily('taskFormDescEditor', this.value); this.selectedIndex=0;" class="rich-toolbar-btn bg-slate-900 text-slate-300 text-[10px] py-1 cursor-pointer">
+                <option value="" disabled selected>🔤 ฟอนต์</option>
+                <option value="'Prompt', sans-serif">Prompt (ค่าเริ่มต้น)</option>
+                <option value="'Sarabun', sans-serif">Sarabun (ทางการ)</option>
+                <option value="'Chakra Petch', sans-serif">Chakra Petch (โมเดิร์น)</option>
+                <option value="'Mali', cursive">Mali (ลายมือวัยรุ่น)</option>
+              </select>
+
+              <!-- Font Size Selector -->
+              <select onchange="applyFontSize('taskFormDescEditor', this.value); this.selectedIndex=0;" class="rich-toolbar-btn bg-slate-900 text-slate-300 text-[10px] py-1 cursor-pointer">
+                <option value="" disabled selected>📏 ขนาด</option>
+                <option value="12px">เล็ก (12px)</option>
+                <option value="14px">ปกติ (14px)</option>
+                <option value="16px">ใหญ่ (16px)</option>
+                <option value="18px">หัวข้อ (18px)</option>
+              </select>
+
+              <span class="w-[1px] h-4 bg-white/10 mx-0.5"></span>
+
+              <!-- Highlight Color Palette -->
+              <div class="flex items-center gap-1">
+                <span class="text-[10px] text-slate-400 font-bold ml-0.5">🎨 ไฮไลต์:</span>
+                <button type="button" onclick="applyHighlightColor('taskFormDescEditor', '#fef08a')" class="w-4 h-4 rounded-full bg-yellow-300 hover:scale-110 transition shadow-sm border border-yellow-400" title="ไฮไลต์สีเหลือง"></button>
+                <button type="button" onclick="applyHighlightColor('taskFormDescEditor', '#fed7aa')" class="w-4 h-4 rounded-full bg-orange-300 hover:scale-110 transition shadow-sm border border-orange-400" title="ไฮไลต์สีส้ม KKU"></button>
+                <button type="button" onclick="applyHighlightColor('taskFormDescEditor', '#a7f3d0')" class="w-4 h-4 rounded-full bg-emerald-300 hover:scale-110 transition shadow-sm border border-emerald-400" title="ไฮไลต์สีเขียว"></button>
+                <button type="button" onclick="applyHighlightColor('taskFormDescEditor', '#bae6fd')" class="w-4 h-4 rounded-full bg-sky-300 hover:scale-110 transition shadow-sm border border-sky-400" title="ไฮไลต์สีฟ้า"></button>
+                <button type="button" onclick="applyHighlightColor('taskFormDescEditor', '#fbcfe8')" class="w-4 h-4 rounded-full bg-pink-300 hover:scale-110 transition shadow-sm border border-pink-400" title="ไฮไลต์สีชมพู"></button>
+                <button type="button" onclick="applyHighlightColor('taskFormDescEditor', 'transparent')" class="rich-toolbar-btn text-[9px] px-1 py-0.5 text-slate-400" title="ล้างไฮไลต์">ล้าง</button>
+              </div>
+
+              <span class="w-[1px] h-4 bg-white/10 mx-0.5"></span>
+
+              <!-- Bullet List -->
+              <button type="button" onclick="formatRichDoc('taskFormDescEditor', 'insertUnorderedList')" class="rich-toolbar-btn text-[10px]" title="รายการจุด (Bullet List)">• ลำดับ</button>
+              <button type="button" onclick="formatRichDoc('taskFormDescEditor', 'insertOrderedList')" class="rich-toolbar-btn text-[10px]" title="รายการเลข (1. 2. 3.)">1. ลำดับ</button>
+            </div>
+
+            <!-- Contenteditable Container -->
+            <div id="taskFormDescEditor"
+                 contenteditable="true"
+                 data-placeholder="ระบุสิ่งที่ต้องทำ ลำดับขั้นตอน ลิงก์ หรือคำชี้แจง..."
+                 oninput="syncRichEditorToTextarea('taskFormDescEditor', 'taskFormDesc')"
+                 class="rich-editor-content p-3 text-xs text-white"></div>
+          </div>
+
+          <!-- Hidden Textarea for Form Value Storage -->
+          <textarea id="taskFormDesc" name="taskFormDesc" class="hidden"></textarea>
         </div>
+
 
         <div class="flex items-center justify-between pt-3 border-t border-white/10 flex-wrap gap-2">
           <div class="flex items-center gap-2">
@@ -890,6 +1146,45 @@
     </div>
   </div>
 
+  
+  <!-- ================= SLEEK CUSTOM DELETE CONFIRMATION MODAL ================= -->
+  <div id="customDeleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all">
+    <div class="glass-card rounded-3xl border border-rose-500/30 max-w-sm w-full p-6 shadow-2xl relative overflow-hidden space-y-4 bg-gradient-to-b from-[#160b12] to-[#0a0d18] transform transition-all scale-95 opacity-0 duration-200" id="customDeleteModalCard">
+      <!-- Ambient Glow -->
+      <div class="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-rose-500/20 blur-2xl pointer-events-none"></div>
+
+      <!-- Icon & Header -->
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center flex-shrink-0 shadow-lg shadow-rose-500/10">
+          <i data-lucide="trash-2" class="w-6 h-6 stroke-[2.2]"></i>
+        </div>
+        <div>
+          <div class="text-[10px] font-mono uppercase tracking-widest text-rose-400 font-black">// CONFIRM DELETION</div>
+          <h3 id="customDeleteModalTitle" class="text-base font-black text-white">ยืนยันการลบรายการ</h3>
+        </div>
+      </div>
+
+      <!-- Message Description -->
+      <div class="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
+        <p id="customDeleteModalMessage" class="text-xs text-slate-300 leading-relaxed">คุณแน่ใจหรือไม่ว่าต้องการย้ายรายการนี้ลงถังขยะ?</p>
+        <div id="customDeleteModalSubtext" class="text-[10px] text-slate-400 flex items-center gap-1">
+          <i data-lucide="info" class="w-3 h-3 text-amber-400 flex-shrink-0"></i>
+          <span>สามารถกู้คืนได้ภายหลังจากแท็บถังขยะ</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-end gap-2.5 pt-2">
+        <button type="button" onclick="closeCustomDeleteModal(false)" class="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition border border-white/5 cursor-pointer">
+          ยกเลิก
+        </button>
+        <button type="button" id="btnCustomDeleteConfirm" onclick="closeCustomDeleteModal(true)" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white text-xs font-black transition shadow-lg shadow-rose-600/30 cursor-pointer">
+          ยืนยันการลบ
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= SCRIPT LOGIC ================= -->
   <script>
     let appState = {
@@ -909,6 +1204,165 @@
       calendarMonth: new Date().getMonth(), // 0-11
       calendarScopeFilter: 'all'
     };
+
+    // =========================================================================
+    // RICH TEXT FORMATTING UTILITIES & EDITOR SYNC
+    // =========================================================================
+    function formatRichDoc(editorId, command, value = null) {
+      const editor = document.getElementById(editorId);
+      if (!editor) return;
+      editor.focus();
+      document.execCommand(command, false, value);
+      const targetTextareaId = editorId.replace('Editor', '');
+      syncRichEditorToTextarea(editorId, targetTextareaId);
+    }
+
+    function applyFontFamily(editorId, fontName) {
+      if (!fontName) return;
+      const editor = document.getElementById(editorId);
+      if (!editor) return;
+      editor.focus();
+      document.execCommand('fontName', false, fontName);
+      const targetTextareaId = editorId.replace('Editor', '');
+      syncRichEditorToTextarea(editorId, targetTextareaId);
+    }
+
+    function applyFontSize(editorId, sizePx) {
+      if (!sizePx) return;
+      const editor = document.getElementById(editorId);
+      if (!editor) return;
+      editor.focus();
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      const span = document.createElement('span');
+      span.style.fontSize = sizePx;
+      try {
+        range.surroundContents(span);
+      } catch (e) {
+        document.execCommand('fontSize', false, '3');
+      }
+      const targetTextareaId = editorId.replace('Editor', '');
+      syncRichEditorToTextarea(editorId, targetTextareaId);
+    }
+
+    function applyHighlightColor(editorId, color) {
+      const editor = document.getElementById(editorId);
+      if (!editor) return;
+      editor.focus();
+      if (color === 'transparent') {
+        document.execCommand('removeFormat', false, null);
+      } else {
+        document.execCommand('hiliteColor', false, color);
+      }
+      const targetTextareaId = editorId.replace('Editor', '');
+      syncRichEditorToTextarea(editorId, targetTextareaId);
+    }
+
+    function syncRichEditorToTextarea(editorId, textareaId) {
+      const editor = document.getElementById(editorId);
+      const textarea = document.getElementById(textareaId);
+      if (editor && textarea) {
+        textarea.value = editor.innerHTML.trim();
+      }
+    }
+
+    function setRichEditorContent(editorId, htmlContent) {
+      const editor = document.getElementById(editorId);
+      const targetTextareaId = editorId.replace('Editor', '');
+      const textarea = document.getElementById(targetTextareaId);
+      if (editor) {
+        editor.innerHTML = htmlContent || '';
+      }
+      if (textarea) {
+        textarea.value = htmlContent || '';
+      }
+    }
+
+    // Custom Toast Notification (Sleek Obsidian & KKU Brick-Orange)
+    function showAppToast(title, message = '', type = 'success') {
+      const toast = document.createElement('div');
+      const isSuccess = type === 'success';
+      const isError = type === 'error';
+      const borderCol = isSuccess ? 'border-emerald-500/40' : isError ? 'border-rose-500/40' : 'border-orange-500/40';
+      const bgCol = isSuccess ? 'bg-[#061711]/95 text-emerald-300' : isError ? 'bg-[#1a080d]/95 text-rose-300' : 'bg-[#170e0a]/95 text-orange-300';
+      const icon = isSuccess ? 'check-circle' : isError ? 'alert-triangle' : 'info';
+      
+      toast.className = `fixed top-5 right-5 z-50 flex items-start gap-3 p-4 rounded-2xl border ${borderCol} ${bgCol} backdrop-blur-2xl shadow-2xl max-w-sm transition-all duration-300 transform translate-y-[-20px] opacity-0`;
+      toast.innerHTML = `
+        <i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+        <div class="flex-1 text-xs">
+          <div class="font-bold text-white">${escapeHtml(title)}</div>
+          ${message ? `<div class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">${escapeHtml(message)}</div>` : ''}
+        </div>
+      `;
+      document.body.appendChild(toast);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-[-20px]', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // =========================================================================
+    // CUSTOM DELETE PROMISE MODAL
+    // =========================================================================
+    let deleteModalResolve = null;
+
+    function promptCustomDelete(options = {}) {
+      return new Promise((resolve) => {
+        deleteModalResolve = resolve;
+        const modal = document.getElementById('customDeleteModal');
+        const card = document.getElementById('customDeleteModalCard');
+        const titleEl = document.getElementById('customDeleteModalTitle');
+        const msgEl = document.getElementById('customDeleteModalMessage');
+        const subEl = document.getElementById('customDeleteModalSubtext');
+        const confirmBtn = document.getElementById('btnCustomDeleteConfirm');
+
+        if (titleEl) titleEl.textContent = options.title || 'ยืนยันการลบรายการ';
+        if (msgEl) msgEl.textContent = options.message || 'คุณแน่ใจหรือไม่ว่าต้องการดำเนินการนี้?';
+        if (subEl) {
+          subEl.innerHTML = `
+            <i data-lucide="${options.isPermanent ? 'alert-octagon' : 'info'}" class="w-3 h-3 ${options.isPermanent ? 'text-rose-400' : 'text-amber-400'} flex-shrink-0"></i>
+            <span>${options.subtext || (options.isPermanent ? 'การลบถาวรจะไม่สามารถกู้คืนข้อมูลได้' : 'สามารถกู้คืนได้ภายหลัง')}</span>
+          `;
+        }
+        if (confirmBtn) {
+          confirmBtn.textContent = options.confirmText || 'ยืนยันการลบ';
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        setTimeout(() => {
+          card.classList.remove('scale-95', 'opacity-0');
+          card.classList.add('scale-100', 'opacity-100');
+        }, 10);
+      });
+    }
+
+    function closeCustomDeleteModal(result) {
+      const modal = document.getElementById('customDeleteModal');
+      const card = document.getElementById('customDeleteModalCard');
+      card.classList.remove('scale-100', 'opacity-100');
+      card.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        if (deleteModalResolve) {
+          deleteModalResolve(!!result);
+          deleteModalResolve = null;
+        }
+      }, 200);
+    }
+
+
 
     const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
 
@@ -1377,7 +1831,7 @@
       document.getElementById('sectionInsideRoom').classList.remove('hidden');
 
       document.getElementById('activeRoomTitle').textContent = plan.title;
-      document.getElementById('activeRoomDesc').textContent = plan.description || 'ไม่มีรายละเอียดเพิ่มเติม';
+      document.getElementById('activeRoomDesc').innerHTML = plan.description || 'ไม่มีรายละเอียดเพิ่มเติม';
       document.getElementById('activeRoomDateText').textContent = new Date(plan.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
       document.getElementById('activeRoomCreatorName').textContent = plan.creator_name || 'สมาชิก';
       document.getElementById('activeRoomCreatorEmail').textContent = `(${plan.creator_email || '-'})`;
@@ -1742,6 +2196,8 @@
       now.setMinutes(0); now.setHours(now.getHours() + 1);
       const iso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
       document.getElementById('newRoomStartDate').value = iso;
+      document.getElementById('newRoomTitle').value = '';
+      setRichEditorContent('newRoomDescEditor', '');
       appState.selectedRoomCollabs = [];
       renderNewRoomCollabs();
     }
@@ -1889,7 +2345,7 @@
       document.getElementById('editRoomTitle').value = plan.title || '';
       document.getElementById('editRoomPriority').value = plan.priority || 'normal';
       document.getElementById('editRoomScope').value = plan.scope || 'department';
-      document.getElementById('editRoomDesc').value = plan.description || '';
+      setRichEditorContent('editRoomDescEditor', plan.description || '');
 
       if (plan.start_date) {
         const d = new Date(plan.start_date);
@@ -1956,7 +2412,7 @@
         if (appState.activeRoom && appState.activeRoom.id === planId) {
           appState.activeRoom = { ...appState.activeRoom, ...updates };
           document.getElementById('activeRoomTitle').textContent = title;
-          document.getElementById('activeRoomDesc').textContent = desc || 'ไม่มีรายละเอียดเพิ่มเติม';
+          document.getElementById('activeRoomDesc').innerHTML = desc || 'ไม่มีรายละเอียดเพิ่มเติม';
           document.getElementById('activeRoomDateText').textContent = new Date(updates.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
           const scopeBadge = document.getElementById('activeRoomScopeBadge');
           if (scopeBadge) {
@@ -1965,9 +2421,9 @@
         }
 
         await refreshAllData();
-        alert("✅ แก้ไขข้อมูลห้องงานเรียบร้อยแล้ว!");
+        showAppToast("แก้ไขข้อมูลสำเร็จ", "อัปเดตข้อมูลห้องงานเรียบร้อยแล้ว", "success");
       } catch (err) {
-        alert("เกิดข้อผิดพลาดในการแก้ไขห้องงาน: " + err.message);
+        showAppToast("เกิดข้อผิดพลาด", err.message, "error");
       }
     }
 
@@ -1992,16 +2448,23 @@
       const p = appState.plans.find(x => x.id === planId);
       if (!p) return;
       if (!canManagePlan(p)) {
-        alert("🔒 คุณไม่มีสิทธิ์ลบห้องงานนี้\n(เฉพาะผู้สร้างห้องงานหรือผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ลบ)");
+        showAppToast("สิทธิ์ไม่เพียงพอ", "🔒 เฉพาะผู้สร้างห้องงานหรือแอดมินเท่านั้นที่มีสิทธิ์ลบ", "error");
         return;
       }
-      if (confirm(`ต้องการย้ายห้องงาน "${p.title}" ลงถังขยะหรือไม่?`)) {
+      const confirmed = await promptCustomDelete({
+        title: "ย้ายห้องงานลงถังขยะ",
+        message: `ต้องการย้ายห้องงาน "${p.title}" ลงถังขยะใช่หรือไม่?`,
+        subtext: "งานย่อยทั้งหมดจะถูกเก็บรักษาไว้ สามารถกู้คืนได้ทุกเมื่อ",
+        confirmText: "ย้ายลงถังขยะ"
+      });
+      if (confirmed) {
         try {
           const email = getCurrentUserEmail();
           await window.PlansRepo.moveToTrashPlan(planId, email, isCurrentUserAdmin() ? 'admin' : 'owner');
           await refreshAllData();
+          showAppToast("ย้ายห้องงานลงถังขยะแล้ว", p.title, "success");
         } catch (err) {
-          alert("ไม่สามารถย้ายลงถังขยะได้: " + err.message);
+          showAppToast("เกิดข้อผิดพลาด", err.message, "error");
         }
       }
     }
@@ -2112,7 +2575,7 @@
       document.getElementById('taskFormId').value = '';
       document.getElementById('taskFormTitle').value = '';
       document.getElementById('taskFormAttachmentUrl').value = '';
-      document.getElementById('taskFormDesc').value = '';
+      setRichEditorContent('taskFormDescEditor', '');
       document.getElementById('taskFormDueDate').value = '';
       document.getElementById('taskFormTag').value = '';
       document.getElementById('taskFormAssigneeSearch').value = '';
@@ -2137,7 +2600,7 @@
       document.getElementById('taskModalTitle').textContent = 'แก้ไขงานย่อย';
       document.getElementById('taskFormId').value = task.id;
       document.getElementById('taskFormTitle').value = task.title;
-      document.getElementById('taskFormDesc').value = task.description || '';
+      setRichEditorContent('taskFormDescEditor', task.description || '');
       document.getElementById('taskFormPriority').value = task.priority || 'normal';
       document.getElementById('taskFormAttachmentUrl').value = (task.attachments && task.attachments[0]) ? task.attachments[0].url : '';
       
@@ -2405,18 +2868,25 @@
       if (!taskId) return;
       const task = appState.activeTasks.find(t => t.id === taskId);
       if (!canManageTask(task, appState.activeRoom)) {
-        alert("🔒 คุณไม่มีสิทธิ์ลบงานย่อยนี้ (เฉพาะผู้สร้างงานย่อย หรือผู้สร้างห้องงานเท่านั้น)");
+        showAppToast("สิทธิ์ไม่เพียงพอ", "🔒 เฉพาะผู้สร้างงานย่อยหรือผู้สร้างห้องงานเท่านั้นที่มีสิทธิ์ลบ", "error");
         return;
       }
-      if (!confirm("คุณต้องการย้ายงานย่อยนี้ไปยังถังขยะของห้องใช่หรือไม่?")) return;
+      const confirmed = await promptCustomDelete({
+        title: "ย้ายงานย่อยลงถังขยะ",
+        message: `คุณต้องการย้ายงานย่อย "${task ? task.title : ''}" ไปยังถังขยะของห้องใช่หรือไม่?`,
+        subtext: "สามารถกู้คืนกลับมาได้จากถังขยะห้อง",
+        confirmText: "ย้ายลงถังขยะ"
+      });
+      if (!confirmed) return;
 
       try {
         const email = getCurrentUserEmail();
         await window.PlansRepo.moveToTrashTask(taskId, email);
         closeTaskModal();
         await loadActiveRoomTasks(appState.activeRoom.id);
+        showAppToast("ย้ายงานย่อยลงถังขยะแล้ว", "", "success");
       } catch (err) {
-        alert("ไม่สามารถลบงานย่อยได้: " + err.message);
+        showAppToast("เกิดข้อผิดพลาด", err.message, "error");
       }
     }
 
@@ -2479,14 +2949,23 @@
         alert("🔒 คุณไม่มีสิทธิ์ลบงานย่อยนี้ถาวร");
         return;
       }
-      if (!confirm("คุณแน่ใจว่าต้องการลบงานย่อยนี้ถาวร? ข้อมูลจะไม่สามารถกู้คืนได้")) return;
+      const confirmed = await promptCustomDelete({
+        title: "⚠️ ยืนยันการลบงานย่อยถาวร",
+        message: `คุณแน่ใจว่าต้องการลบงานย่อยนี้ถาวร?`,
+        subtext: "ข้อมูลงานย่อยนี้จะไม่สามารถกู้คืนได้อีกต่อไป!",
+        confirmText: "ลบงานย่อยถาวร",
+        isPermanent: true
+      });
+      if (!confirmed) return;
+
       const email = getCurrentUserEmail();
       try {
         await window.PlansRepo.permanentlyDeleteTask(taskId, email, isCurrentUserAdmin());
         await loadActiveRoomTasks(appState.activeRoom.id);
         openRoomTrashModal();
+        showAppToast("ลบงานย่อยถาวรเรียบร้อยแล้ว", "", "success");
       } catch (e) {
-        alert(e.message);
+        showAppToast("เกิดข้อผิดพลาด", e.message, "error");
       }
     }
 
@@ -2494,17 +2973,25 @@
     async function handleDeleteCurrentRoom() {
       if (!appState.activeRoom) return;
       if (!canManagePlan(appState.activeRoom)) {
-        alert("🔒 คุณไม่มีสิทธิ์ลบห้องงานนี้\n(เฉพาะผู้สร้างห้องงานหรือผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ลบ)");
+        showAppToast("สิทธิ์ไม่เพียงพอ", "🔒 เฉพาะผู้สร้างห้องงานหรือแอดมินเท่านั้นที่มีสิทธิ์ลบ", "error");
         return;
       }
-      if (!confirm("คุณต้องการย้ายห้องงานนี้ไปยังถังขยะใช่หรือไม่? (งานย่อยทั้งหมดจะถูกเก็บไว้ เมื่อกู้คืนจะกลับมาด้วย)")) return;
+      closeEditRoomModal();
+      const confirmed = await promptCustomDelete({
+        title: "ย้ายห้องงานลงถังขยะ",
+        message: `คุณต้องการย้ายห้องงาน "${appState.activeRoom.title}" ไปยังถังขยะใช่หรือไม่?`,
+        subtext: "งานย่อยทั้งหมดจะถูกเก็บรักษาไว้ เมื่อกู้คืนห้องงานจะกลับมาครบ",
+        confirmText: "ย้ายลงถังขยะ"
+      });
+      if (!confirmed) return;
 
       try {
         const email = getCurrentUserEmail();
         await window.PlansRepo.moveToTrashPlan(appState.activeRoom.id, email, isCurrentUserAdmin() ? 'admin' : 'owner');
         backToRoomsList();
+        showAppToast("ย้ายห้องงานเรียบร้อยแล้ว", "", "success");
       } catch (err) {
-        alert("ไม่สามารถย้ายลงถังขยะได้: " + err.message);
+        showAppToast("เกิดข้อผิดพลาด", err.message, "error");
       }
     }
 
@@ -2574,17 +3061,26 @@
     async function permanentlyDeletePlan(planId) {
       const p = appState.allTrashPlans.find(x => x.id === planId);
       if (!canManagePlan(p)) {
-        alert("🔒 คุณไม่มีสิทธิ์ลบห้องงานนี้ถาวร (เฉพาะผู้สร้างห้องงานหรือผู้ดูแลระบบเท่านั้น)");
+        showAppToast("สิทธิ์ไม่เพียงพอ", "🔒 เฉพาะผู้สร้างห้องงานหรือแอดมินเท่านั้นที่มีสิทธิ์ลบถาวร", "error");
         return;
       }
-      if (!confirm("คุณแน่ใจว่าต้องการลบห้องงานนี้ถาวร? งานย่อยทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้")) return;
+      const confirmed = await promptCustomDelete({
+        title: "⚠️ ยืนยันการลบถาวร",
+        message: `คุณแน่ใจว่าต้องการลบห้องงาน "${p ? p.title : ''}" ถาวร?`,
+        subtext: "งานย่อยทั้งหมดและข้อมูลในห้องจะถูกลบถาวร ไม่สามารถกู้คืนได้อีก!",
+        confirmText: "ลบถาวรทันที",
+        isPermanent: true
+      });
+      if (!confirmed) return;
+
       const email = getCurrentUserEmail();
       try {
         await window.PlansRepo.permanentlyDeletePlan(planId, email, isCurrentUserAdmin());
         await refreshAllData();
         renderTrashList();
+        showAppToast("ลบห้องงานถาวรเรียบร้อยแล้ว", "", "success");
       } catch (e) {
-        alert(e.message);
+        showAppToast("เกิดข้อผิดพลาด", e.message, "error");
       }
     }
     // =========================================================================
