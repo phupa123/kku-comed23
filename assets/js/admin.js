@@ -2362,9 +2362,14 @@ function inspectSlipDirect(studentId, name, nickname, slipUrl, timestamp, refCod
         <iframe src="${drivePreviewUrl}" class="w-full h-full border-0 rounded-2xl" allow="autoplay" loading="lazy"></iframe>
       </div>
       <div class="flex items-center justify-between gap-2 pt-1">
-        <a href="${driveViewUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md shadow-sky-600/25">
-          <i data-lucide="external-link" class="w-4 h-4"></i><span>เปิดดูรูปเต็มบน Google Drive</span>
-        </a>
+        <div class="flex items-center gap-2">
+          <a href="${driveViewUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md shadow-sky-600/25">
+            <i data-lucide="external-link" class="w-4 h-4"></i><span>ดูรูปเต็ม</span>
+          </a>
+          <button type="button" onclick="triggerSlipDownload('${slipUrl}', 'Slip_${studentId}_น้อง${nickname}.png')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md cursor-pointer">
+            <i data-lucide="download" class="w-4 h-4"></i><span>ดาวน์โหลดสลิป</span>
+          </button>
+        </div>
         <button onclick="closeInspectorModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">ปิดหน้าต่าง</button>
       </div>
     </div>
@@ -2443,6 +2448,10 @@ function inspectSlip(studentId) {
               <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
               <span>ดูภาพเต็ม</span>
             </a>
+            <button type="button" onclick="triggerSlipDownload('${rawUrl}', 'Slip_${st.id}_น้อง${st.nickname}_ใบที่${idx + 1}.png')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition inline-flex items-center gap-1.5 shadow-sm cursor-pointer" title="ดาวน์โหลดสลิปใบนี้">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>โหลดสลิป</span>
+            </button>
           </div>
 
           <!-- ลบเฉพาะสลิปนี้ -->
@@ -3111,5 +3120,231 @@ async function testSlipQuotaConnection() {
   } catch (err) {
     console.warn("SlipOK Test Ping:", err);
     alert("ℹ️ ได้ส่งคำสั่งทดสอบเชื่อมต่อไปยัง SlipOK แล้ว (หากมีข้อจำกัด CORS ในเบราว์เซอร์ การส่งรูปสลิปตอนอัปโหลดจริงจะทำงานแบบ multipart/form-data)");
+  }
+}
+
+
+// =========================================================================
+// SLIP DOWNLOAD ENGINE (SINGLE & BULK ZIP DOWNLOADS)
+// =========================================================================
+
+async function triggerSlipDownload(url, filename = 'slip.png') {
+  if (!url) {
+    showToastNotification("⚠️ ไม่พบ URL ของสลิป");
+    return;
+  }
+
+  // 1. Data URI or Blob
+  if (url.startsWith('data:') || url.startsWith('blob:')) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 100);
+    return;
+  }
+
+  // 2. Google Drive direct link
+  let downloadUrl = url;
+  if (url.includes('drive.google.com')) {
+    const idMatch = url.match(/[-\w]{25,}/);
+    if (idMatch) {
+      downloadUrl = `https://drive.google.com/uc?export=download&id=${idMatch[0]}`;
+    }
+  }
+
+  // 3. Direct blob fetch
+  try {
+    const res = await fetch(downloadUrl, { mode: 'cors' });
+    if (res.ok) {
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        a.remove();
+      }, 1000);
+      showToastNotification(`📥 ดาวน์โหลด "${filename}" เรียบร้อย`);
+      return;
+    }
+  } catch (err) {
+    console.warn("Direct fetch slip failed, fallback anchor:", err);
+  }
+
+  // 4. Fallback anchor
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = filename;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => a.remove(), 200);
+  showToastNotification(`📥 กำลังเปิดดาวน์โหลด "${filename}"`);
+}
+
+async function downloadAllSlipsZip() {
+  if (typeof JSZip === 'undefined') {
+    alert("ระบบกำลังโหลดไลบรารี JSZip กรุณาลองใหม่อีกครั้งใน 2-3 วินาที");
+    return;
+  }
+
+  const campName = (currentAdminCampaign && currentAdminCampaign.title) ? currentAdminCampaign.title.replace(/[\/:*?"<>|]/g, '_') : 'Payment_Slips';
+  const zip = new JSZip();
+  const folder = zip.folder(`Slips_${campName}`);
+
+  // Gather all paid students with slips
+  const allPaidStudents = studentDatabase.filter(st => {
+    const rec = paymentRecords[st.id];
+    return rec && rec.paid && (rec.slipUrl || (Array.isArray(rec.slips) && rec.slips.length > 0));
+  });
+
+  if (allPaidStudents.length === 0) {
+    alert("ยังไม่มีรายการสลิปที่ชำระเงินในแคมเปญนี้");
+    return;
+  }
+
+  const btn = document.getElementById('btnDownloadAllSlips');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add('opacity-75', 'cursor-wait');
+  }
+
+  const toast = showLoadingToast(`📦 กำลังเตรียมรวบรวมสลิปทั้งหมด (0/${allPaidStudents.length})...`);
+
+  let downloadedCount = 0;
+  let failedCount = 0;
+
+  for (let i = 0; i < allPaidStudents.length; i++) {
+    const st = allPaidStudents[i];
+    const rec = paymentRecords[st.id];
+    let slips = [];
+
+    if (Array.isArray(rec.slips) && rec.slips.length > 0) {
+      slips = rec.slips;
+    } else if (rec.slipUrl) {
+      slips = [{ url: rec.slipUrl }];
+    }
+
+    if (btn) {
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-amber-400"></i> <span class="hidden sm:inline">โหลด ${i + 1}/${allPaidStudents.length}...</span>`;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    if (toast) {
+      const msgSpan = toast.querySelector('span');
+      if (msgSpan) msgSpan.textContent = `📦 กำลังดาวน์โหลดสลิปของ ${st.name} (${i + 1}/${allPaidStudents.length})...`;
+    }
+
+    for (let sIdx = 0; sIdx < slips.length; sIdx++) {
+      const slipItem = slips[sIdx];
+      const rawUrl = typeof slipItem === 'string' ? slipItem : (slipItem.url || '');
+      if (!rawUrl) continue;
+
+      let ext = 'png';
+      if (rawUrl.includes('.jpg') || rawUrl.includes('.jpeg')) ext = 'jpg';
+      else if (rawUrl.includes('.webp')) ext = 'webp';
+      else if (rawUrl.includes('.pdf')) ext = 'pdf';
+
+      const slipSuffix = slips.length > 1 ? `_part${sIdx + 1}` : '';
+      const safeName = `${st.id}_${st.name.replace(/\s+/g, '_')}_น้อง${st.nickname}${slipSuffix}.${ext}`;
+
+      try {
+        let blob = null;
+        if (rawUrl.startsWith('data:')) {
+          const arr = rawUrl.split(',');
+          const mime = arr[0].match(/:(.*?);/)[1];
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          blob = new Blob([u8arr], { type: mime });
+        } else {
+          // Fetch through CORS proxy if needed or directly
+          let targetFetchUrl = rawUrl;
+          if (rawUrl.includes('drive.google.com')) {
+            const idMatch = rawUrl.match(/[-\w]{25,}/);
+            if (idMatch) targetFetchUrl = `https://drive.google.com/uc?export=download&id=${idMatch[0]}`;
+          }
+          
+          let resp = null;
+          try {
+            resp = await fetch(targetFetchUrl);
+          } catch(fetchErr) {
+            // If CORS fails, try via proxy if available
+            const proxyEndpoint = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('edspace')) 
+              ? `/api/catbox-proxy?url=${encodeURIComponent(targetFetchUrl)}` 
+              : `https://kku-comed23.edspace.workers.dev/api/catbox-proxy?url=${encodeURIComponent(targetFetchUrl)}`;
+            try {
+              resp = await fetch(proxyEndpoint);
+            } catch(e) {}
+          }
+
+          if (resp && resp.ok) {
+            blob = await resp.blob();
+          }
+        }
+
+        if (blob) {
+          folder.file(safeName, blob);
+          downloadedCount++;
+        } else {
+          // Put text link file if binary cannot be fetched
+          folder.file(`${safeName}.url.txt`, `URL: ${rawUrl}\nStudent: ${st.id} - ${st.name}`);
+        }
+      } catch (err) {
+        console.warn(`Failed to package slip for ${st.name}:`, err);
+        failedCount++;
+        folder.file(`${safeName}_link.txt`, `URL: ${rawUrl}`);
+      }
+    }
+  }
+
+  if (toast) {
+    const msgSpan = toast.querySelector('span');
+    if (msgSpan) msgSpan.textContent = "⚡ กำลังบีบอัดไฟล์ ZIP สำหรับดาวน์โหลด...";
+  }
+
+  try {
+    const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+      if (toast) {
+        const msgSpan = toast.querySelector('span');
+        if (msgSpan) msgSpan.textContent = `⚡ บีบอัด ZIP: ${Math.round(metadata.percent)}%`;
+      }
+    });
+
+    const zipFileName = `COMED23_Slips_${campName}_${new Date().toISOString().slice(0, 10)}.zip`;
+    const downloadUrl = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = zipFileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(downloadUrl);
+      a.remove();
+    }, 2000);
+
+    if (toast) toast.remove();
+    showToastNotification(`🎉 ดาวน์โหลดสลิปทั้งหมด ${downloadedCount} ไฟล์เป็น ZIP สำเร็จ!`);
+  } catch (zipErr) {
+    console.error("ZIP Generation error:", zipErr);
+    if (toast) toast.remove();
+    alert("เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: " + zipErr.message);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('opacity-75', 'cursor-wait');
+      btn.innerHTML = originalHtml;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
   }
 }

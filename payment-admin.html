@@ -48,6 +48,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- GSAP for Ultra-Smooth Animations -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- JSZip for Bulk Slip Downloads -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- SheetJS with Full Cell Styling Support (xlsx-js-style for real .xlsx colors) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
@@ -235,6 +237,14 @@
             title="ส่งออก Excel">
             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
             <span class="hidden sm:inline">Export Excel</span>
+          </button>
+
+          <button onclick="downloadAllSlipsZip()"
+            id="btnDownloadAllSlips"
+            class="p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold text-amber-300 bg-amber-950/80 hover:bg-amber-900 border border-amber-700/60 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            title="ดาวน์โหลดสลิปทั้งหมดเป็นไฟล์ ZIP">
+            <i data-lucide="archive" class="w-4 h-4 text-amber-400"></i>
+            <span class="hidden sm:inline">โหลดสลิปทั้งหมด (.ZIP)</span>
           </button>
 
           <!-- Dropdown: More Tools (สแกน QR, ตรวจสลิป, หน้าเว็บย่อย) -->
