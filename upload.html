@@ -44,6 +44,8 @@
   <!-- Multi-Cloud File Uploader Core -->
   <script src="assets/js/background_uploader.js"></script>
   <script src="assets/js/multi_uploader.js"></script>
+  <script src="assets/js/pdf_compressor_engine.js"></script>
+  <script src="assets/js/smart_upload_modal.js"></script>
   <!-- JSZip for ZIP folder download -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Multi-Downloader Library -->
@@ -1195,8 +1197,47 @@
       let currentFileIndex = 0;
 
       for (let i = 0; i < totalFiles; i++) {
-        const file = selectedFilesQueue[i];
+        let file = selectedFilesQueue[i];
         currentFileIndex = i + 1;
+
+        // Smart PDF / Oversize check for upload.html
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        const isOversized = (chosenProvider === 'catbox' || !chosenProvider) && file.size > (200 * 1024 * 1024);
+        if (isPdf || isOversized) {
+          const userChoice = await new Promise((resolve) => {
+            if (typeof showUploadConfirmModal === 'function') {
+              showUploadConfirmModal({
+                title: isOversized ? '⚠️ ไฟล์มีขนาดเกิน 200 MB' : '📄 ตรวจพบไฟล์เอกสาร PDF',
+                message: isOversized 
+                  ? `ไฟล์ "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB) เกินขีดจำกัด Catbox 200 MB คุณสามารถสั่งบีบอัด PDF ตอนนี้เพื่อให้ระบบบีบอัดลงมาได้`
+                  : `ไฟล์ "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB) สามารถบีบอัด Client-side เพื่อลดขนาดและดาวน์โหลดรวดเร็วขึ้น`,
+                fileName: file.name,
+                fileSize: file.size,
+                fileType: isPdf ? 'pdf' : 'file',
+                confirmText: isPdf ? 'อัปโหลดทันที (ไม่อัด)' : 'ดำเนินการต่อ',
+                cancelText: 'ข้ามไฟล์นี้',
+                showExternalHelp: isOversized,
+                showCompressAction: isPdf,
+                onCompressAndUpload: async (updateProgress) => {
+                  if (window.PdfCompressorEngine) {
+                    return await window.PdfCompressorEngine.compressPdf(file, {
+                      targetMaxSizeBytes: 190 * 1024 * 1024,
+                      onProgress: (pct, msg) => updateProgress(pct, msg)
+                    });
+                  }
+                  throw new Error("PDF Compressor Engine not available");
+                },
+                onConfirm: (compFile) => resolve({ proceed: true, file: compFile || file }),
+                onCancel: () => resolve({ proceed: false })
+              });
+            } else {
+              resolve({ proceed: true, file });
+            }
+          });
+
+          if (!userChoice.proceed) continue;
+          if (userChoice.file) file = userChoice.file;
+        }
 
         // Base progress for completed files in batch
         const baseBatchPct = Math.round((i / totalFiles) * 100);

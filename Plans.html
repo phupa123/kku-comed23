@@ -89,6 +89,7 @@
   <script src="assets/js/qr_suite.js"></script>
   <!-- Strict No-LocalStorage Plans Repository -->
   <script src="assets/js/multi_uploader.js"></script>
+  <script src="assets/js/pdf_compressor_engine.js"></script>
   <script src="assets/js/smart_upload_modal.js"></script>
   <script src="assets/js/plans_repo.js"></script>
   <!-- Google Calendar & iCalendar (.ics) Sync Engine -->
@@ -1343,7 +1344,7 @@
     let roomEditImages = [];
     let taskFormImages = [];
 
-        async function handleMultiImageUpload(event, containerType) {
+            async function handleMultiImageUpload(event, containerType) {
       const files = Array.from(event.target.files || []);
       if (files.length === 0) return;
 
@@ -1355,16 +1356,14 @@
       else if (containerType === 'editRoom') targetList = roomEditImages;
       else if (containerType === 'taskForm') targetList = taskFormImages;
 
-      // Iterate through files with confirmation checks for PDF and Large files
       for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+        let file = files[i];
         const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
         const isOversized = file.size > (200 * 1024 * 1024);
         const isLarge = file.size > (25 * 1024 * 1024);
 
-        // Check if file is oversized (> 200MB) or PDF or Large (> 25MB)
         if (isOversized || isPdf || isLarge) {
-          const userConfirmed = await new Promise((resolve) => {
+          const userResult = await new Promise((resolve) => {
             if (typeof showUploadConfirmModal === 'function') {
               let title = 'ยืนยันการอัปโหลดไฟล์';
               let message = 'ต้องการอัปโหลดไฟล์นี้ขึ้นระบบหรือไม่?';
@@ -1372,15 +1371,15 @@
 
               if (isOversized) {
                 title = '⚠️ ไฟล์มีขนาดเกิน 200 MB';
-                message = `ไฟล์ "${file.name}" มีขนาด ${(file.size / (1024 * 1024)).toFixed(1)} MB ซึ่งเกินขีดจำกัดของระบบ (สูงสุด 200 MB ต่อไฟล์) กรุณาบีบอัดลดขนาดก่อนอัปโหลด หรืออัปโหลดเข้า Google Drive แล้วนำลิงก์มาวาง`;
+                message = `ไฟล์ "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB) เกินขีดจำกัด Catbox 200 MB คุณสามารถกดปุ่ม "บีบอัด PDF ตอนนี้" ด้านล่างเพื่อให้ระบบบีบอัดหลายรอบจนขนาดลดลงต่ำกว่า 200 MB หรือใช้ Google Drive`;
                 showHelp = true;
               } else if (isPdf) {
                 title = '📄 ตรวจพบไฟล์เอกสาร PDF';
-                message = `ไฟล์ "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB) เป็นไฟล์เอกสาร PDF หากต้องการให้โหลดเร็วและประหยัดพื้นที่ แนะนำให้บีบอัดไฟล์ก่อนอัปโหลด หรือกดดำเนินการต่อเพื่ออัปโหลดทันที`;
+                message = `ไฟล์ "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB) เป็นไฟล์เอกสาร PDF แนะนำให้บีบอัดเพื่อลดขนาดให้เปิดดูบนมือถือได้รวดเร็ว หรือกดอัปโหลดทันที`;
                 showHelp = true;
               } else if (isLarge) {
                 title = '⚡ ตรวจพบไฟล์ขนาดใหญ่';
-                message = `ไฟล์ "${file.name}" มีขนาด ${(file.size / (1024 * 1024)).toFixed(1)} MB ซึ่งอาจใช้เวลาอัปโหลดสักครู่ ต้องการดำเนินการต่อหรือไม่?`;
+                message = `ไฟล์ "${file.name}" มีขนาด ${(file.size / (1024 * 1024)).toFixed(1)} MB ต้องการดำเนินการต่อหรือไม่?`;
                 showHelp = true;
               }
 
@@ -1390,24 +1389,37 @@
                 fileName: file.name,
                 fileSize: file.size,
                 fileType: isPdf ? 'pdf' : (file.type.split('/')[1] || 'file'),
-                confirmText: isPdf ? 'ยืนยันอัปโหลด PDF' : 'ดำเนินการต่อ',
+                confirmText: isPdf ? 'อัปโหลดทันที (ไม่อัด)' : 'ดำเนินการต่อ',
                 cancelText: 'ข้ามไฟล์นี้',
                 showExternalHelp: showHelp,
-                onConfirm: () => resolve(true),
-                onCancel: () => resolve(false)
+                showCompressAction: isPdf,
+                onCompressAndUpload: async (updateProgress) => {
+                  if (window.PdfCompressorEngine) {
+                    return await window.PdfCompressorEngine.compressPdf(file, {
+                      targetMaxSizeBytes: 190 * 1024 * 1024,
+                      onProgress: (pct, msg) => updateProgress(pct, msg)
+                    });
+                  }
+                  throw new Error("PDF Compressor Engine not loaded");
+                },
+                onConfirm: (compressedFile) => resolve({ confirmed: true, file: compressedFile || file }),
+                onCancel: () => resolve({ confirmed: false })
               });
             } else {
               if (isOversized) {
-                alert(`ไฟล์ "${file.name}" มีขนาดเกิน 200 MB ไม่สามารถอัปโหลดได้`);
-                resolve(false);
+                alert(`ไฟล์ "${file.name}" มีขนาดเกิน 200 MB`);
+                resolve({ confirmed: false });
               } else {
-                resolve(confirm(`ต้องการอัปโหลด "${file.name}" หรือไม่?`));
+                resolve({ confirmed: confirm(`ต้องการอัปโหลด "${file.name}" หรือไม่?`), file });
               }
             }
           });
 
-          if (!userConfirmed) {
-            continue; // Skip this file
+          if (!userResult || !userResult.confirmed) {
+            continue;
+          }
+          if (userResult.file) {
+            file = userResult.file;
           }
         }
 
