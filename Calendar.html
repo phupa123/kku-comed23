@@ -68,6 +68,9 @@
     });
   </script>
   -->
+  <!-- Bootstrap Icons & GSAP Animation CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Google Identity Services -->
@@ -276,6 +279,7 @@
 
         <select id="calendarUrgencyFilter" onchange="renderCalendarView()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-xs font-bold">
           <option value="all">⚡ ลำดับทั้งหมด</option>
+          <option value="priority_desc">🚨 เรียงตามความสำคัญ (Urgent &gt; Normal)</option>
           <option value="upcoming_soon">⏳ ใกล้เข้ามาถึง (7 วันข้างหน้า)</option>
           <option value="today">🔥 ภายในวันนี้</option>
           <option value="this_month">📅 ภายในเดือนนี้</option>
@@ -404,9 +408,19 @@
             </select>
           </div>
           <div>
-            <label class="block font-bold text-slate-300 mb-1">สถานที่ / ห้องเรียน</label>
-            <input type="text" id="newRoomLocation" placeholder="เช่น ED2104, ห้องประชุม 2 หรือ Meet" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <label class="block font-bold text-slate-300 mb-1">ระดับความสำคัญ (Priority)</label>
+            <select id="newRoomPriority" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+              <option value="urgent">🚨 ด่วนที่สุด (Urgent)</option>
+              <option value="high">🔥 สำคัญมาก (High)</option>
+              <option value="normal" selected>⚡ ปานกลาง / ทั่วไป (Normal)</option>
+              <option value="low">🌱 ไม่เร่งด่วน (Low)</option>
+            </select>
           </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">สถานที่ / ห้องเรียน / ลิงก์ห้องประชุม</label>
+          <input type="text" id="newRoomLocation" placeholder="เช่น ED2104, ห้องประชุม 2 หรือ Google Meet..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -442,6 +456,94 @@
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
           <button type="button" onclick="closeCreatePlanModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold">ยกเลิก</button>
           <button type="submit" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-black shadow-md transition">สร้างกิจกรรม</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: EDIT PLAN / EVENT ================= -->
+  <div id="editCalendarPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/20 max-w-lg w-full p-6 shadow-2xl relative overflow-hidden space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <i class="bi bi-pencil-square"></i>
+          </span>
+          <h3 class="text-base font-black text-white">แก้ไขกิจกรรมและนัดหมาย</h3>
+        </div>
+        <button type="button" onclick="closeEditCalendarPlanModal()" class="p-1 rounded-xl text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form onsubmit="handleEditPlanSubmit(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="editPlanId">
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่องาน / กิจกรรม <span class="text-rose-400">*</span></label>
+          <input type="text" id="editPlanTitle" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ระดับความสำคัญ (Priority)</label>
+            <select id="editPlanPriority" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+              <option value="urgent">🚨 ด่วนที่สุด (Urgent)</option>
+              <option value="high">🔥 สำคัญมาก (High)</option>
+              <option value="normal">⚡ ปานกลาง / ทั่วไป (Normal)</option>
+              <option value="low">🌱 ไม่เร่งด่วน (Low)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ขอบเขต (Scope)</label>
+            <select id="editPlanScope" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+              <option value="personal">🔒 ส่วนตัว</option>
+              <option value="shared">👥 งานกลุ่ม</option>
+              <option value="department">🏛️ งานสาขา</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สีประจำกิจกรรม</label>
+            <select id="editPlanColor" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+              <option value="#f97316">🟠 ส้ม (Orange)</option>
+              <option value="#3b82f6">🔵 ฟ้า (Blue)</option>
+              <option value="#10b981">🟢 เขียว (Green)</option>
+              <option value="#8b5cf6">🟣 ม่วง (Purple)</option>
+              <option value="#ef4444">🔴 แดง (Red)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">สถานที่ / ห้องเรียน</label>
+            <input type="text" id="editPlanLocation" placeholder="ED2104 หรือ Meet..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">วันเริ่มกิจกรรม <span class="text-rose-400">*</span></label>
+            <input type="datetime-local" id="editPlanStartDate" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">กำหนดสิ้นสุด</label>
+            <input type="datetime-local" id="editPlanEndDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">รายละเอียดเพิ่มเติม / บันทึกโน้ต</label>
+          <textarea id="editPlanDesc" rows="3" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 pt-3 border-t border-white/10">
+          <button type="button" onclick="quickDeleteEditingPlan()" class="px-3.5 py-2 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white font-bold transition flex items-center gap-1 cursor-pointer">
+            <i class="bi bi-trash3"></i>
+            <span>ลบ</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeEditCalendarPlanModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold cursor-pointer">ยกเลิก</button>
+            <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-white font-black shadow-md transition cursor-pointer">บันทึกการแก้ไข</button>
+          </div>
         </div>
       </form>
     </div>
@@ -825,8 +927,14 @@
         });
       }
 
-      // เรียงลำดับความสำคัญ: นำกิจกรรมที่กำลังจะมาถึงเร็วที่สุดขึ้นก่อน (Upcoming proximity sorting)
+      // เรียงลำดับความสำคัญ / วันที่
+      const priorityWeight = { urgent: 4, high: 3, normal: 2, low: 1 };
       list.sort((a, b) => {
+        if (urgencyFilter === 'priority_desc') {
+          const pA = priorityWeight[a.priority] || 2;
+          const pB = priorityWeight[b.priority] || 2;
+          if (pB !== pA) return pB - pA;
+        }
         const timeA = new Date(a.start_date).getTime();
         const timeB = new Date(b.start_date).getTime();
         return timeA - timeB;
@@ -1223,25 +1331,36 @@
           countdownBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-sky-500/20 text-sky-300">อีก ${diffDays} วัน</span>`;
         }
 
+        let priorityBadge = '';
+        if (p.priority === 'urgent') {
+          priorityBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-xs">🚨 ด่วนที่สุด</span>';
+        } else if (p.priority === 'high') {
+          priorityBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">🔥 สำคัญมาก</span>';
+        } else if (p.priority === 'low') {
+          priorityBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-500/20 text-slate-400">🌱 ไม่เร่งด่วน</span>';
+        }
+
         const dateStr = startDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
         const timeStr = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
         const scopeBadge = p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
         const color = p.color || '#f97316';
         const isOfficial = p.is_official;
-        const canDelete = canUserManagePlan(p);
+        const canManage = canUserManagePlan(p);
 
         const item = document.createElement('div');
         item.className = `p-3.5 rounded-2xl bg-white/[0.02] border transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 group ${
+          p.priority === 'urgent' ? 'border-rose-500/40 bg-rose-500/[0.04]' :
           isUrgent ? 'border-amber-500/40 bg-amber-500/[0.03]' : 'border-white/10 hover:border-amber-500/40 hover:bg-white/[0.05]'
         }`;
         item.innerHTML = `
-          <div class="flex items-start gap-3">
+          <div class="flex items-start gap-3 cursor-pointer flex-1" onclick="openCalendarPlanModal('${p.id}')">
             <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center flex-shrink-0 text-white shadow-md font-mono" style="background-color: ${color}">
               <span class="text-[9px] uppercase font-bold leading-none">${startDate.toLocaleDateString('en-US', { month: 'short' })}</span>
               <span class="text-base font-black leading-none mt-0.5">${startDate.getDate()}</span>
             </div>
             <div>
               <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                ${priorityBadge}
                 ${countdownBadge}
                 <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/10 text-slate-300">${scopeBadge}</span>
                 ${isOfficial ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">⭐ ทางการ</span>' : ''}
@@ -1264,8 +1383,11 @@
             <button onclick="if(window.CalendarSync) window.CalendarSync.downloadIcsFile(appState.plans.find(x=>x.id==='${p.id}'));" class="p-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-white transition" title="ดาวน์โหลดไฟล์ .ics สำหรับเปิดในเครื่อง">
               <i data-lucide="download" class="w-4 h-4"></i>
             </button>
-            ${canDelete ? `
-            <button onclick="handleDeleteCalendarPlan('${p.id}')" class="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition cursor-pointer" title="ลบกิจกรรมนี้ (เจ้าของ/แอดมิน)">
+            ${canManage ? `
+            <button onclick="openEditCalendarPlanModal('${p.id}')" class="p-1.5 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white transition cursor-pointer" title="แก้ไขกิจกรรมนี้">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+            </button>
+            <button onclick="handleDeleteCalendarPlan('${p.id}')" class="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition cursor-pointer" title="ลบกิจกรรมนี้ (ย้ายลงถังขยะ)">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
             ` : ''}
@@ -1298,6 +1420,10 @@
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-300">
                 ${p.scope === 'department' ? '🏛️ งานสาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว'}
               </span>
+              ${p.priority === 'urgent' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">🚨 ด่วนที่สุด</span>' :
+                p.priority === 'high' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">🔥 สำคัญมาก</span>' :
+                p.priority === 'low' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-500/20 text-slate-300">🌱 ไม่เร่งด่วน</span>' :
+                '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-sky-500/20 text-sky-300">⚡ ปานกลาง</span>'}
               ${p.is_official ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">⭐ ทางการ</span>' : ''}
             </div>
             <button onclick="this.closest('#calendarQuickModal').remove()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -1336,6 +1462,10 @@
                 <span>.ICS</span>
               </button>
               ${isOwnerOrAdmin ? `
+              <button onclick="document.getElementById('calendarQuickModal').remove(); openEditCalendarPlanModal('${p.id}');" class="px-3 py-2 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-orange-500/30 transition cursor-pointer" title="แก้ไขรายละเอียดกิจกรรม">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <span>แก้ไข</span>
+              </button>
               <button onclick="document.getElementById('calendarQuickModal').remove(); handleDeleteCalendarPlan('${p.id}');" class="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-rose-500/30 transition cursor-pointer" title="ลบกิจกรรมนี้ (ย้ายลงถังขยะ)">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 <span>ลบ</span>
@@ -1509,6 +1639,7 @@
       const title = document.getElementById('newRoomTitle').value;
       const planType = document.getElementById('newRoomType') ? document.getElementById('newRoomType').value : 'event';
       const scope = document.getElementById('newRoomScope').value;
+      const priority = document.getElementById('newRoomPriority') ? document.getElementById('newRoomPriority').value : 'normal';
       const color = document.getElementById('newRoomColor').value;
       const startDate = document.getElementById('newRoomStartDate').value;
       const endDate = document.getElementById('newRoomEndDate').value;
@@ -1522,6 +1653,7 @@
         plan_type: planType,
         description: desc,
         scope,
+        priority,
         color,
         location,
         custom_columns: ["สิ่งที่ต้องทำ", "กำลังทำ", "เสร็จสิ้น"],
@@ -1542,6 +1674,101 @@
       } catch (err) {
         alert("สร้างกิจกรรมไม่สำเร็จ: " + err.message);
       }
+    }
+
+    function openEditCalendarPlanModal(planId) {
+      const plan = (appState.plans || []).find(p => p.id === planId);
+      if (!plan) return;
+
+      if (!canUserManagePlan(plan)) {
+        alert("🔒 คุณไม่มีสิทธิ์แก้ไขกิจกรรมนี้ (เฉพาะผู้สร้างหรือผู้ดูแลระบบเท่านั้น)");
+        return;
+      }
+
+      document.getElementById('editPlanId').value = plan.id;
+      document.getElementById('editPlanTitle').value = plan.title || '';
+      document.getElementById('editPlanPriority').value = plan.priority || 'normal';
+      document.getElementById('editPlanScope').value = plan.scope || 'shared';
+      document.getElementById('editPlanColor').value = plan.color || '#f97316';
+      document.getElementById('editPlanLocation').value = plan.location || '';
+      document.getElementById('editPlanDesc').value = plan.description || '';
+
+      if (plan.start_date) {
+        const d = new Date(plan.start_date);
+        const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('editPlanStartDate').value = iso;
+      } else {
+        document.getElementById('editPlanStartDate').value = '';
+      }
+
+      if (plan.end_date) {
+        const d = new Date(plan.end_date);
+        const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('editPlanEndDate').value = iso;
+      } else {
+        document.getElementById('editPlanEndDate').value = '';
+      }
+
+      const modal = document.getElementById('editCalendarPlanModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeEditCalendarPlanModal() {
+      const modal = document.getElementById('editCalendarPlanModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    async function handleEditPlanSubmit(e) {
+      e.preventDefault();
+      const planId = document.getElementById('editPlanId').value;
+      if (!planId) return;
+
+      const plan = (appState.plans || []).find(p => p.id === planId);
+      if (!canUserManagePlan(plan)) {
+        alert("🔒 คุณไม่มีสิทธิ์แก้ไขกิจกรรมนี้");
+        return;
+      }
+
+      const title = document.getElementById('editPlanTitle').value.trim();
+      const priority = document.getElementById('editPlanPriority').value;
+      const scope = document.getElementById('editPlanScope').value;
+      const color = document.getElementById('editPlanColor').value;
+      const location = document.getElementById('editPlanLocation').value.trim();
+      const startDate = document.getElementById('editPlanStartDate').value;
+      const endDate = document.getElementById('editPlanEndDate').value;
+      const desc = document.getElementById('editPlanDesc').value.trim();
+
+      const updates = {
+        title,
+        priority,
+        scope,
+        color,
+        location,
+        description: desc,
+        start_date: new Date(startDate).toISOString(),
+        end_date: endDate ? new Date(endDate).toISOString() : null
+      };
+
+      try {
+        await window.PlansRepo.updatePlan(planId, updates);
+        closeEditCalendarPlanModal();
+        await refreshCalendarData();
+        alert("✅ แก้ไขข้อมูลกิจกรรมเรียบร้อยแล้ว!");
+      } catch (err) {
+        alert("เกิดข้อผิดพลาดในการแก้ไข: " + err.message);
+      }
+    }
+
+    async function quickDeleteEditingPlan() {
+      const planId = document.getElementById('editPlanId').value;
+      if (!planId) return;
+      closeEditCalendarPlanModal();
+      await handleDeleteCalendarPlan(planId);
     }
 
     function escapeHtml(str) {

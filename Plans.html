@@ -240,6 +240,7 @@
           <!-- Sort / Urgency Selector -->
           <select id="roomUrgencySort" onchange="renderRoomsGrid()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-xs font-bold focus:outline-hidden">
             <option value="nearest">⚡ ใกล้ถึงกำหนดที่สุด (Proximity First)</option>
+            <option value="priority_desc">🚨 เรียงตามความสำคัญ (Urgent &gt; High &gt; Normal)</option>
             <option value="urgent_only">⏳ ใกล้ถึงใน 7 วัน</option>
             <option value="newest">🕒 สร้างล่าสุด</option>
             <option value="progress_asc">📊 ค้างส่ง / คืบหน้าน้อยสุด</option>
@@ -325,6 +326,10 @@
             <button onclick="openAddTaskModal()" class="px-3.5 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>เพิ่มงานย่อย</span>
+            </button>
+            <button id="btnEditRoom" onclick="openEditRoomModal()" class="hidden px-3 py-1.5 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white text-xs font-bold transition flex items-center gap-1 cursor-pointer" title="แก้ไขข้อมูลห้องงาน (ชื่อ, รายละเอียด, กำหนดส่ง)">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>แก้ไขห้อง</span>
             </button>
             <button onclick="openRoomTrashModal()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition" title="ถังขยะของห้องนี้">
               <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
@@ -530,6 +535,77 @@
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
           <button type="button" onclick="closeCreatePlanModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold hover:bg-white/10 transition">ยกเลิก</button>
           <button type="submit" id="btnSubmitNewRoom" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-black shadow-lg shadow-orange-500/30 transition">สร้างห้องงาน</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: EDIT MASTER ROOM ================= -->
+  <div id="editRoomModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+          </span>
+          <h3 class="text-base font-black text-white">แก้ไขข้อมูลห้องงาน (Edit Master Room)</h3>
+        </div>
+        <button type="button" onclick="closeEditRoomModal()" class="p-1 rounded-xl text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form onsubmit="handleEditRoomSubmit(event)" class="space-y-4 pt-3 text-xs">
+        <input type="hidden" id="editRoomId">
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่องานหลัก <span class="text-rose-400">*</span></label>
+          <input type="text" id="editRoomTitle" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">ระดับความสำคัญ (Priority)</label>
+            <select id="editRoomPriority" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+              <option value="urgent">🚨 ด่วนที่สุด (Urgent)</option>
+              <option value="high">🔥 สำคัญมาก (High)</option>
+              <option value="normal">⚡ ปานกลาง / ทั่วไป (Normal)</option>
+              <option value="low">🌱 ไม่เร่งด่วน (Low)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">การแชร์ & ขอบเขต</label>
+            <select id="editRoomScope" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+              <option value="department">🏛️ แชร์ลงสาขา (ทุกคนเห็น)</option>
+              <option value="shared">👥 แชร์เพื่อนในสาขาที่กำหนด</option>
+              <option value="personal">🔒 สร้างเป็นส่วนตัว (ฉันคนเดียว)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">วันเริ่มงาน <span class="text-rose-400">*</span></label>
+            <input type="datetime-local" id="editRoomStartDate" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">กำหนดเสร็จ (ถ้ามี)</label>
+            <input type="datetime-local" id="editRoomEndDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">รายละเอียดงาน</label>
+          <textarea id="editRoomDesc" rows="3" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-white/10">
+          <button type="button" onclick="handleDeleteCurrentRoom()" class="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white font-bold transition flex items-center gap-1 cursor-pointer">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>ลบห้อง</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeEditRoomModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold hover:bg-white/10 transition cursor-pointer">ยกเลิก</button>
+            <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-white font-black shadow-lg transition cursor-pointer">บันทึกการแก้ไข</button>
+          </div>
         </div>
       </form>
     </div>
@@ -1054,7 +1130,16 @@
       const nowMs = Date.now();
       const in7Days = nowMs + (7 * 24 * 60 * 60 * 1000);
 
-      if (sortMode === 'urgent_only') {
+      const priorityWeight = { urgent: 4, high: 3, normal: 2, low: 1 };
+
+      if (sortMode === 'priority_desc') {
+        list.sort((a, b) => {
+          const pA = priorityWeight[a.priority] || 2;
+          const pB = priorityWeight[b.priority] || 2;
+          if (pB !== pA) return pB - pA;
+          return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+        });
+      } else if (sortMode === 'urgent_only') {
         list = list.filter(p => {
           if (!p.start_date) return false;
           const s = new Date(p.start_date).getTime();
@@ -1106,7 +1191,14 @@
         const scopeLabel = p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
         const scopeClass = p.scope === 'department' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : p.scope === 'shared' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-slate-500/20 text-slate-300 border-slate-500/30';
         
-        // Check Proximity badge
+        // Priority & Proximity badge
+        let priorityBadge = '';
+        if (p.priority === 'urgent') {
+          priorityBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-500/25 text-rose-300 border border-rose-500/40">🚨 ด่วน</span>`;
+        } else if (p.priority === 'high') {
+          priorityBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">🔥 สำคัญ</span>`;
+        }
+
         const sTime = new Date(p.start_date).getTime();
         const diffDays = Math.ceil((sTime - nowMs) / (1000 * 60 * 60 * 24));
         let urgencyBadge = '';
@@ -1116,7 +1208,7 @@
           urgencyBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⏳ อีก ${diffDays} วัน</span>`;
         }
 
-        const canDelete = canManagePlan(p);
+        const canManage = canManagePlan(p);
 
         card.innerHTML = `
           <div class="space-y-2.5 sm:space-y-3">
@@ -1125,11 +1217,15 @@
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${scopeClass}">
                   ${scopeLabel}
                 </span>
+                ${priorityBadge}
                 ${urgencyBadge}
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5">
                 <span class="text-sm font-black font-mono ${pct === 100 ? 'text-emerald-400' : 'text-orange-400'}">${pct}%</span>
-                ${canDelete ? `
+                ${canManage ? `
+                <button onclick="event.stopPropagation(); openEditRoomModalById('${p.id}');" class="p-1 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 transition" title="แก้ไขห้องงาน">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                </button>
                 <button onclick="event.stopPropagation(); quickDeletePlanConfirm('${p.id}');" class="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition" title="ย้ายลงถังขยะ">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
@@ -1196,10 +1292,20 @@
       const scopeBadge = document.getElementById('activeRoomScopeBadge');
       scopeBadge.textContent = plan.scope === 'department' ? '🏛️ งานสาขา' : plan.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
 
-      // ตรวจสอบสิทธิ์การลบห้อง: แสดงปุ่มลบเฉพาะผู้สร้างห้องหรือแอดมินเท่านั้น
+      // ตรวจสอบสิทธิ์การจัดการห้อง: แสดงปุ่มแก้ไขและปุ่มลบเฉพาะผู้สร้างห้องหรือแอดมินเท่านั้น
+      const canManage = canManagePlan(plan);
+      const btnEditRoom = document.getElementById('btnEditRoom');
+      if (btnEditRoom) {
+        if (canManage) {
+          btnEditRoom.classList.remove('hidden');
+        } else {
+          btnEditRoom.classList.add('hidden');
+        }
+      }
+
       const btnDeleteRoom = document.getElementById('btnDeleteRoom');
       if (btnDeleteRoom) {
-        if (canManagePlan(plan)) {
+        if (canManage) {
           btnDeleteRoom.classList.remove('hidden');
         } else {
           btnDeleteRoom.classList.add('hidden');
@@ -1238,8 +1344,21 @@
       const cols = appState.activeRoom.custom_columns || ["สิ่งที่ต้องทำ", "กำลังทำ", "เสร็จสิ้น"];
       container.innerHTML = '';
 
+      const priorityWeight = { urgent: 4, high: 3, normal: 2, low: 1 };
+
       cols.forEach(colName => {
-        const colTasks = appState.activeTasks.filter(t => t.column_name === colName);
+        let colTasks = appState.activeTasks.filter(t => t.column_name === colName);
+
+        // จัดเรียงตามความสำคัญ Priority (ด่วนสุด > สำคัญ > ปานกลาง > ทั่วไป) แล้วตามด้วย Due Date
+        colTasks.sort((a, b) => {
+          const pA = priorityWeight[a.priority] || 2;
+          const pB = priorityWeight[b.priority] || 2;
+          if (pB !== pA) return pB - pA;
+          if (a.due_date && b.due_date) return new Date(a.due_date) - new Date(b.due_date);
+          if (a.due_date) return -1;
+          if (b.due_date) return 1;
+          return 0;
+        });
         const colDiv = document.createElement('div');
         colDiv.className = 'glass-card rounded-2xl p-3.5 flex flex-col min-w-[270px] bg-slate-900/60 border border-white/10';
         colDiv.dataset.column = colName;
@@ -1280,21 +1399,33 @@
           card.ondragend = () => card.classList.remove('dragging-card');
           card.onclick = () => openEditTaskModal(task);
 
-          const priorityBadge = task.priority === 'urgent' ? '<span class="text-[9px] px-1.5 py-0.2 rounded-md bg-rose-500/20 text-rose-300 font-black">ด่วนสุด</span>' :
-                                task.priority === 'high' ? '<span class="text-[9px] px-1.5 py-0.2 rounded-md bg-orange-500/20 text-orange-300 font-bold">สำคัญ</span>' : '';
+          const priorityBadge = task.priority === 'urgent' ? '<span class="text-[9px] px-1.5 py-0.5 rounded-md bg-rose-500/25 text-rose-300 border border-rose-500/40 font-black">🚨 ด่วนสุด</span>' :
+                                task.priority === 'high' ? '<span class="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">🔥 สำคัญ</span>' :
+                                task.priority === 'low' ? '<span class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-500/20 text-slate-400 font-bold">🌱 ทั่วไป</span>' : '';
 
-          // Due date check & overdue formatting
+          // Due date check & overdue formatting with detailed time
           let dueDateHtml = '';
           if (task.due_date) {
             const dueObj = new Date(task.due_date);
-            const isOverdue = dueObj < new Date() && !task.is_completed;
+            const now = new Date();
+            const isOverdue = dueObj < now && !task.is_completed;
+            const diffHours = Math.round((dueObj - now) / (1000 * 60 * 60));
             const dueStr = dueObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+            const timeStr = dueObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+            
+            let countdownStr = '';
+            if (isOverdue) {
+              countdownStr = 'เลยกำหนด ';
+            } else if (diffHours >= 0 && diffHours <= 24) {
+              countdownStr = `อีก ${diffHours} ชม. `;
+            }
+
             dueDateHtml = `
               <span class="inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded-md ${
                 isOverdue ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse font-bold' : 'bg-white/5 text-slate-300'
               }" title="กำหนดส่ง: ${dueObj.toLocaleString('th-TH')}">
                 <i data-lucide="clock" class="w-2.5 h-2.5 ${isOverdue ? 'text-rose-400' : 'text-slate-400'}"></i>
-                <span>${isOverdue ? 'เลยกำหนด ' : ''}${dueStr}</span>
+                <span>${countdownStr}${dueStr} ${timeStr}</span>
               </span>
             `;
           }
@@ -1490,6 +1621,12 @@
           <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
           <span>เปิดบอร์ดห้องงาน</span>
         </button>
+        ${hasDeletePermission ? `
+        <button onclick="closePlanContextMenu(); openEditRoomModalById('${plan.id}')" class="w-full text-left px-3 py-2 rounded-xl text-amber-300 hover:bg-amber-500/20 font-bold transition flex items-center gap-2 cursor-pointer">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>แก้ไขห้องงานนี้</span>
+        </button>
+        ` : ''}
         <button onclick="sharePlanQuickLink('${plan.id}')" class="w-full text-left px-3 py-2 rounded-xl text-white hover:bg-white/10 font-bold transition flex items-center gap-2 cursor-pointer">
           <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
           <span>แชร์ QR Code ห้องนี้</span>
@@ -1549,6 +1686,106 @@
           userUrl: url,
           adminUrl: url
         });
+      }
+    }
+
+    function openEditRoomModal() {
+      if (!appState.activeRoom) return;
+      openEditRoomModalById(appState.activeRoom.id);
+    }
+
+    function openEditRoomModalById(planId) {
+      const plan = (appState.plans || []).find(p => p.id === planId) || appState.activeRoom;
+      if (!plan) return;
+
+      if (!canManagePlan(plan)) {
+        alert("🔒 คุณไม่มีสิทธิ์แก้ไขห้องงานนี้ (เฉพาะผู้สร้างหรือผู้ดูแลระบบเท่านั้น)");
+        return;
+      }
+
+      document.getElementById('editRoomId').value = plan.id;
+      document.getElementById('editRoomTitle').value = plan.title || '';
+      document.getElementById('editRoomPriority').value = plan.priority || 'normal';
+      document.getElementById('editRoomScope').value = plan.scope || 'department';
+      document.getElementById('editRoomDesc').value = plan.description || '';
+
+      if (plan.start_date) {
+        const d = new Date(plan.start_date);
+        const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('editRoomStartDate').value = iso;
+      } else {
+        document.getElementById('editRoomStartDate').value = '';
+      }
+
+      if (plan.end_date) {
+        const d = new Date(plan.end_date);
+        const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('editRoomEndDate').value = iso;
+      } else {
+        document.getElementById('editRoomEndDate').value = '';
+      }
+
+      const modal = document.getElementById('editRoomModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeEditRoomModal() {
+      const modal = document.getElementById('editRoomModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    async function handleEditRoomSubmit(e) {
+      e.preventDefault();
+      const planId = document.getElementById('editRoomId').value;
+      if (!planId) return;
+
+      const plan = (appState.plans || []).find(p => p.id === planId) || appState.activeRoom;
+      if (!canManagePlan(plan)) {
+        alert("🔒 คุณไม่มีสิทธิ์แก้ไขห้องงานนี้");
+        return;
+      }
+
+      const title = document.getElementById('editRoomTitle').value.trim();
+      const priority = document.getElementById('editRoomPriority').value;
+      const scope = document.getElementById('editRoomScope').value;
+      const startDate = document.getElementById('editRoomStartDate').value;
+      const endDate = document.getElementById('editRoomEndDate').value;
+      const desc = document.getElementById('editRoomDesc').value.trim();
+
+      const updates = {
+        title,
+        priority,
+        scope,
+        description: desc,
+        start_date: new Date(startDate).toISOString(),
+        end_date: endDate ? new Date(endDate).toISOString() : null
+      };
+
+      try {
+        await window.PlansRepo.updatePlan(planId, updates);
+        closeEditRoomModal();
+        
+        // หากกำลังเปิดอยู่ในห้องนี้ ให้อัปเดตข้อมูลบนบอร์ดทันที
+        if (appState.activeRoom && appState.activeRoom.id === planId) {
+          appState.activeRoom = { ...appState.activeRoom, ...updates };
+          document.getElementById('activeRoomTitle').textContent = title;
+          document.getElementById('activeRoomDesc').textContent = desc || 'ไม่มีรายละเอียดเพิ่มเติม';
+          document.getElementById('activeRoomDateText').textContent = new Date(updates.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+          const scopeBadge = document.getElementById('activeRoomScopeBadge');
+          if (scopeBadge) {
+            scopeBadge.textContent = scope === 'department' ? '🏛️ งานสาขา' : scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
+          }
+        }
+
+        await refreshAllData();
+        alert("✅ แก้ไขข้อมูลห้องงานเรียบร้อยแล้ว!");
+      } catch (err) {
+        alert("เกิดข้อผิดพลาดในการแก้ไขห้องงาน: " + err.message);
       }
     }
 
