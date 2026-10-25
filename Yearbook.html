@@ -48,6 +48,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
   <script src="students_data.js"></script>
+  <script src="assets/js/room_roles_data.js"></script>
   <script src="config/events_repo.js?v=2.3.0"></script>
   <script src="assets/js/pwa-installer.js"></script>
   <!-- Cyber Particles Background & 3D Tilt Engine -->
@@ -206,7 +207,7 @@
         </div>
         <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 tilt-card-3d">
           <span class="text-slate-400 text-[11px] block">ฝ่ายดำเนินงานห้อง</span>
-          <span class="text-2xl sm:text-3xl font-black text-[#FF7A29] font-mono mt-0.5 block">6 <span class="text-xs text-slate-500 font-normal">ฝ่าย</span></span>
+          <span class="text-2xl sm:text-3xl font-black text-[#FF7A29] font-mono mt-0.5 block">8 <span class="text-xs text-slate-500 font-normal">ฝ่าย</span></span>
         </div>
         <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 tilt-card-3d">
           <span class="text-slate-400 text-[11px] block">เลือกฝ่ายแล้ว</span>
@@ -242,31 +243,40 @@
         <div class="tree-line-v h-10"></div>
       </div>
 
-      <!-- TIER 2: DEPUTIES & CORE EXECUTIVES (รองหัวหน้าห้อง, เลขานุการ, เหรัญญิก) -->
+      <!-- TIER 2: DEPUTIES & CORE EXECUTIVES (รองหัวหน้าห้อง 2 ท่าน, ฝ่ายเลขาฯ 2 ท่าน, ฝ่ายการเงิน/เหรัญญิก 2 ท่าน) -->
       <div class="flex flex-col items-center">
         <!-- Horizontal connector line -->
-        <div class="w-full max-w-3xl tree-line-h"></div>
-        <div class="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3">
+        <div class="w-full max-w-4xl tree-line-h"></div>
+        <div class="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3">
           
           <!-- Deputy 1 & 2 -->
           <div class="flex flex-col items-center space-y-2">
-            <span class="text-[11px] font-bold uppercase text-sky-400">รองหัวหน้าห้อง</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              <span>รองหัวหน้าห้อง (2 คน)</span>
+            </span>
             <div id="nodesDeputies" class="w-full space-y-2.5">
               <!-- Rendered via JS -->
             </div>
           </div>
 
-          <!-- Secretary -->
+          <!-- Secretary & Asst Secretary -->
           <div class="flex flex-col items-center space-y-2">
-            <span class="text-[11px] font-bold uppercase text-pink-400">เลขานุการ</span>
-            <div id="nodeSecretary" class="w-full">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-pink-400 flex items-center gap-1">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+              <span>เลขานุการ & ผู้ช่วย (2 คน)</span>
+            </span>
+            <div id="nodeSecretary" class="w-full space-y-2.5">
               <!-- Rendered via JS -->
             </div>
           </div>
 
-          <!-- Treasurers -->
+          <!-- Treasurer & Asst Treasurer -->
           <div class="flex flex-col items-center space-y-2">
-            <span class="text-[11px] font-bold uppercase text-emerald-400">เหรัญญิก & ผู้ช่วย</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+              <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+              <span>เหรัญญิก & ผู้ช่วย (2 คน)</span>
+            </span>
             <div id="nodesTreasurers" class="w-full space-y-2.5">
               <!-- Rendered via JS -->
             </div>
@@ -278,14 +288,14 @@
         <div class="tree-line-v h-12 mt-4"></div>
       </div>
 
-      <!-- TIER 3: THE 5 FUNCTIONAL DEPARTMENTS (5 ฝ่ายดำเนินงาน) -->
+      <!-- TIER 3: THE 7 FUNCTIONAL DEPARTMENTS (7 ฝ่ายดำเนินงาน) -->
       <div class="space-y-5">
         <div class="text-center space-y-1">
           <span class="text-xs font-black uppercase tracking-wider text-[#FF7A29] flex items-center justify-center gap-1.5">
             <i data-lucide="boxes" class="w-4 h-4"></i>
-            <span>ฝ่ายดำเนินงานย่อยทั้ง 5 ฝ่าย (Functional Departments)</span>
+            <span>ฝ่ายดำเนินงานย่อยทั้ง 7 ฝ่าย (Functional Departments)</span>
           </span>
-          <p class="text-xs text-slate-400">คณะทำงานฝ่ายวิชาการ, นันทนาการ, สวัสดิการ, เทคโนโลยี และพิธีกร</p>
+          <p class="text-xs text-slate-400">คณะทำงานฝ่ายสถานที่และวิจิตรศิลป์, พยาบาล, เทคโนโลยีและสื่อ, นันทนาการ, สวัสดิการ, วิชาการ และพิธีกรและปฏิคม</p>
         </div>
 
         <!-- Departments Grid -->
@@ -331,21 +341,39 @@
           </button>
           <button onclick="setDepartmentFilter('dept_executive')" data-filter="dept_executive" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
             <span>👑 ฝ่ายบริหาร</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-amber-300">7</span>
           </button>
-          <button onclick="setDepartmentFilter('dept_academic')" data-filter="dept_academic" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
-            <span>📖 ฝ่ายวิชาการ</span>
+          <button onclick="setDepartmentFilter('dept_art')" data-filter="dept_art" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+            <span>🎨 สถานที่และวิจิตรศิลป์</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-orange-300">10</span>
           </button>
-          <button onclick="setDepartmentFilter('dept_recreation')" data-filter="dept_recreation" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
-            <span>✨ ฝ่ายนันทนาการ</span>
-          </button>
-          <button onclick="setDepartmentFilter('dept_welfare')" data-filter="dept_welfare" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
-            <span>🤝 ฝ่ายสวัสดิการ</span>
+          <button onclick="setDepartmentFilter('dept_nurse')" data-filter="dept_nurse" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+            <span>🩺 ฝ่ายพยาบาล</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-rose-300">8</span>
           </button>
           <button onclick="setDepartmentFilter('dept_tech')" data-filter="dept_tech" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
-            <span>💻 ฝ่ายเทคโนโลยี</span>
+            <span>💻 เทคโนโลยีและสื่อ</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-cyan-300">8</span>
+          </button>
+          <button onclick="setDepartmentFilter('dept_recreation')" data-filter="dept_recreation" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+            <span>✨ นันทนาการ</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-pink-300">8</span>
+          </button>
+          <button onclick="setDepartmentFilter('dept_welfare')" data-filter="dept_welfare" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+            <span>🤝 สวัสดิการ</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-emerald-300">8</span>
+          </button>
+          <button onclick="setDepartmentFilter('dept_academic')" data-filter="dept_academic" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+            <span>📖 วิชาการ</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-blue-300">5</span>
           </button>
           <button onclick="setDepartmentFilter('dept_mc')" data-filter="dept_mc" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
-            <span>🎤 ฝ่ายพิธีกร</span>
+            <span>🎤 พิธีกรและปฏิคม</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-purple-300">5</span>
+          </button>
+          <button onclick="setDepartmentFilter('dept_unassigned')" data-filter="dept_unassigned" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+            <span>⏳ ยังไม่เลือก</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px] text-slate-400">1</span>
           </button>
         </div>
 
@@ -448,11 +476,14 @@
 
     const DEPT_META = {
       'dept_executive': { name: 'ฝ่ายบริหาร', icon: 'crown', color: 'from-amber-500 to-orange-600', badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
-      'dept_academic': { name: 'ฝ่ายวิชาการ', icon: 'book-open', color: 'from-blue-500 to-indigo-600', badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
+      'dept_art': { name: 'ฝ่ายสถานที่และวิจิตรศิลป์', icon: 'palette', color: 'from-orange-500 to-amber-600', badge: 'bg-orange-500/15 text-orange-300 border-orange-500/30' },
+      'dept_nurse': { name: 'ฝ่ายพยาบาล', icon: 'heart-pulse', color: 'from-red-500 to-rose-600', badge: 'bg-red-500/15 text-red-300 border-red-500/30' },
+      'dept_tech': { name: 'ฝ่ายเทคโนโลยีและสื่อ', icon: 'cpu', color: 'from-cyan-500 to-blue-600', badge: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' },
       'dept_recreation': { name: 'ฝ่ายนันทนาการ', icon: 'sparkles', color: 'from-pink-500 to-rose-600', badge: 'bg-pink-500/15 text-pink-300 border-pink-500/30' },
       'dept_welfare': { name: 'ฝ่ายสวัสดิการ', icon: 'heart-handshake', color: 'from-emerald-500 to-teal-600', badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
-      'dept_tech': { name: 'ฝ่ายเทคโนโลยีและสื่อ', icon: 'cpu', color: 'from-cyan-500 to-blue-600', badge: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' },
-      'dept_mc': { name: 'ฝ่ายพิธีกรและปฏิคม', icon: 'mic', color: 'from-purple-500 to-violet-600', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' }
+      'dept_academic': { name: 'ฝ่ายวิชาการ', icon: 'book-open', color: 'from-blue-500 to-indigo-600', badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
+      'dept_mc': { name: 'ฝ่ายพิธีกรและปฏิคม', icon: 'mic', color: 'from-purple-500 to-violet-600', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
+      'dept_unassigned': { name: 'ยังไม่เลือกฝ่าย', icon: 'help-circle', color: 'from-slate-700 to-slate-800', badge: 'bg-slate-700/30 text-slate-400 border-slate-600/30' }
     };
 
     function switchYearbookView(view) {
@@ -568,13 +599,15 @@
     }
 
     function renderOrgChart() {
-      const headReg = roomRegistrations.find(r => r.roleId === 'role_head');
+      // 1. หัวหน้าห้อง
+      const headReg = roomRegistrations.find(r => r.roleId === 'role_head' || r.roleTitle === 'หัวหน้าห้อง');
       const headEl = document.getElementById('nodeHeadOfClass');
       if (headEl) {
         headEl.innerHTML = buildOrgPersonCard(headReg, 'หัวหน้าห้อง', 'border-amber-500/50 bg-gradient-to-r from-amber-950/30 to-orange-950/30');
       }
 
-      const deputyRegs = roomRegistrations.filter(r => r.roleId === 'role_deputy');
+      // 2. รองหัวหน้าห้อง (2 คน)
+      const deputyRegs = roomRegistrations.filter(r => r.roleId === 'role_deputy' || r.roleTitle === 'รองหัวหน้าห้อง');
       const deputyEl = document.getElementById('nodesDeputies');
       if (deputyEl) {
         deputyEl.innerHTML = `
@@ -583,14 +616,20 @@
         `;
       }
 
-      const secReg = roomRegistrations.find(r => r.roleId === 'role_secretary');
+      // 3. เลขานุการ และ ผู้ช่วยเลขานุการ
+      const secReg = roomRegistrations.find(r => r.roleId === 'role_secretary' || r.roleTitle === 'เลขานุการ');
+      const asstSecReg = roomRegistrations.find(r => r.roleId === 'role_asst_sec' || r.roleTitle === 'ผู้ช่วยเลขานุการ');
       const secEl = document.getElementById('nodeSecretary');
       if (secEl) {
-        secEl.innerHTML = buildOrgPersonCard(secReg, 'เลขานุการ', 'border-pink-500/40');
+        secEl.innerHTML = `
+          ${buildOrgPersonCard(secReg, 'เลขานุการ', 'border-pink-500/40')}
+          ${buildOrgPersonCard(asstSecReg, 'ผู้ช่วยเลขานุการ', 'border-pink-500/30')}
+        `;
       }
 
-      const treReg = roomRegistrations.find(r => r.roleId === 'role_treasurer');
-      const astTreReg = roomRegistrations.find(r => r.roleId === 'role_assistant_treasurer');
+      // 4. เหรัญญิก และ ผู้ช่วยเหรัญญิก
+      const treReg = roomRegistrations.find(r => r.roleId === 'role_treasurer' || r.roleTitle === 'เหรัญญิก');
+      const astTreReg = roomRegistrations.find(r => r.roleId === 'role_asst_tre' || r.roleId === 'role_assistant_treasurer' || r.roleTitle === 'ผู้ช่วยเหรัญญิก');
       const treEl = document.getElementById('nodesTreasurers');
       if (treEl) {
         treEl.innerHTML = `
@@ -599,31 +638,56 @@
         `;
       }
 
+      // 5. ฝ่ายดำเนินงานทั้ง 7 ฝ่าย (พร้อมแยก หัวหน้า/รอง/สมาชิก ในแต่ละการ์ด)
       const depts = [
-        { id: 'dept_academic', name: 'ฝ่ายวิชาการ', icon: 'book-open', color: 'from-blue-500/20 to-indigo-500/10', border: 'border-blue-500/30' },
+        { id: 'dept_art', name: 'ฝ่ายสถานที่และวิจิตรศิลป์', icon: 'palette', color: 'from-orange-500/20 to-amber-500/10', border: 'border-orange-500/30' },
+        { id: 'dept_nurse', name: 'ฝ่ายพยาบาล', icon: 'heart-pulse', color: 'from-red-500/20 to-rose-500/10', border: 'border-red-500/30' },
+        { id: 'dept_tech', name: 'ฝ่ายเทคโนโลยีและสื่อ', icon: 'cpu', color: 'from-cyan-500/20 to-blue-500/10', border: 'border-cyan-500/30' },
         { id: 'dept_recreation', name: 'ฝ่ายนันทนาการ', icon: 'sparkles', color: 'from-pink-500/20 to-rose-500/10', border: 'border-pink-500/30' },
         { id: 'dept_welfare', name: 'ฝ่ายสวัสดิการ', icon: 'heart-handshake', color: 'from-emerald-500/20 to-teal-500/10', border: 'border-emerald-500/30' },
-        { id: 'dept_tech', name: 'ฝ่ายเทคโนโลยีและสื่อ', icon: 'cpu', color: 'from-cyan-500/20 to-blue-500/10', border: 'border-cyan-500/30' },
+        { id: 'dept_academic', name: 'ฝ่ายวิชาการ', icon: 'book-open', color: 'from-blue-500/20 to-indigo-500/10', border: 'border-blue-500/30' },
         { id: 'dept_mc', name: 'ฝ่ายพิธีกรและปฏิคม', icon: 'mic', color: 'from-purple-500/20 to-violet-500/10', border: 'border-purple-500/30' }
       ];
 
       const deptsGrid = document.getElementById('orgDepartmentsGrid');
       if (deptsGrid) {
         deptsGrid.innerHTML = depts.map(d => {
-          const members = roomRegistrations.filter(r => r.departmentId === d.id);
+          let members = roomRegistrations.filter(r => r.departmentId === d.id);
+          
+          // เรียงลำดับ: หัวหน้าฝ่าย -> รองหัวหน้า -> สมาชิก
+          members.sort((a, b) => {
+            const getRank = (t = '') => {
+              if (t.includes('หัวหน้าฝ่าย')) return 1;
+              if (t.includes('รอง')) return 2;
+              return 3;
+            };
+            return getRank(a.roleTitle) - getRank(b.roleTitle);
+          });
+
           const memberListHtml = members.length === 0 ? `
             <div class="text-[11px] text-slate-500 italic py-2">ยังไม่มีสมาชิกสังกัดฝ่ายนี้</div>
           ` : members.map((m) => {
             const st = (window.STUDENTS_DATA || []).find(s => s.id === m.studentId) || { id: m.studentId, name: m.studentName, nickname: m.nickname };
             const custom = getStudentProfile(st.email, st.id);
             const avatar = custom?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(st.email || st.name)}`;
+            const isLead = m.roleTitle?.includes('หัวหน้า') && !m.roleTitle?.includes('รอง');
+            const isDeputy = m.roleTitle?.includes('รอง');
+            const roleBadgeClass = isLead 
+              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-black' 
+              : (isDeputy ? 'bg-sky-500/20 text-sky-300 border-sky-500/30 font-bold' : 'bg-white/5 text-slate-400 border-white/5');
+
             return `
-              <div onclick="openStudentProfile('${st.id}')" class="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] transition cursor-pointer">
+              <div onclick="openStudentProfile('${st.id}')" class="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] hover:border-orange-500/30 transition cursor-pointer group">
                 <div class="flex items-center gap-2 min-w-0">
-                  <img src="${avatar}" class="w-6 h-6 rounded-lg object-cover" alt="Thumb" loading="lazy">
-                  <span class="text-xs text-white truncate font-medium">${st.name}</span>
+                  <img src="${avatar}" class="w-6 h-6 rounded-lg object-cover flex-shrink-0" alt="Thumb" loading="lazy">
+                  <div class="min-w-0">
+                    <span class="text-xs text-white truncate font-medium block group-hover:text-orange-300 transition-colors">${st.name}</span>
+                    <span class="text-[10px] text-slate-400 block truncate">${m.roleTitle || 'สมาชิก'}</span>
+                  </div>
                 </div>
-                <span class="text-[10px] font-mono text-amber-300 font-bold px-1.5 py-0.5 rounded bg-black/40">น้อง${st.nickname || custom?.nickname}</span>
+                <div class="text-right flex-shrink-0 pl-1">
+                  <span class="text-[10px] font-mono text-amber-300 font-bold px-1.5 py-0.5 rounded bg-black/40 block">น้อง${st.nickname || custom?.nickname}</span>
+                </div>
               </div>
             `;
           }).join('');
@@ -637,12 +701,12 @@
                   </div>
                   <div>
                     <h4 class="font-bold text-white text-xs sm:text-sm">${d.name}</h4>
-                    <span class="text-[10px] font-mono text-slate-400">สมาชิก ${members.length} คน</span>
+                    <span class="text-[10px] font-mono text-slate-400">${members.length} คน</span>
                   </div>
                 </div>
               </div>
               
-              <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1 custom-scroll">
+              <div class="space-y-1.5 max-h-64 overflow-y-auto pr-1 custom-scroll">
                 ${memberListHtml}
               </div>
             </div>
@@ -655,24 +719,27 @@
     }
 
     async function initYearbook() {
+      // โหลดข้อมูลอย่างชาญฉลาด: ใช้ข้อมูล 60 คนที่ได้บันทึกไว้อย่างเป็นทางการ
+      let loadedRegs = [];
+      if (window.COMED_ROOM_ROLES_DEFAULT && Array.isArray(window.COMED_ROOM_ROLES_DEFAULT) && window.COMED_ROOM_ROLES_DEFAULT.length > 0) {
+        loadedRegs = [...window.COMED_ROOM_ROLES_DEFAULT];
+      }
+
       if (window.ComedEventManager && typeof window.ComedEventManager.fetchCloudData === 'function') {
         try {
           await window.ComedEventManager.fetchCloudData('room_roles_69');
+          const cloudRegs = window.ComedEventManager.getRegistrations('room_roles_69');
+          if (Array.isArray(cloudRegs) && cloudRegs.length >= loadedRegs.length) {
+            loadedRegs = cloudRegs;
+          }
         } catch (e) {
           console.warn('Fetch cloud data deferred:', e);
         }
-        roomRegistrations = window.ComedEventManager.getRegistrations('room_roles_69') || [];
-      } else {
-        try {
-          const raw = localStorage.getItem('COMED_EVENT_REGISTRATIONS_V1');
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            roomRegistrations = parsed['room_roles_69'] || [];
-          }
-        } catch (e) {}
       }
 
-      const assignedCount = roomRegistrations.length;
+      roomRegistrations = loadedRegs;
+
+      const assignedCount = roomRegistrations.filter(r => r.departmentId !== 'dept_unassigned').length;
       const assignedEl = document.getElementById('statAssignedCount');
       if (assignedEl) assignedEl.textContent = `${assignedCount} / 60`;
 
