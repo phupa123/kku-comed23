@@ -3194,9 +3194,9 @@ async function downloadAllSlipsZip() {
     return;
   }
 
-  const campName = (currentAdminCampaign && currentAdminCampaign.title) ? currentAdminCampaign.title.replace(/[\/:*?"<>|]/g, '_') : 'Payment_Slips';
+  // Sanitize campaign name for ASCII/Windows-safe filename
+  const campId = (currentAdminCampaign && currentAdminCampaign.id) ? String(currentAdminCampaign.id).replace(/[^a-zA-Z0-9_-]/g, '_') : 'camp';
   const zip = new JSZip();
-  const folder = zip.folder(`Slips_${campName}`);
 
   // Gather all paid students with slips
   const allPaidStudents = studentDatabase.filter(st => {
@@ -3239,7 +3239,7 @@ async function downloadAllSlipsZip() {
 
     if (toast) {
       const msgSpan = toast.querySelector('span');
-      if (msgSpan) msgSpan.textContent = `📦 กำลังดาวน์โหลดสลิปของ ${st.name} (${i + 1}/${allPaidStudents.length})...`;
+      if (msgSpan) msgSpan.textContent = `📦 กำลังรวบรวมสลิป: ${st.id} (${i + 1}/${allPaidStudents.length})...`;
     }
 
     for (let sIdx = 0; sIdx < slips.length; sIdx++) {
@@ -3248,15 +3248,21 @@ async function downloadAllSlipsZip() {
       if (!rawUrl) continue;
 
       let ext = 'png';
-      if (rawUrl.includes('.jpg') || rawUrl.includes('.jpeg')) ext = 'jpg';
-      else if (rawUrl.includes('.webp')) ext = 'webp';
-      else if (rawUrl.includes('.pdf')) ext = 'pdf';
+      const cleanUrl = rawUrl.toLowerCase();
+      if (cleanUrl.includes('.jpg') || cleanUrl.includes('.jpeg')) ext = 'jpg';
+      else if (cleanUrl.includes('.webp')) ext = 'webp';
+      else if (cleanUrl.includes('.pdf')) ext = 'pdf';
 
       const slipSuffix = slips.length > 1 ? `_part${sIdx + 1}` : '';
-      const safeName = `${st.id}_${st.name.replace(/\s+/g, '_')}_น้อง${st.nickname}${slipSuffix}.${ext}`;
+      // Windows-safe filename: No illegal characters (\ / : * ? " < > |)
+      const safeNickname = (st.nickname || '').replace(/[/\\?%*:|"<>]/g, '');
+      const safeStudentName = (st.name || '').replace(/[/\\?%*:|"<>]/g, '').replace(/\s+/g, '_');
+      const safeFileName = `${st.id}_${safeStudentName}_น้อง${safeNickname}${slipSuffix}.${ext}`;
 
       try {
         let blob = null;
+
+        // 1. Data URI
         if (rawUrl.startsWith('data:')) {
           const arr = rawUrl.split(',');
           const mime = arr[0].match(/:(.*?);/)[1];
@@ -3268,24 +3274,32 @@ async function downloadAllSlipsZip() {
           }
           blob = new Blob([u8arr], { type: mime });
         } else {
-          // Fetch through CORS proxy if needed or directly
-          let targetFetchUrl = rawUrl;
+          // 2. Fetch using direct URL or Cloudflare Worker download-proxy to eliminate CORS
+          let fetchTarget = rawUrl;
           if (rawUrl.includes('drive.google.com')) {
             const idMatch = rawUrl.match(/[-\w]{25,}/);
-            if (idMatch) targetFetchUrl = `https://drive.google.com/uc?export=download&id=${idMatch[0]}`;
+            if (idMatch) fetchTarget = `https://drive.google.com/uc?export=download&id=${idMatch[0]}`;
           }
-          
+
+          // Try direct first
           let resp = null;
           try {
-            resp = await fetch(targetFetchUrl);
-          } catch(fetchErr) {
-            // If CORS fails, try via proxy if available
-            const proxyEndpoint = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('edspace')) 
-              ? `/api/catbox-proxy?url=${encodeURIComponent(targetFetchUrl)}` 
-              : `https://kku-comed23.edspace.workers.dev/api/catbox-proxy?url=${encodeURIComponent(targetFetchUrl)}`;
+            resp = await fetch(fetchTarget, { mode: 'cors' });
+          } catch(directErr) {
+            resp = null;
+          }
+
+          // If direct fetch fails or is blocked by CORS, route through /api/download-proxy
+          if (!resp || !resp.ok) {
+            const proxyBase = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('edspace')) 
+              ? '' 
+              : 'https://kku-comed23.edspace.workers.dev';
+            const proxyUrl = `${proxyBase}/api/download-proxy?url=${encodeURIComponent(fetchTarget)}&filename=${encodeURIComponent(safeFileName)}`;
             try {
-              resp = await fetch(proxyEndpoint);
-            } catch(e) {}
+              resp = await fetch(proxyUrl);
+            } catch(proxyErr) {
+              resp = null;
+            }
           }
 
           if (resp && resp.ok) {
@@ -3293,35 +3307,42 @@ async function downloadAllSlipsZip() {
           }
         }
 
-        if (blob) {
-          folder.file(safeName, blob);
+        if (blob && blob.size > 0) {
+          zip.file(safeFileName, blob);
           downloadedCount++;
         } else {
-          // Put text link file if binary cannot be fetched
-          folder.file(`${safeName}.url.txt`, `URL: ${rawUrl}\nStudent: ${st.id} - ${st.name}`);
+          zip.file(`${st.id}_slip_link_${sIdx + 1}.txt`, `URL: ${rawUrl}\nStudent ID: ${st.id}\nName: ${st.name}`);
+          failedCount++;
         }
       } catch (err) {
-        console.warn(`Failed to package slip for ${st.name}:`, err);
+        console.warn(`[BulkDownload] Failed to fetch slip for ${st.id}:`, err);
+        zip.file(`${st.id}_slip_link_${sIdx + 1}.txt`, `URL: ${rawUrl}\nError: ${err.message}`);
         failedCount++;
-        folder.file(`${safeName}_link.txt`, `URL: ${rawUrl}`);
       }
     }
   }
 
   if (toast) {
     const msgSpan = toast.querySelector('span');
-    if (msgSpan) msgSpan.textContent = "⚡ กำลังบีบอัดไฟล์ ZIP สำหรับดาวน์โหลด...";
+    if (msgSpan) msgSpan.textContent = "⚡ กำลังสร้างและบีบอัดไฟล์ ZIP...";
   }
 
   try {
-    const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+    const zipBlob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    }, (metadata) => {
       if (toast) {
         const msgSpan = toast.querySelector('span');
         if (msgSpan) msgSpan.textContent = `⚡ บีบอัด ZIP: ${Math.round(metadata.percent)}%`;
       }
     });
 
-    const zipFileName = `COMED23_Slips_${campName}_${new Date().toISOString().slice(0, 10)}.zip`;
+    // Pure ASCII and standard safe filename for Windows Explorer
+    const nowStr = new Date().toISOString().slice(0, 10);
+    const zipFileName = `COMED23_Slips_${campId}_${nowStr}.zip`;
+
     const downloadUrl = URL.createObjectURL(zipBlob);
     const a = document.createElement('a');
     a.href = downloadUrl;
@@ -3334,7 +3355,7 @@ async function downloadAllSlipsZip() {
     }, 2000);
 
     if (toast) toast.remove();
-    showToastNotification(`🎉 ดาวน์โหลดสลิปทั้งหมด ${downloadedCount} ไฟล์เป็น ZIP สำเร็จ!`);
+    showToastNotification(`🎉 สร้างไฟล์ ZIP สำเร็จ (${downloadedCount} สลิป)!`);
   } catch (zipErr) {
     console.error("ZIP Generation error:", zipErr);
     if (toast) toast.remove();
