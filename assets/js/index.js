@@ -1128,7 +1128,7 @@ function renderRoster(students) {
 
     return `
       <div onclick="openStudentProfileModal('${st.id}')"
-        class="roster-card-hover p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-orange-500/50 hover:bg-slate-900/95 transition-all duration-300 group shadow-md cursor-pointer relative overflow-hidden"
+        class="roster-card-hover tilt-card-3d p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-orange-500/50 hover:bg-slate-900/95 transition-all duration-300 group shadow-md cursor-pointer relative overflow-hidden"
         title="คลิกดูโปรไฟล์ของ ${displayName}">
         
         <div class="flex items-center gap-3.5">
@@ -1177,6 +1177,9 @@ function renderRoster(students) {
         setTimeout(() => handleAvatarImageLoaded(img), Math.min(i * 35, 400));
       }
     });
+    if (window.init3DTiltCards) {
+      window.init3DTiltCards();
+    }
   }, 60);
 }
 

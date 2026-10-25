@@ -50,6 +50,8 @@
   <script src="students_data.js"></script>
   <script src="config/events_repo.js?v=2.3.0"></script>
   <script src="assets/js/pwa-installer.js"></script>
+  <!-- Cyber Particles Background & 3D Tilt Engine -->
+  <script src="assets/js/cyber_particles.js"></script>
 
   <style>
     /* Custom Scrollbar */
@@ -58,28 +60,42 @@
     ::-webkit-scrollbar-thumb { background: #262E45; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #E65A19; }
 
-    /* Glassmorphism Classes */
-    .glass-surface {
-      background: rgba(12, 16, 28, 0.75);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+    /* Animated Ambient Gradient Loops */
+    @keyframes ambientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-    .glass-surface-hover:hover {
-      background: rgba(18, 24, 42, 0.85);
-      border-color: rgba(230, 90, 25, 0.35);
-      transform: translateY(-2px);
+    .ambient-glow-loop {
+      background: linear-gradient(135deg, rgba(230, 90, 25, 0.15), rgba(16, 185, 129, 0.05), rgba(59, 130, 246, 0.12), rgba(245, 158, 11, 0.15));
+      background-size: 300% 300%;
+      animation: ambientShift 18s ease infinite;
     }
 
-    /* Cyber Ambient Grid */
-    .cyber-bg {
-      background-color: #06070A;
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(230, 90, 25, 0.12) 0%, transparent 60%),
-        radial-gradient(circle at 100% 50%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
-        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+    /* Kinetic 3D Embossed Typography */
+    .title-3d {
+      text-shadow: 
+        0 1px 0 #b32b19,
+        0 2px 0 #8c2012,
+        0 3px 0 #61150a,
+        0 8px 25px rgba(230, 90, 25, 0.45);
+      letter-spacing: -0.02em;
+    }
+
+    /* Glassmorphism Classes with 3D Depth */
+    .glass-surface {
+      background: rgba(12, 16, 28, 0.72);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+    .glass-surface-hover:hover {
+      background: rgba(18, 24, 42, 0.88);
+      border-color: rgba(230, 90, 25, 0.45);
+      box-shadow: 0 25px 60px rgba(230, 90, 25, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     /* Hierarchy Connecting Lines */
@@ -109,7 +125,10 @@
   </style>
 </head>
 
-<body class="cyber-bg text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-[#E65A19] selection:text-white overflow-x-hidden">
+<body class="bg-[#06070A] text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-[#E65A19] selection:text-white overflow-x-hidden relative">
+
+  <!-- Ambient Looping Canvas Glow (Injected behind particles) -->
+  <div class="fixed inset-0 pointer-events-none z-0 ambient-glow-loop opacity-70"></div>
 
   <!-- ================= 1. GLOBAL STICKY HEADER ================= -->
   <header class="sticky top-0 z-40 glass-surface border-b border-white/5">
@@ -122,8 +141,8 @@
         </a>
         <div>
           <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#E65A19]/20 to-[#B32B19]/20 border border-[#E65A19]/30 text-[#FF7A29] text-[10px] font-mono font-black uppercase tracking-wider">
-              YEARBOOK & ORG CHART
+            <span class="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#E65A19]/25 to-[#B32B19]/25 border border-[#E65A19]/40 text-[#FF7A29] text-[10px] font-mono font-black uppercase tracking-wider animate-pulse">
+              YEARBOOK & 3D ORG CHART
             </span>
           </div>
           <h1 class="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-1.5 mt-0.5">
@@ -137,7 +156,7 @@
       <div class="flex items-center gap-2 sm:gap-3">
         
         <!-- Toggle Tabs: Org Chart vs Roster Grid -->
-        <div class="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.04] border border-white/10">
+        <div class="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.04] border border-white/10 shadow-inner">
           <button type="button" onclick="switchYearbookView('chart')" id="viewBtnChart" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-[#E65A19] text-white shadow-sm cursor-pointer">
             <i data-lucide="git-fork" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">ผังบอร์ดบริหาร (Org Chart)</span>
@@ -150,7 +169,7 @@
           </button>
         </div>
 
-        <a href="event.html" class="hidden md:flex px-3 py-1.5 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-[#FF7A29] text-xs font-bold transition items-center gap-1.5 shadow-sm">
+        <a href="event.html" class="hidden md:flex px-3.5 py-1.5 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-[#FF7A29] text-xs font-bold transition items-center gap-1.5 shadow-sm">
           <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
           <span>เลือกฝ่ายห้อง</span>
         </a>
@@ -160,42 +179,42 @@
   </header>
 
   <!-- ================= 2. HERO & STATS OVERVIEW ================= -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 relative z-10">
     
-    <!-- Hero Banner Card -->
-    <div class="glass-surface p-6 sm:p-8 rounded-3xl relative overflow-hidden shadow-2xl border border-white/10">
-      <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-[#E65A19]/15 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Hero Banner Card with 3D Depth & Embossed Typography -->
+    <div class="glass-surface p-6 sm:p-9 rounded-3xl relative overflow-hidden shadow-2xl border border-white/10">
+      <div class="absolute -right-12 -bottom-12 w-80 h-80 bg-[#E65A19]/20 rounded-full blur-3xl pointer-events-none"></div>
       <div class="relative z-10 max-w-2xl space-y-3">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-slate-300 text-xs font-mono">
           <i data-lucide="award" class="w-3.5 h-3.5 text-[#E65A19]"></i>
           <span>Computer Education KKU • Cohort 23 (รหัส 69)</span>
         </div>
-        <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+        <h2 class="text-3xl sm:text-5xl font-black text-white title-3d leading-tight">
           ผังบอร์ดบริหาร & ทำเนียบรุ่น <br class="hidden sm:inline">
-          <span class="bg-gradient-to-r from-[#FF7A29] to-[#F59E0B] bg-clip-text text-transparent">คอมพิวเตอร์ศึกษา รุ่นที่ 23</span>
+          <span class="bg-gradient-to-r from-[#FF7A29] via-[#F59E0B] to-[#FF4500] bg-clip-text text-transparent">คอมพิวเตอร์ศึกษา รุ่น 23</span>
         </h2>
-        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-          ผังโครงสร้างสายบังคับบัญชาและคณะทำงานรุ่น โยงลำดับตำแหน่งจากหัวหน้าห้อง รองหัวหน้า ฝ่ายประสานงาน ไปจนถึง 6 ฝ่ายดำเนินงานของเพื่อนๆ ทั้ง 60 คน
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+          ผังโครงสร้างสายบังคับบัญชาและคณะทำงานรุ่น โยงลำดับตำแหน่งจากหัวหน้าห้อง รองหัวหน้า ฝ่ายประสานงาน ไปจนถึง 6 ฝ่ายดำเนินงานของเพื่อนๆ ทั้ง 60 คน (คลิกที่การ์ดเพื่อดูโปรไฟล์แบบเต็ม)
         </p>
       </div>
 
       <!-- Quick Metrics Counters -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/5">
-        <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-7 pt-6 border-t border-white/10">
+        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 tilt-card-3d">
           <span class="text-slate-400 text-[11px] block">สมาชิกทั้งหมด</span>
-          <span class="text-xl sm:text-2xl font-black text-white font-mono mt-0.5 block">60 <span class="text-xs text-slate-500 font-normal">คน</span></span>
+          <span class="text-2xl sm:text-3xl font-black text-white font-mono mt-0.5 block">60 <span class="text-xs text-slate-500 font-normal">คน</span></span>
         </div>
-        <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 tilt-card-3d">
           <span class="text-slate-400 text-[11px] block">ฝ่ายดำเนินงานห้อง</span>
-          <span class="text-xl sm:text-2xl font-black text-[#FF7A29] font-mono mt-0.5 block">6 <span class="text-xs text-slate-500 font-normal">ฝ่าย</span></span>
+          <span class="text-2xl sm:text-3xl font-black text-[#FF7A29] font-mono mt-0.5 block">6 <span class="text-xs text-slate-500 font-normal">ฝ่าย</span></span>
         </div>
-        <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 tilt-card-3d">
           <span class="text-slate-400 text-[11px] block">เลือกฝ่ายแล้ว</span>
-          <span id="statAssignedCount" class="text-xl sm:text-2xl font-black text-emerald-400 font-mono mt-0.5 block">-</span>
+          <span id="statAssignedCount" class="text-2xl sm:text-3xl font-black text-emerald-400 font-mono mt-0.5 block">-</span>
         </div>
-        <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 tilt-card-3d">
           <span class="text-slate-400 text-[11px] block">รหัสประจำรุ่น</span>
-          <span class="text-xl sm:text-2xl font-black text-amber-300 font-mono mt-0.5 block">693050xxx</span>
+          <span class="text-2xl sm:text-3xl font-black text-amber-300 font-mono mt-0.5 block">693050xxx</span>
         </div>
       </div>
     </div>
@@ -204,18 +223,18 @@
     <div id="viewOrgChartContainer" class="space-y-8 py-4">
       
       <div class="text-center space-y-1.5">
-        <span class="text-[11px] font-mono uppercase tracking-wider text-[#FF7A29] font-bold">BOARD & EXECUTIVE HIERARCHY</span>
-        <h3 class="text-xl sm:text-2xl font-black text-white">โครงสร้างบอร์ดบริหารและสายงานรุ่น COMED 23</h3>
+        <span class="text-[11px] font-mono uppercase tracking-wider text-[#FF7A29] font-black">BOARD & EXECUTIVE HIERARCHY</span>
+        <h3 class="text-2xl sm:text-3xl font-black text-white title-3d">โครงสร้างบอร์ดบริหารและสายงานรุ่น COMED 23</h3>
         <p class="text-xs text-slate-400">ผังแสดงตำแหน่งผู้รับผิดชอบหลัก เชื่อมโยงสายประสานงานและการดำเนินงานฝ่ายต่างๆ</p>
       </div>
 
       <!-- TIER 1: HEAD OF CLASS (หัวหน้าห้อง) -->
       <div class="flex flex-col items-center">
-        <div class="text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-2 flex items-center gap-1.5">
+        <div class="text-xs font-black uppercase tracking-wider text-amber-400 mb-2.5 flex items-center gap-1.5">
           <i data-lucide="crown" class="w-4 h-4"></i>
           <span>ผู้นำรุ่น / หัวหน้าห้อง (Head of Cohort)</span>
         </div>
-        <div id="nodeHeadOfClass" class="w-full max-w-sm">
+        <div id="nodeHeadOfClass" class="w-full max-w-sm tilt-card-3d">
           <!-- Rendered via JS -->
         </div>
         
@@ -231,15 +250,15 @@
           
           <!-- Deputy 1 & 2 -->
           <div class="flex flex-col items-center space-y-2">
-            <span class="text-[10px] font-bold uppercase text-sky-400">รองหัวหน้าห้อง</span>
-            <div id="nodesDeputies" class="w-full space-y-2">
+            <span class="text-[11px] font-bold uppercase text-sky-400">รองหัวหน้าห้อง</span>
+            <div id="nodesDeputies" class="w-full space-y-2.5">
               <!-- Rendered via JS -->
             </div>
           </div>
 
           <!-- Secretary -->
           <div class="flex flex-col items-center space-y-2">
-            <span class="text-[10px] font-bold uppercase text-pink-400">เลขานุการ</span>
+            <span class="text-[11px] font-bold uppercase text-pink-400">เลขานุการ</span>
             <div id="nodeSecretary" class="w-full">
               <!-- Rendered via JS -->
             </div>
@@ -247,8 +266,8 @@
 
           <!-- Treasurers -->
           <div class="flex flex-col items-center space-y-2">
-            <span class="text-[10px] font-bold uppercase text-emerald-400">เหรัญญิก & ผู้ช่วย</span>
-            <div id="nodesTreasurers" class="w-full space-y-2">
+            <span class="text-[11px] font-bold uppercase text-emerald-400">เหรัญญิก & ผู้ช่วย</span>
+            <div id="nodesTreasurers" class="w-full space-y-2.5">
               <!-- Rendered via JS -->
             </div>
           </div>
@@ -260,9 +279,9 @@
       </div>
 
       <!-- TIER 3: THE 5 FUNCTIONAL DEPARTMENTS (5 ฝ่ายดำเนินงาน) -->
-      <div class="space-y-4">
+      <div class="space-y-5">
         <div class="text-center space-y-1">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-[#FF7A29] flex items-center justify-center gap-1.5">
+          <span class="text-xs font-black uppercase tracking-wider text-[#FF7A29] flex items-center justify-center gap-1.5">
             <i data-lucide="boxes" class="w-4 h-4"></i>
             <span>ฝ่ายดำเนินงานย่อยทั้ง 5 ฝ่าย (Functional Departments)</span>
           </span>
@@ -350,8 +369,71 @@
 
   </section>
 
-  <!-- ================= 5. FOOTER ================= -->
-  <footer class="mt-auto py-10 px-4 border-t border-white/5 glass-surface text-center text-xs font-mono text-slate-500">
+  <!-- ================= 3. ULTRA-LUXURY STUDENT PROFILE MODAL (ใหญ่พิเศษ) ================= -->
+  <div id="modalStudentProfile" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 transition-all duration-300" onclick="closeStudentProfileModal(event)">
+    <div id="studentProfileCard" onclick="event.stopPropagation()" class="relative bg-gradient-to-b from-[#0F1424] via-[#0B0F1B] to-[#060810] border border-orange-500/30 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-[0_25px_80px_rgba(230,90,25,0.25)] text-center space-y-6 overflow-hidden">
+      
+      <!-- Top Ambient Radial Glow Accents -->
+      <div class="absolute -top-16 -right-16 w-48 h-48 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-16 -left-16 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Close Button -->
+      <button type="button" onclick="closeStudentProfileModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer z-10" title="ปิดหน้าต่าง">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Giant Profile Avatar Showcase (ใหญ่พิเศษ 36x36 / 144px) -->
+      <div class="py-2 flex flex-col items-center justify-center">
+        <div id="modalStudentAvatarFrame" class="relative w-36 h-36 rounded-3xl bg-slate-950 p-1.5 border-2 border-[#E65A19] shadow-[0_10px_35px_rgba(230,90,25,0.4)] overflow-hidden">
+          <div id="modalStudentAvatarSkeleton" class="avatar-skeleton"></div>
+          <img id="modalStudentAvatar" src="" alt="Avatar" class="w-full h-full object-cover rounded-2xl transition-transform duration-300 hover:scale-105" onload="this.previousElementSibling.classList.add('loaded')">
+        </div>
+        <div class="mt-3.5 flex items-center gap-2">
+          <span id="modalStudentBadge" class="text-[11px] font-black px-3.5 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 shadow-sm">
+            COMED 23 MEMBER
+          </span>
+          <span id="modalStudentDeptBadge" class="text-[11px] font-bold px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">
+            ฝ่ายทั่วไป
+          </span>
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div class="space-y-1.5">
+        <h3 id="modalStudentName" class="text-xl sm:text-2xl font-black text-white title-3d tracking-wide">ชื่อ - สกุล</h3>
+        <p id="modalStudentNickname" class="text-sm font-black text-amber-400 font-mono">น้องชื่อเล่น</p>
+        <p id="modalStudentId" class="text-xs text-slate-400 font-mono flex items-center justify-center gap-1.5 pt-0.5">
+          <i data-lucide="hash" class="w-3.5 h-3.5 text-slate-500"></i>
+          <span>693050xxx-x</span>
+        </p>
+      </div>
+
+      <!-- Role / Bio Quote Box -->
+      <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-xs text-slate-300 italic text-center leading-relaxed">
+        <span id="modalStudentBio">"ยินดีที่ได้เป็นส่วนหนึ่งของครอบครัว COMED 23 มข. ครับ!"</span>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="space-y-2.5 pt-2 border-t border-white/10 text-xs">
+        <div class="flex items-center justify-between px-2 text-slate-400">
+          <span>อีเมลนักศึกษา:</span>
+          <a id="modalStudentEmail" href="#" class="text-sky-400 hover:underline font-mono truncate max-w-[220px]">student@kkumail.com</a>
+        </div>
+        <div class="flex items-center justify-between px-2 text-slate-400">
+          <span>ตำแหน่งหน้าที่:</span>
+          <span id="modalStudentRoleText" class="text-white font-bold">-</span>
+        </div>
+      </div>
+
+      <button type="button" onclick="closeStudentProfileModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition">
+        ปิดหน้าต่าง
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ================= 4. FOOTER ================= -->
+  <footer class="mt-auto py-10 px-4 border-t border-white/5 glass-surface text-center text-xs font-mono text-slate-500 relative z-10">
     <div class="max-w-7xl mx-auto space-y-2">
       <p class="font-bold text-slate-400">COMED 23 • Computer Education, Faculty of Education, Khon Kaen University</p>
       <p class="text-[11px]">© 2026 COMED KKU • Designed & Engineered with High-Performance Tech Stack</p>
@@ -360,11 +442,10 @@
 
   <!-- ================= SCRIPT & CORE ENGINE ================= -->
   <script>
-    let currentView = 'chart'; // 'chart' | 'grid'
+    let currentView = 'chart';
     let activeDepartmentFilter = 'all';
     let roomRegistrations = [];
 
-    // Department Metadata & Badges
     const DEPT_META = {
       'dept_executive': { name: 'ฝ่ายบริหาร', icon: 'crown', color: 'from-amber-500 to-orange-600', badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
       'dept_academic': { name: 'ฝ่ายวิชาการ', icon: 'book-open', color: 'from-blue-500 to-indigo-600', badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
@@ -374,7 +455,6 @@
       'dept_mc': { name: 'ฝ่ายพิธีกรและปฏิคม', icon: 'mic', color: 'from-purple-500 to-violet-600', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' }
     };
 
-    // View Switcher (Org Chart vs Grid)
     function switchYearbookView(view) {
       currentView = view;
       const chartContainer = document.getElementById('viewOrgChartContainer');
@@ -397,7 +477,6 @@
       }
     }
 
-    // Get Custom Profile from LocalStorage / Ecosystem Sync
     function getStudentProfile(email, studentId) {
       const cleanEmail = email ? email.toLowerCase().trim() : '';
       const cleanId = studentId ? studentId.trim() : '';
@@ -409,7 +488,53 @@
       return null;
     }
 
-    // Helper: Build Student Org Node Component
+    // Interactive Modal Opener
+    function openStudentProfile(studentId) {
+      const allStudents = window.STUDENTS_DATA || [];
+      const st = allStudents.find(s => s.id === studentId);
+      if (!st) return;
+
+      const reg = roomRegistrations.find(r => r.studentId === st.id);
+      const custom = getStudentProfile(st.email, st.id);
+      const avatar = custom?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(st.email || st.name)}`;
+
+      const modal = document.getElementById('modalStudentProfile');
+      if (!modal) return;
+
+      document.getElementById('modalStudentName').textContent = custom?.name || st.name;
+      document.getElementById('modalStudentNickname').textContent = `น้อง${custom?.nickname || st.nickname}`;
+      document.getElementById('modalStudentId').innerHTML = `<i data-lucide="hash" class="w-3.5 h-3.5 text-slate-500"></i><span>${st.id}</span>`;
+      
+      const emailEl = document.getElementById('modalStudentEmail');
+      if (emailEl) {
+        emailEl.textContent = st.email;
+        emailEl.href = `mailto:${st.email}`;
+      }
+
+      const roleEl = document.getElementById('modalStudentRoleText');
+      if (roleEl) roleEl.textContent = reg?.roleTitle || 'สมาชิก';
+
+      const deptBadge = document.getElementById('modalStudentDeptBadge');
+      if (deptBadge) deptBadge.textContent = reg?.departmentName || 'ยังไม่เลือกฝ่าย';
+
+      const bioEl = document.getElementById('modalStudentBio');
+      if (bioEl) bioEl.textContent = custom?.bio ? `"${custom.bio}"` : `"ยินดีที่ได้เป็นส่วนหนึ่งของครอบครัว COMED 23 มข. ครับ!"`;
+
+      const avatarImg = document.getElementById('modalStudentAvatar');
+      const skeleton = document.getElementById('modalStudentAvatarSkeleton');
+      if (skeleton) skeleton.classList.remove('loaded');
+      if (avatarImg) avatarImg.src = avatar;
+
+      modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeStudentProfileModal(e) {
+      if (e && e.target !== e.currentTarget && e.type !== 'click') return;
+      const modal = document.getElementById('modalStudentProfile');
+      if (modal) modal.classList.add('hidden');
+    }
+
     function buildOrgPersonCard(reg, fallbackRole, accentClass = 'border-white/10') {
       if (!reg) {
         return `
@@ -425,60 +550,55 @@
       const avatar = custom?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(st.email || st.name)}`;
 
       return `
-        <div class="glass-surface p-3.5 rounded-2xl border ${accentClass} flex items-center gap-3 shadow-lg hover:border-[#E65A19]/50 transition-all">
-          <div class="relative w-11 h-11 rounded-xl bg-slate-950 p-0.5 border border-white/10 overflow-hidden flex-shrink-0">
-            <img src="${avatar}" alt="${st.name}" class="w-full h-full object-cover rounded-lg" loading="lazy" decoding="async">
+        <div onclick="openStudentProfile('${st.id}')" class="glass-surface glass-surface-hover tilt-card-3d p-4 rounded-2xl border ${accentClass} flex items-center gap-3.5 shadow-xl transition-all cursor-pointer">
+          <div class="relative w-12 h-12 rounded-2xl bg-slate-950 p-0.5 border border-white/10 overflow-hidden flex-shrink-0 shadow-inner">
+            <img src="${avatar}" alt="${st.name}" class="w-full h-full object-cover rounded-xl" loading="lazy" decoding="async">
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-1.5">
-              <span class="font-bold text-white text-xs truncate">${st.name}</span>
+              <span class="font-black text-white text-xs sm:text-sm truncate">${st.name}</span>
               <span class="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 font-bold flex-shrink-0">น้อง${st.nickname || custom?.nickname}</span>
             </div>
-            <div class="text-[11px] font-bold text-[#FF7A29] truncate mt-0.5">${reg.roleTitle || fallbackRole}</div>
+            <div class="text-[11px] font-black text-[#FF7A29] truncate mt-0.5">${reg.roleTitle || fallbackRole}</div>
             <div class="text-[10px] font-mono text-slate-400">${st.id}</div>
           </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600 flex-shrink-0"></i>
         </div>
       `;
     }
 
-    // Render Org Chart Structure
     function renderOrgChart() {
-      // 1. Head of Class
       const headReg = roomRegistrations.find(r => r.roleId === 'role_head');
       const headEl = document.getElementById('nodeHeadOfClass');
       if (headEl) {
-        headEl.innerHTML = buildOrgPersonCard(headReg, 'หัวหน้าห้อง', 'border-amber-500/40 bg-gradient-to-r from-amber-950/20 to-orange-950/20');
+        headEl.innerHTML = buildOrgPersonCard(headReg, 'หัวหน้าห้อง', 'border-amber-500/50 bg-gradient-to-r from-amber-950/30 to-orange-950/30');
       }
 
-      // 2. Deputies
       const deputyRegs = roomRegistrations.filter(r => r.roleId === 'role_deputy');
       const deputyEl = document.getElementById('nodesDeputies');
       if (deputyEl) {
         deputyEl.innerHTML = `
-          ${buildOrgPersonCard(deputyRegs[0], 'รองหัวหน้าห้องคนที่ 1', 'border-sky-500/30')}
-          ${buildOrgPersonCard(deputyRegs[1], 'รองหัวหน้าห้องคนที่ 2', 'border-sky-500/30')}
+          ${buildOrgPersonCard(deputyRegs[0], 'รองหัวหน้าห้องคนที่ 1', 'border-sky-500/40')}
+          ${buildOrgPersonCard(deputyRegs[1], 'รองหัวหน้าห้องคนที่ 2', 'border-sky-500/40')}
         `;
       }
 
-      // 3. Secretary
       const secReg = roomRegistrations.find(r => r.roleId === 'role_secretary');
       const secEl = document.getElementById('nodeSecretary');
       if (secEl) {
-        secEl.innerHTML = buildOrgPersonCard(secReg, 'เลขานุการ', 'border-pink-500/30');
+        secEl.innerHTML = buildOrgPersonCard(secReg, 'เลขานุการ', 'border-pink-500/40');
       }
 
-      // 4. Treasurers
       const treReg = roomRegistrations.find(r => r.roleId === 'role_treasurer');
       const astTreReg = roomRegistrations.find(r => r.roleId === 'role_assistant_treasurer');
       const treEl = document.getElementById('nodesTreasurers');
       if (treEl) {
         treEl.innerHTML = `
-          ${buildOrgPersonCard(treReg, 'เหรัญญิก', 'border-emerald-500/30')}
-          ${buildOrgPersonCard(astTreReg, 'ผู้ช่วยเหรัญญิก', 'border-emerald-500/20')}
+          ${buildOrgPersonCard(treReg, 'เหรัญญิก', 'border-emerald-500/40')}
+          ${buildOrgPersonCard(astTreReg, 'ผู้ช่วยเหรัญญิก', 'border-emerald-500/30')}
         `;
       }
 
-      // 5. Functional Departments (5 ฝ่าย)
       const depts = [
         { id: 'dept_academic', name: 'ฝ่ายวิชาการ', icon: 'book-open', color: 'from-blue-500/20 to-indigo-500/10', border: 'border-blue-500/30' },
         { id: 'dept_recreation', name: 'ฝ่ายนันทนาการ', icon: 'sparkles', color: 'from-pink-500/20 to-rose-500/10', border: 'border-pink-500/30' },
@@ -493,12 +613,12 @@
           const members = roomRegistrations.filter(r => r.departmentId === d.id);
           const memberListHtml = members.length === 0 ? `
             <div class="text-[11px] text-slate-500 italic py-2">ยังไม่มีสมาชิกสังกัดฝ่ายนี้</div>
-          ` : members.map((m, mIdx) => {
+          ` : members.map((m) => {
             const st = (window.STUDENTS_DATA || []).find(s => s.id === m.studentId) || { id: m.studentId, name: m.studentName, nickname: m.nickname };
             const custom = getStudentProfile(st.email, st.id);
             const avatar = custom?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(st.email || st.name)}`;
             return `
-              <div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition">
+              <div onclick="openStudentProfile('${st.id}')" class="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] transition cursor-pointer">
                 <div class="flex items-center gap-2 min-w-0">
                   <img src="${avatar}" class="w-6 h-6 rounded-lg object-cover" alt="Thumb" loading="lazy">
                   <span class="text-xs text-white truncate font-medium">${st.name}</span>
@@ -509,7 +629,7 @@
           }).join('');
 
           return `
-            <div class="glass-surface p-4 sm:p-5 rounded-2xl border ${d.border} bg-gradient-to-b ${d.color} space-y-3 shadow-lg">
+            <div class="glass-surface p-4 sm:p-5 rounded-2xl border ${d.border} bg-gradient-to-b ${d.color} space-y-3 shadow-lg tilt-card-3d">
               <div class="flex items-center justify-between pb-2 border-b border-white/5">
                 <div class="flex items-center gap-2">
                   <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white">
@@ -531,9 +651,9 @@
       }
 
       if (typeof lucide !== 'undefined') lucide.createIcons();
+      if (typeof window.init3DTiltCards === 'function') window.init3DTiltCards();
     }
 
-    // Initialize Page Data
     async function initYearbook() {
       if (window.ComedEventManager && typeof window.ComedEventManager.fetchCloudData === 'function') {
         try {
@@ -552,22 +672,18 @@
         } catch (e) {}
       }
 
-      // Update Counters
       const assignedCount = roomRegistrations.length;
       const assignedEl = document.getElementById('statAssignedCount');
       if (assignedEl) assignedEl.textContent = `${assignedCount} / 60`;
 
-      // Render Default View (Org Chart)
       renderOrgChart();
 
-      // Setup Search Listener for Grid View
       const searchInput = document.getElementById('yearbookSearchInput');
       if (searchInput) {
         searchInput.addEventListener('input', applyFiltersAndRender);
       }
     }
 
-    // Set Active Department Filter Tab
     function setDepartmentFilter(deptId) {
       activeDepartmentFilter = deptId;
       document.querySelectorAll('.dept-filter-btn').forEach(btn => {
@@ -581,7 +697,6 @@
       applyFiltersAndRender();
     }
 
-    // Grid Filter & Render Logic
     function applyFiltersAndRender() {
       const grid = document.getElementById('yearbookGrid');
       const emptyState = document.getElementById('yearbookEmptyState');
@@ -645,7 +760,7 @@
           : { name: 'ยังไม่เลือกฝ่าย', badge: 'bg-slate-800/80 text-slate-400 border-slate-700/50', icon: 'help-circle' };
 
         return `
-          <div class="glass-surface glass-surface-hover p-4 sm:p-5 rounded-2xl relative group transition-all duration-300 flex flex-col justify-between shadow-lg">
+          <div onclick="openStudentProfile('${st.id}')" class="glass-surface glass-surface-hover tilt-card-3d p-4 sm:p-5 rounded-2xl relative group transition-all duration-300 flex flex-col justify-between shadow-lg cursor-pointer">
             <div class="flex items-center justify-between pb-3 border-b border-white/5">
               <span class="px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/5 text-[11px] font-mono text-slate-400">
                 #${String(st.seqNumber).padStart(2, '0')}
@@ -696,6 +811,7 @@
       }).join('');
 
       if (typeof lucide !== 'undefined') lucide.createIcons();
+      if (typeof window.init3DTiltCards === 'function') window.init3DTiltCards();
     }
 
     document.addEventListener('DOMContentLoaded', initYearbook);
