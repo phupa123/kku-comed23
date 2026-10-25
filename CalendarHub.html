@@ -1,25 +1,28 @@
 <!DOCTYPE html>
-<html lang="th" class="dark">
+<html lang="th" class="scroll-smooth dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>KKU / COMED 23 // Calendar & PlanToDo Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <title>KKU / COMED 23 // CALENDAR &amp; PLANTODO HUB</title>
   <meta name="description" content="ศูนย์กลางปฏิทินและกระดานงานโปรเจกต์แบบครบวงจร สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น">
 
-  <!-- Maintenance Guard -->
+  <!-- Maintenance Guard & Core PWA -->
   <script src="assets/js/maintenance-guard.js"></script>
-
-  <!-- PWA & Favicon -->
-  <link rel="icon" type="image/png" href="logo.png">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#06070A">
-  <link rel="apple-touch-icon" href="logo.png">
   <script src="assets/js/pwa-installer.js" defer></script>
 
-  <!-- Google Fonts: Plus Jakarta Sans & Prompt -->
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  <meta name="theme-color" content="#070914">
+
+  <!-- Preconnect Fonts: Plus Jakarta Sans, Prompt, JetBrains Mono, Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 Pro & Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,43 +31,33 @@
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
-            display: ['Plus Jakarta Sans', 'Prompt', 'sans-serif'],
-            mono: ['Plus Jakarta Sans', 'monospace']
-          },
           colors: {
             kku: {
-              orange: '#E65A19',
+              navy: '#0C1030',
+              deep: '#070914',
+              surface: '#12162A',
+              card: '#161B33',
+              border: '#242A4A',
               red: '#B32B19',
+              orange: '#E65A19',
               amber: '#FF7A29',
-              dark: '#8C1E0F'
-            },
-            obsidian: {
-              950: '#06070A',
-              900: '#090D16',
-              800: '#101524',
-              700: '#182035'
-            },
-            cyber: {
-              cyan: '#00E5FF',
-              blue: '#38BDF8',
-              emerald: '#10B981',
-              rose: '#F43F5E'
+              chrome: '#EAEAEA'
             }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Prompt"', 'sans-serif'],
+            display: ['"Space Grotesk"', '"Prompt"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
           }
         }
       }
     }
   </script>
 
-  <!-- Bootstrap Icons & Lucide Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
   <!-- GSAP Animation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -77,48 +70,67 @@
   <script src="assets/js/notifications.js"></script>
 
   <style>
-    /* Obsidian Canvas Grids & Glows */
-    body {
-      background-color: #06070A;
-      background-image: 
-        radial-gradient(ellipse 65% 50% at 50% -10%, rgba(230, 90, 25, 0.12) 0%, transparent 60%),
-        radial-gradient(circle 350px at 90% 25%, rgba(0, 229, 255, 0.04) 0%, transparent 70%),
-        radial-gradient(circle 450px at 10% 85%, rgba(230, 90, 25, 0.06) 0%, transparent 70%),
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+    /* Noise texture overlay identical to index.html & profile.html */
+    .bg-noise {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/font%3E%3C/svg%3E");
     }
 
-    /* Glass Panels */
-    .glass-obsidian {
-      background: rgba(16, 21, 36, 0.72);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    /* Subtle cyber grid lines */
+    .grid-lines {
+      background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 32px 32px;
     }
 
-    .glass-obsidian-subtle {
-      background: rgba(255, 255, 255, 0.03);
+    /* Micro-reflective border */
+    .chrome-border {
+      position: relative;
+    }
+    .chrome-border::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(230,90,25,0.25) 50%, rgba(12,16,48,0.6) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* KKU Surface & Card Design matching Index & Profile */
+    .kku-card {
+      background: rgba(18, 22, 42, 0.78);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid #242A4A;
+      box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.65);
+    }
+    .kku-card:hover {
+      border-color: rgba(230, 90, 25, 0.45);
+    }
+
+    .kku-card-deep {
+      background: rgba(12, 16, 36, 0.92);
       backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      border: 1px solid #242A4A;
     }
 
-    /* Scrollbars */
-    .custom-scroll::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+    /* Custom Scrollbar matching index.html */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-    .custom-scroll::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.2);
+    ::-webkit-scrollbar-track {
+      background: #070914;
     }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(230, 90, 25, 0.35);
-      border-radius: 999px;
+    ::-webkit-scrollbar-thumb {
+      background: #242A4A;
+      border-radius: 9999px;
     }
-    .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(230, 90, 25, 0.65);
+    ::-webkit-scrollbar-thumb:hover {
+      background: #E65A19;
     }
 
     /* Drag & Drop Visuals */
@@ -128,121 +140,182 @@
     .kanban-task-card:hover {
       transform: translateY(-2px);
       border-color: rgba(230, 90, 25, 0.5);
-      box-shadow: 0 10px 25px -5px rgba(230, 90, 25, 0.15);
+      box-shadow: 0 10px 25px -5px rgba(230, 90, 25, 0.2);
     }
     .dragging-card {
-      opacity: 0.45;
-      transform: scale(0.97);
+      opacity: 0.4;
+      transform: scale(0.96);
     }
     .drag-over-col {
-      background: rgba(230, 90, 25, 0.08) !important;
+      background: rgba(230, 90, 25, 0.12) !important;
       border: 2px dashed rgba(230, 90, 25, 0.6) !important;
     }
     .drag-over-date {
       border-color: #E65A19 !important;
-      background: rgba(230, 90, 25, 0.18) !important;
+      background: rgba(230, 90, 25, 0.22) !important;
     }
 
-    /* Pulse effect */
-    @keyframes kkuGlow {
-      0%, 100% { box-shadow: 0 0 12px rgba(230, 90, 25, 0.35); }
-      50% { box-shadow: 0 0 22px rgba(230, 90, 25, 0.7); }
+    /* Dynamic Calendar Tear-Off Sheet Icon */
+    .cal-tear-icon {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: #0C1030;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
     }
-    .kku-pulse-glow {
-      animation: kkuGlow 2.8s infinite ease-in-out;
+    .cal-tear-icon .cal-tear-top {
+      width: 100%;
+      height: 10px;
+      background: linear-gradient(135deg, #B32B19 0%, #E65A19 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .cal-tear-icon .cal-tear-pin {
+      width: 2.5px;
+      height: 2.5px;
+      border-radius: 9999px;
+      background: #ffffff;
+      opacity: 0.9;
+    }
+    .cal-tear-icon .cal-tear-day {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 900;
+      font-size: 13px;
+      line-height: 1;
+      color: #ffffff;
+      padding-top: 1px;
     }
 
-    /* Hide scrollbar for tabs */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+    /* Pulse Glow */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(230, 90, 25, 0.7); }
+      70% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(230, 90, 25, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(230, 90, 25, 0); }
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .hotspot-pulse {
+      animation: pulse-ring 2.4s infinite;
     }
+
+    /* Hide scrollbar for navigation tabs */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 
-<body class="text-slate-100 min-h-screen flex flex-col font-sans selection:bg-[#E65A19] selection:text-white pb-20 lg:pb-8">
+<body class="bg-[#070914] text-slate-100 antialiased selection:bg-[#E65A19] selection:text-white relative overflow-x-hidden min-h-screen flex flex-col font-sans pb-24 lg:pb-12">
 
-  <!-- ================= 1. STICKY FROSTED HEADER (Height: 64px) ================= -->
-  <header class="sticky top-0 z-40 w-full h-16 backdrop-blur-2xl bg-[#06070A]/85 border-b border-white/[0.08] transition-all">
-    <div class="max-w-[1680px] mx-auto h-full px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
+  <!-- Noise Overlay Across Whole Screen (Identical to Index & Profile) -->
+  <div class="fixed inset-0 pointer-events-none z-50 bg-noise"></div>
+
+  <!-- Ambient Glow Gradients (Navy to Red-Orange) -->
+  <div class="fixed top-[-15%] right-[-10%] w-[650px] h-[650px] rounded-full bg-gradient-to-br from-[#E65A19]/15 to-[#B32B19]/5 blur-[140px] pointer-events-none z-0"></div>
+  <div class="fixed top-[20%] left-[-15%] w-[600px] h-[600px] rounded-full bg-[#0C1030]/80 blur-[150px] pointer-events-none z-0"></div>
+
+  <!-- ================= 1. MODERN STICKY NAVIGATION BAR (64PX) ================= -->
+  <header id="mainNavbar" class="fixed top-0 left-0 right-0 z-40 w-full h-16 bg-[#060814]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-all">
+    <div class="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-4">
       
-      <!-- Left: KKU Emblem & Title -->
-      <div class="flex items-center gap-3">
-        <a href="index.html" class="flex items-center gap-2.5 group">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#E65A19]/25 to-[#B32B19]/20 p-1.5 border border-[#E65A19]/40 flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#E65A19]/10 group-hover:border-[#E65A19] transition">
-            <img src="logo.png" alt="KKU Emblem" class="w-full h-full object-contain filter drop-shadow">
+      <!-- 1. BRANDING & DYNAMIC CALENDAR TEAR-OFF ICON (Top-Left) -->
+      <a href="index.html" class="flex items-center gap-2.5 sm:gap-3 group flex-shrink-0">
+        <!-- Logo Emblem -->
+        <div class="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#B32B19] to-[#E65A19] p-0.5 shadow-[0_0_20px_rgba(230,90,25,0.35)] group-hover:scale-105 transition-transform flex-shrink-0">
+          <div class="w-full h-full bg-[#0C1030] rounded-[10px] flex items-center justify-center p-1 overflow-hidden">
+            <img src="logo.png" alt="KKU COMED" class="w-full h-full object-contain filter drop-shadow">
           </div>
-          <div>
-            <div class="flex items-center gap-1.5">
-              <span class="font-display font-black text-white text-sm sm:text-base tracking-tight group-hover:text-amber-400 transition">KKU / COMED 23</span>
-              <span class="text-[10px] font-mono font-bold text-slate-500 hidden sm:inline">// 69</span>
-            </div>
-            <div class="text-[10px] font-mono tracking-widest text-[#E65A19] font-bold uppercase hidden xs:block">
-              // CALENDAR &amp; PLANTODO HUB
-            </div>
-          </div>
-        </a>
-      </div>
+        </div>
 
-      <!-- Center: Filter Pills with Active Glow -->
-      <nav class="hidden md:flex items-center gap-1 bg-[#090D16]/90 p-1 rounded-2xl border border-white/[0.08]">
-        <button onclick="setFilterScope('all')" data-scope="all" class="scope-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-[#E65A19] text-white shadow-md shadow-[#E65A19]/25">
-          <i class="bi bi-grid-fill"></i>
-          <span>ปฏิทินและบอร์ดงาน</span>
-        </button>
-        <button onclick="setFilterScope('department')" data-scope="department" class="scope-pill px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5">
-          <span>🏛️ สาขา</span>
-        </button>
-        <button onclick="setFilterScope('shared')" data-scope="shared" class="scope-pill px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5">
-          <span>👥 กลุ่ม</span>
-        </button>
-        <button onclick="setFilterScope('personal')" data-scope="personal" class="scope-pill px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5">
-          <span>🔒 ส่วนตัว</span>
-        </button>
+        <!-- Dynamic Date Tear Icon -->
+        <div class="cal-tear-icon chrome-border hidden xs:flex" title="วันนี้">
+          <div class="cal-tear-top">
+            <span class="cal-tear-pin"></span>
+            <span class="cal-tear-pin"></span>
+          </div>
+          <span class="cal-tear-day" id="headerDynamicDayNumber">25</span>
+        </div>
+
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5 leading-none">
+            <span class="text-[13px] font-black tracking-wider text-white font-display">KKU</span>
+            <span class="text-[12px] font-bold text-white font-mono tracking-tight drop-shadow-sm">/ CALENDAR HUB</span>
+          </div>
+          <span class="text-[9px] font-mono uppercase tracking-widest text-[#E65A19] font-bold mt-0.5 hidden sm:inline">// COMED 23 &amp; PLANTODO</span>
+        </div>
+      </a>
+
+      <!-- 2. GLOBAL MENU (Middle - Desktop) -->
+      <nav class="hidden md:flex items-center gap-1.5 font-mono text-xs font-bold">
+        <a href="index.html" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition">
+          HOME
+        </a>
+        <a href="CalendarHub.html" class="relative px-3.5 py-1.5 rounded-lg text-white transition flex items-center gap-1.5 bg-[#E65A19]/20 border border-[#E65A19]/40 shadow-sm">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#E65A19] shadow-[0_0_8px_#E65A19]"></span>
+          <span>CALENDAR HUB</span>
+        </a>
+        <a href="storage.html" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-[#FF7A29] transition">
+          DRIVE
+        </a>
+        <a href="Profile.html" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-[#FF7A29] transition">
+          PROFILE
+        </a>
       </nav>
 
-      <!-- Right: Sync Action + Create Trigger + User Status -->
-      <div class="flex items-center gap-2 sm:gap-2.5">
+      <!-- 3. ACTION SUITE & USER PROFILE (Top-Right) -->
+      <div class="flex items-center gap-2 sm:gap-3">
         
         <!-- 1-Click Sync Google Calendar Button -->
-        <button onclick="openSyncModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 border border-white/[0.1] hover:border-amber-400/40 transition cursor-pointer" title="เชื่อมต่อหรือซิงค์ปฏิทิน">
-          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <i class="bi bi-calendar2-range text-amber-400"></i>
+        <button onclick="openSyncModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#12162A] hover:bg-[#161B33] text-slate-200 hover:text-white text-xs font-mono font-bold border border-white/20 transition cursor-pointer" title="เชื่อมต่อและซิงค์ปฏิทิน">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <i class="bi bi-google text-xs text-amber-400"></i>
           <span class="hidden xl:inline">1-Click Sync</span>
           <span class="xl:hidden">Sync</span>
         </button>
 
         <!-- Create Trigger Button -->
-        <button onclick="openCreateHubModal()" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-[#E65A19] hover:bg-[#FF7A29] text-white shadow-lg shadow-[#E65A19]/30 flex items-center gap-1.5 transition cursor-pointer kku-pulse-glow">
+        <button onclick="openCreateHubModal()" class="px-3.5 py-1.5 rounded-full text-xs font-black bg-gradient-to-r from-[#B32B19] via-[#E65A19] to-[#FF7A29] hover:opacity-95 text-white shadow-[0_0_20px_rgba(230,90,25,0.4)] flex items-center gap-1.5 transition cursor-pointer transform hover:scale-105">
           <i class="bi bi-plus-circle-fill"></i>
-          <span>+ สร้างกิจกรรม/งาน</span>
+          <span class="hidden sm:inline">+ สร้างกิจกรรม/งาน</span>
+          <span class="sm:hidden">+ สร้าง</span>
         </button>
 
-        <!-- User Authentication Status & Profile Avatar -->
-        <div id="authContainer" class="flex items-center gap-2 pl-1 border-l border-white/[0.08]">
-          <!-- Logged Out State -->
-          <button id="btnHeaderLogin" onclick="triggerGoogleLogin()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/[0.05] hover:bg-white/[0.1] text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition cursor-pointer">
-            <i class="bi bi-google text-xs"></i>
-            <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+        <!-- User Authentication Status & Profile Pill -->
+        <div id="authContainer" class="flex items-center gap-2 pl-1 border-l border-white/10">
+          
+          <!-- Guest State: Login Button -->
+          <button id="btnHeaderLogin" onclick="triggerGoogleLogin()" class="px-3 py-1.5 rounded-full bg-[#0C1124] border border-white/20 hover:border-[#E65A19] text-xs font-mono font-bold text-white flex items-center gap-1.5 transition cursor-pointer">
+            <i class="bi bi-google text-xs text-amber-400"></i>
+            <span>เข้าสู่ระบบ</span>
           </button>
 
-          <!-- Logged In State (Hidden by default) -->
+          <!-- Logged In State: Profile Pill with Green Dot Beacon -->
           <div id="headerUserProfile" class="hidden items-center gap-2">
-            <div class="relative cursor-pointer" onclick="toggleUserDropdown()" title="โปรไฟล์ผู้ใช้">
-              <img id="headerUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" class="w-8 h-8 rounded-xl object-cover border border-[#E65A19]/50 shadow">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#06070A] absolute -bottom-0.5 -right-0.5 ring-1 ring-emerald-500/50"></span>
-            </div>
-            <div class="hidden xl:flex flex-col text-left leading-tight cursor-pointer" onclick="toggleUserDropdown()">
-              <span id="headerUserName" class="text-xs font-bold text-white truncate max-w-[110px]">ผู้ใช้งาน</span>
-              <span class="text-[9px] font-mono text-emerald-400 flex items-center gap-1">● Online</span>
-            </div>
-            <button onclick="handleLogout()" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition ml-0.5" title="ออกจากระบบ">
-              <i class="bi bi-box-arrow-right"></i>
+            <a href="Profile.html" class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-[#0C1124] border border-white/20 hover:border-[#E65A19] transition group cursor-pointer" title="เปิดหน้าโปรไฟล์ของคุณ">
+              <div class="relative w-7 h-7 rounded-full overflow-hidden border border-white/25 flex-shrink-0">
+                <img id="headerUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" class="w-full h-full object-cover">
+                <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#070914] shadow-[0_0_6px_#34d399]"></span>
+              </div>
+              <div class="hidden sm:flex flex-col text-left leading-tight">
+                <span id="headerUserName" class="text-xs font-mono font-bold text-white group-hover:text-[#FF7A29] truncate max-w-[95px]">ผู้ใช้งาน</span>
+                <span class="text-[9px] font-mono text-emerald-400">● Online</span>
+              </div>
+            </a>
+            <button onclick="handleLogout()" class="w-8 h-8 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 flex items-center justify-center transition cursor-pointer" title="ออกจากระบบ">
+              <i class="bi bi-box-arrow-right text-xs"></i>
             </button>
           </div>
+
         </div>
 
       </div>
@@ -250,37 +323,59 @@
     </div>
   </header>
 
-  <!-- ================= 2. MOBILE STREAMLINED ACCESSIBILITY STRIP (< 1024px) ================= -->
-  <div class="block lg:hidden px-3 pt-3 max-w-[1680px] mx-auto w-full space-y-2.5">
+  <!-- ================= 2. MAIN HUB CONTENT CONTAINER ================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-22 relative z-10 w-full flex-1 space-y-5">
     
-    <!-- Mobile Filter Scope Tabs -->
-    <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
-      <button onclick="setFilterScope('all')" data-scope="all" class="scope-pill-mob flex-shrink-0 px-3 py-1 rounded-xl text-xs font-bold bg-[#E65A19] text-white">
-        📅 รวมทั้งหมด
-      </button>
-      <button onclick="setFilterScope('department')" data-scope="department" class="scope-pill-mob flex-shrink-0 px-3 py-1 rounded-xl text-xs font-bold text-slate-300 bg-white/[0.04] border border-white/5">
-        🏛️ สาขา
-      </button>
-      <button onclick="setFilterScope('shared')" data-scope="shared" class="scope-pill-mob flex-shrink-0 px-3 py-1 rounded-xl text-xs font-bold text-slate-300 bg-white/[0.04] border border-white/5">
-        👥 งานกลุ่ม
-      </button>
-      <button onclick="setFilterScope('personal')" data-scope="personal" class="scope-pill-mob flex-shrink-0 px-3 py-1 rounded-xl text-xs font-bold text-slate-300 bg-white/[0.04] border border-white/5">
-        🔒 ส่วนตัว
-      </button>
-      <button onclick="switchMobileTab('calendar')" id="mobTabCal" class="flex-shrink-0 ml-auto px-2.5 py-1 rounded-lg text-xs font-bold bg-white/10 text-amber-300">
-        ปฏิทิน
-      </button>
-      <button onclick="switchMobileTab('kanban')" id="mobTabKanban" class="flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 bg-white/5">
-        บอร์ดงาน
-      </button>
+    <!-- Top Filter Scope Capsules Bar (All, Department, Group, Personal) -->
+    <div class="kku-card rounded-2xl p-2.5 sm:p-3 flex flex-wrap items-center justify-between gap-3">
+      
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        <button onclick="setFilterScope('all')" data-scope="all" class="scope-pill flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 bg-[#E65A19] text-white shadow-md shadow-[#E65A19]/30">
+          <i class="bi bi-grid-fill"></i>
+          <span>ปฏิทินและบอร์ดงาน</span>
+        </button>
+        <button onclick="setFilterScope('department')" data-scope="department" class="scope-pill flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 transition flex items-center gap-1.5">
+          <span>🏛️ สาขา</span>
+        </button>
+        <button onclick="setFilterScope('shared')" data-scope="shared" class="scope-pill flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 transition flex items-center gap-1.5">
+          <span>👥 กลุ่ม</span>
+        </button>
+        <button onclick="setFilterScope('personal')" data-scope="personal" class="scope-pill flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 transition flex items-center gap-1.5">
+          <span>🔒 ส่วนตัว</span>
+        </button>
+      </div>
+
+      <!-- Mobile Tab View Switcher (Calendar vs Kanban) -->
+      <div class="flex lg:hidden items-center gap-1 bg-[#0C1030] p-1 rounded-xl border border-white/10 ml-auto">
+        <button onclick="switchMobileTab('calendar')" id="mobTabCal" class="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-[#E65A19] text-white">
+          ปฏิทิน
+        </button>
+        <button onclick="switchMobileTab('kanban')" id="mobTabKanban" class="px-3 py-1 rounded-lg text-xs font-mono font-bold text-slate-400">
+          บอร์ดงาน
+        </button>
+      </div>
+
+      <!-- Quick Telemetry Status Indicator -->
+      <div class="hidden lg:flex items-center gap-3 text-xs font-mono text-slate-400">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
+          <span>สัปดาห์นี้: <strong id="counterWeekJobsTop" class="text-white">0</strong> งาน</span>
+        </span>
+        <span class="text-slate-600">|</span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Supabase Cloud Sync</span>
+        </span>
+      </div>
+
     </div>
 
-    <!-- Swipeable Mini Calendar Strip on top showing current week days -->
-    <div class="glass-obsidian rounded-2xl p-2.5">
-      <div class="flex items-center justify-between text-xs font-bold text-slate-300 mb-2 px-1">
+    <!-- Mobile Mini Week Strip (< 1024px) -->
+    <div class="block lg:hidden kku-card rounded-2xl p-3 space-y-2">
+      <div class="flex items-center justify-between text-xs font-mono font-bold text-slate-300 px-1">
         <span id="mobileWeekRangeTitle">สัปดาห์นี้</span>
-        <button onclick="openSyncModal()" class="text-[11px] font-mono text-amber-400 flex items-center gap-1 hover:underline">
-          <i class="bi bi-google"></i>
+        <button onclick="openSyncModal()" class="text-[11px] text-[#FF7A29] flex items-center gap-1 hover:underline">
+          <i class="bi bi-arrow-repeat"></i>
           <span>ซิงค์ Google Calendar</span>
         </button>
       </div>
@@ -289,69 +384,53 @@
       </div>
     </div>
 
-    <!-- Mobile Urgent Alert Callout Capsule -->
-    <div id="mobileUrgentAlertCapsule" class="hidden glass-obsidian border-rose-500/30 bg-rose-500/[0.06] rounded-2xl p-3 items-center justify-between gap-2 animate-in fade-in">
-      <div class="flex items-center gap-2.5">
-        <span class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
-          <i class="bi bi-exclamation-octagon-fill"></i>
-        </span>
-        <div>
-          <div class="text-[10px] font-black uppercase text-rose-300 tracking-wider">🚨 Urgent Alert</div>
-          <div id="mobileUrgentAlertText" class="text-xs font-bold text-white line-clamp-1">กำลังตรวจสอบกำหนดส่ง...</div>
-        </div>
-      </div>
-      <button onclick="focusUrgentTask()" class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-200 text-[10px] font-black hover:bg-rose-500 hover:text-white transition flex-shrink-0">
-        ดูทันที
-      </button>
-    </div>
-
-  </div>
-
-  <!-- ================= 3. DESKTOP VIEWPORT (> 1024px) - TWO-COLUMN UNIFIED DASHBOARD ================= -->
-  <main class="flex-1 max-w-[1680px] w-full mx-auto px-3 sm:px-6 py-4 sm:py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+    <!-- ================= 3. TWO-COLUMN DASHBOARD (DESKTOP > 1024px) ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
       
       <!-- ================= LEFT COLUMN (55% Width - Monthly Calendar & Telemetry) ================= -->
       <section id="columnCalendarSection" class="lg:col-span-7 space-y-4">
         
-        <!-- Telemetry & Month Navigator Card -->
-        <div class="glass-obsidian rounded-3xl p-4 sm:p-5">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+        <!-- Monthly Master Calendar Card -->
+        <div class="kku-card rounded-3xl p-4 sm:p-6 space-y-4">
+          
+          <!-- Month Navigator & Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#242A4A]">
             
-            <!-- Month/Year Display & Arrows -->
             <div class="flex items-center gap-2">
-              <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white transition flex items-center justify-center cursor-pointer" title="เดือนก่อนหน้า">
-                <i class="bi bi-chevron-left"></i>
+              <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white transition flex items-center justify-center cursor-pointer" title="เดือนก่อนหน้า">
+                <i class="bi bi-chevron-left text-sm"></i>
               </button>
-              <h2 id="calendarTitle" class="text-lg sm:text-xl font-display font-black text-white tracking-tight min-w-[170px] text-center">
-                ตุลาคม 2569
-              </h2>
-              <button onclick="changeMonth(1)" class="w-8 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white transition flex items-center justify-center cursor-pointer" title="เดือนถัดไป">
-                <i class="bi bi-chevron-right"></i>
+              
+              <div class="flex items-center gap-2 min-w-[170px] justify-center">
+                <h2 id="calendarTitle" class="text-base sm:text-lg font-display font-black text-white tracking-tight">
+                  ตุลาคม 2569
+                </h2>
+              </div>
+
+              <button onclick="changeMonth(1)" class="w-8 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white transition flex items-center justify-center cursor-pointer" title="เดือนถัดไป">
+                <i class="bi bi-chevron-right text-sm"></i>
               </button>
-              <button onclick="jumpToToday()" class="px-3 py-1 rounded-xl bg-[#E65A19]/15 hover:bg-[#E65A19]/25 text-[#FF7A29] border border-[#E65A19]/30 text-xs font-bold transition cursor-pointer">
+
+              <button onclick="jumpToToday()" class="px-3 py-1 rounded-xl bg-[#E65A19]/15 hover:bg-[#E65A19]/25 text-[#FF7A29] border border-[#E65A19]/40 text-xs font-mono font-bold transition cursor-pointer">
                 วันนี้
               </button>
             </div>
 
-            <!-- Telemetry Badges & Drag Note -->
-            <div class="flex items-center gap-2 flex-wrap text-xs">
-              <div class="px-3 py-1 rounded-xl bg-white/[0.03] border border-white/[0.06] text-slate-300 flex items-center gap-1.5 font-mono text-[11px]">
-                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                <span>เดือนนี้:</span>
-                <strong id="badgeTotalMonthEvents" class="text-white">0</strong>
-                <span>งาน</span>
-              </div>
-              <div class="px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-bold flex items-center gap-1">
+            <!-- Drag Note & Total Month Count -->
+            <div class="flex items-center gap-2 flex-wrap text-xs font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/10 text-slate-300 text-[11px]">
+                รวมเดือนนี้: <strong id="badgeTotalMonthEvents" class="text-white">0</strong> กิจกรรม
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] flex items-center gap-1 font-sans">
                 <i class="bi bi-arrows-move text-amber-400"></i>
-                <span class="hidden sm:inline">ลากการ์ดเพื่อเลื่อนวัน</span>
-              </div>
+                <span class="hidden sm:inline">ลากการ์ดเปลี่ยนวันได้</span>
+              </span>
             </div>
 
           </div>
 
-          <!-- 7-Column Master Calendar Grid Header (Sun - Sat) -->
-          <div class="grid grid-cols-7 gap-1 sm:gap-2 pt-3 pb-1 text-center text-xs font-display font-bold uppercase tracking-wider text-slate-400">
+          <!-- 7-Column Master Calendar Day Names (Sun - Sat) -->
+          <div class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs font-mono font-bold uppercase tracking-wider text-slate-400 pt-1">
             <div class="text-rose-400 py-1">อา.</div>
             <div class="py-1">จ.</div>
             <div class="py-1">อ.</div>
@@ -362,44 +441,44 @@
           </div>
 
           <!-- 7-Column Master Calendar Days Grid -->
-          <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2 pt-1">
+          <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2">
             <!-- Rendered dynamically -->
           </div>
 
         </div>
 
-        <!-- Left Quick Telemetry Card: "สัปดาห์นี้ X งาน" + "Urgent // ด่วนที่สุด" -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <!-- Left Quick Telemetry Card: Week Counter + Urgent Alert -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           
           <!-- Counter Widget: Week Telemetry -->
-          <div class="glass-obsidian rounded-2xl p-4 flex items-center justify-between border-l-4 border-l-cyan-400">
+          <div class="kku-card rounded-2xl p-4 flex items-center justify-between border-l-4 border-l-cyan-400">
             <div>
               <div class="text-[10px] font-mono uppercase tracking-widest text-cyan-400 font-bold">// TELEMETRY</div>
-              <div class="text-sm font-black text-white mt-0.5">กิจกรรมสัปดาห์นี้</div>
-              <div class="text-xs text-slate-400 mt-1">รวมทั้งงานสาขา สอบ และการบ้าน</div>
+              <div class="text-sm font-bold text-white mt-0.5">กิจกรรมสัปดาห์นี้</div>
+              <div class="text-xs text-slate-400 mt-1">รวมงานสาขา สอบ และการบ้าน</div>
             </div>
             <div class="text-right">
               <span id="counterWeekJobs" class="text-3xl font-display font-black text-cyan-300 font-mono">0</span>
-              <span class="text-xs text-slate-400 ml-1">รายการ</span>
+              <span class="text-xs text-slate-400 ml-1 font-mono">งาน</span>
             </div>
           </div>
 
           <!-- Urgent Alert Card: Urgent // ด่วนที่สุด -->
-          <div class="glass-obsidian rounded-2xl p-4 flex items-center justify-between border-l-4 border-l-[#E65A19] relative overflow-hidden group">
-            <div class="absolute -right-4 -bottom-4 w-20 h-20 rounded-full bg-[#E65A19]/10 blur-xl pointer-events-none"></div>
+          <div class="kku-card rounded-2xl p-4 flex items-center justify-between border-l-4 border-l-[#E65A19] relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-[#E65A19]/10 blur-xl pointer-events-none"></div>
             <div>
               <div class="flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
                 <span class="text-[10px] font-mono uppercase tracking-wider text-rose-400 font-black">Urgent // ด่วนที่สุด</span>
               </div>
-              <div id="urgentDeadlineTitle" class="text-sm font-black text-white mt-0.5 truncate max-w-[220px]">
+              <div id="urgentDeadlineTitle" class="text-sm font-black text-white mt-0.5 truncate max-w-[200px]">
                 ไม่มีงานด่วนค้างส่ง
               </div>
               <div id="urgentDeadlineSubtitle" class="text-xs text-amber-400 font-mono mt-1">
                 ทุกอย่างอยู่ในสถานะปกติ
               </div>
             </div>
-            <button onclick="handleUrgentCardClick()" class="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-[#E65A19] text-xs font-bold text-slate-200 hover:text-white transition flex items-center gap-1">
+            <button onclick="handleUrgentCardClick()" class="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-[#E65A19] text-xs font-mono font-bold text-slate-200 hover:text-white transition flex items-center gap-1 border border-white/10 cursor-pointer">
               <span>เปิดดู</span>
               <i class="bi bi-chevron-right text-[10px]"></i>
             </button>
@@ -413,10 +492,10 @@
       <section id="columnKanbanSection" class="lg:col-span-5 space-y-4">
         
         <!-- Room & Board Master Header Card -->
-        <div class="glass-obsidian rounded-3xl p-4 sm:p-5 space-y-3.5">
+        <div class="kku-card rounded-3xl p-4 sm:p-5 space-y-4">
           
           <!-- Board Title & Room Switcher -->
-          <div class="flex items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+          <div class="flex items-center justify-between gap-3 pb-3 border-b border-[#242A4A]">
             <div>
               <div class="flex items-center gap-2">
                 <span id="activeRoomScopeBadge" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#E65A19]/20 text-[#FF7A29] border border-[#E65A19]/30">
@@ -424,17 +503,17 @@
                 </span>
                 <span class="text-[10px] font-mono text-slate-400">// PLANTODO KANBAN</span>
               </div>
-              <h3 id="activeRoomTitle" class="text-lg sm:text-xl font-display font-black text-white mt-0.5 line-clamp-1">
+              <h3 id="activeRoomTitle" class="text-base sm:text-lg font-display font-black text-white mt-0.5 line-clamp-1">
                 กระดานงานประจำห้อง
               </h3>
             </div>
             
             <div class="flex items-center gap-1.5">
-              <button onclick="openSelectRoomModal()" class="px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1 border border-white/[0.07]" title="สลับห้องงาน">
+              <button onclick="openSelectRoomModal()" class="px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white text-xs font-mono font-bold transition flex items-center gap-1 border border-white/10 cursor-pointer" title="สลับห้องงาน">
                 <i class="bi bi-folder2-open text-amber-400"></i>
                 <span class="hidden sm:inline">สลับห้อง</span>
               </button>
-              <button id="btnEditCurrentRoom" onclick="openEditActiveRoomModal()" class="hidden p-1.5 rounded-xl bg-white/[0.04] hover:bg-[#E65A19]/20 text-slate-400 hover:text-[#FF7A29] transition" title="แก้ไขห้องนี้">
+              <button id="btnEditCurrentRoom" onclick="openEditActiveRoomModal()" class="p-1.5 rounded-xl bg-white/[0.04] hover:bg-[#E65A19]/20 text-slate-400 hover:text-[#FF7A29] border border-white/10 transition cursor-pointer" title="แก้ไขหรือลบกิจกรรมห้องนี้">
                 <i class="bi bi-pencil-square"></i>
               </button>
             </div>
@@ -451,13 +530,13 @@
                 0% สำเร็จ
               </span>
             </div>
-            <div class="w-full h-2.5 bg-black/40 rounded-full overflow-hidden p-0.5 border border-white/[0.08]">
-              <div id="activeRoomProgressBar" class="h-full rounded-full bg-gradient-to-r from-[#E65A19] via-amber-400 to-[#10B981] transition-all duration-700 shadow-sm" style="width: 0%"></div>
+            <div class="w-full h-2.5 bg-[#0C1030] rounded-full overflow-hidden p-0.5 border border-[#242A4A]">
+              <div id="activeRoomProgressBar" class="h-full rounded-full bg-gradient-to-r from-[#B32B19] via-[#E65A19] to-[#10B981] transition-all duration-700 shadow-sm" style="width: 0%"></div>
             </div>
           </div>
 
           <!-- Alert Callout Capsule -->
-          <div id="boardAlertCallout" class="p-2.5 rounded-2xl bg-amber-500/[0.07] border border-amber-500/20 flex items-center justify-between gap-2 text-xs">
+          <div id="boardAlertCallout" class="p-2.5 rounded-2xl bg-amber-500/[0.08] border border-amber-500/20 flex items-center justify-between gap-2 text-xs">
             <div class="flex items-center gap-2 truncate">
               <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0 text-xs">
                 🚨
@@ -466,7 +545,7 @@
                 ยังไม่มีการแจ้งเตือนด่วนสำหรับห้องนี้
               </span>
             </div>
-            <button onclick="openAddTaskModal()" class="px-2.5 py-1 rounded-xl bg-[#E65A19] hover:bg-[#FF7A29] text-white font-black text-[11px] flex-shrink-0 transition flex items-center gap-1">
+            <button onclick="openAddTaskModal()" class="px-2.5 py-1 rounded-xl bg-[#E65A19] hover:bg-[#FF7A29] text-white font-black text-[11px] flex-shrink-0 transition flex items-center gap-1 cursor-pointer">
               <i class="bi bi-plus-lg"></i>
               <span>เพิ่มงาน</span>
             </button>
@@ -478,54 +557,54 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
           
           <!-- Column 1: สิ่งที่ต้องทำ (To Do) -->
-          <div class="glass-obsidian rounded-2xl p-3 flex flex-col min-h-[380px] border border-white/[0.07]" data-column="สิ่งที่ต้องทำ">
-            <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/[0.06]">
+          <div class="kku-card rounded-2xl p-3 flex flex-col min-h-[380px]" data-column="สิ่งที่ต้องทำ">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#242A4A]">
               <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-rose-400"></span>
-                <span class="text-xs font-black text-slate-200">สิ่งที่ต้องทำ</span>
+                <span class="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_8px_#f43f5e]"></span>
+                <span class="text-xs font-black text-slate-200 font-mono">To Do</span>
               </div>
               <span id="countColTodo" class="px-2 py-0.2 rounded-full text-[10px] font-mono font-bold bg-white/[0.05] text-slate-400">0</span>
             </div>
             <div id="dropzoneTodo" class="kanban-dropzone space-y-2.5 flex-1 min-h-[260px]">
               <!-- Cards rendered here -->
             </div>
-            <button onclick="openAddTaskModal('สิ่งที่ต้องทำ')" class="mt-2.5 w-full py-1.5 rounded-xl border border-dashed border-white/10 hover:border-[#E65A19]/50 text-slate-400 hover:text-[#FF7A29] text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer">
+            <button onclick="openAddTaskModal('สิ่งที่ต้องทำ')" class="mt-2.5 w-full py-1.5 rounded-xl border border-dashed border-[#242A4A] hover:border-[#E65A19]/60 text-slate-400 hover:text-[#FF7A29] text-xs font-mono font-bold transition flex items-center justify-center gap-1 cursor-pointer">
               <i class="bi bi-plus"></i>
               <span>เพิ่มงาน</span>
             </button>
           </div>
 
           <!-- Column 2: กำลังทำ (In Progress) -->
-          <div class="glass-obsidian rounded-2xl p-3 flex flex-col min-h-[380px] border border-white/[0.07]" data-column="กำลังทำ">
-            <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/[0.06]">
+          <div class="kku-card rounded-2xl p-3 flex flex-col min-h-[380px]" data-column="กำลังทำ">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#242A4A]">
               <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                <span class="text-xs font-black text-slate-200">กำลังทำ</span>
+                <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]"></span>
+                <span class="text-xs font-black text-slate-200 font-mono">In Progress</span>
               </div>
               <span id="countColInProgress" class="px-2 py-0.2 rounded-full text-[10px] font-mono font-bold bg-white/[0.05] text-slate-400">0</span>
             </div>
             <div id="dropzoneInProgress" class="kanban-dropzone space-y-2.5 flex-1 min-h-[260px]">
               <!-- Cards rendered here -->
             </div>
-            <button onclick="openAddTaskModal('กำลังทำ')" class="mt-2.5 w-full py-1.5 rounded-xl border border-dashed border-white/10 hover:border-amber-400/50 text-slate-400 hover:text-amber-400 text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer">
+            <button onclick="openAddTaskModal('กำลังทำ')" class="mt-2.5 w-full py-1.5 rounded-xl border border-dashed border-[#242A4A] hover:border-amber-400/60 text-slate-400 hover:text-amber-400 text-xs font-mono font-bold transition flex items-center justify-center gap-1 cursor-pointer">
               <i class="bi bi-plus"></i>
               <span>เพิ่มงาน</span>
             </button>
           </div>
 
           <!-- Column 3: เสร็จสิ้น (Done) -->
-          <div class="glass-obsidian rounded-2xl p-3 flex flex-col min-h-[380px] border border-white/[0.07]" data-column="เสร็จสิ้น">
-            <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/[0.06]">
+          <div class="kku-card rounded-2xl p-3 flex flex-col min-h-[380px]" data-column="เสร็จสิ้น">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#242A4A]">
               <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span class="text-xs font-black text-slate-200">เสร็จสิ้น</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+                <span class="text-xs font-black text-slate-200 font-mono">Done</span>
               </div>
               <span id="countColDone" class="px-2 py-0.2 rounded-full text-[10px] font-mono font-bold bg-white/[0.05] text-slate-400">0</span>
             </div>
             <div id="dropzoneDone" class="kanban-dropzone space-y-2.5 flex-1 min-h-[260px]">
               <!-- Cards rendered here -->
             </div>
-            <button onclick="openAddTaskModal('เสร็จสิ้น')" class="mt-2.5 w-full py-1.5 rounded-xl border border-dashed border-white/10 hover:border-emerald-400/50 text-slate-400 hover:text-emerald-400 text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer">
+            <button onclick="openAddTaskModal('เสร็จสิ้น')" class="mt-2.5 w-full py-1.5 rounded-xl border border-dashed border-[#242A4A] hover:border-emerald-400/60 text-slate-400 hover:text-emerald-400 text-xs font-mono font-bold transition flex items-center justify-center gap-1 cursor-pointer">
               <i class="bi bi-plus"></i>
               <span>เพิ่มงาน</span>
             </button>
@@ -538,42 +617,52 @@
     </div>
   </main>
 
-  <!-- ================= 4. PERSISTENT FLOATING BOTTOM DOCK (MOBILE ONLY) ================= -->
-  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 h-16 backdrop-blur-2xl bg-[#06070A]/90 border-t border-white/[0.1] px-4 flex items-center justify-around">
-    <a href="index.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
+  <!-- ================= 4. THUMB-ACCESSIBLE FLOATING BOTTOM NAVIGATION (MOBILE) ================= -->
+  <!-- Identical structure to index.html floating mobile dock -->
+  <nav class="lg:hidden fixed bottom-3 left-3 right-3 z-50 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl p-2 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
+    <a href="index.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i class="bi bi-house-door text-base"></i>
-      <span class="text-[9px] font-bold">หน้าแรก</span>
+      <span class="text-[10px] font-mono">Home</span>
     </a>
-    <button onclick="switchMobileTab('calendar')" class="flex flex-col items-center gap-0.5 text-[#FF7A29] transition relative">
-      <i class="bi bi-calendar3 text-base"></i>
-      <span class="text-[9px] font-black">ปฏิทิน</span>
-      <span class="w-1 h-1 rounded-full bg-[#E65A19] absolute -bottom-1"></span>
+    
+    <!-- Dynamic Date Tear Icon on Mobile Dock (Active Tab) -->
+    <button onclick="switchMobileTab('calendar')" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-[#FF7A29] transition relative">
+      <div class="cal-tear-icon chrome-border scale-90 mb-0.5">
+        <div class="cal-tear-top">
+          <span class="cal-tear-pin"></span>
+          <span class="cal-tear-pin"></span>
+        </div>
+        <span class="cal-tear-day" id="dockDynamicDayNumber">25</span>
+      </div>
+      <span class="text-[10px] font-mono font-bold leading-none">Calendar</span>
+      <span class="w-1.5 h-1.5 rounded-full bg-[#E65A19] absolute -bottom-1 shadow-[0_0_6px_#E65A19]"></span>
     </button>
-    <button onclick="switchMobileTab('kanban')" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
+
+    <button onclick="switchMobileTab('kanban')" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i class="bi bi-kanban text-base"></i>
-      <span class="text-[9px] font-bold">บอร์ดงาน</span>
+      <span class="text-[10px] font-mono">Kanban</span>
     </button>
-    <button onclick="openSyncModal()" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
+    <button onclick="openSyncModal()" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i class="bi bi-arrow-repeat text-base"></i>
-      <span class="text-[9px] font-bold">ซิงค์</span>
+      <span class="text-[10px] font-mono">Sync</span>
     </button>
-    <button onclick="triggerGoogleLogin()" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
+    <a href="Profile.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i class="bi bi-person text-base"></i>
-      <span class="text-[9px] font-bold">โปรไฟล์</span>
-    </button>
+      <span class="text-[10px] font-mono">Profile</span>
+    </a>
   </nav>
 
-  <!-- ================= 5. MODALS & SLIDE-OVERS ================= -->
+  <!-- ================= 5. MODALS & DIALOGS ================= -->
 
   <!-- MODAL 1: CREATE MASTER PLAN / EVENT -->
-  <div id="modalCreateHub" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div class="glass-obsidian rounded-3xl max-w-lg w-full p-6 border border-white/10 shadow-2xl relative space-y-4">
+  <div id="modalCreateHub" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl">
+    <div class="kku-card-deep rounded-3xl max-w-lg w-full p-6 border border-white/15 shadow-2xl relative space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-white/10">
         <div class="flex items-center gap-2">
           <span class="w-8 h-8 rounded-xl bg-[#E65A19]/20 text-[#FF7A29] flex items-center justify-center">
-            <i class="bi bi-calendar-plus"></i>
+            <i class="bi bi-calendar-plus text-base"></i>
           </span>
-          <h3 class="text-base font-black text-white">สร้างกิจกรรม หรือห้องงานใหม่</h3>
+          <h3 class="text-base font-black text-white font-display">สร้างกิจกรรม หรือห้องงานใหม่</h3>
         </div>
         <button onclick="closeModal('modalCreateHub')" class="p-1 rounded-xl text-slate-400 hover:text-white cursor-pointer"><i class="bi bi-x-lg"></i></button>
       </div>
@@ -581,20 +670,20 @@
       <form onsubmit="handleCreatePlanSubmit(event)" class="space-y-3.5 text-xs">
         <div>
           <label class="block font-bold text-slate-300 mb-1">ชื่องาน / กิจกรรม <span class="text-rose-400">*</span></label>
-          <input type="text" id="newPlanTitle" required placeholder="เช่น สอบกลางภาค ED1447, ซุ้มรับปริญญา" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-[#E65A19]">
+          <input type="text" id="newPlanTitle" required placeholder="เช่น สอบกลางภาค ED1447, ซุ้มรับปริญญา" class="w-full px-3.5 py-2.5 rounded-xl bg-[#070914] border border-white/10 text-white focus:outline-hidden focus:border-[#E65A19]">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-300 mb-1">ประเภท</label>
-            <select id="newPlanType" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <select id="newPlanType" class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
               <option value="event">📅 กิจกรรม / สอบ / นัดหมาย</option>
               <option value="project">📁 ห้องงานโปรเจกต์ (มีบอร์ด Kanban)</option>
             </select>
           </div>
           <div>
             <label class="block font-bold text-slate-300 mb-1">ระดับความสำคัญ</label>
-            <select id="newPlanPriority" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <select id="newPlanPriority" class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
               <option value="urgent">🚨 ด่วนที่สุด (Urgent)</option>
               <option value="high">🔥 สำคัญมาก (High)</option>
               <option value="normal" selected>⚡ ปานกลาง (Normal)</option>
@@ -606,7 +695,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-300 mb-1">ขอบเขตการแชร์</label>
-            <select id="newPlanScope" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <select id="newPlanScope" class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
               <option value="department">🏛️ งานสาขา (ทุกคนเห็น)</option>
               <option value="shared">👥 งานกลุ่ม</option>
               <option value="personal">🔒 ส่วนตัว</option>
@@ -614,7 +703,7 @@
           </div>
           <div>
             <label class="block font-bold text-slate-300 mb-1">สีประจำกิจกรรม</label>
-            <select id="newPlanColor" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <select id="newPlanColor" class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
               <option value="#E65A19">🟠 ส้ม KKU</option>
               <option value="#38BDF8">🔵 ฟ้า Cyber</option>
               <option value="#10B981">🟢 เขียว Emerald</option>
@@ -627,37 +716,37 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-300 mb-1">วัน-เวลาเริ่ม <span class="text-rose-400">*</span></label>
-            <input type="datetime-local" id="newPlanStartDate" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <input type="datetime-local" id="newPlanStartDate" required class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
           </div>
           <div>
             <label class="block font-bold text-slate-300 mb-1">วัน-เวลาสิ้นสุด (ถ้ามี)</label>
-            <input type="datetime-local" id="newPlanEndDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <input type="datetime-local" id="newPlanEndDate" class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
           </div>
         </div>
 
         <div>
           <label class="block font-bold text-slate-300 mb-1">สถานที่ / ห้องเรียน / ลิงก์ห้องประชุม</label>
-          <input type="text" id="newPlanLocation" placeholder="เช่น ED2104, ห้องประชุม 2 หรือ Google Meet..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+          <input type="text" id="newPlanLocation" placeholder="เช่น ED2104, ห้องประชุม 2 หรือ Google Meet..." class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
         </div>
 
         <div>
           <label class="block font-bold text-slate-300 mb-1">รายละเอียดเพิ่มเติม</label>
-          <textarea id="newPlanDesc" rows="3" placeholder="ระบุสิ่งที่ต้องเตรียม เอกสาร หรือรายละเอียดงาน..." class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
+          <textarea id="newPlanDesc" rows="3" placeholder="ระบุสิ่งที่ต้องเตรียม เอกสาร หรือรายละเอียดงาน..." class="w-full px-3.5 py-2 rounded-xl bg-[#070914] border border-white/10 text-white"></textarea>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
           <button type="button" onclick="closeModal('modalCreateHub')" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold hover:bg-white/10 transition cursor-pointer">ยกเลิก</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-[#E65A19] hover:bg-[#FF7A29] text-white font-black shadow-lg shadow-[#E65A19]/30 transition cursor-pointer">สร้างกิจกรรม</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] hover:from-[#c7321e] hover:to-[#ff6720] text-white font-black shadow-md shadow-[#E65A19]/30 transition cursor-pointer">สร้างกิจกรรม</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODAL 2: ADD / EDIT KANBAN TASK -->
-  <div id="modalTaskForm" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div class="glass-obsidian rounded-3xl max-w-md w-full p-6 border border-white/10 shadow-2xl relative space-y-4">
+  <div id="modalTaskForm" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl">
+    <div class="kku-card-deep rounded-3xl max-w-md w-full p-6 border border-white/15 shadow-2xl relative space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-white/10">
-        <h3 id="modalTaskTitleHeader" class="text-base font-black text-white">เพิ่มงานย่อย</h3>
+        <h3 id="modalTaskTitleHeader" class="text-base font-black text-white font-display">เพิ่มงานย่อย</h3>
         <button onclick="closeModal('modalTaskForm')" class="p-1 rounded-xl text-slate-400 hover:text-white cursor-pointer"><i class="bi bi-x-lg"></i></button>
       </div>
 
@@ -666,13 +755,13 @@
 
         <div>
           <label class="block font-bold text-slate-300 mb-1">หัวข้องานย่อย <span class="text-rose-400">*</span></label>
-          <input type="text" id="taskFormTitle" required placeholder="เช่น ออกแบบ UI, ทำสไลด์นำเสนอ" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-[#E65A19]">
+          <input type="text" id="taskFormTitle" required placeholder="เช่น ออกแบบ UI, ทำสไลด์นำเสนอ" class="w-full px-3.5 py-2.5 rounded-xl bg-[#070914] border border-white/10 text-white focus:outline-hidden focus:border-[#E65A19]">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-300 mb-1">ขั้นตอน / คอลัมน์</label>
-            <select id="taskFormColumn" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <select id="taskFormColumn" class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
               <option value="สิ่งที่ต้องทำ">สิ่งที่ต้องทำ (To Do)</option>
               <option value="กำลังทำ">กำลังทำ (In Progress)</option>
               <option value="เสร็จสิ้น">เสร็จสิ้น (Done)</option>
@@ -680,7 +769,7 @@
           </div>
           <div>
             <label class="block font-bold text-slate-300 mb-1">ความสำคัญ</label>
-            <select id="taskFormPriority" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <select id="taskFormPriority" class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
               <option value="urgent">🚨 ด่วนที่สุด</option>
               <option value="high">🔥 สำคัญมาก</option>
               <option value="normal" selected>⚡ ปานกลาง</option>
@@ -692,17 +781,17 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-300 mb-1">กำหนดส่ง (Due Date)</label>
-            <input type="datetime-local" id="taskFormDueDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <input type="datetime-local" id="taskFormDueDate" class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
           </div>
           <div>
             <label class="block font-bold text-slate-300 mb-1">หมวดหมู่ / แท็ก</label>
-            <input type="text" id="taskFormTag" placeholder="เช่น Design, Report, Lab" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
+            <input type="text" id="taskFormTag" placeholder="เช่น Design, Report, Lab" class="w-full px-3 py-2 rounded-xl bg-[#070914] border border-white/10 text-white">
           </div>
         </div>
 
         <div>
           <label class="block font-bold text-slate-300 mb-1">รายละเอียดงาน</label>
-          <textarea id="taskFormDesc" rows="3" placeholder="ระบุสิ่งที่ต้องทำ ลำดับขั้นตอน..." class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
+          <textarea id="taskFormDesc" rows="3" placeholder="ระบุสิ่งที่ต้องทำ ลำดับขั้นตอน..." class="w-full px-3.5 py-2 rounded-xl bg-[#070914] border border-white/10 text-white"></textarea>
         </div>
 
         <div class="flex items-center justify-between pt-3 border-t border-white/10">
@@ -711,16 +800,16 @@
           </button>
           <div class="flex items-center gap-2 ml-auto">
             <button type="button" onclick="closeModal('modalTaskForm')" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold hover:bg-white/10 transition cursor-pointer">ยกเลิก</button>
-            <button type="submit" class="px-5 py-2 rounded-xl bg-[#E65A19] hover:bg-[#FF7A29] text-white font-black shadow-md transition cursor-pointer">บันทึก</button>
+            <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] hover:from-[#c7321e] hover:to-[#ff6720] text-white font-black shadow-md transition cursor-pointer">บันทึก</button>
           </div>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 3: EVENT DETAILS & QUICK ACTIONS -->
-  <div id="modalEventDetail" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div class="glass-obsidian rounded-3xl max-w-md w-full p-6 border border-white/10 shadow-2xl relative space-y-4">
+  <!-- MODAL 3: EVENT DETAILS & QUICK ACTIONS / EDIT -->
+  <div id="modalEventDetail" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl">
+    <div class="kku-card-deep rounded-3xl max-w-md w-full p-6 border border-white/15 shadow-2xl relative space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-white/10">
         <div class="flex items-center gap-2">
           <span id="detailScopeBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#E65A19]/20 text-[#FF7A29]">
@@ -767,14 +856,14 @@
   </div>
 
   <!-- MODAL 4: 1-CLICK SYNC SUITE & GOOGLE CALENDAR -->
-  <div id="modalSyncSuite" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-    <div class="glass-obsidian rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-white/10 shadow-2xl relative space-y-5">
+  <div id="modalSyncSuite" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl">
+    <div class="kku-card-deep rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-white/15 shadow-2xl relative space-y-5">
       <div class="flex items-center justify-between pb-3 border-b border-white/10">
         <div class="flex items-center gap-2">
           <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
-            <i class="bi bi-calendar2-check"></i>
+            <i class="bi bi-calendar2-check text-base"></i>
           </span>
-          <h3 class="text-base font-black text-white">1-Click Calendar Sync Hub</h3>
+          <h3 class="text-base font-black text-white font-display">1-Click Calendar Sync Hub</h3>
         </div>
         <button onclick="closeModal('modalSyncSuite')" class="p-1 rounded-xl text-slate-400 hover:text-white cursor-pointer"><i class="bi bi-x-lg"></i></button>
       </div>
@@ -814,7 +903,7 @@
       </div>
 
       <div class="p-3 rounded-2xl bg-[#E65A19]/10 border border-[#E65A19]/25 text-[11px] text-slate-300 space-y-1">
-        <strong class="text-[#FF7A29] flex items-center gap-1">
+        <strong class="text-[#FF7A29] flex items-center gap-1 font-mono">
           <i class="bi bi-info-circle"></i> เคล็ดลับการซิงค์:
         </strong>
         <p>เมื่อมีกิจกรรมใหม่บนเว็บ ข้อมูลจะอัปเดตแบบเรียลไทม์ผ่านระบบ Cloud ของสาขาวิชา</p>
@@ -823,16 +912,16 @@
   </div>
 
   <!-- MODAL 5: ROOM SELECTOR -->
-  <div id="modalSelectRoom" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div class="glass-obsidian rounded-3xl max-w-md w-full p-6 border border-white/10 shadow-2xl relative space-y-4">
+  <div id="modalSelectRoom" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl">
+    <div class="kku-card-deep rounded-3xl max-w-md w-full p-6 border border-white/15 shadow-2xl relative space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-white/10">
-        <h3 class="text-base font-black text-white flex items-center gap-2">
+        <h3 class="text-base font-black text-white flex items-center gap-2 font-display">
           <i class="bi bi-folder2-open text-amber-400"></i>
           <span>เลือกห้องงาน (PlanToDo Rooms)</span>
         </h3>
         <button onclick="closeModal('modalSelectRoom')" class="p-1 rounded-xl text-slate-400 hover:text-white cursor-pointer"><i class="bi bi-x-lg"></i></button>
       </div>
-      <div id="roomSelectionList" class="space-y-2 max-h-80 overflow-y-auto custom-scroll text-xs">
+      <div id="roomSelectionList" class="space-y-2 max-h-80 overflow-y-auto custom-scroll text-xs font-mono">
         <!-- Rendered dynamically -->
       </div>
     </div>
@@ -860,11 +949,21 @@
 
     // ================= INITIALIZATION & AUTH =================
     document.addEventListener('DOMContentLoaded', async () => {
+      syncDynamicDateIcons();
       checkAuthSession();
       setupGoogleAuthGsi();
       await refreshAllData();
       initRealtimeSubscription();
     });
+
+    // Update dynamic day numbers on header & bottom dock icons
+    function syncDynamicDateIcons() {
+      const todayNum = new Date().getDate();
+      const headerIcon = document.getElementById('headerDynamicDayNumber');
+      const dockIcon = document.getElementById('dockDynamicDayNumber');
+      if (headerIcon) headerIcon.textContent = todayNum;
+      if (dockIcon) dockIcon.textContent = todayNum;
+    }
 
     function checkAuthSession() {
       try {
@@ -971,11 +1070,6 @@
       }
     }
 
-    function toggleUserDropdown() {
-      if (!appState.user) return;
-      alert(`👤 ข้อมูลผู้ใช้ปัจจุบัน:\nชื่อ: ${appState.user.name}\nอีเมล: ${appState.user.email}\nสถานะ: เข้าสู่ระบบแล้ว`);
-    }
-
     // ================= REALTIME SUBSCRIPTION (SUPABASE) =================
     function initRealtimeSubscription() {
       if (window.PlansRepo && typeof window.PlansRepo.subscribeToChanges === 'function') {
@@ -1021,16 +1115,9 @@
       appState.filterScope = scope;
       document.querySelectorAll('.scope-pill').forEach(btn => {
         if (btn.dataset.scope === scope) {
-          btn.className = 'scope-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-[#E65A19] text-white shadow-md shadow-[#E65A19]/25';
+          btn.className = 'scope-pill flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 bg-[#E65A19] text-white shadow-md shadow-[#E65A19]/30';
         } else {
-          btn.className = 'scope-pill px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-1.5';
-        }
-      });
-      document.querySelectorAll('.scope-pill-mob').forEach(btn => {
-        if (btn.dataset.scope === scope) {
-          btn.className = 'scope-pill-mob flex-shrink-0 px-3 py-1 rounded-xl text-xs font-bold bg-[#E65A19] text-white';
-        } else {
-          btn.className = 'scope-pill-mob flex-shrink-0 px-3 py-1 rounded-xl text-xs font-bold text-slate-300 bg-white/[0.04] border border-white/5';
+          btn.className = 'scope-pill flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 transition flex items-center gap-1.5';
         }
       });
       renderCalendar();
@@ -1100,7 +1187,7 @@
       for (let i = firstDayIndex - 1; i >= 0; i--) {
         const dayNum = prevMonthDays - i;
         const cell = document.createElement('div');
-        cell.className = 'min-h-[72px] sm:min-h-[85px] p-1.5 rounded-2xl bg-white/[0.01] border border-white/[0.03] text-slate-600 opacity-40 select-none';
+        cell.className = 'min-h-[76px] sm:min-h-[90px] p-1.5 rounded-2xl bg-[#080B18]/40 border border-[#242A4A]/40 text-slate-600 opacity-30 select-none';
         cell.innerHTML = `<span class="text-[11px] font-mono">${dayNum}</span>`;
         grid.appendChild(cell);
       }
@@ -1117,8 +1204,8 @@
         });
 
         const cell = document.createElement('div');
-        cell.className = `min-h-[72px] sm:min-h-[85px] p-1.5 rounded-2xl border transition-all flex flex-col justify-between select-none relative group ${
-          isToday ? 'bg-[#E65A19]/10 border-[#E65A19]/40 ring-1 ring-[#E65A19]/50' : 'bg-white/[0.02] border-white/[0.05] hover:border-white/20 hover:bg-white/[0.04]'
+        cell.className = `min-h-[76px] sm:min-h-[90px] p-1.5 rounded-2xl border transition-all flex flex-col justify-between select-none relative group ${
+          isToday ? 'bg-[#0E132A] border-[#E65A19] ring-1 ring-[#E65A19]/50 shadow-[0_0_15px_rgba(230,90,25,0.2)]' : 'bg-[#0C1026]/70 border-[#242A4A] hover:border-[#E65A19]/50 hover:bg-[#121636]'
         }`;
 
         // Drag & Drop Listener for rescheduling
@@ -1141,7 +1228,7 @@
         // Date Number & Badge Header
         let cellHtml = `
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-mono font-bold ${isToday ? 'px-1.5 py-0.2 rounded-md bg-[#E65A19] text-white' : 'text-slate-300'}">
+            <span class="text-xs font-mono font-bold ${isToday ? 'px-1.5 py-0.2 rounded-md bg-[#E65A19] text-white shadow-sm' : 'text-slate-300'}">
               ${d}
             </span>
             ${dayPlans.length > 0 ? `<span class="text-[9px] font-mono font-bold text-amber-400 bg-amber-400/10 px-1 rounded">${dayPlans.length}</span>` : ''}
@@ -1149,10 +1236,10 @@
         `;
 
         // Event Tags Container
-        cellHtml += `<div class="space-y-1 overflow-y-auto max-h-[52px] sm:max-h-[64px] custom-scroll">`;
+        cellHtml += `<div class="space-y-1 overflow-y-auto max-h-[54px] sm:max-h-[66px] custom-scroll">`;
         dayPlans.slice(0, 3).forEach(p => {
           const isExam = (p.title && (p.title.includes('สอบ') || p.title.toLowerCase().includes('exam')));
-          const colorBar = isExam ? '#E65A19' : (p.color || '#00E5FF');
+          const colorBar = isExam ? '#E65A19' : (p.color || '#38BDF8');
           const timeStr = new Date(p.start_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 
           cellHtml += `
@@ -1160,7 +1247,7 @@
                  ondragstart="handlePlanDragStart(event, '${p.id}')"
                  onclick="openEventDetailModal('${p.id}')"
                  class="px-1.5 py-0.5 rounded-lg text-[9px] font-bold text-white truncate transition hover:scale-[1.02] flex items-center gap-1 shadow-xs cursor-pointer border border-white/10"
-                 style="background: rgba(16, 21, 36, 0.9);"
+                 style="background: #12162A;"
                  title="${escapeHtml(p.title)} (${timeStr})">
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color: ${colorBar}; box-shadow: 0 0 6px ${colorBar};"></span>
               <span class="truncate">${escapeHtml(p.title)}</span>
@@ -1182,7 +1269,7 @@
       const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
       for (let n = 1; n <= remaining; n++) {
         const cell = document.createElement('div');
-        cell.className = 'min-h-[72px] sm:min-h-[85px] p-1.5 rounded-2xl bg-white/[0.01] border border-white/[0.03] text-slate-600 opacity-40 select-none';
+        cell.className = 'min-h-[76px] sm:min-h-[90px] p-1.5 rounded-2xl bg-[#080B18]/40 border border-[#242A4A]/40 text-slate-600 opacity-30 select-none';
         cell.innerHTML = `<span class="text-[11px] font-mono">${n}</span>`;
         grid.appendChild(cell);
       }
@@ -1241,15 +1328,6 @@
         scopeBadge.textContent = room.scope === 'department' ? '🏛️ งานสาขา' : room.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
       }
 
-      const btnEdit = document.getElementById('btnEditCurrentRoom');
-      if (btnEdit) {
-        if (canManagePlan(room)) {
-          btnEdit.classList.remove('hidden');
-        } else {
-          btnEdit.classList.add('hidden');
-        }
-      }
-
       // Calculate Progress
       const tasks = appState.activeTasks || [];
       const doneCount = tasks.filter(t => t.column_name === 'เสร็จสิ้น' || t.is_completed).length;
@@ -1290,7 +1368,7 @@
 
       tasks.forEach(task => {
         const card = document.createElement('div');
-        card.className = 'kanban-task-card p-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-xs shadow-md space-y-2 cursor-grab active:cursor-grabbing select-none relative';
+        card.className = 'kanban-task-card p-3 rounded-2xl bg-[#0F1428] border border-[#242A4A] text-xs shadow-md space-y-2 cursor-grab active:cursor-grabbing select-none relative';
         card.draggable = true;
 
         card.ondragstart = (e) => {
@@ -1343,7 +1421,7 @@
 
           <div class="flex items-center justify-between gap-1 pt-1.5 border-t border-white/5 text-[10px]">
             ${dueDateHtml}
-            <button onclick="quickAdvanceTask('${task.id}', '${colName}')" class="ml-auto px-2 py-0.5 rounded-lg bg-white/5 hover:bg-[#E65A19] text-slate-300 hover:text-white font-bold transition flex items-center gap-1" title="เลื่อนสถานะ">
+            <button onclick="quickAdvanceTask('${task.id}', '${colName}')" class="ml-auto px-2 py-0.5 rounded-lg bg-white/5 hover:bg-[#E65A19] text-slate-300 hover:text-white font-mono font-bold transition flex items-center gap-1 cursor-pointer" title="เลื่อนสถานะ">
               <span>${colName === 'เสร็จสิ้น' ? '✓ สำเร็จ' : 'ถัดไป →'}</span>
             </button>
           </div>
@@ -1425,7 +1503,9 @@
       });
 
       const counterEl = document.getElementById('counterWeekJobs');
+      const counterTop = document.getElementById('counterWeekJobsTop');
       if (counterEl) counterEl.textContent = weekPlans.length;
+      if (counterTop) counterTop.textContent = weekPlans.length;
 
       // 2. Urgent deadline finder
       const urgentPlan = plans.find(p => {
@@ -1437,8 +1517,6 @@
 
       const urgentTitle = document.getElementById('urgentDeadlineTitle');
       const urgentSubtitle = document.getElementById('urgentDeadlineSubtitle');
-      const mobileAlert = document.getElementById('mobileUrgentAlertCapsule');
-      const mobileText = document.getElementById('mobileUrgentAlertText');
       const boardAlertText = document.getElementById('boardAlertCalloutText');
 
       if (urgentPlan) {
@@ -1448,15 +1526,10 @@
 
         if (urgentTitle) urgentTitle.textContent = urgentPlan.title;
         if (urgentSubtitle) urgentSubtitle.textContent = `🚨 ${countdownText} • ${d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.`;
-
-        if (mobileAlert) mobileAlert.classList.remove('hidden');
-        if (mobileText) mobileText.textContent = `${urgentPlan.title} (${countdownText})`;
-
         if (boardAlertText) boardAlertText.textContent = `🚨 Urgent Alert: [${urgentPlan.title}] ${countdownText}`;
       } else {
         if (urgentTitle) urgentTitle.textContent = "ไม่มีงานด่วนค้างส่ง";
         if (urgentSubtitle) urgentSubtitle.textContent = "ทุกอย่างอยู่ในสถานะปกติ";
-        if (mobileAlert) mobileAlert.classList.add('hidden');
         if (boardAlertText) boardAlertText.textContent = "ยังไม่มีกำหนดการเร่งด่วนสำหรับช่วงเวลานี้";
       }
     }
@@ -1480,7 +1553,7 @@
 
         const item = document.createElement('div');
         item.className = `p-1.5 rounded-xl flex flex-col items-center justify-center text-xs ${
-          isToday ? 'bg-[#E65A19] text-white font-black shadow-md' : 'bg-white/[0.02] text-slate-400'
+          isToday ? 'bg-[#E65A19] text-white font-black shadow-md' : 'bg-[#0A0D1E] border border-white/5 text-slate-400'
         }`;
         item.innerHTML = `
           <span class="text-[9px] uppercase font-bold">${dayNames[i]}</span>
@@ -1499,13 +1572,13 @@
       if (tab === 'calendar') {
         colCal.classList.remove('hidden');
         colKan.classList.add('hidden');
-        btnCal.className = 'flex-shrink-0 ml-auto px-2.5 py-1 rounded-lg text-xs font-bold bg-white/10 text-amber-300';
-        btnKan.className = 'flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 bg-white/5';
+        if (btnCal) btnCal.className = 'px-3 py-1 rounded-lg text-xs font-mono font-bold bg-[#E65A19] text-white';
+        if (btnKan) btnKan.className = 'px-3 py-1 rounded-lg text-xs font-mono font-bold text-slate-400';
       } else {
         colCal.classList.add('hidden');
         colKan.classList.remove('hidden');
-        btnCal.className = 'flex-shrink-0 ml-auto px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 bg-white/5';
-        btnKan.className = 'flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-white/10 text-amber-300';
+        if (btnCal) btnCal.className = 'px-3 py-1 rounded-lg text-xs font-mono font-bold text-slate-400';
+        if (btnKan) btnKan.className = 'px-3 py-1 rounded-lg text-xs font-mono font-bold bg-[#E65A19] text-white';
       }
     }
 
@@ -1694,7 +1767,7 @@
       if (!p) return;
 
       document.getElementById('detailEventTitle').textContent = p.title;
-      document.getElementById('detailScopeBadge').textContent = p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
+      document.getElementById('detailScopeBadge').textContent = p.scope === 'department' ? '🏛️ งานสาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
       
       const prioEl = document.getElementById('detailPriorityBadge');
       if (p.priority === 'urgent') {
@@ -1763,7 +1836,7 @@
 
       (appState.plans || []).forEach(p => {
         const item = document.createElement('div');
-        item.className = 'p-3 rounded-2xl bg-white/[0.03] hover:bg-[#E65A19]/20 border border-white/10 hover:border-[#E65A19]/40 flex items-center justify-between cursor-pointer transition';
+        item.className = 'p-3 rounded-2xl bg-[#0F1428] hover:bg-[#E65A19]/20 border border-[#242A4A] hover:border-[#E65A19]/50 flex items-center justify-between cursor-pointer transition';
         item.onclick = async () => {
           appState.activeRoom = p;
           closeModal('modalSelectRoom');
@@ -1785,10 +1858,6 @@
     function openEditActiveRoomModal() {
       if (!appState.activeRoom) return;
       openEventDetailModal(appState.activeRoom.id);
-    }
-
-    function focusUrgentTask() {
-      switchMobileTab('kanban');
     }
 
     function handleUrgentCardClick() {
