@@ -81,6 +81,7 @@
   <script src="students_data.js"></script>
   <!-- Strict No-LocalStorage Plans Repository & Calendar Engine -->
   <script src="assets/js/multi_uploader.js"></script>
+  <script src="assets/js/smart_upload_modal.js"></script>
   <script src="assets/js/plans_repo.js"></script>
   <script src="assets/js/calendar_sync.js"></script>
   <!-- Real-Time Push Notification Engine -->
@@ -662,7 +663,7 @@
             <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
               <i data-lucide="upload" class="w-3.5 h-3.5"></i>
               <span>เลือกหลายรูปภาพ...</span>
-              <input type="file" multiple accept="image/*" onchange="handleCalMultiImageUpload(event, 'newRoom')" class="hidden">
+              <input type="file" multiple accept="image/*,.pdf,application/pdf" onchange="handleCalMultiImageUpload(event, 'newRoom')" class="hidden">
             </label>
             <span class="text-[11px] text-slate-400">เลือกได้หลายภาพพร้อมกัน</span>
           </div>
@@ -808,7 +809,7 @@
             <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
               <i data-lucide="upload" class="w-3.5 h-3.5"></i>
               <span>เลือกหลายรูปภาพ...</span>
-              <input type="file" multiple accept="image/*" onchange="handleCalMultiImageUpload(event, 'editPlan')" class="hidden">
+              <input type="file" multiple accept="image/*,.pdf,application/pdf" onchange="handleCalMultiImageUpload(event, 'editPlan')" class="hidden">
             </label>
             <span class="text-[11px] text-slate-400">เลือกได้หลายภาพ</span>
           </div>
@@ -944,26 +945,79 @@
     let calCreateImages = [];
     let calEditImages = [];
 
-    async function handleCalMultiImageUpload(event, containerType) {
+        async function handleCalMultiImageUpload(event, containerType) {
       const files = Array.from(event.target.files || []);
       if (files.length === 0) return;
 
       const progressEl = document.getElementById(containerType + 'UploadProgress');
       const progressText = document.getElementById(containerType + 'UploadText');
-      if (progressEl) progressEl.classList.remove('hidden');
 
       let targetList = (containerType === 'newRoom') ? calCreateImages : calEditImages;
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        if (progressText) progressText.textContent = `กำลังอัปโหลดรูปที่ ${i + 1}/${files.length} (บีบอัดลดขนาด & ฝาก Catbox)...`;
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        const isOversized = file.size > (200 * 1024 * 1024);
+        const isLarge = file.size > (25 * 1024 * 1024);
+
+        if (isOversized || isPdf || isLarge) {
+          const userConfirmed = await new Promise((resolve) => {
+            if (typeof showUploadConfirmModal === 'function') {
+              let title = 'ยืนยันการอัปโหลดไฟล์';
+              let message = 'ต้องการอัปโหลดไฟล์นี้ขึ้นระบบหรือไม่?';
+              let showHelp = false;
+
+              if (isOversized) {
+                title = '⚠️ ไฟล์มีขนาดเกิน 200 MB';
+                message = `ไฟล์ "${file.name}" มีขนาด ${(file.size / (1024 * 1024)).toFixed(1)} MB ซึ่งเกินขีดจำกัดของระบบ (สูงสุด 200 MB ต่อไฟล์) กรุณาบีบอัดลดขนาดก่อนอัปโหลด หรืออัปโหลดเข้า Google Drive แล้วนำลิงก์มาวาง`;
+                showHelp = true;
+              } else if (isPdf) {
+                title = '📄 ตรวจพบไฟล์เอกสาร PDF';
+                message = `ไฟล์ "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB) เป็นไฟล์เอกสาร PDF หากต้องการให้โหลดเร็วและประหยัดพื้นที่ แนะนำให้บีบอัดไฟล์ก่อนอัปโหลด หรือกดดำเนินการต่อเพื่ออัปโหลดทันที`;
+                showHelp = true;
+              } else if (isLarge) {
+                title = '⚡ ตรวจพบไฟล์ขนาดใหญ่';
+                message = `ไฟล์ "${file.name}" มีขนาด ${(file.size / (1024 * 1024)).toFixed(1)} MB ซึ่งอาจใช้เวลาอัปโหลดสักครู่ ต้องการดำเนินการต่อหรือไม่?`;
+                showHelp = true;
+              }
+
+              showUploadConfirmModal({
+                title,
+                message,
+                fileName: file.name,
+                fileSize: file.size,
+                fileType: isPdf ? 'pdf' : (file.type.split('/')[1] || 'file'),
+                confirmText: isPdf ? 'ยืนยันอัปโหลด PDF' : 'ดำเนินการต่อ',
+                cancelText: 'ข้ามไฟล์นี้',
+                showExternalHelp: showHelp,
+                onConfirm: () => resolve(true),
+                onCancel: () => resolve(false)
+              });
+            } else {
+              if (isOversized) {
+                alert(`ไฟล์ "${file.name}" มีขนาดเกิน 200 MB ไม่สามารถอัปโหลดได้`);
+                resolve(false);
+              } else {
+                resolve(confirm(`ต้องการอัปโหลด "${file.name}" หรือไม่?`));
+              }
+            }
+          });
+
+          if (!userConfirmed) {
+            continue;
+          }
+        }
+
+        if (progressEl) progressEl.classList.remove('hidden');
+        if (progressText) progressText.textContent = `กำลังอัปโหลด ${i + 1}/${files.length}: ${file.name}...`;
+
         try {
           let uploadedUrl = '';
           const uploader = window.MultiCloudUploader || window.MultiUploader;
           if (uploader && typeof uploader.upload === 'function') {
             const res = await uploader.upload(file, {
               preferredProvider: 'catbox',
-              autoCompress: true,
+              autoCompress: !isPdf,
               maxDimension: 1200,
               quality: 0.80
             });
@@ -973,7 +1027,6 @@
             formData.append('reqtype', 'fileupload');
             formData.append('userhash', '4f0c883945e2fe8d067b3dd12');
             formData.append('fileToUpload', file);
-            // Route via Cloudflare Worker proxy to prevent CORS errors
             const proxyEndpoint = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('edspace')) 
               ? '/api/catbox-proxy' 
               : 'https://kku-comed23.edspace.workers.dev/api/catbox-proxy';
@@ -984,14 +1037,14 @@
           if (uploadedUrl && uploadedUrl.startsWith('http')) {
             targetList.push({
               url: uploadedUrl.trim(),
-              name: file.name || 'image.jpg',
-              type: 'image'
+              name: file.name || 'attachment',
+              type: isPdf ? 'pdf' : 'image'
             });
             renderCalMultiImagePreviews(containerType);
           }
         } catch (err) {
-          console.error("Upload image error:", err);
-          showAppToast("อัปโหลดภาพไม่สำเร็จ", file.name, "error");
+          console.error("Upload error:", err);
+          showAppToast("อัปโหลดไม่สำเร็จ", file.name, "error");
         }
       }
 
