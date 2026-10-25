@@ -52,17 +52,76 @@
     if (pill) pill.remove();
   }
 
-  // 2. Register Service Worker
+  // 2. Register Service Worker with Real-Time Update Detection
+  let refreshing = false;
   if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
         .then((reg) => {
           console.log('[PWA] Service Worker registered with scope:', reg.scope);
+
+          // Check if a new service worker is waiting
+          if (reg.waiting) {
+            showUpdateNotification(reg.waiting);
+          }
+
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  showUpdateNotification(newWorker);
+                }
+              });
+            }
+          });
         })
         .catch((err) => {
           console.warn('[PWA] Service Worker registration failed:', err);
         });
     });
+  }
+
+  function showUpdateNotification(worker) {
+    if (document.getElementById('swUpdatePill')) return;
+
+    const pill = document.createElement('div');
+    pill.id = 'swUpdatePill';
+    pill.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#090D16]/95 border border-orange-500/40 text-white shadow-2xl backdrop-blur-2xl text-xs max-w-sm sm:max-w-md w-[92%] sm:w-auto animate-bounce-in';
+    pill.innerHTML = `
+      <div class="w-8 h-8 rounded-xl bg-orange-500/20 text-[#E65A19] flex items-center justify-center flex-shrink-0 border border-orange-500/30">
+        <i data-lucide="sparkles" class="w-4 h-4"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="font-bold text-white text-xs">เวอร์ชันใหม่พร้อมใช้งาน</div>
+        <div class="text-[11px] text-slate-400 truncate">อัปเดตระบบและปรับปรุงความเร็ว</div>
+      </div>
+      <button id="swUpdateBtn" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#B32B19] text-white font-bold text-xs hover:opacity-90 transition flex-shrink-0 shadow cursor-pointer">
+        อัปเดตทันที
+      </button>
+      <button id="swDismissBtn" class="p-1 rounded-lg text-slate-400 hover:text-white transition flex-shrink-0 cursor-pointer" title="ปิด">
+        &times;
+      </button>
+    `;
+
+    document.body.appendChild(pill);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    pill.querySelector('#swUpdateBtn').onclick = () => {
+      pill.querySelector('#swUpdateBtn').innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> กำลังโหลด...';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      worker.postMessage({ type: 'SKIP_WAITING' });
+    };
+
+    pill.querySelector('#swDismissBtn').onclick = () => {
+      pill.remove();
+    };
   }
 
   // 3. Capture install prompt (Chrome / Android)

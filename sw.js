@@ -1,32 +1,39 @@
 /**
  * COMED23 Service Worker for PWA (Progressive Web App)
- * Caches core assets, provides offline resilience and OneSignal Web Push
+ * Smart Stale-While-Revalidate Engine with Instant Loading, Offline Resilience, and Web Push
  */
 
-// Import OneSignal SDK Service Worker for reliable Background Push (RFC 8291)
+// Import OneSignal SDK Service Worker for Background Push
 try {
   importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 } catch (e) {
   console.warn('[SW] OneSignal import deferred:', e);
 }
 
-const CACHE_NAME = 'comed23-pwa-v2';
+const CACHE_NAME = 'comed23-pwa-v3';
+
+// Core Application Shell & Essential Static Assets
 const CORE_ASSETS = [
   '/',
   '/index.html',
   '/Calendar.html',
   '/Plans.html',
   '/payment.html',
+  '/storage.html',
+  '/upload.html',
   '/manifest.json',
   '/logo.png',
   '/favicon.png',
+  '/students_data.js',
   '/assets/js/calendar_sync.js',
   '/assets/js/plans_repo.js',
-  '/assets/js/notifications.js'
+  '/assets/js/notifications.js',
+  '/assets/js/pwa-installer.js',
+  '/assets/js/smart_upload_modal.js',
+  '/assets/js/pdf_compressor_engine.js'
 ];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(CORE_ASSETS).catch((err) => {
@@ -42,12 +49,20 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log('[ServiceWorker] Purging outdated cache:', key);
             return caches.delete(key);
           }
         })
       );
     }).then(() => self.clients.claim())
   );
+});
+
+// Allow webpage to send SKIP_WAITING when user clicks "Update Now"
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Push Event: รับข้อมูล Push จาก Server เมื่อผู้ใช้ปิดแอปหรือล็อกหน้าจอ
@@ -74,7 +89,6 @@ self.addEventListener('push', (event) => {
     badge: '/favicon.png',
     tag: 'comed-push-' + (data.id || Date.now()),
     data: { url: data.link || '/' },
-    // สั่นเตือนบนโทรศัพท์: สั่น 300ms, หยุด 100ms, สั่น 400ms, หยุด 100ms, สั่น 300ms
     vibrate: [300, 100, 400, 100, 300],
     renotify: true,
     requireInteraction: true,
@@ -96,7 +110,6 @@ self.addEventListener('notificationclick', (event) => {
   const transfer = notifData.transfer;
 
   if (event.action === 'decline' && transfer) {
-    // ผู้ใช้กดปฏิเสธจากแถบแจ้งเตือน
     event.waitUntil(
       clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
         for (let client of windowClients) {
@@ -107,8 +120,7 @@ self.addEventListener('notificationclick', (event) => {
     return;
   }
 
-  // หากกด 'accept' หรือคลิกที่ตัวการ์ดแจ้งเตือน
-  let urlToOpen = notifData.url || '/fastshare.html';
+  let urlToOpen = notifData.url || '/';
   if (event.action === 'accept' && transfer) {
     urlToOpen = `/fastshare.html?auto_accept=${encodeURIComponent(transfer.id || '')}&file_url=${encodeURIComponent(transfer.file_url || '')}&file_name=${encodeURIComponent(transfer.file_name || '')}`;
   }
@@ -130,40 +142,86 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
+/**
+ * SMART FETCH ENGINE:
+ * 1. Static Assets (CSS, JS, Fonts, Images): Stale-While-Revalidate (Instant load from cache, refresh in background)
+ * 2. HTML Navigation: Network-first with cache fallback
+ * 3. External APIs / Proxy: Pass-through
+ */
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Skip non-GET requests or external analytics/APIs (Supabase, Google)
+  // Skip non-GET requests or external endpoints (Supabase, Google APIs)
   if (req.method !== 'GET' || url.origin !== location.origin) {
     return;
   }
 
-  // Network-First with Cache fallback strategy
-  event.respondWith(
-    fetch(req)
-      .then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(req, responseClone);
-          });
-        }
-        return networkResponse;
+  // Skip API or dynamic proxy endpoints
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+
+  const isHtml = req.headers.get('accept')?.includes('text/html') || url.pathname.endsWith('.html');
+  const isStaticAsset = url.pathname.match(/\.(js|css|png|jpg|jpeg|webp|svg|ico|json|woff2|woff|ttf)$/i);
+
+  // Strategy A: Static Assets -> Stale-While-Revalidate
+  if (isStaticAsset) {
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        const fetchPromise = fetch(req).then((networkRes) => {
+          if (networkRes && networkRes.status === 200) {
+            const clone = networkRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
+          }
+          return networkRes;
+        }).catch(() => null);
+
+        return cached || fetchPromise;
       })
-      .catch(async () => {
-        // Match with ignoreSearch so /payment.html?camp=shirt69 matches cached /payment.html
-        const cached = await caches.match(req, { ignoreSearch: true });
-        if (cached) return cached;
-        if (req.headers.get('accept')?.includes('text/html') || url.pathname.endsWith('.html') || !url.pathname.includes('.')) {
+    );
+    return;
+  }
+
+  // Strategy B: HTML Documents -> Network-First with graceful Offline Fallback
+  if (isHtml) {
+    event.respondWith(
+      fetch(req)
+        .then((networkRes) => {
+          if (networkRes && networkRes.status === 200) {
+            const clone = networkRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
+          }
+          return networkRes;
+        })
+        .catch(async () => {
+          const cached = await caches.match(req, { ignoreSearch: true });
+          if (cached) return cached;
+
+          // Page fallback mapping
           if (url.pathname.includes('payment')) {
             const cachedPayment = await caches.match('/payment.html');
             if (cachedPayment) return cachedPayment;
           }
+          if (url.pathname.includes('Calendar') || url.pathname.includes('calendar')) {
+            const cachedCal = await caches.match('/Calendar.html');
+            if (cachedCal) return cachedCal;
+          }
+          if (url.pathname.includes('Plans') || url.pathname.includes('plans')) {
+            const cachedPlans = await caches.match('/Plans.html');
+            if (cachedPlans) return cachedPlans;
+          }
+
           const cachedIndex = await caches.match('/index.html');
           if (cachedIndex) return cachedIndex;
-        }
-        return new Response('Offline', { status: 503, statusText: 'Offline' });
-      })
-  );
+
+          return new Response('Offline: KKU COMED 23', {
+            status: 503,
+            statusText: 'Offline',
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+          });
+        })
+    );
+    return;
+  }
 });

@@ -12,6 +12,8 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://kku-comed23.edspace.workers.dev">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
     rel="stylesheet">
@@ -92,7 +94,7 @@
           </div>
           <div
             class="relative w-full h-full rounded-3xl bg-slate-900 border border-slate-700/80 p-2.5 flex items-center justify-center shadow-xl">
-            <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
+            <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain" loading="lazy" decoding="async">
           </div>
         </div>
         <div>
@@ -204,7 +206,7 @@
         <div class="flex items-center gap-3 min-w-0">
           <div
             class="w-10 h-10 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center flex-shrink-0">
-            <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
+            <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain" loading="lazy" decoding="async">
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 flex-wrap">
@@ -610,7 +612,7 @@
           </div>
           <div id="adminSlipPreviewContainer" class="hidden space-y-2">
             <img id="adminSlipPreviewImg" src="" alt="Slip Preview"
-              class="max-h-40 mx-auto rounded-xl border border-slate-700">
+              class="max-h-40 mx-auto rounded-xl border border-slate-700" loading="lazy" decoding="async">
             <span class="text-[11px] text-emerald-400 font-bold block">แนบไฟล์สลิปเรียบร้อยแล้ว</span>
           </div>
         </div>
@@ -1023,7 +1025,7 @@
               <div class="flex items-center gap-3">
                 <div
                   class="w-16 h-20 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
-                  <img id="campQrPreviewImg" src="qr_payment.png" alt="QR Preview" class="w-full h-full object-contain">
+                  <img id="campQrPreviewImg" src="qr_payment.png" alt="QR Preview" class="w-full h-full object-contain" loading="lazy" decoding="async">
                 </div>
                 <div>
                   <span id="campQrPreviewNotice" class="text-xs font-bold text-emerald-400 block">กำลังใช้: ระบบสร้าง QR
@@ -1080,7 +1082,7 @@
                 <div
                   class="w-16 h-12 rounded-xl bg-slate-950 p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
                   <img id="campBannerPreviewImg" src="" alt="Banner Preview"
-                    class="w-full h-full object-cover rounded-lg">
+                    class="w-full h-full object-cover rounded-lg" loading="lazy" decoding="async">
                 </div>
                 <span class="text-[11px] text-slate-400">พรีวิวรูปภาพเสื้อที่จะแสดงให้นักศึกษาเห็น</span>
               </div>
@@ -1092,7 +1094,7 @@
               <input type="text" id="campBgImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campBgPreviewImg')"
                 placeholder="วาง Direct URL ภาพพื้นหลัง (หรือเว้นว่างเพื่อใช้ดีไซน์มาตรฐาน)"
                 class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-purple-500">
-              <img id="campBgPreviewImg" src="logo.png" class="hidden">
+              <img id="campBgPreviewImg" src="logo.png" class="hidden" loading="lazy" decoding="async">
             </div>
           </div>
         </div>

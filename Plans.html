@@ -22,6 +22,8 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://kku-comed23.edspace.workers.dev">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Sarabun:wght@400;600;700&family=Chakra+Petch:wght@400;600;700&family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
@@ -276,7 +278,7 @@
           <!-- Official KKU Crest Emblem -->
           <div class="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#B32B19] to-[#E65A19] p-0.5 shadow-[0_0_20px_rgba(230,90,25,0.35)] group-hover:scale-105 transition-transform flex-shrink-0">
             <div class="w-full h-full bg-[#0C1030] rounded-[10px] flex items-center justify-center p-1 overflow-hidden">
-              <img src="logo.png" alt="KKU COMED" class="w-full h-full object-contain filter drop-shadow">
+              <img src="logo.png" alt="KKU COMED" class="w-full h-full object-contain filter drop-shadow" loading="lazy" decoding="async">
             </div>
           </div>
 
@@ -340,7 +342,7 @@
           
           <div id="authUserInfo" class="hidden items-center gap-1.5 px-2 py-1 rounded-xl bg-white/5 border border-white/10 max-w-[125px] sm:max-w-none">
             <div class="relative flex-shrink-0">
-              <img id="authUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" alt="User" class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg object-cover border border-orange-400/40">
+              <img id="authUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c' loading="lazy" decoding="async"><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" alt="User" class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg object-cover border border-orange-400/40">
               <span class="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 border border-slate-900 shadow-[0_0_6px_#10B981]"></span>
             </div>
             <div class="flex flex-col text-left truncate">
@@ -452,7 +454,7 @@
           <div class="pt-1 flex items-center gap-2 flex-wrap">
             <span class="text-xs text-slate-400">ผู้สร้างห้อง:</span>
             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 text-xs">
-              <img id="activeRoomCreatorAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" class="w-4 h-4 rounded-full flex-shrink-0 object-cover">
+              <img id="activeRoomCreatorAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c' loading="lazy" decoding="async"><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" class="w-4 h-4 rounded-full flex-shrink-0 object-cover">
               <span id="activeRoomCreatorName" class="font-bold text-slate-200">สมาชิก</span>
               <span id="activeRoomCreatorEmail" class="text-[10px] text-slate-400 font-mono hidden sm:inline">(email@kkumail.com)</span>
             </div>
@@ -1487,7 +1489,7 @@
         const thumb = document.createElement('div');
         thumb.className = 'relative group w-14 h-14 rounded-xl overflow-hidden border border-white/15 bg-slate-950 flex-shrink-0 shadow-md';
         thumb.innerHTML = `
-          <img src="${img.url}" class="w-full h-full object-cover" alt="Thumb">
+          <img src="${img.url}" class="w-full h-full object-cover" alt="Thumb" loading="lazy" decoding="async">
           <button type="button" onclick="removeMultiUploadedImage('${containerType}', ${idx})" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-600/90 text-white flex items-center justify-center text-[10px] opacity-80 hover:opacity-100 transition shadow">
             &times;
           </button>
@@ -2085,7 +2087,7 @@
               ${(p.attachments && p.attachments.length > 0) ? `
               <div class="flex items-center gap-1 mt-1.5 overflow-x-auto custom-scroll pb-0.5">
                 ${p.attachments.slice(0, 4).map(att => `
-                  <img src="${att.url}" class="w-7 h-7 rounded-lg object-cover border border-white/10 bg-slate-950 flex-shrink-0" alt="Thumb" onerror="this.remove()">
+                  <img src="${att.url}" class="w-7 h-7 rounded-lg object-cover border border-white/10 bg-slate-950 flex-shrink-0" alt="Thumb" onerror="this.remove()" loading="lazy" decoding="async">
                 `).join('')}
                 ${p.attachments.length > 4 ? `<span class="text-[9px] font-mono text-slate-400 font-bold px-1">+${p.attachments.length - 4}</span>` : ''}
               </div>
@@ -2101,7 +2103,7 @@
           <!-- Footer with Creator Profile -->
           <div class="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
             <div class="flex items-center gap-1.5 truncate max-w-[170px]">
-              <img src="${p.creator_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>"}" class="w-4 h-4 rounded-full flex-shrink-0">
+              <img src="${p.creator_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c' loading="lazy" decoding="async"><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>"}" class="w-4 h-4 rounded-full flex-shrink-0">
               <span class="truncate font-bold text-slate-300">${escapeHtml(p.creator_name || 'สมาชิก')}</span>
             </div>
             <span class="text-[10px] font-mono text-slate-500">${new Date(p.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}</span>
@@ -2151,7 +2153,7 @@
             a.rel = 'noopener noreferrer';
             a.className = 'w-14 h-14 rounded-xl overflow-hidden border border-white/15 bg-slate-950 flex-shrink-0 shadow hover:scale-105 transition block';
             a.title = 'คลิกเพื่อดูภาพขนาดเต็ม';
-            a.innerHTML = `<img src="${att.url}" class="w-full h-full object-cover" alt="Attachment" onerror="this.src='logo.png'">`;
+            a.innerHTML = `<img src="${att.url}" class="w-full h-full object-cover" alt="Attachment" onerror="this.src='logo.png'" loading="lazy" decoding="async">`;
             attContainer.appendChild(a);
           });
         } else {
@@ -2341,7 +2343,7 @@
             assigneesHtml = `<div class="flex items-center -space-x-1.5" title="ผู้รับผิดชอบ: ${task.assignees.map(a => a.name).join(', ')}">`;
             task.assignees.slice(0, 3).forEach(a => {
               const av = a.avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>";
-              assigneesHtml += `<img src="${av}" class="w-4 h-4 rounded-full border border-slate-900 object-cover" alt="${escapeHtml(a.name)}">`;
+              assigneesHtml += `<img src="${av}" class="w-4 h-4 rounded-full border border-slate-900 object-cover" alt="${escapeHtml(a.name)}" loading="lazy" decoding="async">`;
             });
             if (task.assignees.length > 3) {
               assigneesHtml += `<span class="text-[8px] font-bold text-slate-400 px-1">+${task.assignees.length - 3}</span>`;
@@ -2370,7 +2372,7 @@
               </div>
               <!-- Last Mover Profile -->
               <div class="flex items-center gap-1 text-[10px] text-slate-400 ml-auto" title="ย้ายล่าสุดโดย: ${task.last_moved_by_name || '-'}">
-                <img src="${task.last_moved_by_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>"}" class="w-3.5 h-3.5 rounded-full">
+                <img src="${task.last_moved_by_avatar || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23ea580c' loading="lazy" decoding="async"><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>"}" class="w-3.5 h-3.5 rounded-full">
                 <span class="truncate max-w-[70px]">${task.last_moved_by_name || 'สมาชิก'}</span>
               </div>
             </div>
