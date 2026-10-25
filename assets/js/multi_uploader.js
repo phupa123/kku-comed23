@@ -970,7 +970,10 @@
 
   // Expose both class constructor and singleton instance on window
   window.MultiCloudUploader = MultiCloudUploader;
+  window.MultiUploader = MultiCloudUploader;
   window.multiCloudUploader = new MultiCloudUploader();
+  window.MultiUploader.instance = window.multiCloudUploader;
+  window.MultiUploader.getInstance = () => window.multiCloudUploader;
   window.MultiCloudUploader.instance = window.multiCloudUploader;
   window.MultiCloudUploader.getInstance = () => window.multiCloudUploader;
 
