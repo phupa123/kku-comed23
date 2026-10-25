@@ -280,7 +280,7 @@
   </header>
 
   <!-- ================= MAIN CONTENT ================= -->
-  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 flex-1 space-y-6">
 
     <!-- VIEW 1: ROOMS LIST VIEW -->
     <div id="sectionRooms" class="space-y-6">
@@ -408,7 +408,12 @@
         </div>
       </div>
 
-      <!-- PlanToDo Dynamic Columns Board (Drag & Drop) -->
+      <!-- Mobile Kanban Column Switcher (Tab pills on small screens) -->
+      <div id="mobileKanbanTabSwitcher" class="flex sm:hidden items-center gap-1.5 p-1 bg-slate-900/90 rounded-2xl border border-white/10 overflow-x-auto custom-scroll">
+        <!-- Dynamically injected tabs for mobile -->
+      </div>
+
+      <!-- PlanToDo Dynamic Columns Board (Drag & Drop on Desktop / Tabbed on Mobile) -->
       <div id="kanbanColumnsContainer" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-x-auto pb-4 custom-scroll">
         <!-- Rendered dynamically according to room custom_columns -->
       </div>
@@ -1405,11 +1410,41 @@
       renderKanbanColumns();
     }
 
+    // Active Column Tab for Mobile (< 640px)
+    let activeMobileKanbanCol = null;
+
+    function setMobileKanbanColumn(colName) {
+      activeMobileKanbanCol = colName;
+      renderKanbanColumns();
+    }
+
     // Render Dynamic Columns & Task Cards
     function renderKanbanColumns() {
       const container = document.getElementById('kanbanColumnsContainer');
+      const mobileTabsEl = document.getElementById('mobileKanbanTabSwitcher');
       const cols = appState.activeRoom.custom_columns || ["สิ่งที่ต้องทำ", "กำลังทำ", "เสร็จสิ้น"];
       container.innerHTML = '';
+
+      if (!activeMobileKanbanCol || !cols.includes(activeMobileKanbanCol)) {
+        activeMobileKanbanCol = cols[0];
+      }
+
+      if (mobileTabsEl) {
+        mobileTabsEl.innerHTML = cols.map(c => {
+          const count = appState.activeTasks.filter(t => t.column_name === c).length;
+          const isActive = c === activeMobileKanbanCol;
+          return `
+            <button onclick="setMobileKanbanColumn('${escapeHtml(c)}')" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+              isActive
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }">
+              <span class="truncate">${escapeHtml(c)}</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-black/30 text-white' : 'bg-white/10 text-slate-400'}">${count}</span>
+            </button>
+          `;
+        }).join('');
+      }
 
       const priorityWeight = { urgent: 4, high: 3, normal: 2, low: 1 };
 
@@ -1426,8 +1461,9 @@
           if (b.due_date) return 1;
           return 0;
         });
+        const isColActiveOnMobile = colName === activeMobileKanbanCol;
         const colDiv = document.createElement('div');
-        colDiv.className = 'glass-card rounded-2xl p-3.5 flex flex-col min-w-[270px] bg-slate-900/60 border border-white/10';
+        colDiv.className = `glass-card rounded-2xl p-3.5 flex flex-col min-w-[270px] bg-slate-900/60 border border-white/10 ${isColActiveOnMobile ? 'flex' : 'hidden sm:flex'}`;
         colDiv.dataset.column = colName;
 
         // Drag over handlers

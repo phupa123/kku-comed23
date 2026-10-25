@@ -115,10 +115,14 @@
     document.body.appendChild(pill);
   }
 
-  window.dismissPwaInstallPill = function () {
-    localStorage.setItem(STORAGE_DISMISSED_INSTALL, 'true');
+  function hidePwaInstallBanner() {
     const pill = document.getElementById('pwaInstallFloatingPill');
     if (pill) pill.remove();
+  }
+
+  window.dismissPwaInstallPill = function () {
+    localStorage.setItem(STORAGE_DISMISSED_INSTALL, 'true');
+    hidePwaInstallBanner();
   };
 
   // Visual Interactive Install Guide Modal
