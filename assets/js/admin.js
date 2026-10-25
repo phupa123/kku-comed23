@@ -3194,7 +3194,7 @@ async function downloadAllSlipsZip() {
     return;
   }
 
-  // Sanitize campaign name for ASCII/Windows-safe filename
+  const campTitle = (currentAdminCampaign && currentAdminCampaign.title) ? currentAdminCampaign.title : 'ค่าทำป้ายสาขาวิชาเอก';
   const campId = (currentAdminCampaign && currentAdminCampaign.id) ? String(currentAdminCampaign.id).replace(/[^a-zA-Z0-9_-]/g, '_') : 'camp';
   const zip = new JSZip();
 
@@ -3220,6 +3220,7 @@ async function downloadAllSlipsZip() {
 
   let downloadedCount = 0;
   let failedCount = 0;
+  const excelRecords = [];
 
   for (let i = 0; i < allPaidStudents.length; i++) {
     const st = allPaidStudents[i];
@@ -3254,10 +3255,22 @@ async function downloadAllSlipsZip() {
       else if (cleanUrl.includes('.pdf')) ext = 'pdf';
 
       const slipSuffix = slips.length > 1 ? `_part${sIdx + 1}` : '';
-      // Windows-safe filename: No illegal characters (\ / : * ? " < > |)
       const safeNickname = (st.nickname || '').replace(/[/\\?%*:|"<>]/g, '');
       const safeStudentName = (st.name || '').replace(/[/\\?%*:|"<>]/g, '').replace(/\s+/g, '_');
       const safeFileName = `${st.id}_${safeStudentName}_น้อง${safeNickname}${slipSuffix}.${ext}`;
+
+      // Save for Excel summary record
+      excelRecords.push({
+        studentId: st.id,
+        name: st.name,
+        nickname: st.nickname,
+        email: st.email || '',
+        amount: Number(rec.amount || (currentAdminCampaign ? currentAdminCampaign.price : 190)),
+        timestamp: rec.timestamp || '-',
+        refCode: rec.refCode || '-',
+        slipFileName: safeFileName,
+        slipUrl: rawUrl
+      });
 
       try {
         let blob = null;
@@ -3274,14 +3287,13 @@ async function downloadAllSlipsZip() {
           }
           blob = new Blob([u8arr], { type: mime });
         } else {
-          // 2. Fetch using direct URL or Cloudflare Worker download-proxy to eliminate CORS
+          // 2. Fetch using direct URL or Cloudflare Worker download-proxy
           let fetchTarget = rawUrl;
           if (rawUrl.includes('drive.google.com')) {
             const idMatch = rawUrl.match(/[-\w]{25,}/);
             if (idMatch) fetchTarget = `https://drive.google.com/uc?export=download&id=${idMatch[0]}`;
           }
 
-          // Try direct first
           let resp = null;
           try {
             resp = await fetch(fetchTarget, { mode: 'cors' });
@@ -3289,7 +3301,6 @@ async function downloadAllSlipsZip() {
             resp = null;
           }
 
-          // If direct fetch fails or is blocked by CORS, route through /api/download-proxy
           if (!resp || !resp.ok) {
             const proxyBase = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('edspace')) 
               ? '' 
@@ -3322,9 +3333,105 @@ async function downloadAllSlipsZip() {
     }
   }
 
+  // --- GENERATE EMBEDDED EXCEL REPORT (.xlsx) INTO ZIP ---
+  if (typeof XLSX !== 'undefined') {
+    if (toast) {
+      const msgSpan = toast.querySelector('span');
+      if (msgSpan) msgSpan.textContent = "📊 กำลังสร้างไฟล์รายงานสรุป Excel แนบลงใน ZIP...";
+    }
+
+    try {
+      const wb = XLSX.utils.book_new();
+      const headers = [
+        "ลำดับ",
+        "รหัสนักศึกษา",
+        "ชื่อ - นามสกุล",
+        "ชื่อเล่น",
+        "อีเมล (KKU Mail)",
+        "สถานะการชำระเงิน",
+        "ยอดเงิน (บาท)",
+        "วัน-เวลาที่ชำระ",
+        "รหัสอ้างอิง",
+        "ชื่อไฟล์สลิปใน ZIP",
+        "ลิงก์ภาพสลิปออนไลน์"
+      ];
+
+      let totalSum = 0;
+      const rows = excelRecords.map((r, idx) => {
+        totalSum += r.amount;
+        return [
+          idx + 1,
+          r.studentId,
+          r.name,
+          r.nickname,
+          r.email,
+          "ชำระเงินแล้ว",
+          r.amount,
+          r.timestamp,
+          r.refCode,
+          r.slipFileName,
+          r.slipUrl
+        ];
+      });
+
+      // Add Total Summary row at bottom
+      rows.push([
+        "",
+        "รวมทั้งสิ้น",
+        `${allPaidStudents.length} คน (${excelRecords.length} สลิป)`,
+        "",
+        "",
+        "",
+        totalSum,
+        new Date().toLocaleString('th-TH'),
+        "",
+        "",
+        ""
+      ]);
+
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+      // Set column widths
+      ws['!cols'] = [
+        { wch: 6 },  // ลำดับ
+        { wch: 14 }, // รหัส นศ.
+        { wch: 26 }, // ชื่อ-สกุล
+        { wch: 12 }, // ชื่อเล่น
+        { wch: 28 }, // อีเมล
+        { wch: 16 }, // สถานะ
+        { wch: 14 }, // ยอดเงิน
+        { wch: 22 }, // วันเวลา
+        { wch: 16 }, // รหัสอ้างอิง
+        { wch: 42 }, // ชื่อไฟล์สลิป
+        { wch: 45 }  // ลิงก์ออนไลน์
+      ];
+
+      // Format header row style
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (ws[cellRef]) {
+          ws[cellRef].s = {
+            fill: { fgColor: { rgb: "E65A19" } },
+            font: { name: "Prompt", sz: 11, bold: true, color: { rgb: "FFFFFF" } },
+            alignment: { horizontal: "center", vertical: "center" }
+          };
+        }
+      }
+
+      XLSX.utils.book_append_sheet(wb, ws, "รายงานสลิปการชำระเงิน");
+
+      // Generate binary array buffer
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      zip.file(`00_สรุปรายงานสลิป_${campId}.xlsx`, wbout);
+    } catch (excelErr) {
+      console.warn("[BulkDownload] Error generating excel report:", excelErr);
+    }
+  }
+
   if (toast) {
     const msgSpan = toast.querySelector('span');
-    if (msgSpan) msgSpan.textContent = "⚡ กำลังสร้างและบีบอัดไฟล์ ZIP...";
+    if (msgSpan) msgSpan.textContent = "⚡ กำลังบีบอัดและแพ็กเกจไฟล์ ZIP...";
   }
 
   try {
@@ -3339,7 +3446,6 @@ async function downloadAllSlipsZip() {
       }
     });
 
-    // Pure ASCII and standard safe filename for Windows Explorer
     const nowStr = new Date().toISOString().slice(0, 10);
     const zipFileName = `COMED23_Slips_${campId}_${nowStr}.zip`;
 
@@ -3355,7 +3461,7 @@ async function downloadAllSlipsZip() {
     }, 2000);
 
     if (toast) toast.remove();
-    showToastNotification(`🎉 สร้างไฟล์ ZIP สำเร็จ (${downloadedCount} สลิป)!`);
+    showToastNotification(`🎉 ดาวน์โหลดสลิป ${downloadedCount} รูป + รายงาน Excel สำเร็จ!`);
   } catch (zipErr) {
     console.error("ZIP Generation error:", zipErr);
     if (toast) toast.remove();
