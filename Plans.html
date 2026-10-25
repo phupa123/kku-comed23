@@ -88,6 +88,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="assets/js/qr_suite.js"></script>
   <!-- Strict No-LocalStorage Plans Repository -->
+  <script src="assets/js/multi_uploader.js"></script>
   <script src="assets/js/plans_repo.js"></script>
   <!-- Google Calendar & iCalendar (.ics) Sync Engine -->
   <script src="assets/js/calendar_sync.js"></script>
@@ -313,45 +314,45 @@
         </button>
       </nav>
 
-      <!-- Right Action Suite & User Profile -->
-      <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+      <!-- Right Action Suite & User Profile (Fluid & Compact on Mobile) -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
         <!-- QR Suite Trigger Button -->
         <button onclick="openGlobalQrModal()" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer" title="แชร์ QR Code หรือเปิดกล้องสแกน">
           <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
-          <span class="hidden sm:inline font-mono">QR Suite</span>
+          <span class="hidden md:inline font-mono">QR</span>
         </button>
 
         <!-- Primary Action: Create Room -->
-        <button onclick="openCreatePlanModal()" class="px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#FF7A29] hover:from-[#d14f14] hover:to-[#ea6c1e] text-white font-bold text-xs shadow-md shadow-orange-500/20 flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer whitespace-nowrap">
+        <button onclick="openCreatePlanModal()" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#FF7A29] hover:from-[#d14f14] hover:to-[#ea6c1e] text-white font-bold text-xs shadow-md shadow-orange-500/20 flex items-center gap-1 transition transform active:scale-95 cursor-pointer whitespace-nowrap">
           <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
-          <span class="hidden sm:inline">สร้างห้องงานใหม่</span>
-          <span class="sm:hidden">สร้าง</span>
+          <span class="hidden sm:inline">สร้างห้องงาน</span>
+          <span class="sm:hidden text-[11px]">สร้าง</span>
         </button>
 
         <!-- User Authentication Widget -->
         <div id="userAuthContainer" class="flex items-center">
-          <button id="authBtnLogin" onclick="triggerGoogleLogin()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs transition cursor-pointer">
+          <button id="authBtnLogin" onclick="triggerGoogleLogin()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs transition cursor-pointer">
             <i data-lucide="log-in" class="w-3.5 h-3.5 text-orange-400"></i>
-            <span>เข้าสู่ระบบ KKU</span>
+            <span class="hidden xs:inline">เข้าสู่ระบบ</span>
           </button>
           
-          <div id="authUserInfo" class="hidden items-center gap-2 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10">
+          <div id="authUserInfo" class="hidden items-center gap-1.5 px-2 py-1 rounded-xl bg-white/5 border border-white/10 max-w-[125px] sm:max-w-none">
             <div class="relative flex-shrink-0">
-              <img id="authUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" alt="User" class="w-6 h-6 rounded-lg object-cover border border-orange-400/40">
-              <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-slate-900 shadow-[0_0_6px_#10B981]"></span>
+              <img id="authUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" alt="User" class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg object-cover border border-orange-400/40">
+              <span class="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 border border-slate-900 shadow-[0_0_6px_#10B981]"></span>
             </div>
-            <div class="flex flex-col text-left">
-              <span id="authUserName" class="text-xs font-bold text-slate-200 max-w-[85px] sm:max-w-[120px] truncate leading-tight">ชื่อผู้ใช้</span>
-              <span class="text-[9px] font-mono text-emerald-400 leading-none">● online</span>
+            <div class="flex flex-col text-left truncate">
+              <span id="authUserName" class="text-[11px] sm:text-xs font-bold text-slate-200 truncate leading-tight">ชื่อผู้ใช้</span>
+              <span class="text-[8px] sm:text-[9px] font-mono text-emerald-400 leading-none">● online</span>
             </div>
-            <button onclick="logoutUser()" title="ออกจากระบบ" class="text-slate-400 hover:text-rose-400 text-[10px] font-mono transition ml-1 px-1 py-0.5 rounded hover:bg-white/5 cursor-pointer">
-              Logout
+            <button onclick="logoutUser()" title="ออกจากระบบ" class="text-slate-400 hover:text-rose-400 text-[9px] font-mono transition ml-0.5 px-1 py-0.5 rounded hover:bg-white/5 cursor-pointer">
+              ✕
             </button>
           </div>
         </div>
 
         <a href="index.html" class="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex-shrink-0" title="กลับหน้าแรก">
-          <i data-lucide="home" class="w-4 h-4"></i>
+          <i data-lucide="home" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
         </a>
       </div>
 
@@ -442,6 +443,8 @@
         <div class="space-y-2">
           <h2 id="activeRoomTitle" class="text-xl sm:text-2xl font-black text-white leading-tight">ชื่องานหลัก</h2>
           <div id="activeRoomDesc" class="text-xs text-slate-300 max-w-3xl leading-relaxed rich-rendered-html">รายละเอียดงาน</div>
+          <!-- Attached Gallery Strip -->
+          <div id="activeRoomAttachmentsContainer" class="hidden flex items-center gap-2 overflow-x-auto custom-scroll pt-1 pb-1"></div>
 
           <!-- Creator Profile Pill (Compact & Clean) -->
           <div class="pt-1 flex items-center gap-2 flex-wrap">
@@ -691,6 +694,36 @@
           </div>
         </div>
 
+        <!-- Multi-Image Catbox Attachments -->
+        <div class="space-y-1.5">
+          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="images" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>แนบภาพประกอบห้องงาน (หลายรูป)</span>
+            </span>
+            <span class="text-[10px] text-amber-400/90 font-mono">บีบอัดภาพ & ฝาก Catbox อัตโนมัติ</span>
+          </label>
+          
+          <div class="flex items-center gap-2">
+            <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>เลือกหลายรูปภาพ...</span>
+              <input type="file" multiple accept="image/*" onchange="handleMultiImageUpload(event, 'newRoom')" class="hidden">
+            </label>
+            <span class="text-[11px] text-slate-400">เลือกได้หลายภาพพร้อมกัน</span>
+          </div>
+
+          <!-- Upload Progress Status -->
+          <div id="newRoomUploadProgress" class="hidden flex items-center gap-2 p-2 rounded-xl bg-sky-950/60 border border-sky-500/30 text-[11px] text-sky-300 animate-pulse">
+            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-sky-400"></i>
+            <span id="newRoomUploadText">กำลังประมวลผลและอัปโหลด...</span>
+          </div>
+
+          <!-- Thumbnail Previews Grid (Small & Sleek) -->
+          <div id="newRoomImagePreviews" class="hidden flex items-center gap-2 overflow-x-auto custom-scroll p-2 rounded-2xl bg-slate-900/90 border border-white/10"></div>
+        </div>
+
+
 
         <div>
           <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
@@ -825,6 +858,36 @@
             <input type="datetime-local" id="editRoomEndDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
           </div>
         </div>
+
+        <!-- Multi-Image Catbox Attachments -->
+        <div class="space-y-1.5">
+          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="images" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>แนบภาพประกอบห้องงาน (หลายรูป)</span>
+            </span>
+            <span class="text-[10px] text-amber-400/90 font-mono">บีบอัดภาพ & ฝาก Catbox อัตโนมัติ</span>
+          </label>
+          
+          <div class="flex items-center gap-2">
+            <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>เลือกหลายรูปภาพ...</span>
+              <input type="file" multiple accept="image/*" onchange="handleMultiImageUpload(event, 'editRoom')" class="hidden">
+            </label>
+            <span class="text-[11px] text-slate-400">เลือกได้หลายภาพพร้อมกัน</span>
+          </div>
+
+          <!-- Upload Progress Status -->
+          <div id="editRoomUploadProgress" class="hidden flex items-center gap-2 p-2 rounded-xl bg-sky-950/60 border border-sky-500/30 text-[11px] text-sky-300 animate-pulse">
+            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-sky-400"></i>
+            <span id="editRoomUploadText">กำลังประมวลผลและอัปโหลด...</span>
+          </div>
+
+          <!-- Thumbnail Previews Grid (Small & Sleek) -->
+          <div id="editRoomImagePreviews" class="hidden flex items-center gap-2 overflow-x-auto custom-scroll p-2 rounded-2xl bg-slate-900/90 border border-white/10"></div>
+        </div>
+
 
 
         <div>
@@ -979,6 +1042,36 @@
           </label>
           <input type="url" id="taskFormAttachmentUrl" placeholder="https://drive.google.com/... หรือ ลิงก์รูปภาพ" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
         </div>
+
+        <!-- Multi-Image Catbox Attachments -->
+        <div class="space-y-1.5">
+          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="images" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>แนบภาพประกอบงานย่อย (หลายรูปฝาก Catbox)</span>
+            </span>
+            <span class="text-[10px] text-amber-400/90 font-mono">บีบอัดภาพ & ฝาก Catbox อัตโนมัติ</span>
+          </label>
+          
+          <div class="flex items-center gap-2">
+            <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>เลือกหลายรูปภาพ...</span>
+              <input type="file" multiple accept="image/*" onchange="handleMultiImageUpload(event, 'taskForm')" class="hidden">
+            </label>
+            <span class="text-[11px] text-slate-400">เลือกได้หลายภาพพร้อมกัน</span>
+          </div>
+
+          <!-- Upload Progress Status -->
+          <div id="taskFormUploadProgress" class="hidden flex items-center gap-2 p-2 rounded-xl bg-sky-950/60 border border-sky-500/30 text-[11px] text-sky-300 animate-pulse">
+            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-sky-400"></i>
+            <span id="taskFormUploadText">กำลังประมวลผลและอัปโหลด...</span>
+          </div>
+
+          <!-- Thumbnail Previews Grid (Small & Sleek) -->
+          <div id="taskFormImagePreviews" class="hidden flex items-center gap-2 overflow-x-auto custom-scroll p-2 rounded-2xl bg-slate-900/90 border border-white/10"></div>
+        </div>
+
 
 
         <div>
@@ -1233,7 +1326,113 @@
       calendarScopeFilter: 'all'
     };
 
+    
+    // Strip HTML tags for clean preview
+    function stripHtmlTags(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.innerHTML = str;
+      return div.textContent || div.innerText || '';
+    }
+
     // =========================================================================
+    // MULTI-IMAGE UPLOADER (CATBOX.MOE WITH AUTO COMPRESSION)
+    // =========================================================================
+    let roomCreateImages = [];
+    let roomEditImages = [];
+    let taskFormImages = [];
+
+    async function handleMultiImageUpload(event, containerType) {
+      const files = Array.from(event.target.files || []);
+      if (files.length === 0) return;
+
+      const progressEl = document.getElementById(containerType + 'UploadProgress');
+      const progressText = document.getElementById(containerType + 'UploadText');
+      if (progressEl) progressEl.classList.remove('hidden');
+
+      let targetList;
+      if (containerType === 'newRoom') targetList = roomCreateImages;
+      else if (containerType === 'editRoom') targetList = roomEditImages;
+      else if (containerType === 'taskForm') targetList = taskFormImages;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (progressText) progressText.textContent = `กำลังอัปโหลดรูปที่ ${i + 1}/${files.length} (บีบอัดลดขนาด & ฝาก Catbox)...`;
+        try {
+          let uploadedUrl = '';
+          if (window.MultiUploader && typeof window.MultiUploader.upload === 'function') {
+            const res = await window.MultiUploader.upload(file, {
+              preferredProvider: 'catbox',
+              autoCompress: true,
+              maxDimension: 1200,
+              quality: 0.80
+            });
+            uploadedUrl = res.url || res.directUrl;
+          } else {
+            // Direct Catbox upload fallback
+            const formData = new FormData();
+            formData.append('reqtype', 'fileupload');
+            formData.append('userhash', '4f0c883945e2fe8d067b3dd12');
+            formData.append('fileToUpload', file);
+            const resp = await fetch('https://catbox.moe/user/api.php', { method: 'POST', body: formData });
+            uploadedUrl = await resp.text();
+          }
+
+          if (uploadedUrl && uploadedUrl.startsWith('http')) {
+            targetList.push({
+              url: uploadedUrl.trim(),
+              name: file.name || 'image.jpg',
+              type: 'image'
+            });
+            renderMultiImagePreviews(containerType);
+          }
+        } catch (err) {
+          console.error("Upload image error:", err);
+          showAppToast("อัปโหลดภาพไม่สำเร็จ", file.name, "error");
+        }
+      }
+
+      if (progressEl) progressEl.classList.add('hidden');
+      event.target.value = '';
+    }
+
+    function renderMultiImagePreviews(containerType) {
+      const previewGrid = document.getElementById(containerType + 'ImagePreviews');
+      if (!previewGrid) return;
+
+      let targetList;
+      if (containerType === 'newRoom') targetList = roomCreateImages;
+      else if (containerType === 'editRoom') targetList = roomEditImages;
+      else if (containerType === 'taskForm') targetList = taskFormImages;
+
+      previewGrid.innerHTML = '';
+      if (!targetList || targetList.length === 0) {
+        previewGrid.classList.add('hidden');
+        return;
+      }
+      previewGrid.classList.remove('hidden');
+
+      targetList.forEach((img, idx) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'relative group w-14 h-14 rounded-xl overflow-hidden border border-white/15 bg-slate-950 flex-shrink-0 shadow-md';
+        thumb.innerHTML = `
+          <img src="${img.url}" class="w-full h-full object-cover" alt="Thumb">
+          <button type="button" onclick="removeMultiUploadedImage('${containerType}', ${idx})" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-600/90 text-white flex items-center justify-center text-[10px] opacity-80 hover:opacity-100 transition shadow">
+            &times;
+          </button>
+        `;
+        previewGrid.appendChild(thumb);
+      });
+    }
+
+    function removeMultiUploadedImage(containerType, index) {
+      if (containerType === 'newRoom') roomCreateImages.splice(index, 1);
+      else if (containerType === 'editRoom') roomEditImages.splice(index, 1);
+      else if (containerType === 'taskForm') taskFormImages.splice(index, 1);
+      renderMultiImagePreviews(containerType);
+    }
+
+// =========================================================================
     // RICH TEXT FORMATTING UTILITIES & EDITOR SYNC
     // =========================================================================
     function formatRichDoc(editorId, command, value = null) {
@@ -1811,7 +2010,15 @@
 
             <div>
               <h3 class="text-base font-black text-white group-hover:text-orange-400 transition line-clamp-1">${escapeHtml(p.title)}</h3>
-              <p class="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">${escapeHtml(p.description || 'ไม่มีรายละเอียดเพิ่มเติม')}</p>
+              <p class="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">${escapeHtml(stripHtmlTags(p.description) || 'ไม่มีรายละเอียดเพิ่มเติม')}</p>
+              ${(p.attachments && p.attachments.length > 0) ? `
+              <div class="flex items-center gap-1 mt-1.5 overflow-x-auto custom-scroll pb-0.5">
+                ${p.attachments.slice(0, 4).map(att => `
+                  <img src="${att.url}" class="w-7 h-7 rounded-lg object-cover border border-white/10 bg-slate-950 flex-shrink-0" alt="Thumb" onerror="this.remove()">
+                `).join('')}
+                ${p.attachments.length > 4 ? `<span class="text-[9px] font-mono text-slate-400 font-bold px-1">+${p.attachments.length - 4}</span>` : ''}
+              </div>
+              ` : ''}
             </div>
 
             <!-- Progress Bar -->
@@ -1860,6 +2067,26 @@
 
       document.getElementById('activeRoomTitle').textContent = plan.title;
       document.getElementById('activeRoomDesc').innerHTML = plan.description || 'ไม่มีรายละเอียดเพิ่มเติม';
+      
+      const attContainer = document.getElementById('activeRoomAttachmentsContainer');
+      if (attContainer) {
+        attContainer.innerHTML = '';
+        if (plan.attachments && plan.attachments.length > 0) {
+          attContainer.classList.remove('hidden');
+          plan.attachments.forEach(att => {
+            const a = document.createElement('a');
+            a.href = att.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'w-14 h-14 rounded-xl overflow-hidden border border-white/15 bg-slate-950 flex-shrink-0 shadow hover:scale-105 transition block';
+            a.title = 'คลิกเพื่อดูภาพขนาดเต็ม';
+            a.innerHTML = `<img src="${att.url}" class="w-full h-full object-cover" alt="Attachment" onerror="this.src='logo.png'">`;
+            attContainer.appendChild(a);
+          });
+        } else {
+          attContainer.classList.add('hidden');
+        }
+      }
       document.getElementById('activeRoomDateText').textContent = new Date(plan.start_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
       document.getElementById('activeRoomCreatorName').textContent = plan.creator_name || 'สมาชิก';
       document.getElementById('activeRoomCreatorEmail').textContent = `(${plan.creator_email || '-'})`;
@@ -2197,7 +2424,8 @@
         creator_name: appState.user.name || 'สมาชิกสาขา',
         creator_avatar: appState.user.avatar || '',
         creator_student_id: appState.user.studentId || '',
-        collaborators: appState.selectedRoomCollabs
+        collaborators: appState.selectedRoomCollabs,
+        attachments: [...roomCreateImages]
       };
 
       try {
@@ -2374,6 +2602,8 @@
       document.getElementById('editRoomPriority').value = plan.priority || 'normal';
       document.getElementById('editRoomScope').value = plan.scope || 'department';
       setRichEditorContent('editRoomDescEditor', plan.description || '');
+      roomEditImages = (plan.attachments && Array.isArray(plan.attachments)) ? [...plan.attachments] : [];
+      renderMultiImagePreviews('editRoom');
 
       if (plan.start_date) {
         const d = new Date(plan.start_date);
@@ -2428,6 +2658,7 @@
         priority,
         scope,
         description: desc,
+        attachments: [...roomEditImages],
         start_date: new Date(startDate).toISOString(),
         end_date: endDate ? new Date(endDate).toISOString() : null
       };
@@ -2604,6 +2835,8 @@
       document.getElementById('taskFormTitle').value = '';
       document.getElementById('taskFormAttachmentUrl').value = '';
       setRichEditorContent('taskFormDescEditor', '');
+      taskFormImages = [];
+      renderMultiImagePreviews('taskForm');
       document.getElementById('taskFormDueDate').value = '';
       document.getElementById('taskFormTag').value = '';
       document.getElementById('taskFormAssigneeSearch').value = '';
@@ -2629,6 +2862,8 @@
       document.getElementById('taskFormId').value = task.id;
       document.getElementById('taskFormTitle').value = task.title;
       setRichEditorContent('taskFormDescEditor', task.description || '');
+      taskFormImages = (task.attachments && Array.isArray(task.attachments)) ? [...task.attachments] : [];
+      renderMultiImagePreviews('taskForm');
       document.getElementById('taskFormPriority').value = task.priority || 'normal';
       document.getElementById('taskFormAttachmentUrl').value = (task.attachments && task.attachments[0]) ? task.attachments[0].url : '';
       
@@ -2711,7 +2946,10 @@
       const dueDateVal = document.getElementById('taskFormDueDate').value;
       const tagVal = document.getElementById('taskFormTag').value.trim();
 
-      const attachments = attachUrl ? [{ url: attachUrl, name: 'ไฟล์แนบ' }] : [];
+      let attachments = [...taskFormImages];
+      if (attachUrl && !attachments.some(a => a.url === attachUrl)) {
+        attachments.push({ url: attachUrl, name: 'ไฟล์แนบภายนอก', type: 'link' });
+      }
       const tags = tagVal ? [tagVal] : [];
       const dueDateIso = dueDateVal ? new Date(dueDateVal).toISOString() : null;
 

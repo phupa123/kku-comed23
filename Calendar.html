@@ -80,6 +80,7 @@
   <script src="config/supabase_config.js"></script>
   <script src="students_data.js"></script>
   <!-- Strict No-LocalStorage Plans Repository & Calendar Engine -->
+  <script src="assets/js/multi_uploader.js"></script>
   <script src="assets/js/plans_repo.js"></script>
   <script src="assets/js/calendar_sync.js"></script>
   <!-- Real-Time Push Notification Engine -->
@@ -252,19 +253,19 @@
         </a>
       </nav>
 
-      <!-- Right Action Suite & User Profile -->
-      <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+      <!-- Right Action Suite & User Profile (Fluid & Compact) -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
         <!-- 1-Click Sync Trigger -->
-        <button onclick="openCalendarSubscriptionModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 hover:text-white text-xs font-bold transition cursor-pointer" title="ซิงค์ Google Calendar หรือ Apple Calendar อัตโนมัติ">
+        <button onclick="openCalendarSubscriptionModal()" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 hover:text-white text-xs font-bold transition cursor-pointer" title="ซิงค์ Google Calendar หรือ Apple Calendar อัตโนมัติ">
           <i data-lucide="zap" class="w-3.5 h-3.5 text-blue-400"></i>
           <span>ซิงค์ Google Calendar</span>
         </button>
 
         <!-- Primary Action -->
-        <button onclick="openCreatePlanModal()" class="px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#FF7A29] hover:from-[#d14f14] hover:to-[#ea6c1e] text-white font-bold text-xs shadow-md shadow-orange-500/20 flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer whitespace-nowrap">
+        <button onclick="openCreatePlanModal()" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#FF7A29] hover:from-[#d14f14] hover:to-[#ea6c1e] text-white font-bold text-xs shadow-md shadow-orange-500/20 flex items-center gap-1 transition transform active:scale-95 cursor-pointer whitespace-nowrap">
           <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
-          <span class="hidden sm:inline">สร้างกิจกรรมใหม่</span>
-          <span class="sm:hidden">สร้าง</span>
+          <span class="hidden sm:inline">สร้างกิจกรรม</span>
+          <span class="sm:hidden text-[11px]">สร้าง</span>
         </button>
 
         <!-- User Authentication Widget -->
@@ -647,18 +648,31 @@
           </div>
         </div>
 
-        <!-- Cover Image / Illustration URL -->
-        <div>
+        <!-- Multi-Image Catbox Attachments & Poster -->
+        <div class="space-y-1.5">
           <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
-            <span>ภาพประกอบ / ลิงก์โปสเตอร์กิจกรรม (Cover Image URL)</span>
-            <i data-lucide="image" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="images" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>ภาพประกอบกิจกรรม / โปสเตอร์ (ใส่ได้หลายภาพ)</span>
+            </span>
+            <span class="text-[10px] text-amber-400/90 font-mono">บีบอัดภาพ & ฝาก Catbox อัตโนมัติ</span>
           </label>
-          <div class="space-y-1.5">
-            <input type="url" id="newRoomImageUrl" oninput="previewCalendarImage('newRoomImageUrl', 'newRoomImagePreview')" placeholder="https://... ลิงก์รูปภาพ โปสเตอร์ หรือภาพกิจกรรม" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs">
-            <div id="newRoomImagePreview" class="hidden rounded-xl overflow-hidden border border-white/10 max-h-32 bg-slate-950">
-              <img src="" class="w-full h-32 object-cover" alt="Image Preview">
-            </div>
+          
+          <div class="flex items-center gap-2">
+            <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>เลือกหลายรูปภาพ...</span>
+              <input type="file" multiple accept="image/*" onchange="handleCalMultiImageUpload(event, 'newRoom')" class="hidden">
+            </label>
+            <span class="text-[11px] text-slate-400">เลือกได้หลายภาพพร้อมกัน</span>
           </div>
+
+          <div id="newRoomUploadProgress" class="hidden flex items-center gap-2 p-2 rounded-xl bg-sky-950/60 border border-sky-500/30 text-[11px] text-sky-300 animate-pulse">
+            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-sky-400"></i>
+            <span id="newRoomUploadText">กำลังประมวลผลและอัปโหลด...</span>
+          </div>
+
+          <div id="newRoomImagePreviews" class="hidden flex items-center gap-2 overflow-x-auto custom-scroll p-2 rounded-2xl bg-slate-900/90 border border-white/10"></div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -780,18 +794,31 @@
           </div>
         </div>
 
-        <!-- Cover Image URL for Edit -->
-        <div>
+        <!-- Multi-Image Catbox Attachments for Edit -->
+        <div class="space-y-1.5">
           <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
-            <span>ภาพประกอบ / ลิงก์โปสเตอร์กิจกรรม (Cover Image URL)</span>
-            <i data-lucide="image" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="images" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>ภาพประกอบกิจกรรม / โปสเตอร์ (ใส่ได้หลายภาพ)</span>
+            </span>
+            <span class="text-[10px] text-amber-400/90 font-mono">บีบอัดภาพ & ฝาก Catbox</span>
           </label>
-          <div class="space-y-1.5">
-            <input type="url" id="editPlanImageUrl" oninput="previewCalendarImage('editPlanImageUrl', 'editPlanImagePreview')" placeholder="https://... ลิงก์รูปภาพ หรือโปสเตอร์" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs">
-            <div id="editPlanImagePreview" class="hidden rounded-xl overflow-hidden border border-white/10 max-h-32 bg-slate-950">
-              <img src="" class="w-full h-32 object-cover" alt="Image Preview">
-            </div>
+          
+          <div class="flex items-center gap-2">
+            <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>เลือกหลายรูปภาพ...</span>
+              <input type="file" multiple accept="image/*" onchange="handleCalMultiImageUpload(event, 'editPlan')" class="hidden">
+            </label>
+            <span class="text-[11px] text-slate-400">เลือกได้หลายภาพ</span>
           </div>
+
+          <div id="editPlanUploadProgress" class="hidden flex items-center gap-2 p-2 rounded-xl bg-sky-950/60 border border-sky-500/30 text-[11px] text-sky-300 animate-pulse">
+            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-sky-400"></i>
+            <span id="editPlanUploadText">กำลังประมวลผลและอัปโหลด...</span>
+          </div>
+
+          <div id="editPlanImagePreviews" class="hidden flex items-center gap-2 overflow-x-auto custom-scroll p-2 rounded-2xl bg-slate-900/90 border border-white/10"></div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -910,7 +937,96 @@
       draggedPlanId: null
     };
 
+    
     // =========================================================================
+    // MULTI-IMAGE UPLOADER (CATBOX.MOE WITH AUTO COMPRESSION) FOR CALENDAR
+    // =========================================================================
+    let calCreateImages = [];
+    let calEditImages = [];
+
+    async function handleCalMultiImageUpload(event, containerType) {
+      const files = Array.from(event.target.files || []);
+      if (files.length === 0) return;
+
+      const progressEl = document.getElementById(containerType + 'UploadProgress');
+      const progressText = document.getElementById(containerType + 'UploadText');
+      if (progressEl) progressEl.classList.remove('hidden');
+
+      let targetList = (containerType === 'newRoom') ? calCreateImages : calEditImages;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (progressText) progressText.textContent = `กำลังอัปโหลดรูปที่ ${i + 1}/${files.length} (บีบอัดลดขนาด & ฝาก Catbox)...`;
+        try {
+          let uploadedUrl = '';
+          if (window.MultiUploader && typeof window.MultiUploader.upload === 'function') {
+            const res = await window.MultiUploader.upload(file, {
+              preferredProvider: 'catbox',
+              autoCompress: true,
+              maxDimension: 1200,
+              quality: 0.80
+            });
+            uploadedUrl = res.url || res.directUrl;
+          } else {
+            const formData = new FormData();
+            formData.append('reqtype', 'fileupload');
+            formData.append('userhash', '4f0c883945e2fe8d067b3dd12');
+            formData.append('fileToUpload', file);
+            const resp = await fetch('https://catbox.moe/user/api.php', { method: 'POST', body: formData });
+            uploadedUrl = await resp.text();
+          }
+
+          if (uploadedUrl && uploadedUrl.startsWith('http')) {
+            targetList.push({
+              url: uploadedUrl.trim(),
+              name: file.name || 'image.jpg',
+              type: 'image'
+            });
+            renderCalMultiImagePreviews(containerType);
+          }
+        } catch (err) {
+          console.error("Upload image error:", err);
+          showAppToast("อัปโหลดภาพไม่สำเร็จ", file.name, "error");
+        }
+      }
+
+      if (progressEl) progressEl.classList.add('hidden');
+      event.target.value = '';
+    }
+
+    function renderCalMultiImagePreviews(containerType) {
+      const previewGrid = document.getElementById(containerType + 'ImagePreviews');
+      if (!previewGrid) return;
+
+      let targetList = (containerType === 'newRoom') ? calCreateImages : calEditImages;
+
+      previewGrid.innerHTML = '';
+      if (!targetList || targetList.length === 0) {
+        previewGrid.classList.add('hidden');
+        return;
+      }
+      previewGrid.classList.remove('hidden');
+
+      targetList.forEach((img, idx) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'relative group w-14 h-14 rounded-xl overflow-hidden border border-white/15 bg-slate-950 flex-shrink-0 shadow-md';
+        thumb.innerHTML = `
+          <img src="${img.url}" class="w-full h-full object-cover" alt="Thumb">
+          <button type="button" onclick="removeCalMultiUploadedImage('${containerType}', ${idx})" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-600/90 text-white flex items-center justify-center text-[10px] opacity-80 hover:opacity-100 transition shadow">
+            &times;
+          </button>
+        `;
+        previewGrid.appendChild(thumb);
+      });
+    }
+
+    function removeCalMultiUploadedImage(containerType, index) {
+      if (containerType === 'newRoom') calCreateImages.splice(index, 1);
+      else calEditImages.splice(index, 1);
+      renderCalMultiImagePreviews(containerType);
+    }
+
+// =========================================================================
     // CALENDAR EMOJI, MAP PIN & COVER IMAGE HELPERS
     // =========================================================================
     function selectCalendarEmoji(btn, emoji, targetInputId) {
@@ -2020,9 +2136,13 @@
             <button onclick="this.closest('#calendarQuickModal').remove()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
           </div>
 
-          ${(p.attachments && p.attachments[0] && p.attachments[0].type === 'image') ? `
-          <div class="rounded-2xl overflow-hidden max-h-48 border border-white/10 mb-2">
-            <img src="${p.attachments[0].url}" class="w-full h-44 object-cover" alt="Event Cover">
+          ${(p.attachments && p.attachments.length > 0) ? `
+          <div class="flex items-center gap-2 overflow-x-auto custom-scroll p-1.5 rounded-2xl bg-white/[0.02] border border-white/10 mb-2">
+            ${p.attachments.map(att => `
+              <a href="${att.url}" target="_blank" rel="noopener noreferrer" class="w-16 h-16 rounded-xl overflow-hidden border border-white/15 flex-shrink-0 bg-slate-950 shadow hover:scale-105 transition block" title="คลิกเพื่อดูภาพขนาดเต็ม">
+                <img src="${att.url}" class="w-full h-full object-cover" alt="Attachment" onerror="this.src='logo.png'">
+              </a>
+            `).join('')}
           </div>
           ` : ''}
           <div>
@@ -2256,11 +2376,10 @@
       const location = document.getElementById('newRoomLocation').value;
       const desc = document.getElementById('newRoomDesc').value;
       const emoji = document.getElementById('newRoomEmoji') ? document.getElementById('newRoomEmoji').value : '📅';
-      const imageUrl = document.getElementById('newRoomImageUrl') ? document.getElementById('newRoomImageUrl').value.trim() : '';
       const isOfficialCheck = document.getElementById('newRoomIsOfficial');
       const isOfficial = isOfficialCheck ? isOfficialCheck.checked : false;
 
-      const attachments = imageUrl ? [{ type: 'image', url: imageUrl, name: 'โปสเตอร์กิจกรรม' }] : [];
+      const attachments = [...calCreateImages];
 
       const payload = {
         title,
@@ -2313,12 +2432,8 @@
       const editEmojiInput = document.getElementById('editPlanEmoji');
       if (editEmojiInput) editEmojiInput.value = emojiVal;
 
-      const imgUrl = (plan.attachments && plan.attachments[0]) ? plan.attachments[0].url : '';
-      const editImgInput = document.getElementById('editPlanImageUrl');
-      if (editImgInput) {
-        editImgInput.value = imgUrl;
-        previewCalendarImage('editPlanImageUrl', 'editPlanImagePreview');
-      }
+      calEditImages = (plan.attachments && Array.isArray(plan.attachments)) ? [...plan.attachments] : [];
+      renderCalMultiImagePreviews('editPlan');
 
       if (plan.start_date) {
         const d = new Date(plan.start_date);
@@ -2370,9 +2485,7 @@
       const endDate = document.getElementById('editPlanEndDate').value;
       const desc = document.getElementById('editPlanDesc').value.trim();
       const emoji = document.getElementById('editPlanEmoji') ? document.getElementById('editPlanEmoji').value : (plan.emoji || '📅');
-      const imageUrl = document.getElementById('editPlanImageUrl') ? document.getElementById('editPlanImageUrl').value.trim() : '';
-
-      const attachments = imageUrl ? [{ type: 'image', url: imageUrl, name: 'โปสเตอร์กิจกรรม' }] : (plan.attachments || []);
+      const attachments = [...calEditImages];
 
       const updates = {
         title,
