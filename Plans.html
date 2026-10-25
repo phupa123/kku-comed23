@@ -200,97 +200,93 @@
   <div class="fixed top-[20%] left-[-15%] w-[600px] h-[600px] rounded-full bg-[#0C1030]/80 blur-[150px] pointer-events-none z-0"></div>
 
   <!-- ================= TOP NAVIGATION BAR ================= -->
-  <header class="sticky top-0 z-40 bg-[#060814]/95 backdrop-blur-2xl border-b border-white/10 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.6)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+    <header class="sticky top-0 z-40 bg-[#060814]/90 backdrop-blur-2xl border-b border-white/10 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.6)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3 sm:gap-4">
       
       <!-- Brand & Back Button -->
       <div class="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
         <a href="index.html" class="flex items-center gap-2.5 sm:gap-3 group flex-shrink-0">
           <!-- Official KKU Crest Emblem -->
-          <div class="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#B32B19] to-[#E65A19] p-0.5 shadow-[0_0_20px_rgba(230,90,25,0.35)] group-hover:scale-105 transition-transform flex-shrink-0">
+          <div class="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#B32B19] to-[#E65A19] p-0.5 shadow-[0_0_20px_rgba(230,90,25,0.35)] group-hover:scale-105 transition-transform flex-shrink-0">
             <div class="w-full h-full bg-[#0C1030] rounded-[10px] flex items-center justify-center p-1 overflow-hidden">
               <img src="logo.png" alt="KKU COMED" class="w-full h-full object-contain filter drop-shadow">
             </div>
           </div>
 
           <!-- Dynamic Calendar Tear Sheet Icon -->
-          <div class="cal-tear-icon group-hover:scale-105 transition hidden xs:flex" title="วันนี้">
+          <div class="cal-tear-icon group-hover:scale-105 transition hidden xs:flex !w-8 !h-8 sm:!w-9 sm:!h-9" title="วันนี้">
             <div class="cal-tear-top">
               <span class="cal-tear-pin"></span>
               <span class="cal-tear-pin"></span>
             </div>
-            <span class="cal-tear-day" id="plansHeaderDynamicDay">25</span>
+            <span class="cal-tear-day !text-xs sm:!text-sm" id="plansHeaderDynamicDay">25</span>
           </div>
 
           <div class="flex flex-col">
             <div class="flex items-center gap-1.5 leading-none">
-              <span class="text-[13px] font-black tracking-wider text-white font-display">KKU</span>
-              <span class="text-[12px] font-bold text-white font-mono tracking-tight drop-shadow-sm">/ COMED 23</span>
+              <span class="text-xs sm:text-sm font-black tracking-wider text-white font-display">KKU</span>
+              <span class="text-[11px] sm:text-xs font-bold text-white font-mono tracking-tight drop-shadow-sm">/ COMED 23</span>
             </div>
-            <span class="text-[9px] font-mono uppercase tracking-widest text-[#E65A19] font-bold mt-0.5">// PLANTODO HUB</span>
+            <span class="text-[8px] sm:text-[9px] font-mono uppercase tracking-widest text-[#E65A19] font-bold mt-0.5">// PLANTODO HUB</span>
           </div>
         </a>
       </div>
 
-      <!-- Center Switcher: Rooms vs Calendar vs Trash -->
-      <nav class="hidden md:flex items-center gap-1.5 p-1 bg-white/5 border border-white/10 rounded-2xl">
-        <button id="navTabRooms" onclick="switchNavSection('rooms')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-orange-500 text-white shadow-md">
-          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
-          <span>ห้องงานทั้งหมด</span>
-        </button>
-        <button id="navTabCalendar" onclick="switchNavSection('calendar')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
+      <!-- Center Switcher: Subtle sleek pills -->
+      <nav class="hidden md:flex items-center gap-1 p-1 bg-white/[0.04] border border-white/10 rounded-xl font-medium">
+        <a href="Calendar.html" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-white/5">
           <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>ปฏิทินงาน & ซิงค์</span>
-        </button>
-        <a href="Calendar.html" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5" title="เปิดหน้า Calendar Hub แยกเต็มจอ">
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
-          <span>หน้าปฏิทินเต็ม</span>
+          <span>ปฏิทินสาขา (Calendar)</span>
         </a>
-        <button id="navTabTrash" onclick="switchNavSection('trash')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
+        <button id="navTabRooms" onclick="switchNavSection('rooms')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-[#E65A19] text-white shadow-md shadow-[#E65A19]/30">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-white"></i>
+          <span>ห้องงานทั้งหมด (Plans)</span>
+        </button>
+        <button id="navTabTrash" onclick="switchNavSection('trash')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
           <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
           <span>ถังขยะกู้คืน</span>
-          <span id="trashCountBadge" class="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-500/30 text-rose-300 font-bold">0</span>
+          <span id="trashCountBadge" class="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">0</span>
         </button>
       </nav>
 
-      <!-- Right Action & User Profile -->
-      <div class="flex items-center gap-2 sm:gap-2.5">
+      <!-- Right Action Suite & User Profile -->
+      <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
         <!-- QR Suite Trigger Button -->
-        <button onclick="openGlobalQrModal()" class="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer" title="แชร์ QR Code หรือเปิดกล้องสแกน">
-          <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
+        <button onclick="openGlobalQrModal()" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer" title="แชร์ QR Code หรือเปิดกล้องสแกน">
+          <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
           <span class="hidden sm:inline font-mono">QR Suite</span>
         </button>
 
         <!-- Primary Action: Create Room -->
-        <button onclick="openCreatePlanModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#FF7A29] hover:from-[#d14f14] hover:to-[#ea6c1e] text-white font-black text-xs shadow-lg shadow-orange-500/25 flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer">
-          <i data-lucide="plus" class="w-4 h-4 stroke-[3]"></i>
+        <button onclick="openCreatePlanModal()" class="px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#FF7A29] hover:from-[#d14f14] hover:to-[#ea6c1e] text-white font-bold text-xs shadow-md shadow-orange-500/20 flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer whitespace-nowrap">
+          <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
           <span class="hidden sm:inline">สร้างห้องงานใหม่</span>
           <span class="sm:hidden">สร้าง</span>
         </button>
 
         <!-- User Authentication Widget -->
         <div id="userAuthContainer" class="flex items-center">
-          <button id="authBtnLogin" onclick="triggerGoogleLogin()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs transition cursor-pointer">
+          <button id="authBtnLogin" onclick="triggerGoogleLogin()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs transition cursor-pointer">
             <i data-lucide="log-in" class="w-3.5 h-3.5 text-orange-400"></i>
             <span>เข้าสู่ระบบ KKU</span>
           </button>
           
-          <div id="authUserInfo" class="hidden items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10">
-            <div class="relative">
+          <div id="authUserInfo" class="hidden items-center gap-2 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10">
+            <div class="relative flex-shrink-0">
               <img id="authUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" alt="User" class="w-6 h-6 rounded-lg object-cover border border-orange-400/40">
               <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-slate-900 shadow-[0_0_6px_#10B981]"></span>
             </div>
             <div class="flex flex-col text-left">
-              <span id="authUserName" class="text-xs font-bold text-slate-200 max-w-[100px] truncate leading-tight">ชื่อผู้ใช้</span>
+              <span id="authUserName" class="text-xs font-bold text-slate-200 max-w-[85px] sm:max-w-[120px] truncate leading-tight">ชื่อผู้ใช้</span>
               <span class="text-[9px] font-mono text-emerald-400 leading-none">● online</span>
             </div>
-            <button onclick="logoutUser()" title="ออกจากระบบ (Logout)" class="text-slate-400 hover:text-rose-400 text-[10px] font-mono transition ml-1 px-1 py-0.5 rounded hover:bg-white/5">
+            <button onclick="logoutUser()" title="ออกจากระบบ" class="text-slate-400 hover:text-rose-400 text-[10px] font-mono transition ml-1 px-1 py-0.5 rounded hover:bg-white/5 cursor-pointer">
               Logout
             </button>
           </div>
         </div>
 
-        <a href="index.html" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition" title="กลับหน้าแรก">
+        <a href="index.html" class="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex-shrink-0" title="กลับหน้าแรก">
           <i data-lucide="home" class="w-4 h-4"></i>
         </a>
       </div>
