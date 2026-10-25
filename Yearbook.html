@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ทำเนียบรุ่น COMED 23 (60 คน) | คอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น</title>
+  <meta name="description" content="ทำเนียบรุ่นและผังคณะกรรมการดำเนินงาน สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 23 คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://kku-comed23.edspace.workers.dev">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+            display: ['Prompt', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            brand: {
+              orange: '#E65A19',
+              red: '#B32B19',
+              gold: '#F59E0B',
+              dark: '#06070A',
+              card: 'rgba(255, 255, 255, 0.03)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons & GSAP -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- Supabase & Data Repositories -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <script src="students_data.js"></script>
+  <script src="config/events_repo.js?v=2.3.0"></script>
+  <script src="assets/js/pwa-installer.js"></script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #06070A; }
+    ::-webkit-scrollbar-thumb { background: #262E45; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #E65A19; }
+
+    /* Glassmorphism Classes */
+    .glass-surface {
+      background: rgba(12, 16, 28, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-surface-hover:hover {
+      background: rgba(18, 24, 42, 0.85);
+      border-color: rgba(230, 90, 25, 0.35);
+      transform: translateY(-2px);
+    }
+
+    /* Cyber Ambient Grid */
+    .cyber-bg {
+      background-color: #06070A;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(230, 90, 25, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 100% 50%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+    }
+
+    /* Avatar Shimmer Skeleton */
+    .avatar-skeleton {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.02) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s infinite;
+      z-index: 2;
+      transition: opacity 0.3s ease;
+    }
+    .avatar-skeleton.loaded { opacity: 0; pointer-events: none; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  </style>
+</head>
+
+<body class="cyber-bg text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-[#E65A19] selection:text-white overflow-x-hidden">
+
+  <!-- ================= 1. GLOBAL STICKY HEADER ================= -->
+  <header class="sticky top-0 z-40 glass-surface border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition shadow-sm">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#E65A19]/20 to-[#B32B19]/20 border border-[#E65A19]/30 text-[#FF7A29] text-[10px] font-mono font-black uppercase tracking-wider">
+              YEARBOOK • 60 STUDENTS
+            </span>
+          </div>
+          <h1 class="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-1.5 mt-0.5">
+            <span>ทำเนียบรุ่น COMED 23</span>
+            <span class="text-slate-400 text-xs font-normal hidden sm:inline">// คณะศึกษาศาสตร์ มข.</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Quick Nav Buttons -->
+      <div class="flex items-center gap-2">
+        <a href="event.html" class="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-[#FF7A29] text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">ระบบเลือกฝ่ายห้อง</span>
+        </a>
+        <a href="Profile.html" class="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-200 text-xs font-bold transition flex items-center gap-1.5">
+          <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span class="hidden sm:inline">โปรไฟล์ของฉัน</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= 2. HERO & STATS OVERVIEW ================= -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
+    
+    <!-- Hero Banner Card -->
+    <div class="glass-surface p-6 sm:p-8 rounded-3xl relative overflow-hidden shadow-2xl border border-white/10">
+      <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-[#E65A19]/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative z-10 max-w-2xl space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-slate-300 text-xs font-mono">
+          <i data-lucide="award" class="w-3.5 h-3.5 text-[#E65A19]"></i>
+          <span>Computer Education KKU • Cohort 23 (รหัส 69)</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+          ทำเนียบรุ่นและโครงสร้างคณะทำงาน <br class="hidden sm:inline">
+          <span class="bg-gradient-to-r from-[#FF7A29] to-[#F59E0B] bg-clip-text text-transparent">คอมพิวเตอร์ศึกษา รุ่นที่ 23</span>
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+          รวมรายชื่อเพื่อนนักศึกษา 60 คน พร้อมตำแหน่งหน้าที่ ลำดับ และการสังกัดฝ่ายดำเนินงาน เพื่อความสามัคคีและการขับเคลื่อนกิจกรรมรุ่นอย่างมีประสิทธิภาพ
+        </p>
+      </div>
+
+      <!-- Quick Metrics Counters -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/5">
+        <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+          <span class="text-slate-400 text-[11px] block">สมาชิกทั้งหมด</span>
+          <span class="text-xl sm:text-2xl font-black text-white font-mono mt-0.5 block">60 <span class="text-xs text-slate-500 font-normal">คน</span></span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+          <span class="text-slate-400 text-[11px] block">ฝ่ายดำเนินงานห้อง</span>
+          <span class="text-xl sm:text-2xl font-black text-[#FF7A29] font-mono mt-0.5 block">6 <span class="text-xs text-slate-500 font-normal">ฝ่าย</span></span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+          <span class="text-slate-400 text-[11px] block">เลือกฝ่ายแล้ว</span>
+          <span id="statAssignedCount" class="text-xl sm:text-2xl font-black text-emerald-400 font-mono mt-0.5 block">-</span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+          <span class="text-slate-400 text-[11px] block">รหัสประจำรุ่น</span>
+          <span class="text-xl sm:text-2xl font-black text-amber-300 font-mono mt-0.5 block">693050xxx</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 3. CONTROLS, SEARCH & FILTER TABS ================= -->
+    <div class="glass-surface p-4 sm:p-5 rounded-2xl border border-white/5 space-y-4">
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="yearbookSearchInput" placeholder="ค้นหาตามชื่อ, ชื่อเล่น, รหัสนักศึกษา หรือฝ่าย..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#E65A19] transition">
+        </div>
+
+        <!-- Order / Sort Select -->
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-slate-400 whitespace-nowrap">จัดเรียง:</label>
+          <select id="yearbookSortSelect" onchange="applyFiltersAndRender()" class="px-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-[#E65A19]">
+            <option value="id_asc">ตามรหัสนักศึกษา (น้อยไปมาก)</option>
+            <option value="id_desc">ตามรหัสนักศึกษา (มากไปน้อย)</option>
+            <option value="name_asc">ตามชื่อ ก - ฮ</option>
+            <option value="dept">ตามฝ่ายดำเนินงาน</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Department Filter Pills (Horizontal Scroll on Mobile) -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scroll" id="departmentFilterContainer">
+        <button onclick="setDepartmentFilter('all')" data-filter="all" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-[#E65A19] text-white text-xs font-bold transition flex-shrink-0 shadow-sm flex items-center gap-1.5">
+          <span>ทั้งหมด</span>
+          <span class="px-1.5 py-0.2 rounded-full bg-black/30 text-[10px]">60</span>
+        </button>
+        <button onclick="setDepartmentFilter('dept_executive')" data-filter="dept_executive" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+          <span>👑 ฝ่ายบริหาร</span>
+        </button>
+        <button onclick="setDepartmentFilter('dept_academic')" data-filter="dept_academic" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+          <span>📖 ฝ่ายวิชาการ</span>
+        </button>
+        <button onclick="setDepartmentFilter('dept_recreation')" data-filter="dept_recreation" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+          <span>✨ ฝ่ายนันทนาการ</span>
+        </button>
+        <button onclick="setDepartmentFilter('dept_welfare')" data-filter="dept_welfare" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+          <span>🤝 ฝ่ายสวัสดิการ</span>
+        </button>
+        <button onclick="setDepartmentFilter('dept_tech')" data-filter="dept_tech" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+          <span>💻 ฝ่ายเทคโนโลยี</span>
+        </button>
+        <button onclick="setDepartmentFilter('dept_mc')" data-filter="dept_mc" class="dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5">
+          <span>🎤 ฝ่ายพิธีกร</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ================= 4. YEARBOOK CARDS GRID (60 STUDENTS) ================= -->
+    <div id="yearbookGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="yearbookEmptyState" class="hidden text-center py-16 glass-surface rounded-3xl border border-white/5 space-y-3">
+      <div class="w-12 h-12 rounded-2xl bg-white/[0.04] text-slate-500 mx-auto flex items-center justify-center">
+        <i data-lucide="user-x" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-sm font-bold text-white">ไม่พบรายชื่อเพื่อนที่ค้นหา</h3>
+      <p class="text-xs text-slate-400">กรุณาลองเปลี่ยนคำค้นหา หรือเลือกตัวกรองฝ่ายใหม่อีกครั้ง</p>
+    </div>
+
+  </section>
+
+  <!-- ================= 5. FOOTER ================= -->
+  <footer class="mt-auto py-10 px-4 border-t border-white/5 glass-surface text-center text-xs font-mono text-slate-500">
+    <div class="max-w-7xl mx-auto space-y-2">
+      <p class="font-bold text-slate-400">COMED 23 • Computer Education, Faculty of Education, Khon Kaen University</p>
+      <p class="text-[11px]">© 2026 COMED KKU • Designed & Engineered with High-Performance Tech Stack</p>
+    </div>
+  </footer>
+
+  <!-- ================= SCRIPT & CORE ENGINE ================= -->
+  <script>
+    let activeDepartmentFilter = 'all';
+    let roomRegistrations = [];
+
+    // Department Metadata & Badges
+    const DEPT_META = {
+      'dept_executive': { name: 'ฝ่ายบริหาร', icon: 'crown', color: 'from-amber-500 to-orange-600', badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
+      'dept_academic': { name: 'ฝ่ายวิชาการ', icon: 'book-open', color: 'from-blue-500 to-indigo-600', badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
+      'dept_recreation': { name: 'ฝ่ายนันทนาการ', icon: 'sparkles', color: 'from-pink-500 to-rose-600', badge: 'bg-pink-500/15 text-pink-300 border-pink-500/30' },
+      'dept_welfare': { name: 'ฝ่ายสวัสดิการ', icon: 'heart-handshake', color: 'from-emerald-500 to-teal-600', badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
+      'dept_tech': { name: 'ฝ่ายเทคโนโลยีและสื่อ', icon: 'cpu', color: 'from-cyan-500 to-blue-600', badge: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' },
+      'dept_mc': { name: 'ฝ่ายพิธีกรและปฏิคม', icon: 'mic', color: 'from-purple-500 to-violet-600', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' }
+    };
+
+    // Get Custom Profile from LocalStorage / Ecosystem Sync
+    function getStudentProfile(email, studentId) {
+      const cleanEmail = email ? email.toLowerCase().trim() : '';
+      const cleanId = studentId ? studentId.trim() : '';
+      try {
+        const profiles = JSON.parse(localStorage.getItem('COMED_CUSTOM_USERS_PROFILES_V1') || '{}');
+        if (cleanEmail && profiles[cleanEmail]) return profiles[cleanEmail];
+        if (cleanId && profiles[cleanId]) return profiles[cleanId];
+      } catch (e) {}
+      return null;
+    }
+
+    // Initialize Page Data
+    async function initYearbook() {
+      // 1. Fetch Room Registrations from events_repo
+      if (window.ComedEventManager && typeof window.ComedEventManager.fetchCloudData === 'function') {
+        try {
+          await window.ComedEventManager.fetchCloudData('room_roles_69');
+        } catch (e) {
+          console.warn('Fetch cloud data deferred:', e);
+        }
+        roomRegistrations = window.ComedEventManager.getRegistrations('room_roles_69') || [];
+      } else {
+        try {
+          const raw = localStorage.getItem('COMED_EVENT_REGISTRATIONS_V1');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            roomRegistrations = parsed['room_roles_69'] || [];
+          }
+        } catch (e) {}
+      }
+
+      // 2. Update Counter
+      const assignedCount = roomRegistrations.length;
+      const assignedEl = document.getElementById('statAssignedCount');
+      if (assignedEl) assignedEl.textContent = `${assignedCount} / 60`;
+
+      // 3. Render Grid
+      applyFiltersAndRender();
+
+      // 4. Setup Search Listener
+      const searchInput = document.getElementById('yearbookSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', applyFiltersAndRender);
+      }
+    }
+
+    // Set Active Department Filter Tab
+    function setDepartmentFilter(deptId) {
+      activeDepartmentFilter = deptId;
+      document.querySelectorAll('.dept-filter-btn').forEach(btn => {
+        const f = btn.getAttribute('data-filter');
+        if (f === deptId) {
+          btn.className = 'dept-filter-btn px-3.5 py-1.5 rounded-xl bg-[#E65A19] text-white text-xs font-bold transition flex-shrink-0 shadow-sm flex items-center gap-1.5';
+        } else {
+          btn.className = 'dept-filter-btn px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 text-xs font-bold transition flex-shrink-0 border border-white/5 flex items-center gap-1.5';
+        }
+      });
+      applyFiltersAndRender();
+    }
+
+    // Main Filter & Render Logic
+    function applyFiltersAndRender() {
+      const grid = document.getElementById('yearbookGrid');
+      const emptyState = document.getElementById('yearbookEmptyState');
+      if (!grid) return;
+
+      const query = (document.getElementById('yearbookSearchInput')?.value || '').trim().toLowerCase();
+      const sortOpt = document.getElementById('yearbookSortSelect')?.value || 'id_asc';
+
+      let list = [...(window.STUDENTS_DATA || [])];
+
+      // Join each student with their department assignment
+      list = list.map((st, index) => {
+        const reg = roomRegistrations.find(r => r.studentId === st.id);
+        const custom = getStudentProfile(st.email, st.id);
+        return {
+          ...st,
+          seqNumber: index + 1,
+          departmentId: reg?.departmentId || null,
+          departmentName: reg?.departmentName || null,
+          roleTitle: reg?.roleTitle || null,
+          customName: custom?.name || st.name,
+          customNickname: custom?.nickname || st.nickname,
+          avatar: custom?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(st.email || st.name)}`,
+          phone: custom?.phone || reg?.phone || '-'
+        };
+      });
+
+      // Filter: Search Query
+      if (query) {
+        list = list.filter(s => 
+          s.id.toLowerCase().includes(query) ||
+          s.name.toLowerCase().includes(query) ||
+          s.nickname.toLowerCase().includes(query) ||
+          (s.departmentName && s.departmentName.toLowerCase().includes(query)) ||
+          (s.roleTitle && s.roleTitle.toLowerCase().includes(query))
+        );
+      }
+
+      // Filter: Department Tab
+      if (activeDepartmentFilter !== 'all') {
+        list = list.filter(s => s.departmentId === activeDepartmentFilter);
+      }
+
+      // Sorting
+      if (sortOpt === 'id_asc') {
+        list.sort((a, b) => a.id.localeCompare(b.id));
+      } else if (sortOpt === 'id_desc') {
+        list.sort((a, b) => b.id.localeCompare(a.id));
+      } else if (sortOpt === 'name_asc') {
+        list.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+      } else if (sortOpt === 'dept') {
+        list.sort((a, b) => (a.departmentName || 'ฮ').localeCompare(b.departmentName || 'ฮ', 'th'));
+      }
+
+      // Render Cards
+      if (list.length === 0) {
+        grid.innerHTML = '';
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      }
+
+      if (emptyState) emptyState.classList.add('hidden');
+
+      grid.innerHTML = list.map((st) => {
+        const deptInfo = st.departmentId && DEPT_META[st.departmentId] 
+          ? DEPT_META[st.departmentId] 
+          : { name: 'ยังไม่เลือกฝ่าย', badge: 'bg-slate-800/80 text-slate-400 border-slate-700/50', icon: 'help-circle' };
+
+        return `
+          <div class="glass-surface glass-surface-hover p-4 sm:p-5 rounded-2xl relative group transition-all duration-300 flex flex-col justify-between shadow-lg">
+            
+            <!-- Top Card Header: Order Badge & Nickname -->
+            <div class="flex items-center justify-between pb-3 border-b border-white/5">
+              <span class="px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/5 text-[11px] font-mono text-slate-400">
+                #${String(st.seqNumber).padStart(2, '0')}
+              </span>
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-amber-300 text-xs font-black">
+                น้อง${st.customNickname}
+              </span>
+            </div>
+
+            <!-- Profile Info: Avatar & Names -->
+            <div class="py-4 flex items-center gap-3.5">
+              <div class="relative w-14 h-14 rounded-2xl bg-slate-950 p-0.5 border border-white/10 flex-shrink-0 overflow-hidden shadow-inner group-hover:border-[#E65A19]/50 transition-colors">
+                <div class="avatar-skeleton"></div>
+                <img src="${st.avatar}" alt="${st.customName}" 
+                  class="w-full h-full object-cover rounded-xl"
+                  loading="lazy"
+                  decoding="async"
+                  onload="this.previousElementSibling.classList.add('loaded')"
+                  onerror="this.previousElementSibling.classList.add('loaded')">
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <h4 class="font-bold text-white text-xs sm:text-sm truncate group-hover:text-orange-300 transition-colors" title="${st.customName}">
+                  ${st.customName}
+                </h4>
+                <div class="font-mono text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                  <i data-lucide="hash" class="w-3 h-3 text-slate-500"></i>
+                  <span>${st.id}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Role & Department Assignment Capsule -->
+            <div class="pt-3 border-t border-white/5 space-y-1.5">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-500">ฝ่ายที่สังกัด:</span>
+                <span class="px-2 py-0.5 rounded-md border text-[10px] font-bold ${deptInfo.badge}">
+                  ${st.departmentName || deptInfo.name}
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-500">ตำแหน่ง:</span>
+                <span class="font-bold text-slate-200 text-[11px] truncate max-w-[130px]" title="${st.roleTitle || 'สมาชิก'}">
+                  ${st.roleTitle || '-'}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Run on Load
+    document.addEventListener('DOMContentLoaded', initYearbook);
+  </script>
+
+</body>
+</html>
