@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" class="dark scroll-smooth">
+<html lang="th" class="dark scroll-smooth overflow-x-hidden max-w-full">
 
 <head>
   <!-- Site Maintenance & Access Guard -->
@@ -174,13 +174,13 @@
   </style>
 </head>
 
-<body class="bg-[#070914] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-orange-500 selection:text-white relative overflow-x-hidden pb-32 sm:pb-12">
+<body class="bg-[#070914] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-orange-500 selection:text-white relative overflow-x-hidden max-w-full pb-36 sm:pb-16">
 
   <!-- Noise Overlay Across Whole Screen (Identical to Index & Profile) -->
   <div class="fixed inset-0 pointer-events-none z-50 bg-noise"></div>
 
   <!-- Ambient Light Effects (Navy to Red-Orange) -->
-  <div class="fixed top-[-15%] right-[-10%] w-[650px] h-[650px] rounded-full bg-gradient-to-br from-[#E65A19]/15 to-[#B32B19]/5 blur-[140px] pointer-events-none z-0"></div>
+  <div class="fixed top-[-15%] right-[-10%] w-[450px] sm:w-[650px] h-[450px] sm:h-[650px] rounded-full bg-gradient-to-br from-[#E65A19]/15 to-[#B32B19]/5 blur-[140px] pointer-events-none z-0 overflow-hidden"></div>
   <div class="fixed top-[20%] left-[-15%] w-[600px] h-[600px] rounded-full bg-[#0C1030]/80 blur-[150px] pointer-events-none z-0"></div>
 
   <!-- ================= TOP NAVIGATION BAR ================= -->
@@ -279,7 +279,7 @@
   </header>
 
   <!-- ================= MAIN CONTENT ================= -->
-  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-36 sm:pb-32 flex-1 space-y-6">
+  <main class="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-36 sm:pb-32 flex-1 space-y-5 sm:space-y-6 overflow-x-hidden">
 
     <!-- MOBILE-ONLY TOP WIDGETS (< 768px): Swipeable Week Strip & Urgent Banner -->
     <div class="block lg:hidden space-y-3">
@@ -359,7 +359,7 @@
         <button onclick="changeCalendarPeriod(-1)" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer" title="ช่วงก่อนหน้า">
           <i data-lucide="chevron-left" class="w-4 h-4"></i>
         </button>
-        <h3 id="calendarCurrentMonthTitle" class="text-base sm:text-lg font-black text-white min-w-[170px] text-center">
+        <h3 id="calendarCurrentMonthTitle" class="text-sm sm:text-lg font-black text-white min-w-[130px] sm:min-w-[170px] text-center truncate">
           ตุลาคม 2569
         </h3>
         <button onclick="changeCalendarPeriod(1)" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer" title="ช่วงถัดไป">
@@ -390,14 +390,14 @@
           <input type="text" id="calendarSearchInput" oninput="handleCalendarSearch(this.value)" placeholder="ค้นหากิจกรรม, สถานที่..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-full sm:w-48">
         </div>
 
-        <select id="calendarScopeFilter" onchange="renderCalendarView()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs">
+        <select id="calendarScopeFilter" onchange="renderCalendarView()" class="flex-1 sm:flex-initial max-w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs">
           <option value="all">ทุกกิจกรรมที่มองเห็น</option>
           <option value="department">🏛️ เฉพาะงานสาขา</option>
           <option value="shared">👥 เฉพาะงานกลุ่ม</option>
           <option value="personal">🔒 เฉพาะงานส่วนตัว</option>
         </select>
 
-        <select id="calendarUrgencyFilter" onchange="renderCalendarView()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-xs font-bold">
+        <select id="calendarUrgencyFilter" onchange="renderCalendarView()" class="flex-1 sm:flex-initial max-w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-xs font-bold">
           <option value="all">⚡ ลำดับทั้งหมด</option>
           <option value="priority_desc">🚨 เรียงตามความสำคัญ (Urgent &gt; Normal)</option>
           <option value="upcoming_soon">⏳ ใกล้เข้ามาถึง (7 วันข้างหน้า)</option>
@@ -509,7 +509,7 @@
     </div>
 
     <!-- VIEW 3: UPCOMING AGENDA LIST -->
-    <div id="containerAgendaView" class="glass-card rounded-3xl p-6">
+    <div id="containerAgendaView" class="hidden glass-card rounded-3xl p-4 sm:p-6">
       <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
         <h3 class="text-base font-black text-white flex items-center gap-2">
           <i data-lucide="list-checks" class="w-4 h-4 text-orange-400"></i>
