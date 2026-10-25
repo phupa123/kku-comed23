@@ -187,11 +187,18 @@
   <header class="sticky top-0 z-40 bg-[#060814]/95 backdrop-blur-2xl border-b border-white/10 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.6)]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
       
-      <!-- Brand with Dynamic Date Tear-Off Icon -->
-      <div class="flex items-center gap-3">
-        <a href="index.html" class="flex items-center gap-3 group">
+      <!-- Brand with Official KKU Emblem & Dynamic Date Tear-Off Icon -->
+      <div class="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+        <a href="index.html" class="flex items-center gap-2.5 sm:gap-3 group flex-shrink-0">
+          <!-- Official KKU Crest Emblem -->
+          <div class="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#B32B19] to-[#E65A19] p-0.5 shadow-[0_0_20px_rgba(230,90,25,0.35)] group-hover:scale-105 transition-transform flex-shrink-0">
+            <div class="w-full h-full bg-[#0C1030] rounded-[10px] flex items-center justify-center p-1 overflow-hidden">
+              <img src="logo.png" alt="KKU COMED" class="w-full h-full object-contain filter drop-shadow">
+            </div>
+          </div>
+
           <!-- Dynamic Calendar Tear Sheet Icon -->
-          <div class="cal-tear-icon group-hover:scale-105 transition" title="วันนี้">
+          <div class="cal-tear-icon group-hover:scale-105 transition hidden xs:flex" title="วันนี้">
             <div class="cal-tear-top">
               <span class="cal-tear-pin"></span>
               <span class="cal-tear-pin"></span>
@@ -199,42 +206,47 @@
             <span class="cal-tear-day" id="calHeaderDynamicDay">25</span>
           </div>
 
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-base sm:text-lg font-black tracking-tight text-white group-hover:text-amber-400 transition font-display">
-                Calendar Hub
-              </h1>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#E65A19]/20 text-[#FF7A29] border border-[#E65A19]/30">
-                ปฏิทิน &amp; Live Sync
-              </span>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5 leading-none">
+              <span class="text-[13px] font-black tracking-wider text-white font-display">KKU</span>
+              <span class="text-[12px] font-bold text-white font-mono tracking-tight drop-shadow-sm">/ COMED 23</span>
             </div>
-            <p class="text-xs text-slate-400">กำหนดการกิจกรรมสาขา &amp; ซิงค์เข้าปฏิทินส่วนตัวแบบเรียลไทม์</p>
+            <span class="text-[9px] font-mono uppercase tracking-widest text-[#E65A19] font-bold mt-0.5">// CALENDAR HUB</span>
           </div>
         </a>
       </div>
 
-      <!-- Navigation to Plans & Tools -->
-      <nav class="hidden md:flex items-center gap-2">
-        <a href="Plans.html" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10">
-          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-400"></i>
-          <span>ห้องงาน PlanToDo</span>
+      <!-- Center Switcher: Calendar (Active) vs Plans vs Trash -->
+      <nav class="hidden md:flex items-center gap-1.5 p-1 bg-white/5 border border-white/10 rounded-2xl">
+        <a href="Calendar.html" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 relative">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+          <span>ปฏิทินสาขา (Calendar)</span>
+          <span class="absolute -bottom-1 left-3 right-3 h-[2px] bg-white rounded-full"></span>
         </a>
-        <button onclick="openCalendarSubscriptionModal()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-blue-300 hover:text-white transition flex items-center gap-1.5 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-blue-400"></i>
-          <span>ตั้งค่าซิงค์อัตโนมัติ</span>
-        </button>
+        <a href="Plans.html" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span>ห้องงานทั้งหมด (Plans)</span>
+        </a>
+        <a href="Plans.html?tab=trash" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span>ถังขยะกู้คืน (Trash)</span>
+          <span id="trashCountBadge" class="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-500/30 text-rose-300 font-bold">0</span>
+        </a>
       </nav>
 
       <!-- Right Action & User Profile -->
       <div class="flex items-center gap-2 sm:gap-2.5">
-        <button onclick="window.triggerPwaInstall()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer" title="ติดตั้งแอปลงบนมือถือ">
-          <i data-lucide="smartphone" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span class="hidden sm:inline">ติดตั้งแอป</span>
+        <!-- 1-Click Sync Google Calendar Trigger -->
+        <button onclick="openCalendarSubscriptionModal()" class="px-3 py-1.5 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-blue-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs" title="ซิงค์ Google Calendar หรือ Apple Calendar อัตโนมัติ">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-blue-400"></i>
+          <span class="hidden sm:inline">ซิงค์ Google Calendar (1-Click)</span>
+          <span class="sm:hidden">ซิงค์</span>
         </button>
 
-        <button onclick="openCreatePlanModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-extrabold text-xs shadow-lg shadow-orange-500/20 flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">สร้างกิจกรรม</span>
+        <!-- Primary Action: Create Event -->
+        <button onclick="openCreatePlanModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#FF7A29] hover:from-[#d14f14] hover:to-[#ea6c1e] text-white font-black text-xs shadow-lg shadow-orange-500/25 flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer">
+          <i data-lucide="plus" class="w-4 h-4 stroke-[3]"></i>
+          <span class="hidden sm:inline">สร้างกิจกรรมใหม่</span>
           <span class="sm:hidden">สร้าง</span>
         </button>
 
@@ -246,10 +258,16 @@
           </button>
           
           <div id="authUserInfo" class="hidden items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10">
-            <img id="authUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" alt="User" class="w-6 h-6 rounded-lg object-cover border border-orange-400/40">
-            <span id="authUserName" class="text-xs font-bold text-slate-200 max-w-[100px] truncate">ชื่อผู้ใช้</span>
-            <button onclick="logoutUser()" title="ออกจากระบบ" class="text-slate-400 hover:text-rose-400 transition ml-1">
-              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <div class="relative">
+              <img id="authUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" alt="User" class="w-6 h-6 rounded-lg object-cover border border-orange-400/40">
+              <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-slate-900 shadow-[0_0_6px_#10B981]"></span>
+            </div>
+            <div class="flex flex-col text-left">
+              <span id="authUserName" class="text-xs font-bold text-slate-200 max-w-[100px] truncate leading-tight">ชื่อผู้ใช้</span>
+              <span class="text-[9px] font-mono text-emerald-400 leading-none">● online</span>
+            </div>
+            <button onclick="logoutUser()" title="ออกจากระบบ" class="text-slate-400 hover:text-rose-400 text-[10px] font-mono transition ml-1 px-1 py-0.5 rounded hover:bg-white/5">
+              Logout
             </button>
           </div>
         </div>
@@ -264,6 +282,44 @@
 
   <!-- ================= MAIN CONTENT ================= -->
   <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 flex-1 space-y-6">
+
+    <!-- MOBILE-ONLY TOP WIDGETS (< 768px): Swipeable Week Strip & Urgent Banner -->
+    <div class="block lg:hidden space-y-3">
+      <!-- Horizontal Swipeable Mini Calendar Strip -->
+      <div class="glass-card rounded-2xl p-2.5 border border-white/10">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10 text-xs">
+          <span class="font-bold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span id="mobileMiniStripTitle">สัปดาห์นี้</span>
+          </span>
+          <span id="mobileMiniStripCount" class="text-[10px] font-mono text-amber-400">0 กิจกรรม</span>
+        </div>
+        <div id="mobileMiniWeekStrip" class="flex items-center justify-between gap-1 overflow-x-auto pb-1 custom-scroll">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Urgent Event Impending Banner (Mobile Callout) -->
+      <div id="mobileUrgentEventBanner" class="p-3.5 rounded-2xl bg-gradient-to-r from-orange-950/60 via-red-950/40 to-slate-900 border border-orange-500/40 shadow-lg shadow-orange-500/10 flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase text-orange-400 tracking-wider">
+            <i data-lucide="bell-ring" class="w-3.5 h-3.5 animate-bounce text-orange-400"></i>
+            <span>ด่วนที่สุด // IMPENDING EVENT</span>
+          </span>
+          <span id="mobileUrgentCountdown" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-rose-500/25 text-rose-300 border border-rose-500/40">
+            อีก 2 วัน
+          </span>
+        </div>
+        <div>
+          <h4 id="mobileUrgentTitle" class="text-sm font-black text-white">สอบปลายภาค OS (ED1447)</h4>
+          <p id="mobileUrgentDesc" class="text-xs text-slate-300 line-clamp-1">ห้องสอบ 4104 คณะครุศาสตร์</p>
+        </div>
+        <button id="mobileUrgentGoogleBtn" onclick="quickAddCurrentUrgentToGoogle()" class="w-full py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition">
+          <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+          <span>1-tap Google Calendar</span>
+        </button>
+      </div>
+    </div>
 
     <!-- Calendar Controls & Sync Banner -->
     <div class="glass-card rounded-3xl p-5 sm:p-6 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -362,23 +418,65 @@
       <span class="text-slate-400 text-[10px]">บันทึกลง Cloud อัตโนมัติ</span>
     </div>
 
-    <!-- VIEW 1: MONTH GRID VIEW -->
-    <div id="containerMonthView" class="glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
-      <!-- Day Names Header (Sun - Sat) -->
-      <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-black uppercase tracking-wider text-slate-400">
-        <div class="py-2 text-rose-400">อา.</div>
-        <div class="py-2">จ.</div>
-        <div class="py-2">อ.</div>
-        <div class="py-2">พ.</div>
-        <div class="py-2">พฤ.</div>
-        <div class="py-2 text-emerald-400">ศ.</div>
-        <div class="py-2 text-amber-400">ส.</div>
+    <!-- VIEW 1: DESKTOP TWO-COLUMN MONTH & TELEMETRY DASHBOARD -->
+    <div id="containerMonthView" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      
+      <!-- LEFT COLUMN (Main Month Grid - 8 Cols) -->
+      <div class="lg:col-span-8 glass-card rounded-3xl p-4 sm:p-6 overflow-hidden flex flex-col justify-between">
+        <div>
+          <!-- Day Names Header (Sun - Sat) -->
+          <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-black uppercase tracking-wider text-slate-400">
+            <div class="py-2 text-rose-400">อา.</div>
+            <div class="py-2">จ.</div>
+            <div class="py-2">อ.</div>
+            <div class="py-2">พ.</div>
+            <div class="py-2">พฤ.</div>
+            <div class="py-2 text-emerald-400">ศ.</div>
+            <div class="py-2 text-amber-400">ส.</div>
+          </div>
+
+          <!-- Days Cells Grid -->
+          <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
       </div>
 
-      <!-- Days Cells Grid -->
-      <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2">
-        <!-- Rendered dynamically -->
+      <!-- RIGHT COLUMN (Telemetry & Impending Deadlines - 4 Cols) -->
+      <div class="lg:col-span-4 space-y-4">
+        
+        <!-- Card 1: Monthly Telemetry / Stats -->
+        <div class="glass-card rounded-3xl p-5 border border-white/10 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">สถิติกิจกรรมเดือนนี้</span>
+            <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="telemetryMonthCount" class="text-3xl font-black font-mono text-white">0</span>
+            <span class="text-xs text-slate-400 font-mono">กิจกรรมทั้งหมด</span>
+          </div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-3">
+            <div id="telemetryProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full" style="width: 75%"></div>
+          </div>
+        </div>
+
+        <!-- Card 2: Urgent Impending Deadlines -->
+        <div class="glass-card rounded-3xl p-5 border border-white/10 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-white/10">
+            <h4 class="text-xs font-black text-rose-400 flex items-center gap-1.5 uppercase tracking-wider">
+              <i data-lucide="alarm-clock" class="w-3.5 h-3.5"></i>
+              <span>🚨 Urgent Impending Deadlines</span>
+            </h4>
+            <span id="telemetryUrgentCount" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold">0</span>
+          </div>
+
+          <div id="telemetryUrgentList" class="space-y-2 max-h-[380px] overflow-y-auto custom-scroll pr-1">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
       </div>
+
     </div>
 
     <!-- VIEW 2: WEEKLY TIME GRID VIEW -->
@@ -1020,6 +1118,145 @@
       return creatorEmail === userEmail;
     }
 
+    let currentMobileUrgentPlan = null;
+
+    function quickAddCurrentUrgentToGoogle() {
+      if (!currentMobileUrgentPlan) return;
+      if (window.CalendarSync && typeof window.CalendarSync.openGoogleCalendar === 'function') {
+        window.CalendarSync.openGoogleCalendar(currentMobileUrgentPlan);
+      } else {
+        const title = encodeURIComponent(currentMobileUrgentPlan.title);
+        const details = encodeURIComponent(currentMobileUrgentPlan.description || '');
+        const loc = encodeURIComponent(currentMobileUrgentPlan.location || '');
+        const sIso = new Date(currentMobileUrgentPlan.start_date).toISOString().replace(/-|:|\.\d\d\d/g, "");
+        const eIso = currentMobileUrgentPlan.end_date ? new Date(currentMobileUrgentPlan.end_date).toISOString().replace(/-|:|\.\d\d\d/g, "") : sIso;
+        window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${loc}&dates=${sIso}/${eIso}`, '_blank');
+      }
+    }
+
+    function renderMobileWidgets(allPlans) {
+      const nowMs = Date.now();
+      const today = new Date();
+
+      // 1. Render Mobile Mini Week Strip
+      const stripEl = document.getElementById('mobileMiniWeekStrip');
+      if (stripEl) {
+        stripEl.innerHTML = '';
+        const dayOfWeek = today.getDay(); // 0 is Sun
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - dayOfWeek);
+        const thaiDays = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+
+        let weekEventsCount = 0;
+
+        for (let i = 0; i < 7; i++) {
+          const dObj = new Date(startOfWeek);
+          dObj.setDate(startOfWeek.getDate() + i);
+          const isToday = dObj.toDateString() === today.toDateString();
+
+          const dayPlans = allPlans.filter(p => {
+            if (!p.start_date) return false;
+            const pStart = new Date(p.start_date);
+            return pStart.toDateString() === dObj.toDateString();
+          });
+
+          weekEventsCount += dayPlans.length;
+
+          const pill = document.createElement('div');
+          pill.className = `flex-1 min-w-[42px] py-2 px-1 rounded-xl text-center flex flex-col items-center justify-center transition cursor-pointer ${
+            isToday
+              ? 'bg-gradient-to-b from-orange-500 to-amber-500 text-white font-black shadow-md shadow-orange-500/20'
+              : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
+          }`;
+          pill.onclick = () => {
+            setCalendarViewMode('agenda');
+          };
+          pill.innerHTML = `
+            <span class="text-[9px] font-mono opacity-80">${thaiDays[i]}</span>
+            <span class="text-xs font-mono font-black mt-0.5">${dObj.getDate()}</span>
+            <div class="h-1.5 flex items-center gap-0.5 mt-1">
+              ${dayPlans.length > 0 ? `<span class="w-1.5 h-1.5 rounded-full ${isToday ? 'bg-white' : 'bg-orange-400'}"></span>` : ''}
+            </div>
+          `;
+          stripEl.appendChild(pill);
+        }
+
+        const countEl = document.getElementById('mobileMiniStripCount');
+        if (countEl) countEl.textContent = `${weekEventsCount} กิจกรรม`;
+      }
+
+      // 2. Render Mobile Urgent Event Banner
+      const urgentBannerEl = document.getElementById('mobileUrgentEventBanner');
+      const upcoming = allPlans
+        .filter(p => p.start_date && new Date(p.start_date).getTime() >= (nowMs - 3600000))
+        .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+
+      const mostUrgent = upcoming.find(p => p.priority === 'urgent' || p.priority === 'high') || upcoming[0];
+      currentMobileUrgentPlan = mostUrgent;
+
+      if (urgentBannerEl) {
+        if (mostUrgent) {
+          urgentBannerEl.classList.remove('hidden');
+          const sTime = new Date(mostUrgent.start_date).getTime();
+          const diffDays = Math.ceil((sTime - nowMs) / (1000 * 60 * 60 * 24));
+          const countdownText = diffDays <= 0 ? 'วันนี้!' : `อีก ${diffDays} วัน`;
+
+          const cDownEl = document.getElementById('mobileUrgentCountdown');
+          const titleEl = document.getElementById('mobileUrgentTitle');
+          const descEl = document.getElementById('mobileUrgentDesc');
+
+          if (cDownEl) cDownEl.textContent = countdownText;
+          if (titleEl) titleEl.textContent = mostUrgent.title;
+          if (descEl) descEl.textContent = mostUrgent.location ? `📍 ${mostUrgent.location}` : (mostUrgent.description || 'กำหนดการสำคัญของสาขา');
+        } else {
+          urgentBannerEl.classList.add('hidden');
+        }
+      }
+
+      // 3. Render Desktop Telemetry Cards (Monthly stats + Urgent Deadlines)
+      const teleCount = document.getElementById('telemetryMonthCount');
+      if (teleCount) teleCount.textContent = allPlans.length;
+
+      const teleUrgentList = document.getElementById('telemetryUrgentList');
+      const teleUrgentCount = document.getElementById('telemetryUrgentCount');
+
+      if (teleUrgentList) {
+        teleUrgentList.innerHTML = '';
+        const urgentItems = upcoming.filter(p => {
+          const sTime = new Date(p.start_date).getTime();
+          const diffDays = Math.ceil((sTime - nowMs) / (1000 * 60 * 60 * 24));
+          return p.priority === 'urgent' || (diffDays >= 0 && diffDays <= 7);
+        });
+
+        if (teleUrgentCount) teleUrgentCount.textContent = urgentItems.length;
+
+        if (urgentItems.length === 0) {
+          teleUrgentList.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">ไม่มีกำหนดการด่วนใน 7 วันนี้</p>';
+        } else {
+          urgentItems.slice(0, 5).forEach(p => {
+            const sTime = new Date(p.start_date).getTime();
+            const diffDays = Math.ceil((sTime - nowMs) / (1000 * 60 * 60 * 24));
+            const pillColor = diffDays <= 0 ? 'bg-rose-500/25 text-rose-300 border-rose-500/40 animate-pulse' : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+            const pillText = diffDays <= 0 ? 'วันนี้' : `อีก ${diffDays} วัน`;
+
+            const row = document.createElement('div');
+            row.className = 'p-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-orange-500/40 transition cursor-pointer flex items-center justify-between gap-2';
+            row.onclick = () => openCalendarPlanModal(p.id);
+            row.innerHTML = `
+              <div class="truncate">
+                <h5 class="text-xs font-bold text-white truncate">${escapeHtml(p.title)}</h5>
+                <span class="text-[10px] font-mono text-slate-400">${new Date(p.start_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.</span>
+              </div>
+              <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${pillColor} flex-shrink-0">
+                ${pillText}
+              </span>
+            `;
+            teleUrgentList.appendChild(row);
+          });
+        }
+      }
+    }
+
     function renderCalendarView() {
       const allPlans = getFilteredCalendarPlans();
       const badgeEl = document.getElementById('calendarTotalPlansBadge');
@@ -1035,8 +1272,9 @@
         renderCalendarAgendaList(allPlans);
       }
 
-      // Always update agenda list container too
+      // Update agenda list container & mobile widgets & telemetry
       renderCalendarAgendaList(allPlans);
+      renderMobileWidgets(allPlans);
       lucide.createIcons();
     }
 
@@ -1860,13 +2098,15 @@
   </script>
 
   <!-- ================= THUMB-ACCESSIBLE FLOATING BOTTOM NAVIGATION (MOBILE) ================= -->
+  <!-- Persistent Fixed Bottom Navigation Dock (5 Tabs) -->
   <nav class="sm:hidden fixed bottom-3 left-3 right-3 z-50 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl p-2 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
+    <!-- 1. Home -->
     <a href="index.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i data-lucide="home" class="w-4 h-4"></i>
       <span class="text-[10px] font-mono">Home</span>
     </a>
     
-    <!-- Active Calendar Tab with Date Tear Sheet Icon -->
+    <!-- 2. Active Calendar Tab with Date Tear Sheet Icon -->
     <a href="Calendar.html" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-[#FF7A29] transition relative">
       <div class="cal-tear-icon scale-75 -my-1">
         <div class="cal-tear-top">
@@ -1879,14 +2119,19 @@
       <span class="w-1.5 h-1.5 rounded-full bg-[#E65A19] absolute -bottom-1 shadow-[0_0_6px_#E65A19]"></span>
     </a>
 
+    <!-- 3. Plans Hub (Tasks) -->
     <a href="Plans.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
       <span class="text-[10px] font-mono">Plans</span>
     </a>
-    <button onclick="openCalendarSubscriptionModal()" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
-      <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-      <span class="text-[10px] font-mono">Sync</span>
+
+    <!-- 4. Notifications (Triggers Notification Center Modal) -->
+    <button onclick="window.NotificationEngine?.openMobileNotifModal ? window.NotificationEngine.openMobileNotifModal() : alert('ศูนย์แจ้งเตือน')" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition cursor-pointer">
+      <i data-lucide="bell" class="w-4 h-4"></i>
+      <span class="text-[10px] font-mono">Notif</span>
     </button>
+
+    <!-- 5. Profile -->
     <a href="Profile.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i data-lucide="user" class="w-4 h-4"></i>
       <span class="text-[10px] font-mono">Profile</span>
