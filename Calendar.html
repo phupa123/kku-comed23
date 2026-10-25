@@ -171,6 +171,25 @@
     .badge-urgent {
       animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
+  
+    /* Mobile Dialog & Floating Overlay Fixes */
+    @media (max-width: 640px) {
+      .modal-dialog-responsive {
+        max-height: calc(100vh - 5.5rem) !important;
+        max-height: calc(100dvh - 5.5rem) !important;
+        margin-bottom: 4.5rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .modal-body-scrollable {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      #qrSuiteFloatingWidget {
+        display: none !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -525,15 +544,15 @@
   </main>
 
   <!-- ================= MODAL: CREATE MASTER ROOM ================= -->
-  <div id="createPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
+  <div id="createPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden modal-dialog-responsive max-h-[90vh] sm:max-h-[85vh]">
       
-      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+      <div class="flex items-center justify-between pb-4 border-b border-white/10 flex-shrink-0">
         <h3 class="text-base font-black text-white">สร้างห้องงานและกิจกรรมใหม่</h3>
         <button onclick="closeCreatePlanModal()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <form onsubmit="handleCreatePlanSubmit(event)" class="space-y-4 pt-4 text-xs">
+      <form onsubmit="handleCreatePlanSubmit(event)" class="space-y-4 pt-4 text-xs modal-body-scrollable overflow-y-auto pr-1 flex-1">
         <div>
           <label class="block font-bold text-slate-300 mb-1">ชื่องาน / กิจกรรม <span class="text-rose-400">*</span></label>
           <input type="text" id="newRoomTitle" required placeholder="เช่น สัมมนาสาขา, จัดทำป้ายซุ้ม" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
@@ -681,9 +700,9 @@
   </div>
 
   <!-- ================= MODAL: EDIT PLAN / EVENT ================= -->
-  <div id="editCalendarPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-    <div class="glass-card rounded-3xl border border-white/20 max-w-lg w-full p-6 shadow-2xl relative overflow-hidden space-y-4">
-      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+  <div id="editCalendarPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/20 max-w-lg w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden modal-dialog-responsive max-h-[90vh] sm:max-h-[85vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
         <div class="flex items-center gap-2">
           <span class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
             <i class="bi bi-pencil-square"></i>
@@ -693,7 +712,7 @@
         <button type="button" onclick="closeEditCalendarPlanModal()" class="p-1 rounded-xl text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <form onsubmit="handleEditPlanSubmit(event)" class="space-y-4 text-xs">
+      <form onsubmit="handleEditPlanSubmit(event)" class="space-y-4 pt-2 text-xs modal-body-scrollable overflow-y-auto pr-1 flex-1">
         <input type="hidden" id="editPlanId">
 
         <div>
@@ -2409,7 +2428,7 @@
 
   <!-- ================= THUMB-ACCESSIBLE FLOATING BOTTOM NAVIGATION (MOBILE) ================= -->
   <!-- Persistent Fixed Bottom Navigation Dock (5 Tabs) -->
-  <nav class="sm:hidden fixed bottom-3 inset-x-3 max-w-[calc(100vw-24px)] z-50 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl py-1.5 px-1 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.7)]">
+  <nav class="sm:hidden fixed bottom-3 inset-x-3 max-w-[calc(100vw-24px)] z-30 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl py-1.5 px-1 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.7)]">
     <!-- 1. Home -->
     <a href="index.html" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
       <i data-lucide="home" class="w-4 h-4"></i>

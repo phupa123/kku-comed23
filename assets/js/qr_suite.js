@@ -585,7 +585,7 @@
     // Universal Floating Quick Access Buttons (Share QR & Scan QR)
     if (!document.getElementById('qrSuiteFloatingWidget')) {
       const floatHtml = `
-        <div id="qrSuiteFloatingWidget" class="fixed bottom-20 xl:bottom-6 right-4 sm:right-6 z-30 flex flex-col items-end gap-2 pointer-events-auto">
+        <div id="qrSuiteFloatingWidget" class="fixed bottom-20 xl:bottom-6 right-4 sm:right-6 z-20 flex flex-col items-end gap-2 pointer-events-auto">
           <!-- Expanded Menu -->
           <div id="qrSuiteFloatMenu" class="hidden flex-col items-end gap-2 mb-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
             <button onclick="window.QRSuite.openScannerModal(); document.getElementById('qrSuiteFloatMenu').classList.add('hidden');" class="px-3.5 py-2 rounded-2xl bg-slate-900/95 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 text-xs font-bold shadow-xl backdrop-blur-md flex items-center gap-2 cursor-pointer transition transform hover:scale-105 active:scale-95">

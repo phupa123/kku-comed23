@@ -231,6 +231,26 @@
       padding: 0 3px;
     }
 
+  
+    /* Mobile Dialog & Floating Overlay Fixes */
+    @media (max-width: 640px) {
+      .modal-dialog-responsive {
+        max-height: calc(100vh - 5.5rem) !important;
+        max-height: calc(100dvh - 5.5rem) !important;
+        margin-bottom: 4.5rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .modal-body-scrollable {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      /* Ensure floating QR FAB does not overlap modal or bottom bar */
+      #qrSuiteFloatingWidget {
+        display: none !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -395,78 +415,86 @@
     <!-- VIEW 2: INSIDE ROOM (PLANTODO BOARD) -->
     <div id="sectionInsideRoom" class="hidden space-y-5">
       
-      <!-- Room Header Banner -->
-      <div class="glass-card rounded-3xl p-5 sm:p-6 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="space-y-2">
-          <div class="flex items-center gap-2">
-            <button onclick="backToRoomsList()" class="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-slate-300 hover:text-white flex items-center gap-1 transition">
+      <!-- Room Header Banner (Clean, Organized & Fluid) -->
+      <div class="glass-card rounded-3xl p-4 sm:p-6 border border-white/10 space-y-4">
+        <!-- Top Row: Back, Scope, Date & Progress -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/5">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="backToRoomsList()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-slate-300 hover:text-white flex items-center gap-1.5 transition cursor-pointer font-bold">
               <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
               <span>กลับรายการห้อง</span>
             </button>
-            <span id="activeRoomScopeBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-300">🏛️ สาขา</span>
+            <span id="activeRoomScopeBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-300 border border-orange-500/30">🏛️ สาขา</span>
             <span id="activeRoomDateText" class="text-xs text-slate-400 font-mono">--/--/----</span>
           </div>
 
-          <h2 id="activeRoomTitle" class="text-xl sm:text-2xl font-black text-white">ชื่องานหลัก</h2>
-          <p id="activeRoomDesc" class="text-xs text-slate-300 max-w-2xl leading-relaxed">รายละเอียดงาน</p>
+          <!-- Progress Pill -->
+          <div class="flex items-center gap-2.5 bg-slate-950/60 px-3 py-1.5 rounded-2xl border border-white/10 self-start sm:self-auto">
+            <span class="text-xs text-slate-400 font-bold">ความคืบหน้า</span>
+            <div class="w-24 sm:w-32 h-2 bg-slate-900 rounded-full overflow-hidden border border-white/10">
+              <div id="activeRoomProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-emerald-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <span id="activeRoomProgressNumber" class="text-sm font-black text-orange-400 font-mono">0%</span>
+          </div>
+        </div>
 
-          <!-- Creator Profile Pill -->
-          <div class="flex items-center gap-2 pt-1 text-xs text-slate-400">
-            <span>ผู้สร้างห้อง:</span>
-            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-              <img id="activeRoomCreatorAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" class="w-4 h-4 rounded-full">
+        <!-- Middle: Title, Description & Creator Profile -->
+        <div class="space-y-2">
+          <h2 id="activeRoomTitle" class="text-xl sm:text-2xl font-black text-white leading-tight">ชื่องานหลัก</h2>
+          <div id="activeRoomDesc" class="text-xs text-slate-300 max-w-3xl leading-relaxed rich-rendered-html">รายละเอียดงาน</div>
+
+          <!-- Creator Profile Pill (Compact & Clean) -->
+          <div class="pt-1 flex items-center gap-2 flex-wrap">
+            <span class="text-xs text-slate-400">ผู้สร้างห้อง:</span>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 text-xs">
+              <img id="activeRoomCreatorAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ea580c'><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" class="w-4 h-4 rounded-full flex-shrink-0 object-cover">
               <span id="activeRoomCreatorName" class="font-bold text-slate-200">สมาชิก</span>
-              <span id="activeRoomCreatorEmail" class="text-[10px] text-slate-400 font-mono">(email@kkumail.com)</span>
+              <span id="activeRoomCreatorEmail" class="text-[10px] text-slate-400 font-mono hidden sm:inline">(email@kkumail.com)</span>
             </div>
           </div>
         </div>
 
-        <!-- Room Progress Indicator & Actions -->
-        <div class="flex flex-col items-end gap-3 min-w-[200px]">
-          <div class="w-full text-right">
-            <div class="flex justify-between items-baseline mb-1">
-              <span class="text-xs text-slate-400 font-bold">ความคืบหน้ารวม</span>
-              <span id="activeRoomProgressNumber" class="text-2xl font-black text-orange-400 font-mono">0%</span>
-            </div>
-            <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-white/10">
-              <div id="activeRoomProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-emerald-400 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="openRoomQrShare()" class="px-3 py-1.5 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-orange-500/30 transition cursor-pointer" title="แชร์ QR Code ห้องงานนี้ให้เพื่อนร่วมทีม">
-              <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
-              <span>แชร์ QR Code</span>
-            </button>
-            <button onclick="syncCurrentRoomGoogleCalendar()" class="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-blue-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-blue-500/30 transition cursor-pointer" title="เพิ่มกำหนดการห้องนี้ลงใน Google Calendar ของคุณ">
-              <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-blue-400"></i>
-              <span>Google Calendar</span>
-            </button>
-            <button onclick="downloadCurrentRoomIcs()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-amber-500/30 transition cursor-pointer" title="บันทึกไฟล์ .ics ลงในเครื่องสำหรับ Apple Calendar หรือ Outlook">
-              <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>ปฏิทินในเครื่อง (.ics)</span>
-            </button>
-            <button onclick="openManageColumnsModal()" class="px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500 text-purple-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-purple-500/30 transition cursor-pointer" title="ปรับแต่งขั้นตอนคอลัมน์ของบอร์ดนี้">
-              <i data-lucide="columns" class="w-3.5 h-3.5 text-purple-400"></i>
-              <span>ปรับแต่งคอลัมน์</span>
-            </button>
-            <button onclick="exportRoomTasksSummary()" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-emerald-500/30 transition cursor-pointer" title="คัดลอกสรุปรายการงานทั้งหมดสำหรับส่งอาจารย์หรือรายงานในกลุ่ม">
-              <i data-lucide="copy-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-              <span>คัดลอกสรุปงาน</span>
-            </button>
-            <button onclick="openAddTaskModal()" class="px-3.5 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+        <!-- Bottom: Organized Action Bar (Responsive Grid / Clean Grouping) -->
+        <div class="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+          <!-- Primary Actions -->
+          <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+            <button onclick="openAddTaskModal()" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#FF7A29] hover:from-[#d14f14] hover:to-[#ea6c1e] text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-orange-500/20 transition cursor-pointer">
+              <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
               <span>เพิ่มงานย่อย</span>
             </button>
-            <button id="btnEditRoom" onclick="openEditRoomModal()" class="hidden px-3 py-1.5 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white text-xs font-bold transition flex items-center gap-1 cursor-pointer" title="แก้ไขข้อมูลห้องงาน (ชื่อ, รายละเอียด, กำหนดส่ง)">
-              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            <button id="btnEditRoom" onclick="openEditRoomModal()" class="hidden px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white text-xs font-bold transition flex items-center gap-1.5 border border-white/10 cursor-pointer" title="แก้ไขข้อมูลห้องงาน">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
               <span>แก้ไขห้อง</span>
             </button>
-            <button onclick="openRoomTrashModal()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition" title="ถังขยะของห้องนี้">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
-              <span>ถังขยะห้อง (<span id="roomTrashCount">0</span>)</span>
+            <button onclick="openManageColumnsModal()" class="px-3 py-2 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-purple-500/25 transition cursor-pointer" title="ปรับแต่งขั้นตอนคอลัมน์">
+              <i data-lucide="columns" class="w-3.5 h-3.5 text-purple-400"></i>
+              <span class="hidden xs:inline">ปรับขั้นตอน</span>
             </button>
-            <button id="btnDeleteRoom" onclick="handleDeleteCurrentRoom()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white text-xs font-bold transition" title="ลบห้องงานหลักลงถังขยะ">
+          </div>
+
+          <!-- Secondary Utility Actions -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button onclick="openRoomQrShare()" class="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1 border border-white/10 transition cursor-pointer" title="แชร์ QR Code ห้องงาน">
+              <i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span class="hidden sm:inline">QR Code</span>
+            </button>
+            <button onclick="syncCurrentRoomGoogleCalendar()" class="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1 border border-white/10 transition cursor-pointer" title="ซิงค์เข้า Google Calendar">
+              <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-blue-400"></i>
+              <span class="hidden sm:inline">Google</span>
+            </button>
+            <button onclick="downloadCurrentRoomIcs()" class="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1 border border-white/10 transition cursor-pointer" title="ดาวน์โหลดไฟล์ .ics">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span class="hidden sm:inline">.ICS</span>
+            </button>
+            <button onclick="exportRoomTasksSummary()" class="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1 border border-white/10 transition cursor-pointer" title="คัดลอกสรุปรายการงาน">
+              <i data-lucide="copy-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span class="hidden sm:inline">สรุปงาน</span>
+            </button>
+            <button onclick="openRoomTrashModal()" class="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1 border border-white/10 transition cursor-pointer" title="ถังขยะของห้องนี้">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span>(<span id="roomTrashCount">0</span>)</span>
+            </button>
+            <button id="btnDeleteRoom" onclick="handleDeleteCurrentRoom()" class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500 text-rose-300 hover:text-white text-xs font-bold transition border border-rose-500/25 cursor-pointer" title="ลบห้องงานหลักลงถังขยะ">
               <i data-lucide="archive" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -612,15 +640,15 @@
   </main>
 
   <!-- ================= MODAL: CREATE MASTER ROOM ================= -->
-  <div id="createPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
+  <div id="createPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden modal-dialog-responsive max-h-[90vh] sm:max-h-[85vh]">
       
-      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
         <h3 class="text-base font-black text-white">สร้างห้องงานใหม่ (Master Room)</h3>
         <button onclick="closeCreatePlanModal()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <form onsubmit="handleCreatePlanSubmit(event)" class="space-y-4 pt-4 text-xs">
+      <form onsubmit="handleCreatePlanSubmit(event)" class="space-y-4 pt-3 text-xs modal-body-scrollable overflow-y-auto pr-1 flex-1">
         <div>
           <label class="block font-bold text-slate-300 mb-1">ชื่องานหลัก <span class="text-rose-400">*</span></label>
           <input type="text" id="newRoomTitle" required placeholder="เช่น ซุ้มบัณฑิต 2569, จัดค่ายพี่ติวน้อง" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
@@ -747,9 +775,9 @@
   </div>
 
   <!-- ================= MODAL: EDIT MASTER ROOM ================= -->
-  <div id="editRoomModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
-      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+  <div id="editRoomModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden modal-dialog-responsive max-h-[90vh] sm:max-h-[85vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
         <div class="flex items-center gap-2">
           <span class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
             <i data-lucide="edit-3" class="w-4 h-4"></i>
@@ -759,7 +787,7 @@
         <button type="button" onclick="closeEditRoomModal()" class="p-1 rounded-xl text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <form onsubmit="handleEditRoomSubmit(event)" class="space-y-4 pt-3 text-xs">
+      <form onsubmit="handleEditRoomSubmit(event)" class="space-y-4 pt-3 text-xs modal-body-scrollable overflow-y-auto pr-1 flex-1">
         <input type="hidden" id="editRoomId">
 
         <div>
@@ -888,14 +916,14 @@
   </div>
 
   <!-- ================= MODAL: ADD / EDIT SUBTASK (PLANTODO ITEM) ================= -->
-  <div id="taskModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-    <div class="glass-card rounded-3xl border border-white/15 max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
-      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+  <div id="taskModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="glass-card rounded-3xl border border-white/15 max-w-md w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden modal-dialog-responsive max-h-[90vh] sm:max-h-[85vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
         <h3 id="taskModalTitle" class="text-base font-black text-white">เพิ่มงานย่อย</h3>
         <button onclick="closeTaskModal()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <form onsubmit="handleTaskSubmit(event)" class="space-y-3.5 pt-3 text-xs">
+      <form onsubmit="handleTaskSubmit(event)" class="space-y-3.5 pt-3 text-xs modal-body-scrollable overflow-y-auto pr-1 flex-1">
         <input type="hidden" id="taskFormId" value="">
 
         <div>
@@ -3499,7 +3527,7 @@
 
   <!-- ================= THUMB-ACCESSIBLE FLOATING BOTTOM NAVIGATION (MOBILE) ================= -->
   <!-- Persistent Fixed Bottom Navigation Dock (5 Tabs) -->
-  <nav class="sm:hidden fixed bottom-3 left-3 right-3 z-50 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl p-2 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
+  <nav class="sm:hidden fixed bottom-3 left-3 right-3 z-30 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl p-2 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
     <!-- 1. Home -->
     <a href="index.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i data-lucide="home" class="w-4 h-4"></i>
