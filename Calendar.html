@@ -174,7 +174,7 @@
   </style>
 </head>
 
-<body class="bg-[#070914] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-orange-500 selection:text-white relative overflow-x-hidden pb-20 sm:pb-8">
+<body class="bg-[#070914] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-orange-500 selection:text-white relative overflow-x-hidden pb-32 sm:pb-12">
 
   <!-- Noise Overlay Across Whole Screen (Identical to Index & Profile) -->
   <div class="fixed inset-0 pointer-events-none z-50 bg-noise"></div>
@@ -279,7 +279,7 @@
   </header>
 
   <!-- ================= MAIN CONTENT ================= -->
-  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 flex-1 space-y-6">
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-36 sm:pb-32 flex-1 space-y-6">
 
     <!-- MOBILE-ONLY TOP WIDGETS (< 768px): Swipeable Week Strip & Urgent Banner -->
     <div class="block lg:hidden space-y-3">
@@ -1673,24 +1673,24 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap justify-end">
-            <a href="Plans.html?plan=${p.id}" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white font-bold flex items-center gap-1 transition" title="เปิดบอร์ดห้องงาน">
+          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap justify-start sm:justify-end pt-2 sm:pt-0 border-t border-white/5 sm:border-t-0">
+            <a href="Plans.html?plan=${p.id}" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white font-bold flex items-center gap-1 transition" title="เปิดบอร์ดห้องงาน">
               <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-400"></i>
               <span>บอร์ด</span>
             </a>
-            <button onclick="if(window.CalendarSync) window.CalendarSync.openGoogleCalendar(appState.plans.find(x=>x.id==='${p.id}'));" class="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-xs text-blue-300 hover:text-white font-bold flex items-center gap-1 transition" title="เพิ่มใน Google Calendar">
+            <button onclick="if(window.CalendarSync) window.CalendarSync.openGoogleCalendar(appState.plans.find(x=>x.id==='${p.id}'));" class="px-2.5 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-xs text-blue-300 hover:text-white font-bold flex items-center gap-1 transition" title="เพิ่มใน Google Calendar">
               <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-blue-400"></i>
               <span>Google</span>
             </button>
             <button onclick="if(window.CalendarSync) window.CalendarSync.downloadIcsFile(appState.plans.find(x=>x.id==='${p.id}'));" class="p-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-white transition" title="ดาวน์โหลดไฟล์ .ics สำหรับเปิดในเครื่อง">
-              <i data-lucide="download" class="w-4 h-4"></i>
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
             </button>
             ${canManage ? `
             <button onclick="openEditCalendarPlanModal('${p.id}')" class="p-1.5 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white transition cursor-pointer" title="แก้ไขกิจกรรมนี้">
-              <i data-lucide="edit-3" class="w-4 h-4"></i>
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
             </button>
             <button onclick="handleDeleteCalendarPlan('${p.id}')" class="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition cursor-pointer" title="ลบกิจกรรมนี้ (ย้ายลงถังขยะ)">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
             ` : ''}
           </div>
@@ -2097,11 +2097,11 @@
 
   <!-- ================= THUMB-ACCESSIBLE FLOATING BOTTOM NAVIGATION (MOBILE) ================= -->
   <!-- Persistent Fixed Bottom Navigation Dock (5 Tabs) -->
-  <nav class="sm:hidden fixed bottom-3 left-3 right-3 z-50 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl p-2 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
+  <nav class="sm:hidden fixed bottom-3 inset-x-3 max-w-[calc(100vw-24px)] z-50 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl py-1.5 px-1 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.7)]">
     <!-- 1. Home -->
-    <a href="index.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+    <a href="index.html" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
       <i data-lucide="home" class="w-4 h-4"></i>
-      <span class="text-[10px] font-mono">Home</span>
+      <span class="text-[9px] font-mono">Home</span>
     </a>
     
     <!-- 2. Active Calendar Tab with Date Tear Sheet Icon -->
@@ -2113,26 +2113,26 @@
         </div>
         <span class="cal-tear-day" id="calDockDynamicDay">25</span>
       </div>
-      <span class="text-[10px] font-mono font-bold leading-none mt-0.5">Calendar</span>
-      <span class="w-1.5 h-1.5 rounded-full bg-[#E65A19] absolute -bottom-1 shadow-[0_0_6px_#E65A19]"></span>
+      <span class="text-[9px] font-mono font-bold leading-none mt-0.5">Calendar</span>
+      <span class="w-1.5 h-1.5 rounded-full bg-[#E65A19] absolute -bottom-0.5 shadow-[0_0_6px_#E65A19]"></span>
     </a>
 
     <!-- 3. Plans Hub (Tasks) -->
-    <a href="Plans.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+    <a href="Plans.html" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
       <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-      <span class="text-[10px] font-mono">Plans</span>
+      <span class="text-[9px] font-mono">Plans</span>
     </a>
 
     <!-- 4. Notifications (Triggers Notification Center Modal) -->
-    <button onclick="window.NotificationEngine?.openMobileNotifModal ? window.NotificationEngine.openMobileNotifModal() : alert('ศูนย์แจ้งเตือน')" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition cursor-pointer">
+    <button onclick="window.NotificationEngine?.openMobileNotifModal ? window.NotificationEngine.openMobileNotifModal() : alert('ศูนย์แจ้งเตือน')" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition cursor-pointer">
       <i data-lucide="bell" class="w-4 h-4"></i>
-      <span class="text-[10px] font-mono">Notif</span>
+      <span class="text-[9px] font-mono">Notif</span>
     </button>
 
     <!-- 5. Profile -->
-    <a href="Profile.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+    <a href="Profile.html" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
       <i data-lucide="user" class="w-4 h-4"></i>
-      <span class="text-[10px] font-mono">Profile</span>
+      <span class="text-[9px] font-mono">Profile</span>
     </a>
   </nav>
 
