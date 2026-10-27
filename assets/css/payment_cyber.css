@@ -1,156 +1,179 @@
 /* =========================================================================
-   PAYMENT CYBER UI 2.0 - assets/css/payment_cyber.css
-   ดีไซน์ระดับลักชัวรี Cyber Dark Obsidian สำหรับ payment-example.html
-   ออกแบบเฉพาะทั้งเดสก์ท็อปและสมาร์ตโฟน (Mobile Native App Aesthetics)
+   PAYMENT CYBER UI (LUXURY OBSIDIAN SYSTEM - SPACIOUS & HIGH CONTRAST)
+   assets/css/payment_cyber.css
+   Designed to match Yearbook.html aesthetics: clean, calm, readable, spacious
    ========================================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&family=Prompt:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@500;700&display=swap');
 
 :root {
-  --bg-deep: #05070E;
-  --bg-surface: #0B0F1D;
-  --bg-card: rgba(15, 20, 38, 0.75);
-  --border-glow: rgba(255, 255, 255, 0.08);
+  --bg-deep: #06070A;
+  --bg-surface: rgba(12, 16, 28, 0.72);
   --kku-orange: #E65A19;
   --kku-amber: #FF7A29;
-  --kku-gradient: linear-gradient(135deg, #FF7A29 0%, #E65A19 50%, #B32B19 100%);
   --neon-emerald: #10B981;
   --neon-cyan: #06B6D4;
 }
 
-/* Force Dark Mode Body */
+/* Force Dark Mode Body matching Yearbook.html */
 html, body {
-  background-color: var(--bg-deep) !important;
-  color: #F1F5F9 !important;
+  background-color: #06070A !important;
+  color: #F8FAFC !important;
   font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif !important;
   letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* 1. Global Holographic Canvas & Ambient Mesh */
-#cyberParticleCanvas {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.85;
-}
-
-.ambient-glow-loop {
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at 10% 15%, rgba(230, 90, 25, 0.12) 0%, transparent 45%),
-              radial-gradient(circle at 90% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
-              radial-gradient(circle at 50% 85%, rgba(255, 122, 41, 0.08) 0%, transparent 50%);
-  filter: blur(40px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* 2. Glassmorphic Obsidian Panels (No more cheap gray boxes) */
-.cyber-glass {
-  background: rgba(11, 15, 29, 0.82) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
+/* 1. Glass Surfaces matching Yearbook.html */
+.glass-surface, .cyber-glass {
+  background: rgba(12, 16, 28, 0.75) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Micro-Reflective Chrome Borders */
-.cyber-border-glow {
-  position: relative;
-}
-.cyber-border-glow::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(230, 90, 25, 0.4) 50%, rgba(255, 255, 255, 0.04) 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+.glass-surface-hover:hover {
+  background: rgba(18, 24, 42, 0.88) !important;
+  border-color: rgba(230, 90, 25, 0.45) !important;
+  box-shadow: 0 25px 60px rgba(230, 90, 25, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
 }
 
-/* 3. 3D Kinetic Typography */
+/* 2. Ambient Glow Loop Background */
+.ambient-glow-loop {
+  background: linear-gradient(135deg, rgba(230, 90, 25, 0.12), rgba(16, 185, 129, 0.04), rgba(59, 130, 246, 0.08), rgba(245, 158, 11, 0.12)) !important;
+  background-size: 300% 300% !important;
+  animation: ambientShift 18s ease infinite !important;
+}
+
+@keyframes ambientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 3. Typography & 3D Title Accent */
 .title-3d {
   text-shadow: 0 1px 0 #993300, 0 2px 0 #772600, 0 3px 0 #551a00, 0 6px 18px rgba(230, 90, 25, 0.45);
   letter-spacing: -0.025em;
 }
 
-/* 4. Selective Physics: Soft Subtle Hover instead of Excessive 3D Tilt */
+/* 4. Calm Subtle Hover Physics (No dizziness or tilting) */
 .subtle-hover {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease !important;
 }
 .subtle-hover:hover {
-  transform: translateY(-3px) scale(1.008) !important;
-  border-color: rgba(230, 90, 25, 0.4) !important;
-  box-shadow: 0 16px 36px -10px rgba(230, 90, 25, 0.2) !important;
+  transform: translateY(-2px) !important;
+  border-color: rgba(230, 90, 25, 0.45) !important;
+  box-shadow: 0 16px 36px -10px rgba(230, 90, 25, 0.25) !important;
 }
 
-/* 5. Holographic Bank & QR Matrix */
-.qr-matrix-card {
-  background: linear-gradient(160deg, #090D1B 0%, #060812 100%) !important;
-  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
-  box-shadow: 0 0 35px rgba(16, 185, 129, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-}
-
-/* 6. Cyber Form Input & Search Field */
+/* 5. Inputs & Dropdowns - High Contrast Dark Obsidian */
 .cyber-input {
-  background: rgba(6, 9, 18, 0.88) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(6, 9, 18, 0.92) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
   color: #FFFFFF !important;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
   transition: all 0.2s ease !important;
 }
 .cyber-input:focus {
-  border-color: var(--kku-orange) !important;
+  border-color: #E65A19 !important;
   box-shadow: 0 0 0 3px rgba(230, 90, 25, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
-  background: rgba(8, 12, 24, 0.98) !important;
+  background: rgba(10, 15, 30, 0.98) !important;
+}
+.cyber-input::placeholder {
+  color: #64748B !important;
 }
 
-/* 7. Dropzone: High-Tech Bio-Scanner Box */
+/* 6. QR Code Frame & High-Tech Dropzone */
+.qr-cyber-frame {
+  background: linear-gradient(160deg, #0B1024 0%, #060812 100%) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 0 35px rgba(16, 185, 129, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
 .cyber-dropzone {
-  background: linear-gradient(180deg, rgba(230, 90, 25, 0.05) 0%, rgba(9, 13, 26, 0.9) 100%) !important;
+  background: linear-gradient(180deg, rgba(230, 90, 25, 0.04) 0%, rgba(10, 14, 28, 0.92) 100%) !important;
   border: 2px dashed rgba(230, 90, 25, 0.4) !important;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: all 0.25s ease !important;
 }
-.cyber-dropzone:hover {
-  border-color: #FF7A29 !important;
-  background: linear-gradient(180deg, rgba(230, 90, 25, 0.12) 0%, rgba(14, 19, 38, 0.95) 100%) !important;
-  box-shadow: 0 0 35px rgba(230, 90, 25, 0.25) !important;
+.cyber-dropzone:hover, .cyber-dropzone.dragover {
+  border-color: #E65A19 !important;
+  background: linear-gradient(180deg, rgba(230, 90, 25, 0.1) 0%, rgba(12, 17, 34, 0.95) 100%) !important;
+  box-shadow: 0 0 35px rgba(230, 90, 25, 0.2) !important;
 }
 
-/* 8. Modern Cyber Cards for Students Roster */
+/* 7. Student Roster Cards */
 .cyber-student-card {
   background: rgba(12, 17, 34, 0.8) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 1.25rem !important;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 .cyber-student-card:hover {
-  background: rgba(18, 25, 48, 0.95) !important;
-  border-color: rgba(230, 90, 25, 0.45) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.8), 0 0 15px rgba(230, 90, 25, 0.15) !important;
+  border-color: rgba(230, 90, 25, 0.5) !important;
+  box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.8), 0 0 15px rgba(230, 90, 25, 0.15) !important;
 }
 
-/* 9. Dedicated Mobile App Native Polish */
-@media (max-width: 640px) {
-  /* Mobile Bottom Dock Glass */
-  .mobile-cyber-dock {
-    background: rgba(8, 11, 22, 0.92) !important;
-    backdrop-filter: blur(28px) !important;
-    -webkit-backdrop-filter: blur(28px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8) !important;
-  }
-
-  /* Padding adjustments for thumb reachability */
-  .mobile-card {
-    padding: 1.25rem !important;
-    border-radius: 1.5rem !important;
-  }
+/* 8. Text Readability & Contrast Overrides (Eliminates Dark Text on Dark BG) */
+.text-slate-900, .text-slate-800, .text-slate-700 {
+  color: #F8FAFC !important;
 }
+.text-slate-600, .text-slate-500 {
+  color: #94A3B8 !important;
+}
+.text-slate-400 {
+  color: #CBD5E1 !important;
+}
+.text-orange-950, .text-orange-900, .text-orange-800 {
+  color: #FFEDD5 !important;
+}
+.text-orange-700, .text-orange-600 {
+  color: #FB923C !important;
+}
+.text-emerald-950, .text-emerald-900, .text-emerald-800 {
+  color: #D1FAE5 !important;
+}
+.text-emerald-700, .text-emerald-600 {
+  color: #34D399 !important;
+}
+
+/* 9. Soft Dark Badges replacing Garish Pastel Gradients */
+.bg-orange-50, .bg-orange-100 {
+  background: rgba(230, 90, 25, 0.12) !important;
+  border-color: rgba(230, 90, 25, 0.3) !important;
+  color: #FB923C !important;
+}
+.bg-amber-50, .bg-amber-100 {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #FBBF24 !important;
+}
+.bg-emerald-50, .bg-emerald-100 {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #34D399 !important;
+}
+.bg-white\/95, .bg-white\/90 {
+  background: rgba(12, 16, 28, 0.85) !important;
+}
+.border-slate-200, .border-slate-300 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 10. Mobile Native Floating Bottom Dock */
+.mobile-cyber-dock {
+  background: rgba(8, 11, 22, 0.88) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #06070A; }
+::-webkit-scrollbar-thumb { background: #242A4A; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #E65A19; }

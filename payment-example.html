@@ -85,6 +85,7 @@
   <!-- Custom Payment CSS & Master Admin CSS (Avatar Frames & Animation) -->
   <link rel="stylesheet" href="assets/css/payment.css">
   <!-- Cyber Particles Background & 3D Tilt Engine -->
+  <script>window.__DISABLE_3D_TILT = true;</script>
   <script src="assets/js/cyber_particles.js"></script>
   <!-- Cyberpunk Theme Stylesheet -->
   <link rel="stylesheet" href="assets/css/payment_cyber.css">
@@ -152,7 +153,7 @@
 
   <!-- ================= LUXURY USER PROFILE & STATUS MODAL ================= -->
   <div id="modalMyPaymentProfile" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
-    <div id="myPaymentProfileCard" class="relative cyber-glass rounded-[2rem] border border-white/10 max-w-md w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-orange-200 text-center space-y-6 overflow-hidden">
+    <div id="myPaymentProfileCard" class="relative cyber-glass rounded-[2rem] border border-white/10 max-w-md w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border border-white/10 text-center space-y-6 overflow-hidden">
       
       <!-- Top Decorative Glow bar -->
       <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400"></div>
@@ -349,13 +350,13 @@
 
   <!-- TOP HEADER / NAV BAR WITH LOGO -->
   <header
-    class="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-white/10 shadow-sm transition-all duration-300">
+    class="sticky top-0 z-40 glass-surface border-b border-white/10 shadow-lg transition-all duration-300">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
 
       <!-- LOGO & BRANDING -->
       <div class="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-0 flex-1 sm:flex-initial" onclick="switchMainTab('payment')">
         <div
-          class="relative w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-orange-50 via-white to-sky-50 shadow-sm border border-orange-200/60 p-1 flex items-center justify-center transition-all duration-300 flex-shrink-0">
+          class="relative w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-white/[0.06] border border-white/15 shadow-sm p-1 flex items-center justify-center transition-all duration-300 flex-shrink-0">
           <img src="logo.png" alt="โลโก้สาขาวิชาคอมพิวเตอร์ศึกษา" class="w-full h-full object-contain" loading="lazy" decoding="async">
           <div
             class="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-emerald-500 border-2 border-white rounded-full">
@@ -384,7 +385,7 @@
       <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
         
         <!-- Desktop Nav Tabs Bar -->
-        <div class="hidden md:flex items-center gap-1 p-1 bg-white/10/90 rounded-2xl border border-white/10 shadow-inner">
+        <div class="hidden md:flex items-center gap-1 p-1 bg-black/40 rounded-2xl border border-white/10 shadow-inner">
           
           <!-- 1. ชำระเงิน -->
           <button id="navTabPayment" onclick="switchMainTab('payment')"
@@ -410,7 +411,7 @@
 
         <!-- User Guest / Logged-in Avatar Quick Indicator -->
         <div id="navUserGuest" class="flex items-center">
-          <button onclick="openGoogleLoginModal()" class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl sm:rounded-2xl bg-white border border-slate-300 hover:border-orange-500 text-slate-200 font-bold text-xs shadow-xs hover:shadow-md transition transform active:scale-95 cursor-pointer">
+          <button onclick="openGoogleLoginModal()" class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl sm:rounded-2xl bg-white/[0.06] border border-white/15 hover:border-orange-500/60 text-slate-200 font-bold text-xs shadow-xs hover:shadow-md transition transform active:scale-95 cursor-pointer">
             <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
               <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
@@ -440,7 +441,7 @@
 
         <!-- Quick Refresh Button -->
         <button id="btnQuickRefresh" onclick="manualRefreshData()"
-          class="p-1.5 sm:p-2 rounded-xl bg-white border border-white/10 text-slate-600 hover:text-orange-600 hover:border-orange-300 shadow-xs transition flex items-center justify-center cursor-pointer flex-shrink-0"
+          class="p-1.5 sm:p-2 rounded-xl bg-white/[0.06] border border-white/15 text-slate-300 hover:text-white hover:border-orange-500/50 shadow-xs transition flex items-center justify-center cursor-pointer flex-shrink-0"
           title="รีเฟรชข้อมูลล่าสุด">
           <i data-lucide="rotate-cw" id="refreshIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
         </button>
@@ -449,7 +450,7 @@
     </div>
 
     <!-- Quick Horizontal Campaign Switcher Bar -->
-    <div id="headerQuickCampaignBar" class="border-t border-slate-100 bg-white/5/70 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-2 overflow-x-auto mobile-hide-scrollbar flex items-center gap-2">
+    <div id="headerQuickCampaignBar" class="border-t border-white/5 bg-black/40 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-2 overflow-x-auto mobile-hide-scrollbar flex items-center gap-2">
       <div class="flex items-center gap-1.5 text-[11px] font-black text-slate-400 uppercase tracking-wider flex-shrink-0 mr-1">
         <i data-lucide="layers" class="w-3.5 h-3.5 text-orange-500"></i>
         <span class="hidden sm:inline">รายการ:</span>
@@ -513,7 +514,7 @@
   </div>
 
   <!-- MAIN CONTAINER -->
-  <main class="flex-grow max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8">
+  <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10 pb-28 sm:pb-16">
 
     <!-- ================= 0. DYNAMIC CAMPAIGN SELECTOR & OVERVIEW HUB ================= -->
     <section id="campaignSelectorSection" class="cyber-glass rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl space-y-4 ">
@@ -835,7 +836,7 @@
               </div>
               <input type="text" id="smartSearchInput" autocomplete="off"
                 placeholder="กรอกรหัส 693050... หรือ ชื่อเล่น..."
-                class="w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3.5 sm:py-4 cyber-input w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3.5 sm:py-4 rounded-2xl text-white text-sm sm:text-base font-semibold placeholder-slate-500 focus:ring-4 focus:ring-orange-500/20 shadow-sm transition-all outline-none">
+                class="w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3.5 sm:py-4 cyber-input rounded-2xl text-white text-sm sm:text-base font-semibold placeholder-slate-500 focus:ring-4 focus:ring-orange-500/20 shadow-sm transition-all outline-none">
               <!-- Quick Paste / Clear Button -->
               <div class="absolute right-2 flex items-center gap-1">
                 <button type="button" id="btnClearSearch" onclick="clearSearchInput()"
@@ -843,7 +844,7 @@
                   <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
                 <button type="button" onclick="pasteFromClipboard()"
-                  class="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-orange-700 bg-orange-50 hover:bg-orange-100 rounded-xl transition border border-orange-200 shadow-sm">
+                  class="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-orange-300 bg-orange-500/15 hover:bg-orange-500/25 rounded-xl transition border border-orange-500/30 shadow-sm">
                   <i data-lucide="clipboard" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
                   <span>วางรหัส</span>
                 </button>
@@ -973,7 +974,7 @@
 
                 <!-- Real QR Image Box with Click to Zoom -->
                 <div
-                  class="relative p-2.5 bg-gradient-to-b from-slate-50 to-white rounded-3xl border-2 border-emerald-500/30 shadow-md group cursor-pointer transition hover:border-emerald-500/60 hover:shadow-lg"
+                  class="relative p-2.5 bg-white rounded-3xl border-2 border-emerald-500/40 p-3 shadow-md group cursor-pointer transition hover:border-emerald-500/60 hover:shadow-lg"
                   onclick="openCurrentQrFullscreen()">
                   <!-- QR Image — generated dynamically from ThaiQrEngine, no static fallback -->
                   <div id="qrLoadingSpinner" class="w-64 h-64 flex items-center justify-center">
@@ -1108,7 +1109,7 @@
 
                   <!-- Prominent CTA Pill Button -->
                   <div
-                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-white border-2 border-orange-300 group-hover:border-orange-500 text-orange-600 font-black text-xs sm:text-sm shadow-md group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
+                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-white/[0.08] border-2 border-orange-500/40 group-hover:border-orange-500 text-orange-300 font-black text-xs sm:text-sm shadow-md group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
                     <i data-lucide="image-plus" class="w-4 h-4"></i>
                     <span>เลือกไฟล์รูปภาพจากอุปกรณ์</span>
                   </div>
@@ -1117,7 +1118,7 @@
 
               <!-- Medium Size Slip Preview (Before Submit) -->
               <div id="slipPreviewContainer"
-                class="hidden bg-white p-6 rounded-3xl border border-white/10 shadow-md space-y-4">
+                class="hidden glass-surface p-6 rounded-3xl border border-white/10 shadow-xl space-y-4">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
                     <i data-lucide="image" class="w-4 h-4 text-orange-600"></i>

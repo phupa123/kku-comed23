@@ -117,8 +117,9 @@
     }
   }
 
-  // Interactive 3D Tilt Card Helper
+  // Interactive 3D Tilt Card Helper (Disabled if requested for calm luxury UI)
   function init3DTiltCards(selector = '.tilt-card-3d') {
+    if (window.__DISABLE_3D_TILT) return;
     const cards = document.querySelectorAll(selector);
     cards.forEach(card => {
       card.addEventListener('mousemove', (e) => {
