@@ -361,10 +361,10 @@ function renderCampaignsNav() {
 
       return `
         <div onclick="switchCampaignWithAnimation('${camp.id}', event)" 
-          class="p-4 rounded-3xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer hover-elevate group ${
+          class="p-4 rounded-3xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer subtle-hover group ${
             isSelected 
-              ? 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-white border-2 border-orange-500 active-campaign-glow ring-2 ring-orange-500/30' 
-              : 'bg-white hover:bg-orange-50/40 border border-slate-200/90 hover:border-orange-300 shadow-sm'
+              ? 'glass-surface cyber-campaign-active border-orange-500' 
+              : 'glass-surface border-white/10 hover:border-orange-500/40'
           }">
           ${isSelected ? '<div class="absolute top-0 right-0 bg-gradient-to-l from-orange-600 to-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-2xl shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> รายการที่เลือก</div>' : ''}
           

@@ -275,27 +275,33 @@
 
             <!-- Dual-Ring Glowing Neon Dial (Matching Mockup Center) -->
             <div class="cyber-timer-dial my-3">
-              <div class="cyber-timer-ring-outer"></div>
-              <div class="cyber-timer-ring-inner"></div>
-              <div class="relative z-10 flex items-center justify-center gap-2 sm:gap-3 text-center">
+              <svg class="cyber-timer-svg" viewBox="0 0 200 200">
+                <circle class="cyber-timer-track" cx="100" cy="100" r="90" stroke-width="5" />
+                <circle id="cyberTimerCircleOuter" class="cyber-timer-prog-outer" cx="100" cy="100" r="90" stroke-width="5"
+                  stroke-dasharray="565.48" stroke-dashoffset="140" />
+                <circle class="cyber-timer-track" cx="100" cy="100" r="76" stroke-width="4.5" />
+                <circle id="cyberTimerCircleInner" class="cyber-timer-prog-inner" cx="100" cy="100" r="76" stroke-width="4.5"
+                  stroke-dasharray="477.52" stroke-dashoffset="190" />
+              </svg>
+              <div class="relative z-10 flex items-center justify-center gap-2 sm:gap-2.5 text-center">
                 <div>
-                  <span id="cdDays" class="text-2xl sm:text-3xl font-black font-mono text-white block">08</span>
-                  <span class="text-[10px] text-slate-400 font-bold block mt-0.5">วัน</span>
+                  <span id="cdDays" class="text-xl sm:text-2xl font-black font-mono text-white block transition-all">08</span>
+                  <span class="text-[9px] text-slate-400 font-bold block mt-0.5">วัน</span>
                 </div>
-                <span class="text-slate-500 text-lg font-mono -mt-3">:</span>
+                <span class="text-slate-600 text-sm font-mono -mt-3">:</span>
                 <div>
-                  <span id="cdHours" class="text-2xl sm:text-3xl font-black font-mono text-white block">03</span>
-                  <span class="text-[10px] text-slate-400 font-bold block mt-0.5">ชม.</span>
+                  <span id="cdHours" class="text-xl sm:text-2xl font-black font-mono text-white block transition-all">03</span>
+                  <span class="text-[9px] text-slate-400 font-bold block mt-0.5">ชม.</span>
                 </div>
-                <span class="text-slate-500 text-lg font-mono -mt-3">:</span>
+                <span class="text-slate-600 text-sm font-mono -mt-3">:</span>
                 <div>
-                  <span id="cdMins" class="text-2xl sm:text-3xl font-black font-mono text-white block">07</span>
-                  <span class="text-[10px] text-slate-400 font-bold block mt-0.5">นาที</span>
+                  <span id="cdMins" class="text-xl sm:text-2xl font-black font-mono text-white block transition-all">07</span>
+                  <span class="text-[9px] text-slate-400 font-bold block mt-0.5">นาที</span>
                 </div>
-                <span class="text-slate-500 text-lg font-mono -mt-3">:</span>
+                <span class="text-slate-600 text-sm font-mono -mt-3">:</span>
                 <div>
-                  <span id="cdSecs" class="text-2xl sm:text-3xl font-black font-mono text-cyan-400 block">31</span>
-                  <span class="text-[10px] text-cyan-400 font-bold block mt-0.5">วินาที</span>
+                  <span id="cdSecs" class="text-xl sm:text-2xl font-black font-mono text-cyan-400 block transition-all">31</span>
+                  <span class="text-[9px] text-cyan-400 font-bold block mt-0.5">วินาที</span>
                 </div>
               </div>
             </div>

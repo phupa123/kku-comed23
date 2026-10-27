@@ -7,6 +7,15 @@
 
 (function(window) {
   'use strict';
+  function getStudentsList() {
+    if (typeof students !== 'undefined' && Array.isArray(students) && students.length > 0) return students;
+    if (typeof window !== 'undefined') {
+      if (Array.isArray(window.STUDENTS_DATA) && window.STUDENTS_DATA.length > 0) return window.STUDENTS_DATA;
+      if (Array.isArray(window.studentDatabase) && window.studentDatabase.length > 0) return window.studentDatabase;
+    }
+    return [];
+  }
+
 
   let currentViewMode = localStorage.getItem('COMED_PAYMENT_VIEW_MODE') || 'cards'; // 'cards' | 'table'
 
@@ -85,12 +94,13 @@
 
   function renderCyberCards() {
     const cardsGrid = document.getElementById('studentStatusCardsGrid');
-    if (!cardsGrid || typeof students === 'undefined') return;
+    const studentList = getStudentsList();
+    if (!cardsGrid || studentList.length === 0) return;
 
     const queryInput = document.getElementById('tableSearchInput');
     const query = queryInput ? queryInput.value.toLowerCase().trim() : '';
 
-    const filtered = students.filter(st => {
+    const filtered = studentList.filter(st => {
       const matchSearch = !query || 
         st.name.toLowerCase().includes(query) || 
         st.id.includes(query) || 
@@ -158,12 +168,13 @@
   // 2. COMED KKU Redesign: Quick Student Search List in Column 3
   function renderQuickStudentList(query = '') {
     const container = document.getElementById('studentQuickListContainer');
-    if (!container || typeof students === 'undefined') return;
+    const studentList = getStudentsList();
+    if (!container || studentList.length === 0) return;
 
     const q = (query || '').toLowerCase().trim();
     const currentSelectedId = window.currentSelectedStudent ? window.currentSelectedStudent.id : '';
 
-    const list = students.filter(st => {
+    const list = studentList.filter(st => {
       if (!q) return true;
       return st.name.toLowerCase().includes(q) ||
              st.id.includes(q) ||
@@ -216,8 +227,8 @@
 
   // Quick Select Student from List or Roster
   function selectStudentQuick(studentId) {
-    if (typeof students === 'undefined') return;
-    const st = students.find(s => s.id === studentId);
+    const studentList = getStudentsList();
+    const st = studentList.find(s => s.id === studentId);
     if (!st) return;
 
     if (typeof window.selectStudent === 'function') {
@@ -440,3 +451,103 @@
   };
 
 })(window);
+
+
+// Global Bridge for Status Filter Tabs and Auto Rerender
+if (typeof window !== 'undefined') {
+  window.setFilter = function(filter) {
+    if (typeof window.filterStatusList === 'function') {
+      window.filterStatusList(filter);
+    } else {
+      window.currentFilter = filter;
+    }
+    const btnAll = document.getElementById('filterBtnAll');
+    const btnPaid = document.getElementById('filterBtnPaid');
+    const btnUnpaid = document.getElementById('filterBtnUnpaid');
+    [btnAll, btnPaid, btnUnpaid].forEach(b => {
+      if (b) b.className = 'px-3 py-1.5 rounded-lg font-bold text-slate-400 hover:text-white transition';
+    });
+    if (filter === 'all' && btnAll) btnAll.className = 'px-3 py-1.5 rounded-lg font-bold bg-[#E65A19] text-white shadow-sm transition';
+    if (filter === 'paid' && btnPaid) btnPaid.className = 'px-3 py-1.5 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition';
+    if (filter === 'unpaid' && btnUnpaid) btnUnpaid.className = 'px-3 py-1.5 rounded-lg font-bold bg-rose-600 text-white shadow-sm transition';
+
+    if (window.PaymentCyberUI && typeof window.PaymentCyberUI.renderCards === 'function') {
+      window.PaymentCyberUI.renderCards();
+    }
+  };
+}
+
+
+// =========================================================================
+// DYNAMIC SVG DUAL-RING RADIAL PROGRESS & DECREMENT FLASH TRACKER
+// =========================================================================
+(function() {
+  let prevSec = null;
+  let prevMin = null;
+  let prevHour = null;
+
+  function triggerElementFlash(el, flashClass) {
+    if (!el) return;
+    el.classList.remove('cd-flash-red', 'cd-pulse-cyan');
+    // Force reflow
+    void el.offsetWidth;
+    el.classList.add(flashClass);
+    setTimeout(() => {
+      el.classList.remove(flashClass);
+    }, 650);
+  }
+
+  function updateRadialCountdown() {
+    const cdSecs = document.getElementById('cdSecs');
+    const cdMins = document.getElementById('cdMins');
+    const cdHours = document.getElementById('cdHours');
+    const circleOuter = document.getElementById('cyberTimerCircleOuter'); // Cyan (Days/Hours/Total)
+    const circleInner = document.getElementById('cyberTimerCircleInner'); // Orange (Seconds/Minutes)
+
+    if (!cdSecs) return;
+
+    const currentSec = parseInt(cdSecs.textContent, 10);
+    const currentMin = cdMins ? parseInt(cdMins.textContent, 10) : 0;
+    const currentHour = cdHours ? parseInt(cdHours.textContent, 10) : 0;
+
+    // 1. Seconds change flash (Cyan Pulse)
+    if (!isNaN(currentSec) && prevSec !== null && currentSec !== prevSec) {
+      triggerElementFlash(cdSecs, 'cd-pulse-cyan');
+    }
+
+    // 2. Minutes change flash (Red Flash)
+    if (!isNaN(currentMin) && prevMin !== null && currentMin !== prevMin) {
+      triggerElementFlash(cdMins, 'cd-flash-red');
+    }
+
+    // 3. Hours change flash (Red Flash)
+    if (!isNaN(currentHour) && prevHour !== null && currentHour !== prevHour) {
+      triggerElementFlash(cdHours, 'cd-flash-red');
+    }
+
+    // Update state
+    if (!isNaN(currentSec)) prevSec = currentSec;
+    if (!isNaN(currentMin)) prevMin = currentMin;
+    if (!isNaN(currentHour)) prevHour = currentHour;
+
+    // 4. Update SVG Radial Progress Rings
+    // Inner Ring: 60-second loop (Circumference = 2 * PI * 76 = 477.52)
+    if (circleInner && !isNaN(currentSec)) {
+      const innerCircumference = 477.52;
+      const secElapsed = (60 - currentSec) % 60;
+      const innerOffset = innerCircumference - (secElapsed / 60) * innerCircumference;
+      circleInner.style.strokeDashoffset = innerOffset.toFixed(2);
+    }
+
+    // Outer Ring: 60-minute loop (Circumference = 2 * PI * 90 = 565.48)
+    if (circleOuter && !isNaN(currentMin)) {
+      const outerCircumference = 565.48;
+      const minElapsed = (60 - currentMin) % 60;
+      const outerOffset = outerCircumference - (minElapsed / 60) * outerCircumference;
+      circleOuter.style.strokeDashoffset = outerOffset.toFixed(2);
+    }
+  }
+
+  // Interval check every 250ms to ensure immediate detection of timer ticks
+  setInterval(updateRadialCountdown, 250);
+})();

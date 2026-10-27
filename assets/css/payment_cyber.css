@@ -176,36 +176,58 @@ html, body {
 /* Dual-Ring Circular Glowing Countdown Dial */
 .cyber-timer-dial {
   position: relative;
-  width: 190px;
-  height: 190px;
+  width: 200px;
+  height: 200px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.cyber-timer-ring-outer {
+.cyber-timer-svg {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
-  border: 4px solid transparent;
-  border-top-color: #06B6D4;
-  border-right-color: #06B6D4;
-  border-bottom-color: rgba(6, 182, 212, 0.15);
-  border-left-color: rgba(6, 182, 212, 0.15);
-  box-shadow: 0 0 25px rgba(6, 182, 212, 0.35), inset 0 0 15px rgba(6, 182, 212, 0.2);
-  transform: rotate(-35deg);
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  pointer-events: none;
 }
-.cyber-timer-ring-inner {
-  position: absolute;
-  inset: 12px;
-  border-radius: 50%;
-  border: 3.5px solid transparent;
-  border-top-color: #E65A19;
-  border-left-color: #FF7A29;
-  border-bottom-color: rgba(230, 90, 25, 0.15);
-  border-right-color: rgba(230, 90, 25, 0.15);
-  box-shadow: 0 0 25px rgba(230, 90, 25, 0.4), inset 0 0 12px rgba(230, 90, 25, 0.2);
-  transform: rotate(50deg);
+.cyber-timer-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.05);
+}
+.cyber-timer-prog-outer {
+  fill: none;
+  stroke: #06B6D4;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.7));
+  transition: stroke-dashoffset 0.8s ease;
+}
+.cyber-timer-prog-inner {
+  fill: none;
+  stroke: #E65A19;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(230, 90, 25, 0.8));
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+/* Decrement Flash Animations */
+@keyframes cdFlashRed {
+  0% { transform: scale(1.15); color: #FF2E4D; text-shadow: 0 0 16px rgba(255, 46, 77, 0.9); }
+  50% { transform: scale(1.08); color: #FF6B81; text-shadow: 0 0 10px rgba(255, 46, 77, 0.7); }
+  100% { transform: scale(1); color: #FFFFFF; text-shadow: none; }
+}
+
+@keyframes cdPulseCyan {
+  0% { transform: scale(1.1); color: #22D3EE; text-shadow: 0 0 14px rgba(34, 211, 238, 0.85); }
+  100% { transform: scale(1); color: #22D3EE; text-shadow: 0 0 6px rgba(34, 211, 238, 0.4); }
+}
+
+.cd-flash-red {
+  animation: cdFlashRed 0.65s ease-out forwards;
+}
+
+.cd-pulse-cyan {
+  animation: cdPulseCyan 0.4s ease-out forwards;
 }
 
 /* Neon Gradient Progress Bar */
