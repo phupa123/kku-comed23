@@ -1472,18 +1472,30 @@ function openConfirmModal() {
 
   if (mImg) mImg.src = tempSlipDataUrl;
 
-  // Reset Modal UI state
+  // Reset Modal UI state & steps
   const actionArea = document.getElementById('slipActionButtonsArea');
   const progressState = document.getElementById('slipUploadingProgressState');
   const bar = document.getElementById('uploadAnimatedBar');
   const title = document.getElementById('uploadStatusTitle');
   const subtitle = document.getElementById('uploadStatusSubtitle');
+  const pctBadge = document.getElementById('uploadPercentBadge');
+  const byteCounter = document.getElementById('uploadByteCounter');
+  const speedEstimate = document.getElementById('uploadSpeedEstimate');
+  const s1 = document.getElementById('stepVerify');
+  const s2 = document.getElementById('stepCloud');
+  const s3 = document.getElementById('stepDatabase');
 
   if (actionArea) actionArea.classList.remove('hidden');
   if (progressState) progressState.classList.add('hidden');
   if (bar) bar.style.width = '0%';
+  if (pctBadge) pctBadge.textContent = '0%';
+  if (byteCounter) byteCounter.textContent = 'พร้อมส่งข้อมูล';
+  if (speedEstimate) speedEstimate.textContent = '⚡ ความเร็วสูง';
+  [s1, s2, s3].forEach(s => {
+    if (s) s.className = 'p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 transition-all';
+  });
   if (title) title.textContent = 'กำลังส่งข้อมูลและอัปโหลดรูปสลิป...';
-  if (subtitle) subtitle.textContent = 'กรุณารอสักครู่ ระบบกำลังประมวลผลขึ้นสู่ Google Cloud';
+  if (subtitle) subtitle.textContent = 'ระบบกำลังวิเคราะห์และบีบอัดรูปสลิปเพื่อความรวดเร็ว';
 
   const modal = document.getElementById('modalConfirmUpload');
   if (modal) modal.classList.remove('hidden');
@@ -1516,10 +1528,39 @@ async function executeSlipSubmission() {
   const bar = document.getElementById('uploadAnimatedBar');
   const title = document.getElementById('uploadStatusTitle');
   const subtitle = document.getElementById('uploadStatusSubtitle');
+  const pctBadge = document.getElementById('uploadPercentBadge');
+  const byteCounter = document.getElementById('uploadByteCounter');
+  const speedEstimate = document.getElementById('uploadSpeedEstimate');
+  const s1 = document.getElementById('stepVerify');
+  const s2 = document.getElementById('stepCloud');
+  const s3 = document.getElementById('stepDatabase');
+
+  function updateStepUI(stepIndex, pct, titleText, subtitleText, byteText) {
+    if (bar) bar.style.width = `${pct}%`;
+    if (pctBadge) pctBadge.textContent = `${pct}%`;
+    if (title && titleText) title.textContent = titleText;
+    if (subtitle && subtitleText) subtitle.textContent = subtitleText;
+    if (byteCounter && byteText) byteCounter.textContent = byteText;
+
+    const steps = [s1, s2, s3];
+    steps.forEach((s, idx) => {
+      if (!s) return;
+      if (idx < stepIndex) {
+        // completed step
+        s.className = 'p-2 rounded-xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 transition-all font-bold';
+      } else if (idx === stepIndex) {
+        // current active step
+        s.className = 'p-2 rounded-xl bg-amber-500/20 border border-amber-500/60 text-amber-300 transition-all font-black animate-pulse';
+      } else {
+        // pending
+        s.className = 'p-2 rounded-xl bg-white/5 border border-white/10 text-slate-500 transition-all';
+      }
+    });
+  }
 
   if (actionArea) actionArea.classList.add('hidden');
   if (progressState) progressState.classList.remove('hidden');
-  if (bar) bar.style.width = '35%';
+  updateStepUI(0, 15, '🔍 ขั้นตอนที่ 1/3: ตรวจสอบข้อมูลสลิป', 'กำลังตรวจสอบความถูกต้องของสลิปและยอดเงิน...');
 
   const studentId = currentSelectedStudent.id;
   const finalAmount = currentSelectedShirtSize && currentSelectedShirtSize.price
@@ -1586,7 +1627,7 @@ async function executeSlipSubmission() {
 
       const firstProvider = allowedProviders[0];
       const providerName = window.MultiCloudUploader.getProviderName(firstProvider);
-      if (title) title.textContent = `☁️ กำลังส่งสลิปไปยัง ${providerName}...`;
+      updateStepUI(1, 40, `☁️ ขั้นตอนที่ 2/3: กำลังส่งสลิปขึ้น Cloud (${providerName})`, 'กำลังบีบอัดและส่งภาพด้วยเทคโนโลยี Web Stream...');
 
       const cloudRes = await window.MultiCloudUploader.upload(tempSlipDataUrl, {
         preferredProvider: firstProvider,
@@ -1596,8 +1637,15 @@ async function executeSlipSubmission() {
         uploaderId: currentSelectedStudent.id,
         uploaderName: currentSelectedStudent.name,
         uploaderEmail: currentSelectedStudent.email,
-        onProgress: (pct, msg) => {
-          if (subtitle) subtitle.textContent = msg;
+        onProgress: (pct, msg, details) => {
+          const calcPct = Math.min(85, Math.max(30, Math.round(30 + (pct * 0.55))));
+          let byteInfo = '';
+          if (details && details.loadedBytes && details.totalBytes) {
+            byteInfo = `${(details.loadedBytes/1024).toFixed(0)} KB / ${(details.totalBytes/1024).toFixed(0)} KB (${pct}%)`;
+          } else {
+            byteInfo = `กำลังอัปโหลด... ${pct}%`;
+          }
+          updateStepUI(1, calcPct, `☁️ ขั้นตอนที่ 2/3: กำลังส่งสลิปขึ้น Cloud (${providerName})`, msg || 'กำลังส่งข้อมูลสลิปขึ้นคลาวด์ความเร็วสูง...', byteInfo);
         }
       });
       if (cloudRes && cloudRes.url) {
@@ -1662,7 +1710,7 @@ async function executeSlipSubmission() {
     localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localPay));
   } catch (cErr) {}
 
-  if (bar) bar.style.width = '60%';
+  updateStepUI(2, 88, '💾 ขั้นตอนที่ 3/3: กำลังบันทึกประวัติการชำระเงิน', 'กำลังซิงค์สถานะเข้าสู่ Supabase Database...', 'บันทึกเรียบร้อย');
 
   // 1. Send to Supabase Database (Realtime Cloud Database)
   const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
@@ -1723,9 +1771,8 @@ async function executeSlipSubmission() {
     } catch (e) { }
   }
 
-  if (bar) bar.style.width = '100%';
-  if (title) title.textContent = '✨ อัปโหลดและบันทึกข้อมูลเสร็จสิ้น!';
-  if (subtitle) subtitle.textContent = 'ยอดเงินและหลักฐานสลิปถูกบันทึกเรียบร้อยแล้ว';
+  updateStepUI(3, 100, '🎉 บันทึกการชำระเงินสำเร็จ 100%!', 'สลิปและข้อมูลของคุณถูกบันทึกเข้าสู่ระบบเรียบร้อยแล้ว', '100% สำเร็จ');
+  if (speedEstimate) speedEstimate.textContent = '✅ เสร็จสมบูรณ์';
 
   await new Promise(r => setTimeout(r, 600));
 

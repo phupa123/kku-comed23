@@ -21,8 +21,8 @@
   // Default keys and fallbacks
   const DEFAULT_CONFIG = {
     activeProvider: 'auto', // 'auto' | 'imgbb' | 'cloudinary' | 'freeimage' | 'catbox'
-    enabledProviders: ['catbox', 'imgbb', 'cloudinary'],
-    providerPriority: ['catbox', 'imgbb', 'cloudinary', 'freeimage'],
+    enabledProviders: ['imgbb', 'cloudinary', 'catbox'],
+    providerPriority: ['imgbb', 'cloudinary', 'catbox', 'freeimage'],
     
     // Auto compression settings
     autoCompress: true,
@@ -721,7 +721,7 @@
       });
 
       // กำหนด Timeout แบบไดนามิกตามขนาดไฟล์ (ไฟล์วิดีโอ/ไฟล์ใหญ่ ให้เวลาอย่างน้อย 120-600 วินาที)
-      const dynamicTimeout = Math.max(120000, Math.min(600000, Math.round((fileObj.size || 1024 * 1024) / (50 * 1024) * 1000)));
+      const dynamicTimeout = Math.max(12000, Math.min(45000, Math.round((fileObj.size || 1024 * 1024) / (50 * 1024) * 1000)));
 
       let lastError = null;
       for (const targetUrl of validProxies) {

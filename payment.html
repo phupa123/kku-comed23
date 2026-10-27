@@ -1632,22 +1632,57 @@
         </button>
       </div>
 
-      <!-- Animated Upload Progress State (During Upload) -->
-      <div id="slipUploadingProgressState" class="hidden py-6 text-center space-y-3">
-        <div
-          class="w-16 h-16 mx-auto rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center animate-bounce shadow-md shadow-emerald-500/20">
-          <i data-lucide="upload-cloud" class="w-9 h-9 animate-pulse text-emerald-600"></i>
+      <!-- High-Performance Animated Upload Progress State (Real-time Steps & Visual Feedback) -->
+      <div id="slipUploadingProgressState" class="hidden py-6 text-center space-y-4">
+        <!-- Floating Spinner & Holographic Icon -->
+        <div class="relative w-20 h-20 mx-auto flex items-center justify-center">
+          <div class="absolute inset-0 rounded-3xl bg-emerald-500/20 animate-ping opacity-50"></div>
+          <div class="relative w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shadow-md">
+            <i data-lucide="upload-cloud" id="uploadStatusIcon" class="w-8 h-8 animate-pulse text-emerald-600"></i>
+          </div>
         </div>
-        <div>
-          <span class="text-base font-black text-slate-900 block" id="uploadStatusTitle">กำลังอัปโหลดสลิปขึ้นระบบ
-            Cloud...</span>
-          <span class="text-xs text-slate-500 mt-0.5 block" id="uploadStatusSubtitle">ระบบกำลังบันทึกภาพลง Google Drive
-            และอัปเดต Google Sheets</span>
+
+        <!-- Status Titles & Percentage Indicator -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-center gap-2">
+            <span class="text-base font-black text-slate-900" id="uploadStatusTitle">กำลังเตรียมความพร้อมไฟล์สลิป...</span>
+            <span id="uploadPercentBadge" class="text-xs font-mono font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">15%</span>
+          </div>
+          <span class="text-xs text-slate-500 block" id="uploadStatusSubtitle">กำลังตรวจสอบและปรับขนาดภาพให้ส่งได้เร็วที่สุด</span>
         </div>
-        <!-- Animated Progress bar -->
-        <div class="w-full max-w-xs mx-auto bg-slate-100 rounded-full h-2 overflow-hidden">
-          <div id="uploadAnimatedBar"
-            class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 w-1/3 rounded-full animate-pulse transition-all duration-300">
+
+        <!-- Detailed Multi-step Progress Bar -->
+        <div class="max-w-xs mx-auto space-y-1.5">
+          <div class="w-full bg-slate-100 border border-slate-200 rounded-full h-2.5 overflow-hidden p-0.5 shadow-inner">
+            <div id="uploadAnimatedBar"
+              class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 w-1/6 rounded-full transition-all duration-200">
+            </div>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-slate-500 font-mono px-1">
+            <span id="uploadByteCounter">0 KB / 0 KB</span>
+            <span id="uploadSpeedEstimate" class="text-emerald-700 font-bold">⚡ กำลังส่งข้อมูล...</span>
+          </div>
+        </div>
+
+        <!-- Real-time Step Timeline Indicators -->
+        <div class="grid grid-cols-3 gap-2 pt-2 max-w-sm mx-auto text-[11px]">
+          <div id="stepVerify" class="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 transition-all">
+            <div class="font-bold flex items-center justify-center gap-1">
+              <span class="step-num">1</span>
+              <span>ตรวจสลิป</span>
+            </div>
+          </div>
+          <div id="stepCloud" class="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 transition-all">
+            <div class="font-bold flex items-center justify-center gap-1">
+              <span class="step-num">2</span>
+              <span>ส่งขึ้นคลาวด์</span>
+            </div>
+          </div>
+          <div id="stepDatabase" class="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 transition-all">
+            <div class="font-bold flex items-center justify-center gap-1">
+              <span class="step-num">3</span>
+              <span>บันทึกฐานข้อมูล</span>
+            </div>
           </div>
         </div>
       </div>
