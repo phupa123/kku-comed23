@@ -1,139 +1,156 @@
 /* =========================================================================
-   PAYMENT CYBER LAB - assets/css/payment_cyber.css
-   สไตล์ดาร์ก ล้ำสมัย (Cyberpunk / Obsidian Glassmorphism) สำหรับ payment-example.html
-   อิงตามดีไซน์ระดับรางวัลของ Yearbook.html & Master Admin
+   PAYMENT CYBER UI 2.0 - assets/css/payment_cyber.css
+   ดีไซน์ระดับลักชัวรี Cyber Dark Obsidian สำหรับ payment-example.html
+   ออกแบบเฉพาะทั้งเดสก์ท็อปและสมาร์ตโฟน (Mobile Native App Aesthetics)
    ========================================================================= */
 
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&family=Prompt:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-  --cyber-bg: #06070A;
-  --cyber-surface: rgba(18, 22, 42, 0.75);
-  --cyber-card: rgba(22, 27, 51, 0.85);
-  --cyber-border: rgba(255, 255, 255, 0.08);
+  --bg-deep: #05070E;
+  --bg-surface: #0B0F1D;
+  --bg-card: rgba(15, 20, 38, 0.75);
+  --border-glow: rgba(255, 255, 255, 0.08);
   --kku-orange: #E65A19;
   --kku-amber: #FF7A29;
-  --kku-glow: rgba(230, 90, 25, 0.35);
+  --kku-gradient: linear-gradient(135deg, #FF7A29 0%, #E65A19 50%, #B32B19 100%);
+  --neon-emerald: #10B981;
+  --neon-cyan: #06B6D4;
 }
 
+/* Force Dark Mode Body */
 html, body {
-  background-color: #06070A !important;
+  background-color: var(--bg-deep) !important;
   color: #F1F5F9 !important;
-  font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
-  overflow-x: hidden;
+  font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif !important;
+  letter-spacing: -0.01em;
 }
 
-/* Background canvas particles */
+/* 1. Global Holographic Canvas & Ambient Mesh */
 #cyberParticleCanvas {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100vw;
   height: 100vh;
   pointer-events: none;
   z-index: 0;
-}
-
-/* Looping Ambient Background Mesh (Yearbook Style) */
-@keyframes ambientShift {
-  0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
-  50% { background-position: 100% 50%; filter: hue-rotate(20deg); }
-  100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+  opacity: 0.85;
 }
 
 .ambient-glow-loop {
-  background: linear-gradient(135deg, rgba(230, 90, 25, 0.12), rgba(14, 165, 233, 0.08), rgba(245, 158, 11, 0.12), rgba(16, 185, 129, 0.06));
-  background-size: 300% 300%;
-  animation: ambientShift 18s ease-in-out infinite;
   position: fixed;
   inset: 0;
+  background: radial-gradient(circle at 10% 15%, rgba(230, 90, 25, 0.12) 0%, transparent 45%),
+              radial-gradient(circle at 90% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+              radial-gradient(circle at 50% 85%, rgba(255, 122, 41, 0.08) 0%, transparent 50%);
+  filter: blur(40px);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Kinetic 3D Embossed Typography */
-.title-3d {
-  text-shadow: 0 1px 0 #993300, 0 2px 0 #772600, 0 3px 0 #551a00, 0 4px 0 #331000, 0 8px 18px rgba(230, 90, 25, 0.4);
-  letter-spacing: -0.03em;
-}
-
-/* 3D Tilt Card Support */
-.tilt-card-3d {
-  transform-style: preserve-3d;
-  will-change: transform;
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.tilt-card-3d:hover {
-  border-color: rgba(230, 90, 25, 0.5) !important;
-  box-shadow: 0 20px 40px -10px rgba(230, 90, 25, 0.25), 0 0 20px rgba(230, 90, 25, 0.15) !important;
-}
-
-/* Dark Glassmorphic Panels */
+/* 2. Glassmorphic Obsidian Panels (No more cheap gray boxes) */
 .cyber-glass {
-  background: rgba(12, 16, 32, 0.78) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  background: rgba(11, 15, 29, 0.82) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6) !important;
-  color: #F8FAFC !important;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
-.cyber-glass-card {
-  background: rgba(18, 23, 44, 0.72) !important;
-  backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 1.5rem !important;
+/* Micro-Reflective Chrome Borders */
+.cyber-border-glow {
+  position: relative;
+}
+.cyber-border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(230, 90, 25, 0.4) 50%, rgba(255, 255, 255, 0.04) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
-/* Cyber Inputs */
+/* 3. 3D Kinetic Typography */
+.title-3d {
+  text-shadow: 0 1px 0 #993300, 0 2px 0 #772600, 0 3px 0 #551a00, 0 6px 18px rgba(230, 90, 25, 0.45);
+  letter-spacing: -0.025em;
+}
+
+/* 4. Selective Physics: Soft Subtle Hover instead of Excessive 3D Tilt */
+.subtle-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+.subtle-hover:hover {
+  transform: translateY(-3px) scale(1.008) !important;
+  border-color: rgba(230, 90, 25, 0.4) !important;
+  box-shadow: 0 16px 36px -10px rgba(230, 90, 25, 0.2) !important;
+}
+
+/* 5. Holographic Bank & QR Matrix */
+.qr-matrix-card {
+  background: linear-gradient(160deg, #090D1B 0%, #060812 100%) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 0 35px rgba(16, 185, 129, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 6. Cyber Form Input & Search Field */
 .cyber-input {
-  background: rgba(6, 8, 16, 0.85) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(6, 9, 18, 0.88) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
   color: #FFFFFF !important;
-  transition: all 0.25s ease !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  transition: all 0.2s ease !important;
 }
-
 .cyber-input:focus {
-  border-color: #E65A19 !important;
-  box-shadow: 0 0 0 3px rgba(230, 90, 25, 0.25) !important;
-  background: rgba(10, 14, 26, 0.95) !important;
+  border-color: var(--kku-orange) !important;
+  box-shadow: 0 0 0 3px rgba(230, 90, 25, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  background: rgba(8, 12, 24, 0.98) !important;
 }
 
-/* Cyber Table Styling */
-#studentStatusTableBody tr {
-  background-color: transparent !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-  transition: background-color 0.2s ease, transform 0.15s ease !important;
-}
-
-#studentStatusTableBody tr:hover {
-  background-color: rgba(230, 90, 25, 0.08) !important;
-}
-
-#studentStatusTableBody td {
-  color: #E2E8F0 !important;
-}
-
-/* QR Cyber Frame Glow */
-.qr-cyber-frame {
-  background: linear-gradient(145deg, #0d1224, #080b18) !important;
-  border: 2px solid rgba(16, 185, 129, 0.35) !important;
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.8) !important;
-}
-
-/* Cyber Dropzone */
+/* 7. Dropzone: High-Tech Bio-Scanner Box */
 .cyber-dropzone {
-  background: linear-gradient(180deg, rgba(230, 90, 25, 0.06) 0%, rgba(10, 14, 28, 0.8) 100%) !important;
-  border: 2px dashed rgba(230, 90, 25, 0.45) !important;
+  background: linear-gradient(180deg, rgba(230, 90, 25, 0.05) 0%, rgba(9, 13, 26, 0.9) 100%) !important;
+  border: 2px dashed rgba(230, 90, 25, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
-
 .cyber-dropzone:hover {
-  border-color: #E65A19 !important;
-  background: linear-gradient(180deg, rgba(230, 90, 25, 0.12) 0%, rgba(15, 20, 38, 0.9) 100%) !important;
-  box-shadow: 0 0 30px rgba(230, 90, 25, 0.2) !important;
+  border-color: #FF7A29 !important;
+  background: linear-gradient(180deg, rgba(230, 90, 25, 0.12) 0%, rgba(14, 19, 38, 0.95) 100%) !important;
+  box-shadow: 0 0 35px rgba(230, 90, 25, 0.25) !important;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #06070A; }
-::-webkit-scrollbar-thumb { background: #242A4A; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #E65A19; }
+/* 8. Modern Cyber Cards for Students Roster */
+.cyber-student-card {
+  background: rgba(12, 17, 34, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1.25rem !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.cyber-student-card:hover {
+  background: rgba(18, 25, 48, 0.95) !important;
+  border-color: rgba(230, 90, 25, 0.45) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.8), 0 0 15px rgba(230, 90, 25, 0.15) !important;
+}
+
+/* 9. Dedicated Mobile App Native Polish */
+@media (max-width: 640px) {
+  /* Mobile Bottom Dock Glass */
+  .mobile-cyber-dock {
+    background: rgba(8, 11, 22, 0.92) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8) !important;
+  }
+
+  /* Padding adjustments for thumb reachability */
+  .mobile-card {
+    padding: 1.25rem !important;
+    border-radius: 1.5rem !important;
+  }
+}

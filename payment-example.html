@@ -91,6 +91,7 @@
   <link rel="stylesheet" href="assets/css/master-admin.css">
   <!-- Universal Themed Intro Loader -->
   <script src="assets/js/universal_intro.js"></script>
+  <script src="assets/js/payment_cyber_ui.js"></script>
 </head>
 
 <body
@@ -151,7 +152,7 @@
 
   <!-- ================= LUXURY USER PROFILE & STATUS MODAL ================= -->
   <div id="modalMyPaymentProfile" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
-    <div id="myPaymentProfileCard" class="relative bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-orange-200 text-center space-y-6 overflow-hidden">
+    <div id="myPaymentProfileCard" class="relative cyber-glass rounded-[2rem] border border-white/10 max-w-md w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-orange-200 text-center space-y-6 overflow-hidden">
       
       <!-- Top Decorative Glow bar -->
       <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400"></div>
@@ -161,7 +162,7 @@
           <i data-lucide="user-check" class="w-3.5 h-3.5 text-orange-500"></i>
           <span>ข้อมูลนักศึกษา (COMED23 KKU63)</span>
         </span>
-        <button onclick="closeMyProfileModal()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 rounded-xl transition">
+        <button onclick="closeMyProfileModal()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-300 bg-white/10 rounded-xl transition">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -172,28 +173,28 @@
           <img id="myProfileModalAvatar" src="" alt="Avatar" class="w-full h-full rounded-2xl object-cover border-2 border-orange-300 shadow-md" loading="lazy" decoding="async">
         </div>
         <div>
-          <h3 id="myProfileModalName" class="text-xl font-black text-slate-900">ชื่อนักศึกษา</h3>
+          <h3 id="myProfileModalName" class="text-xl font-black text-white">ชื่อนักศึกษา</h3>
           <p id="myProfileModalEmail" class="text-xs text-orange-600 font-mono font-bold">email@kkumail.com</p>
         </div>
       </div>
 
       <!-- Detailed Info Card -->
-      <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 border border-slate-200 text-left">
+      <div class="bg-white/5 rounded-2xl p-4 text-xs space-y-2.5 border border-white/10 text-left">
         <div class="flex justify-between items-center">
           <span class="text-slate-500">รหัสนักศึกษา:</span>
-          <span id="myProfileModalID" class="font-mono font-bold text-slate-800">-</span>
+          <span id="myProfileModalID" class="font-mono font-bold text-slate-200">-</span>
         </div>
         <div class="flex justify-between items-center">
           <span class="text-slate-500">ชื่อเล่น:</span>
-          <span id="myProfileModalNickname" class="font-bold text-slate-800">-</span>
+          <span id="myProfileModalNickname" class="font-bold text-slate-200">-</span>
         </div>
         <div class="flex justify-between items-center">
           <span class="text-slate-500">รายการ:</span>
-          <span class="font-bold text-slate-800">ค่าทำป้ายสาขาวิชาเอก (฿190)</span>
+          <span class="font-bold text-slate-200">ค่าทำป้ายสาขาวิชาเอก (฿190)</span>
         </div>
-        <div class="border-t border-slate-200 pt-2 flex justify-between items-center">
+        <div class="border-t border-white/10 pt-2 flex justify-between items-center">
           <span class="text-slate-500">สถานะการชำระเงิน:</span>
-          <span id="myProfileModalStatusBadge" class="font-black text-xs px-2.5 py-1 rounded-full bg-slate-200 text-slate-700">กำลังตรวจสอบ...</span>
+          <span id="myProfileModalStatusBadge" class="font-black text-xs px-2.5 py-1 rounded-full bg-slate-200 text-slate-300">กำลังตรวจสอบ...</span>
         </div>
       </div>
 
@@ -224,14 +225,14 @@
     <div class="absolute w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none -bottom-20 -right-20 animate-pulse" style="animation-delay: 1.5s;"></div>
 
     <div id="googleLoginCard"
-      class="relative bg-white/95 backdrop-blur-2xl rounded-[2.5rem] max-w-md w-full p-8 sm:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.35)] border-2 border-white/80 space-y-6 text-center overflow-hidden">
+      class="relative cyber-glass rounded-[2rem] border border-white/10 max-w-md w-full p-8 sm:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.35)] border-2 border-white/80 space-y-6 text-center overflow-hidden">
       
       <!-- Top Decorative Gradient Line -->
       <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 via-amber-400 to-cyan-500"></div>
 
       <!-- Close Button -->
       <div class="flex justify-end -mt-2">
-        <button onclick="closeGoogleLoginModal()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-2xl transition transform active:scale-90">
+        <button onclick="closeGoogleLoginModal()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-300 bg-white/10 hover:bg-slate-200 rounded-2xl transition transform active:scale-90">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -288,7 +289,7 @@
     <div class="absolute w-96 h-96 bg-orange-500/20 rounded-full blur-3xl pointer-events-none -bottom-10 -right-10 animate-pulse"></div>
 
     <div id="loginSuccessCard"
-      class="relative bg-white/95 backdrop-blur-2xl rounded-[2.5rem] max-w-sm w-full p-6 sm:p-8 shadow-[0_25px_70px_rgba(0,0,0,0.35)] border-2 border-emerald-200/80 text-center space-y-5 overflow-hidden">
+      class="relative cyber-glass rounded-[2rem] border border-white/10 max-w-sm w-full p-6 sm:p-8 shadow-[0_25px_70px_rgba(0,0,0,0.35)] border-2 border-emerald-200/80 text-center space-y-5 overflow-hidden">
       
       <!-- Top Accent Line -->
       <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-orange-500"></div>
@@ -317,10 +318,10 @@
       </div>
 
       <!-- User Card Preview -->
-      <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-left text-xs space-y-1.5 shadow-xs">
+      <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10/80 text-left text-xs space-y-1.5 shadow-xs">
         <div class="flex justify-between items-center">
           <span class="text-slate-400">ชื่อนักศึกษา:</span>
-          <span id="loginSuccessName" class="font-black text-slate-800 truncate max-w-[170px]">-</span>
+          <span id="loginSuccessName" class="font-black text-slate-200 truncate max-w-[170px]">-</span>
         </div>
         <div class="flex justify-between items-center">
           <span class="text-slate-400">รหัสนักศึกษา:</span>
@@ -338,7 +339,7 @@
           <i data-lucide="credit-card" class="w-4 h-4"></i>
           <span>เริ่มดำเนินการชำระเงินทันที</span>
         </button>
-        <button type="button" onclick="closeLoginSuccessModal(false)" class="w-full py-2.5 rounded-xl text-slate-500 hover:text-slate-800 text-xs font-bold transition cursor-pointer">
+        <button type="button" onclick="closeLoginSuccessModal(false)" class="w-full py-2.5 rounded-xl text-slate-500 hover:text-slate-200 text-xs font-bold transition cursor-pointer">
           ปิดหน้าต่าง
         </button>
       </div>
@@ -383,7 +384,7 @@
       <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
         
         <!-- Desktop Nav Tabs Bar -->
-        <div class="hidden md:flex items-center gap-1 p-1 bg-slate-100/90 rounded-2xl border border-slate-200 shadow-inner">
+        <div class="hidden md:flex items-center gap-1 p-1 bg-white/10/90 rounded-2xl border border-white/10 shadow-inner">
           
           <!-- 1. ชำระเงิน -->
           <button id="navTabPayment" onclick="switchMainTab('payment')"
@@ -401,7 +402,7 @@
 
           <!-- 3. รายชื่อ -->
           <button id="navTabStatus" onclick="switchMainTab('status')"
-            class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 cursor-pointer">
+            class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-white cursor-pointer">
             <i data-lucide="clipboard-check" class="w-4 h-4"></i>
             <span>รายชื่อ</span>
           </button>
@@ -409,7 +410,7 @@
 
         <!-- User Guest / Logged-in Avatar Quick Indicator -->
         <div id="navUserGuest" class="flex items-center">
-          <button onclick="openGoogleLoginModal()" class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl sm:rounded-2xl bg-white border border-slate-300 hover:border-orange-500 text-slate-800 font-bold text-xs shadow-xs hover:shadow-md transition transform active:scale-95 cursor-pointer">
+          <button onclick="openGoogleLoginModal()" class="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl sm:rounded-2xl bg-white border border-slate-300 hover:border-orange-500 text-slate-200 font-bold text-xs shadow-xs hover:shadow-md transition transform active:scale-95 cursor-pointer">
             <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
               <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
@@ -424,7 +425,7 @@
         <div id="navUserLoggedIn" class="hidden items-center">
           <div onclick="openMyProfileModal()" class="flex items-center gap-1 sm:gap-1.5 p-1 pr-1.5 sm:pr-2 rounded-xl sm:rounded-2xl bg-orange-50/90 border border-orange-300 shadow-xs cursor-pointer transition-all max-w-[130px] sm:max-w-[200px]" title="คลิกเพื่อดูข้อมูลฉัน">
             <img id="navUserAvatar" src="" alt="Avatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl object-cover border border-orange-300 flex-shrink-0" loading="lazy" decoding="async">
-            <span id="navUserName" class="text-[11px] sm:text-xs font-black text-slate-800 truncate">ชื่อผู้ใช้</span>
+            <span id="navUserName" class="text-[11px] sm:text-xs font-black text-slate-200 truncate">ชื่อผู้ใช้</span>
             <button type="button" onclick="event.stopPropagation(); handlePaymentLogout()" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition flex-shrink-0" title="ออกจากระบบ">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             </button>
@@ -439,7 +440,7 @@
 
         <!-- Quick Refresh Button -->
         <button id="btnQuickRefresh" onclick="manualRefreshData()"
-          class="p-1.5 sm:p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-orange-600 hover:border-orange-300 shadow-xs transition flex items-center justify-center cursor-pointer flex-shrink-0"
+          class="p-1.5 sm:p-2 rounded-xl bg-white border border-white/10 text-slate-600 hover:text-orange-600 hover:border-orange-300 shadow-xs transition flex items-center justify-center cursor-pointer flex-shrink-0"
           title="รีเฟรชข้อมูลล่าสุด">
           <i data-lucide="rotate-cw" id="refreshIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
         </button>
@@ -448,7 +449,7 @@
     </div>
 
     <!-- Quick Horizontal Campaign Switcher Bar -->
-    <div id="headerQuickCampaignBar" class="border-t border-slate-100 bg-slate-50/70 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-2 overflow-x-auto mobile-hide-scrollbar flex items-center gap-2">
+    <div id="headerQuickCampaignBar" class="border-t border-slate-100 bg-white/5/70 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-2 overflow-x-auto mobile-hide-scrollbar flex items-center gap-2">
       <div class="flex items-center gap-1.5 text-[11px] font-black text-slate-400 uppercase tracking-wider flex-shrink-0 mr-1">
         <i data-lucide="layers" class="w-3.5 h-3.5 text-orange-500"></i>
         <span class="hidden sm:inline">รายการ:</span>
@@ -461,7 +462,7 @@
 
   <!-- MOBILE BOTTOM FLOATING DOCK (ULTRA TACTILE HAPTIC & BOUNCY SPRING) -->
   <div
-    class="sm:hidden fixed left-2 right-2 z-40 bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-1.5 flex items-center justify-around shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
+    class="sm:hidden fixed left-3 right-3 z-40 mobile-cyber-dock rounded-3xl p-2 flex items-center justify-around"
     style="bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));">
     
     <!-- 1. หน้าหลัก -->
@@ -515,7 +516,7 @@
   <main class="flex-grow max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8">
 
     <!-- ================= 0. DYNAMIC CAMPAIGN SELECTOR & OVERVIEW HUB ================= -->
-    <section id="campaignSelectorSection" class="cyber-glass rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl space-y-4 tilt-card-3d">
+    <section id="campaignSelectorSection" class="cyber-glass rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl space-y-4 ">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
         <div class="flex items-center gap-2.5">
           <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-md shadow-orange-500/30 flex-shrink-0">
@@ -531,7 +532,7 @@
         </div>
 
         <div class="flex items-center gap-2 self-end sm:self-auto">
-          <a href="payment-example.html" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5" title="แสดงรายการทั้งหมด">
+          <a href="payment-example.html" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-slate-200 text-slate-300 text-xs font-bold transition flex items-center gap-1.5" title="แสดงรายการทั้งหมด">
             <i data-lucide="grid" class="w-3.5 h-3.5 text-orange-500"></i>
             <span>ดูทุกรายการ</span>
           </a>
@@ -546,7 +547,7 @@
 
     <!-- HERO & COUNTDOWN & STATS SECTION (MODERN LUXURY TECH AESTHETICS) -->
     <section
-      class="hero-card-animate mobile-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#06070A] via-[#0D1226] to-[#06070A] text-white p-4 sm:p-8 md:p-10 shadow-2xl border border-orange-500/30 tilt-card-3d">
+      class="hero-card-animate mobile-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#06070A] via-[#0D1226] to-[#06070A] text-white p-4 sm:p-8 md:p-10 shadow-2xl border border-orange-500/30 ">
 
       <!-- Custom Dynamic Background Wallpaper Layer -->
       <div id="heroCustomBgLayer" class="absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-700 pointer-events-none mix-blend-overlay"></div>
@@ -706,7 +707,7 @@
     </section>
 
     <!-- PROMINENT CAMPAIGN ACTION TAB SWITCHER (ชำระเงิน <-> เช็ครายชื่อ) -->
-    <div id="campaignMainTabSwitcher" class="sticky top-16 z-30 py-2.5 -mx-2 px-2 bg-slate-50/80 backdrop-blur-md transition-all">
+    <div id="campaignMainTabSwitcher" class="sticky top-16 z-30 py-2.5 -mx-2 px-2 bg-white/5/80 backdrop-blur-md transition-all">
       <div class="max-w-md mx-auto p-1.5 bg-slate-200/90 rounded-2xl shadow-inner border border-slate-300/80 flex items-center gap-1.5">
         <button id="campaignTabBtnPayment" onclick="switchMainTab('payment')"
           class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-black transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 cursor-pointer active:scale-95">
@@ -714,7 +715,7 @@
           <span>ชำระเงิน</span>
         </button>
         <button id="campaignTabBtnStatus" onclick="switchMainTab('status')"
-          class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-700 hover:text-slate-900 hover:bg-white/60 cursor-pointer active:scale-95">
+          class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-white/60 cursor-pointer active:scale-95">
           <i data-lucide="clipboard-list" class="w-4 h-4 text-slate-500"></i>
           <span>ดูรายชื่อผู้ชำระ</span>
         </button>
@@ -779,7 +780,7 @@
             <!-- Price Highlight Box (Clean ฿390 THB display) -->
             <div class="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 rounded-2xl p-4 sm:p-5 border-2 border-orange-200/90 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div class="space-y-0.5">
-                <span class="text-xs font-black text-slate-700 flex items-center gap-1.5">
+                <span class="text-xs font-black text-slate-300 flex items-center gap-1.5">
                   <i data-lucide="tag" class="w-4 h-4 text-orange-600"></i>
                   <span>ราคาชำระต่อคน</span>
                 </span>
@@ -800,7 +801,7 @@
 
       <!-- Search & Autocomplete Card -->
       <div
-        class="search-card-animate mobile-card cyber-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative tilt-card-3d">
+        class="search-card-animate mobile-card cyber-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative ">
 
         <!-- Subtle background deco -->
         <div class="absolute right-0 top-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -824,7 +825,7 @@
           <!-- Input Group with Auto-formatting -->
           <div class="relative" id="searchContainer">
             <label for="smartSearchInput"
-              class="block text-[11px] sm:text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 sm:mb-2 flex items-center justify-between">
+              class="block text-[11px] sm:text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5 sm:mb-2 flex items-center justify-between">
               <span>ช่องค้นหาอัจฉริยะ</span>
               <span class="text-[10px] sm:text-[11px] font-normal text-orange-600">(สมมติ เช่น 693050XXX-X หรือ สมมติ)</span>
             </label>
@@ -838,7 +839,7 @@
               <!-- Quick Paste / Clear Button -->
               <div class="absolute right-2 flex items-center gap-1">
                 <button type="button" id="btnClearSearch" onclick="clearSearchInput()"
-                  class="hidden p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition">
+                  class="hidden p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-white/10 transition">
                   <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
                 <button type="button" onclick="pasteFromClipboard()"
@@ -866,7 +867,7 @@
 
       <!-- Student Profile Card (Appears when selected) -->
       <div id="studentProfileCard"
-        class="hidden mobile-card cyber-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-2xl border border-orange-500/40 transition-all tilt-card-3d">
+        class="hidden mobile-card cyber-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-2xl border border-orange-500/40 transition-all ">
         <div class="max-w-4xl mx-auto space-y-4 sm:space-y-6">
 
           <!-- Top Profile Header -->
@@ -939,7 +940,7 @@
             <!-- Optional Shirt Size Selection for this Student (if campaign has sizes) -->
             <div id="studentShirtSizeCard" class="hidden p-5 sm:p-6 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 rounded-3xl border-2 border-orange-200 shadow-sm space-y-3">
               <div class="flex items-center justify-between">
-                <span class="text-sm font-black text-slate-900 flex items-center gap-2">
+                <span class="text-sm font-black text-white flex items-center gap-2">
                   <i data-lucide="shirt" class="w-5 h-5 text-orange-600"></i>
                   <span>เลือกไซส์เสื้อสาขาวิชาเอกของคุณ <span class="text-rose-500">*จำเป็น</span></span>
                 </span>
@@ -959,7 +960,7 @@
 
             <!-- QR Payment Guide & Bank Info -->
             <div
-              class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-emerald-950/20 via-[#0A0D1D] to-orange-950/20 p-6 sm:p-8 rounded-3xl border border-emerald-500/30 shadow-2xl tilt-card-3d">
+              class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-emerald-950/20 via-[#0A0D1D] to-orange-950/20 p-6 sm:p-8 rounded-3xl border border-emerald-500/30 shadow-2xl ">
 
               <!-- Real QR Code Image Display -->
               <div
@@ -996,7 +997,7 @@
                 </div>
 
                 <!-- Modern Pill Badge for Locked Amount -->
-                <div class="mt-3.5 w-full bg-emerald-50/80 border border-emerald-200 rounded-2xl p-2.5 flex items-center justify-between text-xs text-slate-700">
+                <div class="mt-3.5 w-full bg-emerald-50/80 border border-emerald-200 rounded-2xl p-2.5 flex items-center justify-between text-xs text-slate-300">
                   <span class="flex items-center gap-1 text-[11px] font-bold text-slate-500">
                     <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-600"></i>
                     <span>ยอดล็อคอัตโนมัติ:</span>
@@ -1043,7 +1044,7 @@
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
                       <span><strong>ชื่อบัญชี:</strong> <span id="bankDetailAccountName"
-                          class="font-black text-slate-900 bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/10 text-white">น.ส. พิชามญธุ์ สามสี</span></span>
+                          class="font-black text-white bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/10 text-white">น.ส. พิชามญธุ์ สามสี</span></span>
                     </li>
                   </ul>
                 </div>
@@ -1059,7 +1060,7 @@
             <!-- Upload Slip Area (ULTRA PROMINENT MODERN HERO DROPZONE) -->
             <div class="space-y-4 pt-2">
               <div class="flex items-center justify-between flex-wrap gap-2">
-                <label class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2.5">
+                <label class="text-base sm:text-lg font-black text-white flex items-center gap-2.5">
                   <span
                     class="flex items-center justify-center w-8 h-8 rounded-xl bg-orange-600 text-white shadow-md shadow-orange-600/30">
                     <i data-lucide="receipt" class="w-4 h-4"></i>
@@ -1074,7 +1075,7 @@
               <!-- Ultra Prominent Drag & Drop Zone with Glowing Border and Dynamic Depth -->
               <div id="slipDropZone" onclick="document.getElementById('slipFileInput').click()"
                 ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"
-                class="relative overflow-hidden cyber-dropzone rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-300 group shadow-2xl transform hover:-translate-y-0.5 tilt-card-3d">
+                class="relative overflow-hidden cyber-dropzone rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-300 group shadow-2xl transform hover:-translate-y-0.5 ">
                 <!-- Subtle Background Decorative Ambient Glow -->
                 <div
                   class="absolute -top-12 -right-12 w-40 h-40 bg-orange-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-500">
@@ -1116,11 +1117,11 @@
 
               <!-- Medium Size Slip Preview (Before Submit) -->
               <div id="slipPreviewContainer"
-                class="hidden bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-4">
+                class="hidden bg-white p-6 rounded-3xl border border-white/10 shadow-md space-y-4">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
                     <i data-lucide="image" class="w-4 h-4 text-orange-600"></i>
-                    <span class="text-xs font-bold text-slate-700">ตัวอย่างภาพสลิปที่เลือก (คลิกเพื่อดูภาพใหญ่)</span>
+                    <span class="text-xs font-bold text-slate-300">ตัวอย่างภาพสลิปที่เลือก (คลิกเพื่อดูภาพใหญ่)</span>
                   </div>
                   <button type="button" onclick="cancelSelectedSlip()"
                     class="text-xs text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1">
@@ -1131,7 +1132,7 @@
 
                 <!-- Medium Preview Box with Zoom Indicator -->
                 <div
-                  class="relative group max-w-sm mx-auto overflow-hidden rounded-2xl border border-slate-200 shadow-md bg-slate-900/5 cursor-pointer"
+                  class="relative group max-w-sm mx-auto overflow-hidden rounded-2xl border border-white/10 shadow-md bg-slate-900/5 cursor-pointer"
                   onclick="openFullscreenModal(tempSlipDataUrl)">
                   <img id="mediumSlipImg" src="" alt="ภาพสลิปตัวอย่าง"
                     class="w-full h-72 object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" decoding="async">
@@ -1171,14 +1172,14 @@
             </div>
 
             <!-- Receipt & Proof Details Box -->
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-5 shadow-sm">
-              <h5 class="text-sm font-black text-slate-900 flex items-center gap-2">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-white/10 space-y-5 shadow-sm">
+              <h5 class="text-sm font-black text-white flex items-center gap-2">
                 <i data-lucide="file-text" class="w-4 h-4 text-orange-600"></i>
                 รายละเอียดหลักฐานการชำระเงิน
               </h5>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
-                <div class="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                <div class="space-y-3 bg-white/5 p-5 rounded-2xl border border-white/10">
                   <div class="flex justify-between border-b border-white/10 pb-2">
                     <span class="text-slate-400">สถานะการชำระ:</span>
                     <span class="font-black text-emerald-600 flex items-center gap-1">
@@ -1187,11 +1188,11 @@
                   </div>
                   <div class="flex justify-between border-b border-white/10 pb-2">
                     <span class="text-slate-400">ยอดเงิน:</span>
-                    <span id="paidAmountDisplay" class="font-black text-slate-900 text-base">฿190.00 บาท</span>
+                    <span id="paidAmountDisplay" class="font-black text-white text-base">฿190.00 บาท</span>
                   </div>
                   <div class="flex justify-between border-b border-white/10 pb-2">
                     <span class="text-slate-400">วัน-เวลาที่บันทึก:</span>
-                    <span id="paidTimestampText" class="font-mono font-bold text-slate-700">-</span>
+                    <span id="paidTimestampText" class="font-mono font-bold text-slate-300">-</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-slate-400">รหัสอ้างอิง:</span>
@@ -1200,13 +1201,13 @@
                 </div>
 
                 <!-- Proof Slip Action & Embedded Preview Box -->
-                <div class="flex flex-col p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <div class="flex flex-col p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3">
                   <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-700">ภาพสลิปหลักฐาน:</span>
+                    <span class="text-xs font-bold text-slate-300">ภาพสลิปหลักฐาน:</span>
                     <span id="paidSlipCounterBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-100 text-orange-800 border border-orange-200">1 ใบ</span>
                   </div>
                   <div id="paidSectionIframeWrapper"
-                    class="w-full h-72 sm:h-80 rounded-xl bg-white border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
+                    class="w-full h-72 sm:h-80 rounded-xl bg-white border border-white/10 overflow-hidden shadow-inner flex items-center justify-center">
                     <span class="text-xs text-slate-400 font-medium">กำลังโหลดสลิป...</span>
                   </div>
                   <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
@@ -1227,7 +1228,7 @@
               <!-- Multi-Slip History Gallery (กรณีโอนหลายยอด หรือ แนบสลิปเพิ่ม) -->
               <div id="paidMultiSlipsContainer" class="hidden space-y-3 pt-3 border-t border-slate-100">
                 <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                     <i data-lucide="layers" class="w-3.5 h-3.5 text-orange-600"></i>
                     <span>ประวัติสลิปทั้งหมดที่คุณแนบไว้ (<span id="paidMultiSlipsCount">0</span> ใบ)</span>
                   </span>
@@ -1274,7 +1275,7 @@
                 <span class="inline-block px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300">
                   🎉 สิทธิพิเศษ / ได้รับการยกเว้น
                 </span>
-                <h4 class="text-2xl font-black text-slate-900">คุณได้รับการยกเว้นสำหรับรายการนี้</h4>
+                <h4 class="text-2xl font-black text-white">คุณได้รับการยกเว้นสำหรับรายการนี้</h4>
                 <p id="exemptedNoticeCampaignName" class="text-xs sm:text-sm text-slate-600 max-w-md mx-auto font-medium">
                   แอดมินหรือคณะกรรมการสาขาวิชาได้ตั้งค่าให้คุณไม่ต้องชำระเงินในกิจกรรมนี้
                 </p>
@@ -1296,7 +1297,7 @@
 
     <!-- SECTION 2: TAB STATUS CHECK (WHO HAS PAID / UNPAID) -->
     <div id="tabContentStatus" class="hidden space-y-6">
-      <div class="cyber-glass rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/10 space-y-6 tilt-card-3d">
+      <div class="cyber-glass rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/10 space-y-6 ">
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -1372,7 +1373,7 @@
 
   <!-- FOOTER & HELP DESK CONTACT -->
   <footer
-    class="mt-auto border-t border-slate-200 bg-white/80 backdrop-blur-md py-8 text-center text-xs text-slate-500">
+    class="mt-auto border-t border-white/10 bg-white/80 backdrop-blur-md py-8 text-center text-xs text-slate-500">
     <div class="max-w-6xl mx-auto px-4 space-y-4 flex flex-col items-center">
 
       <!-- Help Desk & Contact Bar -->
@@ -1401,7 +1402,7 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2 font-bold text-slate-700">
+      <div class="flex items-center gap-2 font-bold text-slate-300">
         <img src="logo.png" alt="Logo" class="w-5 h-5 object-contain" loading="lazy" decoding="async">
         <span>สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</span>
       </div>
@@ -1411,14 +1412,14 @@
       
       <!-- Version & Last Update Badge -->
       <div class="flex items-center justify-center gap-2 flex-wrap text-[11px] font-medium text-slate-500 pt-1">
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold border border-slate-200">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 text-slate-600 font-bold border border-white/10">
           <i data-lucide="tag" class="w-3 h-3 text-orange-500"></i>
           v2.2.0 (Stable Release)
         </span>
         <span>•</span>
         <span class="inline-flex items-center gap-1 text-slate-500">
           <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
-          อัปเดตล่าสุดเมื่อ: <strong class="text-slate-700 font-bold">29 ส.ค. 69 เวลา 20:00 น.</strong>
+          อัปเดตล่าสุดเมื่อ: <strong class="text-slate-300 font-bold">29 ส.ค. 69 เวลา 20:00 น.</strong>
         </span>
       </div>
 
@@ -1445,36 +1446,36 @@
             <i data-lucide="message-square-plus" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="text-base sm:text-lg font-black text-slate-900">แจ้งปัญหาการใช้งาน / สอบถาม</h3>
+            <h3 class="text-base sm:text-lg font-black text-white">แจ้งปัญหาการใช้งาน / สอบถาม</h3>
             <p class="text-xs text-slate-400">ระบบจะส่งข้อมูลไปยังหลังบ้าน Admin เพื่อตรวจสอบทันที</p>
           </div>
         </div>
         <button onclick="closeIssueModal()"
-          class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition">
+          class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-white/10 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <form onsubmit="handleIssueSubmit(event)" class="space-y-4 text-xs sm:text-sm">
         <div>
-          <label class="block font-black text-slate-800 mb-1">รหัสนักศึกษา หรือ ชื่อของคุณ <span
+          <label class="block font-black text-slate-200 mb-1">รหัสนักศึกษา หรือ ชื่อของคุณ <span
               class="text-rose-600 font-extrabold">*จำเป็น</span></label>
           <input type="text" id="issueStudentInput" required placeholder="เช่น 693050XXX-X หรือ ชื่อเล่นของคุณ"
-            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 placeholder:text-slate-400 font-bold focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-white placeholder:text-slate-400 font-bold focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
         </div>
 
         <div>
-          <label class="block font-black text-slate-800 mb-1">ช่องทางติดต่อกลับ (เบอร์โทร, IG หรือ Line ID) <span
+          <label class="block font-black text-slate-200 mb-1">ช่องทางติดต่อกลับ (เบอร์โทร, IG หรือ Line ID) <span
               class="text-rose-600 font-extrabold">*จำเป็น</span></label>
           <input type="text" id="issueContactInput" required placeholder="เช่น IG: my_ig หรือ 081-234-5678"
-            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 placeholder:text-slate-400 font-bold focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-white placeholder:text-slate-400 font-bold focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
         </div>
 
         <div>
-          <label class="block font-black text-slate-800 mb-1">หัวข้อปัญหา <span
+          <label class="block font-black text-slate-200 mb-1">หัวข้อปัญหา <span
               class="text-rose-600 font-extrabold">*จำเป็น</span></label>
           <select id="issueCategorySelect"
-            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 font-bold focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-white font-bold focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
             <option value="โอนเงินแล้วแต่สถานะไม่ขึ้น">โอนเงินแล้วแต่สถานะไม่ขึ้น</option>
             <option value="แนบสลิปผิด / ต้องการแก้ไขสลิป">แนบสลิปผิด / ต้องการแก้ไขสลิป</option>
             <option value="ชื่อหรือข้อมูลส่วนตัวไม่ถูกต้อง">ชื่อหรือข้อมูลส่วนตัวไม่ถูกต้อง</option>
@@ -1484,25 +1485,25 @@
         </div>
 
         <div>
-          <label class="block font-black text-slate-800 mb-1">รายละเอียดปัญหา <span
+          <label class="block font-black text-slate-200 mb-1">รายละเอียดปัญหา <span
               class="text-slate-500 font-bold text-xs">(ถ้ามี)</span></label>
           <textarea id="issueDetailInput" rows="3"
             placeholder="อธิบายปัญหาที่พบ เช่น โอนเงินเวลา 14:30 น. ยอด 190 บาท แต่สถานะยังไม่ขึ้น..."
-            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 placeholder:text-slate-400 font-medium focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none shadow-xs"></textarea>
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-white placeholder:text-slate-400 font-medium focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none resize-none shadow-xs"></textarea>
         </div>
 
         <div>
-          <label class="block font-black text-slate-800 mb-1">ลิงก์หลักฐาน / Google Drive (ถ้ามี)</label>
+          <label class="block font-black text-slate-200 mb-1">ลิงก์หลักฐาน / Google Drive (ถ้ามี)</label>
           <input type="url" id="issueEvidenceUrlInput"
             placeholder="https://drive.google.com/... (โปรดเปิดสิทธิ์ Public)"
-            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-slate-900 placeholder:text-slate-400 font-mono text-xs focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
+            class="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-white placeholder:text-slate-400 font-mono text-xs focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none shadow-xs">
           <span class="text-[11px] text-slate-600 font-medium mt-1 block">หากเป็นลิงก์ Google Drive โปรดเปิดสิทธิ์แชร์เป็น
             "ทุกคนที่มีลิงก์สามารถดูได้"</span>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2">
           <button type="button" onclick="closeIssueModal()"
-            class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition cursor-pointer">
+            class="px-4 py-2.5 rounded-xl bg-white/10 text-slate-300 font-bold hover:bg-slate-200 transition cursor-pointer">
             ยกเลิก
           </button>
           <button type="button" onclick="openIssueConfirmModal()"
@@ -1519,27 +1520,27 @@
   <div id="modalConfirmIssue"
     class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div
-      class="cyber-glass rounded-3xl max-w-md w-full border border-white/10 shadow-2xl p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 transform transition-all">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+      class="cyber-glass rounded-3xl max-w-md w-full border border-white/10 shadow-2xl p-6 sm:p-8 shadow-2xl border border-white/10 space-y-5 transform transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
         <div class="flex items-center gap-2.5">
           <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-sm">
             <i data-lucide="help-circle" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="text-base sm:text-lg font-black text-slate-900">ตรวจสอบรายละเอียดปัญหา</h3>
+            <h3 class="text-base sm:text-lg font-black text-white">ตรวจสอบรายละเอียดปัญหา</h3>
             <p class="text-xs text-slate-500 font-medium">โปรดตรวจความถูกต้องก่อนยืนยันส่งข้อมูล</p>
           </div>
         </div>
         <button onclick="closeIssueConfirmModal()"
-          class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer">
+          class="text-slate-400 hover:text-slate-300 p-1.5 rounded-xl hover:bg-white/10 transition cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 text-xs sm:text-sm">
+      <div class="space-y-3 bg-white/5 p-4 rounded-2xl border-2 border-white/10 text-xs sm:text-sm">
         <div class="flex justify-between items-center">
           <span class="text-slate-600 font-bold">ผู้แจ้ง:</span>
-          <span id="confirmIssueStudent" class="font-black text-slate-900 text-sm">-</span>
+          <span id="confirmIssueStudent" class="font-black text-white text-sm">-</span>
         </div>
         <div class="flex justify-between items-center">
           <span class="text-slate-600 font-bold">ติดต่อกลับ:</span>
@@ -1549,13 +1550,13 @@
           <span class="text-slate-600 font-bold">หมวดหมู่:</span>
           <span id="confirmIssueCategory" class="font-black text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-lg border border-amber-300">-</span>
         </div>
-        <div class="border-t border-slate-200 pt-2 space-y-1">
+        <div class="border-t border-white/10 pt-2 space-y-1">
           <span class="text-slate-600 font-bold block">รายละเอียด:</span>
           <p id="confirmIssueDetail"
-            class="text-slate-900 bg-white p-3 rounded-xl border border-slate-300 font-semibold whitespace-pre-wrap leading-relaxed shadow-xs">-
+            class="text-white bg-white p-3 rounded-xl border border-slate-300 font-semibold whitespace-pre-wrap leading-relaxed shadow-xs">-
           </p>
         </div>
-        <div id="confirmIssueEvidenceRow" class="border-t border-slate-200 pt-2 flex justify-between items-center hidden">
+        <div id="confirmIssueEvidenceRow" class="border-t border-white/10 pt-2 flex justify-between items-center hidden">
           <span class="text-slate-600 font-bold">ลิงก์หลักฐาน:</span>
           <span id="confirmIssueEvidence" class="font-mono font-bold text-sky-700 text-xs truncate max-w-[200px]">-</span>
         </div>
@@ -1564,7 +1565,7 @@
       <!-- Action & Loading State -->
       <div id="issueSubmitActionArea" class="flex items-center justify-end gap-2 pt-2">
         <button type="button" onclick="closeIssueConfirmModal()"
-          class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition">
+          class="px-4 py-2.5 rounded-xl bg-white/10 text-slate-600 font-bold hover:bg-slate-200 transition">
           กลับไปแก้ไข
         </button>
         <button type="button" id="btnFinalSubmitIssue" onclick="executeIssueSubmission()"
@@ -1581,7 +1582,7 @@
           <i data-lucide="loader-2" class="w-8 h-8 animate-spin"></i>
         </div>
         <div>
-          <span class="text-sm font-black text-slate-900 block">กำลังส่งข้อมูลแจ้งปัญหาขึ้นระบบ Cloud...</span>
+          <span class="text-sm font-black text-white block">กำลังส่งข้อมูลแจ้งปัญหาขึ้นระบบ Cloud...</span>
           <span class="text-xs text-slate-400">กรุณารอสักครู่ ระบบกำลังบันทึกข้อมูลและส่งแจ้งเตือน</span>
         </div>
       </div>
@@ -1601,21 +1602,21 @@
             <i data-lucide="check-check" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="text-base sm:text-lg font-black text-slate-900">ตรวจสอบความถูกต้อง</h3>
+            <h3 class="text-base sm:text-lg font-black text-white">ตรวจสอบความถูกต้อง</h3>
             <p class="text-xs text-slate-400">โปรดยืนยันข้อมูลก่อนบันทึกเข้าระบบจริง</p>
           </div>
         </div>
         <button onclick="closeConfirmModal()"
-          class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition">
+          class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-white/10 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <!-- Verification Summary Table -->
-      <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs sm:text-sm">
+      <div class="space-y-3 bg-white/5 p-4 rounded-2xl border border-white/10 text-xs sm:text-sm">
         <div class="flex justify-between">
           <span class="text-slate-500">ชื่อ-นามสกุล:</span>
-          <span id="modalConfirmName" class="font-black text-slate-900">-</span>
+          <span id="modalConfirmName" class="font-black text-white">-</span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-500">รหัสนักศึกษา:</span>
@@ -1623,7 +1624,7 @@
         </div>
         <div class="flex justify-between">
           <span class="text-slate-500">รายการ:</span>
-          <span id="modalConfirmCampaignTitle" class="font-bold text-slate-800 text-right">-</span>
+          <span id="modalConfirmCampaignTitle" class="font-bold text-slate-200 text-right">-</span>
         </div>
         <div id="modalConfirmSizeRow" class="hidden flex justify-between bg-orange-100/70 p-2 rounded-xl border border-orange-200">
           <span class="text-orange-900 font-bold flex items-center gap-1">
@@ -1640,9 +1641,9 @@
 
       <!-- Attached Slip Preview in Modal -->
       <div class="space-y-2">
-        <span class="text-xs font-bold text-slate-700">หลักฐานสลิปที่จะบันทึก:</span>
+        <span class="text-xs font-bold text-slate-300">หลักฐานสลิปที่จะบันทึก:</span>
         <div
-          class="w-full h-48 rounded-2xl border border-slate-200 overflow-hidden bg-slate-900/5 cursor-pointer relative group"
+          class="w-full h-48 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/5 cursor-pointer relative group"
           onclick="openFullscreenModal(tempSlipDataUrl)">
           <img id="modalConfirmSlipImg" src="" alt="ภาพสลิป" class="w-full h-full object-contain" loading="lazy" decoding="async">
           <div
@@ -1655,7 +1656,7 @@
       <!-- Action Buttons -->
       <div id="slipActionButtonsArea" class="flex items-center justify-end gap-3 pt-2">
         <button type="button" onclick="closeConfirmModal()"
-          class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-bold transition">
+          class="px-5 py-2.5 rounded-xl border border-white/10 text-slate-300 hover:bg-white/5 text-xs sm:text-sm font-bold transition">
           ยกเลิก / แก้ไข
         </button>
         <button type="button" id="btnFinalSubmit" onclick="executeSlipSubmission()"
@@ -1759,12 +1760,12 @@
       class="cyber-glass rounded-3xl max-w-lg w-full border border-white/10 shadow-2xl p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 transform transition-all">
 
       <div class="flex items-center justify-between pb-3 border-b border-white/10">
-        <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+        <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
           <i data-lucide="user-check" class="w-5 h-5 text-orange-600"></i>
           ข้อมูลและหลักฐานการชำระเงิน
         </h3>
         <button onclick="closeStudentDetailModal()"
-          class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition">
+          class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-white/10 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
