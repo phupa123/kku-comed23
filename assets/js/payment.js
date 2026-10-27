@@ -1258,37 +1258,56 @@ function selectStudent(st) {
     const multiCount = document.getElementById('paidMultiSlipsCount');
     const multiList = document.getElementById('paidMultiSlipsList');
 
-    if (multiContainer && multiList) {
+        if (multiContainer && multiList) {
       if (slipsList.length > 1) {
         multiContainer.classList.remove('hidden');
         if (multiCount) multiCount.textContent = slipsList.length;
+        multiList.className = "grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1";
         multiList.innerHTML = slipsList.map((sItem, sIdx) => {
           const rawSUrl = typeof sItem === 'string' ? sItem : (sItem.url || '');
           const sDisplayUrl = formatDriveImageUrl(rawSUrl);
           const sTime = typeof sItem === 'object' && sItem.timestamp ? sItem.timestamp : '';
-          const isDirectImg = rawSUrl.startsWith('data:image') || rawSUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || rawSUrl.includes('cloudinary') || rawSUrl.includes('catbox');
+          const isDirectImg = rawSUrl.startsWith('data:image') || rawSUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || rawSUrl.includes('cloudinary') || rawSUrl.includes('catbox') || rawSUrl.includes('ibb.co');
           return `
-            <div onclick="openFullscreenModal('${sDisplayUrl}')" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-orange-300 transition cursor-pointer group flex flex-col items-center">
-              <div class="w-full h-24 rounded-lg bg-white overflow-hidden flex items-center justify-center border border-slate-100 shadow-xs mb-1.5">
-                ${isDirectImg 
-                  ? `<img src="${sDisplayUrl}" alt="สลิป ${sIdx+1}" class="max-h-full max-w-full object-contain">`
-                  : `<iframe src="${sDisplayUrl}" class="w-full h-full pointer-events-none border-0" loading="lazy"></iframe>`
-                }
-              </div>
-                            <div class="w-full flex items-center justify-between text-[10px] text-slate-400 font-medium">
-                <span class="font-bold text-slate-200">สลิป #${sIdx+1}</span>
-                <div class="flex items-center gap-1.5">
-                  <span class="text-orange-400 font-bold group-hover:underline">ดู</span>
-                  <button type="button" onclick="event.stopPropagation(); openDeleteCurrentSlipModal(${sIdx})"
-                    class="p-1 rounded-md bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 transition ml-0.5"
-                    title="ลบสลิปใบนี้">
-                    <i data-lucide="trash-2" class="w-3 h-3 text-rose-400"></i>
-                  </button>
+            <div class="p-3.5 sm:p-4 rounded-2xl glass-surface border border-white/10 hover:border-orange-500/40 shadow-xl transition flex flex-col justify-between group">
+              <div>
+                <div class="flex items-center justify-between mb-2.5">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-xs font-black text-white">
+                    <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                    <span>สลิปฉบับที่ #${sIdx+1}</span>
+                  </span>
+                  <span class="text-[10px] text-slate-400 font-mono">${sTime ? sTime.slice(0, 16) : '-'}</span>
                 </div>
+
+                <div onclick="openFullscreenModal('${sDisplayUrl}')" class="relative w-full h-40 sm:h-48 rounded-xl bg-black/60 overflow-hidden flex items-center justify-center border border-white/10 shadow-inner cursor-pointer group-hover:border-orange-500/30 transition">
+                  ${isDirectImg 
+                    ? `<img src="${sDisplayUrl}" alt="สลิป ${sIdx+1}" class="max-h-full max-w-full object-contain mx-auto transition transform duration-300 group-hover:scale-105" loading="lazy">`
+                    : `<iframe src="${sDisplayUrl}" class="w-full h-full pointer-events-none border-0" loading="lazy"></iframe>`
+                  }
+                  <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-xs font-bold transition-opacity">
+                    <i data-lucide="zoom-in" class="w-5 h-5 mb-1 text-orange-400"></i>
+                    <span>คลิกดูภาพขยาย</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="w-full flex items-center justify-between gap-2 pt-3 mt-3 border-t border-white/10">
+                <button type="button" onclick="openFullscreenModal('${sDisplayUrl}')"
+                  class="flex-1 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-white/10 cursor-pointer">
+                  <i data-lucide="eye" class="w-3.5 h-3.5 text-slate-300"></i>
+                  <span>ดูสลิป</span>
+                </button>
+                <button type="button" onclick="openDeleteCurrentSlipModal(${sIdx})"
+                  class="flex-1 py-2 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-black transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-sm"
+                  title="ลบสลิปฉบับนี้">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+                  <span>ลบไฟล์นี้</span>
+                </button>
               </div>
             </div>
           `;
         }).join('');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
       } else {
         multiContainer.classList.add('hidden');
       }
@@ -2058,6 +2077,15 @@ function manageMySlipFromProfile() {
     }
   } catch (e) { }
 }
+
+// Explicit Global Window Exports for Event Handlers
+window.openDeleteCurrentSlipModal = openDeleteCurrentSlipModal;
+window._openDeleteCurrentSlipModalImpl = openDeleteCurrentSlipModal;
+window.openDeleteSlipForStudent = openDeleteSlipForStudent;
+window.closeDeleteSlipModal = closeDeleteSlipModal;
+window.executeConfirmedSlipDeletion = executeConfirmedSlipDeletion;
+window.manageMySlipFromProfile = manageMySlipFromProfile;
+
 
 
 // --- FULLSCREEN SLIP VIEWER ---

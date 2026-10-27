@@ -93,6 +93,19 @@
   <!-- Universal Themed Intro Loader -->
   <script src="assets/js/universal_intro.js"></script>
   <script src="assets/js/payment_cyber_ui.js"></script>
+  <!-- Global Early Binding for Slip Deletion -->
+  <script>
+    window.openDeleteCurrentSlipModal = function(idx) {
+      if (typeof window._openDeleteCurrentSlipModalImpl === 'function') {
+        return window._openDeleteCurrentSlipModalImpl(idx);
+      }
+      console.warn("Slip deletion engine initializing...");
+    };
+    window.closeDeleteSlipModal = function() {
+      const modal = document.getElementById('modalConfirmDeleteSlip');
+      if (modal) modal.classList.add('hidden');
+    };
+  </script>
 </head>
 
 <body
@@ -1852,7 +1865,7 @@
   <!-- Thai QR Payment & PromptPay Slip Generator Engine -->
   <script src="assets/js/thai_qr_engine.js?v=20261017_2012"></script>
   <!-- Application Logic -->
-  <script src="assets/js/payment.js?v=20261017_1510"></script>
+  <script src="assets/js/payment.js?v=20261027_2135"></script>
 </body>
 
 </html>
