@@ -84,6 +84,10 @@
   <script src="config/campaigns_repo.js"></script>
   <!-- Custom Payment CSS & Master Admin CSS (Avatar Frames & Animation) -->
   <link rel="stylesheet" href="assets/css/payment.css">
+  <!-- Cyber Particles Background & 3D Tilt Engine -->
+  <script src="assets/js/cyber_particles.js"></script>
+  <!-- Cyberpunk Theme Stylesheet -->
+  <link rel="stylesheet" href="assets/css/payment_cyber.css">
   <link rel="stylesheet" href="assets/css/master-admin.css">
   <!-- Universal Themed Intro Loader -->
   <script src="assets/js/universal_intro.js"></script>
@@ -91,6 +95,10 @@
 
 <body
   class="min-h-screen flex flex-col antialiased selection:bg-orange-500 selection:text-white bg-mesh-canvas overflow-x-hidden">
+
+  <!-- Interactive Cyber Particles & Ambient Background Loop -->
+  <div class="fixed inset-0 pointer-events-none z-0 ambient-glow-loop opacity-70"></div>
+  <canvas id="cyberParticleCanvas"></canvas>
 
   <!-- ================= ADMIN TEST ENVIRONMENT BANNER ================= -->
   <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white px-4 py-2 text-xs font-bold shadow-lg flex items-center justify-between sticky top-0 z-50 border-b border-amber-300/30">
@@ -242,7 +250,7 @@
             <i data-lucide="shield-check" class="w-3.5 h-3.5 text-orange-500"></i>
             <span>KKU AUTHENTICATION</span>
           </div>
-          <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">เข้าสู่ระบบนักศึกษา</h3>
+          <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight">เข้าสู่ระบบนักศึกษา</h3>
           <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto leading-relaxed">
             สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มข.
           </p>
@@ -300,7 +308,7 @@
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-500"></i>
           <span>เข้าสู่ระบบสำเร็จ</span>
         </div>
-        <h3 id="loginSuccessTitle" class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight pt-1">
+        <h3 id="loginSuccessTitle" class="text-xl sm:text-2xl font-black text-white title-3d tracking-tight pt-1">
           ยินดีต้อนรับ
         </h3>
         <p id="loginSuccessSubtitle" class="text-xs text-slate-500 font-medium leading-relaxed">
@@ -340,7 +348,7 @@
 
   <!-- TOP HEADER / NAV BAR WITH LOGO -->
   <header
-    class="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/80 shadow-sm transition-all duration-300">
+    class="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-white/10 shadow-sm transition-all duration-300">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
 
       <!-- LOGO & BRANDING -->
@@ -366,7 +374,7 @@
             </span>
           </div>
           <h1 id="headerDynamicTitle"
-            class="text-[11px] sm:text-sm md:text-base font-extrabold text-slate-800 tracking-tight leading-tight truncate">
+            class="text-[11px] sm:text-sm md:text-base font-extrabold text-amber-300 tracking-tight leading-tight truncate">
             ระบบชำระเงินสาขาวิชาเอกคอมพิวเตอร์ศึกษา</h1>
         </div>
       </div>
@@ -507,18 +515,18 @@
   <main class="flex-grow max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8">
 
     <!-- ================= 0. DYNAMIC CAMPAIGN SELECTOR & OVERVIEW HUB ================= -->
-    <section id="campaignSelectorSection" class="premium-glass rounded-3xl p-4 sm:p-6 border border-orange-200/80 shadow-card-premium space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+    <section id="campaignSelectorSection" class="cyber-glass rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl space-y-4 tilt-card-3d">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
         <div class="flex items-center gap-2.5">
           <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-md shadow-orange-500/30 flex-shrink-0">
             <i data-lucide="layers" class="w-5 h-5"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-sm sm:text-base font-black text-slate-900">เลือกรายการที่ต้องการชำระเงิน</h2>
+              <h2 class="text-sm sm:text-base font-black text-white">เลือกรายการที่ต้องการชำระเงิน</h2>
               <span id="campaignsTotalCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-100 text-orange-700 border border-orange-200">1 รายการ</span>
             </div>
-            <p class="text-[11px] text-slate-500">คลิกเลือกรายการเพื่อเปิดหน้ารายละเอียดและบันทึกการชำระเงิน</p>
+            <p class="text-[11px] text-slate-400">คลิกเลือกรายการเพื่อเปิดหน้ารายละเอียดและบันทึกการชำระเงิน</p>
           </div>
         </div>
 
@@ -538,7 +546,7 @@
 
     <!-- HERO & COUNTDOWN & STATS SECTION (MODERN LUXURY TECH AESTHETICS) -->
     <section
-      class="hero-card-animate mobile-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-4 sm:p-8 md:p-10 shadow-2xl border border-slate-800">
+      class="hero-card-animate mobile-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#06070A] via-[#0D1226] to-[#06070A] text-white p-4 sm:p-8 md:p-10 shadow-2xl border border-orange-500/30 tilt-card-3d">
 
       <!-- Custom Dynamic Background Wallpaper Layer -->
       <div id="heroCustomBgLayer" class="absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-700 pointer-events-none mix-blend-overlay"></div>
@@ -760,7 +768,7 @@
                 <i data-lucide="shirt" class="w-3.5 h-3.5 text-orange-600"></i>
                 <span id="showcaseCategoryPill">เสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา</span>
               </div>
-              <h3 id="showcaseTitleText" class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              <h3 id="showcaseTitleText" class="text-xl sm:text-3xl font-black text-white tracking-tight leading-tight">
                 เสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา (COMED KKU 69)
               </h3>
               <p id="showcaseSubtitleText" class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
@@ -775,7 +783,7 @@
                   <i data-lucide="tag" class="w-4 h-4 text-orange-600"></i>
                   <span>ราคาชำระต่อคน</span>
                 </span>
-                <p class="text-[11px] text-slate-500">ยอดเงินที่ต้องโอนตรงตามจำนวนที่ระบุ</p>
+                <p class="text-[11px] text-slate-400">ยอดเงินที่ต้องโอนตรงตามจำนวนที่ระบุ</p>
               </div>
               <div class="flex items-baseline gap-1.5">
                 <span id="showcaseSinglePriceText" class="text-3xl sm:text-4xl font-mono font-black text-orange-600 tracking-tight">฿390</span>
@@ -792,7 +800,7 @@
 
       <!-- Search & Autocomplete Card -->
       <div
-        class="search-card-animate mobile-card premium-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-card-premium relative">
+        class="search-card-animate mobile-card cyber-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-2xl border border-white/10 relative tilt-card-3d">
 
         <!-- Subtle background deco -->
         <div class="absolute right-0 top-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -804,7 +812,7 @@
               class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-orange-100 via-orange-50 to-amber-100 text-orange-600 mb-1 sm:mb-2 shadow-sm border border-orange-200/80">
               <img src="logo.png" alt="โลโก้" class="w-8 h-8 sm:w-10 sm:h-10 object-contain" loading="lazy" decoding="async">
             </div>
-            <h2 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">ค้นหาข้อมูลเพื่อบันทึกการชำระเงิน
+            <h2 class="text-xl sm:text-3xl font-black text-white title-3d tracking-tight">ค้นหาข้อมูลเพื่อบันทึกการชำระเงิน
             </h2>
             <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
               พิมพ์ <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">รหัสนักศึกษา</span>,
@@ -826,7 +834,7 @@
               </div>
               <input type="text" id="smartSearchInput" autocomplete="off"
                 placeholder="กรอกรหัส 693050... หรือ ชื่อเล่น..."
-                class="w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3.5 sm:py-4 bg-white/90 border-2 border-slate-200 rounded-2xl text-slate-900 text-sm sm:text-base font-semibold placeholder-slate-400 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 shadow-sm transition-all outline-none">
+                class="w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3.5 sm:py-4 cyber-input w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3.5 sm:py-4 rounded-2xl text-white text-sm sm:text-base font-semibold placeholder-slate-500 focus:ring-4 focus:ring-orange-500/20 shadow-sm transition-all outline-none">
               <!-- Quick Paste / Clear Button -->
               <div class="absolute right-2 flex items-center gap-1">
                 <button type="button" id="btnClearSearch" onclick="clearSearchInput()"
@@ -849,7 +857,7 @@
 
             <!-- In-flow Autocomplete Results Panel (Natural Layout - ไม่ลอยทับหรือจมด้านหลัง) -->
             <div id="autocompleteDropdown"
-              class="hidden mt-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border-2 border-orange-200/90 max-h-96 overflow-y-auto custom-scrollbar divide-y divide-slate-100/90 transition-all duration-300">
+              class="hidden mt-3 cyber-glass rounded-2xl shadow-2xl border border-orange-500/30 max-h-96 overflow-y-auto custom-scrollbar divide-y divide-white/10 transition-all duration-300">
               <!-- Rendered dynamically -->
             </div>
           </div>
@@ -858,12 +866,12 @@
 
       <!-- Student Profile Card (Appears when selected) -->
       <div id="studentProfileCard"
-        class="hidden mobile-card premium-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-card-premium border-2 border-orange-200/80 transition-all">
+        class="hidden mobile-card cyber-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-2xl border border-orange-500/40 transition-all tilt-card-3d">
         <div class="max-w-4xl mx-auto space-y-4 sm:space-y-6">
 
           <!-- Top Profile Header -->
           <div
-            class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-slate-200/80">
+            class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-white/10">
             <div class="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
               <div
                 class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-orange-600 via-amber-500 to-orange-400 flex items-center justify-center text-white text-2xl sm:text-3xl font-black shadow-lg shadow-orange-500/30 border-2 border-white flex-shrink-0">
@@ -871,7 +879,7 @@
               </div>
               <div class="flex-grow">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <h3 id="profileFullName" class="text-lg sm:text-3xl font-black text-slate-900 tracking-tight">ชื่อ
+                  <h3 id="profileFullName" class="text-lg sm:text-3xl font-black text-white tracking-tight">ชื่อ
                     นามสกุล</h3>
                   <span id="profileNickname"
                     class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300/80 shadow-sm">
@@ -880,7 +888,7 @@
                 </div>
                 <div
                   class="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-slate-500 mt-1 font-mono flex-wrap">
-                  <span id="profileStudentId" class="font-extrabold text-slate-800">693050XXX-X</span>
+                  <span id="profileStudentId" class="font-extrabold text-amber-300">693050XXX-X</span>
                   <span class="text-slate-300">•</span>
                   <span id="profileEmail" class="text-slate-600 text-[10px] sm:text-xs">xxx@kkumail.com</span>
                 </div>
@@ -894,31 +902,31 @@
           </div>
 
           <!-- Academic Info Grid (Enhanced Design) -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 py-4 border-b border-slate-200/80 text-xs sm:text-sm">
-            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 py-4 border-b border-white/10 text-xs sm:text-sm">
+            <div class="bg-white/[0.04] p-4 rounded-2xl border border-white/5 shadow-sm">
               <span class="text-slate-400 block text-xs mb-1 font-medium">คณะ</span>
-              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+              <span class="font-bold text-white flex items-center gap-1.5">
                 <i data-lucide="book-open" class="w-4 h-4 text-orange-500"></i>
                 คณะศึกษาศาสตร์
               </span>
             </div>
-            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="bg-white/[0.04] p-4 rounded-2xl border border-white/5 shadow-sm">
               <span class="text-slate-400 block text-xs mb-1 font-medium">สาขาวิชาเอก</span>
-              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+              <span class="font-bold text-white flex items-center gap-1.5">
                 <i data-lucide="laptop" class="w-4 h-4 text-sky-500"></i>
                 คอมพิวเตอร์ศึกษา
               </span>
             </div>
-            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="bg-white/[0.04] p-4 rounded-2xl border border-white/5 shadow-sm">
               <span class="text-slate-400 block text-xs mb-1 font-medium">ระดับ / ชั้นปี</span>
-              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+              <span class="font-bold text-white flex items-center gap-1.5">
                 <i data-lucide="award" class="w-4 h-4 text-emerald-500"></i>
                 ชั้นปีที่ 1 (COMED23 KKU63)
               </span>
             </div>
-            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="bg-white/[0.04] p-4 rounded-2xl border border-white/5 shadow-sm">
               <span class="text-slate-400 block text-xs mb-1 font-medium">สถาบัน</span>
-              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+              <span class="font-bold text-white flex items-center gap-1.5">
                 <i data-lucide="landmark" class="w-4 h-4 text-amber-500"></i>
                 มหาวิทยาลัยขอนแก่น
               </span>
@@ -951,11 +959,11 @@
 
             <!-- QR Payment Guide & Bank Info -->
             <div
-              class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-emerald-50/80 via-white to-orange-50/60 p-6 sm:p-8 rounded-3xl border-2 border-emerald-200 shadow-md">
+              class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-emerald-950/20 via-[#0A0D1D] to-orange-950/20 p-6 sm:p-8 rounded-3xl border border-emerald-500/30 shadow-2xl tilt-card-3d">
 
               <!-- Real QR Code Image Display -->
               <div
-                class="md:col-span-5 flex flex-col items-center justify-center p-5 bg-white rounded-2xl border border-slate-200 shadow-lg text-center relative group">
+                class="md:col-span-5 flex flex-col items-center justify-center p-5 qr-cyber-frame rounded-2xl text-center relative group">
                 <span
                   class="text-[11px] font-black text-emerald-800 mb-2.5 uppercase tracking-wider flex items-center gap-1.5 bg-emerald-100/90 px-3.5 py-1.5 rounded-full border border-emerald-300 shadow-xs">
                   <i data-lucide="qr-code" class="w-3.5 h-3.5 text-emerald-600"></i>
@@ -1009,11 +1017,11 @@
               <!-- Bank & Transfer Details -->
               <div class="md:col-span-7 flex flex-col justify-between space-y-4">
                 <div>
-                  <h4 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 mb-3">
+                  <h4 class="text-base sm:text-lg font-black text-white flex items-center gap-2 mb-3">
                     <i data-lucide="building-2" class="w-5 h-5 text-emerald-600"></i>
                     รายละเอียดบัญชีรับโอนเงิน
                   </h4>
-                  <ul class="space-y-3 text-xs sm:text-sm text-slate-700">
+                  <ul class="space-y-3 text-xs sm:text-sm text-slate-300">
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
                       <span><strong>รายการ:</strong> <span id="bankDetailTitle">ค่าทำป้ายสาขาวิชาเอกคอมพิวเตอร์ศึกษา (COMED23 KKU63)</span></span>
@@ -1030,12 +1038,12 @@
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
                       <span><strong>เลขที่บัญชี:</strong> <span id="bankDetailAccountNum"
-                          class="font-mono font-black text-emerald-950 bg-emerald-100/90 px-2.5 py-1 rounded-xl select-all border-2 border-emerald-300 tracking-wider text-sm sm:text-base">236-2-47817-3</span></span>
+                          class="font-mono font-black text-emerald-950 bg-emerald-950/60 text-emerald-300 px-2.5 py-1 rounded-xl select-all border border-emerald-500/40 tracking-wider text-sm sm:text-base font-mono font-black">236-2-47817-3</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
                       <span><strong>ชื่อบัญชี:</strong> <span id="bankDetailAccountName"
-                          class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">น.ส. พิชามญธุ์ สามสี</span></span>
+                          class="font-black text-slate-900 bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/10 text-white">น.ส. พิชามญธุ์ สามสี</span></span>
                     </li>
                   </ul>
                 </div>
@@ -1066,7 +1074,7 @@
               <!-- Ultra Prominent Drag & Drop Zone with Glowing Border and Dynamic Depth -->
               <div id="slipDropZone" onclick="document.getElementById('slipFileInput').click()"
                 ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"
-                class="relative overflow-hidden border-3 border-dashed border-orange-400 hover:border-orange-600 bg-gradient-to-b from-orange-50/80 via-amber-50/40 to-white hover:from-orange-100/90 hover:via-orange-50/60 hover:to-amber-50/50 rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-300 group shadow-xl hover:shadow-2xl shadow-orange-500/10 hover:shadow-orange-500/20 transform hover:-translate-y-0.5">
+                class="relative overflow-hidden cyber-dropzone rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-300 group shadow-2xl transform hover:-translate-y-0.5 tilt-card-3d">
                 <!-- Subtle Background Decorative Ambient Glow -->
                 <div
                   class="absolute -top-12 -right-12 w-40 h-40 bg-orange-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-500">
@@ -1088,10 +1096,10 @@
 
                   <div class="space-y-1.5">
                     <span
-                      class="text-lg sm:text-xl font-black text-slate-900 block group-hover:text-orange-700 transition-colors">
+                      class="text-lg sm:text-xl font-black text-white block group-hover:text-orange-300 transition-colors">
                       คลิกเพื่อเลือกไฟล์สลิป หรือลากไฟล์รูปภาพมาวางที่นี่
                     </span>
-                    <p class="text-xs sm:text-sm text-slate-600 font-medium max-w-md mx-auto">
+                    <p class="text-xs sm:text-sm text-slate-400 font-medium max-w-md mx-auto">
                       กรุณาแนบรูปภาพสลิปที่มียอดเงิน <span id="slipDropZoneTargetAmount" class="text-orange-600 font-black">฿190.00 บาท</span>
                       ชัดเจนเพื่อความรวดเร็วในการตรวจสอบ
                     </p>
@@ -1171,17 +1179,17 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
                 <div class="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                  <div class="flex justify-between border-b border-slate-200/80 pb-2">
+                  <div class="flex justify-between border-b border-white/10 pb-2">
                     <span class="text-slate-400">สถานะการชำระ:</span>
                     <span class="font-black text-emerald-600 flex items-center gap-1">
                       <i data-lucide="check" class="w-4 h-4"></i> สำเร็จ (Paid)
                     </span>
                   </div>
-                  <div class="flex justify-between border-b border-slate-200/80 pb-2">
+                  <div class="flex justify-between border-b border-white/10 pb-2">
                     <span class="text-slate-400">ยอดเงิน:</span>
                     <span id="paidAmountDisplay" class="font-black text-slate-900 text-base">฿190.00 บาท</span>
                   </div>
-                  <div class="flex justify-between border-b border-slate-200/80 pb-2">
+                  <div class="flex justify-between border-b border-white/10 pb-2">
                     <span class="text-slate-400">วัน-เวลาที่บันทึก:</span>
                     <span id="paidTimestampText" class="font-mono font-bold text-slate-700">-</span>
                   </div>
@@ -1288,11 +1296,11 @@
 
     <!-- SECTION 2: TAB STATUS CHECK (WHO HAS PAID / UNPAID) -->
     <div id="tabContentStatus" class="hidden space-y-6">
-      <div class="premium-glass rounded-3xl p-6 sm:p-10 shadow-card-premium space-y-6">
+      <div class="cyber-glass rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/10 space-y-6 tilt-card-3d">
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+            <h2 class="text-xl sm:text-3xl font-black text-white title-3d tracking-tight flex items-center gap-2.5">
               <i data-lucide="clipboard-list" class="w-7 h-7 text-orange-600"></i>
               ตรวจสอบสถานะรายชื่อนักศึกษา
             </h2>
@@ -1303,17 +1311,17 @@
 
           <!-- Status Filter Tabs -->
           <div
-            class="flex items-center gap-1 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200 text-xs font-bold shadow-inner">
+            class="flex items-center gap-1 p-1.5 bg-black/50 rounded-2xl border border-white/10 text-xs font-bold shadow-inner">
             <button onclick="filterStatusList('all')" id="filterBtnAll"
-              class="px-4 py-2 rounded-xl bg-white text-slate-900 shadow-sm transition font-black">
+              class="px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition font-black">
               ทั้งหมด (<span id="countAllFilter">60</span>)
             </button>
             <button onclick="filterStatusList('paid')" id="filterBtnPaid"
-              class="px-4 py-2 rounded-xl text-slate-600 hover:text-emerald-700 transition">
+              class="px-4 py-2 rounded-xl text-slate-400 hover:text-emerald-400 transition">
               จ่ายแล้ว (<span id="countPaidFilter">0</span>)
             </button>
             <button onclick="filterStatusList('unpaid')" id="filterBtnUnpaid"
-              class="px-4 py-2 rounded-xl text-slate-600 hover:text-rose-700 transition">
+              class="px-4 py-2 rounded-xl text-slate-400 hover:text-rose-400 transition">
               ยังไม่จ่าย (<span id="countUnpaidFilter">60</span>)
             </button>
           </div>
@@ -1327,13 +1335,13 @@
           <input type="text" id="tableSearchInput"
             placeholder="ค้นหาในตารางด้วย ชื่อ, นามสกุล, ชื่อเล่น, รหัสนักศึกษา หรือ อีเมล..."
             oninput="handleTableSearch(this.value)"
-            class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 shadow-sm outline-none transition">
+            class="cyber-input w-full pl-11 pr-4 py-3 rounded-2xl text-xs sm:text-sm focus:border-orange-500 shadow-sm outline-none transition">
         </div>
 
         <!-- Student List Table (Responsive Modern Styling) -->
-        <div class="overflow-x-auto rounded-2xl border border-slate-200/90 shadow-sm">
+        <div class="overflow-x-auto rounded-2xl border border-white/10 shadow-xl bg-black/30">
           <table class="w-full text-left text-xs sm:text-sm">
-            <thead class="bg-slate-100/90 text-slate-700 font-extrabold border-b border-slate-200">
+            <thead class="bg-white/[0.04] text-slate-300 font-extrabold border-b border-white/10">
               <tr>
                 <th class="p-4 text-center w-12">ลำดับ</th>
                 <th class="p-4">รหัสนักศึกษา</th>
@@ -1344,7 +1352,7 @@
                 <th class="p-4 text-center w-32">ดำเนินการ</th>
               </tr>
             </thead>
-            <tbody id="studentStatusTableBody" class="divide-y divide-slate-100 bg-white">
+            <tbody id="studentStatusTableBody" class="divide-y divide-white/5 bg-transparent">
               <!-- Rendered via Javascript -->
             </tbody>
           </table>
@@ -1430,8 +1438,8 @@
   <div id="modalReportIssue"
     class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 transform transition-all">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      class="cyber-glass rounded-3xl max-w-lg w-full border border-white/10 shadow-2xl p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 transform transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
         <div class="flex items-center gap-2.5">
           <div class="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shadow-sm">
             <i data-lucide="message-square-plus" class="w-5 h-5"></i>
@@ -1511,7 +1519,7 @@
   <div id="modalConfirmIssue"
     class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 transform transition-all">
+      class="cyber-glass rounded-3xl max-w-md w-full border border-white/10 shadow-2xl p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 transform transition-all">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2.5">
           <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-sm">
@@ -1585,9 +1593,9 @@
   <div id="modalConfirmUpload"
     class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 transform transition-all">
+      class="cyber-glass rounded-3xl max-w-lg w-full border border-white/10 shadow-2xl p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 transform transition-all">
 
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
         <div class="flex items-center gap-2.5">
           <div class="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shadow-sm">
             <i data-lucide="check-check" class="w-5 h-5"></i>
@@ -1713,9 +1721,9 @@
   <div id="modalStudentDetail"
     class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 transform transition-all">
+      class="cyber-glass rounded-3xl max-w-lg w-full border border-white/10 shadow-2xl p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 transform transition-all">
 
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
         <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
           <i data-lucide="user-check" class="w-5 h-5 text-orange-600"></i>
           ข้อมูลและหลักฐานการชำระเงิน

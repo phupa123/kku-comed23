@@ -1,0 +1,139 @@
+/* =========================================================================
+   PAYMENT CYBER LAB - assets/css/payment_cyber.css
+   สไตล์ดาร์ก ล้ำสมัย (Cyberpunk / Obsidian Glassmorphism) สำหรับ payment-example.html
+   อิงตามดีไซน์ระดับรางวัลของ Yearbook.html & Master Admin
+   ========================================================================= */
+
+:root {
+  --cyber-bg: #06070A;
+  --cyber-surface: rgba(18, 22, 42, 0.75);
+  --cyber-card: rgba(22, 27, 51, 0.85);
+  --cyber-border: rgba(255, 255, 255, 0.08);
+  --kku-orange: #E65A19;
+  --kku-amber: #FF7A29;
+  --kku-glow: rgba(230, 90, 25, 0.35);
+}
+
+html, body {
+  background-color: #06070A !important;
+  color: #F1F5F9 !important;
+  font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Background canvas particles */
+#cyberParticleCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Looping Ambient Background Mesh (Yearbook Style) */
+@keyframes ambientShift {
+  0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+  50% { background-position: 100% 50%; filter: hue-rotate(20deg); }
+  100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+}
+
+.ambient-glow-loop {
+  background: linear-gradient(135deg, rgba(230, 90, 25, 0.12), rgba(14, 165, 233, 0.08), rgba(245, 158, 11, 0.12), rgba(16, 185, 129, 0.06));
+  background-size: 300% 300%;
+  animation: ambientShift 18s ease-in-out infinite;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Kinetic 3D Embossed Typography */
+.title-3d {
+  text-shadow: 0 1px 0 #993300, 0 2px 0 #772600, 0 3px 0 #551a00, 0 4px 0 #331000, 0 8px 18px rgba(230, 90, 25, 0.4);
+  letter-spacing: -0.03em;
+}
+
+/* 3D Tilt Card Support */
+.tilt-card-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.tilt-card-3d:hover {
+  border-color: rgba(230, 90, 25, 0.5) !important;
+  box-shadow: 0 20px 40px -10px rgba(230, 90, 25, 0.25), 0 0 20px rgba(230, 90, 25, 0.15) !important;
+}
+
+/* Dark Glassmorphic Panels */
+.cyber-glass {
+  background: rgba(12, 16, 32, 0.78) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6) !important;
+  color: #F8FAFC !important;
+}
+
+.cyber-glass-card {
+  background: rgba(18, 23, 44, 0.72) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1.5rem !important;
+}
+
+/* Cyber Inputs */
+.cyber-input {
+  background: rgba(6, 8, 16, 0.85) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+  transition: all 0.25s ease !important;
+}
+
+.cyber-input:focus {
+  border-color: #E65A19 !important;
+  box-shadow: 0 0 0 3px rgba(230, 90, 25, 0.25) !important;
+  background: rgba(10, 14, 26, 0.95) !important;
+}
+
+/* Cyber Table Styling */
+#studentStatusTableBody tr {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: background-color 0.2s ease, transform 0.15s ease !important;
+}
+
+#studentStatusTableBody tr:hover {
+  background-color: rgba(230, 90, 25, 0.08) !important;
+}
+
+#studentStatusTableBody td {
+  color: #E2E8F0 !important;
+}
+
+/* QR Cyber Frame Glow */
+.qr-cyber-frame {
+  background: linear-gradient(145deg, #0d1224, #080b18) !important;
+  border: 2px solid rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Cyber Dropzone */
+.cyber-dropzone {
+  background: linear-gradient(180deg, rgba(230, 90, 25, 0.06) 0%, rgba(10, 14, 28, 0.8) 100%) !important;
+  border: 2px dashed rgba(230, 90, 25, 0.45) !important;
+}
+
+.cyber-dropzone:hover {
+  border-color: #E65A19 !important;
+  background: linear-gradient(180deg, rgba(230, 90, 25, 0.12) 0%, rgba(15, 20, 38, 0.9) 100%) !important;
+  box-shadow: 0 0 30px rgba(230, 90, 25, 0.2) !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #06070A; }
+::-webkit-scrollbar-thumb { background: #242A4A; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #E65A19; }
