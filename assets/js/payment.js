@@ -1275,9 +1275,16 @@ function selectStudent(st) {
                   : `<iframe src="${sDisplayUrl}" class="w-full h-full pointer-events-none border-0" loading="lazy"></iframe>`
                 }
               </div>
-              <div class="w-full flex items-center justify-between text-[10px] text-slate-500 font-medium">
-                <span class="font-bold text-slate-700">ใบที่ #${sIdx+1}</span>
-                <span class="text-orange-600 font-bold group-hover:underline">ดูรูป</span>
+                            <div class="w-full flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                <span class="font-bold text-slate-200">สลิป #${sIdx+1}</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-orange-400 font-bold group-hover:underline">ดู</span>
+                  <button type="button" onclick="event.stopPropagation(); openDeleteCurrentSlipModal(${sIdx})"
+                    class="p-1 rounded-md bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 transition ml-0.5"
+                    title="ลบสลิปใบนี้">
+                    <i data-lucide="trash-2" class="w-3 h-3 text-rose-400"></i>
+                  </button>
+                </div>
               </div>
             </div>
           `;
@@ -1848,6 +1855,211 @@ async function promptResetPayment() {
   }
 }
 
+// ================= SLIP DELETION & MANAGEMENT ENGINE =================
+let pendingDeleteStudentId = null;
+let pendingDeleteSlipIndex = -1; // -1 = current primary / all slips
+
+function openDeleteCurrentSlipModal(slipIndex = -1) {
+  if (!currentSelectedStudent) return;
+  openDeleteSlipForStudent(currentSelectedStudent.id, slipIndex);
+}
+
+function openDeleteSlipForStudent(studentId, slipIndex = -1) {
+  const st = (typeof students !== 'undefined' ? students : []).find(s => s.id === studentId);
+  const rec = paymentRecords[studentId];
+  if (!rec) {
+    showFrontendToast("ไม่พบข้อมูลหลักฐานการชำระเงินของนักศึกษารายนี้");
+    return;
+  }
+
+  pendingDeleteStudentId = studentId;
+  pendingDeleteSlipIndex = slipIndex;
+
+  const modal = document.getElementById('modalConfirmDeleteSlip');
+  const nameEl = document.getElementById('deleteSlipStudentName');
+  const targetEl = document.getElementById('deleteSlipTargetLabel');
+  const noticeEl = document.getElementById('deleteSlipImpactNotice');
+  const btnText = document.getElementById('btnDeleteSlipText');
+
+  const slipsList = Array.isArray(rec.slips) && rec.slips.length > 0 
+    ? rec.slips 
+    : (rec.slipUrl ? [{ url: rec.slipUrl }] : []);
+
+  if (nameEl) {
+    nameEl.textContent = `${st ? st.name : (rec.studentName || rec.name || studentId)} (${st ? 'น้อง' + st.nickname : '-'})`;
+  }
+
+  if (targetEl) {
+    if (slipIndex >= 0 && slipsList.length > 1) {
+      targetEl.textContent = `สลิปฉบับที่ #${slipIndex + 1} (จากทั้งหมด ${slipsList.length} ใบ)`;
+    } else {
+      targetEl.textContent = `สลิปหลักฐานปัจจุบัน (ทั้งหมด ${slipsList.length} ใบ)`;
+    }
+  }
+
+  if (noticeEl) {
+    if (slipIndex >= 0 && slipsList.length > 1) {
+      noticeEl.textContent = `จะทำการลบเฉพาะสลิปฉบับที่ #${slipIndex + 1} เท่านั้น สลิปอื่น ๆ อีก ${slipsList.length - 1} ใบจะยังคงอยู่ตามปกติ`;
+    } else {
+      noticeEl.textContent = `หากลบสลิปนี้ สถานะจะเปลี่ยนกลับเป็น "ยังไม่ชำระเงิน" และสามารถแนบไฟล์สลิปใหม่ได้ทันที`;
+    }
+  }
+
+  if (btnText) {
+    btnText.textContent = "ยืนยันลบสลิป";
+  }
+
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeDeleteSlipModal() {
+  const modal = document.getElementById('modalConfirmDeleteSlip');
+  if (modal) modal.classList.add('hidden');
+  pendingDeleteStudentId = null;
+  pendingDeleteSlipIndex = -1;
+}
+
+async function executeConfirmedSlipDeletion() {
+  if (!pendingDeleteStudentId) return;
+
+  const stId = pendingDeleteStudentId;
+  const slipIdx = pendingDeleteSlipIndex;
+  const record = paymentRecords[stId];
+
+  if (!record) {
+    closeDeleteSlipModal();
+    return;
+  }
+
+  const btn = document.getElementById('btnExecuteDeleteSlip');
+  const btnText = document.getElementById('btnDeleteSlipText');
+  if (btn) btn.disabled = true;
+  if (btnText) btnText.textContent = "กำลังลบไฟล์...";
+
+  let slipsList = Array.isArray(record.slips) && record.slips.length > 0 
+    ? [...record.slips] 
+    : (record.slipUrl ? [{ url: record.slipUrl, timestamp: record.timestamp || '', amount: record.amount }] : []);
+
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+
+  try {
+    if (slipIdx >= 0 && slipIdx < slipsList.length && slipsList.length > 1) {
+      // 1. Remove specific slip only
+      slipsList.splice(slipIdx, 1);
+      const latestSlip = slipsList[slipsList.length - 1];
+      const primaryUrl = typeof latestSlip === 'string' ? latestSlip : (latestSlip.url || '');
+
+      record.slips = slipsList;
+      record.slipUrl = primaryUrl;
+      if (typeof latestSlip === 'object' && latestSlip.amount) record.amount = latestSlip.amount;
+      if (typeof latestSlip === 'object' && latestSlip.timestamp) record.timestamp = latestSlip.timestamp;
+
+      if (sb && currentCampaign && currentCampaign.id) {
+        try {
+          await sb.from('payments').upsert({
+            campaign_id: currentCampaign.id,
+            student_id: stId,
+            student_name: record.studentName || record.name || '',
+            amount: record.amount || currentCampaign.amount || 190,
+            paid: true,
+            timestamp: record.timestamp || new Date().toISOString(),
+            slip_url: JSON.stringify(slipsList),
+            ref_code: record.refCode,
+            verified: record.verified || false
+          }, { onConflict: 'campaign_id,student_id' });
+        } catch (err) {
+          console.warn("Supabase update remaining slips error:", err);
+        }
+      }
+
+      saveLocalBackup();
+      refreshProgressStats();
+
+      if (currentSelectedStudent && currentSelectedStudent.id === stId) {
+        selectStudent(currentSelectedStudent);
+      }
+      renderStatusTable();
+      if (window.PaymentCyberUI && window.PaymentCyberUI.renderCardsView) {
+        window.PaymentCyberUI.renderCardsView();
+      }
+
+      // If student detail modal was open, refresh it
+      const detailModal = document.getElementById('modalStudentDetail');
+      if (detailModal && !detailModal.classList.contains('hidden')) {
+        openStudentDetailModal(stId);
+      }
+
+      showFrontendToast(`ลบสลิปฉบับที่ #${slipIdx + 1} เรียบร้อยแล้ว`);
+    } else {
+      // 2. Remove all slips / revert to Unpaid
+      if (sb && currentCampaign && currentCampaign.id) {
+        try {
+          await sb.from('payments').delete().match({
+            campaign_id: currentCampaign.id,
+            student_id: stId
+          });
+        } catch (err) {
+          console.warn("Supabase delete payment record error:", err);
+        }
+      }
+
+      // Clear local caches
+      try {
+        const localPay = JSON.parse(localStorage.getItem('COMED_LOCAL_PAYMENTS') || '{}');
+        const cleanId = stId.replace(/-/g, '').trim();
+        delete localPay[stId];
+        if (cleanId) delete localPay[cleanId];
+        localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localPay));
+      } catch (e) { }
+
+      delete paymentRecords[stId];
+      saveLocalBackup();
+      refreshProgressStats();
+
+      if (currentSelectedStudent && currentSelectedStudent.id === stId) {
+        selectStudent(currentSelectedStudent);
+      }
+      renderStatusTable();
+      if (window.PaymentCyberUI && window.PaymentCyberUI.renderCardsView) {
+        window.PaymentCyberUI.renderCardsView();
+      }
+
+      // If student detail modal was open, close it
+      const detailModal = document.getElementById('modalStudentDetail');
+      if (detailModal) detailModal.classList.add('hidden');
+
+      showFrontendToast("ลบสลิปเรียบร้อยแล้ว สถานะกลับเป็นรอชำระเงิน");
+    }
+  } catch (error) {
+    console.error("Execute slip deletion error:", error);
+    showFrontendToast("เกิดข้อผิดพลาดในการลบสลิป กรุณาลองใหม่อีกครั้ง");
+  } finally {
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = "ยืนยันลบสลิป";
+    closeDeleteSlipModal();
+  }
+}
+
+function manageMySlipFromProfile() {
+  closeMyProfileModal();
+  const session = localStorage.getItem('COMED_USER_SESSION');
+  if (!session) return;
+  try {
+    const user = JSON.parse(session);
+    const myId = (user.studentId || '').replace(/-/g, '').trim();
+    const st = (typeof students !== 'undefined' ? students : []).find(s => s.id.replace(/-/g, '').trim() === myId);
+    if (st) {
+      selectStudent(st);
+      setTimeout(() => {
+        const target = document.getElementById('studentProfileCard');
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 200);
+    }
+  } catch (e) { }
+}
+
+
 // --- FULLSCREEN SLIP VIEWER ---
 function openFullscreenModal(imageUrl) {
   if (!imageUrl) return;
@@ -2210,6 +2422,10 @@ function openStudentDetail(studentId) {
                       <i data-lucide="external-link" class="w-3.5 h-3.5"></i> 
                       <span>เปิดดูรูปเต็ม</span>
                     </a>
+                    <button type="button" onclick="openDeleteSlipForStudent('${st.id}', ${slIdx})" class="px-3.5 py-1.5 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer" title="ลบสลิปหลักฐานนี้">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+                      <span>ลบสลิป</span>
+                    </button>
                   </div>
                 </div>
               `;
@@ -2596,6 +2812,7 @@ function openMyProfileModal() {
     if (isPaid) {
       badge.className = "font-black text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300";
       badge.textContent = `ชำระเงินเรียบร้อยแล้ว (฿${Number(payAmt).toFixed(2)})`;
+      const manageSlipBtn = document.getElementById("myProfileManageSlipBtn"); if (manageSlipBtn) manageSlipBtn.classList.remove("hidden");
     } else {
       badge.className = "font-black text-xs px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
       badge.textContent = "ยังไม่ได้ชำระเงิน (รอแนบสลิป)";
