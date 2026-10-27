@@ -391,40 +391,61 @@
   }
 
   // Hook into App Lifecycle
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      initCyberViewSwitcher();
-      renderQuickStudentList();
-      updateDashboardUploadCard();
-      syncDashboardCampaignMeta();
+  
+  function startCyberUI() {
+    initCyberViewSwitcher();
+    renderQuickStudentList(document.getElementById('smartSearchInput')?.value || '');
+    updateDashboardUploadCard();
+    syncDashboardCampaignMeta();
 
-      // Listen to search input
-      const searchInput = document.getElementById('smartSearchInput');
-      if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-          renderQuickStudentList(e.target.value);
-        });
-      }
-    }, 300);
+    const searchInput = document.getElementById('smartSearchInput');
+    if (searchInput && !searchInput.dataset.cyberBound) {
+      searchInput.dataset.cyberBound = 'true';
+      searchInput.addEventListener('input', (e) => {
+        renderQuickStudentList(e.target.value);
+      });
+      searchInput.addEventListener('focus', () => {
+        renderQuickStudentList(searchInput.value);
+      });
+    }
+  }
 
-    // Patch selectStudent to update Quick Student List and Upload Card
-    if (typeof window.selectStudent === 'function') {
+  // Run on DOM ready or immediately if already ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startCyberUI);
+  } else {
+    startCyberUI();
+  }
+
+  // Periodic poll to re-render if data is resolved asynchronously
+  let pollCount = 0;
+  const pollInterval = setInterval(() => {
+    pollCount++;
+    const list = getStudentsList();
+    if (list.length > 0) {
+      startCyberUI();
+      if (pollCount >= 10) clearInterval(pollInterval);
+    }
+  }, 400);
+
+  // Hook into selectStudent and refreshProgressStats
+  function attachHooks() {
+    if (typeof window.selectStudent === 'function' && !window.selectStudent._isCyberPatched) {
       const prevSelect = window.selectStudent;
       window.selectStudent = function(st) {
         prevSelect(st);
         renderQuickStudentList(document.getElementById('smartSearchInput')?.value || '');
         updateDashboardUploadCard();
       };
+      window.selectStudent._isCyberPatched = true;
     }
 
-    // Patch refreshProgressStats to sync with new dashboard stat badges
-    if (typeof window.refreshProgressStats === 'function') {
+    if (typeof window.refreshProgressStats === 'function' && !window.refreshProgressStats._isCyberPatched) {
       const prevRefresh = window.refreshProgressStats;
       window.refreshProgressStats = function() {
         prevRefresh();
         syncDashboardCampaignMeta();
 
-        // Update targetPeopleStat & peopleRatioText
         const paidEl = document.getElementById('totalPeoplePaid');
         const targetEl = document.getElementById('targetPeople');
         const badgeEl = document.getElementById('targetPeopleStat');
@@ -434,12 +455,15 @@
           const paidNum = paidEl.textContent || '0';
           const match = (targetEl.textContent || '').match(/\d+/);
           const totalNum = match ? match[0] : '53';
-          badgeEl.textContent = `${paidNum} / ${totalNum} คน`;
-          if (ratioEl) ratioEl.textContent = `${paidNum} / ${totalNum} คน`;
+          badgeEl.textContent = paidNum + ' / ' + totalNum + ' คน';
+          if (ratioEl) ratioEl.textContent = paidNum + ' / ' + totalNum + ' คน';
         }
       };
+      window.refreshProgressStats._isCyberPatched = true;
     }
-  });
+  }
+
+  setInterval(attachHooks, 500);
 
   window.PaymentCyberUI = {
     init: initCyberViewSwitcher,

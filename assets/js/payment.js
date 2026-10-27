@@ -320,25 +320,22 @@ function renderCampaignsNav() {
   if (!window.ComedCampaignManager) return;
 
   const allCampaigns = window.ComedCampaignManager.getAllCampaigns();
-  if (countBadge) countBadge.textContent = `${allCampaigns.length} รายการ`;
+  if (countBadge) countBadge.textContent = allCampaigns.length + ' รายการ';
 
   // 1. Render Header Quick Pills
   if (headerPillsContainer) {
     headerPillsContainer.innerHTML = allCampaigns.map(camp => {
       const isSelected = (camp.id.toLowerCase() === currentCampaign.id.toLowerCase());
-      return `
-        <a href="payment.html?camp=${encodeURIComponent(camp.id)}" 
-          onclick="switchCampaignWithAnimation('${camp.id}', event)"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 flex-shrink-0 cursor-pointer active:scale-95 ${
-            isSelected 
-              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 ring-2 ring-orange-500/30' 
-              : 'bg-white hover:bg-orange-50 text-slate-700 hover:text-orange-600 border border-slate-200 hover:border-orange-300 shadow-2xs'
-          }">
-          <span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white animate-ping' : 'bg-orange-400'}"></span>
-          <span class="truncate max-w-[150px] sm:max-w-none">${camp.title}</span>
-          <span class="text-[10px] font-mono opacity-85 px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}">฿${camp.amount}</span>
-        </a>
-      `;
+      return '<a href="payment.html?camp=' + encodeURIComponent(camp.id) + '" ' +
+        'onclick="switchCampaignWithAnimation(\'' + camp.id + '\', event)" ' +
+        'class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 flex-shrink-0 cursor-pointer active:scale-95 ' +
+        (isSelected 
+          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 ring-2 ring-orange-500/30' 
+          : 'glass-surface hover:border-orange-500/50 text-slate-300 hover:text-white border border-white/10') + '">' +
+        '<span class="w-1.5 h-1.5 rounded-full ' + (isSelected ? 'bg-white animate-ping' : 'bg-orange-400') + '"></span>' +
+        '<span class="truncate max-w-[150px] sm:max-w-none">' + camp.title + '</span>' +
+        '<span class="text-[10px] font-mono opacity-85 px-1.5 py-0.2 rounded-full ' + (isSelected ? 'bg-white/20 text-white' : 'bg-white/10 text-slate-300') + '">฿' + camp.amount + '</span>' +
+      '</a>';
     }).join('');
   }
 
@@ -349,59 +346,57 @@ function renderCampaignsNav() {
       let statusPill = '';
 
       if (camp.status === 'completed') {
-        statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1"><i data-lucide="check-check" class="w-3 h-3"></i> ชำระครบแล้ว</span>';
+        statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1"><i data-lucide="check-check" class="w-3 h-3"></i> ชำระครบแล้ว</span>';
       } else if (camp.status === 'open') {
-        statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-100 text-orange-800 border border-orange-300 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span> เปิดรับ</span>';
+        statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-500/20 text-orange-300 border border-orange-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></span> เปิดรับ</span>';
       } else {
-        statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-700 border border-slate-300">ปิดรับชั่วคราว</span>';
+        statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/10 text-slate-400 border border-white/10">ปิดรับชั่วคราว</span>';
       }
 
-      const payLink = `payment.html?camp=${encodeURIComponent(camp.id)}&auto=pay`;
-      const checkLink = `payment.html?camp=${encodeURIComponent(camp.id)}&tab=status`;
+      const isExamplePage = window.location.pathname.includes('payment-example');
+      const basePage = isExamplePage ? 'payment-example.html' : 'payment.html';
+      const payLink = basePage + '?camp=' + encodeURIComponent(camp.id) + '&auto=pay';
+      const checkLink = basePage + '?camp=' + encodeURIComponent(camp.id) + '&tab=status';
 
-      return `
-        <div onclick="switchCampaignWithAnimation('${camp.id}', event)" 
-          class="p-4 rounded-3xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer subtle-hover group ${
-            isSelected 
-              ? 'glass-surface cyber-campaign-active border-orange-500' 
-              : 'glass-surface border-white/10 hover:border-orange-500/40'
-          }">
-          ${isSelected ? '<div class="absolute top-0 right-0 bg-gradient-to-l from-orange-600 to-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-2xl shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> รายการที่เลือก</div>' : ''}
+      return '<div onclick="switchCampaignWithAnimation(\'' + camp.id + '\', event)" ' +
+        'class="p-4 rounded-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer subtle-hover group ' +
+        (isSelected 
+          ? 'glass-surface cyber-campaign-active border-orange-500 ring-1 ring-orange-500/40' 
+          : 'glass-surface border-white/10 hover:border-orange-500/40') + '">' +
+        (isSelected ? '<div class="absolute top-0 right-0 bg-gradient-to-l from-orange-600 to-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-md flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> รายการที่เลือก</div>' : '') +
+        
+        '<div class="space-y-2">' +
+          '<div class="flex items-start justify-between gap-2">' +
+            '<span class="text-[10px] font-extrabold uppercase tracking-wider text-orange-400 bg-orange-500/15 px-2.5 py-0.5 rounded-full border border-orange-500/30">' + (camp.category || 'กิจกรรม') + '</span>' +
+            '<div class="pt-0.5">' + statusPill + '</div>' +
+          '</div>' +
+          '<h3 class="font-black text-sm text-white line-clamp-1 group-hover:text-orange-400 transition-colors pt-0.5">' + camp.title + '</h3>' +
+          '<p class="text-xs text-slate-400 line-clamp-1">' + (camp.subtitle || 'คณะศึกษาศาสตร์ มข.') + '</p>' +
           
-          <div>
-            <div class="flex items-start justify-between gap-2 mb-2">
-              <span class="text-[10px] font-extrabold uppercase tracking-wider text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-200">${camp.category || 'กิจกรรม'}</span>
-              <div class="pt-0.5">${statusPill}</div>
-            </div>
-            <h3 class="font-black text-sm sm:text-base text-slate-900 line-clamp-1 group-hover:text-orange-600 transition-colors">${camp.title}</h3>
-            <p class="text-xs text-slate-500 line-clamp-1 mt-0.5">${camp.subtitle || 'คณะศึกษาศาสตร์ มข.'}</p>
-            
-            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span class="font-bold text-slate-400 text-[11px]">ยอดชำระต่อคน</span>
-              <span class="font-black text-orange-600 font-mono text-base">฿${Number(camp.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-            </div>
-          </div>
+          '<div class="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-xs">' +
+            '<span class="font-bold text-slate-400 text-[11px]">ยอดชำระต่อคน</span>' +
+            '<span class="font-black text-white font-mono text-base tracking-tight">฿' + Number(camp.amount).toLocaleString(undefined, {minimumFractionDigits: 2}) + '</span>' +
+          '</div>' +
+        '</div>' +
 
-          <div class="mt-3.5 pt-2.5 border-t border-slate-100 grid grid-cols-2 gap-2" onclick="event.stopPropagation()">
-            <a href="${payLink}" 
-              onclick="switchCampaignWithAnimation('${camp.id}', event, 'auto=pay')"
-              class="py-2 px-3 rounded-2xl text-xs font-black text-center flex items-center justify-center gap-1.5 transition active:scale-95 ${
-                isSelected 
-                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md shadow-orange-500/25' 
-                  : 'bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200'
-              }">
-              <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
-              <span>ชำระเงิน</span>
-            </a>
-            <a href="${checkLink}" 
-              onclick="switchCampaignWithAnimation('${camp.id}', event, 'tab=status')"
-              class="py-2 px-3 rounded-2xl text-xs font-bold text-center flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 transition active:scale-95">
-              <i data-lucide="users" class="w-3.5 h-3.5 text-slate-500"></i>
-              <span>เช็ครายชื่อ</span>
-            </a>
-          </div>
-        </div>
-      `;
+        '<div class="mt-3 pt-2.5 border-t border-white/10 grid grid-cols-2 gap-2" onclick="event.stopPropagation()">' +
+          '<a href="' + payLink + '" ' +
+            'onclick="switchCampaignWithAnimation(\'' + camp.id + '\', event, \'auto=pay\')" ' +
+            'class="py-2 px-3 rounded-xl text-xs font-black text-center flex items-center justify-center gap-1.5 transition active:scale-95 ' +
+            (isSelected 
+              ? 'cyber-btn-primary shadow-md shadow-orange-500/25' 
+              : 'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10') + '">' +
+            '<i data-lucide="credit-card" class="w-3.5 h-3.5"></i>' +
+            '<span>ชำระเงิน</span>' +
+          '</a>' +
+          '<a href="' + checkLink + '" ' +
+            'onclick="switchCampaignWithAnimation(\'' + camp.id + '\', event, \'tab=status\')" ' +
+            'class="py-2 px-3 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition active:scale-95">' +
+            '<i data-lucide="users" class="w-3.5 h-3.5 text-slate-400"></i>' +
+            '<span>เช็ครายชื่อ</span>' +
+          '</a>' +
+        '</div>' +
+      '</div>';
     }).join('');
   }
 
