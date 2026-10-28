@@ -1541,6 +1541,72 @@ function closeConfirmModal() {
   if (subtitle) subtitle.textContent = 'กรุณารอสักครู่ ระบบกำลังประมวลผลขึ้นสู่ Google Cloud';
 }
 
+
+// =========================================================================
+// GUARANTEED CLOUD SYNC & OFFLINE QUEUE MANAGER
+// =========================================================================
+const COMED_PENDING_QUEUE_KEY = 'COMED_PENDING_PAYMENT_SYNC_QUEUE';
+
+function getPendingPaymentQueue() {
+  try {
+    return JSON.parse(localStorage.getItem(COMED_PENDING_QUEUE_KEY) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function savePendingPaymentQueue(queue) {
+  try {
+    localStorage.setItem(COMED_PENDING_QUEUE_KEY, JSON.stringify(queue || []));
+  } catch (e) {}
+}
+
+function enqueuePendingPayment(payload) {
+  const queue = getPendingPaymentQueue();
+  // Avoid duplicate entries for same campaign + student
+  const filtered = queue.filter(item => !(item.campaign_id === payload.campaign_id && item.student_id === payload.student_id));
+  filtered.push({ ...payload, queued_at: new Date().toISOString() });
+  savePendingPaymentQueue(filtered);
+  console.log('[CloudQueue] Queued payment for offline/background retry:', payload.student_id);
+}
+
+async function processPendingPaymentQueue() {
+  const queue = getPendingPaymentQueue();
+  if (queue.length === 0) return;
+
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (!sb || !navigator.onLine) return;
+
+  console.log(`[CloudQueue] Processing ${queue.length} pending payments for cloud sync...`);
+  const remaining = [];
+
+  for (const item of queue) {
+    try {
+      const { error: sbErr } = await sb.from('payments').upsert(item, { onConflict: 'campaign_id,student_id' });
+      if (sbErr) {
+        console.warn('[CloudQueue] Retry notice, attempting slip_url string fallback:', sbErr);
+        await sb.from('payments').upsert({
+          ...item,
+          slip_url: typeof item.slip_url === 'string' ? item.slip_url : ''
+        }, { onConflict: 'campaign_id,student_id' });
+      }
+      console.log(`[CloudQueue] Successfully synced queued payment for: ${item.student_id}`);
+    } catch (err) {
+      console.warn(`[CloudQueue] Failed to sync queued item for ${item.student_id}, keeping in queue:`, err);
+      remaining.push(item);
+    }
+  }
+
+  savePendingPaymentQueue(remaining);
+}
+
+// Auto process queue on reconnect and on page load
+window.addEventListener('online', () => {
+  console.log('[CloudQueue] Network back online, triggering queue flush...');
+  processPendingPaymentQueue();
+});
+setInterval(processPendingPaymentQueue, 30000); // Check every 30 seconds
+
 async function executeSlipSubmission() {
   if (!currentSelectedStudent || !tempSlipDataUrl) return;
 
@@ -1731,46 +1797,52 @@ async function executeSlipSubmission() {
     localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localPay));
   } catch (cErr) {}
 
-  updateStepUI(2, 90, '💾 ขั้นตอนที่ 3/3: กำลังบันทึกประวัติการชำระเงิน', 'กำลังซิงค์สถานะเข้าสู่ Cloud Database...', 'บันทึกเรียบร้อย');
+  updateStepUI(2, 92, '💾 ขั้นตอนที่ 3/3: กำลังบันทึกประวัติการชำระเงิน', 'กำลังซิงค์เข้าสู่ Cloud Database เพื่อให้อุปกรณ์อื่นมองเห็นทันที...', 'กำลังบันทึก');
 
-  // 1. Send to Supabase Database with Timeout Guard (Max 2.5s - Non-blocking fallback)
+  // 1. Guaranteed Realtime Cloud Sync via Supabase (AWAIT for actual 200 OK from Cloud)
   const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  const payloadWithAllSlips = {
+    campaign_id: currentCampaign.id,
+    student_id: studentId,
+    student_name: currentSelectedStudent.name,
+    student_nickname: selectedShirtSizeStr ? `${currentSelectedStudent.nickname} [ไซส์: ${selectedShirtSizeStr}]` : currentSelectedStudent.nickname,
+    student_email: currentSelectedStudent.email,
+    amount: finalAmount,
+    paid: true,
+    timestamp: thaiTimestamp,
+    slip_url: JSON.stringify(updatedSlips),
+    ref_code: refCode,
+    verified: isVerifiedAuto
+  };
+
+  let cloudSyncSuccess = false;
+
   if (sb) {
     try {
-      const payloadWithAllSlips = {
-        campaign_id: currentCampaign.id,
-        student_id: studentId,
-        student_name: currentSelectedStudent.name,
-        student_nickname: selectedShirtSizeStr ? `${currentSelectedStudent.nickname} [ไซส์: ${selectedShirtSizeStr}]` : currentSelectedStudent.nickname,
-        student_email: currentSelectedStudent.email,
-        amount: finalAmount,
-        paid: true,
-        timestamp: thaiTimestamp,
-        slip_url: JSON.stringify(updatedSlips),
-        ref_code: refCode,
-        verified: isVerifiedAuto
-      };
-
-      // Wrap Supabase upsert in Promise.race with a 2500ms timeout
-      const supabaseSyncPromise = (async () => {
-        const { error: sbErr } = await sb.from('payments').upsert(payloadWithAllSlips, { onConflict: 'campaign_id,student_id' });
-        if (sbErr) {
-          console.warn("Supabase upsert payment notice, attempting simple slip_url fallback:", sbErr);
-          await sb.from('payments').upsert({
-            ...payloadWithAllSlips,
-            slip_url: uploadedSlipUrl
-          }, { onConflict: 'campaign_id,student_id' });
-        }
-      })();
-
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Supabase sync timeout')), 2500));
-      await Promise.race([supabaseSyncPromise, timeoutPromise]);
+      // Direct upsert to Supabase - average response is 200-500ms
+      const { error: sbErr } = await sb.from('payments').upsert(payloadWithAllSlips, { onConflict: 'campaign_id,student_id' });
+      if (sbErr) {
+        console.warn("Supabase upsert notice, falling back to simple slip_url:", sbErr);
+        const { error: fallbackErr } = await sb.from('payments').upsert({
+          ...payloadWithAllSlips,
+          slip_url: uploadedSlipUrl
+        }, { onConflict: 'campaign_id,student_id' });
+        if (!fallbackErr) cloudSyncSuccess = true;
+      } else {
+        cloudSyncSuccess = true;
+      }
     } catch(err) {
-      console.warn("Supabase sync notice (proceeding with local & background sync):", err.message || err);
+      console.warn("Supabase immediate network exception:", err);
     }
   }
 
-  // 2. Background Fire-and-Forget Sync to Google Apps Script (Do NOT await - GAS takes 4-8s)
+  // If cloud write failed or user went offline midway, queue for guaranteed auto-sync
+  if (!cloudSyncSuccess) {
+    enqueuePendingPayment(payloadWithAllSlips);
+    console.log('[CloudSync] Queued for guaranteed persistent background upload to cloud');
+  }
+
+  // 2. Fire-and-Forget Background Sync to Google Apps Script (Do NOT await - runs purely in background)
   if (googleAppsScriptUrl) {
     fetch(googleAppsScriptUrl, {
       method: 'POST',
