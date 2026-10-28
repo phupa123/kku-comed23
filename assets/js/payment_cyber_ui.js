@@ -359,7 +359,7 @@
     const st = window.currentSelectedStudent;
     const rec = st && window.paymentRecords ? window.paymentRecords[st.id] : null;
     const isPaid = rec && rec.paid;
-    const amount = (window.currentCampaign && window.currentCampaign.amount) || 190;
+    const amount = (window.currentCampaign && window.currentCampaign.amount) !== undefined ? window.currentCampaign.amount : (window.TARGET_PAYMENT_PER_PERSON || 390);
 
     if (!st) {
       // Empty state prompt

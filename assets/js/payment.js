@@ -446,23 +446,28 @@ function applyCampaignDetailsToUI() {
   }
 
   // Bank Info Update
-  const bTitle = document.getElementById('bankDetailTitle');
-  const bAmt = document.getElementById('bankDetailAmount');
-  const bBank = document.getElementById('bankDetailBankName');
-  const bAccNum = document.getElementById('bankDetailAccountNum');
-  const bAccName = document.getElementById('bankDetailAccountName');
-  const bAmtHi = document.getElementById('bankAmountHighlight');
-
-  if (bTitle) bTitle.textContent = `${c.title} (COMED KKU 69)`;
-  if (bAmt) bAmt.textContent = `฿${Number(c.amount).toFixed(2)} บาท / คน`;
-  if (bBank) bBank.textContent = c.bankName || "ธนาคารกสิกรไทย (KPlus)";
-  if (bAccNum) bAccNum.textContent = c.accountNumber || "236-2-47817-3";
-  if (bAccName) bAccName.textContent = c.accountName || "น.ส. พิชามญธุ์ สามสี";
-  if (bAmtHi) bAmtHi.textContent = `฿${Number(c.amount).toLocaleString()} บาท`;
+  // Bank Info Update (Sync to all occurrences in DOM)
+  document.querySelectorAll('#bankDetailTitle, [data-bank-sync="title"]').forEach(el => {
+    el.textContent = `${c.title} (COMED KKU 69)`;
+  });
+  document.querySelectorAll('#bankDetailAmount, [data-bank-sync="amount"]').forEach(el => {
+    el.textContent = `฿${Number(c.amount).toFixed(2)} บาท / คน`;
+  });
+  document.querySelectorAll('#bankDetailBankName, [data-bank-sync="bank"]').forEach(el => {
+    el.textContent = c.bankName || "ธนาคารกสิกรไทย (KPlus)";
+  });
+  document.querySelectorAll('#bankDetailAccountNum, [data-bank-sync="accNum"]').forEach(el => {
+    el.textContent = c.accountNumber || "236-2-47817-3";
+  });
+  document.querySelectorAll('#bankDetailAccountName, [data-bank-sync="accName"]').forEach(el => {
+    el.textContent = c.accountName || "น.ส. พิชามญธุ์ สามสี";
+  });
+  document.querySelectorAll('#bankAmountHighlight').forEach(el => {
+    el.textContent = `฿${Number(c.amount).toLocaleString()} บาท`;
+  });
   const dzAmt = document.getElementById('slipDropZoneTargetAmount');
   if (dzAmt) dzAmt.textContent = `฿${Number(c.amount).toFixed(2)} บาท`;
 
-  // Dynamic QR Code Generation (Auto Locked PromptPay vs Custom Image)
   renderCurrentCampaignQrCode(c.amount);
 
   // Render Shirt Showcase UI (If banner or shirt sizes available)

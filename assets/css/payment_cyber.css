@@ -291,3 +291,31 @@ html, body {
 ::-webkit-scrollbar-track { background: #06070A; }
 ::-webkit-scrollbar-thumb { background: #242A4A; border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: #E65A19; }
+
+/* 12. Contrast enhancement for light-themed container elements inside obsidian mode */
+#studentProfileCard {
+  background: rgba(12, 16, 28, 0.95) !important;
+  border-color: rgba(230, 90, 25, 0.4) !important;
+  color: #F8FAFC !important;
+}
+
+#studentProfileCard .bg-white\/80, 
+#studentProfileCard .bg-white {
+  background: rgba(20, 26, 46, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+#studentProfileCard .text-slate-900,
+#studentProfileCard .text-slate-800 {
+  color: #FFFFFF !important;
+}
+
+#studentProfileCard .text-slate-600,
+#studentProfileCard .text-slate-500 {
+  color: #94A3B8 !important;
+}
+
+#studentProfileCard .border-slate-200,
+#studentProfileCard .border-slate-200\/80 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
