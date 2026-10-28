@@ -1731,14 +1731,12 @@ async function executeSlipSubmission() {
     localStorage.setItem('COMED_LOCAL_PAYMENTS', JSON.stringify(localPay));
   } catch (cErr) {}
 
-  updateStepUI(2, 88, '💾 ขั้นตอนที่ 3/3: กำลังบันทึกประวัติการชำระเงิน', 'กำลังซิงค์สถานะเข้าสู่ Supabase Database...', 'บันทึกเรียบร้อย');
+  updateStepUI(2, 90, '💾 ขั้นตอนที่ 3/3: กำลังบันทึกประวัติการชำระเงิน', 'กำลังซิงค์สถานะเข้าสู่ Cloud Database...', 'บันทึกเรียบร้อย');
 
-  // 1. Send to Supabase Database (Realtime Cloud Database)
+  // 1. Send to Supabase Database with Timeout Guard (Max 2.5s - Non-blocking fallback)
   const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
   if (sb) {
     try {
-      // Primary payload: store serialized updatedSlips directly inside slip_url so that
-      // even if Supabase table schema lacks a dedicated 'slips' column, all multi-slips are 100% preserved
       const payloadWithAllSlips = {
         campaign_id: currentCampaign.id,
         student_id: studentId,
@@ -1753,32 +1751,35 @@ async function executeSlipSubmission() {
         verified: isVerifiedAuto
       };
 
-      const { error: sbErr } = await sb.from('payments').upsert(payloadWithAllSlips, { onConflict: 'campaign_id,student_id' });
-      if (sbErr) {
-        console.warn("Supabase upsert payment notice, attempting simple slip_url fallback:", sbErr);
-        // Fallback: simple primary string url
-        await sb.from('payments').upsert({
-          ...payloadWithAllSlips,
-          slip_url: uploadedSlipUrl
-        }, { onConflict: 'campaign_id,student_id' });
-      }
+      // Wrap Supabase upsert in Promise.race with a 2500ms timeout
+      const supabaseSyncPromise = (async () => {
+        const { error: sbErr } = await sb.from('payments').upsert(payloadWithAllSlips, { onConflict: 'campaign_id,student_id' });
+        if (sbErr) {
+          console.warn("Supabase upsert payment notice, attempting simple slip_url fallback:", sbErr);
+          await sb.from('payments').upsert({
+            ...payloadWithAllSlips,
+            slip_url: uploadedSlipUrl
+          }, { onConflict: 'campaign_id,student_id' });
+        }
+      })();
+
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Supabase sync timeout')), 2500));
+      await Promise.race([supabaseSyncPromise, timeoutPromise]);
     } catch(err) {
-      console.warn("Supabase insert payment warning:", err);
+      console.warn("Supabase sync notice (proceeding with local & background sync):", err.message || err);
     }
   }
 
-  // 2. Send to Google Apps Script (Cloud)
+  // 2. Background Fire-and-Forget Sync to Google Apps Script (Do NOT await - GAS takes 4-8s)
   if (googleAppsScriptUrl) {
-    try {
-      await fetch(googleAppsScriptUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    } catch (e) {
-      console.warn("Cloud Sync warning", e);
-    }
+    fetch(googleAppsScriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(e => {
+      console.warn("Background GAS sync warning", e);
+    });
   }
 
   // 2. Send to Local Backend Server (if running on localhost)
