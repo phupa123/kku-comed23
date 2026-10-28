@@ -1878,11 +1878,68 @@ function openDeleteCurrentSlipModal(slipIndex = -1) {
   openDeleteSlipForStudent(currentSelectedStudent.id, slipIndex);
 }
 
+// Security Guard: Check if current logged-in user is the owner of the slip or an admin
+function canUserManageSlip(targetStudentId) {
+  const cleanTargetId = (targetStudentId || '').replace(/[-\s]/g, '').trim().toLowerCase();
+
+  // 1. Check Super Admin / Admin whitelist via sessionStorage or localStorage
+  const adminEmail = (sessionStorage.getItem('COMED_KKU69_ADMIN_LOGGED_USER') || '').toLowerCase().trim();
+  const superAdmins = ['thitiwut.a@kkumail.com', 'phupa5874@gmail.com', 'pichamon.sam@kkumail.com', 'nattachai.p@kkumail.com'];
+  if (adminEmail && superAdmins.includes(adminEmail)) return { allowed: true, reason: 'admin' };
+
+  // 2. Check User Session (Google Login with @kkumail.com)
+  const sessionStr = localStorage.getItem('COMED_USER_SESSION');
+  if (sessionStr) {
+    try {
+      const user = JSON.parse(sessionStr);
+      const userEmail = (user.email || '').toLowerCase().trim();
+      const userStudentId = (user.studentId || '').replace(/[-\s]/g, '').trim().toLowerCase();
+
+      // If user is Admin tester
+      if (user.isSpecialTester || superAdmins.includes(userEmail)) {
+        return { allowed: true, reason: 'admin' };
+      }
+
+      // Check if logged-in student ID matches target student ID
+      if (userStudentId && userStudentId === cleanTargetId) {
+        return { allowed: true, reason: 'owner' };
+      }
+
+      // Check by student email
+      const targetStudent = (typeof students !== 'undefined' ? students : []).find(s => s.id.replace(/[-\s]/g, '').trim().toLowerCase() === cleanTargetId);
+      if (targetStudent && targetStudent.email && targetStudent.email.toLowerCase().trim() === userEmail) {
+        return { allowed: true, reason: 'owner' };
+      }
+
+      return { allowed: false, reason: 'not_owner', user: user };
+    } catch(e) {}
+  }
+
+  // Not logged in or not owner
+  return { allowed: false, reason: 'not_logged_in' };
+}
+
+window.canUserManageSlip = canUserManageSlip;
+
 function openDeleteSlipForStudent(studentId, slipIndex = -1) {
   const st = (typeof students !== 'undefined' ? students : []).find(s => s.id === studentId);
   const rec = paymentRecords[studentId];
   if (!rec) {
     showFrontendToast("ไม่พบข้อมูลหลักฐานการชำระเงินของนักศึกษารายนี้");
+    return;
+  }
+
+  // Security Check: Verify Ownership
+  const authCheck = canUserManageSlip(studentId);
+  if (!authCheck.allowed) {
+    if (authCheck.reason === 'not_logged_in') {
+      alert("🔒 ความปลอดภัย: คุณต้องเข้าสู่ระบบบัญชี KKU Mail ก่อน จึงจะสามารถจัดการหรือลบไฟล์สลิปของตนเองได้\n\n(ป้องกันผู้อื่นลบสลิปโดยไม่ได้รับอนุญาต)");
+      if (typeof openGoogleLoginModal === 'function') {
+        openGoogleLoginModal();
+      }
+    } else {
+      alert(`⛔ ปฏิเสธการเข้าถึง!\n\nคุณเข้าสู่ระบบด้วยบัญชี: ${authCheck.user?.name || authCheck.user?.email || 'นักศึกษาอื่น'}\nคุณไม่มีสิทธิ์ลบสลิปของ "${st ? st.name : studentId}"\n\nเฉพาะเจ้าของสลิปหรือผู้ดูแลระบบเท่านั้นที่สามารถลบไฟล์นี้ได้`);
+    }
     return;
   }
 

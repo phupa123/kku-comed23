@@ -14,8 +14,8 @@
     return String(str)
       .toLowerCase()
       .trim()
-      .replace(/[​-‍﻿]/g, '') // zero-width
-      .replace(/[-s_.,/]/g, ''); // strip hyphens, spaces, dots
+      .replace(/[\u200B-\u200D\uFEFF]/g, '') // zero-width
+      .replace(/[-\s_.,/]/g, ''); // strip hyphens, spaces, dots
   }
 
   function matchStudentSmart(st, rawQuery) {
@@ -65,7 +65,6 @@
     }
     return [];
   }
-
 
   let currentViewMode = localStorage.getItem('COMED_PAYMENT_VIEW_MODE') || 'cards'; // 'cards' | 'table'
 
@@ -160,11 +159,10 @@
     });
 
     const counter = document.getElementById('cyberRosterCounter');
-    if (counter) counter.textContent = `แสดง ${filtered.length} จาก 60 คน`;
+    if (counter) counter.textContent = `แสดง ${filtered.length} จาก ${studentList.length} คน`;
 
     cardsGrid.innerHTML = filtered.map((st, idx) => {
       const isPaid = window.paymentRecords && window.paymentRecords[st.id] && window.paymentRecords[st.id].paid;
-      const rec = window.paymentRecords ? window.paymentRecords[st.id] : null;
       const avatarUrl = st.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(st.name)}&background=1e293b&color=fdba74&bold=true`;
 
       let statusBadge = isPaid
@@ -182,11 +180,11 @@
               <img src="${avatarUrl}" alt="${st.name}" class="w-full h-full object-cover rounded-xl" loading="lazy">
             </div>
             <div class="min-w-0 flex-1">
-              <h4 class="font-bold text-white text-xs sm:text-sm truncate group-hover:text-orange-300 transition-colors">${st.name}</h4>
-              <div class="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 mt-0.5">
+              <h4 class="font-bold text-white text-xs sm:text-sm group-hover:text-orange-300 transition-colors break-words leading-snug">${st.name}</h4>
+              <div class="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 mt-1 flex-wrap">
                 <span class="text-amber-300 font-bold">น้อง${st.nickname}</span>
                 <span>•</span>
-                <span class="truncate">${st.id}</span>
+                <span>${st.id}</span>
               </div>
             </div>
           </div>
@@ -211,8 +209,37 @@
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
-  // 2. COMED KKU Redesign: Quick Student Search List in Column 3
-  function renderQuickStudentList(query = '') {
+  // 2. COMED KKU Redesign: Quick Student Search List in Column 3 with Infinite Scroll
+  let currentFilteredList = [];
+  let currentVisibleCount = 15;
+  let isLoadingMore = false;
+  let scrollListenerAttached = false;
+
+  function renderStudentListItemHtml(st, currentSelectedId) {
+    const isPaid = window.paymentRecords && window.paymentRecords[st.id] && window.paymentRecords[st.id].paid;
+    const isSelected = st.id === currentSelectedId;
+
+    return `
+      <div onclick="window.PaymentCyberUI.selectStudentQuick('${st.id}')"
+        class="p-2.5 sm:p-3 rounded-2xl cyber-student-list-item cursor-pointer flex items-center justify-between gap-3 ${isSelected ? 'selected' : ''}">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="font-bold text-xs sm:text-sm text-white break-words leading-tight">${st.name}</span>
+            <span class="text-[10px] text-amber-300 font-bold flex-shrink-0">(${st.nickname})</span>
+          </div>
+          <span class="font-mono text-[10px] text-slate-400 block mt-0.5">${st.id}</span>
+        </div>
+        <div class="flex-shrink-0">
+          ${isPaid
+            ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">จ่ายแล้ว</span>`
+            : `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">ยังไม่จ่าย</span>`
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  function renderQuickStudentList(query = '', resetPagination = true) {
     const container = document.getElementById('studentQuickListContainer');
     const studentList = getStudentsList();
     if (!container || studentList.length === 0) return;
@@ -220,52 +247,77 @@
     const q = (query || '').toLowerCase().trim();
     const currentSelectedId = window.currentSelectedStudent ? window.currentSelectedStudent.id : '';
 
-    const list = studentList.filter(st => {
-      return matchStudentSmart(st, q);
-    });
+    if (resetPagination) {
+      currentFilteredList = studentList.filter(st => matchStudentSmart(st, q));
+      currentVisibleCount = 15; // Initial batch
+    }
 
     const matchCounter = document.getElementById('searchMatchCounter');
-    if (matchCounter) matchCounter.textContent = `${list.length} คน`;
+    if (matchCounter) matchCounter.textContent = `${currentFilteredList.length} คน`;
 
-    // Take top 8 matching if empty query, or all filtered
-    const displayList = q ? list : list.slice(0, 10);
-
-    if (displayList.length === 0) {
+    if (currentFilteredList.length === 0) {
       container.innerHTML = `
-        <div class="p-4 text-center text-xs text-slate-400 bg-white/[0.02] rounded-xl border border-white/5">
-          <i data-lucide="user-x" class="w-5 h-5 mx-auto mb-1 text-slate-500"></i>
-          <span>ไม่พบข้อมูลนักศึกษาที่ค้นหา</span>
+        <div class="p-6 text-center text-xs text-slate-400 bg-white/[0.02] rounded-2xl border border-white/5 space-y-1.5">
+          <i data-lucide="user-x" class="w-6 h-6 mx-auto text-slate-500"></i>
+          <span class="block font-bold">ไม่พบข้อมูลนักศึกษาที่ค้นหา</span>
+          <span class="text-[10px] text-slate-500">ลองพิมพ์ชื่อเล่น รหัสนักศึกษา หรืออีเมล</span>
         </div>
       `;
       if (typeof lucide !== 'undefined') lucide.createIcons();
       return;
     }
 
-    container.innerHTML = displayList.map(st => {
-      const isPaid = window.paymentRecords && window.paymentRecords[st.id] && window.paymentRecords[st.id].paid;
-      const isSelected = st.id === currentSelectedId;
+    const visibleItems = currentFilteredList.slice(0, currentVisibleCount);
+    let html = visibleItems.map(st => renderStudentListItemHtml(st, currentSelectedId)).join('');
 
-      return `
-        <div onclick="window.PaymentCyberUI.selectStudentQuick('${st.id}')"
-          class="p-2 sm:p-2.5 rounded-xl cyber-student-list-item cursor-pointer flex items-center justify-between gap-2.5 ${isSelected ? 'selected' : ''}">
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-1.5">
-              <span class="font-bold text-xs sm:text-sm text-white truncate">${st.name}</span>
-              <span class="text-[10px] text-amber-300 font-bold flex-shrink-0">(${st.nickname})</span>
-            </div>
-            <span class="font-mono text-[10px] text-slate-400 block">${st.id}</span>
-          </div>
-          <div>
-            ${isPaid
-              ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex-shrink-0">จ่ายแล้ว</span>`
-              : `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 flex-shrink-0">ยังไม่จ่าย</span>`
-            }
-          </div>
+    // Append loading spinner if there are more students to load
+    if (currentVisibleCount < currentFilteredList.length) {
+      html += `
+        <div id="quickListLoadingIndicator" class="p-3 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+          <svg class="animate-spin w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+          </svg>
+          <span class="font-mono text-[11px]">เลื่อนลงเพื่อดูเพิ่มเติม (${currentVisibleCount}/${currentFilteredList.length})...</span>
         </div>
       `;
-    }).join('');
+    }
 
+    container.innerHTML = html;
     if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Attach infinite scroll listener once
+    if (!scrollListenerAttached) {
+      container.addEventListener('scroll', handleQuickListScroll);
+      scrollListenerAttached = true;
+    }
+  }
+
+  function handleQuickListScroll(e) {
+    const container = e.target;
+    if (isLoadingMore) return;
+    if (currentVisibleCount >= currentFilteredList.length) return;
+
+    // Check if scrolled near bottom (within 40px)
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 40) {
+      isLoadingMore = true;
+      const indicator = document.getElementById('quickListLoadingIndicator');
+      if (indicator) {
+        indicator.innerHTML = `
+          <svg class="animate-spin w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+          </svg>
+          <span class="font-bold text-orange-300 text-[11px]">กำลังโหลดรายชื่อเพิ่มเติม...</span>
+        `;
+      }
+
+      setTimeout(() => {
+        currentVisibleCount = Math.min(currentVisibleCount + 15, currentFilteredList.length);
+        renderQuickStudentList(document.getElementById('smartSearchInput')?.value || '', false);
+        isLoadingMore = false;
+      }, 150);
+    }
   }
 
   // Quick Select Student from List or Roster
@@ -283,14 +335,20 @@
       window.switchMainTab('payment');
     }
 
-    renderQuickStudentList(document.getElementById('smartSearchInput')?.value || '');
+    renderQuickStudentList(document.getElementById('smartSearchInput')?.value || '', false);
     updateDashboardUploadCard();
 
-    // Scroll upload card into view smoothly on mobile
-    if (window.innerWidth < 1024) {
+    // Smoothly scroll both Dashboard Upload Card and Detailed Profile Card into view
+    setTimeout(() => {
       const uploadCard = document.getElementById('dashboardUploadCard');
-      if (uploadCard) uploadCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+      const profileCard = document.getElementById('studentProfileCard');
+
+      if (profileCard && !profileCard.classList.contains('hidden')) {
+        profileCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (uploadCard) {
+        uploadCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   }
 
   // 3. Render Dashboard Upload Card matching Mockup Bottom-Right
@@ -329,12 +387,12 @@
 
       card.innerHTML = `
         <div class="space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-white/10">
-            <div>
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 gap-2">
+            <div class="min-w-0 flex-1">
               <span class="text-[10px] text-slate-400 block font-medium">หลักฐานการชำระเงิน</span>
-              <h4 class="text-sm font-black text-white">${st.name} (${st.nickname})</h4>
+              <h4 class="text-sm font-black text-white break-words">${st.name} (${st.nickname})</h4>
             </div>
-            <span class="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+            <span class="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 flex-shrink-0">
               <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
               <span>สำเร็จ (Paid)</span>
             </span>
@@ -356,7 +414,7 @@
               <i data-lucide="eye" class="w-3.5 h-3.5"></i>
               <span>ดูสลิป</span>
             </button>
-            <button type="button" onclick="openDeleteCurrentSlipModal()"
+            <button type="button" onclick="openDeleteSlipForStudent('${st.id}')"
               class="flex-1 py-2.5 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
               <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
               <span>ลบสลิปนี้</span>
@@ -368,12 +426,12 @@
       // Unpaid state with QR Code preview & Big Solid Orange Button matching mockup
       card.innerHTML = `
         <div class="space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-white/10">
-            <div>
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 gap-2">
+            <div class="min-w-0 flex-1">
               <span class="text-[10px] text-slate-400 block font-medium">อัปโหลดหลักฐานสลิป</span>
-              <h4 class="text-sm font-black text-white">${st.name} (${st.nickname})</h4>
+              <h4 class="text-sm font-black text-white break-words">${st.name} (${st.nickname})</h4>
             </div>
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-orange-500/15 text-orange-400 border border-orange-500/30">฿${amount}.00</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-orange-500/15 text-orange-400 border border-orange-500/30 flex-shrink-0">฿${amount}.00</span>
           </div>
 
           <!-- QR Code Trigger & Slip Dropzone slot -->
@@ -434,7 +492,6 @@
   }
 
   // Hook into App Lifecycle
-  
   function startCyberUI() {
     initCyberViewSwitcher();
     renderQuickStudentList(document.getElementById('smartSearchInput')?.value || '');
@@ -477,7 +534,7 @@
       const prevSelect = window.selectStudent;
       window.selectStudent = function(st) {
         prevSelect(st);
-        renderQuickStudentList(document.getElementById('smartSearchInput')?.value || '');
+        renderQuickStudentList(document.getElementById('smartSearchInput')?.value || '', false);
         updateDashboardUploadCard();
       };
       window.selectStudent._isCyberPatched = true;
@@ -497,7 +554,7 @@
         if (paidEl && targetEl && badgeEl) {
           const paidNum = paidEl.textContent || '0';
           const match = (targetEl.textContent || '').match(/\d+/);
-          const totalNum = match ? match[0] : '53';
+          const totalNum = match ? match[0] : '60';
           badgeEl.textContent = paidNum + ' / ' + totalNum + ' คน';
           if (ratioEl) ratioEl.textContent = paidNum + ' / ' + totalNum + ' คน';
         }

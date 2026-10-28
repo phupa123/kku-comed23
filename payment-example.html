@@ -57,8 +57,7 @@
   <script src="assets/js/cyber_particles.js"></script>
   <link rel="stylesheet" href="assets/css/payment_cyber.css?v=20261027_2255">
   <script src="assets/js/universal_intro.js"></script>
-  <script src="assets/js/payment_cyber_ui.js?v=20261027_2255"></script>
-
+  
   <!-- Global Early Binding for Slip Deletion -->
   <script>
     window.openDeleteCurrentSlipModal = function(idx) {
@@ -432,7 +431,7 @@
             </div>
 
             <!-- Quick Select Student List (Matching Mockup Right-Top List) -->
-            <div id="studentQuickListContainer" class="space-y-1.5 max-h-52 overflow-y-auto custom-scrollbar pr-0.5">
+            <div id="studentQuickListContainer" class="space-y-1.5 max-h-72 sm:max-h-80 overflow-y-auto custom-scrollbar pr-0.5">
               <!-- Dynamically populated with students and 'ยังไม่จ่าย' / 'จ่ายแล้ว' badges -->
             </div>
           </div>
@@ -446,28 +445,451 @@
 
       </div>
 
-      <!-- Hidden Data Elements Required for payment.js sync -->
+      <!-- Dedicated Full Detail Profile & Payment Submission Card -->
+      <div class="mt-6">
+        <div id="studentProfileCard"
+        class="hidden mobile-card premium-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-card-premium border-2 border-orange-200/80 transition-all">
+        <div class="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+
+          <!-- Top Profile Header -->
+          <div
+            class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-slate-200/80">
+            <div class="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
+              <div
+                class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-orange-600 via-amber-500 to-orange-400 flex items-center justify-center text-white text-2xl sm:text-3xl font-black shadow-lg shadow-orange-500/30 border-2 border-white flex-shrink-0">
+                <span id="profileAvatarText">ข</span>
+              </div>
+              <div class="flex-grow">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 id="profileFullName" class="text-lg sm:text-3xl font-black text-slate-900 tracking-tight">ชื่อ
+                    นามสกุล</h3>
+                  <span id="profileNickname"
+                    class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300/80 shadow-sm">
+                    ชื่อเล่น: -
+                  </span>
+                </div>
+                <div
+                  class="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-slate-500 mt-1 font-mono flex-wrap">
+                  <span id="profileStudentId" class="font-extrabold text-slate-800">693050XXX-X</span>
+                  <span class="text-slate-300">•</span>
+                  <span id="profileEmail" class="text-slate-600 text-[10px] sm:text-xs">xxx@kkumail.com</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Status Tag & Action -->
+            <div id="profileStatusBadgeContainer" class="w-full md:w-auto flex items-center gap-2 flex-wrap justify-between md:justify-end">
+              <!-- Injected dynamically: Paid or Unpaid -->
+            </div>
+          </div>
+
+          <!-- Academic Info Grid (Enhanced Design) -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 py-4 border-b border-slate-200/80 text-xs sm:text-sm">
+            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-slate-400 block text-xs mb-1 font-medium">คณะ</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                <i data-lucide="book-open" class="w-4 h-4 text-orange-500"></i>
+                คณะศึกษาศาสตร์
+              </span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-slate-400 block text-xs mb-1 font-medium">สาขาวิชาเอก</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                <i data-lucide="laptop" class="w-4 h-4 text-sky-500"></i>
+                คอมพิวเตอร์ศึกษา
+              </span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-slate-400 block text-xs mb-1 font-medium">ระดับ / ชั้นปี</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                <i data-lucide="award" class="w-4 h-4 text-emerald-500"></i>
+                ชั้นปีที่ 1 (COMED23 KKU63)
+              </span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-slate-400 block text-xs mb-1 font-medium">สถาบัน</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                <i data-lucide="landmark" class="w-4 h-4 text-amber-500"></i>
+                มหาวิทยาลัยขอนแก่น
+              </span>
+            </div>
+          </div>
+
+          <!-- DYNAMIC CONTENT: UNPAID STATE (PAYMENT & SLIP UPLOAD) -->
+          <div id="unpaidSection" class="pt-4 space-y-6">
+
+            <!-- Optional Shirt Size Selection for this Student (if campaign has sizes) -->
+            <div id="studentShirtSizeCard" class="hidden p-5 sm:p-6 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 rounded-3xl border-2 border-orange-200 shadow-sm space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <i data-lucide="shirt" class="w-5 h-5 text-orange-600"></i>
+                  <span>เลือกไซส์เสื้อสาขาวิชาเอกของคุณ <span class="text-rose-500">*จำเป็น</span></span>
+                </span>
+                <span class="text-xs font-bold text-orange-600 font-mono bg-white px-3 py-1 rounded-full border border-orange-200" id="studentSelectedSizePriceBadge">
+                  ฿290.00
+                </span>
+              </div>
+              <p class="text-xs text-slate-600">
+                กรุณาเลือกไซส์เสื้อที่ต้องการสั่งตัด (ระบบจะแนบไซส์นี้ไปพร้อมกับสลิปโอนเงินของคุณ)
+              </p>
+
+              <!-- Size Radio/Button Selector -->
+              <div id="studentSizeButtonsContainer" class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
+                <!-- Rendered dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- QR Payment Guide & Bank Info -->
+            <div
+              class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-emerald-50/80 via-white to-orange-50/60 p-6 sm:p-8 rounded-3xl border-2 border-emerald-200 shadow-md">
+
+              <!-- Real QR Code Image Display -->
+              <div
+                class="md:col-span-5 flex flex-col items-center justify-center p-5 bg-white rounded-2xl border border-slate-200 shadow-lg text-center relative group">
+                <span
+                  class="text-[11px] font-black text-emerald-800 mb-2.5 uppercase tracking-wider flex items-center gap-1.5 bg-emerald-100/90 px-3.5 py-1.5 rounded-full border border-emerald-300 shadow-xs">
+                  <i data-lucide="qr-code" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  <span>สแกนชำระเงินผ่าน K PLUS / ทุกธนาคาร</span>
+                </span>
+
+                <!-- Real QR Image Box with Click to Zoom -->
+                <div
+                  class="relative p-2.5 bg-gradient-to-b from-slate-50 to-white rounded-3xl border-2 border-emerald-500/30 shadow-md group cursor-pointer transition hover:border-emerald-500/60 hover:shadow-lg"
+                  onclick="openCurrentQrFullscreen()">
+                  <!-- QR Image — generated dynamically from ThaiQrEngine, no static fallback -->
+                  <div id="qrLoadingSpinner" class="w-64 h-64 flex items-center justify-center">
+                    <div class="flex flex-col items-center gap-3 text-slate-400">
+                      <svg class="animate-spin w-10 h-10" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      </svg>
+                      <span class="text-xs font-semibold">กำลังสร้าง QR Code...</span>
+                    </div>
+                  </div>
+                  <img id="bankQrImage" src="" alt="Thai QR Payment"
+                    class="w-64 max-w-full h-auto object-contain rounded-2xl shadow-xs transition-transform duration-300 group-hover:scale-102 hidden" loading="lazy" decoding="async">
+                  <div
+                    class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-xs font-bold transition-opacity rounded-3xl backdrop-blur-xs">
+                    <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-1.5 backdrop-blur-md">
+                      <i data-lucide="zoom-in" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span>แตะเพื่อดูรูป QR เต็มจอ</span>
+                  </div>
+                </div>
+
+                <!-- Modern Pill Badge for Locked Amount -->
+                <div class="mt-3.5 w-full bg-emerald-50/80 border border-emerald-200 rounded-2xl p-2.5 flex items-center justify-between text-xs text-slate-700">
+                  <span class="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-600"></i>
+                    <span>ยอดล็อคอัตโนมัติ:</span>
+                  </span>
+                  <strong id="bankAmountHighlight" class="text-emerald-700 text-base font-black">฿190.00 บาท</strong>
+                </div>
+
+                <!-- Direct Download QR Button -->
+                <div class="mt-2.5 w-full flex items-center justify-center gap-2">
+                  <button type="button" onclick="downloadCurrentQrImage()"
+                    class="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>บันทึกรูป QR Code ลงเครื่อง</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bank & Transfer Details -->
+              <div class="md:col-span-7 flex flex-col justify-between space-y-4">
+                <div>
+                  <h4 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 mb-3">
+                    <i data-lucide="building-2" class="w-5 h-5 text-emerald-600"></i>
+                    รายละเอียดบัญชีรับโอนเงิน
+                  </h4>
+                  <ul class="space-y-3 text-xs sm:text-sm text-slate-700">
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>รายการ:</strong> <span id="bankDetailTitle">ค่าทำป้ายสาขาวิชาเอกคอมพิวเตอร์ศึกษา (COMED23 KKU63)</span></span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>จำนวนเงิน:</strong> <span id="bankDetailAmount" class="font-black text-emerald-700 text-base">฿190.00 บาท / คน</span></span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>ธนาคาร:</strong> <span id="bankDetailBankName"
+                          class="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">ธนาคารกสิกรไทย (KBank / K PLUS)</span></span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>เลขที่บัญชี:</strong> <span id="bankDetailAccountNum"
+                          class="font-mono font-black text-emerald-950 bg-emerald-100/90 px-2.5 py-1 rounded-xl select-all border-2 border-emerald-300 tracking-wider text-sm sm:text-base">236-2-47817-3</span></span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>ชื่อบัญชี:</strong> <span id="bankDetailAccountName"
+                          class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">น.ส. พิชามญธุ์ สามสี</span></span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div
+                  class="p-3.5 bg-amber-100/90 border border-amber-300 rounded-2xl text-xs text-amber-950 flex items-center gap-2.5 shadow-sm">
+                  <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 flex-shrink-0"></i>
+                  <span>เมื่อโอนเงินเสร็จแล้ว กรุณาแนบรูปภาพสลิปด้านล่างเพื่อบันทึกประวัติเข้าระบบ</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Slip Area (ULTRA PROMINENT MODERN HERO DROPZONE) -->
+            <div class="space-y-4 pt-2">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <label class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2.5">
+                  <span
+                    class="flex items-center justify-center w-8 h-8 rounded-xl bg-orange-600 text-white shadow-md shadow-orange-600/30">
+                    <i data-lucide="receipt" class="w-4 h-4"></i>
+                  </span>
+                  <span>แนบสลิปหลักฐานการโอนเงิน</span>
+                  <span
+                    class="text-xs font-bold text-orange-600 bg-orange-100/80 px-2.5 py-0.5 rounded-full border border-orange-300">จำเป็น</span>
+                </label>
+                <span class="text-xs text-slate-500 font-medium">รองรับ PNG, JPG, JPEG (ไม่เกิน 10MB)</span>
+              </div>
+
+              <!-- Ultra Prominent Drag & Drop Zone with Glowing Border and Dynamic Depth -->
+              <div id="slipDropZone" onclick="document.getElementById('slipFileInput').click()"
+                ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"
+                class="relative overflow-hidden border-3 border-dashed border-orange-400 hover:border-orange-600 bg-gradient-to-b from-orange-50/80 via-amber-50/40 to-white hover:from-orange-100/90 hover:via-orange-50/60 hover:to-amber-50/50 rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-300 group shadow-xl hover:shadow-2xl shadow-orange-500/10 hover:shadow-orange-500/20 transform hover:-translate-y-0.5">
+                <!-- Subtle Background Decorative Ambient Glow -->
+                <div
+                  class="absolute -top-12 -right-12 w-40 h-40 bg-orange-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-500">
+                </div>
+                <div
+                  class="absolute -bottom-12 -left-12 w-40 h-40 bg-amber-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-500">
+                </div>
+
+                <input type="file" id="slipFileInput" accept="image/*" class="hidden"
+                  onchange="handleFileSelect(event)">
+
+                <div class="relative z-10 space-y-4">
+                  <!-- Animated Floating Icon Box -->
+                  <div
+                    class="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center transition-all duration-300 shadow-xl shadow-orange-500/30 group-hover:scale-110 group-hover:rotate-3">
+                    <i data-lucide="upload-cloud" class="w-10 h-10 sm:w-12 sm:h-12 animate-bounce"
+                      style="animation-duration: 2.5s;"></i>
+                  </div>
+
+                  <div class="space-y-1.5">
+                    <span
+                      class="text-lg sm:text-xl font-black text-slate-900 block group-hover:text-orange-700 transition-colors">
+                      คลิกเพื่อเลือกไฟล์สลิป หรือลากไฟล์รูปภาพมาวางที่นี่
+                    </span>
+                    <p class="text-xs sm:text-sm text-slate-600 font-medium max-w-md mx-auto">
+                      กรุณาแนบรูปภาพสลิปที่มียอดเงิน <span id="slipDropZoneTargetAmount" class="text-orange-600 font-black">฿190.00 บาท</span>
+                      ชัดเจนเพื่อความรวดเร็วในการตรวจสอบ
+                    </p>
+                  </div>
+
+                  <!-- Prominent CTA Pill Button -->
+                  <div
+                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-white border-2 border-orange-300 group-hover:border-orange-500 text-orange-600 font-black text-xs sm:text-sm shadow-md group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
+                    <i data-lucide="image-plus" class="w-4 h-4"></i>
+                    <span>เลือกไฟล์รูปภาพจากอุปกรณ์</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Medium Size Slip Preview (Before Submit) -->
+              <div id="slipPreviewContainer"
+                class="hidden bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="image" class="w-4 h-4 text-orange-600"></i>
+                    <span class="text-xs font-bold text-slate-700">ตัวอย่างภาพสลิปที่เลือก (คลิกเพื่อดูภาพใหญ่)</span>
+                  </div>
+                  <button type="button" onclick="cancelSelectedSlip()"
+                    class="text-xs text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    ลบ / เปลี่ยนรูป
+                  </button>
+                </div>
+
+                <!-- Medium Preview Box with Zoom Indicator -->
+                <div
+                  class="relative group max-w-sm mx-auto overflow-hidden rounded-2xl border border-slate-200 shadow-md bg-slate-900/5 cursor-pointer"
+                  onclick="openFullscreenModal(tempSlipDataUrl)">
+                  <img id="mediumSlipImg" src="" alt="ภาพสลิปตัวอย่าง"
+                    class="w-full h-72 object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" decoding="async">
+                  <div
+                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity duration-200">
+                    <i data-lucide="zoom-in" class="w-8 h-8 mb-1"></i>
+                    <span
+                      class="text-xs font-bold bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm">คลิกเพื่อดูรูปภาพขนาดเต็ม</span>
+                  </div>
+                </div>
+
+                <!-- Action Button to Trigger Confirmation Modal -->
+                <div class="pt-2 flex justify-end">
+                  <button type="button" onclick="openConfirmModal()"
+                    class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 hover:from-orange-700 hover:to-amber-700 text-white font-extrabold text-sm sm:text-base rounded-2xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 flex items-center justify-center gap-2 transition-all transform active:scale-98">
+                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                    <span>ตรวจสอบข้อมูลและยืนยันการอัปโหลด</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- DYNAMIC CONTENT: PAID STATE (RECEIPT & EVIDENCE) -->
+          <div id="paidSection" class="hidden pt-4 space-y-6">
+
+            <div
+              class="bg-gradient-to-br from-emerald-50 via-teal-50/40 to-emerald-50 rounded-3xl p-6 sm:p-8 border border-emerald-200 text-center space-y-3 shadow-sm">
+              <div
+                class="w-16 h-16 mx-auto rounded-3xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <i data-lucide="badge-check" class="w-9 h-9"></i>
+              </div>
+              <h4 id="paidNoticeTitle" class="text-2xl font-black text-emerald-950">ชำระเงินเรียบร้อยแล้ว</h4>
+              <p id="paidNoticeSubtitle" class="text-xs sm:text-sm text-emerald-700 max-w-md mx-auto">
+                ระบบได้บันทึกข้อมูลและยอดเงินเข้าสู่ฐานข้อมูลเรียบร้อยแล้ว
+            </div>
+
+            <!-- Receipt & Proof Details Box -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-5 shadow-sm">
+              <h5 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                <i data-lucide="file-text" class="w-4 h-4 text-orange-600"></i>
+                รายละเอียดหลักฐานการชำระเงิน
+              </h5>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+                <div class="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                  <div class="flex justify-between border-b border-slate-200/80 pb-2">
+                    <span class="text-slate-400">สถานะการชำระ:</span>
+                    <span class="font-black text-emerald-600 flex items-center gap-1">
+                      <i data-lucide="check" class="w-4 h-4"></i> สำเร็จ (Paid)
+                    </span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-200/80 pb-2">
+                    <span class="text-slate-400">ยอดเงิน:</span>
+                    <span id="paidAmountDisplay" class="font-black text-slate-900 text-base">฿190.00 บาท</span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-200/80 pb-2">
+                    <span class="text-slate-400">วัน-เวลาที่บันทึก:</span>
+                    <span id="paidTimestampText" class="font-mono font-bold text-slate-700">-</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">รหัสอ้างอิง:</span>
+                    <span id="paidRefCode" class="font-mono font-semibold text-slate-500">-</span>
+                  </div>
+                </div>
+
+                <!-- Proof Slip Action & Embedded Preview Box -->
+                <div class="flex flex-col p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-700">ภาพสลิปหลักฐาน:</span>
+                    <span id="paidSlipCounterBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-100 text-orange-800 border border-orange-200">1 ใบ</span>
+                  </div>
+                  <div id="paidSectionIframeWrapper"
+                    class="w-full h-72 sm:h-80 rounded-xl bg-white border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
+                    <span class="text-xs text-slate-400 font-medium">กำลังโหลดสลิป...</span>
+                  </div>
+                  <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                    <button type="button" onclick="downloadCurrentSlip()"
+                      class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer">
+                      <i data-lucide="download" class="w-4 h-4"></i>
+                      <span>ดาวน์โหลดสลิป</span>
+                    </button>
+                    <a id="paidSectionDriveLink" href="#" target="_blank" rel="noopener noreferrer"
+                      class="w-full sm:w-auto px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-md active:scale-95">
+                      <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                      <span>เปิดดูรูปเต็ม</span>
+                    </a>
+
+                    <button type="button" onclick="openDeleteCurrentSlipModal()"
+                      class="w-full sm:w-auto px-4 py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                      title="ลบสลิปหลักฐานนี้เพื่ออัปโหลดใหม่">
+                      <i data-lucide="trash-2" class="w-4 h-4 text-rose-400"></i>
+                      <span>ลบสลิปนี้</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Multi-Slip History Gallery (กรณีโอนหลายยอด หรือ แนบสลิปเพิ่ม) -->
+              <div id="paidMultiSlipsContainer" class="hidden space-y-3 pt-3 border-t border-slate-100">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-orange-600"></i>
+                    <span>ประวัติสลิปทั้งหมดที่คุณแนบไว้ (<span id="paidMultiSlipsCount">0</span> ใบ)</span>
+                  </span>
+                </div>
+                <div id="paidMultiSlipsList" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Actions: Add Extra Slip / Search Another / Cancel -->
+              <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                  <button type="button" onclick="openAddExtraSlipModal()"
+                    class="w-full sm:w-auto px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-sky-600/20 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+                    title="กรณีโอนไม่ครบ หรือต้องการส่งสลิปเพิ่มอีกใบ">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>แนบสลิปเพิ่มเติม (โอนเพิ่ม)</span>
+                  </button>
+
+                  <button type="button" onclick="clearSelectedStudent()"
+                    class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-orange-500/20 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+                    <i data-lucide="user-search" class="w-4 h-4"></i>
+                    <span>ค้นหา / ส่งให้เพื่อน</span>
+                  </button>
+                </div>
+
+                <button type="button" onclick="promptResetPayment()"
+                  class="text-xs text-slate-400 hover:text-rose-600 transition font-medium flex items-center gap-1">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>ต้องการยกเลิกและส่งหลักฐานใหม่?</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- DYNAMIC CONTENT: EXEMPTED STATE (ได้รับการยกเว้นไม่ต้องชำระ) -->
+          <div id="exemptedSection" class="hidden pt-4 space-y-6">
+            <div class="bg-gradient-to-br from-amber-50/80 via-white to-amber-50/80 rounded-3xl p-6 sm:p-8 border-2 border-amber-300 text-center space-y-4 shadow-sm">
+              <div class="w-16 h-16 mx-auto rounded-3xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <i data-lucide="shield-check" class="w-9 h-9"></i>
+              </div>
+              <div class="space-y-1">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300">
+                  🎉 สิทธิพิเศษ / ได้รับการยกเว้น
+                </span>
+                <h4 class="text-2xl font-black text-slate-900">คุณได้รับการยกเว้นสำหรับรายการนี้</h4>
+                <p id="exemptedNoticeCampaignName" class="text-xs sm:text-sm text-slate-600 max-w-md mx-auto font-medium">
+                  แอดมินหรือคณะกรรมการสาขาวิชาได้ตั้งค่าให้คุณไม่ต้องชำระเงินในกิจกรรมนี้
+                </p>
+              </div>
+              <div class="p-4 bg-white/90 rounded-2xl border border-amber-200 max-w-sm mx-auto text-xs text-slate-500 text-left space-y-1">
+                <div class="flex items-center gap-1.5 font-bold text-amber-900">
+                  <i data-lucide="info" class="w-4 h-4 text-amber-600"></i>
+                  <span>หมายเหตุการยกเว้น:</span>
+                </div>
+                <p class="text-[11px] text-slate-600">คุณไม่มียอดค้างชำระในกิจกรรมนี้ และไม่มีผลกระทบต่อสิทธิ์กิจกรรมใดๆ ของสาขา</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    
+      </div>
+
+      <!-- Hidden Remaining Sync Elements -->
       <div class="hidden">
         <span id="totalPeoplePaid">0</span>
         <span id="targetPeople">53</span>
         <div id="peopleProgressBar"></div>
-        <div id="studentProfileCard"></div>
-        <div id="unpaidSection"></div>
-        <div id="paidSection">
-          <div id="paidSectionIframeWrapper"></div>
-          <span id="paidTimestampText">-</span>
-          <span id="paidRefCode">-</span>
-          <span id="paidAmountDisplay">-</span>
-          <span id="paidSlipCounterBadge">1 ใบ</span>
-          <a id="paidSectionDriveLink" href="#"></a>
-          <div id="paidMultiSlipsContainer">
-            <span id="paidMultiSlipsCount">0</span>
-            <div id="paidMultiSlipsList"></div>
-          </div>
-        </div>
-        <div id="exemptedSection"></div>
         <div id="autocompleteDropdown"></div>
-        <input type="file" id="slipFileInput" accept="image/*" onchange="handleFileSelect(event)">
       </div>
 
     </div>
@@ -1138,5 +1560,7 @@
   <script src="assets/js/thai_qr_engine.js?v=20261017_2012"></script>
   <!-- Application Logic -->
   <script src="assets/js/payment.js?v=20261027_2255"></script>
+  <!-- Cyber UI Engine loaded after payment.js for complete sync -->
+  <script src="assets/js/payment_cyber_ui.js?v=20261028_1130"></script>
 </body>
 </html>
