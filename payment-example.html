@@ -235,28 +235,6 @@
               <span id="campaignsTotalCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-500/15 text-orange-400 border border-orange-500/30">1 รายการ</span>
             </div>
 
-            <!-- Active Campaign Card (Matching Mockup Left Card) -->
-            <div class="p-4 rounded-2xl glass-surface cyber-campaign-active space-y-3.5 relative overflow-hidden">
-              <div class="flex items-start justify-between gap-2">
-                <div>
-                  <h4 id="col1CampaignTitle" class="text-sm font-black text-white leading-snug">ค่าเสื้อสาขาวิชาเอก (COMED 69)</h4>
-                </div>
-                <!-- Glowing Active Radio Circle -->
-                <span class="w-3.5 h-3.5 rounded-full bg-orange-500 border-2 border-white/90 shadow-[0_0_12px_#E65A19] flex-shrink-0 mt-1"></span>
-              </div>
-
-              <div class="flex items-baseline justify-between pt-1">
-                <span id="col1CampaignAmount" class="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">฿410</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-orange-500/20 text-orange-300 border border-orange-500/40">เปิดรับอยู่</span>
-              </div>
-
-              <div class="pt-1">
-                <button type="button" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 transition shadow-inner flex items-center justify-center gap-1.5 cursor-pointer">
-                  <span>ชำระเงิน</span>
-                </button>
-              </div>
-            </div>
-
             <!-- Multiple Campaigns Container (if exists) -->
             <div id="campaignsNavGrid" class="space-y-3">
               <!-- Rendered via JS -->
@@ -342,6 +320,86 @@
               </div>
             </div>
           </div>
+        
+          <!-- Center Card 3: รายละเอียดเสื้อสาขา & ข้อมูลบัญชีธนาคาร (Campaign Visual Showcase & Bank Details) -->
+          <div id="campaignShirtShowcaseSection" class="glass-surface rounded-3xl p-5 sm:p-6 border border-white/10 shadow-2xl space-y-4">
+            
+            <!-- Showcase Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <span id="showcaseCategoryPill" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-orange-400 bg-orange-500/15 border border-orange-500/30">
+                  เสื้อสาขาวิชาเอก
+                </span>
+                <span id="showcaseBadgeText" class="px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-400 bg-white/5 border border-white/10">
+                  Official Merch • COMED69
+                </span>
+              </div>
+              <span id="showcasePriceTag" class="px-2.5 py-1 rounded-xl bg-orange-500/20 text-orange-300 font-mono font-black text-xs border border-orange-500/30">
+                ฿390.-
+              </span>
+            </div>
+
+            <!-- Image & Info Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              <!-- Banner Image with Click to Zoom -->
+              <div class="sm:col-span-5 relative group rounded-2xl overflow-hidden border border-white/10 bg-black/60 aspect-[4/3] flex items-center justify-center cursor-pointer" onclick="openCurrentShirtBannerFullscreen()">
+                <img id="showcaseMainBannerImg" src="" alt="ภาพเสื้อสาขา" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-80 group-hover:opacity-95 transition-opacity"></div>
+                <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-white text-[11px] font-bold">
+                  <span class="flex items-center gap-1 drop-shadow-md text-slate-300">
+                    <i data-lucide="zoom-in" class="w-3.5 h-3.5 text-orange-400"></i>
+                    <span>แตะดูรูปใหญ่</span>
+                  </span>
+                  <span id="showcaseSinglePriceText" class="font-mono font-black text-orange-400 text-sm">฿390</span>
+                </div>
+              </div>
+
+              <!-- Campaign Description & Price -->
+              <div class="sm:col-span-7 space-y-2">
+                <h4 id="showcaseTitleText" class="text-sm sm:text-base font-black text-white leading-snug">
+                  เสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา (COMED KKU 69)
+                </h4>
+                <p id="showcaseSubtitleText" class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                  เสื้อกิจกรรมและเสื้อเอกประจำรุ่น เนื้อผ้าเกรดพรีเมียม สวมใส่สบาย ระบายอากาศดี ดีไซน์สกรีนเอกลักษณ์เฉพาะสาขา
+                </p>
+                <div id="showcaseThumbnailsRow" class="hidden flex items-center gap-1.5 overflow-x-auto py-1 custom-scrollbar"></div>
+              </div>
+            </div>
+
+            <!-- Bank Transfer Credentials Card -->
+            <div class="pt-3 border-t border-white/10 space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-white flex items-center gap-1.5">
+                  <i data-lucide="building-2" class="w-4 h-4 text-emerald-400"></i>
+                  <span>บัญชีรับโอนเงิน</span>
+                </span>
+                <span id="bankDetailBankName" class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                  ธนาคารกสิกรไทย (KBank)
+                </span>
+              </div>
+
+              <div class="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-2">
+                <div>
+                  <span class="text-[10px] text-slate-400 block font-medium">เลขที่บัญชี</span>
+                  <span id="bankDetailAccountNum" class="font-mono font-black text-white text-sm sm:text-base select-all tracking-wider">236-2-47817-3</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] text-slate-400 block font-medium">ชื่อบัญชี</span>
+                  <span id="bankDetailAccountName" class="text-xs font-bold text-slate-200">น.ส. พิชามญธุ์ สามสี</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] text-slate-400">
+                <span class="flex items-center gap-1">
+                  <i data-lucide="tag" class="w-3 h-3 text-orange-400"></i>
+                  <span>รายการ: <strong id="bankDetailTitle" class="text-slate-300 font-bold">ค่าเสื้อสาขาวิชาเอก</strong></span>
+                </span>
+                <span class="font-mono text-emerald-400 font-bold" id="bankDetailAmount">฿390.00 / คน</span>
+              </div>
+            </div>
+
+          </div>
+
         </section>
 
         <!-- ================= COLUMN 3: ค้นหาและอัปโหลด (lg:col-span-4) ================= -->

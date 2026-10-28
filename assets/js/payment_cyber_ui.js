@@ -7,6 +7,56 @@
 
 (function(window) {
   'use strict';
+  
+  // Helper: Smart Token Matching for Thai, English, Student ID, Email
+  function normalizeToken(str) {
+    if (!str) return '';
+    return String(str)
+      .toLowerCase()
+      .trim()
+      .replace(/[​-‍﻿]/g, '') // zero-width
+      .replace(/[-s_.,/]/g, ''); // strip hyphens, spaces, dots
+  }
+
+  function matchStudentSmart(st, rawQuery) {
+    if (!rawQuery || !rawQuery.trim()) return true;
+    const qTrimmed = rawQuery.trim().toLowerCase();
+
+    // Extract individual search tokens by whitespace, comma, or dash
+    const rawTokens = qTrimmed.split(/[\s,]+/).filter(Boolean);
+    if (rawTokens.length === 0) return true;
+
+    // Student fields for matching
+    const nameLower = (st.name || '').toLowerCase();
+    const nickLower = (st.nickname || '').toLowerCase();
+    const idRaw = (st.id || '').toLowerCase();
+    const idClean = normalizeToken(st.id);
+    const emailLower = (st.email || '').toLowerCase();
+    const emailPrefix = emailLower.split('@')[0];
+
+    // Every token must match at least one attribute of the student
+    return rawTokens.every(token => {
+      const tokenClean = normalizeToken(token);
+      if (!tokenClean) return true;
+
+      // 1. Check ID (raw with dash, or clean digits)
+      if (idRaw.includes(token) || idClean.includes(tokenClean)) return true;
+
+      // 2. Check Name (direct substring or clean)
+      if (nameLower.includes(token) || normalizeToken(nameLower).includes(tokenClean)) return true;
+
+      // 3. Check Nickname
+      if (nickLower.includes(token) || normalizeToken(nickLower).includes(tokenClean)) return true;
+
+      // 4. Check Email / Email Username prefix
+      if (emailLower.includes(token) || emailPrefix.includes(token) || normalizeToken(emailPrefix).includes(tokenClean)) return true;
+
+      // 5. Full combined string check
+      const combined = `${idRaw} ${idClean} ${nameLower} ${nickLower} ${emailLower}`;
+      return combined.includes(token);
+    });
+  }
+
   function getStudentsList() {
     if (typeof students !== 'undefined' && Array.isArray(students) && students.length > 0) return students;
     if (typeof window !== 'undefined') {
@@ -101,11 +151,7 @@
     const query = queryInput ? queryInput.value.toLowerCase().trim() : '';
 
     const filtered = studentList.filter(st => {
-      const matchSearch = !query || 
-        st.name.toLowerCase().includes(query) || 
-        st.id.includes(query) || 
-        (st.nickname && st.nickname.toLowerCase().includes(query));
-      
+      const matchSearch = matchStudentSmart(st, query);
       const isPaid = window.paymentRecords && window.paymentRecords[st.id] && window.paymentRecords[st.id].paid;
       const currentFilter = window.currentFilter || 'all';
       if (currentFilter === 'paid' && !isPaid) return false;
@@ -175,10 +221,7 @@
     const currentSelectedId = window.currentSelectedStudent ? window.currentSelectedStudent.id : '';
 
     const list = studentList.filter(st => {
-      if (!q) return true;
-      return st.name.toLowerCase().includes(q) ||
-             st.id.includes(q) ||
-             (st.nickname && st.nickname.toLowerCase().includes(q));
+      return matchStudentSmart(st, q);
     });
 
     const matchCounter = document.getElementById('searchMatchCounter');
