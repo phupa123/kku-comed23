@@ -13,7 +13,6 @@
   const ADMIN_ACCOUNTS_KEY = 'COMED_KKU69_ADMIN_ACCOUNTS_V2';
 
   // บัญชีผู้ดูแลระบบที่ได้รับอนุญาตอย่างเป็นทางการ (Whitelist)
-  // สามารถเพิ่ม/แก้ไข อีเมลที่ต้องการให้เข้าหลังบ้านได้ที่นี่
   const AUTHORIZED_ADMIN_WHITELIST = [
     'thitiwut.a@kkumail.com',     // ภูผา (Super Admin)
     'phupa5874@gmail.com',        // ภูผา (ผู้ดูแลระบบ & ผู้ทดสอบระบบ - กรณีพิเศษ ไม่รวม 60 คน)
@@ -35,11 +34,33 @@
   }
 
   function verifyCurrentSession() {
-    // หากเป็นหน้า admin.html เอง ให้ปล่อยให้แสดงหน้าจอล็อกอิน
     const currentPath = window.location.pathname.toLowerCase();
-    const isMainAdminLogin = currentPath.endsWith('admin.html');
 
-    const sessionEmail = (sessionStorage.getItem(ADMIN_SESSION_KEY) || '').toLowerCase().trim();
+    // 1. ตรวจสอบว่ากำลังอยู่ที่หน้า Login หลักหรือไม่ (รองรับทั้ง /admin, /admin.html, /payment-admin, /payment-admin.html)
+    const isMainAdminLogin = 
+      currentPath.endsWith('admin.html') || 
+      currentPath.endsWith('/admin') ||
+      currentPath === '/admin' ||
+      currentPath.endsWith('payment-admin.html') ||
+      currentPath.endsWith('/payment-admin') ||
+      currentPath === '/payment-admin';
+
+    // 2. ดึง session ปัจจุบัน (รองรับทั้ง admin session และ user session ที่เป็น admin)
+    let sessionEmail = (sessionStorage.getItem(ADMIN_SESSION_KEY) || '').toLowerCase().trim();
+    if (!sessionEmail) {
+      try {
+        const userSessionStr = localStorage.getItem('COMED_USER_SESSION') || sessionStorage.getItem('COMED_USER_SESSION');
+        if (userSessionStr) {
+          const userObj = JSON.parse(userSessionStr);
+          const uEmail = (userObj.email || '').toLowerCase().trim();
+          if (AUTHORIZED_ADMIN_WHITELIST.includes(uEmail)) {
+            sessionEmail = uEmail;
+            sessionStorage.setItem(ADMIN_SESSION_KEY, uEmail); // Sync automatically
+          }
+        }
+      } catch (e) {}
+    }
+
     const validEmails = getStoredAdminList();
 
     const isAuthorized = sessionEmail && (
@@ -48,11 +69,14 @@
     );
 
     if (!isAuthorized) {
-      if (!isMainAdminLogin) {
-        // บล็อกและดีดกลับไปหน้า Login ทันที ก่อนที่เนื้อหาจะแสดง
-        window.location.replace('admin.html?error=unauthorized_access');
+      // หากอยู่ในหน้า Login หลัก (admin.html หรือ /admin หรือ payment-admin.html) ให้แสดงฟอร์มล็อกอินตามปกติ ไม่ดีดวนลูป
+      if (isMainAdminLogin) {
         return false;
       }
+
+      // หากเป็นหน้าหลังบ้านอื่นๆ แล้วยังไม่ได้ล็อกอิน ให้ redirect กลับไปหน้าล็อกอินพร้อมเก็บ returnUrl
+      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.replace(`admin.html?error=unauthorized_access&returnUrl=${returnUrl}`);
       return false;
     }
 

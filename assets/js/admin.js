@@ -486,13 +486,41 @@ function initGoogleAdminButton() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
+  let loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
+
+  // If no admin session, check if active Google user session belongs to whitelist
+  if (!loggedEmail) {
+    try {
+      const uSessionStr = localStorage.getItem('COMED_USER_SESSION') || sessionStorage.getItem('COMED_USER_SESSION');
+      if (uSessionStr) {
+        const u = JSON.parse(uSessionStr);
+        const uMail = (u.email || '').toLowerCase().trim();
+        const superAdmins = ['thitiwut.a@kkumail.com', 'phupa5874@gmail.com', 'pichamon.sam@kkumail.com', 'nattachai.p@kkumail.com'];
+        if (superAdmins.includes(uMail) || adminAccounts.some(a => a.email.toLowerCase() === uMail)) {
+          loggedEmail = uMail;
+          sessionStorage.setItem(ADMIN_SESSION_KEY, uMail);
+        }
+      }
+    } catch(e) {}
+  }
+
   if (loggedEmail) {
     currentLoggedInAdmin = adminAccounts.find(a => a.email.toLowerCase() === loggedEmail.toLowerCase()) || { email: loggedEmail, name: "Admin" };
     showDashboard();
   } else {
     showLoginScreen();
     initGoogleAdminButton();
+
+    // Check if redirected with unauthorized_access error
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'unauthorized_access') {
+      const errBox = document.getElementById('loginErrorMsg');
+      const errText = document.getElementById('loginErrorText');
+      if (errBox && errText) {
+        errBox.classList.remove('hidden');
+        errText.textContent = "🔒 กรุณาเข้าสู่ระบบบัญชีผู้ดูแลระบบ (Admin) ก่อนเข้าใช้งานหน้านี้";
+      }
+    }
   }
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
