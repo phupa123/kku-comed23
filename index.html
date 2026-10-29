@@ -780,6 +780,53 @@
   </section>
 
   <!-- ================= QUICK HUB & LIVE SERVICES ================= -->
+    <!-- ================= SECTION: LIVE BROADCASTS & PUBLIC RELATIONS (ประชาสัมพันธ์สาขา) ================= -->
+  <section id="broadcasts-section" class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-gradient-to-b from-[#090D1E] via-[#0B0E24] to-[#070914] relative overflow-hidden">
+    <!-- Background Glow Accents -->
+    <div class="absolute -top-24 left-1/4 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 right-1/4 w-96 h-96 bg-sky-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto space-y-8 relative z-10">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-[10px] font-mono text-orange-400 font-bold uppercase mb-2">
+            <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+            <span>PUBLIC RELATIONS &amp; BROADCAST HUB</span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-display font-black text-white tracking-tight flex items-center gap-2.5">
+            <span>ข่าวสาร &amp; ประชาสัมพันธ์สาขาวิชา</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            ประกาศสำคัญ กิจกรรม สื่อวิดีโอ และไฟล์เอกสารดาวน์โหลดสำหรับนักศึกษา COMED23
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <span class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-slate-300 flex items-center gap-1.5">
+            <i class="bi bi-broadcast text-orange-400"></i>
+            <span id="broadcastCounterText">ซิงค์สด Realtime</span>
+          </span>
+          <a href="notification-admin.html" class="px-3.5 py-1.5 rounded-xl bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-xs font-mono font-bold text-orange-300 hover:text-white transition flex items-center gap-1.5">
+            <i class="bi bi-megaphone-fill text-xs"></i>
+            <span>จัดการประกาศ (Admin)</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Broadcast Cards Grid -->
+      <div id="indexBroadcastsFeed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="col-span-full py-16 text-center text-slate-400 text-xs space-y-3">
+          <i class="bi bi-arrow-repeat text-2xl animate-spin text-orange-500 block"></i>
+          <span class="text-sm font-bold text-slate-300">กำลังเชื่อมต่อคลังข่าวประชาสัมพันธ์ล่าสุด...</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= QUICK HUB & LIVE SERVICES ================= -->
   <section id="quick-hub" class="relative py-16 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#0C1030]/60 backdrop-blur-md">
     <div class="max-w-7xl mx-auto space-y-8">
       
@@ -1536,5 +1583,180 @@
     });
   </script>
 
+
+  <!-- Real-time Broadcast Renderer for Index.html -->
+  <script>
+    (function() {
+      async function loadIndexBroadcasts() {
+        const feed = document.getElementById('indexBroadcastsFeed');
+        if (!feed) return;
+
+        let items = [];
+        try {
+          if (typeof window.getSupabaseClient === 'function') {
+            const client = window.getSupabaseClient();
+            if (client) {
+              const { data, error } = await client
+                .from('notifications')
+                .select('*')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(9);
+              if (!error && Array.isArray(data)) items = data;
+            }
+          }
+        } catch (e) {
+          console.warn('[Index Broadcast] Fetch error:', e);
+        }
+
+        if (items.length === 0) {
+          try {
+            const cached = localStorage.getItem('COMED23_NOTIFICATIONS_CACHE_V2');
+            if (cached) items = JSON.parse(cached);
+          } catch(e) {}
+        }
+
+        const counterEl = document.getElementById('broadcastCounterText');
+        if (counterEl && items.length > 0) {
+          counterEl.textContent = `ทั้งหมด ${items.length} รายการล่าสุด`;
+        }
+
+        if (items.length === 0) {
+          feed.innerHTML = `
+            <div class="col-span-full p-12 text-center rounded-3xl bg-slate-900/40 border border-white/5 space-y-2">
+              <i class="bi bi-info-circle text-2xl text-slate-500 block"></i>
+              <p class="text-sm font-bold text-white">ยังไม่มีข่าวประชาสัมพันธ์ในขณะนี้</p>
+              <p class="text-xs text-slate-400">เมื่อฝ่ายบริหารสาขาประกาศข้อความหรือแนบไฟล์ รายการจะปรากฏตรงนี้อัตโนมัติ</p>
+            </div>
+          `;
+          return;
+        }
+
+        feed.innerHTML = items.map(item => {
+          let meta = item.media_meta;
+          let cleanMessage = item.message || '';
+          if (typeof meta === 'string') {
+            try { meta = JSON.parse(meta); } catch(e){}
+          } else if (!meta && cleanMessage.includes('[MEDIA_META:')) {
+            try {
+              const parts = cleanMessage.split('[MEDIA_META:');
+              cleanMessage = parts[0].trim();
+              const jsonStr = parts[1].split(']')[0];
+              meta = JSON.parse(jsonStr);
+            } catch(e){}
+          }
+
+          const videoUrl = item.video_url || meta?.video_url || null;
+          const attachments = item.attachments || meta?.attachments || [];
+          const publishDate = meta?.publish_time || item.created_at;
+
+          const dateStr = publishDate ? new Date(publishDate).toLocaleDateString('th-TH', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }) + ' น.' : 'เมื่อสักครู่';
+
+          let typeLabel = 'ประชาสัมพันธ์';
+          let badgeClass = 'bg-orange-500/20 text-orange-300 border-orange-500/30';
+          if (item.type === 'urgent') {
+            typeLabel = 'ด่วนที่สุด';
+            badgeClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+          } else if (item.type === 'warning') {
+            typeLabel = 'สำคัญ';
+            badgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+          } else if (item.type === 'event') {
+            typeLabel = 'กิจกรรม';
+            badgeClass = 'bg-sky-500/20 text-sky-300 border-sky-500/40';
+          }
+
+          let mediaBlock = '';
+          if (videoUrl) {
+            mediaBlock = `
+              <div class="w-full rounded-2xl overflow-hidden bg-black/60 border border-white/10 mb-3.5 relative">
+                <video src="${videoUrl}" controls preload="metadata" class="w-full max-h-56 object-cover"></video>
+              </div>
+            `;
+          } else if (item.image_url) {
+            mediaBlock = `
+              <div class="w-full h-44 rounded-2xl overflow-hidden bg-black/40 border border-white/10 mb-3.5 relative group">
+                <img src="${item.image_url}" alt="Cover" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.remove()">
+              </div>
+            `;
+          }
+
+          let attachmentsBlock = '';
+          if (attachments && attachments.length > 0) {
+            attachmentsBlock = `
+              <div class="pt-3 border-t border-white/10 space-y-1.5">
+                <span class="text-[10px] font-mono font-bold text-emerald-400 flex items-center gap-1.5">
+                  <i class="bi bi-paperclip"></i>
+                  <span>เอกสารแนบสำหรับดาวน์โหลด (${attachments.length} ไฟล์):</span>
+                </span>
+                <div class="space-y-1">
+                  ${attachments.map(f => `
+                    <a href="${f.url}" target="_blank" download class="flex items-center justify-between p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-xs transition group">
+                      <span class="flex items-center gap-2 truncate text-slate-200 group-hover:text-white">
+                        <i class="bi bi-file-earmark-arrow-down-fill text-emerald-400 text-sm flex-shrink-0"></i>
+                        <span class="truncate">${f.name}</span>
+                      </span>
+                      <span class="text-[10px] font-mono text-emerald-300 bg-emerald-500/15 group-hover:bg-emerald-500/25 px-2 py-0.5 rounded-lg border border-emerald-500/30 whitespace-nowrap flex items-center gap-1">
+                        <i class="bi bi-download text-[9px]"></i>
+                        <span>โหลด ${f.size ? '(' + f.size + ')' : ''}</span>
+                      </span>
+                    </a>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="p-5 rounded-3xl bg-[#0D1226]/90 border border-white/10 hover:border-orange-500/40 transition-all shadow-xl flex flex-col justify-between space-y-4 hover:shadow-orange-500/10">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badgeClass}">
+                    ${typeLabel}
+                  </span>
+                  <span class="text-[11px] font-mono text-slate-400 flex items-center gap-1">
+                    <i class="bi bi-clock"></i>
+                    <span>${dateStr}</span>
+                  </span>
+                </div>
+
+                ${mediaBlock}
+
+                <h3 class="text-base font-bold text-white tracking-wide line-clamp-2 mb-1.5">
+                  ${item.title || 'ประกาศสาขา'}
+                </h3>
+                <p class="text-xs text-slate-300 leading-relaxed line-clamp-4">
+                  ${cleanMessage}
+                </p>
+              </div>
+
+              <div class="space-y-3 pt-2">
+                ${attachmentsBlock}
+                ${item.link ? `
+                  <a href="${item.link}" target="_blank" class="w-full py-2.5 px-4 rounded-xl bg-orange-600/15 hover:bg-orange-600/25 border border-orange-500/30 text-orange-300 hover:text-white text-xs font-mono font-bold transition flex items-center justify-center gap-1.5">
+                    <span>เปิดดูรายละเอียดเพิ่มเติม</span>
+                    <i class="bi bi-arrow-up-right"></i>
+                  </a>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        loadIndexBroadcasts();
+        if (window.supabase) {
+          setTimeout(loadIndexBroadcasts, 1500);
+        }
+      });
+      window.refreshIndexBroadcasts = loadIndexBroadcasts;
+    })();
+  </script>
 </body>
 </html>

@@ -46,6 +46,7 @@
   <!-- Supabase JS Client & Configs -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
+  <script src="assets/js/multi_uploader.js"></script>
   <!-- Students Database -->
   <script src="students_data.js"></script>
 
@@ -282,33 +283,139 @@
               class="w-full px-4 py-3 rounded-2xl bg-slate-950/80 border border-white/15 text-white placeholder-slate-500 text-sm outline-none focus:border-amber-500 transition font-mono text-xs">
           </div>
 
-          <!-- Image URL & AI Smart Image Generator -->
-          <div class="space-y-2 p-4 rounded-2xl bg-slate-900/60 border border-white/10">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                <i class="bi bi-image text-[#FF7A29]"></i>
-                <span>รูปภาพประกอบการแจ้งเตือน (Banner Image URL)</span>
+          <!-- Image URL, Video & File Attachments Section -->
+          <div class="space-y-4 p-5 rounded-2xl bg-slate-900/60 border border-white/10">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <label class="text-xs font-bold text-white flex items-center gap-2">
+                <i class="bi bi-collection-play-fill text-[#FF7A29] text-base"></i>
+                <span class="text-sm">สื่อประกอบ & ไฟล์แนบประชาสัมพันธ์ (Media & Attachments)</span>
               </label>
-              <span class="text-[10px] font-mono text-slate-400">แนะนำ 16:9</span>
+              <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">รองรับ รูปภาพ / วิดีโอ / ไฟล์ดาวน์โหลด</span>
             </div>
-            <div class="flex gap-2">
-              <input type="url" id="notifImageUrl" placeholder="ใส่ URL ภาพ หรือกดปุ่ม Gen ภาพด้านขวา..."
-                oninput="updateLivePreview()"
-                class="flex-grow px-4 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white placeholder-slate-500 text-xs outline-none focus:border-amber-500 transition font-mono">
-              <button type="button" onclick="generateNotificationBanner()" id="btnGenImage" class="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] hover:opacity-90 text-white text-xs font-bold font-mono transition flex items-center gap-1.5 shadow-md cursor-pointer whitespace-nowrap">
-                <i class="bi bi-stars"></i>
-                <span>Gen ภาพ AI</span>
-              </button>
+
+            <!-- Tab Switcher for Media: Image vs Video -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <i class="bi bi-image text-[#FF7A29]"></i>
+                  <span>1. รูปภาพแบนเนอร์ (Image Banner / GIF)</span>
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">JPG, PNG, WEBP, GIF</span>
+              </div>
+              <div class="flex gap-2">
+                <input type="url" id="notifImageUrl" placeholder="วาง URL ภาพ/GIF หรือกดปุ่มอัปโหลด/Gen AI..."
+                  oninput="updateLivePreview()"
+                  class="flex-grow px-4 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white placeholder-slate-500 text-xs outline-none focus:border-amber-500 transition font-mono">
+                <label class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-bold font-mono transition flex items-center gap-1.5 shadow-md cursor-pointer whitespace-nowrap" title="อัปโหลดภาพจากเครื่อง">
+                  <i class="bi bi-cloud-arrow-up-fill text-amber-400"></i>
+                  <span>อัปโหลดภาพ</span>
+                  <input type="file" id="fileImageInput" accept="image/*" class="hidden" onchange="handleDirectMediaUpload(this, 'image')">
+                </label>
+                <button type="button" onclick="generateNotificationBanner()" id="btnGenImage" class="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#B32B19] to-[#E65A19] hover:opacity-90 text-white text-xs font-bold font-mono transition flex items-center gap-1.5 shadow-md cursor-pointer whitespace-nowrap">
+                  <i class="bi bi-stars"></i>
+                  <span>Gen AI</span>
+                </button>
+              </div>
+              <!-- Quick preset banners -->
+              <div class="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                <span class="text-slate-400 text-[10px]">ภาพด่วน:</span>
+                <button type="button" onclick="setPresetImage('urgent')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-300 text-[10px] transition cursor-pointer">🚨 ด่วนพิเศษ</button>
+                <button type="button" onclick="setPresetImage('payment')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-emerald-300 text-[10px] transition cursor-pointer">💳 ยอดสลิป</button>
+                <button type="button" onclick="setPresetImage('event')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-sky-300 text-[10px] transition cursor-pointer">📅 กิจกรรม</button>
+                <button type="button" onclick="setPresetImage('study')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-purple-300 text-[10px] transition cursor-pointer">💻 การเรียน</button>
+                <button type="button" onclick="document.getElementById('notifImageUrl').value=''; updateLivePreview();" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] transition cursor-pointer">ล้างรูป</button>
+              </div>
             </div>
-            <!-- Quick preset banners -->
-            <div class="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
-              <span class="text-slate-400 text-[10px]">ภาพด่วน:</span>
-              <button type="button" onclick="setPresetImage('urgent')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-300 text-[10px] transition cursor-pointer">🚨 ด่วนพิเศษ</button>
-              <button type="button" onclick="setPresetImage('payment')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-emerald-300 text-[10px] transition cursor-pointer">💳 ยอดสลิป</button>
-              <button type="button" onclick="setPresetImage('event')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-sky-300 text-[10px] transition cursor-pointer">📅 กิจกรรม</button>
-              <button type="button" onclick="setPresetImage('study')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-purple-300 text-[10px] transition cursor-pointer">💻 การเรียน</button>
-              <button type="button" onclick="document.getElementById('notifImageUrl').value=''; updateLivePreview();" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] transition cursor-pointer">ล้างรูป</button>
+
+            <!-- Video Section -->
+            <div class="space-y-2 pt-2 border-t border-white/5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <i class="bi bi-camera-video-fill text-sky-400"></i>
+                  <span>2. วิดีโอคลิปประชาสัมพันธ์ (Video MP4 / WebM / YouTube)</span>
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">เล่นบนเว็บอัตโนมัติ</span>
+              </div>
+              <div class="flex gap-2">
+                <input type="url" id="notifVideoUrl" placeholder="ใส่ลิงก์ตรง MP4, WebM หรือกดปุ่มอัปโหลดคลิป..."
+                  oninput="updateLivePreview()"
+                  class="flex-grow px-4 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white placeholder-slate-500 text-xs outline-none focus:border-sky-500 transition font-mono">
+                <label class="px-3.5 py-2.5 rounded-xl bg-sky-600/20 hover:bg-sky-600/30 border border-sky-500/40 text-sky-300 text-xs font-bold font-mono transition flex items-center gap-1.5 shadow-md cursor-pointer whitespace-nowrap" title="อัปโหลดวิดีโอ">
+                  <i class="bi bi-film"></i>
+                  <span>อัปโหลดคลิป</span>
+                  <input type="file" id="fileVideoInput" accept="video/mp4,video/webm" class="hidden" onchange="handleDirectMediaUpload(this, 'video')">
+                </label>
+                <button type="button" onclick="document.getElementById('notifVideoUrl').value=''; updateLivePreview();" class="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-mono transition cursor-pointer">
+                  ล้างคลิป
+                </button>
+              </div>
             </div>
+
+            <!-- Downloadable Attachments Section (PDF, DOCX, ZIP, etc.) -->
+            <div class="space-y-2 pt-2 border-t border-white/5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <i class="bi bi-paperclip text-emerald-400 text-base"></i>
+                  <span>3. ไฟล์เอกสารแนบให้ดาวน์โหลด (PDF, Word, Excel, Slide, ZIP)</span>
+                </span>
+                <span class="text-[10px] font-mono text-emerald-400">ผู้ใช้กดดาวน์โหลดได้ทันที</span>
+              </div>
+              
+              <!-- File Upload Action Bar -->
+              <div class="flex flex-col sm:flex-row gap-2">
+                <div class="relative flex-grow">
+                  <input type="text" id="manualFileUrl" placeholder="วางลิงก์ดาวน์โหลดตรง เช่น https://... / Drive URL" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white placeholder-slate-500 text-xs outline-none focus:border-emerald-500 transition font-mono">
+                </div>
+                <input type="text" id="manualFileName" placeholder="ชื่อไฟล์ (เช่น ประกาศกำหนดการ.pdf)" class="sm:w-48 px-3 py-2.5 rounded-xl bg-slate-950 border border-white/15 text-white placeholder-slate-500 text-xs outline-none focus:border-emerald-500 transition">
+                <button type="button" onclick="addManualAttachment()" class="px-4 py-2.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer">
+                  <i class="bi bi-plus-lg"></i>
+                  <span>เพิ่มไฟล์</span>
+                </button>
+                <label class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer whitespace-nowrap" title="อัปโหลดไฟล์ตรงเข้า Cloud">
+                  <i class="bi bi-cloud-arrow-up-fill"></i>
+                  <span>อัปโหลดเข้าคลาวด์</span>
+                  <input type="file" id="fileAttachmentInput" multiple class="hidden" onchange="handleMultipleFileUpload(this)">
+                </label>
+              </div>
+
+              <!-- Uploading Spinner Banner -->
+              <div id="uploadProgressBanner" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                  <i class="bi bi-arrow-repeat animate-spin text-base"></i>
+                  <span id="uploadProgressText">กำลังอัปโหลดไฟล์สู่คลาวด์...</span>
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">MultiCloud Engine</span>
+              </div>
+
+              <!-- List of attached files -->
+              <div id="attachedFilesList" class="space-y-1.5 min-h-[30px] p-2.5 rounded-xl bg-slate-950/70 border border-white/5">
+                <div class="text-[11px] text-slate-500 italic p-1">ยังไม่มีไฟล์แนบ (สามารถอัปโหลดไฟล์หรือวางลิงก์ดาวน์โหลดด้านบนได้)</div>
+              </div>
+            </div>
+
+            <!-- Date & Time Scheduling for Publication -->
+            <div class="space-y-2 pt-2 border-t border-white/5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <i class="bi bi-calendar-check text-amber-400"></i>
+                  <span>4. วัน-เวลาที่ระบุในประกาศ (Publication & Expiry DateTime)</span>
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">เวลาประเทศไทย</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label class="text-[11px] text-slate-400 block mb-1">วันและเวลาที่ประกาศ (Publish Date-Time)</label>
+                  <input type="datetime-local" id="notifPublishTime"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/15 text-white font-mono text-xs outline-none focus:border-amber-500">
+                </div>
+                <div>
+                  <label class="text-[11px] text-slate-400 block mb-1">วันและเวลาที่สิ้นสุด/หมดอายุ (Expire Date-Time, ไม่บังคับ)</label>
+                  <input type="datetime-local" id="notifExpireTime"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-white/15 text-white font-mono text-xs outline-none focus:border-amber-500">
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- Options Checkboxes -->
@@ -411,6 +518,29 @@
               <!-- Preview Image Banner -->
               <div id="previewImageWrapper" class="hidden rounded-xl overflow-hidden bg-black/60 border border-white/10 max-h-36">
                 <img id="previewImage" src="" alt="Banner Preview" class="w-full h-full object-cover">
+              </div>
+
+              <!-- Preview Video Player -->
+              <div id="previewVideoWrapper" class="hidden rounded-xl overflow-hidden bg-black/60 border border-white/10 max-h-40">
+                <video id="previewVideo" src="" controls class="w-full h-full max-h-40 object-cover"></video>
+              </div>
+
+              <!-- Preview Attached Files Pills -->
+              <div id="previewFilesWrapper" class="hidden space-y-1.5 pt-1">
+                <div class="text-[9px] font-mono text-emerald-400 flex items-center gap-1 font-bold">
+                  <i class="bi bi-paperclip"></i>
+                  <span>ไฟล์แนบดาวน์โหลด (<span id="previewFilesCount">0</span>):</span>
+                </div>
+                <div id="previewFilesList" class="space-y-1"></div>
+              </div>
+
+              <!-- Preview Date Time Stamp -->
+              <div class="flex items-center justify-between text-[9px] text-slate-400 font-mono pt-1">
+                <span class="flex items-center gap-1 text-slate-400">
+                  <i class="bi bi-clock"></i>
+                  <span id="previewDateTimeText">เผยแพร่: ตอนนี้</span>
+                </span>
+                <span id="previewExpireText" class="text-amber-400/80 hidden">มีกำหนดหมดอายุ</span>
               </div>
 
               <div id="previewLinkRow" class="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] text-orange-400">
@@ -537,6 +667,199 @@
       updateLivePreview();
     }
 
+
+    // --- BROADCAST MEDIA & ATTACHMENTS ENGINE ---
+    let attachedFiles = []; // [{ name, size, url, ext }]
+
+    // Set default publish datetime to now (Bangkok timezone formatted for datetime-local)
+    function initDateTimePickers() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      const nowIso = now.toISOString().slice(0, 16);
+      const publishInput = document.getElementById('notifPublishTime');
+      if (publishInput && !publishInput.value) {
+        publishInput.value = nowIso;
+      }
+      if (publishInput) {
+        publishInput.addEventListener('change', updateLivePreview);
+      }
+      const expireInput = document.getElementById('notifExpireTime');
+      if (expireInput) {
+        expireInput.addEventListener('change', updateLivePreview);
+      }
+    }
+
+    // Direct Media Upload (Image or Video)
+    async function handleDirectMediaUpload(inputEl, type) {
+      const file = inputEl.files && inputEl.files[0];
+      if (!file) return;
+
+      const progressBanner = document.getElementById('uploadProgressBanner');
+      const progressText = document.getElementById('uploadProgressText');
+      if (progressBanner) {
+        progressBanner.classList.remove('hidden');
+        progressText.textContent = `กำลังอัปโหลด${type === 'video' ? 'คลิปวิดีโอ' : 'ภาพแบนเนอร์'}: ${file.name}...`;
+      }
+
+      try {
+        if (!window.MultiCloudUploader) {
+          throw new Error('ไม่พบคลาส MultiCloudUploader ในระบบ');
+        }
+
+        const res = await window.MultiCloudUploader.uploadFile(file);
+        if (!res || !res.url) {
+          throw new Error(res?.error || 'การอัปโหลดไฟล์ล้มเหลว');
+        }
+
+        if (type === 'video') {
+          document.getElementById('notifVideoUrl').value = res.url;
+        } else {
+          document.getElementById('notifImageUrl').value = res.url;
+        }
+        updateLivePreview();
+        alert(`อัปโหลด${type === 'video' ? 'วิดีโอ' : 'ภาพ'}สำเร็จแล้ว!`);
+      } catch (err) {
+        console.error('[Upload Media Error]', err);
+        alert('เกิดข้อผิดพลาดในการอัปโหลด: ' + err.message);
+      } finally {
+        if (progressBanner) progressBanner.classList.add('hidden');
+        inputEl.value = '';
+      }
+    }
+
+    // Upload Multiple Attachments
+    async function handleMultipleFileUpload(inputEl) {
+      const files = Array.from(inputEl.files || []);
+      if (files.length === 0) return;
+
+      const progressBanner = document.getElementById('uploadProgressBanner');
+      const progressText = document.getElementById('uploadProgressText');
+      if (progressBanner) progressBanner.classList.remove('hidden');
+
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (progressText) {
+            progressText.textContent = `กำลังอัปโหลดไฟล์แนบ (${i + 1}/${files.length}): ${file.name}...`;
+          }
+
+          let fileUrl = '';
+          if (window.MultiCloudUploader) {
+            const res = await window.MultiCloudUploader.uploadFile(file);
+            fileUrl = res?.url;
+          }
+
+          if (fileUrl) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            attachedFiles.push({
+              name: file.name,
+              size: formatBytes(file.size),
+              url: fileUrl,
+              ext: ext
+            });
+          }
+        }
+        renderAttachedFiles();
+        updateLivePreview();
+      } catch (err) {
+        console.error('[Upload Attachments Error]', err);
+        alert('การอัปโหลดไฟล์แนบบางส่วนล้มเหลว: ' + err.message);
+      } finally {
+        if (progressBanner) progressBanner.classList.add('hidden');
+        inputEl.value = '';
+      }
+    }
+
+    function addManualAttachment() {
+      const urlInput = document.getElementById('manualFileUrl');
+      const nameInput = document.getElementById('manualFileName');
+      const url = (urlInput.value || '').trim();
+      let name = (nameInput.value || '').trim();
+
+      if (!url) {
+        alert('กรุณาระบุ URL สำหรับดาวน์โหลดไฟล์');
+        return;
+      }
+      if (!name) {
+        name = url.split('/').pop().split('?')[0] || 'ไฟล์แนบประชาสัมพันธ์';
+      }
+
+      const ext = name.split('.').pop().toLowerCase();
+      attachedFiles.push({
+        name: name,
+        size: 'Cloud Link',
+        url: url,
+        ext: ext
+      });
+
+      urlInput.value = '';
+      nameInput.value = '';
+      renderAttachedFiles();
+      updateLivePreview();
+    }
+
+    function removeAttachment(index) {
+      attachedFiles.splice(index, 1);
+      renderAttachedFiles();
+      updateLivePreview();
+    }
+
+    function renderAttachedFiles() {
+      const container = document.getElementById('attachedFilesList');
+      if (!container) return;
+
+      if (attachedFiles.length === 0) {
+        container.innerHTML = '<div class="text-[11px] text-slate-500 italic p-1">ยังไม่มีไฟล์แนบ (สามารถอัปโหลดไฟล์หรือวางลิงก์ดาวน์โหลดด้านบนได้)</div>';
+        return;
+      }
+
+      container.innerHTML = attachedFiles.map((file, idx) => {
+        const iconInfo = getFileIcon(file.ext);
+        return `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-white/10 text-xs">
+            <div class="flex items-center gap-2.5 min-w-0 pr-2">
+              <span class="w-7 h-7 rounded-lg ${iconInfo.bg} ${iconInfo.color} flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                <i class="bi ${iconInfo.icon}"></i>
+              </span>
+              <div class="min-w-0">
+                <p class="font-bold text-white truncate max-w-xs sm:max-w-md">${file.name}</p>
+                <span class="text-[10px] font-mono text-slate-400">${file.size} • .${file.ext.toUpperCase()}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <a href="${file.url}" target="_blank" download class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-sky-400 text-[10px] font-mono transition flex items-center gap-1">
+                <i class="bi bi-box-arrow-up-right"></i>
+                <span class="hidden sm:inline">ทดสอบลิงก์</span>
+              </a>
+              <button type="button" onclick="removeAttachment(${idx})" class="w-6 h-6 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 flex items-center justify-center transition cursor-pointer" title="ลบไฟล์นี้">
+                &times;
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes || isNaN(bytes)) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function getFileIcon(ext) {
+      ext = (ext || '').toLowerCase();
+      if (['pdf'].includes(ext)) return { icon: 'bi-file-earmark-pdf-fill', color: 'text-rose-400', bg: 'bg-rose-500/15' };
+      if (['doc', 'docx'].includes(ext)) return { icon: 'bi-file-earmark-word-fill', color: 'text-sky-400', bg: 'bg-sky-500/15' };
+      if (['xls', 'xlsx', 'csv'].includes(ext)) return { icon: 'bi-file-earmark-excel-fill', color: 'text-emerald-400', bg: 'bg-emerald-500/15' };
+      if (['ppt', 'pptx'].includes(ext)) return { icon: 'bi-file-earmark-ppt-fill', color: 'text-orange-400', bg: 'bg-orange-500/15' };
+      if (['zip', 'rar', '7z', 'tar'].includes(ext)) return { icon: 'bi-file-earmark-zip-fill', color: 'text-amber-400', bg: 'bg-amber-500/15' };
+      if (['mp4', 'mov', 'webm', 'mkv'].includes(ext)) return { icon: 'bi-file-earmark-play-fill', color: 'text-purple-400', bg: 'bg-purple-500/15' };
+      if (['mp3', 'wav', 'aac'].includes(ext)) return { icon: 'bi-file-earmark-music-fill', color: 'text-pink-400', bg: 'bg-pink-500/15' };
+      return { icon: 'bi-file-earmark-arrow-down-fill', color: 'text-slate-300', bg: 'bg-white/10' };
+    }
+
     function updateLivePreview() {
       const title = document.getElementById('notifTitle').value || 'ตัวอย่างหัวข้อแจ้งเตือน';
       const message = document.getElementById('notifMessage').value || 'ข้อความรายละเอียดจะปรากฏตรงนี้บนหน้าจอของผู้ใช้';
@@ -583,6 +906,60 @@
         imgWrap.classList.remove('hidden');
       } else if (imgWrap) {
         imgWrap.classList.add('hidden');
+      }
+
+      // Preview Video Handling
+      const vidUrl = (document.getElementById('notifVideoUrl')?.value || '').trim();
+      const vidWrap = document.getElementById('previewVideoWrapper');
+      const vidEl = document.getElementById('previewVideo');
+      if (vidUrl && vidWrap && vidEl) {
+        vidEl.src = vidUrl;
+        vidWrap.classList.remove('hidden');
+      } else if (vidWrap) {
+        vidWrap.classList.add('hidden');
+      }
+
+      // Preview Files Handling
+      const filesWrap = document.getElementById('previewFilesWrapper');
+      const filesCount = document.getElementById('previewFilesCount');
+      const filesList = document.getElementById('previewFilesList');
+      if (filesWrap && filesCount && filesList) {
+        if (attachedFiles.length > 0) {
+          filesWrap.classList.remove('hidden');
+          filesCount.textContent = attachedFiles.length;
+          filesList.innerHTML = attachedFiles.slice(0, 3).map(f => `
+            <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-black/50 border border-white/10 text-[9px]">
+              <i class="bi bi-file-earmark-arrow-down text-emerald-400"></i>
+              <span class="truncate flex-grow text-slate-200">${f.name}</span>
+              <span class="text-slate-400 font-mono">${f.size}</span>
+            </div>
+          `).join('');
+        } else {
+          filesWrap.classList.add('hidden');
+        }
+      }
+
+      // Preview DateTime stamp
+      const pubTime = document.getElementById('notifPublishTime')?.value;
+      const pubText = document.getElementById('previewDateTimeText');
+      if (pubText) {
+        if (pubTime) {
+          const d = new Date(pubTime);
+          pubText.textContent = 'เผยแพร่: ' + d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' น.';
+        } else {
+          pubText.textContent = 'เผยแพร่: ตอนนี้';
+        }
+      }
+      const expTime = document.getElementById('notifExpireTime')?.value;
+      const expText = document.getElementById('previewExpireText');
+      if (expText) {
+        if (expTime) {
+          const ed = new Date(expTime);
+          expText.textContent = 'หมดอายุ: ' + ed.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+          expText.classList.remove('hidden');
+        } else {
+          expText.classList.add('hidden');
+        }
       }
     }
 
@@ -774,6 +1151,17 @@
 
       const targetEmails = audience === 'specific' ? selectedStudents.map(s => s.email.toLowerCase()) : null;
       const imageUrl = (document.getElementById('notifImageUrl')?.value || '').trim() || null;
+      const videoUrl = (document.getElementById('notifVideoUrl')?.value || '').trim() || null;
+      const publishTime = document.getElementById('notifPublishTime')?.value ? new Date(document.getElementById('notifPublishTime').value).toISOString() : new Date().toISOString();
+      const expireTime = document.getElementById('notifExpireTime')?.value ? new Date(document.getElementById('notifExpireTime').value).toISOString() : null;
+
+      // Pack metadata into JSON string to maintain schema compatibility with any database version
+      const mediaMeta = {
+        video_url: videoUrl,
+        attachments: attachedFiles,
+        publish_time: publishTime,
+        expire_time: expireTime
+      };
 
       const payload = {
         title,
@@ -781,11 +1169,14 @@
         type,
         link: link || null,
         image_url: imageUrl,
+        video_url: videoUrl,
+        attachments: attachedFiles.length > 0 ? attachedFiles : null,
+        media_meta: mediaMeta,
         target_audience: audience,
-        target_users: targetEmails, // รายชื่ออีเมลผู้รับเฉพาะบุคคล
+        target_users: targetEmails,
         sender_email: adminEmail,
         is_active: true,
-        created_at: new Date().toISOString()
+        created_at: publishTime
       };
 
       try {
@@ -796,12 +1187,30 @@
           // พยายามบันทึกข้อมูลแจ้งเตือน
           let { data, error } = await client.from('notifications').insert([payload]);
           
-          // หากตารางใน Supabase ยังไม่ได้เพิ่มคอลัมน์ target_users หรือ image_url ให้ตัดฟิลด์ออกแล้ว retry
-          if (error && (error.message?.includes('target_users') || error.message?.includes('image_url') || error.code === 'PGRST204' || error.message?.includes('column'))) {
-            const fallbackPayload = Object.assign({}, payload);
-            if (error.message?.includes('target_users')) delete fallbackPayload.target_users;
-            if (error.message?.includes('image_url')) delete fallbackPayload.image_url;
-            const retryRes = await client.from('notifications').insert([fallbackPayload]);
+          // หากตารางใน Supabase ยังไม่มีคอลัมน์เฉพาะ (เช่น video_url, attachments, media_meta, target_users) ให้ encode ลงใน message หรือตัดฟิลด์ออกอย่างชาญฉลาด
+          if (error && (error.code === 'PGRST204' || error.message?.includes('column') || error.message?.includes('does not exist'))) {
+            console.warn('[Admin Broadcast] Schema adaptation: Retrying with compatible payload structure...', error.message);
+            const fallbackPayload = {
+              title: payload.title,
+              // Encode media and attachments into JSON tag inside message if column not exist
+              message: payload.message + (payload.media_meta ? '\n\n[MEDIA_META:' + JSON.stringify(payload.media_meta) + ']' : ''),
+              type: payload.type,
+              link: payload.link,
+              sender_email: payload.sender_email,
+              target_audience: payload.target_audience,
+              is_active: true,
+              created_at: payload.created_at
+            };
+            if (payload.image_url) fallbackPayload.image_url = payload.image_url;
+            if (payload.target_users) fallbackPayload.target_users = payload.target_users;
+
+            let retryRes = await client.from('notifications').insert([fallbackPayload]);
+            if (retryRes.error) {
+              // Further minimal fallback
+              delete fallbackPayload.target_users;
+              delete fallbackPayload.image_url;
+              retryRes = await client.from('notifications').insert([fallbackPayload]);
+            }
             error = retryRes.error;
           }
 
@@ -876,6 +1285,8 @@
         const targetCountTxt = audience === 'specific' ? `(เฉพาะบุคคล ${selectedStudents.length} คน)` : '(ทุกคนในระบบ)';
         alert(`ยิงกระจายข้อความแจ้งเตือนสำเร็จแล้ว! ระบบส่ง Push เข้าเครื่องนักศึกษา ${targetCountTxt} เรียบร้อยแล้ว`);
         document.getElementById('broadcastForm').reset();
+        attachedFiles = [];
+        renderAttachedFiles();
         clearSelectedStudents();
         toggleAudienceMode();
         // Restore remembered keys
@@ -947,6 +1358,28 @@
           </div>
         ` : '';
 
+        // Extract metadata if exists
+        let meta = item.media_meta;
+        if (typeof meta === 'string') {
+          try { meta = JSON.parse(meta); } catch(e){}
+        } else if (!meta && item.message && item.message.includes('[MEDIA_META:')) {
+          try {
+            const jsonPart = item.message.split('[MEDIA_META:')[1].split(']')[0];
+            meta = JSON.parse(jsonPart);
+          } catch(e){}
+        }
+
+        const hasVideo = item.video_url || meta?.video_url;
+        const attachmentsList = item.attachments || meta?.attachments || [];
+        
+        let mediaBadges = '';
+        if (hasVideo) {
+          mediaBadges += `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-sky-500/15 text-sky-300 text-[9px] font-mono border border-sky-500/30"><i class="bi bi-camera-video"></i> Video</span> `;
+        }
+        if (attachmentsList && attachmentsList.length > 0) {
+          mediaBadges += `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 text-[9px] font-mono border border-emerald-500/30"><i class="bi bi-paperclip"></i> ${attachmentsList.length} ไฟล์</span> `;
+        }
+
         return `
           <tr class="hover:bg-white/5 transition">
             <td class="py-3 px-3 font-mono text-[11px] text-slate-400">${timeStr}</td>
@@ -955,7 +1388,7 @@
               <div class="flex items-start gap-2.5">
                 ${imgThumb}
                 <div class="min-w-0">
-                  <strong class="text-white block text-xs">${item.title || '-'}</strong>
+                  <div class="flex items-center gap-1.5 flex-wrap"><strong class="text-white block text-xs">${item.title || '-'}</strong> ${mediaBadges}</div>
                   <span class="text-slate-400 text-[11px] line-clamp-1">${item.message || '-'}</span>
                 </div>
               </div>
@@ -1007,6 +1440,7 @@
       if (savedOsAppId && document.getElementById('osAppId')) document.getElementById('osAppId').value = savedOsAppId;
       if (savedOsRestKey && document.getElementById('osRestKey')) document.getElementById('osRestKey').value = savedOsRestKey;
 
+      initDateTimePickers();
       updateLivePreview();
       loadBroadcastHistory();
     });

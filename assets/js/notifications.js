@@ -159,6 +159,32 @@
       }, 3000);
     },
 
+    // Helper parse item media & attachments
+    parseItemMedia(item) {
+      if (!item) return { cleanMessage: '', videoUrl: null, attachments: [], publishDate: null };
+      let meta = item.media_meta;
+      let cleanMessage = item.message || '';
+      
+      if (typeof meta === 'string') {
+        try { meta = JSON.parse(meta); } catch(e){}
+      } else if (!meta && cleanMessage.includes('[MEDIA_META:')) {
+        try {
+          const parts = cleanMessage.split('[MEDIA_META:');
+          cleanMessage = parts[0].trim();
+          const jsonStr = parts[1].split(']')[0];
+          meta = JSON.parse(jsonStr);
+        } catch(e){}
+      }
+
+      return {
+        cleanMessage: cleanMessage,
+        videoUrl: item.video_url || meta?.video_url || null,
+        attachments: item.attachments || meta?.attachments || [],
+        publishDate: meta?.publish_time || item.created_at,
+        expireDate: meta?.expire_time || null
+      };
+    },
+
     // 4. In-App Rich Banner Toast (พร้อมภาพประกอบถ้ามี)
     showToast(item) {
       if (!item) return;
@@ -175,9 +201,38 @@
       const toast = document.createElement('div');
       toast.className = 'pointer-events-auto rounded-2xl bg-[#0A0D1E]/95 backdrop-blur-2xl border border-white/15 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.85)] flex flex-col gap-2.5 transform -translate-y-4 opacity-0 transition-all duration-300 relative overflow-hidden group cursor-pointer';
 
+      const parsed = this.parseItemMedia(item);
       const imgHtml = item.image_url ? `
-        <div class="w-full h-32 rounded-xl overflow-hidden bg-black/40 border border-white/10 mt-1 relative">
+        <div class="w-full h-36 rounded-xl overflow-hidden bg-black/40 border border-white/10 mt-1 relative">
           <img src="${item.image_url}" alt="Illustration" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.remove()">
+        </div>
+      ` : '';
+
+      const vidHtml = parsed.videoUrl ? `
+        <div class="w-full rounded-xl overflow-hidden bg-black/60 border border-white/10 mt-1 relative" onclick="event.stopPropagation()">
+          <video src="${parsed.videoUrl}" controls class="w-full max-h-48 object-cover"></video>
+        </div>
+      ` : '';
+
+      const filesHtml = (parsed.attachments && parsed.attachments.length > 0) ? `
+        <div class="pt-2 border-t border-white/10 space-y-1.5" onclick="event.stopPropagation()">
+          <div class="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
+            <i class="bi bi-paperclip"></i>
+            <span>ไฟล์แนบดาวน์โหลด (${parsed.attachments.length} ไฟล์):</span>
+          </div>
+          <div class="space-y-1">
+            ${parsed.attachments.map(f => `
+              <a href="${f.url}" target="_blank" download class="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-white/10 text-xs transition">
+                <span class="flex items-center gap-2 truncate text-slate-200">
+                  <i class="bi bi-file-earmark-arrow-down-fill text-emerald-400 text-sm"></i>
+                  <span class="truncate">${f.name}</span>
+                </span>
+                <span class="text-[10px] font-mono text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-lg border border-emerald-500/30 whitespace-nowrap">
+                  ดาวน์โหลด ${f.size ? '(' + f.size + ')' : ''}
+                </span>
+              </a>
+            `).join('')}
+          </div>
         </div>
       ` : '';
 
@@ -192,13 +247,15 @@
               <span class="text-[10px] text-slate-400 font-mono">เมื่อสักครู่</span>
             </div>
             <h4 class="text-xs sm:text-sm font-bold text-white line-clamp-1">${item.title || 'ประกาศใหม่'}</h4>
-            <p class="text-xs text-slate-300 mt-0.5 line-clamp-2 leading-relaxed">${item.message || ''}</p>
+            <p class="text-xs text-slate-300 mt-0.5 line-clamp-3 leading-relaxed">${parsed.cleanMessage}</p>
           </div>
           <button type="button" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition flex-shrink-0" title="ปิด">
             <i class="bi bi-x-lg text-xs"></i>
           </button>
         </div>
         ${imgHtml}
+        ${vidHtml}
+        ${filesHtml}
         ${item.link ? `
           <div class="pt-1.5 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#FF7A29]">
             <span class="flex items-center gap-1.5">
@@ -446,12 +503,43 @@
     listEl.innerHTML = notificationsList.map(item => {
       const isUnread = !readIds.includes(item.id);
       const meta = getTypeMeta(item.type);
-      const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('th-TH', {
+      const parsed = NotificationEngine.parseItemMedia(item);
+      const dateStr = parsed.publishDate ? new Date(parsed.publishDate).toLocaleDateString('th-TH', {
         day: 'numeric',
         month: 'short',
+        year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
-      }) : 'เมื่อสักครู่';
+      }) + ' น.' : 'เมื่อสักครู่';
+
+      let mediaPills = '';
+      if (parsed.videoUrl) {
+        mediaPills += '<span class="inline-flex items-center gap-1 text-[9px] font-mono text-sky-400 bg-sky-500/10 px-1.5 py-0.2 rounded border border-sky-500/20"><i class="bi bi-camera-video"></i> วิดีโอ</span> ';
+      }
+      if (parsed.attachments && parsed.attachments.length > 0) {
+        mediaPills += `<span class="inline-flex items-center gap-1 text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20"><i class="bi bi-paperclip"></i> ${parsed.attachments.length} ไฟล์</span> `;
+      }
+
+      const filesPreview = (parsed.attachments && parsed.attachments.length > 0) ? `
+        <div class="mt-2 space-y-1" onclick="event.stopPropagation()">
+          ${parsed.attachments.slice(0, 2).map(f => `
+            <a href="${f.url}" target="_blank" download class="flex items-center justify-between p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-[10px] text-emerald-300 transition">
+              <span class="truncate flex items-center gap-1.5">
+                <i class="bi bi-file-earmark-arrow-down-fill text-emerald-400"></i>
+                <span class="truncate">${f.name}</span>
+              </span>
+              <span class="text-[9px] font-mono text-slate-400">${f.size || 'Download'}</span>
+            </a>
+          `).join('')}
+          ${parsed.attachments.length > 2 ? `<p class="text-[9px] text-slate-500 text-right">+ อีก ${parsed.attachments.length - 2} ไฟล์</p>` : ''}
+        </div>
+      ` : '';
+
+      const vidPreview = parsed.videoUrl ? `
+        <div class="mt-2 rounded-xl overflow-hidden bg-black/60 border border-white/10 relative" onclick="event.stopPropagation()">
+          <video src="${parsed.videoUrl}" controls class="w-full max-h-36 object-cover"></video>
+        </div>
+      ` : '';
 
       const thumbImg = item.image_url ? `
         <div class="w-14 h-14 rounded-xl overflow-hidden bg-black/50 border border-white/10 flex-shrink-0 relative">
@@ -460,21 +548,28 @@
       ` : '';
 
       return `
-        <div class="p-3.5 hover:bg-white/5 transition-colors flex gap-3 cursor-pointer ${isUnread ? 'bg-orange-500/[0.04]' : 'opacity-85'}"
+        <div class="p-3.5 hover:bg-white/5 transition-colors flex flex-col gap-2 cursor-pointer border-b border-white/5 ${isUnread ? 'bg-orange-500/[0.04]' : 'opacity-85'}"
           onclick="window.NotificationEngine.onItemClick('${item.id}', '${item.link || ''}')">
-          <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 border ${meta.iconColor} shadow-inner">
-            <i class="bi ${meta.biIcon} text-sm"></i>
-          </div>
-          <div class="flex-grow min-w-0">
-            <div class="flex items-center justify-between gap-1 mb-1">
-              <span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${meta.badgeClass}">${meta.tag}</span>
-              <span class="text-[10px] text-slate-500 font-mono">${dateStr}</span>
+          <div class="flex gap-3">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 border ${meta.iconColor} shadow-inner">
+              <i class="bi ${meta.biIcon} text-sm"></i>
             </div>
-            <h4 class="text-xs font-bold text-white line-clamp-1 ${isUnread ? 'text-[#FF7A29]' : ''}">${item.title || 'ประกาศ'}</h4>
-            <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">${item.message || ''}</p>
+            <div class="flex-grow min-w-0">
+              <div class="flex items-center justify-between gap-1 mb-1">
+                <div class="flex items-center gap-1 flex-wrap">
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${meta.badgeClass}">${meta.tag}</span>
+                  ${mediaPills}
+                </div>
+                <span class="text-[10px] text-slate-500 font-mono">${dateStr}</span>
+              </div>
+              <h4 class="text-xs font-bold text-white line-clamp-1 ${isUnread ? 'text-[#FF7A29]' : ''}">${item.title || 'ประกาศ'}</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">${parsed.cleanMessage}</p>
+            </div>
+            ${thumbImg}
+            ${isUnread ? '<div class="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0 mt-2 shadow-[0_0_6px_rgba(244,63,94,0.8)]"></div>' : ''}
           </div>
-          ${thumbImg}
-          ${isUnread ? '<div class="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0 mt-2 shadow-[0_0_6px_rgba(244,63,94,0.8)]"></div>' : ''}
+          ${vidPreview}
+          ${filesPreview}
         </div>
       `;
     }).join('');
