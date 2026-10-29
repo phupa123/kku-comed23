@@ -201,6 +201,9 @@ window.ComedCampaignManager = {
                   bannerImage: extraMeta.bannerImage || item.banner_image || '',
                   galleryImages: extraMeta.galleryImages || item.gallery_images || [],
                   shirtSizes: extraMeta.shirtSizes !== undefined ? extraMeta.shirtSizes : (item.shirt_sizes !== undefined ? item.shirt_sizes : []),
+                  customAmounts: extraMeta.customAmounts || matchedLocal.customAmounts || {},
+                  displayConfig: extraMeta.displayConfig || matchedLocal.displayConfig || { showBanner: true, showDetails: true, showOptionsSelector: true },
+                  selectableOptions: extraMeta.selectableOptions !== undefined ? extraMeta.selectableOptions : (matchedLocal.selectableOptions || []),
                   targetMode: extraMeta.targetMode || item.target_mode || 'all',
                   eligibleStudentIds: extraMeta.eligibleStudentIds !== undefined ? extraMeta.eligibleStudentIds : (item.eligible_student_ids || matchedLocal.eligibleStudentIds || []),
                   exemptedStudentIds: extraMeta.exemptedStudentIds !== undefined ? extraMeta.exemptedStudentIds : (item.exempted_student_ids || matchedLocal.exemptedStudentIds || []),
@@ -223,6 +226,26 @@ window.ComedCampaignManager = {
   },
 
   // Helper: ตรวจสอบว่านักศึกษาคนนี้ต้องชำระในแคมเปญนี้หรือไม่
+  getStudentDueAmount: function(campaign, studentId) {
+    if (!campaign) return 0;
+    const defaultAmount = Number(campaign.amount || 0);
+    if (!studentId) return defaultAmount;
+    const cleanId = String(studentId).trim();
+    const cleanIdNoDash = cleanId.replace(/-/g, '');
+
+    if (campaign.customAmounts && typeof campaign.customAmounts === 'object') {
+      if (campaign.customAmounts[cleanId] !== undefined) {
+        const customVal = parseFloat(campaign.customAmounts[cleanId]);
+        if (!isNaN(customVal)) return customVal;
+      }
+      if (campaign.customAmounts[cleanIdNoDash] !== undefined) {
+        const customVal = parseFloat(campaign.customAmounts[cleanIdNoDash]);
+        if (!isNaN(customVal)) return customVal;
+      }
+    }
+    return defaultAmount;
+  },
+
   isStudentEligible: function(campaign, studentId) {
     if (!campaign || !studentId) return true;
     const cleanId = String(studentId).trim();
@@ -298,6 +321,9 @@ window.ComedCampaignManager = {
             if (c.bgImage !== undefined) parsedMeta.bgImage = c.bgImage;
             if (c.bannerImage !== undefined) parsedMeta.bannerImage = c.bannerImage;
             if (c.galleryImages !== undefined) parsedMeta.galleryImages = c.galleryImages;
+            if (c.customAmounts !== undefined) parsedMeta.customAmounts = c.customAmounts;
+            if (c.displayConfig !== undefined) parsedMeta.displayConfig = c.displayConfig;
+            if (c.selectableOptions !== undefined) parsedMeta.selectableOptions = c.selectableOptions;
             if (c.slipProvider !== undefined) parsedMeta.slipProvider = c.slipProvider;
             if (c.slipProviders !== undefined) parsedMeta.slipProviders = c.slipProviders;
             metaClosedReason = JSON.stringify(parsedMeta);

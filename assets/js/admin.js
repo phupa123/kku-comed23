@@ -1,3 +1,202 @@
+// =========================================================================
+// CAMPAIGN SHOWCASE MEDIA & SELECTABLE OPTIONS LOGIC (assets/js/admin.js)
+// =========================================================================
+
+let currentEditingCampaignOptions = []; // Array of { id, name, detail, price }
+
+// Toggle Options Builder Container visibility
+window.toggleSelectableOptionsSection = function(enabled) {
+  const container = document.getElementById('campSelectableOptionsSection');
+  if (container) {
+    if (enabled) {
+      container.classList.remove('hidden');
+    } else {
+      container.classList.add('hidden');
+    }
+  }
+};
+
+// Add new empty Option Item
+window.addNewCampaignOptionItem = function(initialData = null) {
+  const optId = initialData && initialData.id ? initialData.id : 'opt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+  const opt = {
+    id: optId,
+    name: initialData && initialData.name ? initialData.name : '',
+    detail: initialData && initialData.detail ? initialData.detail : '',
+    price: initialData && initialData.price !== undefined ? parseFloat(initialData.price) : 0
+  };
+  currentEditingCampaignOptions.push(opt);
+  renderCampaignOptionsRows();
+};
+
+// Remove Option Item by id
+window.removeCampaignOptionItem = function(optId) {
+  currentEditingCampaignOptions = currentEditingCampaignOptions.filter(o => o.id !== optId);
+  renderCampaignOptionsRows();
+};
+
+// Update Option Field
+window.updateCampaignOptionField = function(optId, field, value) {
+  const opt = currentEditingCampaignOptions.find(o => o.id === optId);
+  if (!opt) return;
+  if (field === 'price') {
+    opt.price = parseFloat(value) || 0;
+  } else {
+    opt[field] = value;
+  }
+};
+
+// Render Option Rows in Modal
+window.renderCampaignOptionsRows = function() {
+  const container = document.getElementById('campaignOptionsRowsList');
+  if (!container) return;
+
+  if (currentEditingCampaignOptions.length === 0) {
+    container.innerHTML = `
+      <div class="p-3 rounded-xl bg-slate-900/40 border border-slate-800 text-center text-xs text-slate-500">
+        ยังไม่มีตัวเลือกสินค้า คลิกที่ปุ่ม <strong>"+ เพิ่มตัวเลือก"</strong> เพื่อสร้างตัวเลือก (เช่น ไซส์เสื้อ, รายการของที่ระลึก ฯลฯ)
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = currentEditingCampaignOptions.map((opt, idx) => `
+    <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 transition hover:border-slate-700">
+      <div class="flex items-center gap-2 sm:w-1/3">
+        <span class="text-[10px] font-mono text-slate-500 w-4 text-center">#${idx + 1}</span>
+        <input type="text" value="${escapeHtml(opt.name)}" 
+          placeholder="ชื่อตัวเลือก (เช่น ไซส์ M, เซ็ต A)"
+          oninput="updateCampaignOptionField('${opt.id}', 'name', this.value)"
+          class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-amber-400">
+      </div>
+      <div class="sm:flex-1">
+        <input type="text" value="${escapeHtml(opt.detail)}" 
+          placeholder="รายละเอียด (เช่น อก 38 นิ้ว, แขนสั้น)"
+          oninput="updateCampaignOptionField('${opt.id}', 'detail', this.value)"
+          class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs outline-none focus:border-amber-400">
+      </div>
+      <div class="flex items-center gap-2 sm:w-36">
+        <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-700 w-full">
+          <span class="text-[10px] text-amber-400 font-bold">฿</span>
+          <input type="number" step="0.01" min="0" value="${opt.price}"
+            placeholder="0"
+            oninput="updateCampaignOptionField('${opt.id}', 'price', this.value)"
+            class="w-full bg-transparent text-white font-mono text-xs text-right outline-none">
+        </div>
+        <button type="button" onclick="removeCampaignOptionItem('${opt.id}')"
+          class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition cursor-pointer flex-shrink-0" title="ลบตัวเลือกนี้">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Media Preview & Type Detection (Image, GIF, Video MP4/WebM)
+window.updateMediaPreview = function(url) {
+  const imgEl = document.getElementById('campBannerPreviewImg');
+  const vidEl = document.getElementById('campBannerPreviewVideo');
+  const emptyNotice = document.getElementById('campBannerEmptyNotice');
+  const textIndicator = document.getElementById('mediaTypeIndicatorText');
+
+  if (!url || !url.trim()) {
+    if (imgEl) { imgEl.src = ''; imgEl.classList.add('hidden'); }
+    if (vidEl) { vidEl.src = ''; vidEl.classList.add('hidden'); }
+    if (emptyNotice) emptyNotice.classList.remove('hidden');
+    if (textIndicator) textIndicator.textContent = 'ยังไม่ได้ระบุสื่อประกอบ';
+    return;
+  }
+
+  const cleanUrl = url.trim();
+  const isVideo = cleanUrl.match(/\.(mp4|webm|mov)($|\?)/i) || cleanUrl.includes('video/upload');
+  const isGif = cleanUrl.match(/\.gif($|\?)/i);
+
+  if (emptyNotice) emptyNotice.classList.add('hidden');
+
+  if (isVideo) {
+    if (imgEl) imgEl.classList.add('hidden');
+    if (vidEl) {
+      vidEl.src = cleanUrl;
+      vidEl.classList.remove('hidden');
+      vidEl.load();
+    }
+    if (textIndicator) textIndicator.textContent = '🎥 กำลังใช้งานวิดีโอประกอบ (MP4 / WebM)';
+  } else {
+    if (vidEl) { vidEl.src = ''; vidEl.classList.add('hidden'); }
+    if (imgEl) {
+      imgEl.src = cleanUrl;
+      imgEl.classList.remove('hidden');
+    }
+    if (textIndicator) {
+      textIndicator.textContent = isGif ? '✨ กำลังใช้งานภาพเคลื่อนไหว (GIF Animation)' : '🖼️ กำลังใช้งานภาพประกอบ (Static Image)';
+    }
+  }
+};
+
+// Handle File Upload for Showcase Media (Image, GIF, Video MP4)
+window.handleMediaShowcaseUpload = async function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 50 * 1024 * 1024) {
+    alert("⚠️ ขนาดไฟล์ใหญ่เกินไป กรุณาเลือกไฟล์ขนาดไม่เกิน 50MB");
+    event.target.value = "";
+    return;
+  }
+
+  const inputEl = document.getElementById('campBannerImageInput');
+  const isVideo = file.type.startsWith('video/');
+
+  // Read Local Object URL or Data URL for instant live feedback
+  const localPreviewUrl = URL.createObjectURL(file);
+  updateMediaPreview(localPreviewUrl);
+
+  // Background upload via MultiCloudUploader (Cloudinary/Catbox handles video/gif perfectly)
+  if (window.MultiCloudUploader) {
+    if (typeof showToastNotification === 'function') {
+      showToastNotification(`☁️ กำลังส่ง${isVideo ? 'วิดีโอ' : 'ภาพ'}ขึ้น Cloud...`);
+    }
+    try {
+      const selectedProvider = isVideo ? 'catbox' : 'cloudinary';
+      const res = await window.MultiCloudUploader.upload(file, {
+        preferredProvider: selectedProvider,
+        category: 'สื่อประกอบกิจกรรม',
+        onProgress: (pct, msg) => {
+          if (typeof showToastNotification === 'function' && pct < 100) {
+            showToastNotification(`☁️ ส่งสื่อ (${pct}%)...`);
+          }
+        }
+      });
+
+      if (res && res.url) {
+        if (inputEl) inputEl.value = res.url;
+        updateMediaPreview(res.url);
+        if (typeof showToastNotification === 'function') {
+          showToastNotification(`🎉 อัปโหลดสื่อขึ้น Cloud สำเร็จแล้ว!`);
+        }
+      }
+    } catch(err) {
+      console.warn("Media upload error:", err);
+      // Fallback: convert small files to Base64
+      if (file.size < 4 * 1024 * 1024) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          if (inputEl) inputEl.value = e.target.result;
+          updateMediaPreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  }
+};
+
 /**
  * =========================================================================
  * ADMIN DASHBOARD LOGIC - assets/js/admin.js
@@ -655,6 +854,16 @@ function toggleShirtConfigFields(enabled) {
 }
 
 function openCreateCampaignModal() {
+  currentEditingCampaignOptions = [];
+  const cbBanner = document.getElementById('toggleShowBanner');
+  const cbDetails = document.getElementById('toggleShowDetails');
+  const cbOptions = document.getElementById('toggleShowOptions');
+  if (cbBanner) cbBanner.checked = true;
+  if (cbDetails) cbDetails.checked = true;
+  if (cbOptions) cbOptions.checked = false;
+  toggleSelectableOptionsSection(false);
+  renderCampaignOptionsRows();
+  updateMediaPreview('');
   clearCampaignFormError();
   switchCampaignModalTab('basic');
   const form = document.getElementById('createCampaignForm');
@@ -1119,7 +1328,18 @@ async function handleSaveCampaignSubmit(e) {
   const isShirtChecked = !!document.getElementById('campIsShirtCheckbox')?.checked;
   const bannerInputVal = document.getElementById('campBannerImageInput')?.value.trim();
   const bannerPreviewSrc = document.getElementById('campBannerPreviewImg')?.src || '';
-  const bannerImage = isShirtChecked ? (bannerInputVal || bannerPreviewSrc) : '';
+  const bannerImage = bannerInputVal || bannerPreviewSrc || '';
+  const showBanner = !!document.getElementById('toggleShowBanner')?.checked;
+  const showDetails = !!document.getElementById('toggleShowDetails')?.checked;
+  const showOptions = !!document.getElementById('toggleShowOptions')?.checked;
+
+  const displayConfig = {
+    showBanner: showBanner,
+    showDetails: showDetails,
+    showOptionsSelector: showOptions
+  };
+
+  const cleanSelectableOptions = showOptions ? currentEditingCampaignOptions.filter(o => o.name && o.name.trim()) : [];
 
   const bgInputVal = document.getElementById('campBgImageInput')?.value.trim();
   const bgPreviewSrc = document.getElementById('campBgPreviewImg')?.src || '';
@@ -1155,6 +1375,9 @@ async function handleSaveCampaignSubmit(e) {
     promptpayTarget: accountNumber.replace(/[^0-9]/g, ''),
     qrImage: qrImage,
     bannerImage: bannerImage,
+    displayConfig: displayConfig,
+    selectableOptions: cleanSelectableOptions,
+    customAmounts: existingCampaign?.customAmounts || {},
     shirtSizes: isShirtChecked ? (existingCampaign?.shirtSizes || ['S', 'M', 'L', 'XL', '2XL', '3XL']) : [],
     targetMode: existingCampaign?.targetMode || 'all',
     eligibleStudentIds: existingCampaign?.eligibleStudentIds || [],
@@ -1353,6 +1576,22 @@ function renderAudienceList() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
+
+function updateStudentCustomAmount(studentId, val) {
+  const num = parseFloat(val);
+  if (!isNaN(num) && num >= 0) {
+    currentAudienceCustomAmounts[studentId] = num;
+  } else {
+    delete currentAudienceCustomAmounts[studentId];
+  }
+  renderAudienceList();
+}
+
+function clearStudentCustomAmount(studentId) {
+  delete currentAudienceCustomAmounts[studentId];
+  renderAudienceList();
+}
+
 function toggleStudentAudience(studentId, setExempted) {
   if (setExempted) {
     currentAudienceExemptedMap[studentId] = true;
@@ -1381,6 +1620,7 @@ async function saveAudienceSettings() {
   const exemptedIds = Object.keys(currentAudienceExemptedMap);
   currentAudienceCamp.exemptedStudentIds = exemptedIds;
   currentAudienceCamp.targetMode = "all";
+  currentAudienceCamp.customAmounts = currentAudienceCustomAmounts;
 
   await window.ComedCampaignManager.updateCampaign(currentAudienceCamp);
 

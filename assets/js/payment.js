@@ -484,7 +484,11 @@ async function renderCurrentCampaignQrCode(amountOverride) {
 
   const bQr = document.getElementById('bankQrImage');
   const spinner = document.getElementById('qrLoadingSpinner');
-  const amtToLock = (amountOverride !== undefined && amountOverride !== null) ? Number(amountOverride) : Number(c.amount || 190);
+  let effectiveTargetAmount = c.amount || 190;
+  if (currentSelectedStudent && window.ComedCampaignManager) {
+    effectiveTargetAmount = window.ComedCampaignManager.getStudentDueAmount(c, currentSelectedStudent.id);
+  }
+  const amtToLock = (amountOverride !== undefined && amountOverride !== null) ? Number(amountOverride) : Number(effectiveTargetAmount);
   currentEffectiveAmount = amtToLock;
 
   // Helper: show image, hide spinner
@@ -538,10 +542,15 @@ function renderShirtShowcaseUI(campaign) {
   const showcaseSection = document.getElementById('campaignShirtShowcaseSection');
   if (!showcaseSection) return;
 
-  const hasSizes = Array.isArray(campaign.shirtSizes) && campaign.shirtSizes.length > 0;
+  const disp = campaign.displayConfig || { showBanner: true, showDetails: true, showOptionsSelector: true };
+  const hasCustomOptions = Array.isArray(campaign.selectableOptions) && campaign.selectableOptions.length > 0;
+  const hasLegacyShirtSizes = Array.isArray(campaign.shirtSizes) && campaign.shirtSizes.length > 0;
+  const hasOptions = (hasCustomOptions || hasLegacyShirtSizes) && (disp.showOptionsSelector !== false);
+  const hasBanner = !!(campaign.bannerImage && campaign.bannerImage.trim()) && (disp.showBanner !== false);
+  const showDetails = disp.showDetails !== false;
 
-  // If campaign does not have sizes configured, hide all shirt showcase and student shirt size selector!
-  if (!hasSizes) {
+  // If both banner and options are disabled/hidden, hide showcase section
+  if (!hasBanner && !hasOptions && !showDetails) {
     showcaseSection.classList.add('hidden');
     const studentShirtBox = document.getElementById('studentShirtSizeCard');
     if (studentShirtBox) studentShirtBox.classList.add('hidden');
@@ -550,61 +559,89 @@ function renderShirtShowcaseUI(campaign) {
 
   showcaseSection.classList.remove('hidden');
 
-  // 1. Banner Image & Price
+  // 1. Media Banner (Image / GIF / Video MP4)
+  const bannerContainer = document.getElementById('showcaseMainBannerImg')?.parentElement;
   const bannerImg = document.getElementById('showcaseMainBannerImg');
-  const bannerUrl = campaign.bannerImage || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80';
-  if (bannerImg) bannerImg.src = bannerUrl;
+  const bannerUrl = campaign.bannerImage || '';
+  const isVideo = bannerUrl.match(/\.(mp4|webm|mov)($|\?)/i) || bannerUrl.includes('video/upload');
 
-  const priceTag = document.getElementById('showcasePriceTag');
-  if (priceTag) priceTag.textContent = `฿${Number(campaign.amount || 390).toLocaleString()}.-`;
-
-  const singlePriceEl = document.getElementById('showcaseSinglePriceText');
-  if (singlePriceEl) singlePriceEl.textContent = `฿${Number(campaign.amount || 390).toLocaleString()}`;
-
-  const titleEl = document.getElementById('showcaseTitleText');
-  if (titleEl) titleEl.textContent = campaign.title;
-
-  const subEl = document.getElementById('showcaseSubtitleText');
-  if (subEl) subEl.textContent = campaign.subtitle || 'เสื้อกิจกรรมและเสื้อเอกประจำรุ่น สวมใส่สบาย ระบายอากาศดี';
-
-  const catPill = document.getElementById('showcaseCategoryPill');
-  if (catPill) catPill.textContent = campaign.category || 'เสื้อสาขาวิชาเอก';
-
-  // 2. Thumbnails Gallery (if galleryImages provided)
-  const thumbRow = document.getElementById('showcaseThumbnailsRow');
-  const gallery = Array.isArray(campaign.galleryImages) && campaign.galleryImages.length > 0
-    ? campaign.galleryImages
-    : (hasBanner ? [bannerUrl] : []);
-
-  if (thumbRow) {
-    if (gallery.length > 1) {
-      thumbRow.classList.remove('hidden');
-      thumbRow.innerHTML = gallery.map((imgUrl, i) => `
-        <div onclick="switchShowcaseBanner('${escapeHtmlAttr(imgUrl)}')" class="w-16 h-12 rounded-xl overflow-hidden border-2 border-orange-300 hover:border-orange-500 cursor-pointer flex-shrink-0 transition-transform hover:scale-105 shadow-xs">
-          <img src="${escapeHtmlAttr(imgUrl)}" alt="thumb ${i+1}" class="w-full h-full object-cover">
-        </div>
-      `).join('');
+  if (bannerContainer) {
+    if (hasBanner && bannerUrl) {
+      bannerContainer.classList.remove('hidden');
+      if (isVideo) {
+        bannerContainer.innerHTML = `
+          <video src="${bannerUrl}" class="w-full h-full object-cover" autoplay loop muted playsinline></video>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-80 pointer-events-none"></div>
+          <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-white text-[11px] font-bold pointer-events-none">
+            <span class="flex items-center gap-1 drop-shadow-md text-slate-300">
+              <i data-lucide="video" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>วิดีโอพรีวิว</span>
+            </span>
+            <span id="showcaseSinglePriceText" class="font-mono font-black text-orange-400 text-sm">฿${Number(campaign.amount || 0).toLocaleString()}</span>
+          </div>
+        `;
+      } else {
+        bannerContainer.innerHTML = `
+          <img id="showcaseMainBannerImg" src="${bannerUrl}" alt="ภาพประกอบ" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-80 group-hover:opacity-95 transition-opacity"></div>
+          <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-white text-[11px] font-bold">
+            <span class="flex items-center gap-1 drop-shadow-md text-slate-300">
+              <i data-lucide="zoom-in" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>แตะดูรูปใหญ่</span>
+            </span>
+            <span id="showcaseSinglePriceText" class="font-mono font-black text-orange-400 text-sm">฿${Number(campaign.amount || 0).toLocaleString()}</span>
+          </div>
+        `;
+        bannerContainer.onclick = function() { openFullscreenModal(bannerUrl); };
+      }
     } else {
-      thumbRow.classList.add('hidden');
+      bannerContainer.classList.add('hidden');
     }
   }
 
-  // 3. Sizes Grid
-  const sizes = hasSizes ? campaign.shirtSizes : [
-    { size: "S", chest: "36\"", length: "26\"", price: campaign.amount || 290 },
-    { size: "M", chest: "38\"", length: "27\"", price: campaign.amount || 290 },
-    { size: "L", chest: "40\"", length: "28\"", price: campaign.amount || 290 },
-    { size: "XL", chest: "42\"", length: "29\"", price: campaign.amount || 290 },
-    { size: "2XL", chest: "44\"", length: "30\"", price: (campaign.amount || 290) + 20 },
-    { size: "3XL", chest: "48\"", length: "31\"", price: (campaign.amount || 290) + 40 }
-  ];
+  // 2. Titles & Badges
+  const priceTag = document.getElementById('showcasePriceTag');
+  if (priceTag) priceTag.textContent = `฿${Number(campaign.amount || 0).toLocaleString()}路上-;`.replace('路上-', '.-');
 
-  // Default selection: L or first
-  if (!currentSelectedShirtSize) {
-    currentSelectedShirtSize = sizes.find(s => s.size === 'L') || sizes[0];
+  const titleEl = document.getElementById('showcaseTitleText');
+  if (titleEl) {
+    titleEl.textContent = campaign.title;
+    if (!showDetails) titleEl.parentElement.classList.add('hidden');
+    else titleEl.parentElement.classList.remove('hidden');
   }
 
-  renderSizeButtons(sizes);
+  const subEl = document.getElementById('showcaseSubtitleText');
+  if (subEl) subEl.textContent = campaign.subtitle || 'รายละเอียดกิจกรรมประจำรุ่น';
+
+  const catPill = document.getElementById('showcaseCategoryPill');
+  if (catPill) catPill.textContent = campaign.category || 'กิจกรรม';
+
+  // 3. Render Custom Options or Shirt Sizes
+  const studentShirtBox = document.getElementById('studentShirtSizeCard');
+  if (hasOptions) {
+    if (studentShirtBox) studentShirtBox.classList.remove('hidden');
+
+    // Build unified options list
+    let optionsList = [];
+    if (hasCustomOptions) {
+      optionsList = campaign.selectableOptions.map(o => ({
+        size: o.name,
+        name: o.name,
+        chest: o.detail || '',
+        price: o.price !== undefined ? o.price : (campaign.amount || 0)
+      }));
+    } else if (hasLegacyShirtSizes) {
+      optionsList = campaign.shirtSizes.map(s => (typeof s === 'string' ? { size: s, name: s, chest: '', price: campaign.amount || 0 } : s));
+    }
+
+    if (!currentSelectedShirtSize && optionsList.length > 0) {
+      currentSelectedShirtSize = optionsList[0];
+    }
+
+    renderSizeButtons(optionsList);
+  } else {
+    if (studentShirtBox) studentShirtBox.classList.add('hidden');
+  }
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -1336,7 +1373,9 @@ function selectStudent(st) {
     if (paidSection) paidSection.classList.add('hidden');
     if (exemptedSection) exemptedSection.classList.remove('hidden');
   } else {
-    const currentPrice = currentSelectedShirtSize && currentSelectedShirtSize.price ? currentSelectedShirtSize.price : (currentCampaign.amount || 190);
+    // Calculate dynamic price (Custom Individual Amount > Selected Option/Shirt Price > Campaign Default Amount)
+    const individualAmount = window.ComedCampaignManager ? window.ComedCampaignManager.getStudentDueAmount(currentCampaign, st.id) : (currentCampaign.amount || 190);
+    const currentPrice = currentSelectedShirtSize && currentSelectedShirtSize.price ? currentSelectedShirtSize.price : individualAmount;
     if (statusBadgeContainer) {
       statusBadgeContainer.innerHTML = `
         <div class="px-4 py-2 rounded-2xl bg-rose-100 text-rose-900 border border-rose-300 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
