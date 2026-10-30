@@ -677,16 +677,17 @@ function renderSizeButtons(sizes) {
     if (!container) return;
     container.innerHTML = sizes.map(s => {
       const isSelected = currentSelectedShirtSize && (currentSelectedShirtSize.size === s.size);
+      const detailText = s.chest ? (s.chest.includes('อก') || s.chest.includes('นิ้ว') ? s.chest : 'อก ' + s.chest) : (s.detail || '');
       return `
         <button type="button" onclick="selectShirtSize('${s.size}')"
-          class="p-2.5 rounded-xl border-2 transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 text-center ${
+          class="p-2.5 sm:p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 text-center ${
             isSelected
-              ? 'bg-gradient-to-tr from-orange-500 to-amber-500 border-orange-500 text-white shadow-md shadow-orange-500/30 font-black'
-              : 'bg-white hover:bg-orange-50/60 border-slate-200 text-slate-800 font-bold hover:border-orange-300'
+              ? 'bg-gradient-to-tr from-[#E65A19] to-amber-500 border-orange-400 text-white shadow-lg shadow-orange-500/40 font-black ring-2 ring-orange-400/50 scale-[1.02]'
+              : 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-200 font-bold hover:border-orange-500/50 backdrop-blur-md'
           }">
-          <span class="text-sm font-black block">${s.size}</span>
-          <span class="text-[10px] ${isSelected ? 'text-orange-100' : 'text-slate-500'} block">อก ${s.chest}</span>
-          <span class="text-[9px] ${isSelected ? 'text-amber-200' : 'text-orange-600 font-bold'} block mt-0.5">฿${s.price || currentCampaign.amount}</span>
+          <span class="text-xs sm:text-sm font-black block truncate w-full tracking-tight">${s.size}</span>
+          ${detailText ? `<span class="text-[9px] sm:text-[10px] ${isSelected ? 'text-orange-100' : 'text-slate-400'} block truncate w-full mt-0.5">${detailText}</span>` : ''}
+          <span class="text-[10px] sm:text-xs font-mono font-bold ${isSelected ? 'text-amber-200' : 'text-orange-400'} block mt-1">฿${Number(s.price || currentCampaign.amount || 0).toLocaleString()}</span>
         </button>
       `;
     }).join('');
@@ -699,16 +700,28 @@ function renderSizeButtons(sizes) {
 
 function selectShirtSize(sizeName) {
   const c = currentCampaign;
-  const sizes = (c && Array.isArray(c.shirtSizes) && c.shirtSizes.length > 0)
-    ? c.shirtSizes
-    : [
-      { size: "S", chest: "36\"", length: "26\"", price: c.amount || 290 },
-      { size: "M", chest: "38\"", length: "27\"", price: c.amount || 290 },
-      { size: "L", chest: "40\"", length: "28\"", price: c.amount || 290 },
-      { size: "XL", chest: "42\"", length: "29\"", price: c.amount || 290 },
-      { size: "2XL", chest: "44\"", length: "30\"", price: (c.amount || 290) + 20 },
-      { size: "3XL", chest: "48\"", length: "31\"", price: (c.amount || 290) + 40 }
+  let sizes = [];
+
+  if (c && Array.isArray(c.selectableOptions) && c.selectableOptions.length > 0) {
+    sizes = c.selectableOptions.map(o => ({
+      size: o.name,
+      name: o.name,
+      chest: o.detail || '',
+      detail: o.detail || '',
+      price: o.price !== undefined ? o.price : (c.amount || 0)
+    }));
+  } else if (c && Array.isArray(c.shirtSizes) && c.shirtSizes.length > 0) {
+    sizes = c.shirtSizes.map(s => (typeof s === 'string' ? { size: s, name: s, chest: '', detail: '', price: c.amount || 0 } : s));
+  } else {
+    sizes = [
+      { size: "S", chest: "36\"", length: "26\"", price: c?.amount || 290 },
+      { size: "M", chest: "38\"", length: "27\"", price: c?.amount || 290 },
+      { size: "L", chest: "40\"", length: "28\"", price: c?.amount || 290 },
+      { size: "XL", chest: "42\"", length: "29\"", price: c?.amount || 290 },
+      { size: "2XL", chest: "44\"", length: "30\"", price: (c?.amount || 290) + 20 },
+      { size: "3XL", chest: "48\"", length: "31\"", price: (c?.amount || 290) + 40 }
     ];
+  }
 
   const found = sizes.find(s => s.size === sizeName) || sizes[0];
   currentSelectedShirtSize = found;
@@ -724,10 +737,13 @@ function updateSelectedSizeUI() {
   const price = document.getElementById('showcaseSelectedSizePrice');
   const studentBadge = document.getElementById('studentSelectedSizePriceBadge');
 
+  const detailInfo = currentSelectedShirtSize.chest || currentSelectedShirtSize.detail || '';
+  const displayLabel = detailInfo ? `${currentSelectedShirtSize.size} (${detailInfo})` : currentSelectedShirtSize.size;
+
   if (notice) notice.classList.remove('hidden');
-  if (label) label.textContent = `ไซส์ที่เลือก: ${currentSelectedShirtSize.size} (รอบอก ${currentSelectedShirtSize.chest} ยาว ${currentSelectedShirtSize.length})`;
+  if (label) label.textContent = `ตัวเลือกที่เลือก: ${displayLabel}`;
   if (price) price.textContent = `฿${Number(currentSelectedShirtSize.price).toLocaleString()}`;
-  if (studentBadge) studentBadge.textContent = `ไซส์ ${currentSelectedShirtSize.size} (฿${Number(currentSelectedShirtSize.price).toLocaleString()})`;
+  if (studentBadge) studentBadge.textContent = `${currentSelectedShirtSize.size} (฿${Number(currentSelectedShirtSize.price).toLocaleString()})`;
 
   // Also update bank detail amount if size has custom price
   const bAmtHi = document.getElementById('bankAmountHighlight');

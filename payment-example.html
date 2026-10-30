@@ -365,6 +365,24 @@
               </div>
             </div>
 
+            <!-- Showcase Quick Option / Size Buttons Grid -->
+            <div id="showcaseSizesGridSection" class="pt-2 border-t border-white/10 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>เลือกไซส์ / ตัวเลือกสินค้า</span>
+                </span>
+                <span id="showcaseSelectedSizePrice" class="font-mono font-black text-orange-400 text-xs">฿390</span>
+              </div>
+              <div id="showcaseSizesGrid" class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                <!-- Rendered dynamically via JS -->
+              </div>
+              <div id="showcaseSelectedSizeNotice" class="hidden p-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-[11px] text-orange-300 flex items-center justify-between">
+                <span id="showcaseSelectedSizeLabel" class="truncate font-medium">ตัวเลือกที่เลือก: ไซส์ M</span>
+                <span class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">QR ล็อคยอดอัตโนมัติ</span>
+              </div>
+            </div>
+
             <!-- Bank Transfer Credentials Card -->
             <div class="pt-3 border-t border-white/10 space-y-2.5">
               <div class="flex items-center justify-between text-xs">
@@ -518,23 +536,27 @@
           <!-- DYNAMIC CONTENT: UNPAID STATE (PAYMENT & SLIP UPLOAD) -->
           <div id="unpaidSection" class="pt-4 space-y-6">
 
-            <!-- Optional Shirt Size Selection for this Student (if campaign has sizes) -->
-            <div id="studentShirtSizeCard" class="hidden p-5 sm:p-6 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 rounded-3xl border-2 border-orange-200 shadow-sm space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-black text-slate-900 flex items-center gap-2">
-                  <i data-lucide="shirt" class="w-5 h-5 text-orange-600"></i>
-                  <span>เลือกไซส์เสื้อสาขาวิชาเอกของคุณ <span class="text-rose-500">*จำเป็น</span></span>
+            <!-- Optional Shirt Size / Variant Selection for this Student (Custom Selectable Options) -->
+            <div id="studentShirtSizeCard" class="hidden p-5 sm:p-6 rounded-3xl bg-slate-900/90 border border-orange-500/30 shadow-xl space-y-3 relative overflow-hidden backdrop-blur-xl">
+              <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-rose-500"></div>
+              
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-sm font-black text-white flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center border border-orange-500/30">
+                    <i data-lucide="check-square" class="w-4 h-4 text-orange-400"></i>
+                  </div>
+                  <span>เลือกไซส์ / ตัวเลือกสินค้าของคุณ <span class="text-rose-400">*จำเป็น</span></span>
                 </span>
-                <span class="text-xs font-bold text-orange-600 font-mono bg-white px-3 py-1 rounded-full border border-orange-200" id="studentSelectedSizePriceBadge">
-                  ฿290.00
+                <span class="text-xs font-bold text-orange-300 font-mono bg-orange-500/15 px-3 py-1 rounded-full border border-orange-500/30 shadow-xs" id="studentSelectedSizePriceBadge">
+                  ฿390.00
                 </span>
               </div>
-              <p class="text-xs text-slate-600">
-                กรุณาเลือกไซส์เสื้อที่ต้องการสั่งตัด (ระบบจะแนบไซส์นี้ไปพร้อมกับสลิปโอนเงินของคุณ)
+              <p class="text-xs text-slate-400">
+                คลิกเลือกไซส์หรือตัวเลือกที่ต้องการ (ระบบจะอัปเดตยอดโอนและสร้าง QR Code สำหรับตัวเลือกนั้นให้อัตโนมัติทันที)
               </p>
 
               <!-- Size Radio/Button Selector -->
-              <div id="studentSizeButtonsContainer" class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
+              <div id="studentSizeButtonsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 pt-1">
                 <!-- Rendered dynamically via JS -->
               </div>
             </div>

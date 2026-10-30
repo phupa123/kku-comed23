@@ -1096,6 +1096,26 @@ function openEditCampaignModal(campId) {
 
   const bannerPreview = document.getElementById('campBannerPreviewImg');
   if (bannerPreview) bannerPreview.src = camp.bannerImage || '';
+  if (typeof updateMediaPreview === 'function') {
+    updateMediaPreview(camp.bannerImage || '');
+  }
+
+  // Populate Display Switches and Custom Selectable Options
+  const dispConfig = camp.displayConfig || { showBanner: true, showDetails: true, showOptionsSelector: true };
+  const cbBanner = document.getElementById('toggleShowBanner');
+  const cbDetails = document.getElementById('toggleShowDetails');
+  const cbOptions = document.getElementById('toggleShowOptions');
+  if (cbBanner) cbBanner.checked = dispConfig.showBanner !== false;
+  if (cbDetails) cbDetails.checked = dispConfig.showDetails !== false;
+  if (cbOptions) cbOptions.checked = dispConfig.showOptionsSelector !== false;
+
+  currentEditingCampaignOptions = Array.isArray(camp.selectableOptions) ? camp.selectableOptions.map(o => ({ ...o })) : [];
+  if (typeof toggleSelectableOptionsSection === 'function') {
+    toggleSelectableOptionsSection(cbOptions ? cbOptions.checked : true);
+  }
+  if (typeof renderCampaignOptionsRows === 'function') {
+    renderCampaignOptionsRows();
+  }
 
   const bgInput = document.getElementById('campBgImageInput');
   if (bgInput) bgInput.value = camp.bgImage || '';

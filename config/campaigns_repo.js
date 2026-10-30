@@ -27,9 +27,48 @@ const DEFAULT_COMED_CAMPAIGNS = [
     promptpayTarget: "2362478173",
     qrImage: "qr_payment.png",
     bgImage: "", // URL ภาพพื้นหลังแคมเปญ
-    bannerImage: "",
+    bannerImage: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1280&auto=format&fit=crop",
     galleryImages: [],
-    shirtSizes: [],
+    shirtSizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
+    displayConfig: { showBanner: true, showDetails: true, showOptionsSelector: true },
+    selectableOptions: [
+      {
+            "id": "opt_s",
+            "name": "ไซส์ S",
+            "detail": "รอบอก 36 นิ้ว / ยาว 26 นิ้ว",
+            "price": 390
+      },
+      {
+            "id": "opt_m",
+            "name": "ไซส์ M",
+            "detail": "รอบอก 38 นิ้ว / ยาว 27 นิ้ว",
+            "price": 390
+      },
+      {
+            "id": "opt_l",
+            "name": "ไซส์ L",
+            "detail": "รอบอก 40 นิ้ว / ยาว 28 นิ้ว",
+            "price": 390
+      },
+      {
+            "id": "opt_xl",
+            "name": "ไซส์ XL",
+            "detail": "รอบอก 42 นิ้ว / ยาว 29 นิ้ว",
+            "price": 390
+      },
+      {
+            "id": "opt_2xl",
+            "name": "ไซส์ 2XL",
+            "detail": "รอบอก 44 นิ้ว / ยาว 30 นิ้ว (พิเศษ)",
+            "price": 410
+      },
+      {
+            "id": "opt_3xl",
+            "name": "ไซส์ 3XL",
+            "detail": "รอบอก 48 นิ้ว / ยาว 31 นิ้ว (พิเศษ)",
+            "price": 430
+      }
+],
     targetMode: "all", // "all" = ทุกคนต้องชำระ (เว้นแต่จะอยู่ใน exemptedStudentIds), "specific" = เฉพาะคนที่เลือกใน eligibleStudentIds
     eligibleStudentIds: [], // รหัสที่ต้องชำระ (ใช้เมื่อ targetMode === "specific")
     exemptedStudentIds: [], // รหัสที่ได้รับการยกเว้น (ไม่ต้องชำระ)
