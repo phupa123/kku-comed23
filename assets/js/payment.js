@@ -2381,42 +2381,42 @@ function renderStatusTable() {
     }
 
     const rowHighlightClass = isCurrentUser
-      ? 'bg-orange-500/10 border-l-4 border-l-orange-500 shadow-sm relative'
-      : 'hover:bg-slate-50/80 transition-colors';
+      ? 'bg-amber-500/20 hover:bg-amber-500/25 border-l-4 border-l-amber-400 ring-1 ring-amber-400/30 transition-all relative'
+      : 'hover:bg-white/[0.04] transition-colors';
 
     const currentUserBadge = isCurrentUser
-      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-sm ring-1 ring-orange-400/50 ml-1.5 animate-pulse"><i data-lucide="user" class="w-2.5 h-2.5"></i> บัญชีของคุณ</span>`
+      ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md ring-2 ring-amber-300/60 ml-1.5 animate-pulse"><i data-lucide="check-circle-2" class="w-3 h-3 text-slate-950"></i> บัญชีของคุณ</span>`
       : '';
 
     return `
       <tr class="${rowHighlightClass}">
-        <td class="p-4 text-center font-mono text-xs ${isCurrentUser ? 'text-orange-600 font-bold' : 'text-slate-400'}">${index + 1}</td>
-        <td class="p-4 font-mono font-bold ${isCurrentUser ? 'text-orange-600' : 'text-slate-800'}">
+        <td class="p-4 text-center font-mono text-xs ${isCurrentUser ? 'text-amber-300 font-black' : 'text-slate-400'}">${index + 1}</td>
+        <td class="p-4 font-mono font-bold ${isCurrentUser ? 'text-amber-300 font-black' : 'text-slate-200'}">
           ${st.id}
-          ${isCurrentUser ? '<div class="text-[10px] text-orange-500 font-sans font-bold">★ บัญชีที่เข้าสู่ระบบ</div>' : ''}
+          ${isCurrentUser ? '<div class="text-[10px] text-amber-400 font-sans font-black flex items-center gap-1 mt-0.5"><i data-lucide="sparkles" class="w-3 h-3"></i> บัญชีนี้เข้าสู่ระบบอยู่</div>' : ''}
         </td>
         <td class="p-4">
-          <div class="font-bold text-slate-900 flex items-center flex-wrap gap-1">
+          <div class="font-bold ${isCurrentUser ? 'text-white text-sm font-black' : 'text-slate-200'} flex items-center flex-wrap gap-1">
             <span>${st.name}</span>
             ${currentUserBadge}
           </div>
           ${sizeBadge}
         </td>
         <td class="p-4">
-          <span class="px-2.5 py-1 rounded-lg ${isCurrentUser ? 'bg-orange-500 text-white font-black' : 'bg-orange-50 text-orange-800 font-black border border-orange-200/80'} text-xs shadow-xs">
+          <span class="px-2.5 py-1 rounded-lg ${isCurrentUser ? 'bg-amber-400 text-slate-950 font-black ring-1 ring-amber-300 shadow-sm' : 'bg-orange-500/15 text-orange-300 font-black border border-orange-500/30'} text-xs shadow-xs">
             น้อง${st.nickname}
           </span>
         </td>
-        <td class="p-4 hidden md:table-cell text-slate-500 font-mono text-xs">${st.email}</td>
+        <td class="p-4 hidden md:table-cell ${isCurrentUser ? 'text-amber-200/90 font-bold' : 'text-slate-400'} font-mono text-xs">${st.email}</td>
         <td class="p-4 text-center">
           ${statusPill}
         </td>
         <td class="p-4 text-center">
           ${isPaid
-        ? `<button onclick="openStudentDetail('${st.id}')" class="px-3.5 py-1.5 ${isCurrentUser ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'} text-xs font-bold rounded-xl transition flex items-center gap-1.5 mx-auto shadow-xs cursor-pointer">
-                <i data-lucide="eye" class="w-3.5 h-3.5 ${isCurrentUser ? 'text-white' : 'text-slate-500'}"></i> ${isCurrentUser ? 'ดูสลิปของฉัน' : 'ดูหลักฐาน'}
+        ? `<button onclick="openStudentDetail('${st.id}')" class="px-3.5 py-1.5 ${isCurrentUser ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:from-amber-400 hover:to-orange-400 font-black ring-2 ring-amber-300/50' : 'bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10'} text-xs font-bold rounded-xl transition flex items-center gap-1.5 mx-auto shadow-sm cursor-pointer">
+                <i data-lucide="eye" class="w-3.5 h-3.5 ${isCurrentUser ? 'text-slate-950' : 'text-slate-400'}"></i> ${isCurrentUser ? 'ดูสลิปของฉัน' : 'ดูหลักฐาน'}
                </button>`
-        : `<button onclick="redirectToPayment('${st.id}')" class="px-3.5 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-black rounded-xl transition flex items-center gap-1.5 mx-auto border border-orange-200 shadow-xs cursor-pointer">
+        : `<button onclick="redirectToPayment('${st.id}')" class="px-3.5 py-1.5 ${isCurrentUser ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:from-amber-400 hover:to-orange-400 font-black ring-2 ring-amber-300/50 shadow-md' : 'bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 border border-orange-500/30'} text-xs font-black rounded-xl transition flex items-center gap-1.5 mx-auto shadow-xs cursor-pointer">
                 <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> ${isCurrentUser ? 'ชำระเงินของฉัน' : 'ไปหน้าจ่าย'}
                </button>`
       }

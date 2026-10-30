@@ -945,26 +945,63 @@
         </div>
       </div>
 
-      <!-- Traditional Table Container (Can switch to 3D Cards via toggle) -->
-      <div class="glass-surface rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+      <!-- Traditional Table & 3D Grid Container -->
+      <div class="glass-surface rounded-3xl overflow-hidden border border-white/10 shadow-2xl p-4 sm:p-6 space-y-4">
+        
+        <!-- View Mode Switcher Header -->
+        <div id="cyberViewModeControls" class="flex items-center justify-between gap-3 pb-4 border-b border-white/10 flex-wrap">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">โหมดการแสดงผล:</span>
+            <div class="flex items-center gap-1 p-1 rounded-xl bg-black/60 border border-white/10 text-xs shadow-inner">
+              <button type="button" id="btnViewModeCards" onclick="window.PaymentCyberUI ? window.PaymentCyberUI.setViewMode('cards') : null"
+                class="px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all bg-[#E65A19] text-white shadow-sm cursor-pointer">
+                <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                <span>การ์ด 3D Grid</span>
+              </button>
+              <button type="button" id="btnViewModeTable" onclick="window.PaymentCyberUI ? window.PaymentCyberUI.setViewMode('table') : null"
+                class="px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all text-slate-400 hover:text-white cursor-pointer">
+                <i data-lucide="table" class="w-3.5 h-3.5"></i>
+                <span>ตาราง Table</span>
+              </button>
+            </div>
+          </div>
+          <div class="text-xs text-slate-300 font-mono">
+            <span id="cyberRosterCounter">กำลังโหลดข้อมูล...</span>
+          </div>
+        </div>
+
+        <!-- 1. 3D Cards Grid Container -->
+        <div id="studentStatusCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- 2. Traditional Table Container -->
+        <div id="studentStatusTableWrapper" class="overflow-x-auto rounded-2xl border border-white/10 hidden">
+          <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="border-b border-white/10 bg-white/[0.02] text-[11px] font-black text-slate-400 uppercase tracking-wider">
-                <th class="py-3 px-4">#</th>
-                <th class="py-3 px-4">นักศึกษา</th>
-                <th class="py-3 px-4">รหัสนักศึกษา</th>
-                <th class="py-3 px-4">สถานะ</th>
-                <th class="py-3 px-4">ยอดชำระ</th>
-                <th class="py-3 px-4">เวลาชำระ</th>
-                <th class="py-3 px-4 text-right">หลักฐาน</th>
+              <tr class="border-b border-white/10 bg-white/[0.05] text-[11px] font-black text-slate-300 uppercase tracking-wider">
+                <th class="p-4 text-center w-12">ลำดับ</th>
+                <th class="p-4">รหัสนักศึกษา</th>
+                <th class="p-4">ชื่อ - นามสกุล</th>
+                <th class="p-4">ชื่อเล่น</th>
+                <th class="p-4 hidden md:table-cell">อีเมลนักศึกษา</th>
+                <th class="p-4 text-center">สถานะ</th>
+                <th class="p-4 text-center w-36">ดำเนินการ</th>
               </tr>
             </thead>
-            <tbody id="studentStatusTableBody" class="divide-y divide-white/5 text-xs">
+            <tbody id="studentStatusTableBody" class="divide-y divide-white/5">
               <!-- Rendered via JS -->
             </tbody>
           </table>
         </div>
+
+        <!-- Empty Results Message -->
+        <div id="tableEmptyMessage" class="hidden text-center py-12 space-y-2">
+          <i data-lucide="search-x" class="w-10 h-10 text-slate-500 mx-auto"></i>
+          <p class="text-sm font-bold text-slate-300">ไม่พบข้อมูลที่ตรงกับคำค้นหา</p>
+          <p class="text-xs text-slate-400">ลองตรวจสอบตัวสะกดหรือค้นหาด้วยคำอื่น</p>
+        </div>
+
       </div>
 
     </div>

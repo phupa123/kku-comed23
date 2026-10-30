@@ -121,20 +121,20 @@
   }
 
   function applyViewModeUI() {
-    const tableContainer = document.querySelector('#tabContentStatus .overflow-x-auto');
+    const tableContainer = document.getElementById('studentStatusTableWrapper') || document.querySelector('#tabContentStatus .overflow-x-auto');
     const cardsGrid = document.getElementById('studentStatusCardsGrid');
     const btnCards = document.getElementById('btnViewModeCards');
     const btnTable = document.getElementById('btnViewModeTable');
 
     if (btnCards && btnTable) {
       if (currentViewMode === 'cards') {
-        btnCards.className = 'px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all bg-[#E65A19] text-white shadow-sm cursor-pointer';
-        btnTable.className = 'px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all text-slate-400 hover:text-white cursor-pointer';
+        btnCards.className = 'px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all bg-[#E65A19] text-white shadow-sm cursor-pointer';
+        btnTable.className = 'px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all text-slate-400 hover:text-white cursor-pointer';
         if (tableContainer) tableContainer.classList.add('hidden');
         if (cardsGrid) cardsGrid.classList.remove('hidden');
       } else {
-        btnTable.className = 'px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all bg-[#E65A19] text-white shadow-sm cursor-pointer';
-        btnCards.className = 'px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all text-slate-400 hover:text-white cursor-pointer';
+        btnTable.className = 'px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all bg-[#E65A19] text-white shadow-sm cursor-pointer';
+        btnCards.className = 'px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 font-bold transition-all text-slate-400 hover:text-white cursor-pointer';
         if (tableContainer) tableContainer.classList.remove('hidden');
         if (cardsGrid) cardsGrid.classList.add('hidden');
       }
@@ -184,49 +184,49 @@
         : '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> ยังไม่จ่าย</span>';
 
       const cardBorderClass = isCurrentUser
-        ? 'border-2 border-orange-500/80 bg-orange-950/20 ring-2 ring-orange-500/30 shadow-lg shadow-orange-500/10'
-        : 'border border-white/5 bg-slate-900/60';
+        ? 'border-2 border-amber-400 bg-amber-950/40 ring-2 ring-amber-400/40 shadow-xl shadow-amber-500/20'
+        : 'border border-white/10 bg-slate-900/80';
 
       return `
         <div class="cyber-student-card p-4 flex flex-col justify-between ${cardBorderClass} subtle-hover space-y-3 relative overflow-hidden group">
           ${isCurrentUser ? `
-            <div class="absolute -top-6 -right-6 w-16 h-16 bg-orange-500/20 rounded-full blur-xl pointer-events-none"></div>
+            <div class="absolute -top-6 -right-6 w-20 h-20 bg-amber-400/30 rounded-full blur-xl pointer-events-none"></div>
           ` : ''}
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-1.5">
-              <span class="font-mono text-[10px] ${isCurrentUser ? 'text-orange-400 font-bold' : 'text-slate-500'}">#${String(idx + 1).padStart(2, '0')}</span>
+              <span class="font-mono text-[10px] ${isCurrentUser ? 'text-amber-300 font-black' : 'text-slate-400'}">#${String(idx + 1).padStart(2, '0')}</span>
               ${isCurrentUser ? `
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-xs animate-pulse flex items-center gap-1">
-                  <i data-lucide="user" class="w-2.5 h-2.5"></i> บัญชีของคุณ
+                <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 shadow-md ring-2 ring-amber-300/60 animate-pulse flex items-center gap-1">
+                  <i data-lucide="check-circle-2" class="w-2.5 h-2.5 text-slate-950"></i> บัญชีของคุณ
                 </span>
               ` : ''}
             </div>
             ${statusBadge}
           </div>
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-black/60 p-0.5 ${isCurrentUser ? 'border-2 border-orange-500' : 'border border-white/10'} overflow-hidden flex-shrink-0 relative group-hover:border-[#E65A19]/50 transition-colors">
+            <div class="w-12 h-12 rounded-2xl bg-black/60 p-0.5 ${isCurrentUser ? 'border-2 border-amber-400 ring-2 ring-amber-400/30' : 'border border-white/10'} overflow-hidden flex-shrink-0 relative group-hover:border-[#E65A19]/50 transition-colors">
               <img src="${avatarUrl}" alt="${st.name}" class="w-full h-full object-cover rounded-xl" loading="lazy">
             </div>
             <div class="min-w-0 flex-1">
-              <h4 class="font-bold text-white text-xs sm:text-sm group-hover:text-orange-300 transition-colors break-words leading-snug">
+              <h4 class="font-bold ${isCurrentUser ? 'text-white font-black' : 'text-white'} text-xs sm:text-sm group-hover:text-amber-300 transition-colors break-words leading-snug">
                 ${st.name}
               </h4>
               <div class="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 mt-1 flex-wrap">
-                <span class="text-amber-300 font-bold">น้อง${st.nickname}</span>
+                <span class="${isCurrentUser ? 'text-amber-300 font-black' : 'text-amber-400 font-bold'}">น้อง${st.nickname}</span>
                 <span>•</span>
-                <span class="${isCurrentUser ? 'text-orange-400 font-bold' : ''}">${st.id}</span>
+                <span class="${isCurrentUser ? 'text-amber-300 font-black' : 'text-slate-300'}">${st.id}</span>
               </div>
             </div>
           </div>
-          <div class="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
             ${isPaid
               ? `<button type="button" onclick="openStudentDetail('${st.id}')"
-                  class="w-full py-2 px-3 rounded-xl ${isCurrentUser ? 'bg-orange-600/30 hover:bg-orange-600/40 text-orange-200 border-orange-500/50' : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10'} text-xs font-bold transition flex items-center justify-center gap-1.5 border cursor-pointer">
-                  <i data-lucide="eye" class="w-3.5 h-3.5 ${isCurrentUser ? 'text-orange-400' : 'text-emerald-400'}"></i>
+                  class="w-full py-2 px-3 rounded-xl ${isCurrentUser ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:from-amber-400 hover:to-orange-400 font-black ring-2 ring-amber-300/40' : 'bg-white/10 hover:bg-white/15 text-slate-200 border-white/10'} text-xs font-bold transition flex items-center justify-center gap-1.5 border cursor-pointer">
+                  <i data-lucide="eye" class="w-3.5 h-3.5 ${isCurrentUser ? 'text-slate-950' : 'text-emerald-400'}"></i>
                   <span>${isCurrentUser ? 'ดูสลิปของฉัน' : 'ดูสลิป'}</span>
                 </button>`
               : `<button type="button" onclick="window.PaymentCyberUI.selectStudentQuick('${st.id}')"
-                  class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/20 active:scale-95 cursor-pointer">
+                  class="w-full py-2 px-3 rounded-xl ${isCurrentUser ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 hover:from-amber-300 hover:to-orange-400 font-black ring-2 ring-amber-300/50 shadow-md' : 'bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black'} text-xs transition flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer">
                   <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
                   <span>${isCurrentUser ? 'ชำระเงินของฉัน' : 'เลือกชำระเงิน'}</span>
                 </button>`
