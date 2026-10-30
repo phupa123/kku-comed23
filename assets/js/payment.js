@@ -2328,6 +2328,16 @@ function renderStatusTable() {
   if (!tbody) return;
   const searchVal = (document.getElementById('tableSearchInput')?.value || '').toLowerCase().trim();
 
+  // Get current logged-in user session to highlight user account
+  let loggedUser = null;
+  try {
+    const sStr = localStorage.getItem('COMED_USER_SESSION');
+    if (sStr) loggedUser = JSON.parse(sStr);
+  } catch(e) {}
+
+  const myCleanSid = loggedUser && loggedUser.studentId ? loggedUser.studentId.replace(/[-\s]/g, '').trim().toLowerCase() : '';
+  const myCleanEmail = loggedUser && loggedUser.email ? loggedUser.email.toLowerCase().trim() : '';
+
   let list = studentDatabase.filter(st => {
     const isPaid = paymentRecords[st.id] && paymentRecords[st.id].paid;
     if (currentFilter === 'paid' && !isPaid) return false;
@@ -2349,6 +2359,10 @@ function renderStatusTable() {
   if (emptyMsg) emptyMsg.classList.add('hidden');
 
   tbody.innerHTML = list.map((st, index) => {
+    const stCleanId = (st.id || '').replace(/[-\s]/g, '').trim().toLowerCase();
+    const stCleanEmail = (st.email || '').toLowerCase().trim();
+    const isCurrentUser = (myCleanSid && myCleanSid === stCleanId) || (myCleanEmail && myCleanEmail === stCleanEmail);
+
     const isPaid = paymentRecords[st.id] && paymentRecords[st.id].paid;
     const rec = paymentRecords[st.id];
     const sizeBadge = rec && rec.shirtSize 
@@ -2366,16 +2380,30 @@ function renderStatusTable() {
       statusPill = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-700 bg-rose-100/90 px-3 py-1 rounded-full border border-rose-300 shadow-xs"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>';
     }
 
+    const rowHighlightClass = isCurrentUser
+      ? 'bg-orange-500/10 border-l-4 border-l-orange-500 shadow-sm relative'
+      : 'hover:bg-slate-50/80 transition-colors';
+
+    const currentUserBadge = isCurrentUser
+      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-sm ring-1 ring-orange-400/50 ml-1.5 animate-pulse"><i data-lucide="user" class="w-2.5 h-2.5"></i> บัญชีของคุณ</span>`
+      : '';
+
     return `
-      <tr class="hover:bg-slate-50/80 transition-colors">
-        <td class="p-4 text-center text-slate-400 font-mono text-xs">${index + 1}</td>
-        <td class="p-4 font-mono font-bold text-slate-800">${st.id}</td>
+      <tr class="${rowHighlightClass}">
+        <td class="p-4 text-center font-mono text-xs ${isCurrentUser ? 'text-orange-600 font-bold' : 'text-slate-400'}">${index + 1}</td>
+        <td class="p-4 font-mono font-bold ${isCurrentUser ? 'text-orange-600' : 'text-slate-800'}">
+          ${st.id}
+          ${isCurrentUser ? '<div class="text-[10px] text-orange-500 font-sans font-bold">★ บัญชีที่เข้าสู่ระบบ</div>' : ''}
+        </td>
         <td class="p-4">
-          <div class="font-bold text-slate-900">${st.name}</div>
+          <div class="font-bold text-slate-900 flex items-center flex-wrap gap-1">
+            <span>${st.name}</span>
+            ${currentUserBadge}
+          </div>
           ${sizeBadge}
         </td>
         <td class="p-4">
-          <span class="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-800 text-xs font-black border border-orange-200/80 shadow-xs">
+          <span class="px-2.5 py-1 rounded-lg ${isCurrentUser ? 'bg-orange-500 text-white font-black' : 'bg-orange-50 text-orange-800 font-black border border-orange-200/80'} text-xs shadow-xs">
             น้อง${st.nickname}
           </span>
         </td>
@@ -2385,11 +2413,11 @@ function renderStatusTable() {
         </td>
         <td class="p-4 text-center">
           ${isPaid
-        ? `<button onclick="openStudentDetail('${st.id}')" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 mx-auto shadow-xs cursor-pointer">
-                <i data-lucide="eye" class="w-3.5 h-3.5 text-slate-500"></i> ดูหลักฐาน
+        ? `<button onclick="openStudentDetail('${st.id}')" class="px-3.5 py-1.5 ${isCurrentUser ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'} text-xs font-bold rounded-xl transition flex items-center gap-1.5 mx-auto shadow-xs cursor-pointer">
+                <i data-lucide="eye" class="w-3.5 h-3.5 ${isCurrentUser ? 'text-white' : 'text-slate-500'}"></i> ${isCurrentUser ? 'ดูสลิปของฉัน' : 'ดูหลักฐาน'}
                </button>`
         : `<button onclick="redirectToPayment('${st.id}')" class="px-3.5 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-black rounded-xl transition flex items-center gap-1.5 mx-auto border border-orange-200 shadow-xs cursor-pointer">
-                <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> ไปหน้าจ่าย
+                <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> ${isCurrentUser ? 'ชำระเงินของฉัน' : 'ไปหน้าจ่าย'}
                </button>`
       }
         </td>
@@ -2547,6 +2575,10 @@ function openStudentDetail(studentId) {
   const rawSlipUrl = record?.slipUrl || '';
   const previewImgUrl = formatDriveImageUrl(rawSlipUrl);
 
+  // Security check: only allow delete if logged-in user is the owner or admin
+  const authCheck = (typeof canUserManageSlip === 'function') ? canUserManageSlip(st.id) : { allowed: false };
+  const canDelete = authCheck && authCheck.allowed === true;
+
   const content = document.getElementById('studentDetailModalContent');
   if (!content) return;
 
@@ -2557,34 +2589,34 @@ function openStudentDetail(studentId) {
           ${st.nickname.slice(0, 1)}
         </div>
         <div>
-          <h4 class="font-black text-slate-900 text-lg">${st.name} (น้อง${st.nickname})</h4>
-          <p class="text-xs text-slate-500 font-mono">${st.id} • ${st.email}</p>
+          <h4 class="font-black text-white text-lg">${st.name} (น้อง${st.nickname})</h4>
+          <p class="text-xs text-slate-400 font-mono">${st.id} • ${st.email}</p>
         </div>
       </div>
 
-      <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs sm:text-sm">
+      <div class="bg-black/50 p-4 rounded-2xl border border-white/10 space-y-2 text-xs sm:text-sm">
         <div class="flex justify-between items-center">
-          <span class="text-slate-500">สถานะ:</span>
-          <span class="font-black ${isPaid ? 'text-emerald-600' : 'text-rose-600'}">
+          <span class="text-slate-400">สถานะ:</span>
+          <span class="font-black ${isPaid ? 'text-emerald-400' : 'text-rose-400'}">
             ${isPaid ? `ชำระเงินแล้ว (฿${(record?.amount || currentCampaign.amount || 190).toLocaleString()})` : 'ยังไม่ได้ชำระเงิน'}
           </span>
         </div>
         ${(isPaid && record?.shirtSize) ? `
           <div class="flex justify-between items-center">
-            <span class="text-slate-500">ไซส์เสื้อที่เลือก:</span>
-            <span class="px-2.5 py-0.5 rounded-lg bg-orange-100 text-orange-800 font-extrabold text-xs border border-orange-300">
+            <span class="text-slate-400">ไซส์เสื้อที่เลือก:</span>
+            <span class="px-2.5 py-0.5 rounded-lg bg-orange-500/20 text-orange-300 font-extrabold text-xs border border-orange-500/30">
               ไซส์ ${record.shirtSize}
             </span>
           </div>
         ` : ''}
         ${isPaid ? `
           <div class="flex justify-between">
-            <span class="text-slate-500">วันที่-เวลาที่บันทึก:</span>
-            <span class="font-mono font-bold text-slate-700">${record.timestamp || '-'}</span>
+            <span class="text-slate-400">วันที่-เวลาที่บันทึก:</span>
+            <span class="font-mono font-bold text-slate-200">${record.timestamp || '-'}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-500">รหัสอ้างอิง:</span>
-            <span class="font-mono text-slate-500">${record.refCode || '-'}</span>
+            <span class="text-slate-400">รหัสอ้างอิง:</span>
+            <span class="font-mono text-slate-300">${record.refCode || '-'}</span>
           </div>
         ` : ''}
       </div>
@@ -2592,8 +2624,8 @@ function openStudentDetail(studentId) {
       ${(isPaid && (rawSlipUrl || (record.slips && record.slips.length > 0))) ? `
         <div class="space-y-4">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-700 block">ภาพสลิปหลักฐาน (${(record.slips && record.slips.length) || 1} ใบ):</span>
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-orange-400 border border-slate-700 flex items-center gap-1">
+            <span class="text-xs font-bold text-slate-300 block">ภาพสลิปหลักฐาน (${(record.slips && record.slips.length) || 1} ใบ):</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900/90 text-orange-400 border border-slate-700 flex items-center gap-1">
               <i data-lucide="cloud" class="w-3 h-3 text-orange-400"></i>
               <span>จัดเก็บบน: ${window.MultiCloudUploader ? window.MultiCloudUploader.getProviderName(record.slipProvider || 'cloudinary') : (record.slipProvider || 'Cloud')}</span>
             </span>
@@ -2612,15 +2644,15 @@ function openStudentDetail(studentId) {
 
                 const displaySlUrl = formatDriveImageUrl(slUrl);
                 return `
-                <div class="p-3 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-xs">
+                <div class="p-3 bg-black/40 rounded-2xl border border-white/10 space-y-2.5 shadow-xs">
                   <div class="flex items-center justify-between text-xs font-bold">
-                    <span class="text-slate-700 flex items-center gap-1.5">
-                      <span class="w-5 h-5 rounded-md bg-orange-100 text-orange-700 flex items-center justify-center text-[10px] font-black">#${slIdx+1}</span>
+                    <span class="text-slate-200 flex items-center gap-1.5">
+                      <span class="w-5 h-5 rounded-md bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-black border border-orange-500/30">#${slIdx+1}</span>
                       สลิปใบที่ ${slIdx+1}
                     </span>
                     <span class="text-slate-400 font-mono text-[11px]">${slTime || '-'}</span>
                   </div>
-                  <div class="w-full h-72 sm:h-80 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center">
+                  <div class="w-full h-72 sm:h-80 rounded-xl border border-white/10 overflow-hidden bg-black/60 flex items-center justify-center">
                     ${isImg
                       ? `<img src="${displaySlUrl}" alt="สลิป ${slIdx+1}" class="max-h-full max-w-full object-contain mx-auto rounded-lg">`
                       : `<iframe src="${slPreview}" class="w-full h-full border-0" loading="lazy"></iframe>`
@@ -2631,14 +2663,16 @@ function openStudentDetail(studentId) {
                       <i data-lucide="download" class="w-3.5 h-3.5"></i>
                       <span>ดาวน์โหลดสลิป</span>
                     </button>
-                    <a href="${displaySlUrl}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-md active:scale-95">
+                    <a href="${displaySlUrl}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 border border-white/10 shadow-md active:scale-95">
                       <i data-lucide="external-link" class="w-3.5 h-3.5"></i> 
                       <span>เปิดดูรูปเต็ม</span>
                     </a>
-                    <button type="button" onclick="openDeleteSlipForStudent('${st.id}', ${slIdx})" class="px-3.5 py-1.5 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer" title="ลบสลิปหลักฐานนี้">
+                    ${canDelete ? `
+                    <button type="button" onclick="openDeleteSlipForStudent('${st.id}', ${slIdx})" class="px-3.5 py-1.5 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer" title="ลบสลิปหลักฐานของคุณ">
                       <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
-                      <span>ลบสลิป</span>
+                      <span>ลบสลิปของฉัน</span>
                     </button>
+                    ` : ''}
                   </div>
                 </div>
               `;
@@ -2648,7 +2682,7 @@ function openStudentDetail(studentId) {
       ` : ''}
 
       <div class="flex justify-end pt-2">
-        <button onclick="closeStudentDetailModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer">
+        <button onclick="closeStudentDetailModal()" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold transition border border-white/10 cursor-pointer">
           ปิดหน้าต่าง
         </button>
       </div>

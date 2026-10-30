@@ -146,6 +146,16 @@
     const studentList = getStudentsList();
     if (!cardsGrid || studentList.length === 0) return;
 
+    // Get current logged-in user session to highlight user account
+    let loggedUser = null;
+    try {
+      const sStr = localStorage.getItem('COMED_USER_SESSION');
+      if (sStr) loggedUser = JSON.parse(sStr);
+    } catch(e) {}
+
+    const myCleanSid = loggedUser && loggedUser.studentId ? loggedUser.studentId.replace(/[-\s]/g, '').trim().toLowerCase() : '';
+    const myCleanEmail = loggedUser && loggedUser.email ? loggedUser.email.toLowerCase().trim() : '';
+
     const queryInput = document.getElementById('tableSearchInput');
     const query = queryInput ? queryInput.value.toLowerCase().trim() : '';
 
@@ -162,6 +172,10 @@
     if (counter) counter.textContent = `แสดง ${filtered.length} จาก ${studentList.length} คน`;
 
     cardsGrid.innerHTML = filtered.map((st, idx) => {
+      const stCleanId = (st.id || '').replace(/[-\s]/g, '').trim().toLowerCase();
+      const stCleanEmail = (st.email || '').toLowerCase().trim();
+      const isCurrentUser = (myCleanSid && myCleanSid === stCleanId) || (myCleanEmail && myCleanEmail === stCleanEmail);
+
       const isPaid = window.paymentRecords && window.paymentRecords[st.id] && window.paymentRecords[st.id].paid;
       const avatarUrl = st.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(st.name)}&background=1e293b&color=fdba74&bold=true`;
 
@@ -169,36 +183,52 @@
         ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> จ่ายแล้ว</span>'
         : '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> ยังไม่จ่าย</span>';
 
+      const cardBorderClass = isCurrentUser
+        ? 'border-2 border-orange-500/80 bg-orange-950/20 ring-2 ring-orange-500/30 shadow-lg shadow-orange-500/10'
+        : 'border border-white/5 bg-slate-900/60';
+
       return `
-        <div class="cyber-student-card p-4 flex flex-col justify-between border subtle-hover space-y-3 relative overflow-hidden group">
+        <div class="cyber-student-card p-4 flex flex-col justify-between ${cardBorderClass} subtle-hover space-y-3 relative overflow-hidden group">
+          ${isCurrentUser ? `
+            <div class="absolute -top-6 -right-6 w-16 h-16 bg-orange-500/20 rounded-full blur-xl pointer-events-none"></div>
+          ` : ''}
           <div class="flex items-center justify-between">
-            <span class="font-mono text-[10px] text-slate-500">#${String(idx + 1).padStart(2, '0')}</span>
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-[10px] ${isCurrentUser ? 'text-orange-400 font-bold' : 'text-slate-500'}">#${String(idx + 1).padStart(2, '0')}</span>
+              ${isCurrentUser ? `
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-xs animate-pulse flex items-center gap-1">
+                  <i data-lucide="user" class="w-2.5 h-2.5"></i> บัญชีของคุณ
+                </span>
+              ` : ''}
+            </div>
             ${statusBadge}
           </div>
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-black/60 p-0.5 border border-white/10 overflow-hidden flex-shrink-0 relative group-hover:border-[#E65A19]/50 transition-colors">
+            <div class="w-12 h-12 rounded-2xl bg-black/60 p-0.5 ${isCurrentUser ? 'border-2 border-orange-500' : 'border border-white/10'} overflow-hidden flex-shrink-0 relative group-hover:border-[#E65A19]/50 transition-colors">
               <img src="${avatarUrl}" alt="${st.name}" class="w-full h-full object-cover rounded-xl" loading="lazy">
             </div>
             <div class="min-w-0 flex-1">
-              <h4 class="font-bold text-white text-xs sm:text-sm group-hover:text-orange-300 transition-colors break-words leading-snug">${st.name}</h4>
+              <h4 class="font-bold text-white text-xs sm:text-sm group-hover:text-orange-300 transition-colors break-words leading-snug">
+                ${st.name}
+              </h4>
               <div class="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 mt-1 flex-wrap">
                 <span class="text-amber-300 font-bold">น้อง${st.nickname}</span>
                 <span>•</span>
-                <span>${st.id}</span>
+                <span class="${isCurrentUser ? 'text-orange-400 font-bold' : ''}">${st.id}</span>
               </div>
             </div>
           </div>
           <div class="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
             ${isPaid
               ? `<button type="button" onclick="openStudentDetail('${st.id}')"
-                  class="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5 border border-white/10 cursor-pointer">
-                  <i data-lucide="eye" class="w-3.5 h-3.5 text-emerald-400"></i>
-                  <span>ดูสลิป</span>
+                  class="w-full py-2 px-3 rounded-xl ${isCurrentUser ? 'bg-orange-600/30 hover:bg-orange-600/40 text-orange-200 border-orange-500/50' : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10'} text-xs font-bold transition flex items-center justify-center gap-1.5 border cursor-pointer">
+                  <i data-lucide="eye" class="w-3.5 h-3.5 ${isCurrentUser ? 'text-orange-400' : 'text-emerald-400'}"></i>
+                  <span>${isCurrentUser ? 'ดูสลิปของฉัน' : 'ดูสลิป'}</span>
                 </button>`
               : `<button type="button" onclick="window.PaymentCyberUI.selectStudentQuick('${st.id}')"
                   class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/20 active:scale-95 cursor-pointer">
                   <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
-                  <span>เลือกชำระเงิน</span>
+                  <span>${isCurrentUser ? 'ชำระเงินของฉัน' : 'เลือกชำระเงิน'}</span>
                 </button>`
             }
           </div>
@@ -219,15 +249,28 @@
     const isPaid = window.paymentRecords && window.paymentRecords[st.id] && window.paymentRecords[st.id].paid;
     const isSelected = st.id === currentSelectedId;
 
+    let loggedUser = null;
+    try {
+      const sStr = localStorage.getItem('COMED_USER_SESSION');
+      if (sStr) loggedUser = JSON.parse(sStr);
+    } catch(e) {}
+
+    const myCleanSid = loggedUser && loggedUser.studentId ? loggedUser.studentId.replace(/[-\s]/g, '').trim().toLowerCase() : '';
+    const myCleanEmail = loggedUser && loggedUser.email ? loggedUser.email.toLowerCase().trim() : '';
+    const stCleanId = (st.id || '').replace(/[-\s]/g, '').trim().toLowerCase();
+    const stCleanEmail = (st.email || '').toLowerCase().trim();
+    const isCurrentUser = (myCleanSid && myCleanSid === stCleanId) || (myCleanEmail && myCleanEmail === stCleanEmail);
+
     return `
       <div onclick="window.PaymentCyberUI.selectStudentQuick('${st.id}')"
-        class="p-2.5 sm:p-3 rounded-2xl cyber-student-list-item cursor-pointer flex items-center justify-between gap-3 ${isSelected ? 'selected' : ''}">
+        class="p-2.5 sm:p-3 rounded-2xl cyber-student-list-item cursor-pointer flex items-center justify-between gap-3 ${isSelected ? 'selected' : ''} ${isCurrentUser ? 'border-2 border-orange-500/80 bg-orange-950/30' : ''}">
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-1.5 flex-wrap">
             <span class="font-bold text-xs sm:text-sm text-white break-words leading-tight">${st.name}</span>
             <span class="text-[10px] text-amber-300 font-bold flex-shrink-0">(${st.nickname})</span>
+            ${isCurrentUser ? '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-orange-500 text-white animate-pulse">คุณ</span>' : ''}
           </div>
-          <span class="font-mono text-[10px] text-slate-400 block mt-0.5">${st.id}</span>
+          <span class="font-mono text-[10px] ${isCurrentUser ? 'text-orange-400 font-bold' : 'text-slate-400'} block mt-0.5">${st.id}</span>
         </div>
         <div class="flex-shrink-0">
           ${isPaid

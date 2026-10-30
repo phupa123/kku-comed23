@@ -942,37 +942,38 @@
               </div>
             </div>
 
-            <!-- QR Payment Guide & Bank Info -->
+            <!-- QR Payment Guide & Bank Info (Dark Obsidian Cyber Theme) -->
             <div
-              class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-emerald-50/80 via-white to-orange-50/60 p-6 sm:p-8 rounded-3xl border-2 border-emerald-200 shadow-md">
+              class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-[#0B0F1C]/90 p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
               <!-- Real QR Code Image Display -->
               <div
-                class="md:col-span-5 flex flex-col items-center justify-center p-5 bg-white rounded-2xl border border-slate-200 shadow-lg text-center relative group">
+                class="md:col-span-5 flex flex-col items-center justify-center p-5 bg-slate-950/80 rounded-2xl border border-white/10 shadow-xl text-center relative group">
                 <span
-                  class="text-[11px] font-black text-emerald-800 mb-2.5 uppercase tracking-wider flex items-center gap-1.5 bg-emerald-100/90 px-3.5 py-1.5 rounded-full border border-emerald-300 shadow-xs">
-                  <i data-lucide="qr-code" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  class="text-[11px] font-black text-emerald-300 mb-2.5 uppercase tracking-wider flex items-center gap-1.5 bg-emerald-500/15 px-3.5 py-1.5 rounded-full border border-emerald-500/30 shadow-xs">
+                  <i data-lucide="qr-code" class="w-3.5 h-3.5 text-emerald-400"></i>
                   <span>สแกนชำระเงินผ่าน K PLUS / ทุกธนาคาร</span>
                 </span>
 
                 <!-- Real QR Image Box with Click to Zoom -->
                 <div
-                  class="relative p-2.5 bg-gradient-to-b from-slate-50 to-white rounded-3xl border-2 border-emerald-500/30 shadow-md group cursor-pointer transition hover:border-emerald-500/60 hover:shadow-lg"
+                  class="relative p-3 bg-white rounded-3xl border border-white/20 shadow-2xl group cursor-pointer transition hover:scale-[1.02] hover:shadow-emerald-500/20"
                   onclick="openCurrentQrFullscreen()">
                   <!-- QR Image — generated dynamically from ThaiQrEngine, no static fallback -->
                   <div id="qrLoadingSpinner" class="w-64 h-64 flex items-center justify-center">
                     <div class="flex flex-col items-center gap-3 text-slate-400">
-                      <svg class="animate-spin w-10 h-10" fill="none" viewBox="0 0 24 24">
+                      <svg class="animate-spin w-10 h-10 text-emerald-500" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                       </svg>
-                      <span class="text-xs font-semibold">กำลังสร้าง QR Code...</span>
+                      <span class="text-xs font-semibold text-slate-400">กำลังสร้าง QR Code...</span>
                     </div>
                   </div>
                   <img id="bankQrImage" src="" alt="Thai QR Payment"
-                    class="w-64 max-w-full h-auto object-contain rounded-2xl shadow-xs transition-transform duration-300 group-hover:scale-102 hidden" loading="lazy" decoding="async">
+                    class="w-64 max-w-full h-auto object-contain rounded-2xl shadow-xs transition-transform duration-300 hidden" loading="lazy" decoding="async">
                   <div
-                    class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-xs font-bold transition-opacity rounded-3xl backdrop-blur-xs">
+                    class="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-xs font-bold transition-opacity rounded-3xl backdrop-blur-xs">
                     <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center mb-1.5 backdrop-blur-md">
                       <i data-lucide="zoom-in" class="w-5 h-5 text-white"></i>
                     </div>
@@ -981,91 +982,91 @@
                 </div>
 
                 <!-- Modern Pill Badge for Locked Amount -->
-                <div class="mt-3.5 w-full bg-emerald-50/80 border border-emerald-200 rounded-2xl p-2.5 flex items-center justify-between text-xs text-slate-700">
-                  <span class="flex items-center gap-1 text-[11px] font-bold text-slate-500">
-                    <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <div class="mt-3.5 w-full bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-2.5 flex items-center justify-between text-xs text-slate-200">
+                  <span class="flex items-center gap-1.5 text-[11px] font-bold text-slate-300">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-400"></i>
                     <span>ยอดล็อคอัตโนมัติ:</span>
                   </span>
-                  <strong id="bankAmountHighlight" class="text-emerald-700 text-base font-black">฿190.00 บาท</strong>
+                  <strong id="bankAmountHighlight" class="text-emerald-400 text-base font-black font-mono">฿190.00 บาท</strong>
                 </div>
 
                 <!-- Direct Download QR Button -->
                 <div class="mt-2.5 w-full flex items-center justify-center gap-2">
                   <button type="button" onclick="downloadCurrentQrImage()"
-                    class="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer">
+                    class="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 active:scale-95 cursor-pointer">
                     <i data-lucide="download" class="w-4 h-4"></i>
                     <span>บันทึกรูป QR Code ลงเครื่อง</span>
                   </button>
                 </div>
               </div>
 
-              <!-- Bank & Transfer Details -->
+              <!-- Bank & Transfer Details (High Contrast Dark Text) -->
               <div class="md:col-span-7 flex flex-col justify-between space-y-4">
                 <div>
-                  <h4 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 mb-3">
-                    <i data-lucide="building-2" class="w-5 h-5 text-emerald-600"></i>
-                    รายละเอียดบัญชีรับโอนเงิน
+                  <h4 class="text-base sm:text-lg font-black text-white flex items-center gap-2 mb-3">
+                    <i data-lucide="building-2" class="w-5 h-5 text-emerald-400"></i>
+                    <span>รายละเอียดบัญชีรับโอนเงิน</span>
                   </h4>
-                  <ul class="space-y-3 text-xs sm:text-sm text-slate-700">
+                  <ul class="space-y-3 text-xs sm:text-sm text-slate-200">
                     <li class="flex items-start gap-2.5">
-                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>รายการ:</strong> <span id="bankDetailTitle">ค่าทำป้ายสาขาวิชาเอกคอมพิวเตอร์ศึกษา (COMED23 KKU63)</span></span>
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+                      <span><strong class="text-slate-400">รายการ:</strong> <span id="bankDetailTitle" class="font-bold text-white">ค่าเสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา (COMED KKU 69)</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
-                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>จำนวนเงิน:</strong> <span id="bankDetailAmount" class="font-black text-emerald-700 text-base">฿190.00 บาท / คน</span></span>
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+                      <span><strong class="text-slate-400">จำนวนเงิน:</strong> <span id="bankDetailAmount" class="font-black text-emerald-400 text-base font-mono">฿190.00 บาท / คน</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
-                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>ธนาคาร:</strong> <span id="bankDetailBankName"
-                          class="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">ธนาคารกสิกรไทย (KBank / K PLUS)</span></span>
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+                      <span><strong class="text-slate-400">ธนาคาร:</strong> <span id="bankDetailBankName"
+                          class="font-bold text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-lg border border-emerald-500/30">ธนาคารกสิกรไทย (KBank / K PLUS)</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
-                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>เลขที่บัญชี:</strong> <span id="bankDetailAccountNum"
-                          class="font-mono font-black text-emerald-950 bg-emerald-100/90 px-2.5 py-1 rounded-xl select-all border-2 border-emerald-300 tracking-wider text-sm sm:text-base">236-2-47817-3</span></span>
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+                      <span><strong class="text-slate-400">เลขที่บัญชี:</strong> <span id="bankDetailAccountNum"
+                          class="font-mono font-black text-white bg-slate-900 px-3 py-1 rounded-xl select-all border border-emerald-500/40 tracking-wider text-sm sm:text-base shadow-inner">236-2-47817-3</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
-                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>ชื่อบัญชี:</strong> <span id="bankDetailAccountName"
-                          class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">น.ส. พิชามญธุ์ สามสี</span></span>
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+                      <span><strong class="text-slate-400">ชื่อบัญชี:</strong> <span id="bankDetailAccountName"
+                          class="font-black text-slate-100 bg-white/5 px-2.5 py-0.5 rounded-lg border border-white/10">น.ส. พิชามญธุ์ สามสี</span></span>
                     </li>
                   </ul>
                 </div>
 
                 <div
-                  class="p-3.5 bg-amber-100/90 border border-amber-300 rounded-2xl text-xs text-amber-950 flex items-center gap-2.5 shadow-sm">
-                  <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 flex-shrink-0"></i>
+                  class="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs text-amber-200 flex items-center gap-2.5 shadow-sm">
+                  <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400 flex-shrink-0"></i>
                   <span>เมื่อโอนเงินเสร็จแล้ว กรุณาแนบรูปภาพสลิปด้านล่างเพื่อบันทึกประวัติเข้าระบบ</span>
                 </div>
               </div>
             </div>
 
-            <!-- Upload Slip Area (ULTRA PROMINENT MODERN HERO DROPZONE) -->
+            <!-- Upload Slip Area (Dark Cyber Glass Hero Dropzone) -->
             <div class="space-y-4 pt-2">
               <div class="flex items-center justify-between flex-wrap gap-2">
-                <label class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2.5">
+                <label class="text-base sm:text-lg font-black text-white flex items-center gap-2.5">
                   <span
-                    class="flex items-center justify-center w-8 h-8 rounded-xl bg-orange-600 text-white shadow-md shadow-orange-600/30">
+                    class="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-600 text-white shadow-md shadow-orange-600/30">
                     <i data-lucide="receipt" class="w-4 h-4"></i>
                   </span>
                   <span>แนบสลิปหลักฐานการโอนเงิน</span>
                   <span
-                    class="text-xs font-bold text-orange-600 bg-orange-100/80 px-2.5 py-0.5 rounded-full border border-orange-300">จำเป็น</span>
+                    class="text-xs font-bold text-orange-400 bg-orange-500/15 px-2.5 py-0.5 rounded-full border border-orange-500/30">จำเป็น</span>
                 </label>
-                <span class="text-xs text-slate-500 font-medium">รองรับ PNG, JPG, JPEG (ไม่เกิน 10MB)</span>
+                <span class="text-xs text-slate-400 font-medium">รองรับ PNG, JPG, JPEG (ไม่เกิน 10MB)</span>
               </div>
 
-              <!-- Ultra Prominent Drag & Drop Zone with Glowing Border and Dynamic Depth -->
+              <!-- Ultra Prominent Drag & Drop Zone with Glowing Dark Glass Border -->
               <div id="slipDropZone" onclick="document.getElementById('slipFileInput').click()"
                 ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"
-                class="relative overflow-hidden border-3 border-dashed border-orange-400 hover:border-orange-600 bg-gradient-to-b from-orange-50/80 via-amber-50/40 to-white hover:from-orange-100/90 hover:via-orange-50/60 hover:to-amber-50/50 rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-300 group shadow-xl hover:shadow-2xl shadow-orange-500/10 hover:shadow-orange-500/20 transform hover:-translate-y-0.5">
+                class="relative overflow-hidden border-2 border-dashed border-orange-500/40 hover:border-orange-500 bg-[#0B0F1C]/80 hover:bg-[#0E1426]/90 rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-300 group shadow-2xl hover:shadow-orange-500/20 transform hover:-translate-y-0.5 backdrop-blur-xl">
                 <!-- Subtle Background Decorative Ambient Glow -->
                 <div
-                  class="absolute -top-12 -right-12 w-40 h-40 bg-orange-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-500">
+                  class="absolute -top-12 -right-12 w-48 h-48 bg-orange-500/15 rounded-full blur-3xl pointer-events-none group-hover:scale-150 transition-transform duration-500">
                 </div>
                 <div
-                  class="absolute -bottom-12 -left-12 w-40 h-40 bg-amber-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-500">
+                  class="absolute -bottom-12 -left-12 w-48 h-48 bg-amber-500/15 rounded-full blur-3xl pointer-events-none group-hover:scale-150 transition-transform duration-500">
                 </div>
 
                 <input type="file" id="slipFileInput" accept="image/*" class="hidden"
@@ -1074,26 +1075,26 @@
                 <div class="relative z-10 space-y-4">
                   <!-- Animated Floating Icon Box -->
                   <div
-                    class="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center transition-all duration-300 shadow-xl shadow-orange-500/30 group-hover:scale-110 group-hover:rotate-3">
+                    class="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center transition-all duration-300 shadow-xl shadow-orange-500/40 group-hover:scale-110 group-hover:rotate-3">
                     <i data-lucide="upload-cloud" class="w-10 h-10 sm:w-12 sm:h-12 animate-bounce"
                       style="animation-duration: 2.5s;"></i>
                   </div>
 
                   <div class="space-y-1.5">
                     <span
-                      class="text-lg sm:text-xl font-black text-slate-900 block group-hover:text-orange-700 transition-colors">
+                      class="text-lg sm:text-xl font-black text-white block group-hover:text-orange-400 transition-colors">
                       คลิกเพื่อเลือกไฟล์สลิป หรือลากไฟล์รูปภาพมาวางที่นี่
                     </span>
-                    <p class="text-xs sm:text-sm text-slate-600 font-medium max-w-md mx-auto">
-                      กรุณาแนบรูปภาพสลิปที่มียอดเงิน <span id="slipDropZoneTargetAmount" class="text-orange-600 font-black">฿190.00 บาท</span>
+                    <p class="text-xs sm:text-sm text-slate-300 font-medium max-w-md mx-auto">
+                      กรุณาแนบรูปภาพสลิปที่มียอดเงิน <span id="slipDropZoneTargetAmount" class="text-orange-400 font-black font-mono">฿190.00 บาท</span>
                       ชัดเจนเพื่อความรวดเร็วในการตรวจสอบ
                     </p>
                   </div>
 
                   <!-- Prominent CTA Pill Button -->
                   <div
-                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-white border-2 border-orange-300 group-hover:border-orange-500 text-orange-600 font-black text-xs sm:text-sm shadow-md group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
-                    <i data-lucide="image-plus" class="w-4 h-4"></i>
+                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-black text-xs sm:text-sm shadow-md transition-all duration-300 group-hover:border-orange-500/50">
+                    <i data-lucide="image-plus" class="w-4 h-4 text-orange-400"></i>
                     <span>เลือกไฟล์รูปภาพจากอุปกรณ์</span>
                   </div>
                 </div>
