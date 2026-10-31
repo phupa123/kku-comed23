@@ -107,6 +107,7 @@
       }
 
       try {
+        // 1. Try fetching from dedicated 'broadcasts' table
         const { data, error } = await client
           .from('broadcasts')
           .select('*')
@@ -117,6 +118,65 @@
         if (!error && Array.isArray(data) && data.length > 0) {
           this.broadcasts = data;
           this.saveCachedBroadcasts();
+        } else {
+          // 2. Fallback / Sync from 'notifications' table (which admin publishes to)
+          const { data: notifs, error: nErr } = await client
+            .from('notifications')
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+          if (!nErr && Array.isArray(notifs) && notifs.length > 0) {
+            this.broadcasts = notifs.map(n => {
+              let meta = n.media_meta;
+              let cleanMsg = n.message || '';
+              if (typeof meta === 'string') {
+                try { meta = JSON.parse(meta); } catch(e){}
+              }
+              if (!meta && cleanMsg.includes('[MEDIA_META:')) {
+                try {
+                  const tag = '[MEDIA_META:';
+                  const tagIndex = cleanMsg.lastIndexOf(tag);
+                  if (tagIndex !== -1) {
+                    const jsonCandidate = cleanMsg.slice(tagIndex + tag.length);
+                    const lastBracket = jsonCandidate.lastIndexOf(']');
+                    if (lastBracket !== -1) {
+                      meta = JSON.parse(jsonCandidate.slice(0, lastBracket));
+                      cleanMsg = cleanMsg.slice(0, tagIndex).trim();
+                    }
+                  }
+                } catch(e){}
+              }
+
+              const vidUrl = n.video_url || meta?.video_url || '';
+              const atts = n.attachments || meta?.attachments || [];
+              let medType = 'none';
+              if (vidUrl) {
+                medType = vidUrl.includes('youtube.com') || vidUrl.includes('youtu.be') ? 'youtube' : 'video';
+              } else if (n.image_url) {
+                medType = 'image';
+              }
+
+              return {
+                id: n.id,
+                title: n.title || 'ประกาศจากสาขาวิชา',
+                category: n.type || 'announcement',
+                summary: cleanMsg,
+                content_html: `<p class="whitespace-pre-line">${cleanMsg}</p>`,
+                banner_url: n.image_url || '',
+                media_type: medType,
+                media_url: vidUrl || n.image_url || '',
+                attachments: atts,
+                pinned: true,
+                active: true,
+                author_name: n.sender_email ? n.sender_email.split('@')[0] : 'ฝ่ายประชาสัมพันธ์สาขาฯ',
+                created_at: meta?.publish_time || n.created_at,
+                expires_at: meta?.expire_time || null
+              };
+            });
+            this.saveCachedBroadcasts();
+          }
         }
       } catch (e) {
         console.warn('[BroadcastService] Fetch error, using cache:', e);

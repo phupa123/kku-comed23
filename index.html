@@ -1640,13 +1640,23 @@
           let cleanMessage = item.message || '';
           if (typeof meta === 'string') {
             try { meta = JSON.parse(meta); } catch(e){}
-          } else if (!meta && cleanMessage.includes('[MEDIA_META:')) {
+          }
+          if (!meta && cleanMessage.includes('[MEDIA_META:')) {
             try {
-              const parts = cleanMessage.split('[MEDIA_META:');
-              cleanMessage = parts[0].trim();
-              const jsonStr = parts[1].split(']')[0];
-              meta = JSON.parse(jsonStr);
-            } catch(e){}
+              const tag = '[MEDIA_META:';
+              const tagIndex = cleanMessage.lastIndexOf(tag);
+              if (tagIndex !== -1) {
+                const jsonCandidate = cleanMessage.slice(tagIndex + tag.length);
+                const lastBracket = jsonCandidate.lastIndexOf(']');
+                if (lastBracket !== -1) {
+                  const jsonStr = jsonCandidate.slice(0, lastBracket);
+                  meta = JSON.parse(jsonStr);
+                  cleanMessage = cleanMessage.slice(0, tagIndex).trim();
+                }
+              }
+            } catch(e){
+              console.warn('Error parsing embedded MEDIA_META:', e);
+            }
           }
 
           const videoUrl = item.video_url || meta?.video_url || null;
