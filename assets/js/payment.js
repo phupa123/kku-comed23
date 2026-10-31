@@ -725,6 +725,8 @@ function selectShirtSize(sizeName) {
 
   const found = sizes.find(s => s.size === sizeName) || sizes[0];
   currentSelectedShirtSize = found;
+  window.currentSelectedShirtSize = found;
+  window.currentEffectiveAmount = Number(found.price);
 
   renderSizeButtons(sizes);
 }
@@ -745,13 +747,22 @@ function updateSelectedSizeUI() {
   if (price) price.textContent = `฿${Number(currentSelectedShirtSize.price).toLocaleString()}`;
   if (studentBadge) studentBadge.textContent = `${currentSelectedShirtSize.size} (฿${Number(currentSelectedShirtSize.price).toLocaleString()})`;
 
-  // Also update bank detail amount if size has custom price
-  const bAmtHi = document.getElementById('bankAmountHighlight');
-  const bAmt = document.getElementById('bankDetailAmount');
-  if (bAmtHi) bAmtHi.textContent = `฿${Number(currentSelectedShirtSize.price).toLocaleString()} บาท`;
-  if (bAmt) bAmt.textContent = `฿${Number(currentSelectedShirtSize.price).toFixed(2)} บาท / คน (ไซส์ ${currentSelectedShirtSize.size})`;
-  const dzAmt = document.getElementById('slipDropZoneTargetAmount');
-  if (dzAmt) dzAmt.textContent = `฿${Number(currentSelectedShirtSize.price).toFixed(2)} บาท`;
+  // Update ALL bank detail amount and highlight elements across the page
+  const selectedPrice = Number(currentSelectedShirtSize.price);
+  document.querySelectorAll('#bankAmountHighlight, [data-bank-sync="amount-highlight"]').forEach(el => {
+    el.textContent = `฿${selectedPrice.toLocaleString()} บาท`;
+  });
+  document.querySelectorAll('#bankDetailAmount, [data-bank-sync="amount"]').forEach(el => {
+    el.textContent = `฿${selectedPrice.toFixed(2)} บาท / คน (ไซส์ ${currentSelectedShirtSize.size})`;
+  });
+  document.querySelectorAll('#slipDropZoneTargetAmount').forEach(el => {
+    el.textContent = `฿${selectedPrice.toFixed(2)} บาท`;
+  });
+
+  // Re-render dashboard upload card in payment_cyber_ui if available
+  if (window.PaymentCyberUI && typeof window.PaymentCyberUI.updateUploadCard === 'function') {
+    window.PaymentCyberUI.updateUploadCard();
+  }
 
   // Re-generate locked QR Code for this exact selected size amount!
   if (typeof renderCurrentCampaignQrCode === 'function') {
