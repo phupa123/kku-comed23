@@ -92,15 +92,18 @@
         </div>
 
         <!-- Top Title Bar Overlay (Shows on Hover/Pause) -->
-        <div id="${this.id}-topBar" class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent flex items-center justify-between transition-opacity duration-300 z-20">
-          <div class="flex items-center gap-2 truncate pr-4">
-            <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+        <div id="${this.id}-topBar" class="absolute top-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-b from-black/90 via-black/50 to-transparent flex items-center justify-between transition-opacity duration-300 z-30">
+          <div class="flex items-center gap-2 truncate pr-3">
+            <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse flex-shrink-0"></span>
             <span class="text-xs sm:text-sm font-black text-white truncate drop-shadow">${this.options.title || 'COMED Live Video'}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <a href="${this.options.src}" download target="_blank" title="ดาวน์โหลดวิดีโอนี้" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-slate-200 hover:text-white flex items-center justify-center transition text-xs">
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <a href="${this.options.src}" download target="_blank" title="ดาวน์โหลดวิดีโอนี้" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-slate-200 hover:text-white flex items-center justify-center transition text-xs cursor-pointer">
               <i class="bi bi-download"></i>
             </a>
+            <button type="button" id="${this.id}-topFullscreenBtn" title="เต็มจอ (F)" class="w-8 h-8 rounded-xl bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-300 hover:text-white flex items-center justify-center transition text-xs cursor-pointer">
+              <i class="bi bi-fullscreen"></i>
+            </button>
           </div>
         </div>
 
@@ -220,6 +223,7 @@
       this.loopBtn = document.getElementById(`${this.id}-loopBtn`);
       this.pipBtn = document.getElementById(`${this.id}-pipBtn`);
       this.fullscreenBtn = document.getElementById(`${this.id}-fullscreenBtn`);
+      this.topFullscreenBtn = document.getElementById(`${this.id}-topFullscreenBtn`);
       this.seekFeedbackLeft = document.getElementById(`${this.id}-seekFeedbackLeft`);
       this.seekFeedbackRight = document.getElementById(`${this.id}-seekFeedbackRight`);
     }
@@ -399,6 +403,7 @@
 
       // Fullscreen
       this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+      if (this.topFullscreenBtn) this.topFullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
       this.video.addEventListener('dblclick', () => this.toggleFullscreen());
 
       // Auto-hide controls on mouse idle
@@ -483,12 +488,36 @@
     }
 
     toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        this.container.requestFullscreen?.().catch(() => {});
-        this.fullscreenBtn.innerHTML = '<i class="bi bi-fullscreen-exit text-sm"></i>';
+      const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+      
+      if (!isFullscreen) {
+        // Support all vendor prefixes (including iOS Safari webkitEnterFullscreen on video)
+        if (this.container.requestFullscreen) {
+          this.container.requestFullscreen().catch(() => {});
+        } else if (this.container.webkitRequestFullscreen) {
+          this.container.webkitRequestFullscreen();
+        } else if (this.container.mozRequestFullScreen) {
+          this.container.mozRequestFullScreen();
+        } else if (this.container.msRequestFullscreen) {
+          this.container.msRequestFullscreen();
+        } else if (this.video.webkitEnterFullscreen) {
+          // iOS Safari native fullscreen fallback
+          this.video.webkitEnterFullscreen();
+        }
+        if (this.fullscreenBtn) this.fullscreenBtn.innerHTML = '<i class="bi bi-fullscreen-exit text-sm"></i>';
+        if (this.topFullscreenBtn) this.topFullscreenBtn.innerHTML = '<i class="bi bi-fullscreen-exit"></i>';
       } else {
-        document.exitFullscreen?.().catch(() => {});
-        this.fullscreenBtn.innerHTML = '<i class="bi bi-fullscreen text-sm"></i>';
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+        if (this.fullscreenBtn) this.fullscreenBtn.innerHTML = '<i class="bi bi-fullscreen text-sm"></i>';
+        if (this.topFullscreenBtn) this.topFullscreenBtn.innerHTML = '<i class="bi bi-fullscreen"></i>';
       }
     }
 

@@ -262,53 +262,41 @@
 
         slidesHtml += `
           <div class="broadcast-slide transition-opacity duration-700 ease-in-out ${activeClass}" data-slide-index="${idx}">
-            <div class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-slate-900/90 via-slate-900/80 to-slate-950/95 backdrop-blur-xl p-6 sm:p-8 shadow-2xl">
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-md p-4 sm:p-5 shadow-xl hover:border-orange-500/30 transition">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 
                 <!-- Info Column -->
-                <div class="lg:col-span-7 space-y-4">
+                <div class="space-y-1.5 flex-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
-                    ${item.pinned ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-slate-950 font-mono tracking-wide"><i data-lucide="pin" class="w-3 h-3"></i> PINNED</span>' : ''}
+                    ${item.pinned ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 font-mono"><i data-lucide="pin" class="w-3 h-3"></i> PINNED</span>' : ''}
                     ${this.getCategoryBadge(item.category)}
-                    <span class="text-xs text-slate-400 font-mono flex items-center gap-1">
-                      <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${this.formatDate(item.created_at)}
+                    <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                      <i data-lucide="clock" class="w-3 h-3"></i> ${this.formatDate(item.created_at)}
                     </span>
                   </div>
 
-                  <h2 class="text-lg sm:text-2xl font-black text-white leading-snug line-clamp-2 hover:text-orange-400 transition cursor-pointer" onclick="window.BroadcastServiceInstance.openModal('${item.id}')">
+                  <h2 class="text-sm sm:text-base font-bold text-white leading-snug truncate hover:text-orange-400 transition cursor-pointer" onclick="window.BroadcastServiceInstance.openModal('${item.id}')">
                     ${item.title}
                   </h2>
 
-                  <p class="text-slate-300 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                  <p class="text-slate-400 text-xs line-clamp-1">
                     ${item.summary || ''}
                   </p>
-
-                  <div class="pt-2 flex flex-wrap items-center gap-3">
-                    <button type="button" onclick="window.BroadcastServiceInstance.openModal('${item.id}')"
-                      class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 text-xs sm:text-sm font-black shadow-lg shadow-orange-500/25 flex items-center gap-2 transition transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
-                      <span>อ่านประกาศฉบับเต็ม</span>
-                      <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </button>
-
-                    ${item.attachments && item.attachments.length > 0 ? `
-                      <span class="text-xs text-slate-400 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
-                        <i data-lucide="paperclip" class="w-3.5 h-3.5 text-orange-400"></i>
-                        <span>มีเอกสารแนบ (${item.attachments.length})</span>
-                      </span>
-                    ` : ''}
-                  </div>
                 </div>
 
-                <!-- Media Column -->
-                <div class="lg:col-span-5 hidden sm:block">
-                  <div class="relative aspect-video lg:aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-inner group cursor-pointer" onclick="window.BroadcastServiceInstance.openModal('${item.id}')">
-                    ${mediaPreview}
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-4">
-                      <span class="text-[11px] text-white/90 font-medium flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                        <i data-lucide="expand" class="w-3 h-3 text-orange-400"></i> คลิกเพื่อดูรายละเอียดทั้งหมด
-                      </span>
-                    </div>
-                  </div>
+                <!-- Action Button -->
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  ${item.attachments && item.attachments.length > 0 ? `
+                    <span class="text-[11px] text-emerald-400 hidden md:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                      <i data-lucide="paperclip" class="w-3 h-3"></i>
+                      <span>${item.attachments.length} ไฟล์</span>
+                    </span>
+                  ` : ''}
+                  <button type="button" onclick="window.BroadcastServiceInstance.openModal('${item.id}')"
+                    class="px-3.5 py-1.5 rounded-xl bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-orange-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                    <span>ดูประกาศ</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  </button>
                 </div>
 
               </div>
@@ -322,25 +310,25 @@
       });
 
       container.innerHTML = `
-        <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="relative w-full max-w-6xl mx-auto px-4 sm:px-6 mb-4">
           <div class="relative">
             <!-- Slides Container -->
-            <div id="broadcastSlidesWrapper" class="relative min-h-[220px] sm:min-h-[260px]">
+            <div id="broadcastSlidesWrapper" class="relative min-h-[90px] sm:min-h-[80px]">
               ${slidesHtml}
             </div>
 
             <!-- Controls (if more than 1) -->
             ${items.length > 1 ? `
-              <div class="flex items-center justify-between mt-3 px-2">
+              <div class="flex items-center justify-between mt-2 px-1">
                 <div class="flex items-center gap-1.5" id="broadcastIndicators">
                   ${indicatorsHtml}
                 </div>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="window.BroadcastServiceInstance.prevSlide()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition cursor-pointer">
-                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="window.BroadcastServiceInstance.prevSlide()" class="w-6 h-6 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition cursor-pointer text-xs">
+                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
                   </button>
-                  <button type="button" onclick="window.BroadcastServiceInstance.nextSlide()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition cursor-pointer">
-                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                  <button type="button" onclick="window.BroadcastServiceInstance.nextSlide()" class="w-6 h-6 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition cursor-pointer text-xs">
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
                   </button>
                 </div>
               </div>
@@ -456,20 +444,32 @@
               <span>ไฟล์เอกสารและสื่อแนบดาวน์โหลด (${item.attachments.length})</span>
             </h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              ${item.attachments.map(att => `
-                <a href="${att.url}" target="_blank" download class="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-orange-500/10 border border-white/10 hover:border-orange-500/30 transition group">
-                  <div class="flex items-center gap-2.5 min-w-0">
-                    <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center flex-shrink-0">
-                      <i data-lucide="file-text" class="w-4 h-4"></i>
+              ${item.attachments.map(att => {
+                const safeName = (att.name || 'document').replace(/'/g, "\\'");
+                const safeUrl = (att.url || '').replace(/'/g, "\\'");
+                const safeSize = (att.size || '').replace(/'/g, "\\'");
+                return `
+                  <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-orange-500/10 border border-white/10 hover:border-orange-500/30 transition group gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1" onclick="window.openFilePreview('${safeUrl}', '${safeName}', '${safeSize}')" title="คลิกเพื่อดูตัวอย่าง">
+                      <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                      </div>
+                      <div class="min-w-0">
+                        <span class="text-xs font-bold text-white block truncate group-hover:text-orange-300">${att.name}</span>
+                        <span class="text-[10px] text-slate-400 font-mono">${att.size || 'Download'}</span>
+                      </div>
                     </div>
-                    <div class="min-w-0">
-                      <span class="text-xs font-bold text-white block truncate group-hover:text-orange-300">${att.name}</span>
-                      <span class="text-[10px] text-slate-400 font-mono">${att.size || 'Download'}</span>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                      <button type="button" onclick="window.openFilePreview('${safeUrl}', '${safeName}', '${safeSize}')" class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] text-cyan-300 font-medium transition cursor-pointer" title="ดูตัวอย่าง">
+                        พรีวิว
+                      </button>
+                      <a href="${att.url}" target="_blank" download="${att.name || 'file'}" class="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition cursor-pointer" title="ดาวน์โหลด">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                      </a>
                     </div>
                   </div>
-                  <i data-lucide="download" class="w-4 h-4 text-slate-400 group-hover:text-orange-400 flex-shrink-0 ml-2"></i>
-                </a>
-              `).join('')}
+                `;
+              }).join('')}
             </div>
           </div>
         `;

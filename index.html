@@ -1703,24 +1703,38 @@
           let attachmentsBlock = '';
           if (attachments && attachments.length > 0) {
             attachmentsBlock = `
-              <div class="pt-3 border-t border-white/10 space-y-1.5">
+              <div class="pt-3 border-t border-white/10 space-y-2">
                 <span class="text-[10px] font-mono font-bold text-emerald-400 flex items-center gap-1.5">
                   <i class="bi bi-paperclip"></i>
                   <span>เอกสารแนบสำหรับดาวน์โหลด (${attachments.length} ไฟล์):</span>
                 </span>
-                <div class="space-y-1">
-                  ${attachments.map(f => `
-                    <a href="${f.url}" target="_blank" download class="flex items-center justify-between p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-xs transition group">
-                      <span class="flex items-center gap-2 truncate text-slate-200 group-hover:text-white">
-                        <i class="bi bi-file-earmark-arrow-down-fill text-emerald-400 text-sm flex-shrink-0"></i>
-                        <span class="truncate">${f.name}</span>
-                      </span>
-                      <span class="text-[10px] font-mono text-emerald-300 bg-emerald-500/15 group-hover:bg-emerald-500/25 px-2 py-0.5 rounded-lg border border-emerald-500/30 whitespace-nowrap flex items-center gap-1">
-                        <i class="bi bi-download text-[9px]"></i>
-                        <span>โหลด ${f.size ? '(' + f.size + ')' : ''}</span>
-                      </span>
-                    </a>
-                  `).join('')}
+                <div class="space-y-1.5">
+                  ${attachments.map(f => {
+                    const safeName = (f.name || 'document').replace(/'/g, "\\'");
+                    const safeUrl = (f.url || '').replace(/'/g, "\\'");
+                    const safeSize = (f.size || '').replace(/'/g, "\\'");
+                    return `
+                      <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-xs transition group gap-2">
+                        <!-- Preview clickable title -->
+                        <div class="flex items-center gap-2 truncate cursor-pointer flex-1 min-w-0" onclick="window.openFilePreview('${safeUrl}', '${safeName}', '${safeSize}')" title="คลิกเพื่อดูตัวอย่างเอกสาร">
+                          <i class="bi bi-file-earmark-arrow-down-fill text-emerald-400 text-sm flex-shrink-0 group-hover:scale-110 transition-transform"></i>
+                          <span class="truncate text-slate-200 group-hover:text-orange-400 transition font-medium">${f.name}</span>
+                        </div>
+                        
+                        <!-- Action buttons: Preview & Direct Download -->
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                          <button type="button" onclick="window.openFilePreview('${safeUrl}', '${safeName}', '${safeSize}')" title="ดูตัวอย่างไฟล์ (Preview)" class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-mono text-slate-300 hover:text-white transition flex items-center gap-1 cursor-pointer">
+                            <i class="bi bi-eye text-[11px] text-cyan-400"></i>
+                            <span class="hidden sm:inline">ดูตัวอย่าง</span>
+                          </button>
+                          <a href="${f.url}" target="_blank" download="${f.name || 'download'}" title="ดาวน์โหลดไฟล์ทันที" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-[11px] font-mono text-emerald-300 hover:text-emerald-200 transition flex items-center gap-1 cursor-pointer">
+                            <i class="bi bi-download text-[10px]"></i>
+                            <span>โหลด ${f.size ? '(' + f.size + ')' : ''}</span>
+                          </a>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
                 </div>
               </div>
             `;
@@ -1784,6 +1798,8 @@
       window.refreshIndexBroadcasts = loadIndexBroadcasts;
     })();
   </script>
+  <!-- COMED File Preview Modal Engine -->
+  <script src="assets/js/file_preview_modal.js?v=20261101_01"></script>
   <!-- COMED Cyber Video Player Engine -->
   <script src="assets/js/cyber_video_player.js?v=20261101_01"></script>
   <!-- COMED Broadcast & Announcement Engine -->
