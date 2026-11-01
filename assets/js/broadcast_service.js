@@ -425,11 +425,20 @@
           `;
         }
       } else if (item.media_type === 'video' && item.media_url) {
+        const vidId = `bcast-modal-video-${item.id}`;
         mediaElement = `
-          <div class="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 mb-5 bg-black">
-            <video src="${item.media_url}" controls class="w-full h-full object-contain"></video>
-          </div>
+          <div class="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 mb-5 bg-black" id="${vidId}"></div>
         `;
+        setTimeout(() => {
+          const container = document.getElementById(vidId);
+          if (container && typeof window.CyberVideoPlayer === 'function') {
+            new window.CyberVideoPlayer(container, {
+              src: item.media_url,
+              title: item.title,
+              autoplay: false
+            });
+          }
+        }, 50);
       } else if (item.banner_url) {
         mediaElement = `
           <div class="w-full max-h-80 rounded-2xl overflow-hidden border border-white/10 mb-5">

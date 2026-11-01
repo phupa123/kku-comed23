@@ -1686,9 +1686,10 @@
 
           let mediaBlock = '';
           if (videoUrl) {
+            const vidId = `index-video-${item.id || Math.random().toString(36).substr(2, 9)}`;
             mediaBlock = `
-              <div class="w-full rounded-2xl overflow-hidden bg-black/60 border border-white/10 mb-3.5 relative">
-                <video src="${videoUrl}" controls preload="metadata" class="w-full max-h-56 object-cover"></video>
+              <div class="w-full mb-3.5">
+                <div id="${vidId}" class="w-full aspect-video rounded-2xl overflow-hidden bg-black/80 border border-white/10 shadow-lg" data-video-src="${videoUrl}" data-video-title="${item.title || 'ประกาศสาขาวิชา'}"></div>
               </div>
             `;
           } else if (item.image_url) {
@@ -1760,6 +1761,18 @@
             </div>
           `;
         }).join('');
+
+        // Initialize Cyber Video Player on any rendered video container
+        if (typeof window.CyberVideoPlayer === 'function') {
+          feed.querySelectorAll('[data-video-src]').forEach(container => {
+            const src = container.getAttribute('data-video-src');
+            const title = container.getAttribute('data-video-title');
+            if (src && !container.dataset.initialized) {
+              container.dataset.initialized = 'true';
+              new window.CyberVideoPlayer(container, { src, title });
+            }
+          });
+        }
       }
 
       document.addEventListener('DOMContentLoaded', () => {
@@ -1771,6 +1784,8 @@
       window.refreshIndexBroadcasts = loadIndexBroadcasts;
     })();
   </script>
+  <!-- COMED Cyber Video Player Engine -->
+  <script src="assets/js/cyber_video_player.js?v=20261101_01"></script>
   <!-- COMED Broadcast & Announcement Engine -->
   <script src="assets/js/broadcast_service.js?v=20261101_01"></script>
 </body>
