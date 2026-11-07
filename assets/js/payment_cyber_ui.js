@@ -263,14 +263,14 @@
 
     return `
       <div onclick="window.PaymentCyberUI.selectStudentQuick('${st.id}')"
-        class="p-2.5 sm:p-3 rounded-2xl cyber-student-list-item cursor-pointer flex items-center justify-between gap-3 ${isSelected ? 'selected' : ''} ${isCurrentUser ? 'border-2 border-orange-500/80 bg-orange-950/30' : ''}">
+        class="p-2.5 sm:p-3 rounded-2xl cyber-student-list-item cursor-pointer flex items-center justify-between gap-3 ${isSelected ? 'selected' : ''} ${isCurrentUser ? 'border-2 border-amber-400 bg-amber-950/40 shadow-lg' : ''}">
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="font-bold text-xs sm:text-sm text-white break-words leading-tight">${st.name}</span>
-            <span class="text-[10px] text-amber-300 font-bold flex-shrink-0">(${st.nickname})</span>
-            ${isCurrentUser ? '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-orange-500 text-white animate-pulse">คุณ</span>' : ''}
+            <span class="font-bold text-xs sm:text-sm ${isCurrentUser ? 'text-amber-200 font-black' : 'text-white'} break-words leading-tight">${st.name}</span>
+            <span class="text-[10px] ${isCurrentUser ? 'text-amber-300 font-black' : 'text-amber-300 font-bold'} flex-shrink-0">(${st.nickname})</span>
+            ${isCurrentUser ? '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 animate-pulse">คุณ</span>' : ''}
           </div>
-          <span class="font-mono text-[10px] ${isCurrentUser ? 'text-orange-400 font-bold' : 'text-slate-400'} block mt-0.5">${st.id}</span>
+          <span class="font-mono text-[10px] ${isCurrentUser ? 'text-amber-300 font-bold' : 'text-slate-300'} block mt-0.5">${st.id}</span>
         </div>
         <div class="flex-shrink-0">
           ${isPaid

@@ -361,38 +361,38 @@ function renderCampaignsNav() {
       return '<div onclick="switchCampaignWithAnimation(\'' + camp.id + '\', event)" ' +
         'class="p-4 rounded-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer subtle-hover group ' +
         (isSelected 
-          ? 'glass-surface cyber-campaign-active border-orange-500 ring-1 ring-orange-500/40' 
-          : 'glass-surface border-white/10 hover:border-orange-500/40') + '">' +
+          ? 'bg-slate-900/95 cyber-campaign-active border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-500/10' 
+          : 'bg-slate-900/80 border border-white/10 hover:border-orange-500/40 hover:bg-slate-800/90') + '">' +
         (isSelected ? '<div class="absolute top-0 right-0 bg-gradient-to-l from-orange-600 to-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-md flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> รายการที่เลือก</div>' : '') +
         
-        '<div class="space-y-2">' +
+        '<div class="space-y-2.5">' +
           '<div class="flex items-start justify-between gap-2">' +
-            '<span class="text-[10px] font-extrabold uppercase tracking-wider text-orange-400 bg-orange-500/15 px-2.5 py-0.5 rounded-full border border-orange-500/30">' + (camp.category || 'กิจกรรม') + '</span>' +
+            '<span class="text-[10px] font-extrabold uppercase tracking-wider text-orange-400 bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/40">' + (camp.category || 'กิจกรรม') + '</span>' +
             '<div class="pt-0.5">' + statusPill + '</div>' +
           '</div>' +
-          '<h3 class="font-black text-sm text-white line-clamp-1 group-hover:text-orange-400 transition-colors pt-0.5">' + camp.title + '</h3>' +
-          '<p class="text-xs text-slate-400 line-clamp-1">' + (camp.subtitle || 'คณะศึกษาศาสตร์ มข.') + '</p>' +
+          '<h3 class="font-black text-sm text-white line-clamp-1 group-hover:text-orange-400 transition-colors pt-0.5 drop-shadow-sm">' + camp.title + '</h3>' +
+          '<p class="text-xs text-slate-300 line-clamp-1">' + (camp.subtitle || 'คณะศึกษาศาสตร์ มข.') + '</p>' +
           
-          '<div class="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-xs">' +
-            '<span class="font-bold text-slate-400 text-[11px]">ยอดชำระต่อคน</span>' +
-            '<span class="font-black text-white font-mono text-base tracking-tight">฿' + Number(camp.amount).toLocaleString(undefined, {minimumFractionDigits: 2}) + '</span>' +
+          '<div class="mt-2 pt-2.5 border-t border-white/10 flex items-center justify-between text-xs">' +
+            '<span class="font-bold text-slate-300 text-[11px]">ยอดชำระต่อคน</span>' +
+            '<span class="font-black text-emerald-400 font-mono text-base tracking-tight drop-shadow-sm">฿' + Number(camp.amount).toLocaleString(undefined, {minimumFractionDigits: 2}) + '</span>' +
           '</div>' +
         '</div>' +
 
-        '<div class="mt-3 pt-2.5 border-t border-white/10 grid grid-cols-2 gap-2" onclick="event.stopPropagation()">' +
+        '<div class="mt-3.5 pt-2.5 border-t border-white/10 grid grid-cols-2 gap-2" onclick="event.stopPropagation()">' +
           '<a href="' + payLink + '" ' +
             'onclick="switchCampaignWithAnimation(\'' + camp.id + '\', event, \'auto=pay\')" ' +
             'class="py-2 px-3 rounded-xl text-xs font-black text-center flex items-center justify-center gap-1.5 transition active:scale-95 ' +
             (isSelected 
-              ? 'cyber-btn-primary shadow-md shadow-orange-500/25' 
-              : 'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10') + '">' +
+              ? 'bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white shadow-md shadow-orange-500/30' 
+              : 'bg-white/10 hover:bg-white/20 text-white border border-white/15') + '">' +
             '<i data-lucide="credit-card" class="w-3.5 h-3.5"></i>' +
             '<span>ชำระเงิน</span>' +
           '</a>' +
           '<a href="' + checkLink + '" ' +
             'onclick="switchCampaignWithAnimation(\'' + camp.id + '\', event, \'tab=status\')" ' +
-            'class="py-2 px-3 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition active:scale-95">' +
-            '<i data-lucide="users" class="w-3.5 h-3.5 text-slate-400"></i>' +
+            'class="py-2 px-3 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white border border-white/15 transition active:scale-95">' +
+            '<i data-lucide="users" class="w-3.5 h-3.5 text-orange-400"></i>' +
             '<span>เช็ครายชื่อ</span>' +
           '</a>' +
         '</div>' +
@@ -2392,42 +2392,42 @@ function renderStatusTable() {
     }
 
     const rowHighlightClass = isCurrentUser
-      ? 'bg-amber-500/20 hover:bg-amber-500/25 border-l-4 border-l-amber-400 ring-1 ring-amber-400/30 transition-all relative'
-      : 'hover:bg-white/[0.04] transition-colors';
+      ? 'bg-amber-400/20 hover:bg-amber-400/25 border-l-4 border-l-amber-400 ring-1 ring-amber-400/40 transition-all relative font-bold'
+      : (index % 2 === 0 ? 'bg-slate-900/60 hover:bg-slate-800/80' : 'bg-slate-900/30 hover:bg-slate-800/80') + ' transition-colors';
 
     const currentUserBadge = isCurrentUser
-      ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md ring-2 ring-amber-300/60 ml-1.5 animate-pulse"><i data-lucide="check-circle-2" class="w-3 h-3 text-slate-950"></i> บัญชีของคุณ</span>`
+      ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 shadow-md ring-2 ring-amber-300/80 ml-1.5 animate-pulse"><i data-lucide="check-circle-2" class="w-3 h-3 text-slate-950"></i> บัญชีของคุณ</span>`
       : '';
 
     return `
       <tr class="${rowHighlightClass}">
-        <td class="p-4 text-center font-mono text-xs ${isCurrentUser ? 'text-amber-300 font-black' : 'text-slate-400'}">${index + 1}</td>
-        <td class="p-4 font-mono font-bold ${isCurrentUser ? 'text-amber-300 font-black' : 'text-slate-200'}">
+        <td class="p-4 text-center font-mono text-xs ${isCurrentUser ? 'text-amber-300 font-black' : 'text-slate-300 font-semibold'}">${index + 1}</td>
+        <td class="p-4 font-mono font-bold ${isCurrentUser ? 'text-amber-300 font-black' : 'text-slate-100'}">
           ${st.id}
-          ${isCurrentUser ? '<div class="text-[10px] text-amber-400 font-sans font-black flex items-center gap-1 mt-0.5"><i data-lucide="sparkles" class="w-3 h-3"></i> บัญชีนี้เข้าสู่ระบบอยู่</div>' : ''}
+          ${isCurrentUser ? '<div class="text-[10px] text-amber-300 font-sans font-black flex items-center gap-1 mt-0.5"><i data-lucide="sparkles" class="w-3 h-3"></i> บัญชีนี้เข้าสู่ระบบอยู่</div>' : ''}
         </td>
         <td class="p-4">
-          <div class="font-bold ${isCurrentUser ? 'text-white text-sm font-black' : 'text-slate-200'} flex items-center flex-wrap gap-1">
+          <div class="font-bold ${isCurrentUser ? 'text-white text-sm font-black' : 'text-slate-100 font-semibold'} flex items-center flex-wrap gap-1">
             <span>${st.name}</span>
             ${currentUserBadge}
           </div>
           ${sizeBadge}
         </td>
         <td class="p-4">
-          <span class="px-2.5 py-1 rounded-lg ${isCurrentUser ? 'bg-amber-400 text-slate-950 font-black ring-1 ring-amber-300 shadow-sm' : 'bg-orange-500/15 text-orange-300 font-black border border-orange-500/30'} text-xs shadow-xs">
+          <span class="px-2.5 py-1 rounded-lg ${isCurrentUser ? 'bg-amber-400 text-slate-950 font-black ring-1 ring-amber-300 shadow-sm' : 'bg-orange-500/20 text-orange-300 font-black border border-orange-500/40'} text-xs shadow-xs">
             น้อง${st.nickname}
           </span>
         </td>
-        <td class="p-4 hidden md:table-cell ${isCurrentUser ? 'text-amber-200/90 font-bold' : 'text-slate-400'} font-mono text-xs">${st.email}</td>
+        <td class="p-4 hidden md:table-cell ${isCurrentUser ? 'text-amber-200 font-bold' : 'text-slate-300 font-medium'} font-mono text-xs">${st.email}</td>
         <td class="p-4 text-center">
           ${statusPill}
         </td>
         <td class="p-4 text-center">
           ${isPaid
-        ? `<button onclick="openStudentDetail('${st.id}')" class="px-3.5 py-1.5 ${isCurrentUser ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:from-amber-400 hover:to-orange-400 font-black ring-2 ring-amber-300/50' : 'bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10'} text-xs font-bold rounded-xl transition flex items-center gap-1.5 mx-auto shadow-sm cursor-pointer">
-                <i data-lucide="eye" class="w-3.5 h-3.5 ${isCurrentUser ? 'text-slate-950' : 'text-slate-400'}"></i> ${isCurrentUser ? 'ดูสลิปของฉัน' : 'ดูหลักฐาน'}
+        ? `<button onclick="openStudentDetail('${st.id}')" class="px-3.5 py-1.5 ${isCurrentUser ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:from-amber-400 hover:to-orange-400 font-black ring-2 ring-amber-300/60' : 'bg-white/10 hover:bg-white/20 text-slate-100 hover:text-white border border-white/20'} text-xs font-bold rounded-xl transition flex items-center gap-1.5 mx-auto shadow-sm cursor-pointer">
+                <i data-lucide="eye" class="w-3.5 h-3.5 ${isCurrentUser ? 'text-slate-950' : 'text-emerald-400'}"></i> ${isCurrentUser ? 'ดูสลิปของฉัน' : 'ดูหลักฐาน'}
                </button>`
-        : `<button onclick="redirectToPayment('${st.id}')" class="px-3.5 py-1.5 ${isCurrentUser ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:from-amber-400 hover:to-orange-400 font-black ring-2 ring-amber-300/50 shadow-md' : 'bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 border border-orange-500/30'} text-xs font-black rounded-xl transition flex items-center gap-1.5 mx-auto shadow-xs cursor-pointer">
+        : `<button onclick="redirectToPayment('${st.id}')" class="px-3.5 py-1.5 ${isCurrentUser ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:from-amber-400 hover:to-orange-400 font-black ring-2 ring-amber-300/60 shadow-md' : 'bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 hover:text-orange-200 border border-orange-500/40'} text-xs font-black rounded-xl transition flex items-center gap-1.5 mx-auto shadow-xs cursor-pointer">
                 <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> ${isCurrentUser ? 'ชำระเงินของฉัน' : 'ไปหน้าจ่าย'}
                </button>`
       }
