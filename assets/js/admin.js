@@ -2928,6 +2928,20 @@ function closeExportModal() {
   if (modal) modal.classList.add('hidden');
 }
 
+
+// Helper function to sanitize string values for Excel cells (Excel has a hard limit of 32,767 characters per cell)
+function sanitizeExcelCell(val) {
+  if (val === null || val === undefined) return "";
+  if (typeof val !== 'string') return val;
+  if (val.startsWith('data:image') || val.startsWith('[{"url":"data:image') || val.startsWith('["data:image')) {
+    return "[แนบเป็นไฟล์ภาพ Base64]";
+  }
+  if (val.length > 30000) {
+    return val.substring(0, 30000) + "... [ตัดข้อความเนื่องจากยาวเกิน 32k ตัวอักษร]";
+  }
+  return val;
+}
+
 async function executeCustomExcelExport() {
   // Get User Selections
   const sortOpt = document.querySelector('input[name="exportSortOption"]:checked')?.value || 'default';
@@ -3042,7 +3056,7 @@ async function executeCustomExcelExport() {
       item.amount,
       item.timestamp,
       item.refCode,
-      item.slipUrl
+      sanitizeExcelCell(item.slipUrl)
     ];
   });
 
@@ -3658,7 +3672,7 @@ async function downloadAllSlipsZip() {
           r.timestamp,
           r.refCode,
           r.slipFileName,
-          r.slipUrl
+          sanitizeExcelCell(r.slipUrl)
         ];
       });
 
