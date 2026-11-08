@@ -803,17 +803,28 @@ async function loadPaymentRecords() {
           const latestSlip = slips.length > 0 ? slips[slips.length - 1] : null;
           const primarySlip = latestSlip ? (latestSlip.url || latestSlip) : (item.slip_url || '');
 
+          let extractedShirtSize = item.shirt_size || '';
+          let cleanNick = item.student_nickname || '';
+          if (!extractedShirtSize && cleanNick) {
+            const sizeMatch = cleanNick.match(/\[(?:ไซส์|ขนาด|size):\s*([^\]]+)\]/i);
+            if (sizeMatch) extractedShirtSize = sizeMatch[1].trim();
+          }
+          if (cleanNick) {
+            cleanNick = cleanNick.replace(/\[(?:ไซส์|ขนาด|size):\s*[^\]]+\]/i, '').trim();
+          }
+
           paymentRecords[item.student_id] = {
             studentId: item.student_id,
             studentName: item.student_name || '',
             name: item.student_name || '',
-            nickname: item.student_nickname || '',
+            nickname: cleanNick,
             email: item.student_email || '',
             paid: !!item.paid,
             timestamp: item.timestamp || '',
             slipUrl: primarySlip,
             slips: slips,
             refCode: item.ref_code || '',
+            shirtSize: extractedShirtSize,
             amount: item.amount || currentCampaign.amount
           };
         });
@@ -966,7 +977,13 @@ function refreshProgressStats() {
   });
 
   const totalTargetMoney = totalCount * TARGET_PAYMENT_PER_PERSON;
-  const currentMoney = paidCount * TARGET_PAYMENT_PER_PERSON;
+  let currentMoney = 0;
+  eligibleStudents.forEach(st => {
+    const rec = paymentRecords[st.id];
+    if (rec && rec.paid) {
+      currentMoney += (Number(rec.amount) || TARGET_PAYMENT_PER_PERSON);
+    }
+  });
 
   const peoplePercent = totalCount > 0 ? Math.round((paidCount / totalCount) * 100) : 0;
   const moneyPercent = totalTargetMoney > 0 ? Math.round((currentMoney / totalTargetMoney) * 100) : 0;

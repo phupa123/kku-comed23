@@ -179,8 +179,11 @@
       const isPaid = window.paymentRecords && window.paymentRecords[st.id] && window.paymentRecords[st.id].paid;
       const avatarUrl = st.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(st.name)}&background=1e293b&color=fdba74&bold=true`;
 
+      const rec = window.paymentRecords && window.paymentRecords[st.id];
+      const paidAmt = rec && rec.amount ? rec.amount : null;
+      const sizeText = rec && rec.shirtSize ? rec.shirtSize : '';
       let statusBadge = isPaid
-        ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> จ่ายแล้ว</span>'
+        ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> จ่ายแล้ว ${paidAmt ? `(${paidAmt}฿)` : ''}</span>`
         : '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> ยังไม่จ่าย</span>';
 
       const cardBorderClass = isCurrentUser
@@ -215,6 +218,7 @@
                 <span class="${isCurrentUser ? 'text-amber-300 font-black' : 'text-amber-400 font-bold'}">น้อง${st.nickname}</span>
                 <span>•</span>
                 <span class="${isCurrentUser ? 'text-amber-300 font-black' : 'text-slate-300'}">${st.id}</span>
+                ${sizeText ? `<span class="px-1.5 py-0.2 rounded-md bg-orange-500/20 text-orange-300 text-[10px] font-bold border border-orange-500/30">${sizeText}</span>` : ''}
               </div>
             </div>
           </div>
