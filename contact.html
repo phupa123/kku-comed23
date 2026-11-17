@@ -67,7 +67,8 @@
   <!-- Supabase JS & Config -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
-  <script src="assets/js/support_engine.js?v=20261118_v2"></script>
+  <script src="assets/js/multi_uploader.js"></script>
+  <script src="assets/js/support_engine.js?v=20261118_v3"></script>
 
   <style>
     /* Cloud White Glassmorphism Design Style */
@@ -220,30 +221,47 @@
       </div>
 
       <!-- Chat Active Header -->
-      <div class="p-4 border-b border-slate-200/70 bg-white/60 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="relative">
+      <div class="p-3.5 sm:p-4 border-b border-slate-200/70 bg-white/60 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="relative flex-shrink-0">
             <div id="agentAvatarBadge" class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-sky-400 text-white flex items-center justify-center shadow-md shadow-brand-500/20">
               <i data-lucide="bot" class="w-5 h-5"></i>
             </div>
             <span id="agentStatusDot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-mint-500 rounded-full border-2 border-white shadow-xs"></span>
           </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 id="agentNameDisplay" class="font-bold text-slate-900 text-sm">COMED AI Assistant</h2>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 id="agentNameDisplay" class="font-bold text-slate-900 text-sm truncate">COMED AI Assistant</h2>
               <span id="agentModeTag" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200">
                 โหมดคิดวิเคราะห์รวดเร็ว
               </span>
+              <!-- Online Admins Live Counter Badge -->
+              <span id="adminLiveCounterBadge" class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200" title="จำนวนเจ้าหน้าที่ที่กำลังพร้อมให้บริการ">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400" id="adminLiveDot"></span>
+                <span id="adminLiveText">ตรวจสถานะแอดมิน...</span>
+              </span>
             </div>
-            <p id="agentSubtext" class="text-xs text-slate-500">ตอบกลับทันที • อ้างอิงคลังข้อมูลสาขา COMED KKU</p>
+            <p id="agentSubtext" class="text-xs text-slate-500 truncate">ตอบกลับทันที • อ้างอิงคลังข้อมูลสาขา COMED KKU</p>
           </div>
         </div>
 
-        <!-- Ticket Identifier Badge -->
-        <div class="text-right">
-          <div class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">รหัสการติดต่อ</div>
-          <div id="ticketCodeDisplay" class="font-mono font-bold text-xs text-brand-700 bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-200">
-            CONNECTING...
+        <!-- Ticket Identifier & Actions -->
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button type="button" id="btnMyTickets" onclick="openMyTicketsModal()" class="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer" title="ประวัติการติดต่อของฉัน">
+            <i data-lucide="history" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span>ประวัติตั๋ว</span>
+          </button>
+
+          <button type="button" id="btnCloseTicketHeader" onclick="handleUserCloseTicket()" class="hidden items-center gap-1 px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition cursor-pointer" title="ปิดตั๋วนี้เพื่อกลับไปคุยกับ AI">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-rose-600"></i>
+            <span>ปิดตั๋ว</span>
+          </button>
+
+          <div class="text-right">
+            <div class="text-[9px] font-mono text-slate-400 uppercase tracking-wider">รหัสตั๋ว</div>
+            <div id="ticketCodeDisplay" class="font-mono font-bold text-xs text-brand-700 bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-200">
+              CONNECTING...
+            </div>
           </div>
         </div>
       </div>
@@ -293,32 +311,99 @@
 
       <!-- Chat Input Area -->
       <div class="p-3 sm:p-4 bg-white/95 border-t border-slate-200">
+        <!-- Media Upload / Staging Preview Bar (Hidden if no files) -->
+        <div id="mediaStagingBar" class="hidden pb-2.5 flex items-center gap-2 overflow-x-auto">
+          <div id="stagedItemPreview" class="relative inline-flex items-center gap-2 p-1.5 pr-3 rounded-2xl bg-brand-50 border border-brand-200 text-xs">
+            <div id="stagedThumbnail" class="w-8 h-8 rounded-xl bg-brand-200 overflow-hidden flex items-center justify-center flex-shrink-0 text-brand-700">
+              <i data-lucide="image" class="w-4 h-4"></i>
+            </div>
+            <div class="max-w-[140px] truncate">
+              <span id="stagedFileName" class="font-bold text-slate-800 block truncate text-[11px]">file.png</span>
+              <span id="stagedFileSize" class="text-[9px] text-slate-500 font-mono">120 KB</span>
+            </div>
+            <button type="button" onclick="clearStagedMedia()" class="w-5 h-5 rounded-full bg-slate-200 hover:bg-rose-100 hover:text-rose-600 flex items-center justify-center text-slate-600 transition cursor-pointer">
+              <i data-lucide="x" class="w-3 h-3"></i>
+            </button>
+          </div>
+          <div id="uploadProgressIndicator" class="hidden text-[10px] text-brand-600 font-bold items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-brand-600 animate-ping"></span>
+            <span>กำลังอัปโหลด...</span>
+          </div>
+        </div>
+
+        <!-- Voice Recording Active Bar (Shown while recording voice) -->
+        <div id="voiceRecordingBar" class="hidden p-3 rounded-2xl bg-rose-50 border border-rose-200 mb-2 flex items-center justify-between animate-pulse">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+            <span class="font-bold text-rose-700 text-xs">กำลังบันทึกเสียงพูด...</span>
+            <span id="voiceRecordTimer" class="font-mono font-bold text-xs text-rose-900 bg-rose-100 px-2 py-0.5 rounded-lg">00:00</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="cancelVoiceRecording()" class="px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition cursor-pointer">
+              ยกเลิก
+            </button>
+            <button type="button" onclick="finishVoiceRecordingAndSend()" class="px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1">
+              <i data-lucide="send" class="w-3 h-3"></i>
+              <span>ส่งเสียง</span>
+            </button>
+          </div>
+        </div>
+
         <form id="chatForm" onsubmit="handleUserSubmit(event)" class="space-y-2">
-          <div class="relative flex items-center">
-            <input 
-              type="text" 
-              id="chatInput" 
-              placeholder="พิมพ์คำถามของคุณที่นี่... (เช่น สอบถามเรื่องค่าเสื้อ, วันจัดกิจกรรม)"
-              class="w-full pl-4 pr-24 py-3 rounded-2xl bg-slate-50 border border-slate-300/90 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition shadow-inner font-normal"
-              autocomplete="off"
+          <div class="relative flex items-center gap-1.5">
+            
+            <!-- Hidden File Input (Image & Video) -->
+            <input type="file" id="mediaFileInput" accept="image/*,video/*" class="hidden" onchange="handleMediaSelected(event)">
+
+            <!-- Media Attach Button -->
+            <button 
+              type="button" 
+              onclick="document.getElementById('mediaFileInput').click()" 
+              class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-500 border border-slate-200 flex items-center justify-center transition cursor-pointer flex-shrink-0"
+              title="แนบรูปภาพหรือวิดีโอ (บีบอัดอัตโนมัติ)"
             >
-            <div class="absolute right-2 flex items-center gap-1">
-              <button 
-                type="submit" 
-                id="btnSendMessage" 
-                class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white font-bold text-xs shadow-md shadow-brand-500/20 active:scale-95 transition flex items-center gap-1.5 cursor-pointer"
+              <i data-lucide="paperclip" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Voice Record Button -->
+            <button 
+              type="button" 
+              id="btnVoiceRecord"
+              onclick="toggleVoiceRecording()" 
+              class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 border border-slate-200 flex items-center justify-center transition cursor-pointer flex-shrink-0"
+              title="กดเพื่อบันทึกเสียงพูด (พร้อมถอดเสียงข้อความสด)"
+            >
+              <i data-lucide="mic" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Text Input -->
+            <div class="relative flex-1">
+              <input 
+                type="text" 
+                id="chatInput" 
+                placeholder="พิมพ์คำถาม หรือส่งภาพ/เสียงพูด... (เช่น ค่าเสื้อ, กิจกรรม)"
+                class="w-full pl-4 pr-20 py-2.5 sm:py-3 rounded-2xl bg-slate-50 border border-slate-300/90 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition shadow-inner font-normal"
+                autocomplete="off"
               >
-                <span>ส่ง</span>
-                <i data-lucide="send" class="w-3.5 h-3.5"></i>
-              </button>
+              <div class="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <button 
+                  type="submit" 
+                  id="btnSendMessage" 
+                  class="px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white font-bold text-xs shadow-md shadow-brand-500/20 active:scale-95 transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>ส่ง</span>
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
             </div>
           </div>
-          <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
+          
+          <div class="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-0.5">
             <div class="flex items-center gap-1 text-slate-400">
               <i data-lucide="shield-check" class="w-3 h-3 text-mint-500"></i>
-              <span>ปลอดภัย • การสนทนาเชื่อมต่อผ่าน Supabase Realtime</span>
+              <span>ระบบรักษาความปลอดภัย • บีบอัดภาพ & ถอดเสียงอัตโนมัติ</span>
             </div>
-            <button type="button" onclick="requestHumanAssistance()" class="font-bold text-brand-600 hover:text-brand-800 hover:underline flex items-center gap-1">
+            <button type="button" id="btnRequestHumanAction" onclick="requestHumanAssistance()" class="font-bold text-brand-600 hover:text-brand-800 hover:underline flex items-center gap-1 cursor-pointer">
               <i data-lucide="headphones" class="w-3 h-3"></i>
               <span>ขอคุยกับเจ้าหน้าที่โดยตรง</span>
             </button>
@@ -426,6 +511,54 @@
 
   </main>
 
+  <!-- ================= MODAL: MY TICKETS HISTORY ================= -->
+  <div id="modalMyTickets" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+            <i data-lucide="history" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">ประวัติการติดต่อของฉัน (My Tickets)</h3>
+            <p class="text-xs text-slate-500">ติดตามสถานะและข้อความติดต่อย้อนหลัง</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeMyTicketsModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Tickets List -->
+      <div id="myTicketsListContainer" class="p-5 overflow-y-auto space-y-3 chat-scroll flex-1">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: USER LOGIN REQUIRED ================= -->
+  <div id="modalSupportAuth" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white max-w-sm w-full rounded-3xl p-6 sm:p-7 text-center space-y-4 border border-slate-200 shadow-2xl">
+      <div class="w-14 h-14 rounded-3xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto border border-brand-200 shadow-sm">
+        <i data-lucide="lock" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-base">เข้าสู่ระบบเพื่อติดต่อเจ้าหน้าที่</h3>
+        <p class="text-xs text-slate-500 mt-1">กรุณายืนยันตัวตนด้วยอีเมล KKU หรือบัญชีนักศึกษา เพื่อให้เจ้าหน้าที่สามารถติดตามและบันทึกประวัติได้อย่างปลอดภัย</p>
+      </div>
+
+      <div class="space-y-2 pt-2">
+        <button type="button" onclick="proceedGuestOrStudentAuth()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition cursor-pointer flex items-center justify-center gap-2">
+          <i data-lucide="user-check" class="w-4 h-4"></i>
+          <span>ยืนยันด้วยบัญชีนักศึกษา COMED</span>
+        </button>
+        <button type="button" onclick="closeSupportAuthModal()" class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+          ยกเลิก
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= MODAL: KNOWLEDGE BASE BROWSER ================= -->
   <div id="modalKnowledgeBase" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
@@ -470,27 +603,25 @@
     let activeTicket = null;
     let currentConversationHistory = [];
     let isHumanMode = false;
+    let stagedMediaFile = null;
+
+    // Voice Recording State
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingTimer = null;
+    let recordingSeconds = 0;
+    let speechRecognitionInstance = null;
+    let liveVoiceTranscription = '';
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (typeof lucide !== 'undefined') lucide.createIcons();
       await initTicketSession();
+      initLiveAdminPresenceTracker();
     });
 
     // 1. Initialize Ticket Session
     async function initTicketSession() {
-      // Check current user session from COMED_USER_SESSION if logged in
-      let userData = {};
-      try {
-        const u = localStorage.getItem('COMED_USER_SESSION');
-        if (u) {
-          const parsed = JSON.parse(u);
-          userData = {
-            name: parsed.name || parsed.studentName || 'นักศึกษา COMED',
-            email: parsed.email || '',
-            studentId: parsed.studentId || ''
-          };
-        }
-      } catch(e) {}
+      let userData = getCurrentUserSessionData();
 
       try {
         if (window.ComedSupportEngine) {
@@ -498,42 +629,309 @@
           const tDisplay = document.getElementById('ticketCodeDisplay');
           if (tDisplay) tDisplay.textContent = activeTicket.ticket_code;
 
+          // Check if ticket was previously requested for human
+          if (activeTicket.mode === 'human_requested' || activeTicket.mode === 'human_active') {
+            activateHumanModeUI(activeTicket.assigned_admin || 'เจ้าหน้าที่สาขาวิชา');
+          }
+
           // Subscribe to Supabase Realtime for this ticket
           window.ComedSupportEngine.subscribeTicketMessages(activeTicket.id, (newMsg) => {
             // If message is from admin, append it
             if (newMsg.sender_type === 'admin') {
-              appendMessageBubble('admin', newMsg.sender_name, newMsg.message, newMsg.created_at);
-              // Switch status UI to Human
+              appendMessageBubble('admin', newMsg.sender_name, newMsg.message, newMsg.created_at, null, newMsg.attachments, newMsg.voice_transcription, newMsg.voice_duration);
               activateHumanModeUI(newMsg.sender_name);
+            } else if (newMsg.sender_type === 'system') {
+              appendMessageBubble('system', 'ระบบบริการ', newMsg.message, newMsg.created_at);
             }
           });
         }
       } catch (err) {
         console.warn("Ticket init fallback (offline):", err);
         const tDisplay = document.getElementById('ticketCodeDisplay');
-        if (tDisplay) tDisplay.textContent = 'ONLINE-STANDALONE';
+        if (tDisplay) tDisplay.textContent = 'STANDALONE';
       }
     }
 
-    // 2. User Submits Question
+    function getCurrentUserSessionData() {
+      try {
+        const u = localStorage.getItem('COMED_USER_SESSION');
+        if (u) {
+          const parsed = JSON.parse(u);
+          return {
+            name: parsed.name || parsed.studentName || 'นักศึกษา COMED',
+            email: parsed.email || '',
+            studentId: parsed.studentId || ''
+          };
+        }
+      } catch(e) {}
+      return { name: 'ผู้ติดต่อทั่วไป', email: '', studentId: '' };
+    }
+
+    // 2. Track Live Active Admins Presence
+    async function initLiveAdminPresenceTracker() {
+      if (!window.ComedSupportEngine) return;
+      
+      const updateUI = (stats) => {
+        const counter = document.getElementById('adminLiveCounterBadge');
+        const dot = document.getElementById('adminLiveDot');
+        const text = document.getElementById('adminLiveText');
+        if (!counter || !dot || !text) return;
+
+        counter.classList.remove('hidden');
+        if (stats.availableCount > 0) {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-mint-500 animate-pulse';
+          counter.className = 'hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-mint-50 text-mint-700 border border-mint-200';
+          text.textContent = `แอดมินพร้อมให้บริการ ${stats.availableCount} คน`;
+        } else if (stats.busyCount > 0) {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500';
+          counter.className = 'hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200';
+          text.textContent = `แอดมินกำลังติดภารกิจ (${stats.busyCount})`;
+        } else {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-400';
+          counter.className = 'hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200';
+          text.textContent = `อยู่นอกเวลาทำการ (ฝากข้อความได้)`;
+        }
+      };
+
+      const initialStats = await window.ComedSupportEngine.getActiveAdminsCount();
+      updateUI(initialStats);
+      window.ComedSupportEngine.subscribeAdminPresence(updateUI);
+    }
+
+    // 3. Media Selection & Staging (Auto compressed)
+    async function handleMediaSelected(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const stagingBar = document.getElementById('mediaStagingBar');
+      const fileNameEl = document.getElementById('stagedFileName');
+      const fileSizeEl = document.getElementById('stagedFileSize');
+      const thumbEl = document.getElementById('stagedThumbnail');
+
+      stagingBar.classList.remove('hidden');
+      fileNameEl.textContent = file.name;
+      fileSizeEl.textContent = `${(file.size / 1024).toFixed(1)} KB`;
+
+      if (file.type.startsWith('image/')) {
+        thumbEl.innerHTML = `<img src="${URL.createObjectURL(file)}" class="w-full h-full object-cover">`;
+      } else if (file.type.startsWith('video/')) {
+        thumbEl.innerHTML = `<i data-lucide="video" class="w-4 h-4 text-brand-600"></i>`;
+      } else {
+        thumbEl.innerHTML = `<i data-lucide="file" class="w-4 h-4 text-brand-600"></i>`;
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      stagedMediaFile = file;
+    }
+
+    function clearStagedMedia() {
+      stagedMediaFile = null;
+      document.getElementById('mediaFileInput').value = '';
+      document.getElementById('mediaStagingBar').classList.add('hidden');
+    }
+
+    // 4. Voice Recording with Real-time Speech-to-Text (Instagram Style)
+    async function toggleVoiceRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        finishVoiceRecordingAndSend();
+        return;
+      }
+      startVoiceRecording();
+    }
+
+    async function startVoiceRecording() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("เบราว์เซอร์ของคุณยังไม่รองรับการบันทึกเสียงพูด");
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        recordingSeconds = 0;
+        liveVoiceTranscription = '';
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        // Start Web Speech API Thai recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+          try {
+            speechRecognitionInstance = new SpeechRecognition();
+            speechRecognitionInstance.lang = 'th-TH';
+            speechRecognitionInstance.continuous = true;
+            speechRecognitionInstance.interimResults = true;
+            speechRecognitionInstance.onresult = (event) => {
+              let transcript = '';
+              for (let i = 0; i < event.results.length; ++i) {
+                transcript += event.results[i][0].transcript;
+              }
+              liveVoiceTranscription = transcript;
+            };
+            speechRecognitionInstance.start();
+          } catch(srErr) {
+            console.warn("SpeechRecognition init error:", srErr);
+          }
+        }
+
+        mediaRecorder.start();
+
+        // UI update
+        document.getElementById('voiceRecordingBar').classList.remove('hidden');
+        document.getElementById('voiceRecordTimer').textContent = '00:00';
+        recordingTimer = setInterval(() => {
+          recordingSeconds++;
+          const mins = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
+          const secs = String(recordingSeconds % 60).padStart(2, '0');
+          document.getElementById('voiceRecordTimer').textContent = `${mins}:${secs}`;
+          if (recordingSeconds >= 120) {
+            finishVoiceRecordingAndSend();
+          }
+        }, 1000);
+
+      } catch (err) {
+        console.error("Microphone access denied:", err);
+        alert("กรุณาอนุญาตการเข้าถึงไมโครโฟนเพื่อบันทึกเสียงพูด");
+      }
+    }
+
+    function cancelVoiceRecording() {
+      if (recordingTimer) clearInterval(recordingTimer);
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      }
+      if (speechRecognitionInstance) {
+        try { speechRecognitionInstance.stop(); } catch(e){}
+      }
+      audioChunks = [];
+      mediaRecorder = null;
+      document.getElementById('voiceRecordingBar').classList.add('hidden');
+    }
+
+    async function finishVoiceRecordingAndSend() {
+      if (!mediaRecorder || mediaRecorder.state !== 'recording') return;
+
+      if (recordingTimer) clearInterval(recordingTimer);
+      const duration = recordingSeconds;
+
+      mediaRecorder.onstop = async () => {
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        if (speechRecognitionInstance) {
+          try { speechRecognitionInstance.stop(); } catch(e){}
+        }
+
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioFile = new File([audioBlob], `voice_${Date.now()}.webm`, { type: 'audio/webm' });
+
+        document.getElementById('voiceRecordingBar').classList.add('hidden');
+
+        // Show uploading feedback
+        appendMessageBubble('user', 'คุณ', '🎙️ กำลังส่งข้อความเสียง...');
+
+        try {
+          let mediaUrl = '';
+          if (window.ComedSupportEngine) {
+            const uploaded = await window.ComedSupportEngine.uploadMediaAttachment(audioFile);
+            mediaUrl = uploaded.url;
+          }
+
+          const attachments = [{
+            type: 'audio',
+            url: mediaUrl || URL.createObjectURL(audioBlob),
+            name: audioFile.name,
+            duration: duration
+          }];
+
+          const voiceMeta = {
+            transcription: liveVoiceTranscription.trim() || 'ข้อความเสียง (ไม่มีการถอดความ)',
+            duration: duration
+          };
+
+          // Save to Supabase
+          if (activeTicket && window.ComedSupportEngine) {
+            await window.ComedSupportEngine.sendMessage(
+              activeTicket.id, 
+              'user', 
+              activeTicket.user_name || 'ผู้ใช้งาน', 
+              '', 
+              attachments, 
+              voiceMeta
+            );
+          }
+
+          // If in AI mode, ask AI to answer based on transcription
+          if (!isHumanMode && liveVoiceTranscription.trim()) {
+            showAiThinking(true);
+            const aiRes = await window.ComedSupportEngine.askSmartAI(liveVoiceTranscription.trim(), currentConversationHistory);
+            showAiThinking(false);
+            if (aiRes && aiRes.answer) {
+              appendMessageBubble('ai', 'COMED AI Assistant', aiRes.answer, null, aiRes.source);
+              if (activeTicket && window.ComedSupportEngine) {
+                window.ComedSupportEngine.sendMessage(activeTicket.id, 'ai', 'COMED AI Assistant', aiRes.answer);
+              }
+            }
+          }
+
+        } catch (err) {
+          console.error("Audio upload error:", err);
+          appendMessageBubble('system', 'ระบบบริการ', '⚠️ ไม่สามารถอัปโหลดข้อความเสียงได้ กรุณาลองใหม่อีกครั้ง');
+        }
+      };
+
+      mediaRecorder.stop();
+    }
+
+    // 5. User Submits Question / Attachments
     async function handleUserSubmit(e) {
       if (e) e.preventDefault();
       const input = document.getElementById('chatInput');
       const text = (input?.value || '').trim();
-      if (!text) return;
+      const mediaToSend = stagedMediaFile;
+
+      if (!text && !mediaToSend) return;
 
       input.value = '';
+      clearStagedMedia();
+
+      let attachments = [];
+
+      // If there is media, upload it first
+      if (mediaToSend) {
+        const progressIndicator = document.getElementById('uploadProgressIndicator');
+        if (progressIndicator) progressIndicator.classList.remove('hidden');
+
+        try {
+          if (window.ComedSupportEngine) {
+            const uploaded = await window.ComedSupportEngine.uploadMediaAttachment(mediaToSend);
+            attachments.push({
+              type: mediaToSend.type.startsWith('image/') ? 'image' : (mediaToSend.type.startsWith('video/') ? 'video' : 'file'),
+              url: uploaded.url,
+              name: mediaToSend.name,
+              size: uploaded.size
+            });
+          }
+        } catch(upErr) {
+          console.error("Media upload error:", upErr);
+          alert("ไม่สามารถอัปโหลดไฟล์สื่อได้ กำลังส่งข้อความตัวอักษรแทน");
+        } finally {
+          if (progressIndicator) progressIndicator.classList.add('hidden');
+        }
+      }
 
       // Append user bubble to UI
-      appendMessageBubble('user', 'คุณ', text);
-      currentConversationHistory.push({ sender_type: 'user', message: text });
+      appendMessageBubble('user', 'คุณ', text, null, null, attachments);
+      currentConversationHistory.push({ sender_type: 'user', message: text, attachments });
 
       // Save user message to Supabase
       if (activeTicket && window.ComedSupportEngine) {
-        window.ComedSupportEngine.sendMessage(activeTicket.id, 'user', activeTicket.user_name || 'ผู้ใช้งาน', text);
+        window.ComedSupportEngine.sendMessage(activeTicket.id, 'user', activeTicket.user_name || 'ผู้ใช้งาน', text, attachments);
       }
 
-      // If already in human mode, inform user message is delivered to admin
+      // If already in human mode, message is delivered to admin directly
       if (isHumanMode) {
         return;
       }
@@ -543,14 +941,14 @@
 
       try {
         // Query AI via Multi-Tier Engine
-        const aiResponse = await window.ComedSupportEngine.askSmartAI(text, currentConversationHistory);
+        const queryText = text || (attachments.length > 0 ? 'ส่งไฟล์รูปภาพ/สื่อประกอบ' : '');
+        const aiResponse = await window.ComedSupportEngine.askSmartAI(queryText, currentConversationHistory);
         showAiThinking(false);
 
         if (aiResponse && aiResponse.answer) {
           appendMessageBubble('ai', 'COMED AI Assistant', aiResponse.answer, null, aiResponse.source);
           currentConversationHistory.push({ sender_type: 'ai', message: aiResponse.answer });
 
-          // Save AI answer to Supabase
           if (activeTicket && window.ComedSupportEngine) {
             window.ComedSupportEngine.sendMessage(activeTicket.id, 'ai', 'COMED AI Assistant', aiResponse.answer);
           }
@@ -562,7 +960,7 @@
       }
     }
 
-    // 3. Quick prompt helper
+    // 6. Quick prompt helper
     function sendQuickPrompt(promptText) {
       const input = document.getElementById('chatInput');
       if (input) {
@@ -571,14 +969,22 @@
       }
     }
 
-    // 4. Request Human Assistance
+    // 7. Request Human Assistance (Requires Login Verification)
     async function requestHumanAssistance() {
       if (isHumanMode) {
         alert("คุณได้อยู่ในโหมดติดต่อกับเจ้าหน้าที่แล้วครับ เจ้าหน้าที่จะตอบกลับผ่านหน้าต่างนี้แบบสด ๆ");
         return;
       }
 
-      const confirmReq = confirm("ต้องการส่งต่อการสนทนาไปยังเจ้าหน้าที่/แอดมินหลังบ้าน ใช่หรือไม่?");
+      // Verify user identity
+      const currentUser = getCurrentUserSessionData();
+      if (!currentUser.email && !currentUser.studentId) {
+        // Show login modal
+        document.getElementById('modalSupportAuth').classList.remove('hidden');
+        return;
+      }
+
+      const confirmReq = confirm(`ต้องการส่งต่อการสนทนาไปยังเจ้าหน้าที่/แอดมินสาขาวิชา โดยใช้ข้อมูลของคุณ (${currentUser.name}) ใช่หรือไม่?`);
       if (!confirmReq) return;
 
       activateHumanModeUI('เจ้าหน้าที่สาขาวิชา');
@@ -590,12 +996,24 @@
       appendMessageBubble('system', 'ระบบบริการ', '🔔 ระบบได้ทำการแจ้งเตือนไปยังเจ้าหน้าที่หลังบ้านเรียบร้อยแล้ว แอดมินจะเข้ามาตอบข้อความกับคุณในห้องนี้แบบเรียลไทม์ครับ');
     }
 
+    function closeSupportAuthModal() {
+      document.getElementById('modalSupportAuth').classList.add('hidden');
+    }
+
+    function proceedGuestOrStudentAuth() {
+      closeSupportAuthModal();
+      // Redirect to upload.html or trigger student session setup
+      window.location.href = 'upload.html';
+    }
+
     function activateHumanModeUI(adminName) {
       isHumanMode = true;
       const tag = document.getElementById('agentModeTag');
       const name = document.getElementById('agentNameDisplay');
       const sub = document.getElementById('agentSubtext');
       const badge = document.getElementById('agentAvatarBadge');
+      const btnCloseHeader = document.getElementById('btnCloseTicketHeader');
+      const btnReqAction = document.getElementById('btnRequestHumanAction');
 
       if (tag) {
         tag.textContent = 'โหมดสนทนากับเจ้าหน้าที่';
@@ -608,10 +1026,128 @@
         badge.innerHTML = '<i data-lucide="user-check" class="w-5 h-5"></i>';
         if (typeof lucide !== 'undefined') lucide.createIcons();
       }
+      if (btnCloseHeader) {
+        btnCloseHeader.classList.remove('hidden');
+        btnCloseHeader.classList.add('flex');
+      }
+      if (btnReqAction) {
+        btnReqAction.innerHTML = '<i data-lucide="check-circle" class="w-3 h-3 text-mint-600"></i><span>จบเคส / ปิดตั๋วเพื่อกลับคุยกับ AI</span>';
+        btnReqAction.onclick = handleUserCloseTicket;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
     }
 
-    // 5. Append message bubble to UI
-    function appendMessageBubble(type, senderName, text, timeStr, source) {
+    function deactivateHumanModeUI() {
+      isHumanMode = false;
+      const tag = document.getElementById('agentModeTag');
+      const name = document.getElementById('agentNameDisplay');
+      const sub = document.getElementById('agentSubtext');
+      const badge = document.getElementById('agentAvatarBadge');
+      const btnCloseHeader = document.getElementById('btnCloseTicketHeader');
+      const btnReqAction = document.getElementById('btnRequestHumanAction');
+
+      if (tag) {
+        tag.textContent = 'โหมดคิดวิเคราะห์รวดเร็ว';
+        tag.className = 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200';
+      }
+      if (name) name.textContent = 'COMED AI Assistant';
+      if (sub) sub.textContent = 'ตอบกลับทันที • อ้างอิงคลังข้อมูลสาขา COMED KKU';
+      if (badge) {
+        badge.className = 'w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-sky-400 text-white flex items-center justify-center shadow-md shadow-brand-500/20';
+        badge.innerHTML = '<i data-lucide="bot" class="w-5 h-5"></i>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+      if (btnCloseHeader) {
+        btnCloseHeader.classList.add('hidden');
+        btnCloseHeader.classList.remove('flex');
+      }
+      if (btnReqAction) {
+        btnReqAction.innerHTML = '<i data-lucide="headphones" class="w-3 h-3"></i><span>ขอคุยกับเจ้าหน้าที่โดยตรง</span>';
+        btnReqAction.onclick = requestHumanAssistance;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    // 8. Close Ticket and Return to AI Mode
+    async function handleUserCloseTicket() {
+      if (!activeTicket) return;
+      const confirmClose = confirm("คุณต้องการปิดตั๋วคำถามนี้ เพื่อกลับไปสนทนากับ AI ใช่หรือไม่?");
+      if (!confirmClose) return;
+
+      if (window.ComedSupportEngine) {
+        await window.ComedSupportEngine.closeTicket(activeTicket.id, 'user');
+      }
+
+      appendMessageBubble('system', 'ระบบบริการ', '✅ คุณได้ทำการปิดตั๋วเรียบร้อยแล้ว หน้าต่างสนทนาสลับกลับสู่โหมด AI Assistant สามารถสอบถามข้อมูลต่อได้ทันทีครับ');
+      deactivateHumanModeUI();
+      
+      // Start fresh ticket session for AI
+      await initTicketSession();
+    }
+
+    // 9. My Tickets History Modal
+    async function openMyTicketsModal() {
+      const modal = document.getElementById('modalMyTickets');
+      const container = document.getElementById('myTicketsListContainer');
+      modal.classList.remove('hidden');
+
+      const user = getCurrentUserSessionData();
+      if (!user.email && !user.studentId) {
+        container.innerHTML = `
+          <div class="text-center py-8 space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-200">
+              <i data-lucide="user-x" class="w-6 h-6"></i>
+            </div>
+            <p class="text-xs text-slate-600 font-medium">ไม่พบประวัติการเข้าสู่ระบบ กรุณาเข้าสู่ระบบเพื่อดูตั๋วการติดต่อของคุณ</p>
+            <button type="button" onclick="closeMyTicketsModal(); requestHumanAssistance()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold shadow-xs">
+              เข้าสู่ระบบทันที
+            </button>
+          </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">กำลังโหลดประวัติตั๋ว...</div>';
+
+      if (window.ComedSupportEngine) {
+        const identifier = user.email || user.studentId;
+        const tickets = await window.ComedSupportEngine.fetchUserTickets(identifier);
+
+        if (tickets.length === 0) {
+          container.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">ยังไม่มีประวัติการเปิดตั๋วในบัญชีนี้</div>';
+          return;
+        }
+
+        container.innerHTML = tickets.map(t => {
+          const isClosed = (t.status === 'closed' || t.status === 'resolved');
+          const statusBadge = isClosed 
+            ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">เสร็จสิ้นแล้ว</span>'
+            : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-mint-50 text-mint-700 border border-mint-200">กำลังดำเนินการ</span>';
+          
+          return `
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 hover:border-brand-300 transition">
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-bold text-xs text-brand-700">${t.ticket_code}</span>
+                ${statusBadge}
+              </div>
+              <p class="text-xs text-slate-700 line-clamp-2">${escapeHtml(t.last_message || t.topic)}</p>
+              <div class="flex items-center justify-between pt-1 border-t border-slate-200 text-[10px] text-slate-400 font-mono">
+                <span>${new Date(t.created_at).toLocaleDateString('th-TH')}</span>
+                <span class="font-sans font-bold text-slate-600">โหมด: ${t.mode === 'ai' ? 'AI' : 'เจ้าหน้าที่'}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function closeMyTicketsModal() {
+      document.getElementById('modalMyTickets').classList.add('hidden');
+    }
+
+    // 10. Append message bubble to UI with Voice Message & Media Gallery
+    function appendMessageBubble(type, senderName, text, timeStr, source, attachments = [], voiceTranscription = null, voiceDuration = null) {
       const container = document.getElementById('chatMessagesContainer');
       if (!container) return;
 
@@ -620,6 +1156,60 @@
       const isSystem = (type === 'system');
 
       let bubbleHtml = '';
+
+      // Media attachments rendering (Images, Videos, Voice)
+      let mediaHtml = '';
+      if (Array.isArray(attachments) && attachments.length > 0) {
+        attachments.forEach(att => {
+          if (att.type === 'image') {
+            mediaHtml += `
+              <div class="my-2 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50 max-w-sm">
+                <img src="${att.url}" alt="${att.name}" class="w-full max-h-60 object-cover cursor-pointer hover:scale-[1.01] transition-transform" onclick="window.open('${att.url}', '_blank')">
+              </div>
+            `;
+          } else if (att.type === 'video') {
+            mediaHtml += `
+              <div class="my-2 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-black max-w-sm">
+                <video src="${att.url}" controls class="w-full max-h-60 rounded-2xl"></video>
+              </div>
+            `;
+          } else if (att.type === 'audio') {
+            const dur = att.duration ? `${Math.floor(att.duration/60)}:${String(att.duration%60).padStart(2,'0')}` : '';
+            const transcriptionText = voiceTranscription || '';
+            const transId = 'trans_' + Math.random().toString(36).substring(2, 9);
+
+            mediaHtml += `
+              <div class="my-2 p-3 rounded-2xl bg-gradient-to-r from-sky-50 to-white border border-sky-200 shadow-sm max-w-sm space-y-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                    <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <div class="flex-1">
+                    <audio src="${att.url}" controls class="w-full h-8 outline-none"></audio>
+                  </div>
+                  ${dur ? `<span class="text-[10px] font-mono text-slate-500 font-bold">${dur}</span>` : ''}
+                </div>
+                ${transcriptionText ? `
+                  <div class="pt-1 border-t border-sky-100">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-bold text-sky-800 flex items-center gap-1">
+                        <i data-lucide="file-text" class="w-3 h-3 text-sky-600"></i>
+                        <span>ถอดข้อความเสียง:</span>
+                      </span>
+                      <button type="button" onclick="document.getElementById('${transId}').classList.toggle('hidden')" class="text-[10px] font-bold text-sky-600 hover:text-sky-800 underline cursor-pointer">
+                        ซ่อน/แสดง
+                      </button>
+                    </div>
+                    <div id="${transId}" class="mt-1 p-2 rounded-xl bg-white/90 border border-sky-100 text-xs text-slate-700 leading-relaxed font-sans">
+                      ${escapeHtml(transcriptionText)}
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }
+        });
+      }
 
       if (isSystem) {
         bubbleHtml = `
@@ -633,8 +1223,9 @@
         bubbleHtml = `
           <div class="flex items-start justify-end gap-2.5 max-w-[85%] ml-auto">
             <div class="space-y-1 text-right">
-              <div class="p-3.5 sm:p-4 rounded-2xl rounded-tr-sm bg-gradient-to-r from-brand-600 to-brand-500 text-white text-xs sm:text-sm leading-relaxed shadow-sm text-left">
-                ${escapeHtml(text)}
+              <div class="p-3.5 sm:p-4 rounded-2xl rounded-tr-sm bg-gradient-to-r from-brand-600 to-brand-500 text-white text-xs sm:text-sm leading-relaxed shadow-sm text-left space-y-1">
+                ${text ? `<div>${escapeHtml(text)}</div>` : ''}
+                ${mediaHtml}
               </div>
               <span class="text-[10px] text-slate-400 font-mono pr-1">${time}</span>
             </div>
@@ -660,6 +1251,7 @@
                 <div class="prose prose-sm max-w-none text-slate-700">
                   ${formatMarkdownText(text)}
                 </div>
+                ${mediaHtml}
               </div>
               <span class="text-[10px] text-slate-400 font-mono pl-1">${time}</span>
             </div>

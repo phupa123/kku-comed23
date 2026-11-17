@@ -365,7 +365,7 @@
     /**
      * ส่งข้อความลงตาราง support_messages ใน Supabase
      */
-    async sendMessage(ticketId, senderType, senderName, messageText, attachments = []) {
+    async sendMessage(ticketId, senderType, senderName, messageText, attachments = [], voiceMeta = {}) {
       const sb = this.getSupabase();
       if (!sb || !ticketId) return null;
 
@@ -375,6 +375,8 @@
         sender_name: senderName,
         message: messageText,
         attachments: attachments,
+        voice_transcription: voiceMeta.transcription || null,
+        voice_duration: voiceMeta.duration || null,
         created_at: new Date().toISOString()
       };
 
@@ -389,9 +391,15 @@
       }
 
       // Update ticket last_message
+      const displaySnippet = voiceMeta.transcription 
+        ? `🎙️ [เสียง] ${voiceMeta.transcription.slice(0, 80)}`
+        : (attachments && attachments.length > 0 && (!messageText || messageText.trim() === '')
+          ? `📎 [แนบไฟล์ ${attachments.length} รายการ]`
+          : messageText.substring(0, 150));
+
       await sb.from('support_tickets')
         .update({
-          last_message: messageText.substring(0, 150),
+          last_message: displaySnippet,
           last_message_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -469,6 +477,219 @@
 
       await this.sendMessage(ticketId, 'system', 'ระบบบริการ', '🔔 ผู้ใช้ได้กดขอติดต่อพูดคุยกับเจ้าหน้าที่แล้ว ระบบกำลังแจ้งเตือนแอดมินประจำการ...');
       return true;
+    }
+
+    /**
+     * ปิด Ticket (Close Ticket) เพื่อให้นักศึกษากลับไปคุยกับ AI
+     */
+    async closeTicket(ticketId, closedBy = 'user', rating = null) {
+      const sb = this.getSupabase();
+      if (!sb || !ticketId) return false;
+
+      const { error } = await sb.from('support_tickets')
+        .update({
+          status: 'closed',
+          mode: 'ai',
+          closed_by: closedBy,
+          rating: rating,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', ticketId);
+
+      if (error) {
+        console.error("[SupportEngine] Close ticket error:", error);
+        return false;
+      }
+
+      await this.sendMessage(ticketId, 'system', 'ระบบบริการ', `✅ ตั๋วนี้ได้รับการปิดสถานะเรียบร้อยแล้วโดย ${closedBy === 'user' ? 'ผู้ใช้งาน' : 'เจ้าหน้าที่'} ขอขอบคุณที่ใช้บริการครับ`);
+      this.currentTicket = null;
+      return true;
+    }
+
+    /**
+     * ดึงประวัติ Ticket ทั้งหมดของผู้ใช้ (ตาม email หรือ studentId)
+     */
+    async fetchUserTickets(userIdentifier) {
+      const sb = this.getSupabase();
+      if (!sb || !userIdentifier) return [];
+
+      try {
+        const { data, error } = await sb.from('support_tickets')
+          .select('*')
+          .or(`user_email.eq.${userIdentifier},student_id.eq.${userIdentifier}`)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("[SupportEngine] fetchUserTickets error:", err);
+        return [];
+      }
+    }
+
+    /**
+     * อัปเดตหรือดึงสถานะแอดมินที่พร้อมให้บริการ (Admin Presence)
+     */
+    async setAdminPresence(adminId, adminName, adminEmail, status = 'available') {
+      const sb = this.getSupabase();
+      if (!sb || !adminId) return false;
+
+      try {
+        const payload = {
+          admin_id: String(adminId),
+          admin_name: adminName || 'Admin Staff',
+          admin_email: adminEmail || '',
+          status: status,
+          last_heartbeat: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        const { error } = await sb.from('admin_presence')
+          .upsert([payload], { onConflict: 'admin_id' });
+
+        if (error) throw error;
+        return true;
+      } catch (err) {
+        console.error("[SupportEngine] setAdminPresence error:", err);
+        return false;
+      }
+    }
+
+    /**
+     * ดึงจำนวนและรายชื่อแอดมินที่พร้อมให้บริการในปัจจุบัน
+     */
+    async getActiveAdminsCount() {
+      const sb = this.getSupabase();
+      if (!sb) return { availableCount: 0, busyCount: 0, totalOnline: 0, admins: [] };
+
+      try {
+        // แอดมินที่มี heartbeat ในช่วง 15 นาทีที่ผ่านมา และสถานะไม่เป็น offline
+        const threshold = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+        const { data, error } = await sb.from('admin_presence')
+          .select('*')
+          .gt('last_heartbeat', threshold);
+
+        if (error) throw error;
+        const available = (data || []).filter(a => a.status === 'available');
+        const busy = (data || []).filter(a => a.status === 'busy');
+
+        return {
+          availableCount: available.length,
+          busyCount: busy.length,
+          totalOnline: available.length + busy.length,
+          admins: data || []
+        };
+      } catch (err) {
+        console.warn("[SupportEngine] getActiveAdminsCount fallback:", err);
+        return { availableCount: 0, busyCount: 0, totalOnline: 0, admins: [] };
+      }
+    }
+
+    /**
+     * ฟังการเปลี่ยนแปลงสถานะ Admin Presence แบบ Realtime
+     */
+    subscribeAdminPresence(onChange) {
+      const sb = this.getSupabase();
+      if (!sb) return;
+
+      return sb.channel('admin_presence_channel')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'admin_presence'
+        }, async () => {
+          const stats = await this.getActiveAdminsCount();
+          if (typeof onChange === 'function') onChange(stats);
+        })
+        .subscribe();
+    }
+
+    /**
+     * บีบอัดไฟล์รูปภาพในเบราว์เซอร์อัตโนมัติก่อนส่ง (HTML5 Canvas Compression)
+     */
+    async compressImage(file, maxDimension = 1600, quality = 0.82) {
+      if (!file || !file.type.startsWith('image/')) return file;
+      
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                resolve(file); // fallback
+                return;
+              }
+              const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
+                type: 'image/webp',
+                lastModified: Date.now()
+              });
+              console.log(`[SupportEngine] Image compressed: ${(file.size/1024).toFixed(1)}KB -> ${(compressedFile.size/1024).toFixed(1)}KB`);
+              resolve(compressedFile);
+            }, 'image/webp', quality);
+          };
+          img.onerror = () => resolve(file);
+        };
+        reader.onerror = () => resolve(file);
+      });
+    }
+
+    /**
+     * อัปโหลดไฟล์สื่อ (ภาพ / วิดีโอ / คลิปเสียง) ผ่าน MultiCloudUploader
+     */
+    async uploadMediaAttachment(file, onProgress) {
+      if (!window.MultiCloudUploader) {
+        throw new Error("MultiCloudUploader script is not loaded.");
+      }
+
+      let fileToUpload = file;
+      // Auto compress if image
+      if (file.type && file.type.startsWith('image/')) {
+        fileToUpload = await this.compressImage(file);
+      }
+
+      return new Promise((resolve, reject) => {
+        window.MultiCloudUploader.uploadFile(fileToUpload, {
+          preferredProvider: 'auto',
+          onProgress: (percent) => {
+            if (typeof onProgress === 'function') onProgress(percent);
+          },
+          onSuccess: (result) => {
+            resolve({
+              url: result.directUrl || result.url,
+              name: file.name,
+              size: fileToUpload.size,
+              type: fileToUpload.type,
+              provider: result.provider
+            });
+          },
+          onError: (err) => {
+            console.error("[SupportEngine] Media upload failed:", err);
+            reject(err);
+          }
+        });
+      });
     }
 
     unsubscribe() {
