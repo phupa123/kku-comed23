@@ -5,51 +5,73 @@
  * ============================================================================
  * Features:
  * 1. Tier 1: Real-time In-Memory / Supabase Knowledge Base Semantic Matcher
- * 2. Tier 2: Free AI Inference via Pollinations.ai (No key, 100% free, unlimited)
+ * 2. Tier 2: Free AI Inference via Pollinations.ai (RAG Dynamic Knowledge Injection)
  * 3. Tier 3: Google Gemini Free Tier Integration (context-aware deep reasoning)
- * 4. Supabase Realtime Ticketing & Live Chat Sync for Student <-> Staff
+ * 4. Rich Markdown, Images, Badges, Tables & External Link Confirmation Guard
+ * 5. Supabase Realtime Ticketing & Live Chat Sync for Student <-> Staff
  * ============================================================================
  */
 
 (function(window) {
   'use strict';
 
-  // Fallback Embedded Knowledge Base in case Supabase is unreachable
+  // Fallback Embedded Knowledge Base with rich formatting, badges, tables and image banners
   const EMBEDDED_KB = [
     {
       category: 'payments',
       question: 'ค่าเสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา ราคาเท่าไหร่ และชำระอย่างไร?',
-      answer: 'ค่าเสื้อสาขาวิชาเอก (COMED 69) ยอดชำระปกติอยู่ที่ 390.00 บาท (สำหรับขนาดไม่เกิน 2XL) และหากเป็นขนาด 3XL ขึ้นไป จะบวกเพิ่ม 20 บาท เป็น 410.00 บาท สามารถเข้าไปชำระเงินและแนบสลิปผ่านหน้าเว็บเมนู "ชำระเงิน" (payment.html) ได้โดยตรง',
-      keywords: ['ค่าเสื้อ', 'เสื้อเอก', '390', '410', 'ขนาดเสื้อ', 'ชำระเงินค่าเสื้อ', 'ไซส์เสื้อ']
+      answer: `👕 **ค่าเสื้อสาขาวิชาเอกคอมพิวเตอร์ศึกษา (COMED 69)**
+
+| รายการขนาดเสื้อ | ราคาต่อตัว | รายละเอียด |
+| :--- | :---: | :--- |
+| **ไซส์ปกติ (S - 2XL)** | **390 บาท** | รวมค่าสกรีนและเนื้อผ้าอย่างดี |
+| **ไซส์พิเศษ (3XL ขึ้นไป)** | **410 บาท** | บวกเพิ่ม 20 บาท |
+
+🔗 **ช่องทางการชำระเงิน:**
+สามารถเข้าไปตรวจสอบรายชื่อ เลือกไซส์ และแนบสลิปผ่านระบบ [หน้ารับชำระเงินค่าเสื้อ (payment.html)](payment.html) ได้โดยตรงเลยครับ
+
+![ตัวอย่างเสื้อสาขาวิชา](https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop)`,
+      keywords: ['ค่าเสื้อ', 'เสื้อเอก', '390', '410', 'ขนาดเสื้อ', 'ชำระเงินค่าเสื้อ', 'ไซส์เสื้อ', 'ราคาเสื้อ']
     },
     {
       category: 'payments',
       question: 'ค่าทำป้ายสาขาวิชาเอก (PAIMAI69) ราคาเท่าไหร่?',
-      answer: 'ค่าทำป้ายสาขาวิชาเอกสำหรับนักศึกษาชั้นปีที่ 1 ยอดชำระคนละ 190.00 บาท สามารถตรวจสอบรายชื่อและยืนยันการโอนเงินได้ที่ระบบชำระเงินเมนูค่าทำป้าย (payment.html?camp=paimai69)',
+      answer: `🏷️ **ค่าทำป้ายสาขาวิชาเอกสำหรับนักศึกษาชั้นปีที่ 1 (COMED 69)**
+- **ยอดชำระ:** <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">190.00 บาท / คน</span>
+- **สถานะ:** เปิดให้ยืนยันสิทธิ์และแนบสลิป
+- **ลิงก์ดำเนินการ:** สามารถเข้าชำระได้ที่ [ระบบชำระเงินค่าทำป้าย (payment.html?camp=paimai69)](payment.html?camp=paimai69)`,
       keywords: ['ค่าทำป้าย', 'ป้ายชื่อ', '190', 'paimai', 'ป้ายสาขา', 'ป้าย']
     },
     {
       category: 'calendar',
       question: 'ช่วงเวลาเปิด-ปิดภาคเรียน และปฏิทินการศึกษาตรวจสอบได้ที่ไหน?',
-      answer: 'สามารถตรวจสอบกำหนดการลงทะเบียน วันเริ่มเรียน วันสอบกลางภาค และวันสอบไล่ได้ผ่านหน้าเมนู "ปฏิทินกิจกรรม" (Calendar.html) ของระบบ หรือตรวจสอบทางเว็บไซต์สำนักบริหารและพัฒนาวิชาการ มข. (reg.kku.ac.th)',
+      answer: `📅 **ปฏิทินกิจกรรมและการศึกษา (Academic Calendar)**
+- ตรวจสอบกำหนดการลงทะเบียน วันเปิด-ปิดภาคเรียน และวันสอบกลางภาค/ปลายภาคได้ที่ [ปฏิทินกิจกรรมสาขา (Calendar.html)](Calendar.html)
+- หรือตรวจสอบประกาศทางการจากสำนักบริหารและพัฒนาวิชาการ มข. ที่ [reg.kku.ac.th](https://reg.kku.ac.th)`,
       keywords: ['ปฏิทิน', 'วันสอบ', 'เปิดเทอม', 'ปิดเทอม', 'ลงทะเบียน', 'calendar', 'ตารางเรียน', 'วันหยุด']
     },
     {
       category: 'documents',
       question: 'ดาวน์โหลดเอกสาร แบบฟอร์มคำร้อง และสไลด์การเรียนได้ที่ไหน?',
-      answer: 'นักศึกษาสามารถเข้าใช้งานระบบคลังเอกสารและไฟล์สื่อการเรียนรู้ได้ที่หน้าเมนู "ดาวน์โหลด" (download.html) และ "คลังไฟล์" (storage.html) โดยมีระบบพรีวิวไฟล์และดาวน์โหลดตรงได้ทันที',
+      answer: `📁 **คลังเอกสารและดาวน์โหลด (Documents & Storage)**
+- **คลังเอกสารและคำร้อง:** [ระบบดาวน์โหลดเอกสาร (download.html)](download.html) (มีระบบ Preview ดูตัวอย่างก่อนโหลด)
+- **คลังไฟล์ Cloud Drive สาขา:** [Cloud Storage (storage.html)](storage.html)`,
       keywords: ['ดาวน์โหลด', 'เอกสาร', 'แบบฟอร์ม', 'ไฟล์เรียน', 'download', 'storage', 'ไดรฟ์', 'pdf']
     },
     {
       category: 'professors',
       question: 'ช่องทางติดต่ออาจารย์ที่ปรึกษาและคณาจารย์ประจำสาขาวิชา',
-      answer: 'สามารถติดต่ออาจารย์ประจำสาขาวิชาคอมพิวเตอร์ศึกษาได้ที่ อาคาร 1 คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น หรือผ่านอีเมลทางการของคณาจารย์ในระบบ หรือติดต่อสอบถามผ่านหัวหน้าสาขา / ผู้ดูแลระบบในหน้านี้',
+      answer: `👨‍🏫 **คณาจารย์ประจำสาขาวิชาคอมพิวเตอร์ศึกษา**
+- **ที่ตั้งห้องพักอาจารย์:** อาคาร 1 คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
+- **อีเมลทางการสาขา:** [comed@kku.ac.th](mailto:comed@kku.ac.th)
+- หรือหากต้องการส่งข้อความสอบถาม สามารถกดปุ่ม **"🙋‍♂️ ขอคุยกับเจ้าหน้าที่"** เพื่อฝากเรื่องไว้ได้ครับ`,
       keywords: ['อาจารย์', 'อาจารย์ที่ปรึกษา', 'คณะศึกษาศาสตร์', 'ติดต่ออาจารย์', 'ห้องพักอาจารย์', 'เบอร์อาจารย์']
     },
     {
       category: 'activities',
       question: 'กิจกรรมบายเนียร์และค่ายวิชาการจัดขึ้นเมื่อใด?',
-      answer: 'กิจกรรมของสาขาวิชาคอมพิวเตอร์ศึกษา เช่น กิจกรรมสานสัมพันธ์ ค่ายวิชาการคอมพิวเตอร์ศึกษา และกิจกรรมบายเนียร์ สามารถติดตามประกาศวันเวลาสถานที่อย่างเป็นทางการได้ทางหน้าข่าวสาร (index.html) และเมนู Plans / EventClass',
+      answer: `🎉 **กิจกรรมและค่ายสาขาวิชาคอมพิวเตอร์ศึกษา**
+ติดตามรายละเอียดวัน เวลา สถานที่ และกำหนดการกิจกรรมต่าง ๆ (เช่น ค่ายวิชาการ, บายเนียร์, กิจกรรมสานสัมพันธ์) ได้ที่หน้า [แผนงานและกิจกรรม (Plans.html)](Plans.html) และ [ระบบ EventClass (eventclass.html)](eventclass.html)`,
       keywords: ['กิจกรรม', 'บายเนียร์', 'ค่าย', 'event', 'แผนงาน', 'plans', 'งานสาขา']
     }
   ];
@@ -145,41 +167,38 @@
     }
 
     /**
-     * Tier 2: Free Unlimited AI Inference via Pollinations.ai
+     * Tier 2: Free Unlimited AI Inference via Pollinations.ai with Dynamic Knowledge Context (RAG)
      */
     async queryPollinationsAI(prompt, contextMessages = []) {
       const systemPrompt = `คุณคือ "COMED AI Assistant" ผู้ช่วยปัญญาประดิษฐ์อัจฉริยะประจำสาขาวิชาคอมพิวเตอร์ศึกษา (COMED KKU) คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
-บทบาทของคุณ:
-1. ตอบคำถามอย่างสุภาพ ฉลาด รวดเร็ว กระชับ มีโครงสร้างชัดเจน และเป็นมิตรต่อนักศึกษา
-2. ข้อมูลสาขาวิชาสำคัญ:
+บทบาทและการจัดรูปแบบข้อความที่ต้องปฏิบัติตามอย่างเคร่งครัด:
+1. ตอบคำถามอย่างสุภาพ ฉลาด รวดเร็ว น่าอ่าน มีโครงสร้างชัดเจน และเป็นมิตรต่อนักศึกษา
+2. **การจัดรูปแบบข้อความให้อ่านง่ายและสวยงาม**:
+   - ใช้ **ตัวหนา** ในจุดสำคัญหรือหัวข้อ เช่น **ค่าเสื้อสาขา**, **ขั้นตอนการชำระเงิน**
+   - ใช้ bullet list (-) หรือตัวเลข (1, 2, 3) จัดเป็นข้อย่อย
+   - หากมีตารางหรือเปรียบเทียบ ให้ใช้รูปแบบ Markdown Table เช่น:
+     | รายการ | ราคา |
+     | :--- | :---: |
+     | ปกติ | 390฿ |
+   - สามารถส่งรูปภาพประกอบในคำตอบได้ในรูปแบบ Markdown Image: ![คำอธิบายภาพ](URLรูปภาพ)
+   - สามารถแนบลิงก์ที่เกี่ยวข้องได้ในรูปแบบ Markdown Link: [ข้อความลิงก์](URL) เช่น [ระบบชำระเงิน (payment.html)](payment.html)
+3. ข้อมูลสาขาวิชาสำคัญ:
    - ค่าเสื้อสาขาวิชาเอก (COMED 69): 390 บาท (<= 2XL) และ 410 บาท (>= 3XL) ชำระผ่านหน้าเว็บ payment.html
    - ค่าทำป้ายสาขาวิชา (PAIMAI69): 190 บาท
    - ปฏิทินและกิจกรรม: ดูที่ Calendar.html และ Plans.html
    - ดาวน์โหลดเอกสารและไฟล์สื่อ: download.html และ storage.html
    - ที่ตั้งสาขาวิชา: อาคาร 1 คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
-3. หากมีคำถามที่อยู่นอกเหนือข้อมูล หรือต้องการการตัดสินใจส่วนบุคคล ให้ตอบอย่างมีหลักการพร้อมแนะนำให้กดปุ่ม "ขอคุยกับเจ้าหน้าที่"
-4. ใช้ภาษาไทยเป็นหลักที่ถูกต้อง สุภาพ น่าเชื่อถือ
-5. ตอบเป็น Markdown ที่อ่านง่าย (มีหัวข้อย่อยหรือ bullet เมื่อเหมาะสม)`;
-
-      const messagesPayload = [
-        { role: 'system', content: systemPrompt },
-        ...contextMessages.slice(-6).map(m => ({
-          role: m.sender_type === 'user' ? 'user' : 'assistant',
-          content: m.message
-        })),
-        { role: 'user', content: prompt }
-      ];
+4. ตอบโดยอ้างอิงจากคลังข้อมูลทางการที่ระบุเป็นหลัก ห้ามแต่งเติมข้อมูลที่อาจสร้างความเข้าใจผิด`;
 
       try {
         // Dynamic Knowledge Base Injection (RAG): Inject top official articles from this.kbArticles
         let kbContextText = '';
         if (Array.isArray(this.kbArticles) && this.kbArticles.length > 0) {
           kbContextText = '\n\n[ข้อมูลทางการในคลังความรู้สาขาวิชา COMED KKU]:\n' + 
-            this.kbArticles.slice(0, 10).map((a, i) => `${i+1}. คำถาม: ${a.question}\nคำตอบ: ${a.answer}`).join('\n\n');
+            this.kbArticles.slice(0, 8).map((a, i) => `${i+1}. คำถาม: ${a.question}\nคำตอบ: ${a.answer}`).join('\n\n');
         }
 
-        // Construct clear prompt query for Pollinations Free AI endpoint
-        const fullPrompt = `${systemPrompt}${kbContextText}\n\nคำถามจากผู้ใช้: ${prompt}\nคำแนะนำ: ตอบอย่างสุภาพ กระชับ ถูกต้องตามข้อมูลทางการด้านบนเป็นหลัก`;
+        const fullPrompt = `${systemPrompt}${kbContextText}\n\nคำถามจากผู้ใช้: ${prompt}\nคำแนะนำ: ตอบอย่างน่าอ่าน สุภาพ มีตัวหนา ข้อย่อย และลิงก์/ภาพประกอบที่เกี่ยวข้อง`;
         const url = 'https://text.pollinations.ai/' + encodeURIComponent(fullPrompt) + '?model=openai';
 
         const response = await fetch(url);
@@ -207,15 +226,20 @@
 
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+        
+        let kbContextText = '';
+        if (Array.isArray(this.kbArticles) && this.kbArticles.length > 0) {
+          kbContextText = '\n\n[ข้อมูลทางการในคลังความรู้สาขาวิชา]:\n' + 
+            this.kbArticles.slice(0, 8).map((a, i) => `- ${a.question}: ${a.answer}`).join('\n');
+        }
+
+        const instruction = `คุณคือ COMED AI Assistant ตอบคำถามนี้โดยจัดรูปแบบให้อ่านง่าย มีตัวหนา ลิสต์ข้อย่อย ลิงก์ และตารางเปรียบเทียบเมื่อเหมาะสม:${kbContextText}\n\nคำถาม: "${prompt}"`;
+
         const bodyData = {
-          contents: [{
-            parts: [{
-              text: `คุณคือ COMED AI Assistant ผู้ช่วยอัจฉริยะประจำสาขาวิชาคอมพิวเตอร์ศึกษา มข. ตอบคำถามนี้อย่างมีเหตุผล รวดเร็ว และกระชับ: "${prompt}"`
-            }]
-          }],
+          contents: [{ parts: [{ text: instruction }] }],
           generationConfig: {
             temperature: 0.6,
-            maxOutputTokens: 1000
+            maxOutputTokens: 1200
           }
         };
 
@@ -243,14 +267,9 @@
 
     /**
      * Hybrid Multi-Tier AI Analysis Engine
-     * ลำดับการคิดวิเคราะห์:
-     * 1. ตรวจสอบคลังข้อมูลทางการ COMED KKU (Tier 1) -> หากตรงส่งคำตอบทันที
-     * 2. หากมี Gemini API Key ให้ลองคิดวิเคราะห์เชิงลึก (Tier 3)
-     * 3. รันผ่าน Pollinations AI Free Infinite Engine (Tier 2)
-     * 4. หากออฟไลน์ / เน็ตหลุด ใช้คลังคำตอบจำลองออฟไลน์อัตโนมัติ
      */
     async askSmartAI(userPrompt, contextMessages = []) {
-      // Step 1: Knowledge Base Match
+      // Step 1: Knowledge Base Match (Direct hits are formatted with rich text)
       const kbMatch = this.searchKnowledgeBase(userPrompt);
       if (kbMatch && kbMatch.confidence >= 60) {
         return {
@@ -284,7 +303,7 @@
 
       // Ultimate Fallback
       return {
-        answer: "ขออภัยครับ คำถามนี้ยังไม่มีระบุในคลังข้อมูลของสาขาโดยตรง หรือระบบ AI กำลังอยู่ในช่วงปรับปรุงข้อมูลเบื้องต้น เพื่อความถูกต้องสมบูรณ์และรวดเร็ว คุณสามารถกดปุ่ม **'🙋‍♂️ ขอคุยกับเจ้าหน้าที่'** ด้านล่างเพื่อให้แอดมินสาขาเข้ามาช่วยตอบข้อมูลได้ทันทีครับ!",
+        answer: "ขออภัยครับ คำถามนี้ยังไม่มีระบุในคลังข้อมูลของสาขาโดยตรง เพื่อความถูกต้องสมบูรณ์และรวดเร็ว คุณสามารถกดปุ่ม **'🙋‍♂️ ขอคุยกับเจ้าหน้าที่'** ด้านล่างเพื่อให้แอดมินสาขาเข้ามาช่วยตอบข้อมูลได้ทันทีครับ!",
         source: 'system_fallback',
         confidence: 0
       };
@@ -336,7 +355,7 @@
 
       const payload = {
         ticket_id: ticketId,
-        sender_type: senderType, // 'user', 'ai', 'admin', 'system'
+        sender_type: senderType,
         sender_name: senderName,
         message: messageText,
         attachments: attachments,
@@ -432,7 +451,6 @@
         return false;
       }
 
-      // Add system message
       await this.sendMessage(ticketId, 'system', 'ระบบบริการ', '🔔 ผู้ใช้ได้กดขอติดต่อพูดคุยกับเจ้าหน้าที่แล้ว ระบบกำลังแจ้งเตือนแอดมินประจำการ...');
       return true;
     }
