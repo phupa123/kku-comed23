@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ติดต่อสอบถาม & บริการอัจฉริยะ (Smart Support) | COMED KKU</title>
+
+  <!-- PWA & Favicon -->
+  <link rel="icon" type="image/png" href="assets/images/favicon.png">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="description" content="ศูนย์บริการติดต่อสอบถามอัจฉริยะ สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            mint: {
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+            },
+            slateText: {
+              title: '#0f172a',
+              body: '#334155',
+              muted: '#64748b',
+            }
+          },
+          fontFamily: {
+            sans: ['"Prompt"', '"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          boxShadow: {
+            'glow-sky': '0 20px 35px -8px rgba(14, 165, 233, 0.14)',
+            'glow-mint': '0 20px 35px -8px rgba(16, 185, 129, 0.18)',
+            'glass': '0 8px 32px 0 rgba(14, 165, 233, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons & Libraries -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- Supabase JS & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+  <script src="assets/js/support_engine.js"></script>
+
+  <style>
+    /* Cloud White Glassmorphism Design Style */
+    body {
+      background-color: #f8fafc;
+      font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+      color: #0f172a;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(224, 242, 254, 0.9);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(241, 245, 249, 0.95);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 35px -8px rgba(14, 165, 233, 0.14);
+      border-color: rgba(186, 230, 253, 0.8);
+    }
+
+    /* Ambient Background Atmosphere */
+    .ambient-sphere-1 {
+      position: fixed;
+      top: -10%;
+      right: -8%;
+      width: 580px;
+      height: 580px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, rgba(2, 132, 199, 0.04) 70%, transparent 100%);
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-sphere-2 {
+      position: fixed;
+      bottom: -15%;
+      left: -10%;
+      width: 620px;
+      height: 620px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(14, 165, 233, 0.03) 70%, transparent 100%);
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Custom Scrollbar for Chat Window */
+    .chat-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .chat-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .chat-scroll::-webkit-scrollbar-thumb:hover {
+      background: #0ea5e9;
+    }
+
+    /* Pulse wave for AI thinking */
+    @keyframes aiWave {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; }
+    }
+    .ai-wave-dot {
+      animation: aiWave 1.4s infinite ease-in-out;
+    }
+    .ai-wave-dot:nth-child(2) { animation-delay: 0.2s; }
+    .ai-wave-dot:nth-child(3) { animation-delay: 0.4s; }
+  </style>
+</head>
+
+<body class="min-h-screen relative overflow-x-hidden text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+  
+  <!-- Atmosphere Spheres -->
+  <div class="ambient-sphere-1"></div>
+  <div class="ambient-sphere-2"></div>
+
+  <!-- ================= TOP HEADER NAVIGATION ================= -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Back Button -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="p-2 rounded-xl text-slate-600 hover:text-brand-600 hover:bg-brand-50 transition border border-transparent hover:border-brand-200 flex items-center gap-1.5 text-xs font-bold" title="กลับหน้าหลัก">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">หน้าหลัก</span>
+        </a>
+        <div class="h-4 w-px bg-slate-200"></div>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-brand-500 to-sky-400 flex items-center justify-center text-white shadow-md shadow-brand-500/25">
+            <i data-lucide="message-square-heart" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-none flex items-center gap-2">
+              COMED Smart Desk
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-mint-500/15 text-mint-600 border border-mint-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-mint-500 animate-pulse"></span> ออนไลน์
+              </span>
+            </h1>
+            <p class="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">บริการสอบถามข้อมูล & ช่วยเหลือ 24 ชั่วโมง</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="openKnowledgeModal()" class="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-brand-50 text-brand-700 border border-brand-200 text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+          <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-600"></i>
+          <span class="hidden md:inline">คลังความรู้สาขา</span>
+        </button>
+        <button type="button" id="btnRequestHumanHeader" onclick="requestHumanAssistance()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-brand-500/20 active:scale-95 cursor-pointer">
+          <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+          <span>คุยกับเจ้าหน้าที่</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN LAYOUT ================= -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+    
+    <!-- LEFT COLUMN: Chat Assistant (8 Cols) -->
+    <section class="lg:col-span-8 flex flex-col h-[calc(100vh-140px)] min-h-[600px] glass-panel rounded-3xl shadow-glow-sky border border-sky-100 overflow-hidden relative">
+      
+      <!-- AI Disclaimer Alert Banner (ตาม requirement) -->
+      <div class="px-4 py-2.5 bg-gradient-to-r from-amber-50 via-sky-50 to-white border-b border-amber-200/80 flex items-start gap-2.5 text-xs text-slate-700">
+        <div class="p-1 rounded-lg bg-amber-500/20 text-amber-700 mt-0.5 flex-shrink-0">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+        </div>
+        <div class="flex-1 leading-relaxed">
+          <span class="font-bold text-amber-900">คำชี้แจงด้านความปลอดภัย:</span>
+          ระบบนี้ใช้ปัญญาประดิษฐ์ (AI) ช่วยคิดวิเคราะห์และตอบคำถามเบื้องต้น ข้อมูลที่ AI ให้มาอาจมีข้อผิดพลาดได้ โปรดตรวจสอบความถูกต้องอีกครั้ง หรือกดปุ่ม 
+          <button type="button" onclick="requestHumanAssistance()" class="underline font-bold text-brand-700 hover:text-brand-800">"ติดต่อเจ้าหน้าที่"</button> เพื่อรับคำตอบทางการจากแอดมินสาขา
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 p-1" title="ปิดคำเตือน">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Chat Active Header -->
+      <div class="p-4 border-b border-slate-200/70 bg-white/60 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div id="agentAvatarBadge" class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-sky-400 text-white flex items-center justify-center shadow-md shadow-brand-500/20">
+              <i data-lucide="bot" class="w-5 h-5"></i>
+            </div>
+            <span id="agentStatusDot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-mint-500 rounded-full border-2 border-white shadow-xs"></span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="agentNameDisplay" class="font-bold text-slate-900 text-sm">COMED AI Assistant</h2>
+              <span id="agentModeTag" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200">
+                โหมดคิดวิเคราะห์รวดเร็ว
+              </span>
+            </div>
+            <p id="agentSubtext" class="text-xs text-slate-500">ตอบกลับทันที • อ้างอิงคลังข้อมูลสาขา COMED KKU</p>
+          </div>
+        </div>
+
+        <!-- Ticket Identifier Badge -->
+        <div class="text-right">
+          <div class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">รหัสการติดต่อ</div>
+          <div id="ticketCodeDisplay" class="font-mono font-bold text-xs text-brand-700 bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-200">
+            CONNECTING...
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Messages Scroll Area -->
+      <div id="chatMessagesContainer" class="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4 chat-scroll bg-gradient-to-b from-white/30 to-slate-50/50">
+        
+        <!-- Welcome Bot Message -->
+        <div class="flex items-start gap-3 max-w-[85%]">
+          <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div class="p-4 rounded-2xl rounded-tl-sm bg-white border border-slate-200/90 shadow-sm text-slate-800 text-sm leading-relaxed space-y-2">
+            <p class="font-semibold text-slate-900">สวัสดีครับ! 👋 ยินดีต้อนรับสู่ศูนย์บริการติดต่อสอบถามสาขาวิชาคอมพิวเตอร์ศึกษา</p>
+            <p class="text-slate-600 text-xs sm:text-sm">
+              ผมคือ **COMED AI Assistant** พร้อมช่วยคิดวิเคราะห์และตอบคำถามเกี่ยวกับเรื่องการเรียน กิจกรรม ค่าเสื้อ หรือปฏิทินของสาขาครับ คุณสามารถเลือกหัวข้อยอดนิยมด้านล่าง หรือพิมพ์คำถามที่ต้องการได้เลยครับ!
+            </p>
+            <!-- Quick Chips inside Welcome -->
+            <div class="pt-2 flex flex-wrap gap-1.5">
+              <button type="button" onclick="sendQuickPrompt('ค่าเสื้อสาขาเท่าไหร่และชำระยังไง?')" class="px-2.5 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold border border-brand-200 transition">
+                👕 ค่าเสื้อสาขา
+              </button>
+              <button type="button" onclick="sendQuickPrompt('ปฏิทินการศึกษาและวันสอบดูได้ที่ไหน?')" class="px-2.5 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold border border-brand-200 transition">
+                📅 ปฏิทินและวันสอบ
+              </button>
+              <button type="button" onclick="sendQuickPrompt('ดาวน์โหลดเอกสารและไฟล์สื่อการเรียน')" class="px-2.5 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold border border-brand-200 transition">
+                📁 ดาวน์โหลดเอกสาร
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- AI Thinking State Indicator (Hidden by default) -->
+      <div id="aiThinkingBox" class="hidden px-5 py-2.5 bg-brand-50/70 border-t border-brand-100 flex items-center justify-between text-xs text-brand-700">
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-brand-600 ai-wave-dot"></span>
+            <span class="w-2 h-2 rounded-full bg-brand-500 ai-wave-dot"></span>
+            <span class="w-2 h-2 rounded-full bg-brand-400 ai-wave-dot"></span>
+          </div>
+          <span class="font-semibold">AI กำลังคิดวิเคราะห์ข้อมูลจากคลังความรู้...</span>
+        </div>
+        <span class="text-[10px] font-mono text-slate-400">Fast Neural Engine</span>
+      </div>
+
+      <!-- Chat Input Area -->
+      <div class="p-3 sm:p-4 bg-white/95 border-t border-slate-200">
+        <form id="chatForm" onsubmit="handleUserSubmit(event)" class="space-y-2">
+          <div class="relative flex items-center">
+            <input 
+              type="text" 
+              id="chatInput" 
+              placeholder="พิมพ์คำถามของคุณที่นี่... (เช่น สอบถามเรื่องค่าเสื้อ, วันจัดกิจกรรม)"
+              class="w-full pl-4 pr-24 py-3 rounded-2xl bg-slate-50 border border-slate-300/90 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition shadow-inner font-normal"
+              autocomplete="off"
+            >
+            <div class="absolute right-2 flex items-center gap-1">
+              <button 
+                type="submit" 
+                id="btnSendMessage" 
+                class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white font-bold text-xs shadow-md shadow-brand-500/20 active:scale-95 transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>ส่ง</span>
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
+            <div class="flex items-center gap-1 text-slate-400">
+              <i data-lucide="shield-check" class="w-3 h-3 text-mint-500"></i>
+              <span>ปลอดภัย • การสนทนาเชื่อมต่อผ่าน Supabase Realtime</span>
+            </div>
+            <button type="button" onclick="requestHumanAssistance()" class="font-bold text-brand-600 hover:text-brand-800 hover:underline flex items-center gap-1">
+              <i data-lucide="headphones" class="w-3 h-3"></i>
+              <span>ขอคุยกับเจ้าหน้าที่โดยตรง</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: Quick Directory & Channels (4 Cols) -->
+    <aside class="lg:col-span-4 space-y-5">
+      
+      <!-- Card 1: Official Department Info -->
+      <div class="glass-card p-5 rounded-3xl shadow-sm">
+        <div class="flex items-center gap-2.5 mb-3">
+          <div class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm">
+            <i data-lucide="building-2" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">สาขาวิชาคอมพิวเตอร์ศึกษา</h3>
+            <p class="text-xs text-slate-500">คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</p>
+          </div>
+        </div>
+        <p class="text-xs text-slate-600 leading-relaxed mb-4">
+          อาคาร 1 คณะศึกษาศาสตร์ เลขที่ 123 หมู่ 16 ถ.มิตรภาพ ต.ในเมือง อ.เมือง จ.ขอนแก่น 40002
+        </p>
+        <div class="space-y-2 pt-2 border-t border-slate-100 text-xs">
+          <a href="mailto:comed@kku.ac.th" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 text-slate-700 transition">
+            <span class="flex items-center gap-2">
+              <i data-lucide="mail" class="w-4 h-4 text-brand-500"></i>
+              <span>อีเมลสาขา</span>
+            </span>
+            <span class="font-mono text-slate-400">comed@kku.ac.th</span>
+          </a>
+          <a href="https://www.instagram.com/thitiphaua/" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 text-slate-700 transition">
+            <span class="flex items-center gap-2">
+              <i data-lucide="instagram" class="w-4 h-4 text-rose-500"></i>
+              <span>Instagram</span>
+            </span>
+            <span class="font-mono text-slate-400">@thitiphaua</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 2: Knowledge Base Categories Quick Links -->
+      <div class="glass-card p-5 rounded-3xl shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+            <i data-lucide="help-circle" class="w-4 h-4 text-brand-500"></i>
+            หมวดหมู่คำถามยอดนิยม
+          </h3>
+          <span class="text-[10px] font-mono font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-full border border-brand-200">
+            5 หมวดหมู่
+          </span>
+        </div>
+        <div class="space-y-1.5">
+          <button type="button" onclick="sendQuickPrompt('สอบถามข้อมูลการชำระเงินและค่าเสื้อ')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50/70 text-slate-700 text-xs font-medium transition flex items-center justify-between group">
+            <span class="flex items-center gap-2">
+              <span class="text-base">💳</span>
+              <span>การเงิน & ค่าเสื้อสาขาวิชา</span>
+            </span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition"></i>
+          </button>
+          <button type="button" onclick="sendQuickPrompt('สอบถามข้อมูลปฏิทินการศึกษาและวันสอบ')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50/70 text-slate-700 text-xs font-medium transition flex items-center justify-between group">
+            <span class="flex items-center gap-2">
+              <span class="text-base">📅</span>
+              <span>ปฏิทินการศึกษา & วันสอบ</span>
+            </span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition"></i>
+          </button>
+          <button type="button" onclick="sendQuickPrompt('สอบถามเรื่องกิจกรรมค่ายและบายเนียร์')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50/70 text-slate-700 text-xs font-medium transition flex items-center justify-between group">
+            <span class="flex items-center gap-2">
+              <span class="text-base">🎉</span>
+              <span>กิจกรรมสาขาวิชา (Event / Plans)</span>
+            </span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition"></i>
+          </button>
+          <button type="button" onclick="sendQuickPrompt('ขอช่องทางติดต่ออาจารย์ที่ปรึกษา')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50/70 text-slate-700 text-xs font-medium transition flex items-center justify-between group">
+            <span class="flex items-center gap-2">
+              <span class="text-base">👨‍🏫</span>
+              <span>ช่องทางติดต่อคณาจารย์</span>
+            </span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition"></i>
+          </button>
+          <button type="button" onclick="sendQuickPrompt('ต้องการดาวน์โหลดเอกสารคำร้องและแบบฟอร์ม')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50/70 text-slate-700 text-xs font-medium transition flex items-center justify-between group">
+            <span class="flex items-center gap-2">
+              <span class="text-base">📄</span>
+              <span>ดาวน์โหลดเอกสาร & คำร้อง</span>
+            </span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 3: Switch to Admin Hub Button -->
+      <div class="glass-card p-4 rounded-3xl border border-dashed border-slate-300 text-center space-y-2">
+        <span class="text-xs font-bold text-slate-500 block">สำหรับเจ้าหน้าที่ / คณะกรรมการ</span>
+        <a href="contact-admin.html" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs">
+          <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>เข้าสู่แดชบอร์ดตอบแชทเจ้าหน้าที่</span>
+        </a>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- ================= MODAL: KNOWLEDGE BASE BROWSER ================= -->
+  <div id="modalKnowledgeBase" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+            <i data-lucide="book-marked" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">คลังความรู้สาขาวิชา (Knowledge Directory)</h3>
+            <p class="text-xs text-slate-500">ข้อมูลคำถามและคำตอบที่พบบ่อยของ COMED KKU</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeKnowledgeModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Search in modal -->
+      <div class="p-4 border-b border-slate-100 bg-slate-50">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none"></i>
+          <input 
+            type="text" 
+            id="modalSearchInput" 
+            placeholder="ค้นหาตามคำถามหรือคีย์เวิร์ด..." 
+            oninput="filterKnowledgeArticles(this.value)"
+            class="w-full pl-9 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none focus:border-brand-500"
+          >
+        </div>
+      </div>
+
+      <!-- Articles List -->
+      <div id="modalArticlesContainer" class="p-5 overflow-y-auto space-y-3.5 chat-scroll flex-1">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    let activeTicket = null;
+    let currentConversationHistory = [];
+    let isHumanMode = false;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      await initTicketSession();
+    });
+
+    // 1. Initialize Ticket Session
+    async function initTicketSession() {
+      // Check current user session from COMED_USER_SESSION if logged in
+      let userData = {};
+      try {
+        const u = localStorage.getItem('COMED_USER_SESSION');
+        if (u) {
+          const parsed = JSON.parse(u);
+          userData = {
+            name: parsed.name || parsed.studentName || 'นักศึกษา COMED',
+            email: parsed.email || '',
+            studentId: parsed.studentId || ''
+          };
+        }
+      } catch(e) {}
+
+      try {
+        if (window.ComedSupportEngine) {
+          activeTicket = await window.ComedSupportEngine.getOrCreateTicket(userData);
+          const tDisplay = document.getElementById('ticketCodeDisplay');
+          if (tDisplay) tDisplay.textContent = activeTicket.ticket_code;
+
+          // Subscribe to Supabase Realtime for this ticket
+          window.ComedSupportEngine.subscribeTicketMessages(activeTicket.id, (newMsg) => {
+            // If message is from admin, append it
+            if (newMsg.sender_type === 'admin') {
+              appendMessageBubble('admin', newMsg.sender_name, newMsg.message, newMsg.created_at);
+              // Switch status UI to Human
+              activateHumanModeUI(newMsg.sender_name);
+            }
+          });
+        }
+      } catch (err) {
+        console.warn("Ticket init fallback (offline):", err);
+        const tDisplay = document.getElementById('ticketCodeDisplay');
+        if (tDisplay) tDisplay.textContent = 'ONLINE-STANDALONE';
+      }
+    }
+
+    // 2. User Submits Question
+    async function handleUserSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const text = (input?.value || '').trim();
+      if (!text) return;
+
+      input.value = '';
+
+      // Append user bubble to UI
+      appendMessageBubble('user', 'คุณ', text);
+      currentConversationHistory.push({ sender_type: 'user', message: text });
+
+      // Save user message to Supabase
+      if (activeTicket && window.ComedSupportEngine) {
+        window.ComedSupportEngine.sendMessage(activeTicket.id, 'user', activeTicket.user_name || 'ผู้ใช้งาน', text);
+      }
+
+      // If already in human mode, inform user message is delivered to admin
+      if (isHumanMode) {
+        return;
+      }
+
+      // Show AI Thinking Indicator
+      showAiThinking(true);
+
+      try {
+        // Query AI via Multi-Tier Engine
+        const aiResponse = await window.ComedSupportEngine.askSmartAI(text, currentConversationHistory);
+        showAiThinking(false);
+
+        if (aiResponse && aiResponse.answer) {
+          appendMessageBubble('ai', 'COMED AI Assistant', aiResponse.answer, null, aiResponse.source);
+          currentConversationHistory.push({ sender_type: 'ai', message: aiResponse.answer });
+
+          // Save AI answer to Supabase
+          if (activeTicket && window.ComedSupportEngine) {
+            window.ComedSupportEngine.sendMessage(activeTicket.id, 'ai', 'COMED AI Assistant', aiResponse.answer);
+          }
+        }
+      } catch (err) {
+        showAiThinking(false);
+        console.error("AI response error:", err);
+        appendMessageBubble('ai', 'COMED AI Assistant', 'ขออภัยครับ เกิดข้อขัดข้องชั่วคราวในการประมวลผลคำตอบ คุณสามารถกดปุ่ม "ขอคุยกับเจ้าหน้าที่" เพื่อให้แอดมินเข้ามาช่วยตอบได้ทันทีครับ');
+      }
+    }
+
+    // 3. Quick prompt helper
+    function sendQuickPrompt(promptText) {
+      const input = document.getElementById('chatInput');
+      if (input) {
+        input.value = promptText;
+        handleUserSubmit();
+      }
+    }
+
+    // 4. Request Human Assistance
+    async function requestHumanAssistance() {
+      if (isHumanMode) {
+        alert("คุณได้อยู่ในโหมดติดต่อกับเจ้าหน้าที่แล้วครับ เจ้าหน้าที่จะตอบกลับผ่านหน้าต่างนี้แบบสด ๆ");
+        return;
+      }
+
+      const confirmReq = confirm("ต้องการส่งต่อการสนทนาไปยังเจ้าหน้าที่/แอดมินหลังบ้าน ใช่หรือไม่?");
+      if (!confirmReq) return;
+
+      activateHumanModeUI('เจ้าหน้าที่สาขาวิชา');
+
+      if (activeTicket && window.ComedSupportEngine) {
+        await window.ComedSupportEngine.requestHumanSupport(activeTicket.id);
+      }
+
+      appendMessageBubble('system', 'ระบบบริการ', '🔔 ระบบได้ทำการแจ้งเตือนไปยังเจ้าหน้าที่หลังบ้านเรียบร้อยแล้ว แอดมินจะเข้ามาตอบข้อความกับคุณในห้องนี้แบบเรียลไทม์ครับ');
+    }
+
+    function activateHumanModeUI(adminName) {
+      isHumanMode = true;
+      const tag = document.getElementById('agentModeTag');
+      const name = document.getElementById('agentNameDisplay');
+      const sub = document.getElementById('agentSubtext');
+      const badge = document.getElementById('agentAvatarBadge');
+
+      if (tag) {
+        tag.textContent = 'โหมดสนทนากับเจ้าหน้าที่';
+        tag.className = 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-mint-50 text-mint-700 border border-mint-200';
+      }
+      if (name) name.textContent = adminName || 'เจ้าหน้าที่ประจำการ';
+      if (sub) sub.textContent = 'เชื่อมต่อสดผ่าน Supabase Realtime';
+      if (badge) {
+        badge.className = 'w-10 h-10 rounded-2xl bg-gradient-to-tr from-mint-600 to-emerald-400 text-white flex items-center justify-center shadow-md shadow-mint-500/20';
+        badge.innerHTML = '<i data-lucide="user-check" class="w-5 h-5"></i>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    // 5. Append message bubble to UI
+    function appendMessageBubble(type, senderName, text, timeStr, source) {
+      const container = document.getElementById('chatMessagesContainer');
+      if (!container) return;
+
+      const time = timeStr ? new Date(timeStr).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      const isUser = (type === 'user');
+      const isSystem = (type === 'system');
+
+      let bubbleHtml = '';
+
+      if (isSystem) {
+        bubbleHtml = `
+          <div class="flex justify-center my-2">
+            <span class="px-3 py-1 rounded-full bg-slate-200/80 text-slate-600 text-xs font-medium border border-slate-300">
+              ${text}
+            </span>
+          </div>
+        `;
+      } else if (isUser) {
+        bubbleHtml = `
+          <div class="flex items-start justify-end gap-2.5 max-w-[85%] ml-auto">
+            <div class="space-y-1 text-right">
+              <div class="p-3.5 sm:p-4 rounded-2xl rounded-tr-sm bg-gradient-to-r from-brand-600 to-brand-500 text-white text-xs sm:text-sm leading-relaxed shadow-sm text-left">
+                ${escapeHtml(text)}
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono pr-1">${time}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        // AI or Admin
+        const isAdmin = (type === 'admin');
+        const icon = isAdmin ? 'user-check' : 'sparkles';
+        const iconBg = isAdmin ? 'bg-mint-600' : 'bg-brand-600';
+
+        bubbleHtml = `
+          <div class="flex items-start gap-3 max-w-[85%]">
+            <div class="w-8 h-8 rounded-xl ${iconBg} text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+              <i data-lucide="${icon}" class="w-4 h-4"></i>
+            </div>
+            <div class="space-y-1">
+              <div class="p-4 rounded-2xl rounded-tl-sm bg-white border border-slate-200 shadow-sm text-slate-800 text-xs sm:text-sm leading-relaxed space-y-2">
+                <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-1 mb-1">
+                  <span class="font-bold text-xs ${isAdmin ? 'text-mint-700' : 'text-brand-700'}">${senderName}</span>
+                  ${source ? `<span class="text-[9px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">${source}</span>` : ''}
+                </div>
+                <div class="prose prose-sm max-w-none text-slate-700">
+                  ${formatMarkdownText(text)}
+                </div>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono pl-1">${time}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      container.insertAdjacentHTML('beforeend', bubbleHtml);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
+
+    function showAiThinking(show) {
+      const box = document.getElementById('aiThinkingBox');
+      if (box) {
+        if (show) box.classList.remove('hidden');
+        else box.classList.add('hidden');
+      }
+    }
+
+    // Modal Knowledge Directory
+    function openKnowledgeModal() {
+      const modal = document.getElementById('modalKnowledgeBase');
+      if (modal) {
+        modal.classList.remove('hidden');
+        renderKnowledgeModalArticles();
+      }
+    }
+
+    function closeKnowledgeModal() {
+      const modal = document.getElementById('modalKnowledgeBase');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderKnowledgeModalArticles(filterText = '') {
+      const container = document.getElementById('modalArticlesContainer');
+      if (!container || !window.ComedSupportEngine) return;
+
+      const articles = window.ComedSupportEngine.kbArticles || [];
+      const clean = filterText.toLowerCase().trim();
+
+      const filtered = articles.filter(a => {
+        if (!clean) return true;
+        return (a.question || '').toLowerCase().includes(clean) || (a.answer || '').toLowerCase().includes(clean);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">ไม่พบบทความที่ตรงกับคำค้นหา</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(a => `
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-300 transition space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-xs sm:text-sm text-slate-900">${a.question}</span>
+            <span class="text-[10px] uppercase font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full border border-brand-200">
+              ${a.category || 'ทั่วไป'}
+            </span>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">${a.answer}</p>
+          <div class="pt-1 flex justify-end">
+            <button type="button" onclick="closeKnowledgeModal(); sendQuickPrompt('${a.question}')" class="text-brand-600 hover:text-brand-700 text-xs font-bold underline">
+              สอบถามคำถามนี้ในแชท →
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterKnowledgeArticles(val) {
+      renderKnowledgeModalArticles(val);
+    }
+
+    function escapeHtml(str) {
+      return (str || '')
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatMarkdownText(text) {
+      if (!text) return '';
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code class="bg-slate-100 px-1 py-0.5 rounded text-xs font-mono">$1</code>')
+        .replace(/\n/g, '<br>');
+    }
+  </script>
+</body>
+</html>
