@@ -171,8 +171,15 @@
       ];
 
       try {
-        // Construct clear prompt query for Pollinations Free AI endpoint (GET method is 100% free with no rate block)
-        const fullPrompt = `${systemPrompt}\n\nคำถามจากผู้ใช้: ${prompt}`;
+        // Dynamic Knowledge Base Injection (RAG): Inject top official articles from this.kbArticles
+        let kbContextText = '';
+        if (Array.isArray(this.kbArticles) && this.kbArticles.length > 0) {
+          kbContextText = '\n\n[ข้อมูลทางการในคลังความรู้สาขาวิชา COMED KKU]:\n' + 
+            this.kbArticles.slice(0, 10).map((a, i) => `${i+1}. คำถาม: ${a.question}\nคำตอบ: ${a.answer}`).join('\n\n');
+        }
+
+        // Construct clear prompt query for Pollinations Free AI endpoint
+        const fullPrompt = `${systemPrompt}${kbContextText}\n\nคำถามจากผู้ใช้: ${prompt}\nคำแนะนำ: ตอบอย่างสุภาพ กระชับ ถูกต้องตามข้อมูลทางการด้านบนเป็นหลัก`;
         const url = 'https://text.pollinations.ai/' + encodeURIComponent(fullPrompt) + '?model=openai';
 
         const response = await fetch(url);
