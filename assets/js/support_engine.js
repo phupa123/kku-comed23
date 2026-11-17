@@ -171,50 +171,66 @@
      */
     async queryPollinationsAI(prompt, contextMessages = []) {
       const systemPrompt = `คุณคือ "COMED AI Assistant" ผู้ช่วยปัญญาประดิษฐ์อัจฉริยะประจำสาขาวิชาคอมพิวเตอร์ศึกษา (COMED KKU) คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
-บทบาทและการจัดรูปแบบข้อความที่ต้องปฏิบัติตามอย่างเคร่งครัด:
-1. ตอบคำถามอย่างสุภาพ ฉลาด รวดเร็ว น่าอ่าน มีโครงสร้างชัดเจน และเป็นมิตรต่อนักศึกษา
-2. **การจัดรูปแบบข้อความให้อ่านง่ายและสวยงาม**:
-   - ใช้ **ตัวหนา** ในจุดสำคัญหรือหัวข้อ เช่น **ค่าเสื้อสาขา**, **ขั้นตอนการชำระเงิน**
-   - ใช้ bullet list (-) หรือตัวเลข (1, 2, 3) จัดเป็นข้อย่อย
-   - หากมีตารางหรือเปรียบเทียบ ให้ใช้รูปแบบ Markdown Table เช่น:
-     | รายการ | ราคา |
-     | :--- | :---: |
-     | ปกติ | 390฿ |
-   - สามารถส่งรูปภาพประกอบในคำตอบได้ในรูปแบบ Markdown Image: ![คำอธิบายภาพ](URLรูปภาพ)
-   - สามารถแนบลิงก์ที่เกี่ยวข้องได้ในรูปแบบ Markdown Link: [ข้อความลิงก์](URL) เช่น [ระบบชำระเงิน (payment.html)](payment.html)
-3. ข้อมูลสาขาวิชาสำคัญ:
-   - ค่าเสื้อสาขาวิชาเอก (COMED 69): 390 บาท (<= 2XL) และ 410 บาท (>= 3XL) ชำระผ่านหน้าเว็บ payment.html
-   - ค่าทำป้ายสาขาวิชา (PAIMAI69): 190 บาท
-   - ปฏิทินและกิจกรรม: ดูที่ Calendar.html และ Plans.html
-   - ดาวน์โหลดเอกสารและไฟล์สื่อ: download.html และ storage.html
-   - ที่ตั้งสาขาวิชา: อาคาร 1 คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
-4. ตอบโดยอ้างอิงจากคลังข้อมูลทางการที่ระบุเป็นหลัก ห้ามแต่งเติมข้อมูลที่อาจสร้างความเข้าใจผิด`;
+- ตอบอย่างสุภาพ รวดเร็ว และเป็นมิตรต่อนักศึกษา
+- จัดรูปแบบให้อ่านง่าย: ใช้ **ตัวหนา** เน้นหัวข้อ/ราคา/กำหนดการ, ใช้ bullet point (-) แจกแจงข้อย่อย, ใช้ตาราง Markdown เมื่อเป็นการเปรียบเทียบ
+- สามารถแนบลิงก์หน้าเว็บที่เกี่ยวข้อง เช่น [ชำระเงิน (payment.html)](payment.html), [ปฏิทิน (Calendar.html)](Calendar.html), [ดาวน์โหลด (download.html)](download.html)
+- สามารถแนบภาพ Markdown เช่น ![ตัวอย่าง](assets/images/logo.png)`;
 
-      try {
-        // Dynamic Knowledge Base Injection (RAG): Inject top official articles from this.kbArticles
-        let kbContextText = '';
-        if (Array.isArray(this.kbArticles) && this.kbArticles.length > 0) {
-          kbContextText = '\n\n[ข้อมูลทางการในคลังความรู้สาขาวิชา COMED KKU]:\n' + 
-            this.kbArticles.slice(0, 8).map((a, i) => `${i+1}. คำถาม: ${a.question}\nคำตอบ: ${a.answer}`).join('\n\n');
-        }
-
-        const fullPrompt = `${systemPrompt}${kbContextText}\n\nคำถามจากผู้ใช้: ${prompt}\nคำแนะนำ: ตอบอย่างน่าอ่าน สุภาพ มีตัวหนา ข้อย่อย และลิงก์/ภาพประกอบที่เกี่ยวข้อง`;
-        const url = 'https://text.pollinations.ai/' + encodeURIComponent(fullPrompt) + '?model=openai';
-
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Pollinations HTTP ${response.status}`);
-        const text = await response.text();
-        if (text && text.trim().length > 0) {
-          return {
-            answer: text.trim(),
-            source: 'pollinations_ai',
-            model: 'Pollinations Smart Neural'
-          };
-        }
-      } catch (err) {
-        console.warn("[SupportEngine] Pollinations AI error, checking fallback:", err);
-        return null;
+      // Dynamic Context: Find top 1-2 most relevant KB articles instead of dumping the whole database
+      const matched = this.searchKnowledgeBase(prompt);
+      let kbSnippet = '';
+      if (matched && matched.article) {
+        kbSnippet = `\nข้อมูลอ้างอิงจากคลังความรู้สาขา:\n- เรื่อง: ${matched.article.question}\n- รายละเอียด: ${matched.article.answer}`;
       }
+
+      // Method 1: Try POST to Pollinations (avoids 431 URL length limit)
+      try {
+        const postRes = await fetch('https://text.pollinations.ai/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [
+              { role: 'system', content: systemPrompt + kbSnippet },
+              { role: 'user', content: prompt }
+            ],
+            model: 'openai-fast'
+          })
+        });
+
+        if (postRes.ok) {
+          const text = await postRes.text();
+          if (text && text.trim().length > 0 && !text.includes('Free limit reached')) {
+            return {
+              answer: text.trim(),
+              source: 'pollinations_ai',
+              model: 'Pollinations Smart AI'
+            };
+          }
+        }
+      } catch (postErr) {
+        console.warn("[SupportEngine] Pollinations POST attempt failed:", postErr);
+      }
+
+      // Method 2: Short GET query with compact context (keeps URL < 500 chars to prevent 431)
+      try {
+        const compactPrompt = `[COMED Assistant] ตอบสั้นกระชับ สวยงาม มีตัวหนา ลิสต์ข้อย่อย:${kbSnippet ? kbSnippet.slice(0, 200) : ''} คำถาม: ${prompt.slice(0, 150)}`;
+        const url = 'https://text.pollinations.ai/' + encodeURIComponent(compactPrompt) + '?model=openai-fast';
+        const getRes = await fetch(url);
+        if (getRes.ok) {
+          const text = await getRes.text();
+          if (text && text.trim().length > 0 && !text.includes('Free limit reached')) {
+            return {
+              answer: text.trim(),
+              source: 'pollinations_ai',
+              model: 'Pollinations AI'
+            };
+          }
+        }
+      } catch (getErr) {
+        console.warn("[SupportEngine] Pollinations GET attempt failed:", getErr);
+      }
+
+      return null;
     }
 
     /**
