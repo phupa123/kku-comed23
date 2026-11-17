@@ -171,24 +171,20 @@
       ];
 
       try {
-        const response = await fetch('https://text.pollinations.ai/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: messagesPayload,
-            model: 'openai',
-            seed: 42,
-            jsonMode: false
-          })
-        });
+        // Construct clear prompt query for Pollinations Free AI endpoint (GET method is 100% free with no rate block)
+        const fullPrompt = `${systemPrompt}\n\nคำถามจากผู้ใช้: ${prompt}`;
+        const url = 'https://text.pollinations.ai/' + encodeURIComponent(fullPrompt) + '?model=openai';
 
+        const response = await fetch(url);
         if (!response.ok) throw new Error(`Pollinations HTTP ${response.status}`);
         const text = await response.text();
-        return {
-          answer: text.trim(),
-          source: 'pollinations_ai',
-          model: 'Pollinations Smart Neural'
-        };
+        if (text && text.trim().length > 0) {
+          return {
+            answer: text.trim(),
+            source: 'pollinations_ai',
+            model: 'Pollinations Smart Neural'
+          };
+        }
       } catch (err) {
         console.warn("[SupportEngine] Pollinations AI error, checking fallback:", err);
         return null;
