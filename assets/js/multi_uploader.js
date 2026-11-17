@@ -20,9 +20,9 @@
 
   // Default keys and fallbacks
   const DEFAULT_CONFIG = {
-    activeProvider: 'auto', // 'auto' | 'imgbb' | 'cloudinary' | 'freeimage' | 'catbox'
-    enabledProviders: ['imgbb', 'cloudinary', 'catbox'],
-    providerPriority: ['imgbb', 'cloudinary', 'catbox', 'freeimage'],
+    activeProvider: 'auto', // 'auto' | 'catbox' | 'imgbb' | 'cloudinary' | 'freeimage'
+    enabledProviders: ['catbox', 'imgbb', 'cloudinary'],
+    providerPriority: ['catbox', 'imgbb', 'cloudinary', 'freeimage'],
     
     // Auto compression settings
     autoCompress: true,
@@ -705,23 +705,22 @@
       }
       formData.append('fileToUpload', fileObj);
 
+      // Cloudflare Worker Catbox Proxy
       const proxies = [
-        '/api/catbox-proxy', // Internal Cloudflare Worker proxy (if running on same host)
         'https://kku-comed23.edspace.workers.dev/api/catbox-proxy',
+        '/api/catbox-proxy',
         'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://catbox.moe/user/api.php')
       ];
 
-      // Filter out absolute worker URL if known to be unresponsive or on different origin
+      // Filter out invalid proxies
       const validProxies = proxies.filter(p => {
-        // If testing on localhost or file://, '/api/catbox-proxy' won't exist
         if (p === '/api/catbox-proxy' && (window.location.protocol === 'file:' || window.location.hostname === 'localhost')) {
           return false;
         }
         return true;
       });
 
-      // กำหนด Timeout แบบไดนามิกตามขนาดไฟล์ (ไฟล์วิดีโอ/ไฟล์ใหญ่ ให้เวลาอย่างน้อย 120-600 วินาที)
-      const dynamicTimeout = Math.max(12000, Math.min(45000, Math.round((fileObj.size || 1024 * 1024) / (50 * 1024) * 1000)));
+      const dynamicTimeout = Math.max(15000, Math.min(60000, Math.round((fileObj.size || 1024 * 1024) / (50 * 1024) * 1000)));
 
       let lastError = null;
       for (const targetUrl of validProxies) {
@@ -752,7 +751,7 @@
               }
             };
 
-            xhr.ontimeout = () => reject(new Error(`Connection to ${targetUrl} timed out (HTTP 522/timeout)`));
+            xhr.ontimeout = () => reject(new Error(`Connection to ${targetUrl} timed out`));
             xhr.onerror = () => reject(new Error(`Catbox connection error via ${targetUrl}`));
             xhr.send(formData);
           });

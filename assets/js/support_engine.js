@@ -569,7 +569,14 @@
           .select('*')
           .gt('last_heartbeat', threshold);
 
-        if (error) throw error;
+        if (error) {
+          // หากยังไม่มีตาราง admin_presence ใน Supabase ให้เงียบไว้และ fallback
+          if (error.code === '42P01' || error.message?.includes('does not exist') || error.code === 'PGRST116') {
+            console.warn("[SupportEngine] admin_presence table not created yet in Supabase.");
+          }
+          return { availableCount: 0, busyCount: 0, totalOnline: 0, admins: [] };
+        }
+
         const available = (data || []).filter(a => a.status === 'available');
         const busy = (data || []).filter(a => a.status === 'busy');
 
@@ -580,7 +587,6 @@
           admins: data || []
         };
       } catch (err) {
-        console.warn("[SupportEngine] getActiveAdminsCount fallback:", err);
         return { availableCount: 0, busyCount: 0, totalOnline: 0, admins: [] };
       }
     }
@@ -592,16 +598,22 @@
       const sb = this.getSupabase();
       if (!sb) return;
 
-      return sb.channel('admin_presence_channel')
-        .on('postgres_changes', {
-          event: '*',
-          schema: 'public',
-          table: 'admin_presence'
-        }, async () => {
-          const stats = await this.getActiveAdminsCount();
-          if (typeof onChange === 'function') onChange(stats);
-        })
-        .subscribe();
+      try {
+        return sb.channel('admin_presence_channel')
+          .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'admin_presence'
+          }, async () => {
+            const stats = await this.getActiveAdminsCount();
+            if (typeof onChange === 'function') onChange(stats);
+          })
+          .subscribe((status, err) => {
+            if (err) console.warn("[SupportEngine] Realtime admin_presence sub note:", err.message);
+          });
+      } catch(e) {
+        console.warn("[SupportEngine] subscribeAdminPresence exception:", e);
+      }
     }
 
     /**
@@ -657,6 +669,7 @@
 
     /**
      * อัปโหลดไฟล์สื่อ (ภาพ / วิดีโอ / คลิปเสียง) ผ่าน MultiCloudUploader
+     * จัดลำดับความสำคัญ: 1. Catbox.moe -> 2. ImgBB -> 3. Cloudinary (ท้ายสุด)
      */
     async uploadMediaAttachment(file, onProgress) {
       if (!window.MultiCloudUploader) {
@@ -671,7 +684,8 @@
 
       return new Promise((resolve, reject) => {
         window.MultiCloudUploader.uploadFile(fileToUpload, {
-          preferredProvider: 'auto',
+          preferredProvider: 'catbox',
+          priorityProviders: ['catbox', 'imgbb', 'cloudinary'],
           onProgress: (percent) => {
             if (typeof onProgress === 'function') onProgress(percent);
           },
