@@ -1,2694 +1,450 @@
 <!DOCTYPE html>
-<html lang="th" class="dark scroll-smooth overflow-x-hidden max-w-full">
-
+<html lang="th">
 <head>
-  <!-- Site Maintenance & Access Guard -->
-  <script src="assets/js/maintenance-guard.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ปฏิทินกิจกรรมและแผนงานสาขา | COMED23 KKU63</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>ปฏิทินสาขา — KKU COMED 23</title>
   <link rel="icon" type="image/png" href="logo.png">
 
-  <!-- PWA (Progressive Web App) Meta & Mobile App Support -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ea580c">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="COMED23">
-  <link rel="apple-touch-icon" href="logo.png">
-  <script src="assets/js/pwa-installer.js" defer></script>
-
-  <!-- Google Fonts -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://kku-comed23.edspace.workers.dev">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS CDN -->
+  <!-- Icons & Tailwind -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
-            mono: ['Plus Jakarta Sans', 'monospace']
-          },
-          colors: {
-            brand: {
-              50: '#fff7ed',
-              100: '#ffedd5',
-              200: '#fed7aa',
-              300: '#fdba74',
-              400: '#fb923c',
-              500: '#f97316',
-              600: '#ea580c',
-              700: '#c2410c',
-              kku: '#A73B24'
-            }
-          },
-          backgroundImage: {
-            'mesh-dark': 'radial-gradient(at 10% 20%, rgba(249, 115, 22, 0.15) 0px, transparent 50%), radial-gradient(at 90% 10%, rgba(59, 130, 246, 0.15) 0px, transparent 50%), radial-gradient(at 50% 90%, rgba(234, 88, 12, 0.1) 0px, transparent 50%)'
+            sans: ['"Plus Jakarta Sans"', '"Sarabun"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
           }
         }
       }
     }
   </script>
 
-  <!-- OneSignal Web Push SDK (Disabled temporarily) -->
-  <!--
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "0bb74e88-0d82-463b-bc8d-ae5a27f659c3",
-      });
-    });
-  </script>
-  -->
-  <!-- Bootstrap Icons & GSAP Animation CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- Supabase JS Client & Configs -->
+  <!-- Core App Scripts -->
+  <script src="assets/js/maintenance-guard.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase_config.js"></script>
   <script src="students_data.js"></script>
-  <!-- Strict No-LocalStorage Plans Repository & Calendar Engine -->
-  <script src="assets/js/multi_uploader.js"></script>
-  <script src="assets/js/pdf_compressor_engine.js"></script>
-  <script src="assets/js/smart_upload_modal.js"></script>
   <script src="assets/js/plans_repo.js"></script>
   <script src="assets/js/calendar_sync.js"></script>
-  <!-- Real-Time Push Notification Engine -->
   <script src="assets/js/notifications.js"></script>
 
   <style>
-    /* Minimal & Calm Theme (Notion / Linear / Apple inspired) */
     body {
-      background-color: #F8FAFC !important;
-      color: #0F172A !important;
-    }
-    .bg-noise {
-      display: none !important;
-    }
-
-    /* Dynamic Calendar Tear-Off Sheet Icon */
-    .cal-tear-icon {
-      position: relative;
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: #FFFFFF;
-      border: 1px solid #E2E8F0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-      flex-shrink: 0;
-    }
-    .cal-tear-icon .cal-tear-top {
-      width: 100%;
-      height: 11px;
-      background: #EA580C;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-    .cal-tear-icon .cal-tear-pin {
-      width: 3px;
-      height: 3px;
-      border-radius: 9999px;
-      background: #ffffff;
-      opacity: 0.95;
-    }
-    .cal-tear-icon .cal-tear-day {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
-      font-weight: 800;
-      font-size: 15px;
-      line-height: 1;
+      background-color: #F8FAFC;
       color: #0F172A;
-      padding-top: 1px;
+      font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif;
     }
-
-    .glass-card {
-      background: #FFFFFF !important;
-      backdrop-filter: none !important;
-      border: 1px solid #E2E8F0 !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03) !important;
-    }
-    .glass-card:hover {
-      border-color: #CBD5E1 !important;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.07) !important;
-    }
-    /* Calm surface overrides for legacy dark classes */
-    header, nav {
-      background-color: rgba(255, 255, 255, 0.92) !important;
-      border-color: #E2E8F0 !important;
-      color: #0F172A !important;
-    }
-    .text-white { color: #0F172A !important; }
-    .text-slate-200, .text-slate-300 { color: #334155 !important; }
-    .text-slate-400 { color: #64748B !important; }
-    .bg-\[\#070914\], .bg-\[\#0C1030\], .bg-\[\#12162A\], .bg-\[\#161B33\] {
-      background-color: #FFFFFF !important;
-      border-color: #E2E8F0 !important;
-    }
-    .border-\[\#242A4A\] { border-color: #E2E8F0 !important; }
-    /* Keep primary orange buttons white text */
-    .bg-\[\#E65A19\], .bg-orange-600, .bg-gradient-to-r.from-\[\#B32B19\] {
-      color: #FFFFFF !important;
-    }
-    .bg-\[\#E65A19\] *, .bg-orange-600 *, .bg-gradient-to-r.from-\[\#B32B19\] * {
-      color: #FFFFFF !important;
-    }
-    .custom-scroll::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scroll::-webkit-scrollbar-track {
-      background: #070914;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: #242A4A;
-      border-radius: 999px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: #E65A19;
+    .cal-cell {
+      min-height: 92px;
+      transition: background-color 0.15s ease;
     }
     @media (max-width: 640px) {
-      .mobile-cal-cell {
-        min-height: 70px !important;
-        padding: 3px !important;
-      }
-      .mobile-badge {
-        font-size: 8.5px !important;
-        padding: 1.5px 3.5px !important;
-      }
+      .cal-cell { min-height: 64px; }
     }
-    .badge-urgent {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-  
-    /* Mobile Dialog & Floating Overlay Fixes */
-    @media (max-width: 640px) {
-      .modal-dialog-responsive {
-        max-height: calc(100vh - 5.5rem) !important;
-        max-height: calc(100dvh - 5.5rem) !important;
-        margin-bottom: 4.5rem !important;
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      .modal-body-scrollable {
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-      }
-      #qrSuiteFloatingWidget {
-        display: none !important;
-      }
-    }
-
   </style>
 </head>
+<body class="min-h-screen flex flex-col pb-20 lg:pb-8">
 
-<body class="bg-[#070914] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-orange-500 selection:text-white relative overflow-x-hidden max-w-full pb-36 sm:pb-16">
-
-  <!-- Noise Overlay Across Whole Screen (Identical to Index & Profile) -->
-  <div class="fixed inset-0 pointer-events-none z-50 bg-noise"></div>
-
-  <!-- Ambient Light Effects (Navy to Red-Orange) -->
-  <div class="fixed top-[-15%] right-[-10%] w-[450px] sm:w-[650px] h-[450px] sm:h-[650px] rounded-full bg-gradient-to-br from-[#E65A19]/15 to-[#B32B19]/5 blur-[140px] pointer-events-none z-0 overflow-hidden"></div>
-  <div class="fixed top-[20%] left-[-15%] w-[600px] h-[600px] rounded-full bg-[#0C1030]/80 blur-[150px] pointer-events-none z-0"></div>
-
-  <!-- ================= TOP NAVIGATION BAR ================= -->
-    <header class="sticky top-0 z-40 bg-[#060814]/90 backdrop-blur-2xl border-b border-white/10 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.6)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3 sm:gap-4">
-      
-      <!-- Brand with Official KKU Emblem & Dynamic Date Tear-Off Icon -->
-      <div class="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
-        <a href="index.html" class="flex items-center gap-2.5 sm:gap-3 group flex-shrink-0">
-          <!-- Official KKU Crest Emblem -->
-          <div class="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#B32B19] to-[#E65A19] p-0.5 shadow-[0_0_20px_rgba(230,90,25,0.35)] group-hover:scale-105 transition-transform flex-shrink-0">
-            <div class="w-full h-full bg-[#0C1030] rounded-[10px] flex items-center justify-center p-1 overflow-hidden">
-              <img src="logo.png" alt="KKU COMED" class="w-full h-full object-contain filter drop-shadow" loading="lazy" decoding="async">
-            </div>
-          </div>
-
-          <!-- Dynamic Calendar Tear Sheet Icon -->
-          <div class="cal-tear-icon group-hover:scale-105 transition hidden xs:flex !w-8 !h-8 sm:!w-9 sm:!h-9" title="วันนี้">
-            <div class="cal-tear-top">
-              <span class="cal-tear-pin"></span>
-              <span class="cal-tear-pin"></span>
-            </div>
-            <span class="cal-tear-day !text-xs sm:!text-sm" id="calHeaderDynamicDay">25</span>
-          </div>
-
-          <div class="flex flex-col">
-            <div class="flex items-center gap-1.5 leading-none">
-              <span class="text-xs sm:text-sm font-black tracking-wider text-white font-display">KKU</span>
-              <span class="text-[11px] sm:text-xs font-bold text-white font-mono tracking-tight drop-shadow-sm">/ COMED 23</span>
-            </div>
-            <span class="text-[8px] sm:text-[9px] font-mono uppercase tracking-widest text-[#E65A19] font-bold mt-0.5">// CALENDAR HUB</span>
+  <!-- Top Navbar -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2.5 group">
+          <img src="logo.png" alt="COMED 23" class="w-8 h-8 rounded-lg object-contain border border-slate-200 p-0.5 bg-white">
+          <div>
+            <span class="font-bold text-sm text-slate-900 block leading-tight">KKU COMED 23</span>
+            <span class="text-[11px] text-slate-500 font-mono">Calendar</span>
           </div>
         </a>
       </div>
 
-      <!-- Center Switcher: Subtle sleek pills -->
-      <nav class="hidden md:flex items-center gap-1 p-1 bg-white/[0.04] border border-white/10 rounded-xl font-medium">
-        <a href="Calendar.html" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-[#E65A19] text-white shadow-md shadow-[#E65A19]/30">
-          <i data-lucide="calendar" class="w-3.5 h-3.5 text-white"></i>
-          <span>ปฏิทินสาขา (Calendar)</span>
-        </a>
-        <a href="Plans.html" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-white/5">
-          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-400"></i>
-          <span>ห้องงานทั้งหมด (Plans)</span>
-        </a>
-        <a href="Plans.html?tab=trash" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 hover:bg-white/5">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
-          <span>ถังขยะกู้คืน</span>
-          <span id="trashCountBadge" class="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">0</span>
-        </a>
+      <nav class="hidden md:flex items-center gap-1 text-sm font-medium">
+        <a href="index.html" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">หน้าหลัก</a>
+        <a href="Calendar.html" class="px-3 py-1.5 rounded-lg bg-orange-50 text-orange-700 font-semibold">ปฏิทิน</a>
+        <a href="Plans.html" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">แผนงาน (Plans)</a>
+        <a href="storage.html" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">คลังไฟล์</a>
       </nav>
 
-      <!-- Right Action Suite & User Profile (Fluid & Compact) -->
-      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
-        <!-- 1-Click Sync Trigger -->
-        <button onclick="openCalendarSubscriptionModal()" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 hover:text-white text-xs font-bold transition cursor-pointer" title="ซิงค์ Google Calendar หรือ Apple Calendar อัตโนมัติ">
-          <i data-lucide="zap" class="w-3.5 h-3.5 text-blue-400"></i>
-          <span>ซิงค์ Google Calendar</span>
+      <div class="flex items-center gap-2">
+        <button onclick="openAddModal()" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>เพิ่มกิจกรรม</span>
         </button>
-
-        <!-- Primary Action -->
-        <button onclick="openCreatePlanModal()" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#FF7A29] hover:from-[#d14f14] hover:to-[#ea6c1e] text-white font-bold text-xs shadow-md shadow-orange-500/20 flex items-center gap-1 transition transform active:scale-95 cursor-pointer whitespace-nowrap">
-          <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
-          <span class="hidden sm:inline">สร้างกิจกรรม</span>
-          <span class="sm:hidden text-[11px]">สร้าง</span>
-        </button>
-
-        <!-- User Authentication Widget -->
-        <div id="userAuthContainer" class="flex items-center">
-          <button id="authBtnLogin" onclick="triggerGoogleLogin()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs transition cursor-pointer">
-            <i data-lucide="log-in" class="w-3.5 h-3.5 text-orange-400"></i>
-            <span>เข้าสู่ระบบ KKU</span>
-          </button>
-          
-          <div id="authUserInfo" class="hidden items-center gap-2 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10">
-            <div class="relative flex-shrink-0">
-              <img id="authUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%23ea580c' loading="lazy" decoding="async"><circle cx='12' cy='8' r='4'/><path d='M20 21a8 8 0 1 0-16 0'/></svg>" alt="User" class="w-6 h-6 rounded-lg object-cover border border-orange-400/40">
-              <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-slate-900 shadow-[0_0_6px_#10B981]"></span>
-            </div>
-            <div class="flex flex-col text-left">
-              <span id="authUserName" class="text-xs font-bold text-slate-200 max-w-[85px] sm:max-w-[120px] truncate leading-tight">ชื่อผู้ใช้</span>
-              <span class="text-[9px] font-mono text-emerald-400 leading-none">● online</span>
-            </div>
-            <button onclick="logoutUser()" title="ออกจากระบบ" class="text-slate-400 hover:text-rose-400 text-[10px] font-mono transition ml-1 px-1 py-0.5 rounded hover:bg-white/5 cursor-pointer">
-              Logout
-            </button>
-          </div>
-        </div>
-
-        <a href="index.html" class="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex-shrink-0" title="กลับหน้าแรก">
-          <i data-lucide="home" class="w-4 h-4"></i>
-        </a>
       </div>
-
     </div>
   </header>
 
-  <!-- ================= MAIN CONTENT ================= -->
-  <main class="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-36 sm:pb-32 flex-1 space-y-5 sm:space-y-6 overflow-x-hidden">
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
 
-    <!-- MOBILE-ONLY TOP WIDGETS (< 768px): Swipeable Week Strip & Urgent Banner -->
-    <div class="block lg:hidden space-y-3">
-      <!-- Horizontal Swipeable Mini Calendar Strip -->
-      <div class="glass-card rounded-2xl p-2.5 border border-white/10">
-        <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10 text-xs">
-          <span class="font-bold text-slate-300 flex items-center gap-1.5">
-            <i data-lucide="calendar" class="w-3.5 h-3.5 text-orange-400"></i>
-            <span id="mobileMiniStripTitle">สัปดาห์นี้</span>
-          </span>
-          <span id="mobileMiniStripCount" class="text-[10px] font-mono text-amber-400">0 กิจกรรม</span>
-        </div>
-        <div id="mobileMiniWeekStrip" class="flex items-center justify-between gap-1 overflow-x-auto pb-1 custom-scroll">
-          <!-- Rendered dynamically -->
-        </div>
-      </div>
-
-      <!-- Urgent Event Impending Banner (Mobile Callout) -->
-      <div id="mobileUrgentEventBanner" class="p-3.5 rounded-2xl bg-gradient-to-r from-orange-950/60 via-red-950/40 to-slate-900 border border-orange-500/40 shadow-lg shadow-orange-500/10 flex flex-col gap-2">
-        <div class="flex items-center justify-between">
-          <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase text-orange-400 tracking-wider">
-            <i data-lucide="bell-ring" class="w-3.5 h-3.5 animate-bounce text-orange-400"></i>
-            <span>ด่วนที่สุด // IMPENDING EVENT</span>
-          </span>
-          <span id="mobileUrgentCountdown" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-rose-500/25 text-rose-300 border border-rose-500/40">
-            อีก 2 วัน
-          </span>
-        </div>
-        <div>
-          <h4 id="mobileUrgentTitle" class="text-sm font-black text-white">สอบปลายภาค OS (ED1447)</h4>
-          <p id="mobileUrgentDesc" class="text-xs text-slate-300 line-clamp-1">ห้องสอบ 4104 คณะครุศาสตร์</p>
-        </div>
-        <button id="mobileUrgentGoogleBtn" onclick="quickAddCurrentUrgentToGoogle()" class="w-full py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition">
-          <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
-          <span>1-tap Google Calendar</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Calendar Controls & Sync Banner -->
-    <div class="glass-card rounded-3xl p-5 sm:p-6 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
+    <!-- Toolbar: Month Nav, Search, Category Filter, View Switcher -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <!-- Month / Date Navigation -->
         <div class="flex items-center gap-2">
-          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
-            <i data-lucide="calendar" class="w-3 h-3"></i>
-            <span>ปฏิทินแผนงานสาขา & กิจกรรม</span>
-          </span>
-          <span id="calendarTotalPlansBadge" class="text-xs text-slate-400 font-mono">0 กิจกรรม</span>
-          <span id="calendarUserBadge" class="hidden text-xs text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30">
-            ✓ รวมงานส่วนตัวของคุณ
-          </span>
-        </div>
-        <h2 class="text-xl sm:text-2xl font-black text-white mt-1">ตารางปฏิทินสาขา & ซิงค์เข้าเครื่อง</h2>
-        <p class="text-xs text-slate-400">ตรวจสอบกำหนดการรายเดือน รายสัปดาห์ และเชื่อมต่อเข้า Google Calendar หรือ Apple Calendar อัตโนมัติ</p>
-      </div>
-
-      <!-- Sync Actions Bar -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <button onclick="openCalendarSubscriptionModal()" class="px-3.5 py-2 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-xs font-bold text-blue-300 hover:text-white border border-blue-500/30 flex items-center gap-1.5 transition cursor-pointer" title="เชื่อมต่อปฏิทินเข้าเครื่องหรือ Google Calendar อัตโนมัติ">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-blue-400"></i>
-          <span>ซิงค์อัตโนมัติ (Live Feed)</span>
-        </button>
-        <button onclick="exportAllCalendarIcs()" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-bold text-slate-200 hover:text-white flex items-center gap-1.5 transition cursor-pointer" title="ดาวน์โหลดไฟล์ .ics รวมทุกงาน เพื่อนำเข้า Apple Calendar, Outlook หรือ Windows Calendar">
-          <i data-lucide="download" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>ส่งออก .ICS</span>
-        </button>
-        <a href="Plans.html" class="px-3.5 py-2 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white text-xs font-extrabold flex items-center gap-1.5 border border-orange-500/30 transition">
-          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
-          <span>เปิดบอร์ด Plans</span>
-        </a>
-      </div>
-    </div>
-
-    <!-- Calendar Navigation, View Switcher & Filters -->
-    <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-      <div class="flex items-center gap-2 flex-wrap">
-        <button onclick="changeCalendarPeriod(-1)" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer" title="ช่วงก่อนหน้า">
-          <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        </button>
-        <h3 id="calendarCurrentMonthTitle" class="text-sm sm:text-lg font-black text-white min-w-[130px] sm:min-w-[170px] text-center truncate">
-          ตุลาคม 2569
-        </h3>
-        <button onclick="changeCalendarPeriod(1)" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer" title="ช่วงถัดไป">
-          <i data-lucide="chevron-right" class="w-4 h-4"></i>
-        </button>
-        <button onclick="jumpToCalendarToday()" class="ml-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-amber-300 border border-amber-500/20 transition cursor-pointer">
-          วันนี้
-        </button>
-
-        <!-- View Switcher Tabs -->
-        <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-white/10 ml-0 sm:ml-2">
-          <button id="viewBtnMonth" onclick="setCalendarViewMode('month')" class="px-3 py-1 rounded-lg text-xs font-black transition bg-orange-500 text-white shadow-xs">
-            รายเดือน
+          <button onclick="changeMonth(-1)" aria-label="เดือนก่อนหน้า" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
           </button>
-          <button id="viewBtnWeek" onclick="setCalendarViewMode('week')" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
-            รายสัปดาห์ (Weekly)
+          <h1 id="currentMonthLabel" class="text-lg sm:text-xl font-bold text-slate-900 min-w-[160px] text-center"></h1>
+          <button onclick="changeMonth(1)" aria-label="เดือนถัดไป" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
           </button>
-          <button id="viewBtnAgenda" onclick="setCalendarViewMode('agenda')" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
-            กำหนดการ
+          <button onclick="goToToday()" class="ml-1 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer">
+            วันนี้
           </button>
         </div>
-      </div>
 
-      <!-- Scope Filter & Quick Search -->
-      <div class="flex items-center gap-2 flex-wrap text-xs">
-        <div class="relative flex-1 sm:flex-initial">
-          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-          <input type="text" id="calendarSearchInput" oninput="handleCalendarSearch(this.value)" placeholder="ค้นหากิจกรรม, สถานที่..." class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-orange-500 w-full sm:w-48">
-        </div>
-
-        <select id="calendarScopeFilter" onchange="renderCalendarView()" class="flex-1 sm:flex-initial max-w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs">
-          <option value="all">ทุกกิจกรรมที่มองเห็น</option>
-          <option value="department">🏛️ เฉพาะงานสาขา</option>
-          <option value="shared">👥 เฉพาะงานกลุ่ม</option>
-          <option value="personal">🔒 เฉพาะงานส่วนตัว</option>
-        </select>
-
-        <select id="calendarUrgencyFilter" onchange="renderCalendarView()" class="flex-1 sm:flex-initial max-w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-xs font-bold">
-          <option value="all">⚡ ลำดับทั้งหมด</option>
-          <option value="priority_desc">🚨 เรียงตามความสำคัญ (Urgent &gt; Normal)</option>
-          <option value="upcoming_soon">⏳ ใกล้เข้ามาถึง (7 วันข้างหน้า)</option>
-          <option value="today">🔥 ภายในวันนี้</option>
-          <option value="this_month">📅 ภายในเดือนนี้</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Drag & Drop Hint Banner -->
-    <div id="calendarDragDropHint" class="hidden text-[11px] text-amber-300/90 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 items-center justify-between">
-      <div class="flex items-center gap-2">
-        <i data-lucide="move" class="w-3.5 h-3.5 text-amber-400"></i>
-        <span><strong>เคล็ดลับ:</strong> คุณสามารถลาก (Drag & Drop) แถบกิจกรรมที่คุณสร้าง หรือมีสิทธิ์แอดมิน เพื่อเลื่อนวันจัดกิจกรรมได้โดยตรง</span>
-      </div>
-      <span class="text-slate-400 text-[10px]">บันทึกลง Cloud อัตโนมัติ</span>
-    </div>
-
-    <!-- VIEW 1: DESKTOP TWO-COLUMN MONTH & TELEMETRY DASHBOARD -->
-    <div id="containerMonthView" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      
-      <!-- LEFT COLUMN (Main Month Grid - 8 Cols) -->
-      <div class="lg:col-span-8 glass-card rounded-3xl p-4 sm:p-6 overflow-hidden flex flex-col justify-between">
-        <div>
-          <!-- Day Names Header (Sun - Sat) -->
-          <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-black uppercase tracking-wider text-slate-400">
-            <div class="py-2 text-rose-400">อา.</div>
-            <div class="py-2">จ.</div>
-            <div class="py-2">อ.</div>
-            <div class="py-2">พ.</div>
-            <div class="py-2">พฤ.</div>
-            <div class="py-2 text-emerald-400">ศ.</div>
-            <div class="py-2 text-amber-400">ส.</div>
-          </div>
-
-          <!-- Days Cells Grid -->
-          <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2">
-            <!-- Rendered dynamically -->
-          </div>
+        <!-- View Switcher -->
+        <div class="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200 self-start sm:self-auto">
+          <button onclick="setView('month')" id="btnViewMonth" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">เดือน</button>
+          <button onclick="setView('week')" id="btnViewWeek" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">สัปดาห์</button>
+          <button onclick="setView('agenda')" id="btnViewAgenda" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">รายการ (Agenda)</button>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN (Telemetry & Impending Deadlines - 4 Cols) -->
-      <div class="lg:col-span-4 space-y-4">
-        
-        <!-- Card 1: Monthly Telemetry / Stats -->
-        <div class="glass-card rounded-3xl p-5 border border-white/10 relative overflow-hidden">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">สถิติกิจกรรมเดือนนี้</span>
-            <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <span id="telemetryMonthCount" class="text-3xl font-black font-mono text-white">0</span>
-            <span class="text-xs text-slate-400 font-mono">กิจกรรมทั้งหมด</span>
-          </div>
-          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-3">
-            <div id="telemetryProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full" style="width: 75%"></div>
-          </div>
+      <!-- Search & Category Filter -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
+        <div class="relative flex-1 max-w-md">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="calSearchInput" oninput="renderCalendar()" placeholder="ค้นหากิจกรรม, รายวิชา, สถานที่..."
+            class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 transition">
         </div>
 
-        <!-- Card 2: Urgent Impending Deadlines -->
-        <div class="glass-card rounded-3xl p-5 border border-white/10 space-y-3">
-          <div class="flex items-center justify-between pb-2 border-b border-white/10">
-            <h4 class="text-xs font-black text-rose-400 flex items-center gap-1.5 uppercase tracking-wider">
-              <i data-lucide="alarm-clock" class="w-3.5 h-3.5"></i>
-              <span>🚨 Urgent Impending Deadlines</span>
-            </h4>
-            <span id="telemetryUrgentCount" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold">0</span>
-          </div>
-
-          <div id="telemetryUrgentList" class="space-y-2 max-h-[380px] overflow-y-auto custom-scroll pr-1">
-            <!-- Rendered dynamically -->
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- VIEW 2: WEEKLY TIME GRID VIEW -->
-    <div id="containerWeekView" class="hidden glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
-      <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10 text-xs">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-          <span class="font-bold text-amber-300">มุมมองรายสัปดาห์ (Weekly View & Time Grid)</span>
-          <span class="text-slate-400 text-[11px] hidden sm:inline">• เส้นสีส้มแสดงเวลาปัจจุบัน</span>
-        </div>
-        <span id="calendarWeekRangeBadge" class="font-mono text-slate-400 text-xs">-- ถึง --</span>
-      </div>
-
-      <div class="overflow-x-auto custom-scroll -mx-2 px-2">
-        <div class="min-w-[760px]">
-          <!-- Week Header with Days -->
-          <div id="calendarWeekHeader" class="grid grid-cols-8 gap-2 pb-2 text-center border-b border-white/10 font-mono text-xs">
-            <!-- Col 0 is Time, Col 1-7 are Sun-Sat -->
-          </div>
-
-          <!-- All-Day Events row if any -->
-          <div id="calendarWeekAllDayRow" class="grid grid-cols-8 gap-2 py-2 border-b border-white/10 text-[11px] bg-white/[0.01]">
-            <!-- Rendered dynamically -->
-          </div>
-
-          <!-- 24-Hour Scrollable Grid -->
-          <div id="calendarWeekTimeBody" class="relative max-h-[560px] overflow-y-auto custom-scroll mt-2 divide-y divide-white/5 border-b border-white/10">
-            <!-- Hour slots rendered dynamically -->
-          </div>
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          <button onclick="setCategory('all')" data-cat="all" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">ทั้งหมด</button>
+          <button onclick="setCategory('class')" data-cat="class" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">วิชาเรียน</button>
+          <button onclick="setCategory('activity')" data-cat="activity" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">กิจกรรม</button>
+          <button onclick="setCategory('deadline')" data-cat="deadline" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">เดดไลน์</button>
         </div>
       </div>
     </div>
 
-    <!-- VIEW 3: UPCOMING AGENDA LIST -->
-    <div id="containerAgendaView" class="hidden glass-card rounded-3xl p-4 sm:p-6">
-      <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
-        <h3 class="text-base font-black text-white flex items-center gap-2">
-          <i data-lucide="list-checks" class="w-4 h-4 text-orange-400"></i>
-          <span>กำหนดการกิจกรรม (Upcoming Agenda)</span>
-        </h3>
-        <span class="text-xs text-slate-400">กดที่การ์ดเพื่อดูรายละเอียดหรือซิงค์</span>
-      </div>
-      <div id="calendarAgendaList" class="space-y-3">
-        <!-- Rendered dynamically -->
-      </div>
+    <!-- Calendar Container -->
+    <div id="calendarViewContainer" class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div class="p-12 text-center text-slate-400 text-sm">กำลังโหลดข้อมูลปฏิทิน...</div>
     </div>
 
   </main>
 
-  <!-- ================= MODAL: CREATE MASTER ROOM ================= -->
-  <div id="createPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md">
-    <div class="glass-card rounded-3xl border border-white/15 max-w-lg w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden modal-dialog-responsive max-h-[90vh] sm:max-h-[85vh]">
-      
-      <div class="flex items-center justify-between pb-4 border-b border-white/10 flex-shrink-0">
-        <h3 class="text-base font-black text-white">สร้างห้องงานและกิจกรรมใหม่</h3>
-        <button onclick="closeCreatePlanModal()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+  <!-- Event Detail Modal -->
+  <div id="eventDetailModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4" onclick="closeDetailModal()">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4" onclick="event.stopPropagation()">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <span id="detailBadge" class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold mb-2"></span>
+          <h2 id="detailTitle" class="text-lg font-bold text-slate-900"></h2>
+        </div>
+        <button onclick="closeDetailModal()" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
       </div>
-
-      <form onsubmit="handleCreatePlanSubmit(event)" class="space-y-4 pt-4 text-xs modal-body-scrollable overflow-y-auto pr-1 flex-1">
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">ชื่องาน / กิจกรรม <span class="text-rose-400">*</span></label>
-          <input type="text" id="newRoomTitle" required placeholder="เช่น สัมมนาสาขา, จัดทำป้ายซุ้ม" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">ประเภทรายการ</label>
-            <select id="newRoomType" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-              <option value="event">📅 กิจกรรม / นัดหมายทั่วไป (เหมือน Apple Calendar)</option>
-              <option value="reminder">🔔 งาน / เตือนความจำ (Reminders)</option>
-              <option value="project">📊 ห้องโปรเจกต์งาน (PlanToDo พร้อมกระดานงาน)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">ขอบเขต (Scope)</label>
-            <select id="newRoomScope" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-              <option value="personal">🔒 บันทึกส่วนตัว (ฉันคนเดียว)</option>
-              <option value="shared">👥 งานกลุ่มเพื่อน</option>
-              <option value="department">🏛️ งานสาขา (ทุกคนเห็น)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">สีประจำกิจกรรม</label>
-            <select id="newRoomColor" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-              <option value="#f97316">🟠 ส้ม (Orange)</option>
-              <option value="#3b82f6">🔵 ฟ้า (Blue)</option>
-              <option value="#10b981">🟢 เขียว (Green)</option>
-              <option value="#8b5cf6">🟣 ม่วง (Purple)</option>
-              <option value="#ef4444">🔴 แดง (Red)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">ระดับความสำคัญ (Priority)</label>
-            <select id="newRoomPriority" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-              <option value="urgent">🚨 ด่วนที่สุด (Urgent)</option>
-              <option value="high">🔥 สำคัญมาก (High)</option>
-              <option value="normal" selected>⚡ ปานกลาง / ทั่วไป (Normal)</option>
-              <option value="low">🌱 ไม่เร่งด่วน (Low)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Emoji / Illustration Marker Selector -->
-        <div>
-          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
-            <span>ไอคอนสัญลักษณ์ / อิโมจิมาร์กกิจกรรม</span>
-            <span class="text-[10px] text-amber-400 font-mono">เลือกมาร์กเพื่อแสดงบนปฏิทิน</span>
-          </label>
-          <div class="flex items-center gap-1.5 flex-wrap p-2 rounded-2xl bg-slate-900/80 border border-white/10">
-            <input type="hidden" id="newRoomEmoji" value="📅">
-            <button type="button" onclick="selectCalendarEmoji(this, '📅', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500 text-base flex items-center justify-center transition hover:scale-110">📅</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🏛️', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🏛️</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '📚', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">📚</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🔬', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🔬</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '💻', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">💻</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '📝', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">📝</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🚨', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🚨</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '⭐', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">⭐</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🎯', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🎯</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🏆', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🏆</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🎉', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🎉</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🏕️', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🏕️</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🎤', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🎤</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🚌', 'newRoomEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🚌</button>
-          </div>
-        </div>
-
-        <!-- Location & Google Maps Quick Pin -->
-        <div>
-          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
-            <span>สถานที่ / ห้องเรียน / ปักพิกัด (Google Maps)</span>
-            <span class="text-[10px] text-slate-400">เลือกพิกัดคณะหรือพิมพ์ห้อง</span>
-          </label>
-          <div class="space-y-1.5">
-            <div class="relative">
-              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-              <input type="text" id="newRoomLocation" placeholder="เช่น คณะศึกษาศาสตร์ มข., ED2104, ห้องประชุม 2..." class="w-full pl-8.5 pr-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs">
-            </div>
-            <!-- Quick Preset Chips for KKU Education Faculty -->
-            <div class="flex items-center gap-1.5 flex-wrap text-[10px]">
-              <span class="text-slate-400 font-bold">พิกัดยอดนิยม:</span>
-              <button type="button" onclick="setPresetLocation('newRoomLocation', 'คณะศึกษาศาสตร์ มข. (ED)')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition">📍 คณะศึกษาศาสตร์</button>
-              <button type="button" onclick="setPresetLocation('newRoomLocation', 'ED2104 อาคาร 2 ชั้น 1')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition">ED2104</button>
-              <button type="button" onclick="setPresetLocation('newRoomLocation', 'ED1447 ห้องคอมพิวเตอร์')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition">ED1447</button>
-              <button type="button" onclick="setPresetLocation('newRoomLocation', 'สำนักหอสมุด มหาวิทยาลัยขอนแก่น')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition">หอสมุด มข.</button>
-              <button type="button" onclick="setPresetLocation('newRoomLocation', 'ศูนย์อาหารและบริการ 1 (คอมเพล็กซ์ มข.)')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition">คอมเพล็กซ์</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Multi-Image Catbox Attachments & Poster -->
-        <div class="space-y-1.5">
-          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
-            <span class="flex items-center gap-1.5">
-              <i data-lucide="images" class="w-3.5 h-3.5 text-sky-400"></i>
-              <span>ภาพประกอบกิจกรรม / โปสเตอร์ (ใส่ได้หลายภาพ)</span>
-            </span>
-            <span class="text-[10px] text-amber-400/90 font-mono">บีบอัดภาพ & ฝาก Catbox อัตโนมัติ</span>
-          </label>
-          
-          <div class="flex items-center gap-2">
-            <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
-              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-              <span>เลือกหลายรูปภาพ...</span>
-              <input type="file" multiple accept="image/*,.pdf,application/pdf" onchange="handleCalMultiImageUpload(event, 'newRoom')" class="hidden">
-            </label>
-            <span class="text-[11px] text-slate-400">เลือกได้หลายภาพพร้อมกัน</span>
-          </div>
-
-          <div id="newRoomUploadProgress" class="hidden flex items-center gap-2 p-2 rounded-xl bg-sky-950/60 border border-sky-500/30 text-[11px] text-sky-300 animate-pulse">
-            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-sky-400"></i>
-            <span id="newRoomUploadText">กำลังประมวลผลและอัปโหลด...</span>
-          </div>
-
-          <div id="newRoomImagePreviews" class="hidden flex items-center gap-2 overflow-x-auto custom-scroll p-2 rounded-2xl bg-slate-900/90 border border-white/10"></div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">วันเริ่มกิจกรรม <span class="text-rose-400">*</span></label>
-            <input type="datetime-local" id="newRoomStartDate" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">กำหนดสิ้นสุด (ถ้ามี)</label>
-            <input type="datetime-local" id="newRoomEndDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">รายละเอียดเพิ่มเติม / บันทึกโน้ต</label>
-          <textarea id="newRoomDesc" rows="3" placeholder="ระบุสิ่งที่ต้องเตรียม หรือกำหนดการย่อ..." class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
-        </div>
-
-        <!-- Admin Official Publishing Badge & Switch -->
-        <div id="adminOfficialContainer" class="hidden p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
-              🛡️ Admin Master
-            </span>
-            <span class="text-xs text-slate-200 font-bold">ประกาศเป็นกิจกรรมทางการของสาขา</span>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="newRoomIsOfficial" class="sr-only peer">
-            <div class="w-9 h-5 bg-slate-700 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
-          </label>
-        </div>
-
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
-          <button type="button" onclick="closeCreatePlanModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold">ยกเลิก</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-black shadow-md transition">สร้างกิจกรรม</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ================= MODAL: EDIT PLAN / EVENT ================= -->
-  <div id="editCalendarPlanModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md">
-    <div class="glass-card rounded-3xl border border-white/20 max-w-lg w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden modal-dialog-responsive max-h-[90vh] sm:max-h-[85vh]">
-      <div class="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
+      <div class="space-y-2 text-sm text-slate-600">
         <div class="flex items-center gap-2">
-          <span class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
-            <i class="bi bi-pencil-square"></i>
-          </span>
-          <h3 class="text-base font-black text-white">แก้ไขกิจกรรมและนัดหมาย</h3>
+          <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+          <span id="detailDate"></span>
         </div>
-        <button type="button" onclick="closeEditCalendarPlanModal()" class="p-1 rounded-xl text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div id="detailDescWrap" class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700 leading-relaxed"></div>
       </div>
+      <div class="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button id="btnExportIcs" class="px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>Export .ics</span>
+        </button>
+        <button id="btnGoogleCal" class="px-3 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>Google Calendar</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-      <form onsubmit="handleEditPlanSubmit(event)" class="space-y-4 pt-2 text-xs modal-body-scrollable overflow-y-auto pr-1 flex-1">
-        <input type="hidden" id="editPlanId">
-
+  <!-- Quick Add Event Modal -->
+  <div id="addEventModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4" onclick="closeAddModal()">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900">เพิ่มกิจกรรมใหม่</h2>
+        <button onclick="closeAddModal()" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <form id="addEventForm" onsubmit="handleAddEvent(event)" class="space-y-3.5">
         <div>
-          <label class="block font-bold text-slate-300 mb-1">ชื่องาน / กิจกรรม <span class="text-rose-400">*</span></label>
-          <input type="text" id="editPlanTitle" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white focus:outline-hidden focus:border-orange-500">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อกิจกรรม *</label>
+          <input type="text" id="evTitle" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500">
         </div>
-
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-300 mb-1">ระดับความสำคัญ (Priority)</label>
-            <select id="editPlanPriority" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-              <option value="urgent">🚨 ด่วนที่สุด (Urgent)</option>
-              <option value="high">🔥 สำคัญมาก (High)</option>
-              <option value="normal">⚡ ปานกลาง / ทั่วไป (Normal)</option>
-              <option value="low">🌱 ไม่เร่งด่วน (Low)</option>
-            </select>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">วันที่ *</label>
+            <input type="date" id="evDate" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500">
           </div>
           <div>
-            <label class="block font-bold text-slate-300 mb-1">ขอบเขต (Scope)</label>
-            <select id="editPlanScope" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-              <option value="personal">🔒 ส่วนตัว</option>
-              <option value="shared">👥 งานกลุ่ม</option>
-              <option value="department">🏛️ งานสาขา</option>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">หมวดหมู่</label>
+            <select id="evCategory" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500 bg-white">
+              <option value="activity">กิจกรรม</option>
+              <option value="class">วิชาเรียน</option>
+              <option value="deadline">เดดไลน์</option>
             </select>
           </div>
         </div>
-
-        <!-- Emoji / Illustration Marker Selector for Edit -->
         <div>
-          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
-            <span>ไอคอนสัญลักษณ์ / อิโมจิมาร์กกิจกรรม</span>
-            <span class="text-[10px] text-amber-400 font-mono">เลือกมาร์กเพื่อแสดงบนปฏิทิน</span>
-          </label>
-          <div class="flex items-center gap-1.5 flex-wrap p-2 rounded-2xl bg-slate-900/80 border border-white/10">
-            <input type="hidden" id="editPlanEmoji" value="📅">
-            <button type="button" onclick="selectCalendarEmoji(this, '📅', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">📅</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🏛️', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🏛️</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '📚', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">📚</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🔬', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🔬</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '💻', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">💻</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '📝', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">📝</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🚨', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🚨</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '⭐', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">⭐</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🎯', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🎯</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🏆', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🏆</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🎉', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🎉</button>
-            <button type="button" onclick="selectCalendarEmoji(this, '🏕️', 'editPlanEmoji')" class="cal-emoji-btn w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base flex items-center justify-center transition hover:scale-110">🏕️</button>
-          </div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียด</label>
+          <textarea id="evDesc" rows="3" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500"></textarea>
         </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">สีประจำกิจกรรม</label>
-            <select id="editPlanColor" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-              <option value="#f97316">🟠 ส้ม (Orange)</option>
-              <option value="#3b82f6">🔵 ฟ้า (Blue)</option>
-              <option value="#10b981">🟢 เขียว (Green)</option>
-              <option value="#8b5cf6">🟣 ม่วง (Purple)</option>
-              <option value="#ef4444">🔴 แดง (Red)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">สถานที่ / ปักหมุด</label>
-            <input type="text" id="editPlanLocation" placeholder="ED2104 หรือ พิกัด..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-          </div>
-        </div>
-
-        <!-- Multi-Image Catbox Attachments for Edit -->
-        <div class="space-y-1.5">
-          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
-            <span class="flex items-center gap-1.5">
-              <i data-lucide="images" class="w-3.5 h-3.5 text-sky-400"></i>
-              <span>ภาพประกอบกิจกรรม / โปสเตอร์ (ใส่ได้หลายภาพ)</span>
-            </span>
-            <span class="text-[10px] text-amber-400/90 font-mono">บีบอัดภาพ & ฝาก Catbox</span>
-          </label>
-          
-          <div class="flex items-center gap-2">
-            <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 hover:text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
-              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-              <span>เลือกหลายรูปภาพ...</span>
-              <input type="file" multiple accept="image/*,.pdf,application/pdf" onchange="handleCalMultiImageUpload(event, 'editPlan')" class="hidden">
-            </label>
-            <span class="text-[11px] text-slate-400">เลือกได้หลายภาพ</span>
-          </div>
-
-          <div id="editPlanUploadProgress" class="hidden flex items-center gap-2 p-2 rounded-xl bg-sky-950/60 border border-sky-500/30 text-[11px] text-sky-300 animate-pulse">
-            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-sky-400"></i>
-            <span id="editPlanUploadText">กำลังประมวลผลและอัปโหลด...</span>
-          </div>
-
-          <div id="editPlanImagePreviews" class="hidden flex items-center gap-2 overflow-x-auto custom-scroll p-2 rounded-2xl bg-slate-900/90 border border-white/10"></div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">วันเริ่มกิจกรรม <span class="text-rose-400">*</span></label>
-            <input type="datetime-local" id="editPlanStartDate" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1">กำหนดสิ้นสุด</label>
-            <input type="datetime-local" id="editPlanEndDate" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white">
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">รายละเอียดเพิ่มเติม / บันทึกโน้ต</label>
-          <textarea id="editPlanDesc" rows="3" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white"></textarea>
-        </div>
-
-        <div class="flex items-center justify-between gap-2 pt-3 border-t border-white/10">
-          <button type="button" onclick="quickDeleteEditingPlan()" class="px-3.5 py-2 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white font-bold transition flex items-center gap-1 cursor-pointer">
-            <i class="bi bi-trash3"></i>
-            <span>ลบ</span>
-          </button>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="closeEditCalendarPlanModal()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 font-bold cursor-pointer">ยกเลิก</button>
-            <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-white font-black shadow-md transition cursor-pointer">บันทึกการแก้ไข</button>
-          </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">ยกเลิก</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold cursor-pointer">บันทึก</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ================= MODAL: GOOGLE AUTHENTICATION ================= -->
-  <div id="modalUserAuth" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center p-4">
-    <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative border border-slate-700/80 max-w-md w-full">
-      <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition cursor-pointer">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
-      <div class="text-center space-y-3">
-        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-orange-500/15 to-sky-500/20 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/30 shadow-xl shadow-orange-500/10">
-          <i data-lucide="calendar" class="w-8 h-8 text-amber-400"></i>
-        </div>
-        <div>
-          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-wider mb-1.5">
-            <i data-lucide="shield-check" class="w-3 h-3 text-orange-500"></i>
-            <span>KKU MAIL AUTHENTICATION</span>
-          </div>
-          <h3 class="text-xl sm:text-2xl font-black text-white">เข้าสู่ระบบ Calendar Hub</h3>
-          <p class="text-xs text-slate-400 mt-1">เข้าสู่ระบบด้วยอีเมลสถาบัน <strong class="text-orange-400">@kkumail.com</strong> เพื่อดูและซิงค์ปฏิทินส่วนตัวของคุณ</p>
-        </div>
-      </div>
-
-      <!-- Google Sign-In Area -->
-      <div class="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-4 text-center shadow-inner">
-        <div id="googleBtnContainer" class="flex justify-center min-h-[46px] items-center">
-          <div class="flex items-center gap-2 text-xs text-slate-400">
-            <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-orange-400"></i>
-            <span>กำลังโหลดปุ่ม Google...</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  
-  <!-- ================= SLEEK CUSTOM DELETE CONFIRMATION MODAL ================= -->
-  <div id="customDeleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all">
-    <div class="glass-card rounded-3xl border border-rose-500/30 max-w-sm w-full p-6 shadow-2xl relative overflow-hidden space-y-4 bg-gradient-to-b from-[#160b12] to-[#0a0d18] transform transition-all scale-95 opacity-0 duration-200" id="customDeleteModalCard">
-      <!-- Ambient Glow -->
-      <div class="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-rose-500/20 blur-2xl pointer-events-none"></div>
-
-      <!-- Icon & Header -->
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center flex-shrink-0 shadow-lg shadow-rose-500/10">
-          <i data-lucide="trash-2" class="w-6 h-6 stroke-[2.2]"></i>
-        </div>
-        <div>
-          <div class="text-[10px] font-mono uppercase tracking-widest text-rose-400 font-black">// CONFIRM DELETION</div>
-          <h3 id="customDeleteModalTitle" class="text-base font-black text-white">ยืนยันการลบรายการ</h3>
-        </div>
-      </div>
-
-      <!-- Message Description -->
-      <div class="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
-        <p id="customDeleteModalMessage" class="text-xs text-slate-300 leading-relaxed">คุณแน่ใจหรือไม่ว่าต้องการย้ายรายการนี้ลงถังขยะ?</p>
-        <div id="customDeleteModalSubtext" class="text-[10px] text-slate-400 flex items-center gap-1">
-          <i data-lucide="info" class="w-3 h-3 text-amber-400 flex-shrink-0"></i>
-          <span>สามารถกู้คืนได้ภายหลังจากหน้าถังขยะ</span>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="flex items-center justify-end gap-2.5 pt-2">
-        <button type="button" onclick="closeCustomDeleteModal(false)" class="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition border border-white/5 cursor-pointer">
-          ยกเลิก
-        </button>
-        <button type="button" id="btnCustomDeleteConfirm" onclick="closeCustomDeleteModal(true)" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white text-xs font-black transition shadow-lg shadow-rose-600/30 cursor-pointer">
-          ยืนยันการลบ
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= SCRIPT LOGIC ================= -->
-  <script>
-    let appState = {
-      user: null,
-      plans: [],
-      calendarYear: new Date().getFullYear(),
-      calendarMonth: new Date().getMonth(), // 0-11
-      calendarWeekStart: getStartOfWeek(new Date()), // Date object (Sunday)
-      calendarViewMode: 'month', // 'month' | 'week' | 'agenda'
-      calendarScopeFilter: 'all',
-      searchQuery: '',
-      draggedPlanId: null
-    };
-
-    
-    // =========================================================================
-    // MULTI-IMAGE UPLOADER (CATBOX.MOE WITH AUTO COMPRESSION) FOR CALENDAR
-    // =========================================================================
-    let calCreateImages = [];
-    let calEditImages = [];
-
-            async function handleCalMultiImageUpload(event, containerType) {
-      const files = Array.from(event.target.files || []);
-      if (files.length === 0) return;
-
-      const progressEl = document.getElementById(containerType + 'UploadProgress');
-      const progressText = document.getElementById(containerType + 'UploadText');
-
-      let targetList = (containerType === 'newRoom') ? calCreateImages : calEditImages;
-
-      for (let i = 0; i < files.length; i++) {
-        let file = files[i];
-        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-        const isOversized = file.size > (200 * 1024 * 1024);
-        const isLarge = file.size > (25 * 1024 * 1024);
-
-        if (isOversized || isPdf || isLarge) {
-          const userResult = await new Promise((resolve) => {
-            if (typeof showUploadConfirmModal === 'function') {
-              let title = 'ยืนยันการอัปโหลดไฟล์';
-              let message = 'ต้องการอัปโหลดไฟล์นี้ขึ้นระบบหรือไม่?';
-              let showHelp = false;
-
-              if (isOversized) {
-                title = '⚠️ ไฟล์มีขนาดเกิน 200 MB';
-                message = `ไฟล์ "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB) เกินขีดจำกัด Catbox 200 MB คุณสามารถกดปุ่ม "บีบอัด PDF ตอนนี้" ด้านล่างเพื่อให้ระบบบีบอัดหลายรอบจนขนาดลดลงต่ำกว่า 200 MB หรือใช้ Google Drive`;
-                showHelp = true;
-              } else if (isPdf) {
-                title = '📄 ตรวจพบไฟล์เอกสาร PDF';
-                message = `ไฟล์ "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB) เป็นไฟล์เอกสาร PDF แนะนำให้บีบอัดเพื่อลดขนาดให้เปิดดูบนมือถือได้รวดเร็ว หรือกดอัปโหลดทันที`;
-                showHelp = true;
-              } else if (isLarge) {
-                title = '⚡ ตรวจพบไฟล์ขนาดใหญ่';
-                message = `ไฟล์ "${file.name}" มีขนาด ${(file.size / (1024 * 1024)).toFixed(1)} MB ต้องการดำเนินการต่อหรือไม่?`;
-                showHelp = true;
-              }
-
-              showUploadConfirmModal({
-                title,
-                message,
-                fileName: file.name,
-                fileSize: file.size,
-                fileType: isPdf ? 'pdf' : (file.type.split('/')[1] || 'file'),
-                confirmText: isPdf ? 'อัปโหลดทันที (ไม่อัด)' : 'ดำเนินการต่อ',
-                cancelText: 'ข้ามไฟล์นี้',
-                showExternalHelp: showHelp,
-                showCompressAction: isPdf,
-                onCompressAndUpload: async (updateProgress) => {
-                  if (window.PdfCompressorEngine) {
-                    return await window.PdfCompressorEngine.compressPdf(file, {
-                      targetMaxSizeBytes: 190 * 1024 * 1024,
-                      onProgress: (pct, msg) => updateProgress(pct, msg)
-                    });
-                  }
-                  throw new Error("PDF Compressor Engine not loaded");
-                },
-                onConfirm: (compressedFile) => resolve({ confirmed: true, file: compressedFile || file }),
-                onCancel: () => resolve({ confirmed: false })
-              });
-            } else {
-              if (isOversized) {
-                alert(`ไฟล์ "${file.name}" มีขนาดเกิน 200 MB`);
-                resolve({ confirmed: false });
-              } else {
-                resolve({ confirmed: confirm(`ต้องการอัปโหลด "${file.name}" หรือไม่?`), file });
-              }
-            }
-          });
-
-          if (!userResult || !userResult.confirmed) {
-            continue;
-          }
-          if (userResult.file) {
-            file = userResult.file;
-          }
-        }
-
-        if (progressEl) progressEl.classList.remove('hidden');
-        if (progressText) progressText.textContent = `กำลังอัปโหลด ${i + 1}/${files.length}: ${file.name}...`;
-
-        try {
-          let uploadedUrl = '';
-          const uploader = window.MultiCloudUploader || window.MultiUploader;
-          if (uploader && typeof uploader.upload === 'function') {
-            const res = await uploader.upload(file, {
-              preferredProvider: 'catbox',
-              autoCompress: !isPdf,
-              maxDimension: 1200,
-              quality: 0.80
-            });
-            uploadedUrl = res.url || res.directUrl;
-          } else {
-            const formData = new FormData();
-            formData.append('reqtype', 'fileupload');
-            formData.append('userhash', '4f0c883945e2fe8d067b3dd12');
-            formData.append('fileToUpload', file);
-            const proxyEndpoint = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('edspace')) 
-              ? '/api/catbox-proxy' 
-              : 'https://kku-comed23.edspace.workers.dev/api/catbox-proxy';
-            const resp = await fetch(proxyEndpoint, { method: 'POST', body: formData });
-            uploadedUrl = await resp.text();
-          }
-
-          if (uploadedUrl && uploadedUrl.startsWith('http')) {
-            targetList.push({
-              url: uploadedUrl.trim(),
-              name: file.name || 'attachment',
-              type: isPdf ? 'pdf' : 'image'
-            });
-            renderCalMultiImagePreviews(containerType);
-          }
-        } catch (err) {
-          console.error("Upload error:", err);
-          showAppToast("อัปโหลดไม่สำเร็จ", file.name, "error");
-        }
-      }
-
-      if (progressEl) progressEl.classList.add('hidden');
-      event.target.value = '';
-    }
-
-    function renderCalMultiImagePreviews(containerType) {
-      const previewGrid = document.getElementById(containerType + 'ImagePreviews');
-      if (!previewGrid) return;
-
-      let targetList = (containerType === 'newRoom') ? calCreateImages : calEditImages;
-
-      previewGrid.innerHTML = '';
-      if (!targetList || targetList.length === 0) {
-        previewGrid.classList.add('hidden');
-        return;
-      }
-      previewGrid.classList.remove('hidden');
-
-      targetList.forEach((img, idx) => {
-        const thumb = document.createElement('div');
-        thumb.className = 'relative group w-14 h-14 rounded-xl overflow-hidden border border-white/15 bg-slate-950 flex-shrink-0 shadow-md';
-        thumb.innerHTML = `
-          <img src="${img.url}" class="w-full h-full object-cover" alt="Thumb" loading="lazy" decoding="async">
-          <button type="button" onclick="removeCalMultiUploadedImage('${containerType}', ${idx})" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-600/90 text-white flex items-center justify-center text-[10px] opacity-80 hover:opacity-100 transition shadow">
-            &times;
-          </button>
-        `;
-        previewGrid.appendChild(thumb);
-      });
-    }
-
-    function removeCalMultiUploadedImage(containerType, index) {
-      if (containerType === 'newRoom') calCreateImages.splice(index, 1);
-      else calEditImages.splice(index, 1);
-      renderCalMultiImagePreviews(containerType);
-    }
-
-// =========================================================================
-    // CALENDAR EMOJI, MAP PIN & COVER IMAGE HELPERS
-    // =========================================================================
-    function selectCalendarEmoji(btn, emoji, targetInputId) {
-      const input = document.getElementById(targetInputId);
-      if (input) input.value = emoji;
-      const parent = btn.parentElement;
-      parent.querySelectorAll('.cal-emoji-btn').forEach(b => {
-        b.classList.remove('bg-orange-500/20', 'border-orange-500');
-        b.classList.add('bg-white/5', 'border-white/10');
-      });
-      btn.classList.remove('bg-white/5', 'border-white/10');
-      btn.classList.add('bg-orange-500/20', 'border-orange-500');
-    }
-
-    function setPresetLocation(targetInputId, locationText) {
-      const input = document.getElementById(targetInputId);
-      if (input) {
-        input.value = locationText;
-        input.focus();
-      }
-    }
-
-    function previewCalendarImage(inputId, previewContainerId) {
-      const input = document.getElementById(inputId);
-      const container = document.getElementById(previewContainerId);
-      if (!input || !container) return;
-      const url = input.value.trim();
-      if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image'))) {
-        const img = container.querySelector('img');
-        if (img) img.src = url;
-        container.classList.remove('hidden');
-      } else {
-        container.classList.add('hidden');
-      }
-    }
-
-    // Custom Toast Notification for Calendar.html
-    function showAppToast(title, message = '', type = 'success') {
-      const toast = document.createElement('div');
-      const isSuccess = type === 'success';
-      const isError = type === 'error';
-      const borderCol = isSuccess ? 'border-emerald-500/40' : isError ? 'border-rose-500/40' : 'border-orange-500/40';
-      const bgCol = isSuccess ? 'bg-[#061711]/95 text-emerald-300' : isError ? 'bg-[#1a080d]/95 text-rose-300' : 'bg-[#170e0a]/95 text-orange-300';
-      const icon = isSuccess ? 'check-circle' : isError ? 'alert-triangle' : 'info';
-      
-      toast.className = `fixed top-5 right-5 z-50 flex items-start gap-3 p-4 rounded-2xl border ${borderCol} ${bgCol} backdrop-blur-2xl shadow-2xl max-w-sm transition-all duration-300 transform translate-y-[-20px] opacity-0`;
-      toast.innerHTML = `
-        <i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
-        <div class="flex-1 text-xs">
-          <div class="font-bold text-white">${escapeHtml(title)}</div>
-          ${message ? `<div class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">${escapeHtml(message)}</div>` : ''}
-        </div>
-      `;
-      document.body.appendChild(toast);
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-[-20px]', 'opacity-0');
-      });
-
-      setTimeout(() => {
-        toast.classList.add('translate-y-[-20px]', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
-    }
-
-    // Custom Delete Promise Modal for Calendar.html
-    let deleteModalResolve = null;
-
-    function promptCustomDelete(options = {}) {
-      return new Promise((resolve) => {
-        deleteModalResolve = resolve;
-        const modal = document.getElementById('customDeleteModal');
-        const card = document.getElementById('customDeleteModalCard');
-        const titleEl = document.getElementById('customDeleteModalTitle');
-        const msgEl = document.getElementById('customDeleteModalMessage');
-        const subEl = document.getElementById('customDeleteModalSubtext');
-        const confirmBtn = document.getElementById('btnCustomDeleteConfirm');
-
-        if (titleEl) titleEl.textContent = options.title || 'ยืนยันการลบรายการ';
-        if (msgEl) msgEl.textContent = options.message || 'คุณแน่ใจหรือไม่ว่าต้องการดำเนินการนี้?';
-        if (subEl) {
-          subEl.innerHTML = `
-            <i data-lucide="${options.isPermanent ? 'alert-octagon' : 'info'}" class="w-3 h-3 ${options.isPermanent ? 'text-rose-400' : 'text-amber-400'} flex-shrink-0"></i>
-            <span>${options.subtext || 'สามารถกู้คืนได้ภายหลังจากหน้าถังขยะ'}</span>
-          `;
-        }
-        if (confirmBtn) {
-          confirmBtn.textContent = options.confirmText || 'ยืนยันการลบ';
-        }
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-
-        setTimeout(() => {
-          card.classList.remove('scale-95', 'opacity-0');
-          card.classList.add('scale-100', 'opacity-100');
-        }, 10);
-      });
-    }
-
-    function closeCustomDeleteModal(result) {
-      const modal = document.getElementById('customDeleteModal');
-      const card = document.getElementById('customDeleteModalCard');
-      card.classList.remove('scale-100', 'opacity-100');
-      card.classList.add('scale-95', 'opacity-0');
-      setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        if (deleteModalResolve) {
-          deleteModalResolve(!!result);
-          deleteModalResolve = null;
-        }
-      }, 200);
-    }
-
-
-
-    const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
-
-    const THAI_MONTH_NAMES = [
-      'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-      'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-    ];
-
-    const THAI_DAY_SHORT = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-
-    function parseJwt(token) {
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-        return JSON.parse(jsonPayload);
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function getStartOfWeek(date) {
-      const d = new Date(date);
-      const day = d.getDay(); // 0 is Sunday
-      const diff = d.getDate() - day;
-      const start = new Date(d.setDate(diff));
-      start.setHours(0, 0, 0, 0);
-      return start;
-    }
-
-    function setupGoogleAuth() {
-      try {
-        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-          google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: handleGoogleCredentialResponse,
-            auto_select: false,
-            cancel_on_tap_outside: false
-          });
-
-          const btnContainer = document.getElementById("googleBtnContainer");
-          if (btnContainer) {
-            btnContainer.innerHTML = '';
-            google.accounts.id.renderButton(btnContainer, {
-              theme: "outline",
-              size: "large",
-              shape: "pill",
-              text: "signin_with",
-              width: 280,
-              logo_alignment: "left"
-            });
-          }
-        }
-      } catch (e) {
-        console.warn("setupGoogleAuth error:", e);
-      }
-    }
-
-    function triggerGoogleLogin() {
-      const modal = document.getElementById('modalUserAuth');
-      if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setupGoogleAuth();
-      }
-      if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-        google.accounts.id.prompt();
-      }
-    }
-
-    function closeAuthModal() {
-      const modal = document.getElementById('modalUserAuth');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-    }
-
-    async function handleGoogleCredentialResponse(response) {
-      if (!response.credential) return;
-      const data = parseJwt(response.credential);
-      if (!data || !data.email) return;
-
-      const emailLower = data.email.toLowerCase().trim();
-      const isSuperTester = emailLower === 'phupa5874@gmail.com';
-      const isKKUMail = emailLower.endsWith('@kkumail.com');
-
-      if (!isSuperTester && !isKKUMail) {
-        alert("⚠️ ขออภัย ระบบอนุญาตเฉพาะบัญชีอีเมล @kkumail.com หรือผู้ดูแลระบบเท่านั้น");
-        return;
-      }
-
-      const studentIdMatch = emailLower.match(/([a-z0-9._-]+)@kkumail\.com/);
-      const possibleId = studentIdMatch ? studentIdMatch[1] : '';
-      const student = (window.STUDENTS_DATA || []).find(s => s.id === possibleId || (s.email && s.email.toLowerCase() === emailLower));
-
-      const isUserAdmin = isSuperTester || (window.PlansRepo && window.PlansRepo.isAdminUser(emailLower));
-
-      const userSession = {
-        email: emailLower,
-        name: student ? student.name : (data.name || 'สมาชิก KKU'),
-        nickname: student ? student.nickname : '',
-        studentId: student ? student.id : possibleId,
-        avatar: data.picture || '',
-        isAdmin: isUserAdmin,
-        loggedInAt: new Date().toISOString()
-      };
-
-      localStorage.setItem('COMED_USER_SESSION', JSON.stringify(userSession));
-      sessionStorage.setItem('COMED_USER_SESSION', JSON.stringify(userSession));
-      appState.user = userSession;
-
-      closeAuthModal();
-      updateAuthUI();
-      await refreshCalendarData();
-      alert(`🎉 ยินดีต้อนรับคุณ ${userSession.name} เข้าสู่ระบบเรียบร้อยแล้ว`);
-    }
-
-    function checkSessionUser() {
-      try {
-        let stored = localStorage.getItem('COMED_USER_SESSION') || sessionStorage.getItem('COMED_USER_SESSION');
-        if (stored) {
-          appState.user = JSON.parse(stored);
-        } else {
-          const adminEmail = sessionStorage.getItem('COMED_KKU69_ADMIN_LOGGED_USER');
-          if (adminEmail) {
-            const clean = adminEmail.toLowerCase().trim();
-            appState.user = {
-              email: clean,
-              name: 'ผู้ดูแลระบบ (' + clean + ')',
-              avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${clean}`,
-              isAdmin: true
-            };
-          }
-        }
-      } catch (e) {}
-      updateAuthUI();
-    }
-
-    function updateAuthUI() {
-      const loginBtn = document.getElementById('authBtnLogin');
-      const userInfo = document.getElementById('authUserInfo');
-      const userName = document.getElementById('authUserName');
-      const userAvatar = document.getElementById('authUserAvatar');
-      const userBadge = document.getElementById('calendarUserBadge');
-      const adminContainer = document.getElementById('adminOfficialContainer');
-      const dragHint = document.getElementById('calendarDragDropHint');
-
-      const isLogged = appState.user && appState.user.email;
-      const isAdmin = isLogged && (appState.user.isAdmin || (window.PlansRepo && window.PlansRepo.isAdminUser(appState.user.email)));
-
-      if (isLogged) {
-        if (loginBtn) loginBtn.classList.add('hidden');
-        if (userInfo) {
-          userInfo.classList.remove('hidden');
-          userInfo.classList.add('flex');
-        }
-        if (userName) {
-          userName.innerHTML = (isAdmin ? '<span class="text-amber-400">🛡️ </span>' : '') + escapeHtml(appState.user.name || 'สมาชิก');
-        }
-        if (userAvatar) userAvatar.src = appState.user.avatar || '';
-        if (userBadge) {
-          userBadge.classList.remove('hidden');
-          if (isAdmin) {
-            userBadge.className = 'text-xs text-amber-300 font-bold px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center gap-1';
-            userBadge.innerHTML = '🛡️ บัญชี Admin Master (สิทธิ์เต็ม)';
-          } else {
-            userBadge.className = 'text-xs text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-1';
-            userBadge.innerHTML = '✓ รวมงานส่วนตัวของคุณ';
-          }
-        }
-        if (dragHint) {
-          dragHint.classList.remove('hidden');
-          dragHint.classList.add('flex');
-        }
-      } else {
-        if (loginBtn) loginBtn.classList.remove('hidden');
-        if (userInfo) {
-          userInfo.classList.add('hidden');
-          userInfo.classList.remove('flex');
-        }
-        if (userBadge) userBadge.classList.add('hidden');
-        if (dragHint) {
-          dragHint.classList.add('hidden');
-          dragHint.classList.remove('flex');
-        }
-      }
-
-      if (adminContainer) {
-        if (isAdmin) {
-          adminContainer.classList.remove('hidden');
-          adminContainer.classList.add('flex');
-        } else {
-          adminContainer.classList.add('hidden');
-          adminContainer.classList.remove('flex');
-        }
-      }
-    }
-
-    function logoutUser() {
-      localStorage.removeItem('COMED_USER_SESSION');
-      sessionStorage.removeItem('COMED_USER_SESSION');
-      appState.user = null;
-      updateAuthUI();
-      refreshCalendarData();
-      alert("ออกจากระบบเรียบร้อยแล้ว");
-    }
-
-    // Refresh Data from Supabase Cloud (Strict No-LocalStorage)
-    async function refreshCalendarData() {
-      const email = (appState.user && appState.user.email) ? appState.user.email.toLowerCase().trim() : null;
-      if (window.PlansRepo) {
-        appState.plans = await window.PlansRepo.fetchPlans(email, false);
-      }
-      renderCalendarView();
-    }
-
-    function setCalendarViewMode(mode) {
-      appState.calendarViewMode = mode;
-      
-      const btnMonth = document.getElementById('viewBtnMonth');
-      const btnWeek = document.getElementById('viewBtnWeek');
-      const btnAgenda = document.getElementById('viewBtnAgenda');
-
-      const cMonth = document.getElementById('containerMonthView');
-      const cWeek = document.getElementById('containerWeekView');
-      const cAgenda = document.getElementById('containerAgendaView');
-
-      [btnMonth, btnWeek, btnAgenda].forEach(b => {
-        if (!b) return;
-        b.className = 'px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
-      });
-
-      if (cMonth) cMonth.classList.add('hidden');
-      if (cWeek) cWeek.classList.add('hidden');
-      if (cAgenda) cAgenda.classList.add('hidden');
-
-      if (mode === 'month') {
-        if (btnMonth) btnMonth.className = 'px-3 py-1 rounded-lg text-xs font-black transition bg-orange-500 text-white shadow-xs';
-        if (cMonth) cMonth.classList.remove('hidden');
-      } else if (mode === 'week') {
-        if (btnWeek) btnWeek.className = 'px-3 py-1 rounded-lg text-xs font-black transition bg-orange-500 text-white shadow-xs';
-        if (cWeek) cWeek.classList.remove('hidden');
-      } else {
-        if (btnAgenda) btnAgenda.className = 'px-3 py-1 rounded-lg text-xs font-black transition bg-orange-500 text-white shadow-xs';
-        if (cAgenda) cAgenda.classList.remove('hidden');
-      }
-
-      renderCalendarView();
-    }
-
-    function changeCalendarPeriod(delta) {
-      if (appState.calendarViewMode === 'week') {
-        const cur = new Date(appState.calendarWeekStart);
-        cur.setDate(cur.getDate() + (delta * 7));
-        appState.calendarWeekStart = cur;
-        appState.calendarYear = cur.getFullYear();
-        appState.calendarMonth = cur.getMonth();
-      } else {
-        appState.calendarMonth += delta;
-        if (appState.calendarMonth < 0) {
-          appState.calendarMonth = 11;
-          appState.calendarYear -= 1;
-        } else if (appState.calendarMonth > 11) {
-          appState.calendarMonth = 0;
-          appState.calendarYear += 1;
-        }
-        appState.calendarWeekStart = getStartOfWeek(new Date(appState.calendarYear, appState.calendarMonth, 1));
-      }
-      renderCalendarView();
-    }
-
-    function jumpToCalendarToday() {
-      const now = new Date();
-      appState.calendarYear = now.getFullYear();
-      appState.calendarMonth = now.getMonth();
-      appState.calendarWeekStart = getStartOfWeek(now);
-      renderCalendarView();
-    }
-
-    function handleCalendarSearch(query) {
-      appState.searchQuery = (query || '').trim().toLowerCase();
-      renderCalendarView();
-    }
-
-    function getFilteredCalendarPlans() {
-      const scopeFilter = document.getElementById('calendarScopeFilter') ? document.getElementById('calendarScopeFilter').value : 'all';
-      const urgencyFilter = document.getElementById('calendarUrgencyFilter') ? document.getElementById('calendarUrgencyFilter').value : 'all';
-      let list = appState.plans || [];
-
-      if (scopeFilter !== 'all') {
-        list = list.filter(p => p.scope === scopeFilter);
-      }
-
-      if (appState.searchQuery) {
-        const q = appState.searchQuery;
-        list = list.filter(p => 
-          (p.title && p.title.toLowerCase().includes(q)) ||
-          (p.location && p.location.toLowerCase().includes(q)) ||
-          (p.description && p.description.toLowerCase().includes(q)) ||
-          (p.creator_name && p.creator_name.toLowerCase().includes(q))
-        );
-      }
-
-      // Filter by urgency / proximity
-      const now = new Date();
-      const nowMs = now.getTime();
-      const in7Days = new Date(nowMs + (7 * 24 * 60 * 60 * 1000));
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-
-      if (urgencyFilter === 'upcoming_soon') {
-        list = list.filter(p => {
-          if (!p.start_date) return false;
-          const s = new Date(p.start_date);
-          return s >= todayStart && s <= in7Days;
-        });
-      } else if (urgencyFilter === 'today') {
-        list = list.filter(p => {
-          if (!p.start_date) return false;
-          const s = new Date(p.start_date);
-          const e = p.end_date ? new Date(p.end_date) : s;
-          return s <= todayEnd && e >= todayStart;
-        });
-      } else if (urgencyFilter === 'this_month') {
-        list = list.filter(p => {
-          if (!p.start_date) return false;
-          const s = new Date(p.start_date);
-          return s.getMonth() === now.getMonth() && s.getFullYear() === now.getFullYear();
-        });
-      }
-
-      // เรียงลำดับความสำคัญ / วันที่
-      const priorityWeight = { urgent: 4, high: 3, normal: 2, low: 1 };
-      list.sort((a, b) => {
-        if (urgencyFilter === 'priority_desc') {
-          const pA = priorityWeight[a.priority] || 2;
-          const pB = priorityWeight[b.priority] || 2;
-          if (pB !== pA) return pB - pA;
-        }
-        const timeA = new Date(a.start_date).getTime();
-        const timeB = new Date(b.start_date).getTime();
-        return timeA - timeB;
-      });
-
-      return list;
-    }
-
-    // Permission Check: Can current user edit or reschedule this plan?
-    function canUserManagePlan(plan) {
-      if (!appState.user || !appState.user.email || !plan) return false;
-      const userEmail = appState.user.email.toLowerCase().trim();
-      const isAdmin = appState.user.isAdmin || (window.PlansRepo && window.PlansRepo.isAdminUser(userEmail));
-      if (isAdmin) return true;
-
-      const creatorEmail = (plan.creator_email || '').toLowerCase().trim();
-      return creatorEmail === userEmail;
-    }
-
-    let currentMobileUrgentPlan = null;
-
-    function quickAddCurrentUrgentToGoogle() {
-      if (!currentMobileUrgentPlan) return;
-      if (window.CalendarSync && typeof window.CalendarSync.openGoogleCalendar === 'function') {
-        window.CalendarSync.openGoogleCalendar(currentMobileUrgentPlan);
-      } else {
-        const title = encodeURIComponent(currentMobileUrgentPlan.title);
-        const details = encodeURIComponent(currentMobileUrgentPlan.description || '');
-        const loc = encodeURIComponent(currentMobileUrgentPlan.location || '');
-        const sIso = new Date(currentMobileUrgentPlan.start_date).toISOString().replace(/-|:|\.\d\d\d/g, "");
-        const eIso = currentMobileUrgentPlan.end_date ? new Date(currentMobileUrgentPlan.end_date).toISOString().replace(/-|:|\.\d\d\d/g, "") : sIso;
-        window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${loc}&dates=${sIso}/${eIso}`, '_blank');
-      }
-    }
-
-    function renderMobileWidgets(allPlans) {
-      const nowMs = Date.now();
-      const today = new Date();
-
-      // 1. Render Mobile Mini Week Strip
-      const stripEl = document.getElementById('mobileMiniWeekStrip');
-      if (stripEl) {
-        stripEl.innerHTML = '';
-        const dayOfWeek = today.getDay(); // 0 is Sun
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - dayOfWeek);
-        const thaiDays = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-
-        let weekEventsCount = 0;
-
-        for (let i = 0; i < 7; i++) {
-          const dObj = new Date(startOfWeek);
-          dObj.setDate(startOfWeek.getDate() + i);
-          const isToday = dObj.toDateString() === today.toDateString();
-
-          const dayPlans = allPlans.filter(p => {
-            if (!p.start_date) return false;
-            const pStart = new Date(p.start_date);
-            return pStart.toDateString() === dObj.toDateString();
-          });
-
-          weekEventsCount += dayPlans.length;
-
-          const pill = document.createElement('div');
-          pill.className = `flex-1 min-w-[42px] py-2 px-1 rounded-xl text-center flex flex-col items-center justify-center transition cursor-pointer ${
-            isToday
-              ? 'bg-gradient-to-b from-orange-500 to-amber-500 text-white font-black shadow-md shadow-orange-500/20'
-              : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
-          }`;
-          pill.onclick = () => {
-            setCalendarViewMode('agenda');
-          };
-          pill.innerHTML = `
-            <span class="text-[9px] font-mono opacity-80">${thaiDays[i]}</span>
-            <span class="text-xs font-mono font-black mt-0.5">${dObj.getDate()}</span>
-            <div class="h-1.5 flex items-center gap-0.5 mt-1">
-              ${dayPlans.length > 0 ? `<span class="w-1.5 h-1.5 rounded-full ${isToday ? 'bg-white' : 'bg-orange-400'}"></span>` : ''}
-            </div>
-          `;
-          stripEl.appendChild(pill);
-        }
-
-        const countEl = document.getElementById('mobileMiniStripCount');
-        if (countEl) countEl.textContent = `${weekEventsCount} กิจกรรม`;
-      }
-
-      // 2. Render Mobile Urgent Event Banner
-      const urgentBannerEl = document.getElementById('mobileUrgentEventBanner');
-      const upcoming = allPlans
-        .filter(p => p.start_date && new Date(p.start_date).getTime() >= (nowMs - 3600000))
-        .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
-
-      const mostUrgent = upcoming.find(p => p.priority === 'urgent' || p.priority === 'high') || upcoming[0];
-      currentMobileUrgentPlan = mostUrgent;
-
-      if (urgentBannerEl) {
-        if (mostUrgent) {
-          urgentBannerEl.classList.remove('hidden');
-          const sTime = new Date(mostUrgent.start_date).getTime();
-          const diffDays = Math.ceil((sTime - nowMs) / (1000 * 60 * 60 * 24));
-          const countdownText = diffDays <= 0 ? 'วันนี้!' : `อีก ${diffDays} วัน`;
-
-          const cDownEl = document.getElementById('mobileUrgentCountdown');
-          const titleEl = document.getElementById('mobileUrgentTitle');
-          const descEl = document.getElementById('mobileUrgentDesc');
-
-          if (cDownEl) cDownEl.textContent = countdownText;
-          if (titleEl) titleEl.textContent = mostUrgent.title;
-          if (descEl) descEl.textContent = mostUrgent.location ? `📍 ${mostUrgent.location}` : (mostUrgent.description || 'กำหนดการสำคัญของสาขา');
-        } else {
-          urgentBannerEl.classList.add('hidden');
-        }
-      }
-
-      // 3. Render Desktop Telemetry Cards (Monthly stats + Urgent Deadlines)
-      const teleCount = document.getElementById('telemetryMonthCount');
-      if (teleCount) teleCount.textContent = allPlans.length;
-
-      const teleUrgentList = document.getElementById('telemetryUrgentList');
-      const teleUrgentCount = document.getElementById('telemetryUrgentCount');
-
-      if (teleUrgentList) {
-        teleUrgentList.innerHTML = '';
-        const urgentItems = upcoming.filter(p => {
-          const sTime = new Date(p.start_date).getTime();
-          const diffDays = Math.ceil((sTime - nowMs) / (1000 * 60 * 60 * 24));
-          return p.priority === 'urgent' || (diffDays >= 0 && diffDays <= 7);
-        });
-
-        if (teleUrgentCount) teleUrgentCount.textContent = urgentItems.length;
-
-        if (urgentItems.length === 0) {
-          teleUrgentList.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">ไม่มีกำหนดการด่วนใน 7 วันนี้</p>';
-        } else {
-          urgentItems.slice(0, 5).forEach(p => {
-            const sTime = new Date(p.start_date).getTime();
-            const diffDays = Math.ceil((sTime - nowMs) / (1000 * 60 * 60 * 24));
-            const pillColor = diffDays <= 0 ? 'bg-rose-500/25 text-rose-300 border-rose-500/40 animate-pulse' : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-            const pillText = diffDays <= 0 ? 'วันนี้' : `อีก ${diffDays} วัน`;
-
-            const row = document.createElement('div');
-            row.className = 'p-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-orange-500/40 transition cursor-pointer flex items-center justify-between gap-2';
-            row.onclick = () => openCalendarPlanModal(p.id);
-            row.innerHTML = `
-              <div class="truncate">
-                <h5 class="text-xs font-bold text-white truncate">${escapeHtml(p.title)}</h5>
-                <span class="text-[10px] font-mono text-slate-400">${new Date(p.start_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.</span>
-              </div>
-              <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${pillColor} flex-shrink-0">
-                ${pillText}
-              </span>
-            `;
-            teleUrgentList.appendChild(row);
-          });
-        }
-      }
-    }
-
-    function renderCalendarView() {
-      const allPlans = getFilteredCalendarPlans();
-      const badgeEl = document.getElementById('calendarTotalPlansBadge');
-      if (badgeEl) {
-        badgeEl.textContent = `${allPlans.length} กิจกรรม`;
-      }
-
-      if (appState.calendarViewMode === 'month') {
-        renderMonthGrid(allPlans);
-      } else if (appState.calendarViewMode === 'week') {
-        renderWeekGrid(allPlans);
-      } else {
-        renderCalendarAgendaList(allPlans);
-      }
-
-      // Update agenda list container & mobile widgets & telemetry
-      renderCalendarAgendaList(allPlans);
-      renderMobileWidgets(allPlans);
-      lucide.createIcons();
-    }
-
-    // 1. MONTH GRID
-    function renderMonthGrid(allPlans) {
-      const year = appState.calendarYear;
-      const month = appState.calendarMonth; // 0-11
-      const thaiYear = year + 543;
-
-      const titleEl = document.getElementById('calendarCurrentMonthTitle');
-      if (titleEl) {
-        titleEl.textContent = `${THAI_MONTH_NAMES[month]} ${thaiYear}`;
-      }
-
-      const gridEl = document.getElementById('calendarDaysGrid');
-      if (!gridEl) return;
-      gridEl.innerHTML = '';
-
-      const firstDayIndex = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const prevMonthDays = new Date(year, month, 0).getDate();
-
-      const today = new Date();
-      const isCurrentMonthYear = today.getFullYear() === year && today.getMonth() === month;
-      const todayDate = today.getDate();
-
-      // Leading Days
-      for (let i = firstDayIndex - 1; i >= 0; i--) {
-        const dNum = prevMonthDays - i;
-        const cell = document.createElement('div');
-        cell.className = 'min-h-[90px] sm:min-h-[110px] p-1.5 sm:p-2 rounded-2xl bg-white/[0.01] border border-white/5 opacity-30 select-none flex flex-col justify-between';
-        cell.innerHTML = `<span class="text-xs font-mono font-bold text-slate-500">${dNum}</span>`;
-        gridEl.appendChild(cell);
-      }
-
-      // Active Month Days
-      for (let d = 1; d <= daysInMonth; d++) {
-        const isToday = isCurrentMonthYear && d === todayDate;
-        const targetDateObj = new Date(year, month, d);
-        const dateIsoStr = targetDateObj.toISOString().slice(0, 10);
-
-        const dayPlans = allPlans.filter(p => {
-          if (!p.start_date) return false;
-          const pStart = new Date(p.start_date);
-          const pEnd = p.end_date ? new Date(p.end_date) : pStart;
-          const targetStartOfDay = new Date(year, month, d, 0, 0, 0);
-          const targetEndOfDay = new Date(year, month, d, 23, 59, 59);
-          return pStart <= targetEndOfDay && pEnd >= targetStartOfDay;
-        });
-
-        const cell = document.createElement('div');
-        cell.setAttribute('data-date', dateIsoStr);
-        cell.className = `min-h-[75px] sm:min-h-[110px] p-1 sm:p-2 rounded-xl sm:rounded-2xl border transition flex flex-col justify-between relative group mobile-cal-cell ${
-          isToday
-            ? 'bg-amber-500/15 border-amber-500/60 shadow-lg shadow-amber-500/10'
-            : 'bg-slate-900/60 border-white/10 hover:border-white/25 hover:bg-slate-900/90'
-        }`;
-
-        // Enable Drop on day cell
-        cell.ondragover = (e) => {
-          e.preventDefault();
-          cell.classList.add('border-amber-400', 'bg-amber-500/20');
-        };
-        cell.ondragleave = () => {
-          cell.classList.remove('border-amber-400', 'bg-amber-500/20');
-        };
-        cell.ondrop = async (e) => {
-          e.preventDefault();
-          cell.classList.remove('border-amber-400', 'bg-amber-500/20');
-          const planId = e.dataTransfer.getData('text/plain') || appState.draggedPlanId;
-          if (planId) {
-            await handleDropPlanOnDate(planId, targetDateObj);
-          }
-        };
-
-        let cellHtml = `
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-mono font-extrabold ${isToday ? 'px-1.5 py-0.5 rounded-lg bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-300'}">
-              ${d}
-            </span>
-            ${dayPlans.length > 0 ? `<span class="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">${dayPlans.length}</span>` : ''}
-          </div>
-        `;
-
-        cellHtml += `<div class="space-y-1 overflow-y-auto max-h-[60px] sm:max-h-[75px] custom-scroll">`;
-        dayPlans.slice(0, 3).forEach(p => {
-          const color = p.color || (p.scope === 'department' ? '#f97316' : '#38bdf8');
-          const timeStr = new Date(p.start_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-          const isOwnerOrAdmin = canUserManagePlan(p);
-          const officialStar = p.is_official ? '⭐ ' : '';
-
-          cellHtml += `
-            <div draggable="${isOwnerOrAdmin}"
-                 ondragstart="handleDragStart(event, '${p.id}')"
-                 onclick="openCalendarPlanModal('${p.id}')"
-                 class="px-1.5 py-0.5 rounded-lg text-[10px] font-bold text-white truncate transition hover:scale-[1.02] flex items-center gap-1 shadow-xs ${isOwnerOrAdmin ? 'cursor-grab active:cursor-grabbing hover:ring-1 hover:ring-amber-400' : 'cursor-pointer'}"
-                 style="background-color: ${color}33; border: 1px solid ${color}88"
-                 title="${officialStar}${escapeHtml(p.title)} (${timeStr})${isOwnerOrAdmin ? ' - ลากเพื่อเปลี่ยนวันได้' : ''}">
-              <span class="text-[11px] leading-none">${p.emoji || '📅'}</span>
-              <span class="truncate">${officialStar}${escapeHtml(p.title)}</span>
-            </div>
-          `;
-        });
-
-        if (dayPlans.length > 3) {
-          cellHtml += `
-            <div class="text-[9px] font-bold text-amber-400 hover:text-amber-300 cursor-pointer text-center pt-0.5" onclick="setCalendarViewMode('week')">
-              + อีก ${dayPlans.length - 3} งาน
-            </div>
-          `;
-        }
-        cellHtml += `</div>`;
-
-        cell.innerHTML = cellHtml;
-        gridEl.appendChild(cell);
-      }
-
-      // Trailing Days
-      const totalCells = firstDayIndex + daysInMonth;
-      const nextMonthDays = (7 - (totalCells % 7)) % 7;
-      for (let n = 1; n <= nextMonthDays; n++) {
-        const cell = document.createElement('div');
-        cell.className = 'min-h-[90px] sm:min-h-[110px] p-1.5 sm:p-2 rounded-2xl bg-white/[0.01] border border-white/5 opacity-30 select-none flex flex-col justify-between';
-        cell.innerHTML = `<span class="text-xs font-mono font-bold text-slate-500">${n}</span>`;
-        gridEl.appendChild(cell);
-      }
-    }
-
-    // 2. WEEK VIEW (Weekly Time Grid & Real-time Indicator Line)
-    function renderWeekGrid(allPlans) {
-      const startOfWeek = new Date(appState.calendarWeekStart);
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(endOfWeek.getDate() + 6);
-
-      const titleEl = document.getElementById('calendarCurrentMonthTitle');
-      if (titleEl) {
-        titleEl.textContent = `${THAI_MONTH_NAMES[startOfWeek.getMonth()]} ${startOfWeek.getFullYear() + 543}`;
-      }
-
-      const badgeRange = document.getElementById('calendarWeekRangeBadge');
-      if (badgeRange) {
-        const sTxt = `${startOfWeek.getDate()} ${THAI_MONTH_NAMES[startOfWeek.getMonth()].slice(0, 3)}`;
-        const eTxt = `${endOfWeek.getDate()} ${THAI_MONTH_NAMES[endOfWeek.getMonth()].slice(0, 3)} ${endOfWeek.getFullYear() + 543}`;
-        badgeRange.textContent = `${sTxt} - ${eTxt}`;
-      }
-
-      const headerEl = document.getElementById('calendarWeekHeader');
-      if (!headerEl) return;
-      headerEl.innerHTML = `
-        <div class="text-slate-500 text-[11px] py-1 font-bold">เวลา</div>
-      `;
-
-      const today = new Date();
-      const weekDays = [];
-
-      for (let i = 0; i < 7; i++) {
-        const curDate = new Date(startOfWeek);
-        curDate.setDate(curDate.getDate() + i);
-        weekDays.push(curDate);
-
-        const isToday = curDate.toDateString() === today.toDateString();
-        const dayHeader = document.createElement('div');
-        dayHeader.className = `p-1.5 rounded-xl border text-center transition ${
-          isToday ? 'bg-amber-500/20 border-amber-500/60 text-amber-300' : 'bg-slate-900/60 border-white/5 text-slate-300'
-        }`;
-        dayHeader.innerHTML = `
-          <div class="text-[10px] uppercase font-bold text-slate-400">${THAI_DAY_SHORT[curDate.getDay()]}</div>
-          <div class="text-sm font-black font-mono ${isToday ? 'text-amber-300' : 'text-white'}">${curDate.getDate()}</div>
-        `;
-        headerEl.appendChild(dayHeader);
-      }
-
-      // Time Body: Hours 06:00 to 22:00 (17 active hours for student schedule)
-      const timeBodyEl = document.getElementById('calendarWeekTimeBody');
-      if (!timeBodyEl) return;
-      timeBodyEl.innerHTML = '';
-
-      const START_HOUR = 7; // 07:00
-      const END_HOUR = 21;  // 21:00
-
-      // Calculate real-time line position if today is in this week
-      const currentHour = today.getHours();
-      const currentMinute = today.getMinutes();
-      const isTodayInWeek = weekDays.some(d => d.toDateString() === today.toDateString());
-      const todayDayIndex = today.getDay(); // 0-6
-
-      for (let h = START_HOUR; h <= END_HOUR; h++) {
-        const hourRow = document.createElement('div');
-        hourRow.className = 'grid grid-cols-8 gap-2 py-3 relative min-h-[56px] items-start';
-
-        // Col 0: Hour Label
-        const hourLabel = document.createElement('div');
-        hourLabel.className = 'text-[11px] font-mono text-slate-400 font-bold -mt-2';
-        hourLabel.textContent = `${String(h).padStart(2, '0')}:00`;
-        hourRow.appendChild(hourLabel);
-
-        // Cols 1-7: Day Slots
-        for (let di = 0; di < 7; di++) {
-          const slotDate = weekDays[di];
-          const slotCell = document.createElement('div');
-          slotCell.className = 'relative min-h-[48px] rounded-xl border border-transparent hover:border-white/10 hover:bg-white/[0.02] transition p-1';
-          
-          // Drop target
-          slotCell.ondragover = (e) => {
-            e.preventDefault();
-            slotCell.classList.add('border-amber-400', 'bg-amber-500/20');
-          };
-          slotCell.ondragleave = () => {
-            slotCell.classList.remove('border-amber-400', 'bg-amber-500/20');
-          };
-          slotCell.ondrop = async (e) => {
-            e.preventDefault();
-            slotCell.classList.remove('border-amber-400', 'bg-amber-500/20');
-            const planId = e.dataTransfer.getData('text/plain') || appState.draggedPlanId;
-            if (planId) {
-              const targetTime = new Date(slotDate);
-              targetTime.setHours(h, 0, 0, 0);
-              await handleDropPlanOnDate(planId, targetTime);
-            }
-          };
-
-          // Find plans matching this specific day and hour slot
-          const slotPlans = allPlans.filter(p => {
-            if (!p.start_date) return false;
-            const pStart = new Date(p.start_date);
-            const isSameDay = pStart.toDateString() === slotDate.toDateString();
-            const isSameHour = pStart.getHours() === h;
-            return isSameDay && isSameHour;
-          });
-
-          slotPlans.forEach(p => {
-            const color = p.color || '#f97316';
-            const isOwnerOrAdmin = canUserManagePlan(p);
-            const timeStr = new Date(p.start_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-            
-            const badge = document.createElement('div');
-            badge.draggable = isOwnerOrAdmin;
-            badge.ondragstart = (e) => handleDragStart(e, p.id);
-            badge.onclick = () => openCalendarPlanModal(p.id);
-            badge.className = `p-1.5 rounded-xl text-[10px] font-bold text-white shadow-md transition hover:scale-[1.02] mb-1 ${
-              isOwnerOrAdmin ? 'cursor-grab active:cursor-grabbing hover:ring-1 hover:ring-amber-400' : 'cursor-pointer'
-            }`;
-            badge.style.backgroundColor = `${color}33`;
-            badge.style.border = `1px solid ${color}aa`;
-            badge.innerHTML = `
-              <div class="flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color: ${color}"></span>
-                <span class="font-mono text-[9px] text-amber-300 font-extrabold">${timeStr}</span>
-              </div>
-              <div class="truncate text-[10px] font-bold text-white mt-0.5">${p.is_official ? '⭐ ' : ''}${escapeHtml(p.title)}</div>
-              ${p.location ? `<div class="truncate text-[9px] text-slate-300">📍 ${escapeHtml(p.location)}</div>` : ''}
-            `;
-            slotCell.appendChild(badge);
-          });
-
-          hourRow.appendChild(slotCell);
-        }
-
-        timeBodyEl.appendChild(hourRow);
-      }
-
-      // If Today is in current week, add Real-Time Amber Indicator Line
-      if (isTodayInWeek && currentHour >= START_HOUR && currentHour <= END_HOUR) {
-        const hourDiff = (currentHour - START_HOUR) + (currentMinute / 60);
-        const approxTopPx = hourDiff * 62; // roughly 62px per hour row
-        
-        const nowLine = document.createElement('div');
-        nowLine.className = 'absolute left-0 right-0 pointer-events-none flex items-center z-10';
-        nowLine.style.top = `${approxTopPx}px`;
-        nowLine.innerHTML = `
-          <div class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50 -ml-1"></div>
-          <div class="flex-1 h-[2px] bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 shadow-sm shadow-amber-400/50"></div>
-          <span class="px-2 py-0.5 rounded-md bg-amber-500 text-slate-950 font-black text-[9px] font-mono shadow-sm ml-1">
-            NOW ${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}
-          </span>
-        `;
-        timeBodyEl.appendChild(nowLine);
-      }
-    }
-
-    // Drag & Drop Reschedule Handlers
-    function handleDragStart(e, planId) {
-      appState.draggedPlanId = planId;
-      e.dataTransfer.setData('text/plain', planId);
-      e.dataTransfer.effectAllowed = 'move';
-    }
-
-    async function handleDropPlanOnDate(planId, targetDateObj) {
-      const plan = (appState.plans || []).find(p => p.id === planId);
-      if (!plan) return;
-
-      if (!canUserManagePlan(plan)) {
-        alert("🔒 คุณไม่มีสิทธิ์เลื่อนกำหนดการกิจกรรมนี้ (เฉพาะผู้สร้างกิจกรรม หรือแอดมินเท่านั้น)");
-        return;
-      }
-
-      const originalStart = new Date(plan.start_date);
-      const newStart = new Date(targetDateObj);
-      newStart.setHours(originalStart.getHours(), originalStart.getMinutes(), 0, 0);
-
-      let newEnd = null;
-      if (plan.end_date) {
-        const originalEnd = new Date(plan.end_date);
-        const durationMs = originalEnd.getTime() - originalStart.getTime();
-        newEnd = new Date(newStart.getTime() + durationMs).toISOString();
-      }
-
-      const confirmed = await promptCustomDelete({
-        title: "🗓️ ยืนยันการเลื่อนกิจกรรม",
-        message: `เลื่อนกิจกรรม "${plan.title}" ไปยัง ${newStart.toLocaleDateString('th-TH', { dateStyle: 'full' })} เวลา ${newStart.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.`,
-        subtext: "ระบบจะปรับปรุงเวลาในฐานข้อมูล Supabase และปฏิทินทันที",
-        confirmText: "ยืนยันการเลื่อน"
-      });
-      if (!confirmed) return;
-
-      try {
-        await window.PlansRepo.updatePlan(planId, {
-          start_date: newStart.toISOString(),
-          end_date: newEnd
-        });
-        await refreshCalendarData();
-        alert(`🎉 เลื่อนกิจกรรม "${plan.title}" ไปวันที่ ${newStart.toLocaleDateString('th-TH')} เรียบร้อยแล้ว`);
-      } catch (err) {
-        alert("เลื่อนกิจกรรมไม่สำเร็จ: " + err.message);
-      }
-    }
-
-    // 3. AGENDA LIST
-    function renderCalendarAgendaList(plans) {
-      const container = document.getElementById('calendarAgendaList');
-      if (!container) return;
-      container.innerHTML = '';
-
-      const sorted = [...plans].sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
-
-      if (sorted.length === 0) {
-        container.innerHTML = `
-          <div class="py-10 text-center text-slate-500 text-xs">
-            <i data-lucide="calendar-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-            <p>ยังไม่มีกำหนดการกิจกรรมในปฏิทิน</p>
-          </div>
-        `;
-        lucide.createIcons();
-        return;
-      }
-
-      const nowMs = Date.now();
-      sorted.slice(0, 20).forEach(p => {
-        const startDate = new Date(p.start_date);
-        const diffMs = startDate.getTime() - nowMs;
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-        const isUrgent = diffDays >= 0 && diffDays <= 3;
-        const isPassed = diffDays < 0;
-
-        let countdownBadge = '';
-        if (isPassed) {
-          countdownBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-800 text-slate-400">สิ้นสุดแล้ว</span>';
-        } else if (diffDays === 0) {
-          countdownBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-500/25 text-rose-300 border border-rose-500/40 animate-pulse">🔥 จัดขึ้นวันนี้!</span>';
-        } else if (diffDays <= 3) {
-          countdownBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500/25 text-amber-300 border border-amber-500/40">⏳ อีก ${diffDays} วัน</span>`;
-        } else if (diffDays <= 7) {
-          countdownBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-sky-500/20 text-sky-300">อีก ${diffDays} วัน</span>`;
-        }
-
-        let priorityBadge = '';
-        if (p.priority === 'urgent') {
-          priorityBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-xs">🚨 ด่วนที่สุด</span>';
-        } else if (p.priority === 'high') {
-          priorityBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">🔥 สำคัญมาก</span>';
-        } else if (p.priority === 'low') {
-          priorityBadge = '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-500/20 text-slate-400">🌱 ไม่เร่งด่วน</span>';
-        }
-
-        const dateStr = startDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
-        const timeStr = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
-        const scopeBadge = p.scope === 'department' ? '🏛️ สาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว';
-        const color = p.color || '#f97316';
-        const isOfficial = p.is_official;
-        const canManage = canUserManagePlan(p);
-
-        const item = document.createElement('div');
-        item.className = `p-3.5 rounded-2xl bg-white/[0.02] border transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 group ${
-          p.priority === 'urgent' ? 'border-rose-500/40 bg-rose-500/[0.04]' :
-          isUrgent ? 'border-amber-500/40 bg-amber-500/[0.03]' : 'border-white/10 hover:border-amber-500/40 hover:bg-white/[0.05]'
-        }`;
-        const emojiIcon = p.emoji || '📅';
-        const coverImg = (p.attachments && p.attachments[0] && p.attachments[0].type === 'image') ? p.attachments[0].url : '';
-
-        item.innerHTML = `
-          <div class="flex items-start gap-3 cursor-pointer flex-1" onclick="openCalendarPlanModal('${p.id}')">
-            <div class="w-11 h-11 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 text-white shadow-md font-mono relative overflow-hidden" style="background-color: ${color}">
-              <span class="text-[8px] uppercase font-bold leading-none">${startDate.toLocaleDateString('en-US', { month: 'short' })}</span>
-              <span class="text-sm font-black leading-none mt-0.5">${startDate.getDate()}</span>
-              <span class="absolute -bottom-1 -right-1 text-xs opacity-90 drop-shadow">${emojiIcon}</span>
-            </div>
-            ${coverImg ? `
-            <div class="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 border border-white/10 hidden xs:block">
-              <img src="${coverImg}" class="w-full h-full object-cover" alt="Cover" loading="lazy" decoding="async">
-            </div>
-            ` : ''}
-            <div>
-              <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                ${priorityBadge}
-                ${countdownBadge}
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/10 text-slate-300">${scopeBadge}</span>
-                ${isOfficial ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">⭐ ทางการ</span>' : ''}
-                <span class="text-xs font-mono text-amber-400 font-bold">${dateStr} • ${timeStr}</span>
-              </div>
-              <h4 class="text-sm font-bold text-white group-hover:text-amber-300 transition mt-0.5 flex items-center gap-1.5">
-                <span>${emojiIcon}</span>
-                <span>${escapeHtml(p.title)}</span>
-              </h4>
-              <p class="text-xs text-slate-400 line-clamp-1">${escapeHtml(p.description || (p.location ? '📍 ' + p.location : 'ไม่มีรายละเอียดเพิ่มเติม'))}</p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap justify-start sm:justify-end pt-2 sm:pt-0 border-t border-white/5 sm:border-t-0">
-            <a href="Plans.html?plan=${p.id}" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white font-bold flex items-center gap-1 transition" title="เปิดบอร์ดห้องงาน">
-              <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-orange-400"></i>
-              <span>บอร์ด</span>
-            </a>
-            <button onclick="if(window.CalendarSync) window.CalendarSync.openGoogleCalendar(appState.plans.find(x=>x.id==='${p.id}'));" class="px-2.5 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-xs text-blue-300 hover:text-white font-bold flex items-center gap-1 transition" title="เพิ่มใน Google Calendar">
-              <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-blue-400"></i>
-              <span>Google</span>
-            </button>
-            <button onclick="if(window.CalendarSync) window.CalendarSync.downloadIcsFile(appState.plans.find(x=>x.id==='${p.id}'));" class="p-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-white transition" title="ดาวน์โหลดไฟล์ .ics สำหรับเปิดในเครื่อง">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-            </button>
-            ${canManage ? `
-            <button onclick="openEditCalendarPlanModal('${p.id}')" class="p-1.5 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white transition cursor-pointer" title="แก้ไขกิจกรรมนี้">
-              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-            </button>
-            <button onclick="handleDeleteCalendarPlan('${p.id}')" class="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition cursor-pointer" title="ลบกิจกรรมนี้ (ย้ายลงถังขยะ)">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-            ` : ''}
-          </div>
-        `;
-        container.appendChild(item);
-      });
-      lucide.createIcons();
-    }
-
-    function openCalendarPlanModal(planId) {
-      const p = appState.plans.find(x => x.id === planId);
-      if (!p) return;
-
-      const modal = document.createElement('div');
-      modal.id = 'calendarQuickModal';
-      modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200';
-      
-      const sDate = new Date(p.start_date);
-      const eDate = p.end_date ? new Date(p.end_date) : null;
-      const dateText = sDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' น.' +
-        (eDate ? ` - ${eDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} น.` : '');
-
-      const isOwnerOrAdmin = canUserManagePlan(p);
-
-      modal.innerHTML = `
-        <div class="glass-card rounded-3xl border border-white/20 max-w-md w-full p-6 shadow-2xl relative space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-white/10">
-            <div class="flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-300">
-                ${p.scope === 'department' ? '🏛️ งานสาขา' : p.scope === 'shared' ? '👥 งานกลุ่ม' : '🔒 ส่วนตัว'}
-              </span>
-              ${p.priority === 'urgent' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">🚨 ด่วนที่สุด</span>' :
-                p.priority === 'high' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">🔥 สำคัญมาก</span>' :
-                p.priority === 'low' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-500/20 text-slate-300">🌱 ไม่เร่งด่วน</span>' :
-                '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-sky-500/20 text-sky-300">⚡ ปานกลาง</span>'}
-              ${p.is_official ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">⭐ ทางการ</span>' : ''}
-            </div>
-            <button onclick="this.closest('#calendarQuickModal').remove()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-          </div>
-
-          ${(p.attachments && p.attachments.length > 0) ? `
-          <div class="flex items-center gap-2 overflow-x-auto custom-scroll p-1.5 rounded-2xl bg-white/[0.02] border border-white/10 mb-2">
-            ${p.attachments.map(att => `
-              <a href="${att.url}" target="_blank" rel="noopener noreferrer" class="w-16 h-16 rounded-xl overflow-hidden border border-white/15 flex-shrink-0 bg-slate-950 shadow hover:scale-105 transition block" title="คลิกเพื่อดูภาพขนาดเต็ม">
-                <img src="${att.url}" class="w-full h-full object-cover" alt="Attachment" onerror="this.src='logo.png'" loading="lazy" decoding="async">
-              </a>
-            `).join('')}
-          </div>
-          ` : ''}
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-xl">${p.emoji || '📅'}</span>
-              <h3 class="text-lg font-black text-white">${escapeHtml(p.title)}</h3>
-            </div>
-            <p class="text-xs text-amber-400 font-mono mt-1 font-bold flex items-center gap-1.5">
-              <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-              <span>${dateText}</span>
-            </p>
-            ${p.location ? `
-            <div class="mt-1 flex items-center gap-2">
-              <p class="text-xs text-slate-300 flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400"></i> ${escapeHtml(p.location)}</p>
-              <a href="https://maps.google.com/?q=${encodeURIComponent(p.location)}" target="_blank" rel="noopener noreferrer" class="px-2 py-0.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500 hover:text-white text-[10px] font-bold transition flex items-center gap-1" title="เปิดแผนที่ Google Maps">
-                <i data-lucide="navigation" class="w-2.5 h-2.5"></i> แผนที่
-              </a>
-            </div>
-            ` : ''}
-            ${p.meet_link ? `<a href="${p.meet_link}" target="_blank" class="text-xs text-sky-400 hover:underline mt-1 flex items-center gap-1.5"><i data-lucide="video" class="w-3.5 h-3.5"></i> ห้องประชุม Online</a>` : ''}
-            <div class="text-xs text-slate-300 mt-3 leading-relaxed bg-white/5 p-3.5 rounded-2xl border border-white/5 rich-rendered-html">${p.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</div>
-          </div>
-
-          <div class="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
-            ${p.plan_type === 'project' ? `
-            <a href="Plans.html?plan=${p.id}" class="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs flex items-center gap-1.5 transition">
-              <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
-              <span>กระดานงาน (PlanToDo)</span>
-            </a>
-            ` : `
-            <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
-              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
-              <span>บันทึกบนปฏิทินแล้ว</span>
-            </span>
-            `}
-            <div class="flex items-center gap-2">
-              <button onclick="if(window.CalendarSync) window.CalendarSync.openGoogleCalendar(appState.plans.find(x=>x.id==='${p.id}'));" class="px-3 py-2 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-blue-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-blue-500/30 transition">
-                <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
-                <span>Google</span>
-              </button>
-              <button onclick="if(window.CalendarSync) window.CalendarSync.downloadIcsFile(appState.plans.find(x=>x.id==='${p.id}'));" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-amber-500/30 transition">
-                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                <span>.ICS</span>
-              </button>
-              ${isOwnerOrAdmin ? `
-              <button onclick="document.getElementById('calendarQuickModal').remove(); openEditCalendarPlanModal('${p.id}');" class="px-3 py-2 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-orange-500/30 transition cursor-pointer" title="แก้ไขรายละเอียดกิจกรรม">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                <span>แก้ไข</span>
-              </button>
-              <button onclick="document.getElementById('calendarQuickModal').remove(); handleDeleteCalendarPlan('${p.id}');" class="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-rose-500/30 transition cursor-pointer" title="ลบกิจกรรมนี้ (ย้ายลงถังขยะ)">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                <span>ลบ</span>
-              </button>
-              ` : ''}
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      lucide.createIcons();
-    }
-
-    function openCalendarSubscriptionModal() {
-      const modal = document.createElement('div');
-      modal.id = 'calendarSubscriptionModal';
-      modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200';
-      
-      const userEmail = (appState.user && appState.user.email) ? encodeURIComponent(appState.user.email.toLowerCase().trim()) : '';
-      const feedUrl = userEmail 
-        ? `${window.location.origin}/api/calendar.ics?user=${userEmail}`
-        : `${window.location.origin}/api/calendar.ics`;
-      const webcalUrl = feedUrl.replace(/^https?:\/\//, 'webcal://');
-      const googleSubscribeUrl = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(feedUrl)}`;
-
-      modal.innerHTML = `
-        <div class="glass-card rounded-3xl border border-white/20 max-w-lg w-full p-6 sm:p-7 shadow-2xl relative space-y-5">
-          <div class="flex items-center justify-between pb-3 border-b border-white/10">
-            <div class="flex items-center gap-2">
-              <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
-                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-              </span>
-              <div>
-                <h3 class="text-base font-black text-white">ระบบซิงค์ปฏิทินส่วนตัว (Live Feed Sync)</h3>
-                <span class="text-[10px] text-amber-400 font-bold">${userEmail ? '✓ กำลังซิงค์ปฏิทินเฉพาะบุคคล' : 'กำลังซิงค์ปฏิทินสาขา (กรุณาเข้าสู่ระบบเพื่อซิงค์งานส่วนตัว)'}</span>
-              </div>
-            </div>
-            <button onclick="this.closest('#calendarSubscriptionModal').remove()" class="p-1 rounded-xl text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-          </div>
-
-          <div class="space-y-3 text-xs leading-relaxed text-slate-300">
-            <p>
-              เชื่อมต่อปฏิทินเข้ากับ <strong class="text-white">Google Calendar</strong> หรือ <strong class="text-white">Apple / Windows Calendar</strong> ได้โดยตรง ข้อมูลกิจกรรมใหม่จะอัปเดตลงเครื่องอัตโนมัติจาก Cloud:
-            </p>
-
-            <div class="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/25 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-blue-300 flex items-center gap-1.5 text-xs">
-                  <i data-lucide="calendar" class="w-4 h-4 text-blue-400"></i>
-                  <span>1. ซิงค์เข้า Google Calendar (1-Click)</span>
-                </span>
-                <a href="${googleSubscribeUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-bold text-[11px] transition shadow-md">
-                  เชื่อมต่อทันที
-                </a>
-              </div>
-              <p class="text-[11px] text-slate-400">
-                เพิ่มลงในบัญชี Google Calendar บนมือถือและคอมพิวเตอร์ของคุณ
-              </p>
-            </div>
-
-            <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-amber-300 flex items-center gap-1.5 text-xs">
-                  <i data-lucide="smartphone" class="w-4 h-4 text-amber-400"></i>
-                  <span>2. ซิงค์เข้า iPhone / Mac / Windows (WebCal)</span>
-                </span>
-                <a href="${webcalUrl}" class="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] transition shadow-md">
-                  สมัครรับปฏิทิน
-                </a>
-              </div>
-              <p class="text-[11px] text-slate-400">
-                เปิดแอป Calendar ในเครื่องเพื่อดึงข้อมูลสดอัตโนมัติ
-              </p>
-            </div>
-
-            <div class="space-y-1 pt-1">
-              <label class="block text-[11px] font-bold text-slate-400">หรือคัดลอก Live Feed URL ไปเพิ่มเอง:</label>
-              <div class="flex items-center gap-2">
-                <input type="text" readonly value="${feedUrl}" id="calendarLiveFeedInput" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white font-mono text-[11px] select-all">
-                <button onclick="copyCalendarLiveFeedUrl()" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 transition flex-shrink-0">
-                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                  <span id="copyFeedBtnText">คัดลอก</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="pt-2 border-t border-white/10 text-center">
-            <button onclick="this.closest('#calendarSubscriptionModal').remove()" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition">
-              ปิดหน้าต่าง
-            </button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      lucide.createIcons();
-    }
-
-    function copyCalendarLiveFeedUrl() {
-      const input = document.getElementById('calendarLiveFeedInput');
-      if (input) {
-        input.select();
-        navigator.clipboard.writeText(input.value).then(() => {
-          const btnText = document.getElementById('copyFeedBtnText');
-          if (btnText) {
-            btnText.textContent = 'คัดลอกแล้ว!';
-            setTimeout(() => { btnText.textContent = 'คัดลอก'; }, 2000);
-          }
-        });
-      }
-    }
-
-    function exportAllCalendarIcs() {
-      const list = getFilteredCalendarPlans();
-      if (window.CalendarSync) {
-        window.CalendarSync.exportAllPlansIcs(list, 'COMED23 Calendar');
-      }
-    }
-
-    async function handleDeleteCalendarPlan(planId) {
-      const p = (appState.plans || []).find(x => x.id === planId);
-      if (!p) return;
-      if (!canUserManagePlan(p)) {
-        showAppToast("สิทธิ์ไม่เพียงพอ", "🔒 เฉพาะผู้สร้างกิจกรรมหรือแอดมินเท่านั้นที่มีสิทธิ์ลบ", "error");
-        return;
-      }
-
-      const confirmed = await promptCustomDelete({
-        title: "ย้ายกิจกรรมลงถังขยะ",
-        message: `ยืนยันการย้ายกิจกรรม "${p.title}" ลงถังขยะหรือไม่?`,
-        subtext: "สามารถกู้คืนได้ภายหลังจากหน้า Plans > ถังขยะกู้คืน",
-        confirmText: "ย้ายลงถังขยะ"
-      });
-      if (!confirmed) return;
-
-      try {
-        const email = appState.user ? appState.user.email : null;
-        const isAdmin = appState.user && (appState.user.isAdmin || (window.PlansRepo && window.PlansRepo.isAdminUser(email)));
-        await window.PlansRepo.moveToTrashPlan(planId, email, isAdmin ? 'admin' : 'owner');
-        await refreshCalendarData();
-        showAppToast("ย้ายกิจกรรมลงถังขยะแล้ว", p.title, "success");
-      } catch (err) {
-        showAppToast("เกิดข้อผิดพลาด", err.message, "error");
-      }
-    }
-
-    function openCreatePlanModal() {
-      if (!appState.user || !appState.user.email) {
-        if (confirm("🔒 คุณต้องเข้าสู่ระบบบัญชี KKU Mail ก่อนจึงจะสามารถสร้างกิจกรรมได้\n\nคุณต้องการเข้าสู่ระบบตอนนี้เลยหรือไม่?")) {
-          triggerGoogleLogin();
-        }
-        return;
-      }
-      document.getElementById('createPlanModal').classList.remove('hidden');
-      document.getElementById('createPlanModal').classList.add('flex');
-
-      const now = new Date();
-      now.setMinutes(0); now.setHours(now.getHours() + 1);
-      const iso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-      document.getElementById('newRoomStartDate').value = iso;
-    }
-
-    function closeCreatePlanModal() {
-      document.getElementById('createPlanModal').classList.add('hidden');
-      document.getElementById('createPlanModal').classList.remove('flex');
-    }
-
-    async function handleCreatePlanSubmit(e) {
-      e.preventDefault();
-      if (!appState.user || !appState.user.email) {
-        alert("🔒 กรุณาเข้าสู่ระบบก่อนสร้างกิจกรรม");
-        return;
-      }
-
-      const title = document.getElementById('newRoomTitle').value;
-      const planType = document.getElementById('newRoomType') ? document.getElementById('newRoomType').value : 'event';
-      const scope = document.getElementById('newRoomScope').value;
-      const priority = document.getElementById('newRoomPriority') ? document.getElementById('newRoomPriority').value : 'normal';
-      const color = document.getElementById('newRoomColor').value;
-      const startDate = document.getElementById('newRoomStartDate').value;
-      const endDate = document.getElementById('newRoomEndDate').value;
-      const location = document.getElementById('newRoomLocation').value;
-      const desc = document.getElementById('newRoomDesc').value;
-      const emoji = document.getElementById('newRoomEmoji') ? document.getElementById('newRoomEmoji').value : '📅';
-      const isOfficialCheck = document.getElementById('newRoomIsOfficial');
-      const isOfficial = isOfficialCheck ? isOfficialCheck.checked : false;
-
-      const attachments = [...calCreateImages];
-
-      const payload = {
-        title,
-        plan_type: planType,
-        description: desc,
-        scope,
-        priority,
-        color,
-        location,
-        emoji,
-        custom_columns: ["สิ่งที่ต้องทำ", "กำลังทำ", "เสร็จสิ้น"],
-        start_date: new Date(startDate).toISOString(),
-        end_date: endDate ? new Date(endDate).toISOString() : null,
-        is_official: isOfficial,
-        creator_email: appState.user.email,
-        creator_name: appState.user.name || 'สมาชิกสาขา',
-        creator_avatar: appState.user.avatar || '',
-        creator_student_id: appState.user.studentId || '',
-        attachments
-      };
-
-      try {
-        await window.PlansRepo.createPlan(payload);
-        closeCreatePlanModal();
-        await refreshCalendarData();
-        showAppToast("สร้างกิจกรรมสำเร็จ", title, "success");
-      } catch (err) {
-        showAppToast("เกิดข้อผิดพลาด", err.message, "error");
-      }
-    }
-
-    function openEditCalendarPlanModal(planId) {
-      const plan = (appState.plans || []).find(p => p.id === planId);
-      if (!plan) return;
-
-      if (!canUserManagePlan(plan)) {
-        alert("🔒 คุณไม่มีสิทธิ์แก้ไขกิจกรรมนี้ (เฉพาะผู้สร้างหรือผู้ดูแลระบบเท่านั้น)");
-        return;
-      }
-
-      document.getElementById('editPlanId').value = plan.id;
-      document.getElementById('editPlanTitle').value = plan.title || '';
-      document.getElementById('editPlanPriority').value = plan.priority || 'normal';
-      document.getElementById('editPlanScope').value = plan.scope || 'shared';
-      document.getElementById('editPlanColor').value = plan.color || '#f97316';
-      document.getElementById('editPlanLocation').value = plan.location || '';
-      document.getElementById('editPlanDesc').value = plan.description || '';
-      
-      const emojiVal = plan.emoji || '📅';
-      const editEmojiInput = document.getElementById('editPlanEmoji');
-      if (editEmojiInput) editEmojiInput.value = emojiVal;
-
-      calEditImages = (plan.attachments && Array.isArray(plan.attachments)) ? [...plan.attachments] : [];
-      renderCalMultiImagePreviews('editPlan');
-
-      if (plan.start_date) {
-        const d = new Date(plan.start_date);
-        const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-        document.getElementById('editPlanStartDate').value = iso;
-      } else {
-        document.getElementById('editPlanStartDate').value = '';
-      }
-
-      if (plan.end_date) {
-        const d = new Date(plan.end_date);
-        const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-        document.getElementById('editPlanEndDate').value = iso;
-      } else {
-        document.getElementById('editPlanEndDate').value = '';
-      }
-
-      const modal = document.getElementById('editCalendarPlanModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      lucide.createIcons();
-    }
-
-    function closeEditCalendarPlanModal() {
-      const modal = document.getElementById('editCalendarPlanModal');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-    }
-
-    async function handleEditPlanSubmit(e) {
-      e.preventDefault();
-      const planId = document.getElementById('editPlanId').value;
-      if (!planId) return;
-
-      const plan = (appState.plans || []).find(p => p.id === planId);
-      if (!canUserManagePlan(plan)) {
-        alert("🔒 คุณไม่มีสิทธิ์แก้ไขกิจกรรมนี้");
-        return;
-      }
-
-      const title = document.getElementById('editPlanTitle').value.trim();
-      const priority = document.getElementById('editPlanPriority').value;
-      const scope = document.getElementById('editPlanScope').value;
-      const color = document.getElementById('editPlanColor').value;
-      const location = document.getElementById('editPlanLocation').value.trim();
-      const startDate = document.getElementById('editPlanStartDate').value;
-      const endDate = document.getElementById('editPlanEndDate').value;
-      const desc = document.getElementById('editPlanDesc').value.trim();
-      const emoji = document.getElementById('editPlanEmoji') ? document.getElementById('editPlanEmoji').value : (plan.emoji || '📅');
-      const attachments = [...calEditImages];
-
-      const updates = {
-        title,
-        priority,
-        scope,
-        color,
-        location,
-        emoji,
-        attachments,
-        description: desc,
-        start_date: new Date(startDate).toISOString(),
-        end_date: endDate ? new Date(endDate).toISOString() : null
-      };
-
-      try {
-        await window.PlansRepo.updatePlan(planId, updates);
-        closeEditCalendarPlanModal();
-        await refreshCalendarData();
-        showAppToast("แก้ไขข้อมูลสำเร็จ", "อัปเดตกิจกรรมเรียบร้อยแล้ว", "success");
-      } catch (err) {
-        showAppToast("เกิดข้อผิดพลาด", err.message, "error");
-      }
-    }
-
-    async function quickDeleteEditingPlan() {
-      const planId = document.getElementById('editPlanId').value;
-      if (!planId) return;
-      closeEditCalendarPlanModal();
-      await handleDeleteCalendarPlan(planId);
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      updateCalendarIconsDate();
-      lucide.createIcons();
-      checkSessionUser();
-      setupGoogleAuth();
-      await refreshCalendarData();
-
-      // Realtime Sync from Supabase
-      if (window.PlansRepo) {
-        window.PlansRepo.subscribeToChanges(async (table, payload) => {
-          console.log("[Calendar Realtime Sync]", table, payload);
-          await refreshCalendarData();
-        });
-      }
-    });
-  </script>
-
-  <!-- ================= THUMB-ACCESSIBLE FLOATING BOTTOM NAVIGATION (MOBILE) ================= -->
-  <!-- Persistent Fixed Bottom Navigation Dock (5 Tabs) -->
-  <nav class="sm:hidden fixed bottom-3 inset-x-3 max-w-[calc(100vw-24px)] z-30 bg-[#0C1030]/95 backdrop-blur-2xl border border-[#242A4A] rounded-2xl py-1.5 px-1 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.7)]">
-    <!-- 1. Home -->
-    <a href="index.html" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
+  <!-- Mobile Bottom Nav -->
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 flex items-center justify-around">
+    <a href="index.html" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900">
       <i data-lucide="home" class="w-4 h-4"></i>
-      <span class="text-[9px] font-mono">Home</span>
+      <span class="text-[10px] font-medium">หน้าหลัก</span>
     </a>
-    
-    <!-- 2. Active Calendar Tab with Date Tear Sheet Icon -->
-    <a href="Calendar.html" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-[#FF7A29] transition relative">
-      <div class="cal-tear-icon scale-75 -my-1">
-        <div class="cal-tear-top">
-          <span class="cal-tear-pin"></span>
-          <span class="cal-tear-pin"></span>
-        </div>
-        <span class="cal-tear-day" id="calDockDynamicDay">25</span>
-      </div>
-      <span class="text-[9px] font-mono font-bold leading-none mt-0.5">Calendar</span>
-      <span class="w-1.5 h-1.5 rounded-full bg-[#E65A19] absolute -bottom-0.5 shadow-[0_0_6px_#E65A19]"></span>
+    <a href="Calendar.html" class="flex flex-col items-center gap-0.5 text-orange-600 font-semibold">
+      <i data-lucide="calendar" class="w-4 h-4"></i>
+      <span class="text-[10px]">ปฏิทิน</span>
     </a>
-
-    <!-- 3. Plans Hub (Tasks) -->
-    <a href="Plans.html" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
+    <a href="Plans.html" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900">
       <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-      <span class="text-[9px] font-mono">Plans</span>
+      <span class="text-[10px] font-medium">แผนงาน</span>
     </a>
-
-    <!-- 4. Notifications (Triggers Notification Center Modal) -->
-    <button onclick="window.NotificationEngine?.openMobileNotifModal ? window.NotificationEngine.openMobileNotifModal() : alert('ศูนย์แจ้งเตือน')" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition cursor-pointer">
-      <i data-lucide="bell" class="w-4 h-4"></i>
-      <span class="text-[9px] font-mono">Notif</span>
-    </button>
-
-    <!-- 5. Profile -->
-    <a href="Profile.html" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-400 hover:text-white transition">
+    <a href="Profile.html" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900">
       <i data-lucide="user" class="w-4 h-4"></i>
-      <span class="text-[9px] font-mono">Profile</span>
+      <span class="text-[10px] font-medium">โปรไฟล์</span>
     </a>
   </nav>
 
   <script>
-    // Update Dynamic Calendar Icon Numbers
-    function updateCalendarIconsDate() {
-      const todayNum = new Date().getDate();
-      const topIcon = document.getElementById('calHeaderDynamicDay');
-      const dockIcon = document.getElementById('calDockDynamicDay');
-      if (topIcon) topIcon.textContent = todayNum;
-      if (dockIcon) dockIcon.textContent = todayNum;
+    const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    const THAI_DAYS = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+
+    let currentDate = new Date();
+    let currentView = window.innerWidth < 640 ? 'agenda' : 'month';
+    let currentCategory = 'all';
+    let allEvents = [];
+
+    async function loadEvents() {
+      try {
+        if (window.PlansRepo && typeof window.PlansRepo.fetchPlans === 'function') {
+          const user = JSON.parse(localStorage.getItem('currentUser') || localStorage.getItem('supabase_user') || 'null');
+          const data = await window.PlansRepo.fetchPlans(user?.email || '', false);
+          if (Array.isArray(data)) {
+            allEvents = data.map(item => ({
+              id: item.id,
+              title: item.title || 'ไม่มีชื่อ',
+              date: (item.due_date || item.start_date || item.created_at || '').slice(0, 10),
+              category: item.category || 'activity',
+              description: item.description || '',
+              raw: item
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn('Calendar load fallback:', e);
+      }
+      renderCalendar();
     }
+
+    function getFilteredEvents() {
+      const q = (document.getElementById('calSearchInput')?.value || '').toLowerCase().trim();
+      return allEvents.filter(ev => {
+        const matchCat = currentCategory === 'all' || ev.category === currentCategory;
+        const matchQ = !q || ev.title.toLowerCase().includes(q) || (ev.description || '').toLowerCase().includes(q);
+        return matchCat && matchQ;
+      });
+    }
+
+    function getStatusBadge(dateStr) {
+      if (!dateStr) return { label: 'ไม่ระบุวัน', cls: 'bg-slate-100 text-slate-600' };
+      const today = new Date().toISOString().slice(0, 10);
+      if (dateStr === today) return { label: 'วันนี้', cls: 'bg-orange-100 text-orange-700' };
+      if (dateStr < today) return { label: 'เลยกำหนด', cls: 'bg-rose-100 text-rose-700' };
+      return { label: 'กำลังจะถึง', cls: 'bg-emerald-100 text-emerald-700' };
+    }
+
+    function setView(v) {
+      currentView = v;
+      ['month', 'week', 'agenda'].forEach(mode => {
+        const btn = document.getElementById('btnView' + mode.charAt(0).toUpperCase() + mode.slice(1));
+        if (btn) {
+          btn.className = mode === v
+            ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-xs cursor-pointer'
+            : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer';
+        }
+      });
+      renderCalendar();
+    }
+
+    function setCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.className = btn.dataset.cat === cat
+          ? 'cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white cursor-pointer'
+          : 'cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer';
+      });
+      renderCalendar();
+    }
+
+    function changeMonth(delta) {
+      currentDate.setMonth(currentDate.getMonth() + delta);
+      renderCalendar();
+    }
+
+    function goToToday() {
+      currentDate = new Date();
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const label = document.getElementById('currentMonthLabel');
+      const container = document.getElementById('calendarViewContainer');
+      if (!container) return;
+
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      if (label) label.textContent = `${THAI_MONTHS[month]} ${year + 543}`;
+
+      const events = getFilteredEvents();
+
+      if (currentView === 'agenda') {
+        if (events.length === 0) {
+          container.innerHTML = `<div class="p-12 text-center text-slate-400 text-sm">ไม่พบกิจกรรมที่ตรงกับเงื่อนไข</div>`;
+          return;
+        }
+        const sorted = [...events].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+        container.innerHTML = `
+          <div class="divide-y divide-slate-100">
+            ${sorted.map(ev => {
+              const st = getStatusBadge(ev.date);
+              return `
+                <div onclick='openDetailModal(${JSON.stringify(ev).replace(/'/g, "&#39;")})' class="p-4 hover:bg-slate-50 transition flex items-center justify-between gap-4 cursor-pointer">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${st.cls}">${st.label}</span>
+                      <span class="text-xs font-mono text-slate-500">${ev.date || '-'}</span>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900 truncate">${ev.title}</h3>
+                    ${ev.description ? `<p class="text-xs text-slate-500 truncate mt-0.5">${ev.description}</p>` : ''}
+                  </div>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      // Month Grid
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      let html = `<div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
+        ${THAI_DAYS.map(d => `<div class="py-2.5 text-center text-xs font-semibold text-slate-500">${d}</div>`).join('')}
+      </div><div class="grid grid-cols-7 divide-x divide-y divide-slate-100">`;
+
+      for (let i = 0; i < firstDay; i++) {
+        html += `<div class="cal-cell bg-slate-50/50 p-1.5"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayEvents = events.filter(e => e.date === dateStr);
+        const isToday = dateStr === todayStr;
+
+        html += `
+          <div class="cal-cell p-1.5 sm:p-2 hover:bg-slate-50/80">
+            <div class="flex items-center justify-between mb-1">
+              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${isToday ? 'bg-orange-600 text-white' : 'text-slate-700'}">${day}</span>
+            </div>
+            <div class="space-y-1">
+              ${dayEvents.slice(0, 3).map(ev => `
+                <div onclick='openDetailModal(${JSON.stringify(ev).replace(/'/g, "&#39;")})' class="px-1.5 py-0.5 rounded bg-orange-50 border border-orange-200/70 text-[10px] font-medium text-orange-800 truncate cursor-pointer hover:bg-orange-100">
+                  ${ev.title}
+                </div>
+              `).join('')}
+              ${dayEvents.length > 3 ? `<div class="text-[10px] text-slate-400 font-medium pl-1">+${dayEvents.length - 3} เพิ่มเติม</div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+      html += `</div>`;
+      container.innerHTML = html;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openDetailModal(ev) {
+      const modal = document.getElementById('eventDetailModal');
+      if (!modal) return;
+      const st = getStatusBadge(ev.date);
+      document.getElementById('detailBadge').textContent = st.label;
+      document.getElementById('detailBadge').className = `inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold mb-2 ${st.cls}`;
+      document.getElementById('detailTitle').textContent = ev.title;
+      document.getElementById('detailDate').textContent = ev.date || 'ไม่ระบุวันที่';
+      document.getElementById('detailDescWrap').textContent = ev.description || 'ไม่มีรายละเอียดเพิ่มเติม';
+
+      document.getElementById('btnExportIcs').onclick = () => window.CalendarSync?.downloadIcsFile(ev.raw || ev);
+      document.getElementById('btnGoogleCal').onclick = () => window.CalendarSync?.openGoogleCalendar(ev.raw || ev);
+
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeDetailModal() {
+      document.getElementById('eventDetailModal')?.classList.add('hidden');
+    }
+
+    function openAddModal() {
+      document.getElementById('evDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('addEventModal')?.classList.remove('hidden');
+    }
+
+    function closeAddModal() {
+      document.getElementById('addEventModal')?.classList.add('hidden');
+    }
+
+    async function handleAddEvent(e) {
+      e.preventDefault();
+      const title = document.getElementById('evTitle').value.trim();
+      const date = document.getElementById('evDate').value;
+      const category = document.getElementById('evCategory').value;
+      const description = document.getElementById('evDesc').value.trim();
+      if (!title || !date) return;
+
+      const newEv = { id: crypto.randomUUID(), title, due_date: date, category, description, status: 'todo' };
+      try {
+        if (window.PlansRepo && typeof window.PlansRepo.savePlan === 'function') {
+          await window.PlansRepo.savePlan(newEv);
+        }
+      } catch (err) {
+        console.warn('Save event fallback:', err);
+      }
+      allEvents.unshift({ id: newEv.id, title, date, category, description, raw: newEv });
+      closeAddModal();
+      document.getElementById('addEventForm').reset();
+      renderCalendar();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setView(currentView);
+      setCategory('all');
+      loadEvents();
+      if (window.lucide) lucide.createIcons();
+    });
   </script>
 </body>
 </html>
