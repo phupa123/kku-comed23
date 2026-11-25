@@ -100,9 +100,13 @@
   <script src="assets/js/notifications.js"></script>
 
   <style>
-    /* Noise texture overlay identical to index.html & profile.html */
+    /* Minimal & Calm Theme (Notion / Linear / Apple inspired) */
+    body {
+      background-color: #F8FAFC !important;
+      color: #0F172A !important;
+    }
     .bg-noise {
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+      display: none !important;
     }
 
     /* Dynamic Calendar Tear-Off Sheet Icon */
@@ -110,20 +114,20 @@
       position: relative;
       width: 38px;
       height: 38px;
-      border-radius: 12px;
-      background: #0C1030;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
       display: flex;
       flex-direction: column;
       align-items: center;
       overflow: hidden;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
       flex-shrink: 0;
     }
     .cal-tear-icon .cal-tear-top {
       width: 100%;
-      height: 12px;
-      background: linear-gradient(135deg, #B32B19 0%, #E65A19 100%);
+      height: 11px;
+      background: #EA580C;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -134,7 +138,7 @@
       height: 3px;
       border-radius: 9999px;
       background: #ffffff;
-      opacity: 0.9;
+      opacity: 0.95;
     }
     .cal-tear-icon .cal-tear-day {
       flex: 1;
@@ -142,21 +146,43 @@
       align-items: center;
       justify-content: center;
       font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
-      font-weight: 900;
+      font-weight: 800;
       font-size: 15px;
       line-height: 1;
-      color: #ffffff;
+      color: #0F172A;
       padding-top: 1px;
     }
 
     .glass-card {
-      background: rgba(18, 22, 42, 0.82);
-      backdrop-filter: blur(24px);
-      border: 1px solid #242A4A;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      background: #FFFFFF !important;
+      backdrop-filter: none !important;
+      border: 1px solid #E2E8F0 !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03) !important;
     }
     .glass-card:hover {
-      border-color: rgba(230, 90, 25, 0.4);
+      border-color: #CBD5E1 !important;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.07) !important;
+    }
+    /* Calm surface overrides for legacy dark classes */
+    header, nav {
+      background-color: rgba(255, 255, 255, 0.92) !important;
+      border-color: #E2E8F0 !important;
+      color: #0F172A !important;
+    }
+    .text-white { color: #0F172A !important; }
+    .text-slate-200, .text-slate-300 { color: #334155 !important; }
+    .text-slate-400 { color: #64748B !important; }
+    .bg-\[\#070914\], .bg-\[\#0C1030\], .bg-\[\#12162A\], .bg-\[\#161B33\] {
+      background-color: #FFFFFF !important;
+      border-color: #E2E8F0 !important;
+    }
+    .border-\[\#242A4A\] { border-color: #E2E8F0 !important; }
+    /* Keep primary orange buttons white text */
+    .bg-\[\#E65A19\], .bg-orange-600, .bg-gradient-to-r.from-\[\#B32B19\] {
+      color: #FFFFFF !important;
+    }
+    .bg-\[\#E65A19\] *, .bg-orange-600 *, .bg-gradient-to-r.from-\[\#B32B19\] * {
+      color: #FFFFFF !important;
     }
     .custom-scroll::-webkit-scrollbar {
       width: 6px;

@@ -1078,7 +1078,7 @@
           <p class="text-xs sm:text-sm text-slate-400 mt-1">รายชื่อนักศึกษา สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 23 มหาวิทยาลัยขอนแก่น (คลิกเพื่อดูโปรไฟล์)</p>
         </div>
         <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
-          <input type="text" id="rosterSearchInput" aria-label="ค้นหาชื่อหรือรหัสนักศึกษา" placeholder="ค้นหาชื่อหรือรหัส นศ...." 
+          <input type="text" id="rosterSearchInput" oninput="filterRoster()" aria-label="ค้นหาชื่อหรือรหัสนักศึกษา" placeholder="ค้นหาชื่อหรือรหัส นศ...." 
             class="px-4 py-2 rounded-xl bg-[#12162A] border border-white/15 text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E65A19] focus:ring-1 focus:ring-[#E65A19] w-full sm:w-60 transition">
           
           <a href="Yearbook.html" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#B32B19] hover:from-[#f06828] hover:to-[#c4321e] text-white text-xs font-bold transition shadow-lg shadow-orange-950/40 flex items-center gap-1.5 flex-shrink-0">
@@ -1089,7 +1089,7 @@
       </div>
 
       <!-- Students Grid Container -->
-      <div id="rosterGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div id="rosterGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4">
         <!-- Rendered by students_data.js & index.js -->
       </div>
 
