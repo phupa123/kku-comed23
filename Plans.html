@@ -53,7 +53,7 @@
         <img src="logo.png" alt="COMED 23" class="w-8 h-8 rounded-lg object-contain border border-slate-200 p-0.5 bg-white">
         <div>
           <span class="font-bold text-sm text-slate-900 block leading-tight">KKU COMED 23</span>
-          <span class="text-[11px] text-slate-500 font-mono">Plans &amp; Tasks</span>
+          <span class="text-[11px] text-slate-500 font-mono">Plans &amp; Focus</span>
         </div>
       </a>
 
@@ -64,26 +64,76 @@
         <a href="storage.html" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">คลังไฟล์</a>
       </nav>
 
-      <button onclick="openTaskModal()" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-        <i data-lucide="plus" class="w-4 h-4"></i>
-        <span>เพิ่มงานใหม่</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="openCmdPalette()" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs text-slate-500 transition cursor-pointer">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          <span>ค้นหาด่วน</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-200 font-mono text-[10px] text-slate-400">⌘K</kbd>
+        </button>
+        <button onclick="openTaskModal()" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>เพิ่มงานใหม่</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-5">
+
+    <!-- Executive Bento Dashboard -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- KPI Summary -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">ภาพรวมงาน</span>
+          <div class="flex items-baseline gap-3 mt-1">
+            <span id="kpiActive" class="text-2xl font-extrabold text-slate-900 font-mono">0</span>
+            <span class="text-xs text-slate-500">กำลังทำ</span>
+            <span class="text-slate-300">|</span>
+            <span id="kpiDone" class="text-lg font-bold text-emerald-600 font-mono">0</span>
+            <span class="text-xs text-slate-500">เสร็จแล้ว</span>
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+          <i data-lucide="layers" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <!-- Overall Completion -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">Completion Rate</span>
+          <span id="kpiPercent" class="text-xs font-mono font-bold text-orange-600">0%</span>
+        </div>
+        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden mt-3">
+          <div id="kpiProgressBar" class="h-full bg-orange-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Built-in Focus Timer (Pomodoro) -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-orange-600">Focus Timer</span>
+          <div id="focusTimerDisplay" class="text-2xl font-extrabold text-slate-900 font-mono mt-0.5">25:00</div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="toggleTimer()" id="btnTimerToggle" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold cursor-pointer">เริ่ม</button>
+          <button onclick="resetTimer()" class="p-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-500 cursor-pointer" title="รีเซ็ต">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Toolbar -->
     <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <!-- Active / Completed Tabs -->
         <div class="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200 self-start">
           <button onclick="setTab('active')" id="tabActive" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">กำลังทำ (Active)</button>
           <button onclick="setTab('completed')" id="tabCompleted" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">เสร็จแล้ว (Completed)</button>
         </div>
 
-        <!-- View Switcher -->
         <div class="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200 self-start sm:self-auto">
           <button onclick="setView('kanban')" id="btnViewKanban" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">Kanban</button>
           <button onclick="setView('list')" id="btnViewList" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">List</button>
@@ -91,7 +141,6 @@
         </div>
       </div>
 
-      <!-- Search & Priority Filter -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
         <div class="relative flex-1 max-w-md">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
@@ -117,7 +166,7 @@
 
   <!-- Quick Add / Edit Task Modal -->
   <div id="taskModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4" onclick="closeTaskModal()">
-    <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4" onclick="event.stopPropagation()">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-bold text-slate-900">เพิ่ม / แก้ไขงาน</h2>
         <button onclick="closeTaskModal()" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer">
@@ -154,14 +203,43 @@
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียด</label>
-          <textarea id="taskDesc" rows="3" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500"></textarea>
+          <textarea id="taskDesc" rows="2" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500"></textarea>
         </div>
+
+        <!-- Subtasks Checklist -->
+        <div class="pt-2 border-t border-slate-100 space-y-2">
+          <label class="block text-xs font-semibold text-slate-700">เช็กลิสต์ย่อย (Subtasks)</label>
+          <div id="subtasksList" class="space-y-1.5"></div>
+          <div class="flex gap-2">
+            <input type="text" id="newSubtaskInput" placeholder="เพิ่มขั้นตอนย่อย..." class="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-orange-500">
+            <button type="button" onclick="addSubtask()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 cursor-pointer">เพิ่ม</button>
+          </div>
+        </div>
+
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="closeTaskModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">ยกเลิก</button>
           <button type="submit" class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold cursor-pointer">บันทึกงาน</button>
         </div>
       </form>
     </div>
+  </div>
+
+  <!-- Cmd+K Command Palette -->
+  <div id="cmdPaletteModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-start justify-center pt-20 p-4" onclick="closeCmdPalette()">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+      <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
+        <i data-lucide="command" class="w-4 h-4 text-slate-400"></i>
+        <input type="text" id="cmdInput" oninput="renderCmdResults()" placeholder="พิมพ์คำสั่ง หรือค้นหางาน..." class="w-full text-sm text-slate-800 focus:outline-none">
+        <kbd class="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-mono text-slate-500">ESC</kbd>
+      </div>
+      <div id="cmdResults" class="max-h-72 overflow-y-auto divide-y divide-slate-100 p-2 text-xs"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="hidden fixed bottom-20 lg:bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMsg">บันทึกเรียบร้อย</span>
   </div>
 
   <!-- Mobile Bottom Nav -->
@@ -189,6 +267,53 @@
     let currentTab = 'active';
     let currentView = window.innerWidth < 768 ? 'list' : 'kanban';
     let currentPrio = 'all';
+    let modalSubtasks = [];
+
+    // Focus Timer State
+    let timerSeconds = 25 * 60;
+    let timerInterval = null;
+
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      document.getElementById('toastMsg').textContent = msg;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 2600);
+    }
+
+    function updateTimerUI() {
+      const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+      const s = String(timerSeconds % 60).padStart(2, '0');
+      document.getElementById('focusTimerDisplay').textContent = `${m}:${s}`;
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('btnTimerToggle');
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = 'เริ่ม';
+      } else {
+        btn.textContent = 'พัก';
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerUI();
+          } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            btn.textContent = 'เริ่ม';
+            showToast('ครบเวลา Focus 25 นาทีแล้ว!');
+          }
+        }, 1000);
+      }
+    }
+
+    function resetTimer() {
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      timerSeconds = 25 * 60;
+      document.getElementById('btnTimerToggle').textContent = 'เริ่ม';
+      updateTimerUI();
+    }
 
     async function loadPlans() {
       try {
@@ -204,14 +329,24 @@
               priority: p.priority || 'medium',
               status: p.status || 'todo',
               progress: typeof p.progress === 'number' ? p.progress : (p.status === 'done' ? 100 : p.status === 'in_progress' ? 50 : 0),
+              subtasks: Array.isArray(p.subtasks) ? p.subtasks : [],
               raw: p
             }));
           }
         }
-      } catch (e) {
-        console.warn('Plans load fallback:', e);
-      }
+      } catch (e) { console.warn('Plans load fallback:', e); }
+      updateBentoKPIs();
       renderPlans();
+    }
+
+    function updateBentoKPIs() {
+      const doneCount = allPlans.filter(p => p.status === 'done').length;
+      const activeCount = allPlans.length - doneCount;
+      const pct = allPlans.length ? Math.round((doneCount / allPlans.length) * 100) : 0;
+      document.getElementById('kpiActive').textContent = activeCount;
+      document.getElementById('kpiDone').textContent = doneCount;
+      document.getElementById('kpiPercent').textContent = `${pct}%`;
+      document.getElementById('kpiProgressBar').style.width = `${pct}%`;
     }
 
     function setTab(tab) {
@@ -352,6 +487,28 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    function renderSubtasks() {
+      const list = document.getElementById('subtasksList');
+      list.innerHTML = modalSubtasks.map((s, idx) => `
+        <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-100 text-xs">
+          <label class="flex items-center gap-2 cursor-pointer flex-1">
+            <input type="checkbox" ${s.done ? 'checked' : ''} onchange="modalSubtasks[${idx}].done = this.checked" class="rounded text-orange-600">
+            <span class="${s.done ? 'line-through text-slate-400' : 'text-slate-700'}">${s.text}</span>
+          </label>
+          <button type="button" onclick="modalSubtasks.splice(${idx}, 1); renderSubtasks();" class="text-slate-400 hover:text-rose-500 cursor-pointer">×</button>
+        </div>
+      `).join('');
+    }
+
+    function addSubtask() {
+      const inp = document.getElementById('newSubtaskInput');
+      const val = inp.value.trim();
+      if (!val) return;
+      modalSubtasks.push({ text: val, done: false });
+      inp.value = '';
+      renderSubtasks();
+    }
+
     function openTaskModal(p = null) {
       document.getElementById('taskId').value = p?.id || '';
       document.getElementById('taskTitle').value = p?.title || '';
@@ -359,12 +516,12 @@
       document.getElementById('taskPrio').value = p?.priority || 'medium';
       document.getElementById('taskStatus').value = p?.status || 'todo';
       document.getElementById('taskDesc').value = p?.description || '';
+      modalSubtasks = Array.isArray(p?.subtasks) ? JSON.parse(JSON.stringify(p.subtasks)) : [];
+      renderSubtasks();
       document.getElementById('taskModal')?.classList.remove('hidden');
     }
 
-    function closeTaskModal() {
-      document.getElementById('taskModal')?.classList.add('hidden');
-    }
+    function closeTaskModal() { document.getElementById('taskModal')?.classList.add('hidden'); }
 
     async function handleSaveTask(e) {
       e.preventDefault();
@@ -374,24 +531,56 @@
       const priority = document.getElementById('taskPrio').value;
       const status = document.getElementById('taskStatus').value;
       const description = document.getElementById('taskDesc').value.trim();
-      const progress = status === 'done' ? 100 : status === 'in_progress' ? 50 : 0;
-
-      const payload = { id, title, due_date, priority, status, description, progress };
-      try {
-        if (window.PlansRepo && typeof window.PlansRepo.savePlan === 'function') {
-          await window.PlansRepo.savePlan(payload);
-        }
-      } catch (err) {
-        console.warn('Save plan fallback:', err);
+      let progress = status === 'done' ? 100 : status === 'in_progress' ? 50 : 0;
+      if (modalSubtasks.length > 0) {
+        progress = Math.round((modalSubtasks.filter(s => s.done).length / modalSubtasks.length) * 100);
       }
+
+      const payload = { id, title, due_date, priority, status, description, progress, subtasks: modalSubtasks };
+      try {
+        if (window.PlansRepo && typeof window.PlansRepo.savePlan === 'function') await window.PlansRepo.savePlan(payload);
+      } catch (err) { console.warn('Save plan fallback:', err); }
 
       const idx = allPlans.findIndex(x => x.id === id);
       if (idx >= 0) allPlans[idx] = { ...payload, raw: payload };
       else allPlans.unshift({ ...payload, raw: payload });
 
       closeTaskModal();
+      updateBentoKPIs();
       renderPlans();
+      showToast('บันทึกงานเรียบร้อย');
     }
+
+    // Cmd+K Command Palette
+    function openCmdPalette() {
+      document.getElementById('cmdPaletteModal')?.classList.remove('hidden');
+      const inp = document.getElementById('cmdInput');
+      inp.value = '';
+      inp.focus();
+      renderCmdResults();
+    }
+    function closeCmdPalette() { document.getElementById('cmdPaletteModal')?.classList.add('hidden'); }
+    function renderCmdResults() {
+      const q = (document.getElementById('cmdInput')?.value || '').toLowerCase().trim();
+      const res = document.getElementById('cmdResults');
+      const actions = [
+        { label: '➕ เพิ่มงานใหม่', fn: () => { closeCmdPalette(); openTaskModal(); } },
+        { label: '📌 มุมมอง Kanban', fn: () => { closeCmdPalette(); setView('kanban'); } },
+        { label: '📋 มุมมอง List', fn: () => { closeCmdPalette(); setView('list'); } },
+        { label: '📊 มุมมอง Table', fn: () => { closeCmdPalette(); setView('table'); } }
+      ];
+      const matched = allPlans.filter(p => !q || p.title.toLowerCase().includes(q)).slice(0, 5);
+      res.innerHTML = [
+        ...actions.map((a, i) => `<button onclick="cmdActions[${i}]()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 font-medium text-slate-700 cursor-pointer">${a.label}</button>`),
+        ...matched.map(p => `<button onclick='closeCmdPalette(); openTaskModal(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="w-full text-left px-3 py-2 rounded-lg hover:bg-orange-50 text-slate-800 flex justify-between cursor-pointer"><span class="truncate">${p.title}</span><span class="font-mono text-slate-400">${p.progress}%</span></button>`)
+      ].join('');
+      window.cmdActions = actions.map(a => a.fn);
+    }
+
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCmdPalette(); }
+      if (e.key === 'Escape') { closeCmdPalette(); closeTaskModal(); }
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
       setTab('active');

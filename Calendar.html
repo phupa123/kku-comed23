@@ -56,15 +56,13 @@
   <!-- Top Navbar -->
   <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <a href="index.html" class="flex items-center gap-2.5 group">
-          <img src="logo.png" alt="COMED 23" class="w-8 h-8 rounded-lg object-contain border border-slate-200 p-0.5 bg-white">
-          <div>
-            <span class="font-bold text-sm text-slate-900 block leading-tight">KKU COMED 23</span>
-            <span class="text-[11px] text-slate-500 font-mono">Calendar</span>
-          </div>
-        </a>
-      </div>
+      <a href="index.html" class="flex items-center gap-2.5 group">
+        <img src="logo.png" alt="COMED 23" class="w-8 h-8 rounded-lg object-contain border border-slate-200 p-0.5 bg-white">
+        <div>
+          <span class="font-bold text-sm text-slate-900 block leading-tight">KKU COMED 23</span>
+          <span class="text-[11px] text-slate-500 font-mono">Calendar</span>
+        </div>
+      </a>
 
       <nav class="hidden md:flex items-center gap-1 text-sm font-medium">
         <a href="index.html" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">หน้าหลัก</a>
@@ -74,6 +72,11 @@
       </nav>
 
       <div class="flex items-center gap-2">
+        <button onclick="openCmdPalette()" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs text-slate-500 transition cursor-pointer">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          <span>ค้นหาด่วน</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-200 font-mono text-[10px] text-slate-400">⌘K</kbd>
+        </button>
         <button onclick="openAddModal()" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
           <i data-lucide="plus" class="w-4 h-4"></i>
           <span>เพิ่มกิจกรรม</span>
@@ -83,12 +86,49 @@
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-5">
+
+    <!-- Executive Bento Header -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Card 1: Live Next Up Countdown -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-orange-600">Next Up</span>
+          <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+        </div>
+        <div class="mt-2">
+          <h2 id="bentoNextTitle" class="text-sm font-bold text-slate-900 truncate">กำลังตรวจสอบกำหนดการ...</h2>
+          <p id="bentoNextCountdown" class="text-xs font-mono text-slate-500 mt-0.5">-</p>
+        </div>
+      </div>
+
+      <!-- Card 2: Today & Week Summary -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">ภาพรวมเดือนนี้</span>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="bentoMonthCount" class="text-2xl font-extrabold text-slate-900 font-mono">0</span>
+            <span class="text-xs text-slate-500">กิจกรรมทั้งหมด</span>
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+          <i data-lucide="calendar-check" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <!-- Card 3: Workload Heatmap -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">Workload Heatmap</span>
+          <span class="text-[10px] text-slate-400 font-mono">รายสัปดาห์</span>
+        </div>
+        <div id="bentoHeatmap" class="grid grid-cols-5 gap-1.5 mt-2.5"></div>
+      </div>
+    </div>
 
     <!-- Toolbar: Month Nav, Search, Category Filter, View Switcher -->
     <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <!-- Month / Date Navigation -->
         <div class="flex items-center gap-2">
           <button onclick="changeMonth(-1)" aria-label="เดือนก่อนหน้า" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer">
             <i data-lucide="chevron-left" class="w-4 h-4"></i>
@@ -206,6 +246,24 @@
     </div>
   </div>
 
+  <!-- Cmd+K Command Palette -->
+  <div id="cmdPaletteModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-start justify-center pt-20 p-4" onclick="closeCmdPalette()">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+      <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
+        <i data-lucide="command" class="w-4 h-4 text-slate-400"></i>
+        <input type="text" id="cmdInput" oninput="renderCmdResults()" placeholder="พิมพ์คำสั่ง หรือค้นหากิจกรรม..." class="w-full text-sm text-slate-800 focus:outline-none">
+        <kbd class="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-mono text-slate-500">ESC</kbd>
+      </div>
+      <div id="cmdResults" class="max-h-72 overflow-y-auto divide-y divide-slate-100 p-2 text-xs"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="hidden fixed bottom-20 lg:bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMsg">บันทึกเรียบร้อย</span>
+  </div>
+
   <!-- Mobile Bottom Nav -->
   <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 flex items-center justify-around">
     <a href="index.html" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900">
@@ -235,6 +293,13 @@
     let currentCategory = 'all';
     let allEvents = [];
 
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      document.getElementById('toastMsg').textContent = msg;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 2600);
+    }
+
     async function loadEvents() {
       try {
         if (window.PlansRepo && typeof window.PlansRepo.fetchPlans === 'function') {
@@ -254,7 +319,41 @@
       } catch (e) {
         console.warn('Calendar load fallback:', e);
       }
+      updateBentoHeader();
       renderCalendar();
+    }
+
+    function updateBentoHeader() {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const upcoming = allEvents.filter(e => e.date >= todayStr).sort((a, b) => a.date.localeCompare(b.date));
+      const nextEv = upcoming[0];
+      const nextTitle = document.getElementById('bentoNextTitle');
+      const nextCd = document.getElementById('bentoNextCountdown');
+
+      if (nextEv) {
+        nextTitle.textContent = nextEv.title;
+        const diffDays = Math.ceil((new Date(nextEv.date) - new Date(todayStr)) / 86400000);
+        nextCd.textContent = diffDays === 0 ? 'วันนี้ (Today)' : `อีก ${diffDays} วัน (${nextEv.date})`;
+      } else {
+        nextTitle.textContent = 'ไม่มีกำหนดการที่กำลังจะถึง';
+        nextCd.textContent = 'ผ่อนคลายได้เลย';
+      }
+
+      const ym = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+      const monthEvents = allEvents.filter(e => (e.date || '').startsWith(ym));
+      document.getElementById('bentoMonthCount').textContent = monthEvents.length;
+
+      // 5-week Workload Heatmap
+      const heatmap = document.getElementById('bentoHeatmap');
+      const weeks = [0, 0, 0, 0, 0];
+      monthEvents.forEach(e => {
+        const d = parseInt(e.date.slice(8, 10), 10) || 1;
+        weeks[Math.min(4, Math.floor((d - 1) / 7))]++;
+      });
+      heatmap.innerHTML = weeks.map((cnt, idx) => {
+        const cls = cnt === 0 ? 'bg-slate-100 text-slate-400' : cnt <= 2 ? 'bg-orange-100 text-orange-700' : 'bg-orange-500 text-white';
+        return `<div class="rounded-lg py-1.5 text-center text-[10px] font-mono font-semibold ${cls}" title="สัปดาห์ที่ ${idx + 1}: ${cnt} กิจกรรม">W${idx + 1} (${cnt})</div>`;
+      }).join('');
     }
 
     function getFilteredEvents() {
@@ -299,11 +398,13 @@
 
     function changeMonth(delta) {
       currentDate.setMonth(currentDate.getMonth() + delta);
+      updateBentoHeader();
       renderCalendar();
     }
 
     function goToToday() {
       currentDate = new Date();
+      updateBentoHeader();
       renderCalendar();
     }
 
@@ -348,7 +449,6 @@
         return;
       }
 
-      // Month Grid
       const firstDay = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const todayStr = new Date().toISOString().slice(0, 10);
@@ -396,26 +496,15 @@
       document.getElementById('detailTitle').textContent = ev.title;
       document.getElementById('detailDate').textContent = ev.date || 'ไม่ระบุวันที่';
       document.getElementById('detailDescWrap').textContent = ev.description || 'ไม่มีรายละเอียดเพิ่มเติม';
-
-      document.getElementById('btnExportIcs').onclick = () => window.CalendarSync?.downloadIcsFile(ev.raw || ev);
+      document.getElementById('btnExportIcs').onclick = () => { window.CalendarSync?.downloadIcsFile(ev.raw || ev); showToast('ดาวน์โหลดไฟล์ .ics แล้ว'); };
       document.getElementById('btnGoogleCal').onclick = () => window.CalendarSync?.openGoogleCalendar(ev.raw || ev);
-
       modal.classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
     }
 
-    function closeDetailModal() {
-      document.getElementById('eventDetailModal')?.classList.add('hidden');
-    }
-
-    function openAddModal() {
-      document.getElementById('evDate').value = new Date().toISOString().slice(0, 10);
-      document.getElementById('addEventModal')?.classList.remove('hidden');
-    }
-
-    function closeAddModal() {
-      document.getElementById('addEventModal')?.classList.add('hidden');
-    }
+    function closeDetailModal() { document.getElementById('eventDetailModal')?.classList.add('hidden'); }
+    function openAddModal() { document.getElementById('evDate').value = new Date().toISOString().slice(0, 10); document.getElementById('addEventModal')?.classList.remove('hidden'); }
+    function closeAddModal() { document.getElementById('addEventModal')?.classList.add('hidden'); }
 
     async function handleAddEvent(e) {
       e.preventDefault();
@@ -427,17 +516,45 @@
 
       const newEv = { id: crypto.randomUUID(), title, due_date: date, category, description, status: 'todo' };
       try {
-        if (window.PlansRepo && typeof window.PlansRepo.savePlan === 'function') {
-          await window.PlansRepo.savePlan(newEv);
-        }
-      } catch (err) {
-        console.warn('Save event fallback:', err);
-      }
+        if (window.PlansRepo && typeof window.PlansRepo.savePlan === 'function') await window.PlansRepo.savePlan(newEv);
+      } catch (err) { console.warn('Save event fallback:', err); }
       allEvents.unshift({ id: newEv.id, title, date, category, description, raw: newEv });
       closeAddModal();
       document.getElementById('addEventForm').reset();
+      updateBentoHeader();
       renderCalendar();
+      showToast('เพิ่มกิจกรรมใหม่เรียบร้อย');
     }
+
+    // Cmd+K Command Palette
+    function openCmdPalette() {
+      document.getElementById('cmdPaletteModal')?.classList.remove('hidden');
+      const inp = document.getElementById('cmdInput');
+      inp.value = '';
+      inp.focus();
+      renderCmdResults();
+    }
+    function closeCmdPalette() { document.getElementById('cmdPaletteModal')?.classList.add('hidden'); }
+    function renderCmdResults() {
+      const q = (document.getElementById('cmdInput')?.value || '').toLowerCase().trim();
+      const res = document.getElementById('cmdResults');
+      const actions = [
+        { label: '➕ เพิ่มกิจกรรมใหม่', fn: () => { closeCmdPalette(); openAddModal(); } },
+        { label: '📅 มุมมองเดือน (Month)', fn: () => { closeCmdPalette(); setView('month'); } },
+        { label: '📋 มุมมองรายการ (Agenda)', fn: () => { closeCmdPalette(); setView('agenda'); } }
+      ];
+      const matched = allEvents.filter(e => !q || e.title.toLowerCase().includes(q)).slice(0, 5);
+      res.innerHTML = [
+        ...actions.map((a, i) => `<button onclick="cmdActions[${i}]()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 font-medium text-slate-700 cursor-pointer">${a.label}</button>`),
+        ...matched.map(e => `<button onclick='closeCmdPalette(); openDetailModal(${JSON.stringify(e).replace(/'/g, "&#39;")})' class="w-full text-left px-3 py-2 rounded-lg hover:bg-orange-50 text-slate-800 flex justify-between cursor-pointer"><span class="truncate">${e.title}</span><span class="font-mono text-slate-400">${e.date}</span></button>`)
+      ].join('');
+      window.cmdActions = actions.map(a => a.fn);
+    }
+
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCmdPalette(); }
+      if (e.key === 'Escape') { closeCmdPalette(); closeDetailModal(); closeAddModal(); }
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
       setView(currentView);
