@@ -405,7 +405,7 @@
       </a>
 
       <!-- 2. GLOBAL MENU (Middle - Desktop) -->
-      <nav class="hidden lg:flex items-center gap-1.5">
+      <nav aria-label="Main Navigation" class="hidden lg:flex items-center gap-1.5">
         <a href="#hero" class="relative px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold text-white hover:text-white transition flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-[#E65A19] shadow-[0_0_10px_#E65A19]"></span>
           <span>HOME</span>
@@ -434,7 +434,7 @@
         
         <!-- BUTTON 1: Real-time Notifications Hub (🔔 ศูนย์การแจ้งเตือนสด Supabase) -->
         <div class="relative" id="mainNotifBellWrapper">
-          <button id="notifBellBtn" title="ศูนย์การแจ้งเตือนสด COMED23" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-white/20 hover:border-[#E65A19] flex items-center justify-center text-white hover:text-white transition shadow-sm cursor-pointer">
+          <button id="notifBellBtn" aria-label="ศูนย์การแจ้งเตือนสด COMED23" title="ศูนย์การแจ้งเตือนสด COMED23" class="relative w-9 h-9 rounded-full bg-[#12162A] border border-white/20 hover:border-[#E65A19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E65A19] flex items-center justify-center text-white hover:text-white transition shadow-sm cursor-pointer">
             <i class="bi bi-bell-fill text-sm text-slate-200"></i>
             <span id="notifUnreadBadge" class="notification-badge hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-red-500 to-[#E65A19] text-[10px] font-mono font-black text-white flex items-center justify-center border border-[#070914] shadow-[0_0_10px_rgba(230,90,25,0.8)]">
               0
@@ -680,7 +680,7 @@
   <div id="broadcastHeroContainer" class="pt-6 relative z-20"></div>
 
   <!-- ================= MAIN HERO SECTION (01 / INDEX) ================= -->
-  <section id="hero" class="relative min-h-[calc(100vh-64px)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10 lg:py-16 overflow-hidden">
+  <section id="hero" class="relative min-h-[calc(100vh-64px)] flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-6 pb-12 lg:py-16 overflow-hidden">
     
     <!-- Left Timeline Indicator -->
     <div class="hidden xl:flex fixed left-8 top-1/2 -translate-y-1/2 flex-col items-center gap-3 z-30 pointer-events-none">
@@ -689,54 +689,53 @@
       <div class="w-px h-16 bg-gradient-to-b from-[#E65A19] to-transparent"></div>
     </div>
 
-    <div class="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
+    <div class="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-center relative z-10">
       
       <!-- LEFT-CENTER (The Brand & Mission Statement) -->
-      <div class="lg:col-span-7 flex flex-col justify-center space-y-6 sm:space-y-8 text-left">
+      <div class="lg:col-span-7 flex flex-col justify-center space-y-5 sm:space-y-7 text-left">
         
         <!-- Top Sub-badges -->
         <div class="flex flex-wrap items-center gap-2">
           <span class="px-3 py-1 rounded-full bg-gradient-to-r from-[#B32B19]/30 to-[#E65A19]/30 border border-[#E65A19]/50 text-[10px] font-mono font-bold tracking-wider text-[#FF7A29] uppercase">
             CLASS OF 2023 - 2027
           </span>
-          <span class="px-3 py-1 rounded-full bg-[#161B33] border border-[#242A4A] text-[10px] font-mono font-bold tracking-wider text-slate-300 uppercase">
-            STUDENTS / BATCH 23
+          <span class="px-3 py-1 rounded-full bg-[#161B33]/90 border border-white/10 text-[10px] font-mono font-bold tracking-wider text-slate-300 uppercase">
+            BATCH 23
           </span>
           <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-sans font-medium text-slate-300">
-            สาขาวิชาคอมพิวเตอร์ศึกษา
+            สาขาวิชาคอมพิวเตอร์ศึกษา มข.
           </span>
         </div>
 
         <!-- Large-sized Kinetic Typography Title -->
         <div class="space-y-1">
-          <h1 id="kineticTitle" class="title-kinetic font-display text-4xl sm:text-6xl md:text-7xl lg:text-[78px] tracking-tight leading-[0.95]">
+          <h1 id="kineticTitle" class="title-kinetic font-display text-4xl sm:text-6xl md:text-7xl lg:text-[76px] tracking-tight leading-[0.95]">
             THE HUB OF<br>
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-300">COMED 23</span><br>
-            <span class="text-2xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A29] via-[#E65A19] to-[#B32B19] block mt-1">CONNECTING EDUCATION<br class="hidden sm:inline"> &amp; TECHNOLOGY</span>
+            <span class="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A29] via-[#E65A19] to-[#B32B19] block mt-1.5">CONNECTING EDUCATION<br class="hidden sm:inline"> &amp; TECHNOLOGY</span>
           </h1>
         </div>
 
         <!-- Mission Statement Paragraph -->
         <p class="text-xs sm:text-sm md:text-base font-sans text-slate-400 font-light leading-relaxed max-w-xl">
-          The academic portal for the Computer Education program at Khon Kaen University (Faculty of Education). Navigating the future of digital teaching, creative computing, and educational technology.
+          พอร์ทัลกลางสำหรับนักศึกษาสาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 23 คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น รวมปฏิทินกิจกรรม แผนงาน กองทุนสาขา คลังไฟล์ และทำเนียบรุ่นไว้ในที่เดียว
         </p>
 
         <!-- Elastic-animated CTA Button -->
-        <div class="flex flex-wrap items-center gap-4 pt-2">
-          <a href="#quick-hub" id="explorePortalBtn" class="chrome-border group relative px-7 py-3.5 rounded-full bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white font-mono font-bold text-xs tracking-wider uppercase transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(230,90,25,0.5)] flex items-center gap-2.5 cursor-pointer">
+        <div class="flex flex-wrap items-center gap-3 sm:gap-4 pt-1">
+          <a href="#quick-hub" id="explorePortalBtn" class="chrome-border group relative px-6 py-3 sm:px-7 sm:py-3.5 rounded-full bg-gradient-to-r from-[#B32B19] to-[#E65A19] text-white font-mono font-bold text-xs tracking-wider uppercase transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(230,90,25,0.5)] flex items-center gap-2.5 cursor-pointer">
             <span>[ EXPLORE PORTAL ]</span>
             <span class="group-hover:translate-x-1 transition-transform">→</span>
           </a>
 
-          <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
-            <a href="storage.html" class="hover:text-white underline underline-offset-4 decoration-slate-600 transition">Secondary portals</a>
-            <span class="text-slate-600">•</span>
-            <a href="Plans.html" class="hover:text-white underline underline-offset-4 decoration-slate-600 transition">Navigation index</a>
+          <div class="flex items-center gap-2.5 text-xs font-mono text-slate-400">
+            <a href="storage.html" class="px-3.5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:text-white transition">คลังไฟล์</a>
+            <a href="Calendar.html" class="px-3.5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:text-white transition">ปฏิทิน</a>
           </div>
         </div>
 
         <!-- Scroll Discover Prompt -->
-        <div class="pt-4 flex items-center gap-2 text-slate-500 font-mono text-[10px] tracking-widest uppercase">
+        <div class="pt-2 hidden sm:flex items-center gap-2 text-slate-500 font-mono text-[10px] tracking-widest uppercase">
           <span class="animate-bounce">↓</span>
           <span>SCROLL TO DISCOVER</span>
         </div>
@@ -744,43 +743,43 @@
       </div>
 
       <!-- RIGHT-CENTER (3D "Zero-Gravity" WebGL Engine) -->
-      <div class="lg:col-span-5 relative flex items-center justify-center min-h-[360px] sm:min-h-[460px] lg:min-h-[560px]">
+      <div class="lg:col-span-5 relative flex items-center justify-center min-h-[260px] sm:min-h-[380px] lg:min-h-[520px]">
         
         <!-- Interactive 3D WebGL Canvas Container -->
-        <div id="webglContainer" class="relative w-full h-[360px] sm:h-[460px] lg:h-[560px] flex items-center justify-center cursor-grab active:cursor-grabbing">
+        <div id="webglContainer" class="relative w-full h-[260px] sm:h-[380px] lg:h-[520px] flex items-center justify-center cursor-grab active:cursor-grabbing">
           <!-- Canvas injected here via Three.js -->
         </div>
 
         <!-- Hotspot 01: DIGITAL LAB -->
-        <div id="hotspot1" class="absolute top-[28%] left-[10%] sm:left-[12%] z-20 pointer-events-auto cursor-pointer group">
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0C1030]/90 backdrop-blur-md border border-[#242A4A] hover:border-[#E65A19] shadow-lg transition-transform group-hover:scale-105">
+        <div id="hotspot1" class="absolute top-[22%] left-[6%] sm:left-[12%] z-20 pointer-events-auto cursor-pointer group">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0C1030]/90 backdrop-blur-md border border-white/15 hover:border-[#E65A19] shadow-lg transition-transform group-hover:scale-105">
             <span class="w-2 h-2 rounded-full bg-[#E65A19] hotspot-pulse"></span>
             <span class="text-[10px] font-mono font-bold text-slate-200 group-hover:text-white">01 // DIGITAL LAB</span>
           </div>
         </div>
 
         <!-- Hotspot 02: RESEARCH -->
-        <div id="hotspot2" class="absolute bottom-[28%] right-[10%] sm:right-[12%] z-20 pointer-events-auto cursor-pointer group">
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0C1030]/90 backdrop-blur-md border border-[#242A4A] hover:border-[#E65A19] shadow-lg transition-transform group-hover:scale-105">
+        <div id="hotspot2" class="absolute bottom-[22%] right-[6%] sm:right-[12%] z-20 pointer-events-auto cursor-pointer group">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0C1030]/90 backdrop-blur-md border border-white/15 hover:border-[#E65A19] shadow-lg transition-transform group-hover:scale-105">
             <span class="w-2 h-2 rounded-full bg-slate-400 group-hover:bg-[#E65A19] transition"></span>
             <span class="text-[10px] font-mono font-bold text-slate-300 group-hover:text-white">02 // RESEARCH</span>
           </div>
         </div>
 
         <!-- Hotspot 03: INNOVATION -->
-        <div id="hotspot3" class="absolute top-[18%] right-[15%] z-20 pointer-events-auto cursor-pointer group hidden sm:block">
-          <div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#0C1030]/80 backdrop-blur-md border border-[#242A4A] hover:border-slate-400 shadow-md transition-transform group-hover:scale-105">
+        <div id="hotspot3" class="absolute top-[16%] right-[14%] z-20 pointer-events-auto cursor-pointer group hidden sm:block">
+          <div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#0C1030]/80 backdrop-blur-md border border-white/15 hover:border-slate-400 shadow-md transition-transform group-hover:scale-105">
             <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
             <span class="text-[9px] font-mono text-slate-400 group-hover:text-white">03 // INNOVATION</span>
           </div>
         </div>
 
         <!-- Technical Badges Under 3D Object -->
-        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10 pointer-events-none">
-          <span class="px-2.5 py-0.5 rounded-full bg-[#0C1030]/80 border border-[#242A4A] text-[9px] font-mono text-slate-400">
+        <div class="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10 pointer-events-none">
+          <span class="px-2.5 py-0.5 rounded-full bg-[#0C1030]/80 border border-white/10 text-[9px] font-mono text-slate-400">
             anti-gravity liquid-glass
           </span>
-          <span class="px-2.5 py-0.5 rounded-full bg-[#0C1030]/80 border border-[#242A4A] text-[9px] font-mono text-slate-400">
+          <span class="px-2.5 py-0.5 rounded-full bg-[#0C1030]/80 border border-white/10 text-[9px] font-mono text-slate-400">
             mesh physics
           </span>
         </div>
@@ -853,62 +852,118 @@
         </div>
       </div>
 
-      <!-- Bento Grid of Services -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Bento Grid of Services (2-col Mobile, 4-col Desktop) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         
         <!-- App 1: Calendar -->
-        <a href="Calendar.html" class="hover-lift p-5 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19] transition-all group flex flex-col justify-between min-h-[170px] shadow-lg">
+        <a href="Calendar.html" class="hover-lift p-4 sm:p-5 rounded-2xl bg-[#12162A]/90 border border-white/10 hover:border-[#E65A19] transition-all group flex flex-col justify-between min-h-[135px] sm:min-h-[160px] shadow-lg">
           <div class="flex items-center justify-between">
-            <div class="w-10 h-10 rounded-xl bg-[#E65A19]/15 text-[#FF7A29] flex items-center justify-center font-bold">
-              <i data-lucide="calendar" class="w-5 h-5"></i>
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#E65A19]/15 text-[#FF7A29] flex items-center justify-center font-bold">
+              <i data-lucide="calendar" class="w-4 h-4 sm:w-5 sm:h-5"></i>
             </div>
-            <span class="text-[10px] font-mono text-slate-400 group-hover:text-white transition">01 ↗</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-mono text-slate-400 group-hover:text-white transition">01 ↗</span>
           </div>
-          <div>
-            <h3 class="font-display font-bold text-white text-base group-hover:text-[#FF7A29] transition">ปฏิทินงาน &amp; กิจกรรม</h3>
-            <p class="text-xs text-slate-400 mt-1">Calendar บันทึกกำหนดการและนัดหมายสำคัญ</p>
+          <div class="mt-3">
+            <h3 class="font-display font-bold text-white text-sm sm:text-base group-hover:text-[#FF7A29] transition line-clamp-1">ปฏิทินกิจกรรม</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-2">กำหนดการและนัดหมายสำคัญ</p>
           </div>
         </a>
 
         <!-- App 2: Plans -->
-        <a href="Plans.html" class="hover-lift p-5 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-[#E65A19] transition-all group flex flex-col justify-between min-h-[170px] shadow-lg">
+        <a href="Plans.html" class="hover-lift p-4 sm:p-5 rounded-2xl bg-[#12162A]/90 border border-white/10 hover:border-[#E65A19] transition-all group flex flex-col justify-between min-h-[135px] sm:min-h-[160px] shadow-lg">
           <div class="flex items-center justify-between">
-            <div class="w-10 h-10 rounded-xl bg-[#B32B19]/20 text-[#FF7A29] flex items-center justify-center font-bold">
-              <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#B32B19]/20 text-[#FF7A29] flex items-center justify-center font-bold">
+              <i data-lucide="layout-dashboard" class="w-4 h-4 sm:w-5 sm:h-5"></i>
             </div>
-            <span class="text-[10px] font-mono text-slate-400 group-hover:text-white transition">02 ↗</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-mono text-slate-400 group-hover:text-white transition">02 ↗</span>
           </div>
-          <div>
-            <h3 class="font-display font-bold text-white text-base group-hover:text-[#FF7A29] transition">ห้องงาน Plans</h3>
-            <p class="text-xs text-slate-400 mt-1">ติดตาม Task และกำหนดส่งงานโปรเจกต์รายวิชา</p>
+          <div class="mt-3">
+            <h3 class="font-display font-bold text-white text-sm sm:text-base group-hover:text-[#FF7A29] transition line-clamp-1">ห้องงาน Plans</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-2">ติดตาม Task และโปรเจกต์</p>
           </div>
         </a>
 
         <!-- App 3: Cloud Drive -->
-        <a href="storage.html" class="hover-lift p-5 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-sky-500 transition-all group flex flex-col justify-between min-h-[170px] shadow-lg">
+        <a href="storage.html" class="hover-lift p-4 sm:p-5 rounded-2xl bg-[#12162A]/90 border border-white/10 hover:border-sky-500 transition-all group flex flex-col justify-between min-h-[135px] sm:min-h-[160px] shadow-lg">
           <div class="flex items-center justify-between">
-            <div class="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center font-bold">
-              <i data-lucide="cloud" class="w-5 h-5"></i>
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center font-bold">
+              <i data-lucide="cloud" class="w-4 h-4 sm:w-5 sm:h-5"></i>
             </div>
-            <span class="text-[10px] font-mono text-slate-400 group-hover:text-white transition">03 ↗</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-mono text-slate-400 group-hover:text-white transition">03 ↗</span>
           </div>
-          <div>
-            <h3 class="font-display font-bold text-white text-base group-hover:text-sky-400 transition">Cloud Storage 5GB</h3>
-            <p class="text-xs text-slate-400 mt-1">คลังชีทเรียน สไลด์สอน และโฟลเดอร์งานวิชาชีพ</p>
+          <div class="mt-3">
+            <h3 class="font-display font-bold text-white text-sm sm:text-base group-hover:text-sky-400 transition line-clamp-1">Cloud Storage</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-2">คลังชีทเรียนและสไลด์สอน</p>
           </div>
         </a>
 
         <!-- App 4: Payment -->
-        <a href="payment.html" class="hover-lift p-5 rounded-2xl bg-[#12162A] border border-[#242A4A] hover:border-emerald-500 transition-all group flex flex-col justify-between min-h-[170px] shadow-lg">
+        <a href="payment.html" class="hover-lift p-4 sm:p-5 rounded-2xl bg-[#12162A]/90 border border-white/10 hover:border-emerald-500 transition-all group flex flex-col justify-between min-h-[135px] sm:min-h-[160px] shadow-lg">
           <div class="flex items-center justify-between">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-bold">
-              <i data-lucide="credit-card" class="w-5 h-5"></i>
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-bold">
+              <i data-lucide="credit-card" class="w-4 h-4 sm:w-5 sm:h-5"></i>
             </div>
-            <span class="text-[10px] font-mono text-slate-400 group-hover:text-white transition">04 ↗</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-mono text-slate-400 group-hover:text-white transition">04 ↗</span>
           </div>
-          <div>
-            <h3 class="font-display font-bold text-white text-base group-hover:text-emerald-400 transition">ระบบชำระเงินกองทุน</h3>
-            <p class="text-xs text-slate-400 mt-1">สแกน QR Code ตรวจสลิปอัตโนมัติ Real-time</p>
+          <div class="mt-3">
+            <h3 class="font-display font-bold text-white text-sm sm:text-base group-hover:text-emerald-400 transition line-clamp-1">กองทุนสาขา</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-2">สแกน QR ตรวจสลิป Real-time</p>
+          </div>
+        </a>
+
+        <!-- App 5: Yearbook -->
+        <a href="Yearbook.html" class="hover-lift p-4 sm:p-5 rounded-2xl bg-[#12162A]/90 border border-white/10 hover:border-amber-500 transition-all group flex flex-col justify-between min-h-[135px] sm:min-h-[160px] shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold">
+              <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-mono text-slate-400 group-hover:text-white transition">05 ↗</span>
+          </div>
+          <div class="mt-3">
+            <h3 class="font-display font-bold text-white text-sm sm:text-base group-hover:text-amber-400 transition line-clamp-1">ทำเนียบรุ่น 23</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-2">ทำเนียบนักศึกษาและฝ่ายงาน</p>
+          </div>
+        </a>
+
+        <!-- App 6: Upload Center -->
+        <a href="upload.html" class="hover-lift p-4 sm:p-5 rounded-2xl bg-[#12162A]/90 border border-white/10 hover:border-purple-500 transition-all group flex flex-col justify-between min-h-[135px] sm:min-h-[160px] shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center font-bold">
+              <i data-lucide="upload-cloud" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-mono text-slate-400 group-hover:text-white transition">06 ↗</span>
+          </div>
+          <div class="mt-3">
+            <h3 class="font-display font-bold text-white text-sm sm:text-base group-hover:text-purple-400 transition line-clamp-1">อัปโหลดไฟล์</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-2">ส่งงานและแชร์สื่อขนาดใหญ่</p>
+          </div>
+        </a>
+
+        <!-- App 7: Shortlink -->
+        <a href="shortlink.html" class="hover-lift p-4 sm:p-5 rounded-2xl bg-[#12162A]/90 border border-white/10 hover:border-pink-500 transition-all group flex flex-col justify-between min-h-[135px] sm:min-h-[160px] shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-pink-500/15 text-pink-400 flex items-center justify-center font-bold">
+              <i data-lucide="link-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-mono text-slate-400 group-hover:text-white transition">07 ↗</span>
+          </div>
+          <div class="mt-3">
+            <h3 class="font-display font-bold text-white text-sm sm:text-base group-hover:text-pink-400 transition line-clamp-1">ย่อลิงก์ &amp; QR</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-2">สร้างลิงก์สั้นและ QR Code</p>
+          </div>
+        </a>
+
+        <!-- App 8: Smart Support Desk -->
+        <a href="contact.html" class="hover-lift p-4 sm:p-5 rounded-2xl bg-[#12162A]/90 border border-sky-500/25 hover:border-sky-400 transition-all group flex flex-col justify-between min-h-[135px] sm:min-h-[160px] shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center font-bold">
+              <i data-lucide="message-square-heart" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-sky-500/15 text-[9px] font-mono text-sky-300 font-bold">AI DESK ↗</span>
+          </div>
+          <div class="mt-3">
+            <h3 class="font-display font-bold text-white text-sm sm:text-base group-hover:text-sky-300 transition line-clamp-1">ติดต่อสอบถาม</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-2">Smart Desk &amp; แจ้งปัญหา</p>
           </div>
         </a>
 
@@ -918,7 +973,7 @@
   </section>
 
   <!-- ================= SECTION: PLANS WIDGET (LIVE SUPABASE SYNC) ================= -->
-  <section id="comed-plans-widget" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#070914]">
+  <section id="comed-plans-widget" class="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#070914]">
     <div class="max-w-7xl mx-auto space-y-8">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
         <div>
@@ -949,7 +1004,7 @@
   </section>
 
   <!-- ================= SECTION: ACTIVE DUES & PAYMENTS (SUPABASE SYNC) ================= -->
-  <section id="payments-list" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#0C1030]/30">
+  <section id="payments-list" class="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#0C1030]/30">
     <div class="max-w-7xl mx-auto space-y-10">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
         <div>
@@ -1013,7 +1068,7 @@
   </section>
 
   <!-- ================= SECTION: STUDENTS ROSTER (60 STUDENTS) ================= -->
-  <section id="students" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#0C1030]/30">
+  <section id="students" class="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#0C1030]/30">
     <div class="max-w-7xl mx-auto space-y-8">
       
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#242A4A] pb-5">
@@ -1022,9 +1077,9 @@
           <h2 class="text-2xl sm:text-4xl font-display font-bold text-white mt-1">ทำเนียบรุ่น COMED 23 (60 คน)</h2>
           <p class="text-xs sm:text-sm text-slate-400 mt-1">รายชื่อนักศึกษา สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 23 มหาวิทยาลัยขอนแก่น (คลิกเพื่อดูโปรไฟล์)</p>
         </div>
-        <div class="flex flex-wrap items-center gap-2.5">
-          <input type="text" id="rosterSearchInput" placeholder="ค้นหาชื่อหรือรหัส นศ...." 
-            class="px-4 py-2 rounded-xl bg-[#12162A] border border-[#242A4A] text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E65A19] w-48 sm:w-60">
+        <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <input type="text" id="rosterSearchInput" aria-label="ค้นหาชื่อหรือรหัสนักศึกษา" placeholder="ค้นหาชื่อหรือรหัส นศ...." 
+            class="px-4 py-2 rounded-xl bg-[#12162A] border border-white/15 text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E65A19] focus:ring-1 focus:ring-[#E65A19] w-full sm:w-60 transition">
           
           <a href="Yearbook.html" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E65A19] to-[#B32B19] hover:from-[#f06828] hover:to-[#c4321e] text-white text-xs font-bold transition shadow-lg shadow-orange-950/40 flex items-center gap-1.5 flex-shrink-0">
             <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
@@ -1042,37 +1097,37 @@
   </section>
 
   <!-- ================= THUMB-ACCESSIBLE FLOATING BOTTOM NAVIGATION (MOBILE) ================= -->
-  <nav class="lg:hidden fixed bottom-3 left-3 right-3 z-50 bg-[#0C1030]/90 backdrop-blur-2xl border border-[#242A4A] rounded-2xl p-2 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
-    <a href="#hero" class="flex-1 py-1 flex flex-col items-center gap-1 text-[#FF7A29]">
+  <nav aria-label="Mobile Bottom Navigation" class="lg:hidden fixed bottom-3 left-3 right-3 z-50 bg-[#0A0E24]/90 backdrop-blur-2xl border border-white/15 rounded-2xl px-2 py-2 flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,0.7)]">
+    <a href="#hero" class="flex-1 py-1 flex flex-col items-center gap-1 text-[#FF7A29] transition">
       <i data-lucide="home" class="w-4 h-4"></i>
       <span class="text-[10px] font-mono font-bold">Home</span>
     </a>
-    <a href="#about" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white">
-      <i data-lucide="book-open" class="w-4 h-4"></i>
-      <span class="text-[10px] font-mono">Course</span>
+    <a href="#quick-hub" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+      <i data-lucide="layout-grid" class="w-4 h-4"></i>
+      <span class="text-[10px] font-mono">Apps</span>
     </a>
-    <a href="Calendar.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+    <a href="Calendar.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i data-lucide="calendar" class="w-4 h-4"></i>
-      <span class="text-[10px] font-mono">Activity</span>
+      <span class="text-[10px] font-mono">Calendar</span>
     </a>
-    <a href="#payments-list" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white relative">
-      <i data-lucide="bell" class="w-4 h-4"></i>
-      <span class="absolute top-0 right-1/4 w-1.5 h-1.5 rounded-full bg-[#E65A19]"></span>
-      <span class="text-[10px] font-mono">Notif.</span>
+    <a href="#payments-list" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white relative transition">
+      <i data-lucide="wallet" class="w-4 h-4"></i>
+      <span class="absolute top-0.5 right-1/4 w-1.5 h-1.5 rounded-full bg-[#E65A19]"></span>
+      <span class="text-[10px] font-mono">Dues</span>
     </a>
-    <a href="Profile.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+    <a href="Profile.html" class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
       <i data-lucide="user" class="w-4 h-4"></i>
       <span class="text-[10px] font-mono">Profile</span>
     </a>
   </nav>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="py-12 px-4 sm:px-6 lg:px-8 border-t border-[#242A4A] bg-[#070914] pb-24 lg:pb-12 text-center text-xs font-mono text-slate-500">
+  <footer class="py-10 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-[#070914] pb-24 lg:pb-12 text-center text-xs font-mono text-slate-500">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div>
+      <div class="text-slate-400">
         COMED 23 — Khon Kaen University (Faculty of Education)
       </div>
-      <div class="flex items-center gap-4 text-slate-400">
+      <div class="flex flex-wrap items-center justify-center gap-4 text-slate-400">
         <a href="Calendar.html" class="hover:text-white transition">Calendar</a>
         <a href="Plans.html" class="hover:text-white transition">Plans</a>
         <a href="storage.html" class="hover:text-white transition">Drive</a>
@@ -1157,34 +1212,6 @@
 
     </div>
   </div>
-
-  <!-- ================= FOOTER ================= -->
-  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 pt-12 pb-24 xl:pb-12 px-4 sm:px-6 lg:px-8 text-xs">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-      
-      <div class="flex items-center gap-3 text-white">
-        <img src="logo.png" alt="Logo" class="w-8 h-8 object-contain">
-        <div>
-          <span class="font-black text-sm block">สาขาวิชาคอมพิวเตอร์ศึกษา (COMED KKU)</span>
-          <span class="text-slate-400 text-[11px]">คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</span>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-4 flex-wrap text-[11px]">
-        <a href="index.html" class="text-white hover:text-orange-400 transition font-semibold">หน้าหลัก</a>
-        <span>•</span>
-        <a href="payment.html" class="text-white hover:text-orange-400 transition font-semibold">ระบบชำระเงิน</a>
-        <span>•</span>
-        <a href="admin.html" class="text-amber-400 hover:text-amber-300 transition font-black flex items-center gap-1">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          <span>ศูนย์ควบคุมแอดมิน (Admin Hub)</span>
-        </a>
-        <span>•</span>
-        <a href="https://www.instagram.com/thitiphaua/" target="_blank" class="text-orange-400 hover:underline">IG: Thitipha</a>
-      </div>
-
-    </div>
-  </footer>
 
   <!-- ================= ULTRA-LUXURY POPUP MODAL: SIGN IN WITH GOOGLE ================= -->
   <div id="modalGoogleLogin" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
